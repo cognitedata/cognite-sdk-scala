@@ -28,3 +28,23 @@ scalacOptions ++= List(
   "-Yrangepos",          // required by SemanticDB compiler plugin
   "-Ywarn-unused-import" // required by `RemoveUnused` rule
 )
+
+wartremoverErrors ++= Warts.allBut(
+  Wart.DefaultArguments,
+  Wart.Nothing,
+  Wart.Any,
+  Wart.Throw,
+  Wart.ImplicitParameter,
+  Wart.ToString
+)
+
+scalastyleFailOnWarning := true
+
+lazy val mainScalastyle = taskKey[Unit]("mainScalastyle")
+lazy val testScalastyle = taskKey[Unit]("testScalastyle")
+
+mainScalastyle := scalastyle.in(Compile).toTask("").value
+testScalastyle := scalastyle.in(Test).toTask("").value
+
+(test in Test) := ((test in Test) dependsOn testScalastyle).value
+(test in Test) := ((test in Test) dependsOn mainScalastyle).value

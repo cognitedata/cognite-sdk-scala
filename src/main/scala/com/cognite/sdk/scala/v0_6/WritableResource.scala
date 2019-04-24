@@ -14,6 +14,7 @@ trait WritableResource[R, W, F[_]] extends Resource {
   implicit val writeDecoder: Decoder[W]
   implicit val readDecoder: Decoder[R]
 
+  @SuppressWarnings(Array("org.wartremover.warts.EitherProjectionPartial"))
   def writeItems(items: Items[W]): F[Response[Seq[R]]] =
     sttp
       .auth(auth)

@@ -2,11 +2,13 @@ package com.cognite.sdk.scala.v0_6
 
 import com.softwaremill.sttp._
 
-abstract case class CursorIterator[A, R[_]](firstCursor: Option[String])(
+abstract class CursorIterator[A, R[_]](firstCursor: Option[String])(
     implicit sttpBackend: SttpBackend[R, _])
     extends Iterator[R[Seq[A]]] {
   // scalafix:off DisableSyntax.var
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
   private var nextCursor = firstCursor
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
   private var isFirst = true
   // scalafix:on
 

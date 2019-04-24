@@ -10,7 +10,8 @@ trait ReadableResource[R, F[_]] extends Resource {
   implicit val sttpBackend: SttpBackend[F, _]
   implicit val readDecoder: Decoder[R]
 
-  def read(cursor: Option[String]): F[Response[ItemsWithCursor[R]]] =
+  @SuppressWarnings(Array("org.wartremover.warts.EitherProjectionPartial"))
+  private def readWithCursor(cursor: Option[String]): F[Response[ItemsWithCursor[R]]] =
     sttp
       .auth(auth)
       .contentType("application/json")
@@ -19,13 +20,15 @@ trait ReadableResource[R, F[_]] extends Resource {
       .mapResponse(_.right.get.data)
       .send()
 
-  def read(): F[Response[ItemsWithCursor[R]]] = read(None)
+  def readFromCursor(cursor: String): F[Response[ItemsWithCursor[R]]] = readWithCursor(Some(cursor))
+  def read(): F[Response[ItemsWithCursor[R]]] = readWithCursor(None)
 
-  def readAll(cursor: Option[String]): Iterator[F[Seq[R]]] =
+  private def readWithNextCursor(cursor: Option[String]): Iterator[F[Seq[R]]] =
     new CursorIterator[R, F](cursor) {
       def get(cursor: Option[String]): F[Response[ItemsWithCursor[R]]] =
-        read(cursor)
+        readWithCursor(cursor)
     }
 
-  def readAll(): Iterator[F[Seq[R]]] = readAll(None)
+  def readAllFromCursor(cursor: String): Iterator[F[Seq[R]]] = readWithNextCursor(Some(cursor))
+  def readAll(): Iterator[F[Seq[R]]] = readWithNextCursor(None)
 }
