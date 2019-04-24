@@ -2,16 +2,13 @@ package com.cognite.sdk.scala.v0_6
 
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe._
-import io.circe.generic.semiauto.deriveDecoder
+import io.circe.Decoder
 import io.circe.generic.auto._
 
 trait ReadableResource[R, F[_]] {
   implicit val auth: Auth
   implicit val sttpBackend: SttpBackend[F, _]
   implicit val readDecoder: Decoder[R]
-
-  private implicit val dataItemsWithCursorDecoder: Decoder[Data[ItemsWithCursor[R]]] = deriveDecoder
 
   val listUri: Uri
 

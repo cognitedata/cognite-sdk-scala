@@ -3,7 +3,7 @@ name := "cognite-sdk-scala"
 version := "0.0.1-SNAPSHOT"
 
 scalaVersion := "2.12.7"
-val circeVersion = "0.9.3"
+val circeVersion = "0.11.1"
 val sttpVersion = "1.5.0"
 val jsoniterVersion = "0.46.0"
 
