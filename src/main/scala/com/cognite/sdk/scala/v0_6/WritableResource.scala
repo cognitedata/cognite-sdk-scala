@@ -7,20 +7,18 @@ import com.softwaremill.sttp.circe._
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
-trait WritableResource[R, W, F[_]] {
+trait WritableResource[R, W, F[_]] extends Resource {
   implicit val auth: Auth
   implicit val sttpBackend: SttpBackend[F, _]
   implicit val writeEncoder: Encoder[W]
   implicit val writeDecoder: Decoder[W]
   implicit val readDecoder: Decoder[R]
 
-  val createUri: Uri
-
   def writeItems(items: Items[W]): F[Response[Seq[R]]] =
     sttp
       .auth(auth)
       .contentType("application/json")
-      .post(createUri)
+      .post(baseUri)
       .body(items)
       .response(asJson[Data[ItemsWithCursor[R]]])
       .mapResponse(_.right.get.data.items)

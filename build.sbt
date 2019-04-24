@@ -22,3 +22,9 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion
 )
+
+addCompilerPlugin(scalafixSemanticdb)
+scalacOptions ++= List(
+  "-Yrangepos",          // required by SemanticDB compiler plugin
+  "-Ywarn-unused-import" // required by `RemoveUnused` rule
+)
