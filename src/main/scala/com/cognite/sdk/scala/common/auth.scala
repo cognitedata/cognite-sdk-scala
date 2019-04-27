@@ -1,4 +1,4 @@
-package com.cognite.sdk.scala.v0_6
+package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp.RequestT
 

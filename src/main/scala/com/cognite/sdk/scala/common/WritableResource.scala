@@ -1,9 +1,10 @@
-package com.cognite.sdk.scala.v0_6
+package com.cognite.sdk.scala.common
 
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.auto._
-import com.softwaremill.sttp._
+import com.cognite.sdk.scala.v0_6.{Data, Items, ItemsWithCursor}
 import com.softwaremill.sttp.circe._
+import com.softwaremill.sttp._
+import io.circe.generic.auto._
+import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 

@@ -1,8 +1,9 @@
-package com.cognite.sdk.scala.v0_6
+package com.cognite.sdk.scala.common
 
+import com.cognite.sdk.scala.v0_6.ItemsWithCursor
 import com.softwaremill.sttp._
 
-abstract class CursorIterator[A, R[_]](firstCursor: Option[String])(
+abstract class NextCursorIterator[A, R[_]](firstCursor: Option[String])(
     implicit sttpBackend: SttpBackend[R, _])
     extends Iterator[R[Seq[A]]] {
   // scalafix:off DisableSyntax.var

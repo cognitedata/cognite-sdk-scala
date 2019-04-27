@@ -1,23 +1,12 @@
 package com.cognite.sdk.scala.v0_6
 
-import org.scalatest.{FlatSpec, Matchers}
-import com.softwaremill.sttp._
+import com.cognite.sdk.scala.common.SdkTest
 
-class AssetsTest extends FlatSpec with Matchers {
-  val apiKey = System.getenv("COGNITE_API_KEY")
-  implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
-  implicit val auth: Auth = ApiKeyAuth(apiKey)
-
+class AssetsTest extends SdkTest {
   it should "be possible to retrieve an asset" in {
     val client = new Client()
     val assets = client.assets.read()
     println(assets.unsafeBody.items.headOption.map(_.name).getOrElse("error")) // scalastyle:ignore
-  }
-
-  it should "read login status" in {
-    val client = new Client()
-    val status = client.login.status()
-    println(status.unsafeBody) // scalastyle:ignore
   }
 
   it should "fetch all assets" in {

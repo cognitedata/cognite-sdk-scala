@@ -1,5 +1,6 @@
 package com.cognite.sdk.scala.v0_6
 
+import com.cognite.sdk.scala.common.{Auth, ReadableResource, Resource, WritableResource}
 import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 

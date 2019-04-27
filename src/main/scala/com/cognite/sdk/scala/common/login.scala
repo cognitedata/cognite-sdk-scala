@@ -1,8 +1,9 @@
-package com.cognite.sdk.scala.v0_6
+package com.cognite.sdk.scala.common
 
-import io.circe.generic.auto._
+import com.cognite.sdk.scala.v0_6.Data
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
+import io.circe.generic.auto._
 
 final case class LoginStatus(user: String, loggedIn: Boolean, project: String, projectId: Long)
 
