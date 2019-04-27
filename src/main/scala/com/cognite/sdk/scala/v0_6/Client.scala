@@ -1,5 +1,6 @@
 package com.cognite.sdk.scala.v0_6
 
+import com.cognite.sdk.scala.common.{Auth, Login}
 import com.softwaremill.sttp._
 import io.circe.generic.auto._
 
@@ -17,4 +18,5 @@ final class Client[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
 
   val login = new Login()
   val assets = new Assets()
+  val events = new Events()
 }
