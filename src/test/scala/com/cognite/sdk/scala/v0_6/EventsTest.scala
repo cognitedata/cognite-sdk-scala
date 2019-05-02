@@ -19,7 +19,9 @@ class EventsTest extends SdkTest {
 
   it should "be possible to write an event" in {
     val client = new Client()
-    val events = client.events.write(Seq(Event(description = Some("cognite-scala-sdk"), `type` = Some("cognite-scala-sdk"))))
+    val events = client.events.write(
+      Seq(Event(description = Some("cognite-scala-sdk"), `type` = Some("cognite-scala-sdk")))
+    )
     println("wrote events: ") // scalastyle:ignore
     println(events.unsafeBody.map(_.toString).mkString(", ")) // scalastyle:ignore
   }
