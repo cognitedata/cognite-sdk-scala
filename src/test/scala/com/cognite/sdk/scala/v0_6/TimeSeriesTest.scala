@@ -6,11 +6,11 @@ class TimeSeriesTest extends SdkTest {
   it should "be possible to retrieve a time series" in {
     val client = new Client()
     val timeSeries = client.timeSeries.read()
-    println(
+    println( // scalastyle:ignore
       timeSeries.unsafeBody.items
         .map(ts => s"${ts.name}: ${ts.description.getOrElse("[none]")}")
         .mkString(",\n")
-    ) // scalastyle:ignore
+    )
     println(s"${timeSeries.unsafeBody.items.length} time series") // scalastyle:ignore
   }
 
@@ -25,9 +25,9 @@ class TimeSeriesTest extends SdkTest {
     val r = scala.util.Random
     val client = new Client()
     val id = r.nextInt().toString
-    val timeSeries = client.timeSeries.write(
+    val timeSeries = client.timeSeries.write( // scalastyle:ignore
       Seq(TimeSeries(name = s"cognite-scala-sdk-$id", description = Some(s"test id $id")))
-    ) // scalastyle:ignore
+    )
     println("Created time series: ") // scalastyle:ignore
     println(timeSeries.unsafeBody.map(_.toString).mkString(", ")) // scalastyle:ignore
   }

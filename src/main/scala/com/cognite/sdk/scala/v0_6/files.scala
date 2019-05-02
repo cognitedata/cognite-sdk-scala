@@ -22,8 +22,8 @@ final case class Files(
 class FilesResource[F[_]](
     implicit val auth: Auth,
     val sttpBackend: SttpBackend[F, _],
-    val readDecoder: Decoder[Files])
-    extends Resource
+    val readDecoder: Decoder[Files]
+) extends Resource
     with ReadableResource[Files, F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/files"
 }

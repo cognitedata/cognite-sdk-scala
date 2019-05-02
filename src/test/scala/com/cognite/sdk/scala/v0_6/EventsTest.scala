@@ -7,7 +7,7 @@ class EventsTest extends SdkTest {
     val client = new Client()
     val events = client.events.read()
     println(events.unsafeBody.items.map(_.description.toString).mkString(",\n")) // scalastyle:ignore
-    println(s"${events.unsafeBody.items.length} events")
+    println(s"${events.unsafeBody.items.length} events") // scalastyle:ignore
   }
 
   it should "fetch all events" in {

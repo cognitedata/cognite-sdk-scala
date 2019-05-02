@@ -15,7 +15,8 @@ final case class Asset(
     source: Option[String] = None,
     sourceId: Option[String] = None,
     createdTime: Option[Long] = None,
-    lastUpdatedTime: Option[Long] = None)
+    lastUpdatedTime: Option[Long] = None
+)
 
 final case class PostAsset(
     name: String,
@@ -31,8 +32,8 @@ class Assets[F[_]](
     val sttpBackend: SttpBackend[F, _],
     val readDecoder: Decoder[Asset],
     val writeDecoder: Decoder[PostAsset],
-    val writeEncoder: Encoder[PostAsset])
-    extends Resource
+    val writeEncoder: Encoder[PostAsset]
+) extends Resource
     with ReadableResource[Asset, F]
     with WritableResource[Asset, PostAsset, F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/assets"

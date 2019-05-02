@@ -16,7 +16,8 @@ final case class Event(
     source: Option[String] = None,
     sourceId: Option[String] = None,
     createdTime: Long = 0,
-    lastUpdatedTime: Long = 0)
+    lastUpdatedTime: Long = 0
+)
 
 final case class PostEvent(
     startTime: Option[Long],
@@ -35,8 +36,8 @@ class Events[F[_]](
     val sttpBackend: SttpBackend[F, _],
     val readDecoder: Decoder[Event],
     val writeDecoder: Decoder[PostEvent],
-    val writeEncoder: Encoder[PostEvent])
-    extends Resource
+    val writeEncoder: Encoder[PostEvent]
+) extends Resource
     with ReadableResource[Event, F]
     with WritableResource[Event, PostEvent, F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/events"
