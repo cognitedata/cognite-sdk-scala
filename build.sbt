@@ -2,22 +2,34 @@ name := "cognite-sdk-scala"
 
 version := "0.0.1-SNAPSHOT"
 
-scalaVersion := "2.12.7"
+scalaVersion := "2.12.8"
 val circeVersion = "0.11.1"
 val sttpVersion = "1.5.0"
 val jsoniterVersion = "0.46.0"
 
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+lazy val commonSettings = Seq(
+  scalaVersion := "2.12.8",
+  organization := "com.cognite",
+)
 
-libraryDependencies += "io.scalaland" %% "chimney" % "0.3.1"
+lazy val core = (project in file("."))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      "io.scalaland" %% "chimney" % "0.3.1",
+    ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps
+  )
 
-libraryDependencies ++= Seq(
+val scalaTestDeps = Seq(
+  "org.scalactic" %% "scalactic" % "3.0.5",
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test",
+)
+val sttpDeps = Seq(
   "com.softwaremill.sttp" %% "core" % sttpVersion,
   "com.softwaremill.sttp" %% "circe" % sttpVersion
 )
 
-libraryDependencies ++= Seq(
+val circeDeps = Seq(
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion
