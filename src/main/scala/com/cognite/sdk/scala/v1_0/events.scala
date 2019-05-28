@@ -1,6 +1,13 @@
-package com.cognite.sdk.scala.v0_6
+package com.cognite.sdk.scala.v1_0
 
-import com.cognite.sdk.scala.common.{Auth, Extractor, ItemsWithCursor, ReadableResource, Resource, WritableResource}
+import com.cognite.sdk.scala.common.{
+  Auth,
+  Extractor,
+  ItemsWithCursor,
+  ReadableResource,
+  Resource,
+  WritableResource
+}
 import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 
@@ -37,10 +44,10 @@ class Events[F[_]](
     val readDecoder: Decoder[Event],
     val writeDecoder: Decoder[PostEvent],
     val writeEncoder: Encoder[PostEvent],
-    val containerDecoder: Decoder[Data[ItemsWithCursor[Event]]],
-    val extractor: Extractor[Data]
+    val containerDecoder: Decoder[Id[ItemsWithCursor[Event]]],
+    val extractor: Extractor[Id]
 ) extends Resource
-    with ReadableResource[Event, F, Data]
-    with WritableResource[Event, PostEvent, F, Data] {
+    with ReadableResource[Event, F, Id]
+    with WritableResource[Event, PostEvent, F, Id] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/events"
 }

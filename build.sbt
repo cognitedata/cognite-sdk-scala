@@ -47,8 +47,7 @@ wartremoverErrors ++= Warts.allBut(
   Wart.Any,
   Wart.Throw,
   Wart.ImplicitParameter,
-  Wart.ToString
-)
+  Wart.ToString)
 
 scalastyleFailOnWarning := true
 

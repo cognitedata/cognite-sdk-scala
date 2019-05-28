@@ -1,14 +1,12 @@
-package com.cognite.sdk.scala.v0_6
+package com.cognite.sdk.scala.v1_0
 
 import com.cognite.sdk.scala.common.{Auth, Extractor, Login}
 import com.softwaremill.sttp._
 import io.circe.generic.auto._
 
-final case class Data[A](data: A)
-
 object ExtractorInstances {
-  implicit val dataExtractor: Extractor[Data] = new Extractor[Data] {
-    override def extract[A](c: Data[A]): A = c.data
+  implicit val idExtractor: Extractor[Id] = new Extractor[Id] {
+    override def extract[A](c: Id[A]): A = c
   }
 }
 
@@ -19,7 +17,7 @@ final class Client[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
   import ExtractorInstances._
   val login = new Login()
   val assets = new Assets()
-  val events = new Events()
-  val timeSeries = new TimeSeriesResource()
-  val files = new FilesResource()
+  //val events = new Events()
+  //val timeSeries = new TimeSeriesResource()
+  //val files = new FilesResource()
 }

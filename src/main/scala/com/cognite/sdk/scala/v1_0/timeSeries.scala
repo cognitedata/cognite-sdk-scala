@@ -1,13 +1,6 @@
-package com.cognite.sdk.scala.v0_6
+package com.cognite.sdk.scala.v1_0
 
-import com.cognite.sdk.scala.common.{
-  Auth,
-  Extractor,
-  ItemsWithCursor,
-  ReadableResource,
-  Resource,
-  WritableResource
-}
+import com.cognite.sdk.scala.common.{Auth, Extractor, ItemsWithCursor, ReadableResource, Resource, WritableResource}
 import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 
@@ -42,10 +35,10 @@ class TimeSeriesResource[F[_]](
     val readDecoder: Decoder[TimeSeries],
     val writeDecoder: Decoder[PostTimeSeries],
     val writeEncoder: Encoder[PostTimeSeries],
-    val containerDecoder: Decoder[Data[ItemsWithCursor[TimeSeries]]],
-    val extractor: Extractor[Data]
+    val containerDecoder: Decoder[Id[ItemsWithCursor[TimeSeries]]],
+    val extractor: Extractor[Id]
 ) extends Resource
-    with ReadableResource[TimeSeries, F, Data]
-    with WritableResource[TimeSeries, PostTimeSeries, F, Data] {
+    with ReadableResource[TimeSeries, F, Id]
+    with WritableResource[TimeSeries, PostTimeSeries, F, Id] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/timeseries"
 }
