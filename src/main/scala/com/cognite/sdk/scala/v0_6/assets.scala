@@ -1,13 +1,6 @@
 package com.cognite.sdk.scala.v0_6
 
-import com.cognite.sdk.scala.common.{
-  Auth,
-  Extractor,
-  ItemsWithCursor,
-  ReadableResource,
-  Resource,
-  WritableResource
-}
+import com.cognite.sdk.scala.common.{Auth, Extractor, Items, ItemsWithCursor, ReadableResource, Resource, WritableResource}
 import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 
@@ -41,7 +34,8 @@ class Assets[F[_]](
     val readDecoder: Decoder[Asset],
     val writeDecoder: Decoder[PostAsset],
     val writeEncoder: Encoder[PostAsset],
-    val containerDecoder: Decoder[Data[ItemsWithCursor[Asset]]],
+    val containerItemsWithCursorDecoder: Decoder[Data[ItemsWithCursor[Asset]]],
+    val containerItemsDecoder: Decoder[Data[Items[Asset]]],
     val extractor: Extractor[Data]
 ) extends Resource[F]
     with ReadableResource[Asset, F, Data]

@@ -11,7 +11,7 @@ trait WritableResource[R, W, F[_], C[_]] extends Resource[F] {
   implicit val writeEncoder: Encoder[W]
   implicit val writeDecoder: Decoder[W]
   implicit val readDecoder: Decoder[R]
-  implicit val containerDecoder: Decoder[C[ItemsWithCursor[R]]]
+  implicit val containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
   implicit val extractor: Extractor[C]
 
   def createItems(items: Items[W]): F[Response[Seq[R]]] =
@@ -30,6 +30,7 @@ trait WritableResource[R, W, F[_], C[_]] extends Resource[F] {
 
   def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
     // TODO: group deletes by max deletion request size
+    //       or assert that length of `ids` is less than max deletion request size
     request
       .post(uri"$baseUri/delete")
       .body(Items(ids.map(CogniteId)))

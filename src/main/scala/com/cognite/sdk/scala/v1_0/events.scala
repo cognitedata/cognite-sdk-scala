@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1_0
 
-import com.cognite.sdk.scala.common.{Auth, ItemsWithCursor}
+import com.cognite.sdk.scala.common.{Auth, Items, ItemsWithCursor}
 import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 
@@ -37,7 +37,8 @@ class Events[F[_]](
     val readDecoder: Decoder[Event],
     val writeDecoder: Decoder[PostEvent],
     val writeEncoder: Encoder[PostEvent],
-    val containerDecoder: Decoder[Id[ItemsWithCursor[Event]]],
+    val containerItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[Event]]],
+    val containerItemsDecoder: Decoder[Id[Items[Event]]]
 ) extends ResourceV1[F]
     with ReadableResourceV1[Event, F]
     with WritableResourceV1[Event, PostEvent, F] {
