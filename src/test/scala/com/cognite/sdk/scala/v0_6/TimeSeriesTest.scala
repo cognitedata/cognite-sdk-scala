@@ -25,7 +25,7 @@ class TimeSeriesTest extends SdkTest {
     val r = scala.util.Random
     val client = new Client()
     val id = r.nextInt().toString
-    val timeSeries = client.timeSeries.write( // scalastyle:ignore
+    val timeSeries = client.timeSeries.create( // scalastyle:ignore
       Seq(TimeSeries(name = s"cognite-scala-sdk-$id", description = Some(s"test id $id")))
     )
     println("Created time series: ") // scalastyle:ignore

@@ -8,6 +8,7 @@ final case class CdpApiErrorPayload(code: Int, message: String)
 final case class Error[A](error: A)
 final case class CdpApiException(url: Uri, code: Int, message: String)
   extends Throwable(s"Request to ${url.toString()} failed with status $code: $message")
+final case class CogniteId(id: Long)
 
 trait Extractor[C[_]] {
   def extract[A](c: C[A]): A

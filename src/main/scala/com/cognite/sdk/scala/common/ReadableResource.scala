@@ -5,20 +5,13 @@ import com.softwaremill.sttp._
 //import io.circe.generic.auto._
 import io.circe.Decoder
 
-trait ReadableResource[R, F[_], C[_]] extends Resource {
-  implicit val auth: Auth
-  implicit val sttpBackend: SttpBackend[F, _]
+trait ReadableResource[R, F[_], C[_]] extends Resource[F] {
   implicit val readDecoder: Decoder[R]
   implicit val containerDecoder: Decoder[C[ItemsWithCursor[R]]]
   implicit val extractor: Extractor[C]
-  //implicit val extractor: Extractor[C]
-  //def extract(c: C[ItemsWithCursor[R]]): ItemsWithCursor[R]
 
-  @SuppressWarnings(Array("org.wartremover.warts.EitherProjectionPartial", "org.wartremover.warts.AsInstanceOf"))
   private def readWithCursor(cursor: Option[String]): F[Response[ItemsWithCursor[R]]] =
-    sttp
-      .auth(auth)
-      .contentType("application/json")
+    request
       .get(cursor.fold(baseUri)(baseUri.param("cursor", _)).param("limit", defaultLimit.toString))
       .response(asJson[C[ItemsWithCursor[R]]])
       .mapResponse {
@@ -38,4 +31,6 @@ trait ReadableResource[R, F[_], C[_]] extends Resource {
 
   def readAllFromCursor(cursor: String): Iterator[F[Seq[R]]] = readWithNextCursor(Some(cursor))
   def readAll(): Iterator[F[Seq[R]]] = readWithNextCursor(None)
+
+  //def retrieveByIds(ids: List[Long]): F[Response[Seq[R]]]
 }

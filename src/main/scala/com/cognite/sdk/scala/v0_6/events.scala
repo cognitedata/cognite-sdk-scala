@@ -39,7 +39,7 @@ class Events[F[_]](
     val writeEncoder: Encoder[PostEvent],
     val containerDecoder: Decoder[Data[ItemsWithCursor[Event]]],
     val extractor: Extractor[Data]
-) extends Resource
+) extends Resource[F]
     with ReadableResource[Event, F, Data]
     with WritableResource[Event, PostEvent, F, Data] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/events"

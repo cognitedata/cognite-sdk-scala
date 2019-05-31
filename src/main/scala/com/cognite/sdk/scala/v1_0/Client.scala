@@ -14,7 +14,6 @@ final class Client[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
   // TODO: auth once here instead of passing Auth down
   //val sttp1 = sttp.auth(auth)
 
-  import ExtractorInstances._
   val login = new Login()
   val assets = new Assets()
   //val events = new Events()

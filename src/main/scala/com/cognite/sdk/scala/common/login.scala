@@ -14,6 +14,9 @@ class Login[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
       .auth(auth)
       .get(uri"https://api.cognitedata.com/login/status")
       .response(asJson[Data[LoginStatus]])
-      .mapResponse(_.right.get.data)
+      .mapResponse {
+        case Left(value) => throw value.error
+        case Right(value) => value.data
+      }
       .send()
 }

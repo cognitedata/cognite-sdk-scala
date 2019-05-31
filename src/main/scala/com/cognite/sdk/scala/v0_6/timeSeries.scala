@@ -44,7 +44,7 @@ class TimeSeriesResource[F[_]](
     val writeEncoder: Encoder[PostTimeSeries],
     val containerDecoder: Decoder[Data[ItemsWithCursor[TimeSeries]]],
     val extractor: Extractor[Data]
-) extends Resource
+) extends Resource[F]
     with ReadableResource[TimeSeries, F, Data]
     with WritableResource[TimeSeries, PostTimeSeries, F, Data] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/timeseries"
