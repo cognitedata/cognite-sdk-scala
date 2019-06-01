@@ -27,7 +27,7 @@ class AssetsTest extends SdkTest {
   }
 
   it should "be possible to write a postasset" in {
-    val assets = client.assets.create(Seq(PostAsset(name = "fusion-scala-sdk2")))
+    val assets = client.assets.create(Seq(CreateAsset(name = "fusion-scala-sdk2")))
     println("wrote assets: ") // scalastyle:ignore
     createdAssets = createdAssets ++ assets.unsafeBody
     println(assets.unsafeBody.map(_.toString).mkString(", ")) // scalastyle:ignore

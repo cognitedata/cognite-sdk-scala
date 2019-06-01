@@ -18,7 +18,7 @@ final case class TimeSeries(
     lastUpdatedTime: Option[Long] = None
 )
 
-final case class PostTimeSeries(
+final case class CreateTimeSeries(
     name: String,
     isString: Boolean = false,
     metadata: Option[Map[String, String]] = None,
@@ -33,12 +33,12 @@ class TimeSeriesResource[F[_]](
     implicit val auth: Auth,
     val sttpBackend: SttpBackend[F, _],
     val readDecoder: Decoder[TimeSeries],
-    val writeDecoder: Decoder[PostTimeSeries],
-    val writeEncoder: Encoder[PostTimeSeries],
+    val writeDecoder: Decoder[CreateTimeSeries],
+    val writeEncoder: Encoder[CreateTimeSeries],
     val containerItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[TimeSeries]]],
-    val containerItemsDecoder: Decoder[Id[Items[TimeSeries]]],
+    val containerItemsDecoder: Decoder[Id[Items[TimeSeries]]]
 ) extends ResourceV1[F]
     with ReadableResourceV1[TimeSeries, F]
-    with WritableResourceV1[TimeSeries, PostTimeSeries, F] {
+    with WritableResourceV1[TimeSeries, CreateTimeSeries, F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/timeseries"
 }

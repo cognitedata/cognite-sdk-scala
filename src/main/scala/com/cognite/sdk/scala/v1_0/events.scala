@@ -19,7 +19,7 @@ final case class Event(
     lastUpdatedTime: Long = 0
 )
 
-final case class PostEvent(
+final case class CreateEvent(
     startTime: Option[Long],
     endTime: Option[Long],
     description: Option[String],
@@ -35,12 +35,12 @@ class Events[F[_]](
     implicit val auth: Auth,
     val sttpBackend: SttpBackend[F, _],
     val readDecoder: Decoder[Event],
-    val writeDecoder: Decoder[PostEvent],
-    val writeEncoder: Encoder[PostEvent],
+    val writeDecoder: Decoder[CreateEvent],
+    val writeEncoder: Encoder[CreateEvent],
     val containerItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[Event]]],
     val containerItemsDecoder: Decoder[Id[Items[Event]]]
 ) extends ResourceV1[F]
     with ReadableResourceV1[Event, F]
-    with WritableResourceV1[Event, PostEvent, F] {
+    with WritableResourceV1[Event, CreateEvent, F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/events"
 }
