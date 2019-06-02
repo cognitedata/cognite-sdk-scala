@@ -40,5 +40,5 @@ class TimeSeriesResource[F[_]](
 ) extends ResourceV1[F]
     with ReadableResourceV1[TimeSeries, F]
     with WritableResourceV1[TimeSeries, CreateTimeSeries, F] {
-  override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/timeseries"
+  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/playground/timeseries"
 }

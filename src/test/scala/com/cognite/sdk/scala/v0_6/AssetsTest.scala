@@ -37,7 +37,7 @@ class AssetsTest extends SdkTest {
     val nAssetsBeforeDelete = client.assets.readAll().toSeq.length
     println(s"$nAssetsBeforeDelete before delete") // scalastyle:ignore
     println(s"deleting ${createdAssets.length} assets") // scalastyle:ignore
-    client.assets.deleteByIds(createdAssets.flatMap(_.id.toList)).unsafeBody
+    client.assets.deleteByIds(createdAssets.map(_.id)).unsafeBody
     Thread.sleep(10000)
     val nAssetsAfterDelete = client.assets.readAll().toSeq.length
     println(s"$nAssetsAfterDelete after delete") // scalastyle:ignore

@@ -9,6 +9,7 @@ abstract class Resource[F[_]] {
   val request: RequestT[Empty, String, Nothing] = sttp
     .auth(auth)
     .contentType("application/json")
+    .parseResponseIf(_ => true)
   val baseUri: Uri
-  val defaultLimit: Int = 1000
+  val defaultLimit: Long = 1000
 }

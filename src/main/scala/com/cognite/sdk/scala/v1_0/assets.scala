@@ -1,11 +1,11 @@
 package com.cognite.sdk.scala.v1_0
 
-import com.cognite.sdk.scala.common.{Auth, Items, ItemsWithCursor}
+import com.cognite.sdk.scala.common.{Auth, Items, ItemsWithCursor, WithId}
 import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 
 final case class Asset(
-    id: Option[Long] = None,
+    id: Long = 0,
     path: Option[Seq[Long]] = None,
     depth: Option[Long] = None,
     name: String,
@@ -16,7 +16,7 @@ final case class Asset(
     externalId: Option[String] = None,
     createdTime: Option[Long] = None,
     lastUpdatedTime: Option[Long] = None
-)
+) extends WithId
 
 final case class CreateAsset(
     name: String,

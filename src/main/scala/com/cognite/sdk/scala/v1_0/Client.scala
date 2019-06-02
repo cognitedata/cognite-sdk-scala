@@ -16,7 +16,7 @@ final class Client[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
 
   val login = new Login()
   val assets = new Assets()
-  //val events = new Events()
+  val events = new Events()
   //val timeSeries = new TimeSeriesResource()
-  //val files = new FilesResource()
+  val files = new Files()
 }

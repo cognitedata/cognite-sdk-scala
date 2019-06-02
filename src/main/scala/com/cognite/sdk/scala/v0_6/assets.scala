@@ -5,7 +5,7 @@ import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 
 final case class Asset(
-    id: Option[Long] = None,
+    id: Long = 0,
     path: Option[Seq[Long]] = None,
     depth: Option[Long] = None,
     name: String,
@@ -16,7 +16,7 @@ final case class Asset(
     sourceId: Option[String] = None,
     createdTime: Option[Long] = None,
     lastUpdatedTime: Option[Long] = None
-)
+) extends WithId
 
 final case class CreateAsset(
     name: String,
