@@ -41,7 +41,7 @@ scalacOptions ++= List(
   "-Ywarn-unused-import" // required by `RemoveUnused` rule
 )
 
-wartremoverErrors ++= Warts.allBut(
+wartremoverErrors in (Compile, compile) ++= Warts.allBut(
   Wart.DefaultArguments,
   Wart.Nothing,
   Wart.Any,

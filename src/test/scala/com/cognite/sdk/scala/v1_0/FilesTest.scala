@@ -8,7 +8,7 @@ class FilesTest extends SdkTest with ReadableResourceBehaviors {
   it should behave like readableResource(client.files)
   it should behave like writableResource(
       client.files,
-      Seq(File(name = "scala-sdk-read-example-1"), File(name = "scala-sdk-read-example-2")),
-      Seq(CreateFile(name = "scala-sdk-read-example-1"), CreateFile(name = "scala-sdk-read-example-1"))
+      Seq(File(name = "scala-sdk-read-example-1")),
+      Seq(CreateFile(name = "scala-sdk-read-example-1"))
   )
 }
