@@ -29,16 +29,14 @@ final case class CreateAsset(
 
 class Assets[F[_]](
     implicit val auth: Auth,
-    val e: Extractor[Data],
     val sttpBackend: SttpBackend[F, _],
     val readDecoder: Decoder[Asset],
     val writeDecoder: Decoder[CreateAsset],
     val writeEncoder: Encoder[CreateAsset],
     val containerItemsWithCursorDecoder: Decoder[Data[ItemsWithCursor[Asset]]],
     val containerItemsDecoder: Decoder[Data[Items[Asset]]],
-    val extractor: Extractor[Data]
-) extends Resource[F]
-    with ReadableResource[Asset, F, Data]
-    with WritableResource[Asset, CreateAsset, F, Data] {
+) extends ResourceV0_6[F]
+    with ReadableResource[Asset, F, Data, Long]
+    with WritableResourceV0_6[Asset, CreateAsset, F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/assets"
 }

@@ -1,34 +1,15 @@
 package com.cognite.sdk.scala.v0_6
 
-import com.cognite.sdk.scala.common.SdkTest
+import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest}
 
-class TimeSeriesTest extends SdkTest {
-  it should "be possible to retrieve a time series" in {
-    val client = new Client()
-    val timeSeries = client.timeSeries.read()
-    println( // scalastyle:ignore
-      timeSeries.unsafeBody.items
-        .map(ts => s"${ts.name}: ${ts.description.getOrElse("[none]")}")
-        .mkString(",\n")
-    )
-    println(s"${timeSeries.unsafeBody.items.length} time series") // scalastyle:ignore
-  }
+class TimeSeriesTest extends SdkTest with ReadableResourceBehaviors {
+  private val client = new Client()
 
-  it should "fetch all timeseries" in {
-    val client = new Client()
-    val timeSeries = client.timeSeries.readAll().take(10)
-    val f = timeSeries.flatMap(_.toIterator).take(10000)
-    println(f.length) // scalastyle:ignore
-  }
-
-  it should "be possible to create a new time series" in {
-    val r = scala.util.Random
-    val client = new Client()
-    val id = r.nextInt().toString
-    val timeSeries = client.timeSeries.create( // scalastyle:ignore
-      Seq(TimeSeries(name = s"cognite-scala-sdk-$id", description = Some(s"test id $id")))
-    )
-    println("Created time series: ") // scalastyle:ignore
-    println(timeSeries.unsafeBody.map(_.toString).mkString(", ")) // scalastyle:ignore
-  }
+  it should behave like readableResource(client.timeSeries, supportsMissingAndThrown = false)
+  it should behave like writableResource(
+    client.timeSeries,
+    Seq(TimeSeries(name = "scala-sdk-read-example-1"), TimeSeries(name = "scala-sdk-read-example-2")),
+    Seq(CreateTimeSeries(name = "scala-sdk-create-example-1"), CreateTimeSeries(name = "scala-sdk-create-example-2")),
+    supportsMissingAndThrown = false
+  )
 }

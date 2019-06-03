@@ -2,7 +2,10 @@ package com.cognite.sdk.scala.v0_6
 
 import com.cognite.sdk.scala.common._
 import com.softwaremill.sttp._
+import com.softwaremill.sttp.circe._
+import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Decoder, Encoder}
+import io.circe.generic.auto._
 
 final case class Event(
     id: Long = 0,
@@ -17,18 +20,18 @@ final case class Event(
     sourceId: Option[String] = None,
     createdTime: Long = 0,
     lastUpdatedTime: Long = 0
-)
+) extends WithId
 
 final case class CreateEvent(
-    startTime: Option[Long],
-    endTime: Option[Long],
-    description: Option[String],
-    `type`: Option[String],
-    subtype: Option[String],
-    metadata: Option[Map[String, String]],
-    assetIds: Option[Seq[Long]],
-    source: Option[String],
-    sourceId: Option[String]
+    startTime: Option[Long] = None,
+    endTime: Option[Long] = None,
+    description: Option[String] = None,
+    `type`: Option[String] = None,
+    subtype: Option[String] = None,
+    metadata: Option[Map[String, String]] = None,
+    assetIds: Option[Seq[Long]] = None,
+    source: Option[String] = None,
+    sourceId: Option[String] = None
 )
 
 class Events[F[_]](
@@ -39,9 +42,27 @@ class Events[F[_]](
     val writeEncoder: Encoder[CreateEvent],
     val containerItemsWithCursorDecoder: Decoder[Data[ItemsWithCursor[Event]]],
     val containerItemsDecoder: Decoder[Data[Items[Event]]],
-    val extractor: Extractor[Data]
-) extends Resource[F]
-    with ReadableResource[Event, F, Data]
-    with WritableResource[Event, CreateEvent, F, Data] {
+) extends Resource[F, CogniteId]
+    with ReadableResource[Event, F, Data, CogniteId]
+    with WritableResource[Event, CreateEvent, F, Data, CogniteId] {
+  def toId(id: Long): CogniteId = CogniteId(id)
+  implicit val extractor: Extractor[Data] = ExtractorInstances.dataExtractor
+  implicit val idEncoder: Encoder[CogniteId] = deriveEncoder
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/events"
+
+  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
+    Decoders.eitherDecoder[CdpApiError[CogniteId], Unit]
+  def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
+  // TODO: group deletes by max deletion request size
+  //       or assert that length of `ids` is less than max deletion request size
+    request
+      .post(uri"$baseUri/delete")
+      .body(Items(ids))
+      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
+      .mapResponse {
+        case Left(value) => throw value.error
+        case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
+        case Right(Right(_)) => ()
+      }
+      .send()
 }

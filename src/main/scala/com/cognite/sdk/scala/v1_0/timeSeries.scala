@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1_0
 
-import com.cognite.sdk.scala.common.{Auth, Items, ItemsWithCursor}
+import com.cognite.sdk.scala.common.{Auth, Items, ItemsWithCursor, WithId}
 import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 
@@ -13,10 +13,11 @@ final case class TimeSeries(
     isStep: Boolean = false,
     description: Option[String] = None,
     securityCategories: Option[Seq[Long]] = None,
-    id: Option[Long] = None,
-    createdTime: Option[Long] = None,
-    lastUpdatedTime: Option[Long] = None
-)
+    id: Long = 0,
+    externalId: Option[String] = None,
+    createdTime: Long = 0,
+    lastUpdatedTime: Long = 0
+) extends WithId
 
 final case class CreateTimeSeries(
     name: String,

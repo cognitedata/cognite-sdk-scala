@@ -3,13 +3,14 @@ package com.cognite.sdk.scala.common
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
-import io.circe.Decoder
+import io.circe.{Decoder, Encoder}
 
-trait ReadableResource[R, F[_], C[_]] extends Resource[F] {
+trait ReadableResource[R, F[_], C[_], I] extends Resource[F, I] {
   implicit val readDecoder: Decoder[R]
   implicit val containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
   implicit val containerItemsDecoder: Decoder[C[Items[R]]]
   implicit val extractor: Extractor[C]
+  implicit val idEncoder: Encoder[I]
 
   private def readWithCursor(cursor: Option[String], limit: Option[Long]): F[Response[ItemsWithCursor[R]]] =
     request
@@ -41,7 +42,7 @@ trait ReadableResource[R, F[_], C[_]] extends Resource[F] {
   def retrieveByIds(ids: Seq[Long]): F[Response[Seq[R]]] =
     request
       .get(uri"$baseUri/byids")
-      .body(Items(ids.map(CogniteId)))
+      .body(Items(ids.map(toId)))
       .response(asJson[Either[CdpApiError[CogniteId], C[Items[R]]]])
       .mapResponse {
         case Left(value) => throw value.error

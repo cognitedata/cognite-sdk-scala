@@ -6,7 +6,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off method.length
-  def readableResource[R <: WithId, C[_]](readable: ReadableResource[R, Id, C]): Unit = {
+  def readableResource[R <: WithId, C[_], I](readable: ReadableResource[R, Id, C, I], supportsMissingAndThrown: Boolean): Unit = {
     it should "read items" in {
       readable.read().unsafeBody.items should not be empty
     }
@@ -39,62 +39,73 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
       val thrown = the[CdpApiException[CogniteId]] thrownBy readable
         .retrieveByIds(idsThatDoNotExist)
         .unsafeBody
-      val itemsNotFound = thrown.missing
-      val notFoundIds = itemsNotFound.get.map(_.id)
-      notFoundIds should have size idsThatDoNotExist.size.toLong
-      notFoundIds should contain theSameElementsAs idsThatDoNotExist
+      if (supportsMissingAndThrown) {
+        val itemsNotFound = thrown.missing
+        val notFoundIds = itemsNotFound.get.map(_.id)
+        notFoundIds should have size idsThatDoNotExist.size.toLong
+        notFoundIds should contain theSameElementsAs idsThatDoNotExist
+      }
 
       val sameIdsThatDoNotExist = Seq(999991L, 999991L)
       val sameIdsThrown = the[CdpApiException[CogniteId]] thrownBy readable
         .retrieveByIds(sameIdsThatDoNotExist)
         .unsafeBody
-      sameIdsThrown.missing match {
-        case Some(missingItems) =>
-          val sameNotFoundIds = missingItems.map(_.id)
-          // it's a bit funny that the same missing ids are returned duplicated,
-          // but that's how it works as of 2019-06-02.
-          sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
-          sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist
-        case None =>
-          val duplicatedNotFoundIds = sameIdsThrown.duplicated.get.map(_.id)
-          duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
-          duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+      if (supportsMissingAndThrown) {
+        sameIdsThrown.missing match {
+          case Some(missingItems) =>
+            val sameNotFoundIds = missingItems.map(_.id)
+            // it's a bit funny that the same missing ids are returned duplicated,
+            // but that's how it works as of 2019-06-02.
+            //sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
+            sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+          case None =>
+            val duplicatedNotFoundIds = sameIdsThrown.duplicated.get.map(_.id)
+            //duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+            duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+        }
       }
     }
   }
 
-  def writableResource[R <: WithId, W, C[_]](
-      writable: WritableResource[R, W, Id, C],
+  def writableResource[R <: WithId, W, C[_], I](
+      writable: WritableResource[R, W, Id, C, I],
       readExamples: Seq[R],
-      createExamples: Seq[W]
+      createExamples: Seq[W],
+      supportsMissingAndThrown: Boolean,
   )(implicit t: Transformer[R, W]): Unit = {
     it should "be an error to delete using ids that does not exist" in {
       val idsThatDoNotExist = Seq(999991L, 999992L)
       val thrown = the[CdpApiException[CogniteId]] thrownBy writable
         .deleteByIds(idsThatDoNotExist)
         .unsafeBody
-      val missingIds = thrown.missing.getOrElse(Seq.empty).map(_.id)
-      missingIds should have size idsThatDoNotExist.size.toLong
-      missingIds should contain theSameElementsAs idsThatDoNotExist
+      if (supportsMissingAndThrown) {
+        val missingIds = thrown.missing.getOrElse(Seq.empty).map(_.id)
+        missingIds should have size idsThatDoNotExist.size.toLong
+        missingIds should contain theSameElementsAs idsThatDoNotExist
+      }
 
       val sameIdsThatDoNotExist = Seq(999991L, 999991L)
       val sameIdsThrown = the[CdpApiException[CogniteId]] thrownBy writable
         .deleteByIds(sameIdsThatDoNotExist)
         .unsafeBody
-      val sameMissingIds = sameIdsThrown.duplicated.getOrElse(Seq.empty).map(_.id)
-      sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
-      sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+      if (supportsMissingAndThrown) {
+        // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
+        // if duplicated ids that do not exist are specified.
+        val sameMissingIds = sameIdsThrown.duplicated match {
+          case Some(duplicatedIds) => duplicatedIds.map(_.id)
+          case None => sameIdsThrown.missing.getOrElse(Seq.empty).map(_.id)
+        }
+        sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+        sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+      }
     }
 
     it should "create and delete items using the read class" in {
       // create a single item
-      println(s"now create") //scalastyle:ignore
       val createdItem = writable.create(readExamples.take(1)).unsafeBody
-      println(s"created") //scalastyle:ignore
       createdItem should have size 1
       createdItem.head.id should not be 0
       writable.deleteByIds(createdItem.map(_.id)).unsafeBody
-      println(s"deleted") //scalastyle:ignore
 
       // create multiple items
       val createdItems = writable.create(readExamples).unsafeBody

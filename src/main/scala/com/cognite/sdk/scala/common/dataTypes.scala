@@ -1,6 +1,7 @@
 package com.cognite.sdk.scala.common
 
-import com.softwaremill.sttp.Uri
+import com.cognite.sdk.scala.v0_6.Data
+import com.softwaremill.sttp.{Id, Uri}
 import io.circe.Decoder
 import io.scalaland.chimney.dsl._
 
@@ -24,6 +25,15 @@ trait WithId {
 
 trait Extractor[C[_]] {
   def extract[A](c: C[A]): A
+}
+
+object ExtractorInstances {
+  implicit val idExtractor: Extractor[Id] = new Extractor[Id] {
+    override def extract[A](c: Id[A]): A = c
+  }
+  implicit val dataExtractor: Extractor[Data] = new Extractor[Data] {
+    override def extract[A](c: Data[A]): A = c.data
+  }
 }
 
 object Extract {
