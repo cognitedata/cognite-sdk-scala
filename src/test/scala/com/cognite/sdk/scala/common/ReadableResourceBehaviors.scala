@@ -53,13 +53,13 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
       if (supportsMissingAndThrown) {
         sameIdsThrown.missing match {
           case Some(missingItems) =>
-            val sameNotFoundIds = missingItems.map(_.id)
+            val sameNotFoundIds = missingItems.map(_.id).toSet
             // it's a bit funny that the same missing ids are returned duplicated,
             // but that's how it works as of 2019-06-02.
             //sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
             sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           case None =>
-            val duplicatedNotFoundIds = sameIdsThrown.duplicated.get.map(_.id)
+            val duplicatedNotFoundIds = sameIdsThrown.duplicated.get.map(_.id).toSet
             //duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
             duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
         }
@@ -71,7 +71,7 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
       writable: WritableResource[R, W, Id, C, I],
       readExamples: Seq[R],
       createExamples: Seq[W],
-      supportsMissingAndThrown: Boolean,
+      supportsMissingAndThrown: Boolean
   )(implicit t: Transformer[R, W]): Unit = {
     it should "be an error to delete using ids that does not exist" in {
       val idsThatDoNotExist = Seq(999991L, 999992L)

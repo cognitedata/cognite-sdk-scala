@@ -38,7 +38,7 @@ trait ReadableResource[R, F[_], C[_], I] extends Resource[F, I] {
   def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[Seq[R]]] = readWithNextCursor(Some(cursor), Some(limit))
   def readAll(): Iterator[F[Seq[R]]] = readWithNextCursor(None, None)
 
-  implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] = Decoders.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
+  implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] = EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
   def retrieveByIds(ids: Seq[Long]): F[Response[Seq[R]]] =
     request
       .get(uri"$baseUri/byids")

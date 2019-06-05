@@ -17,7 +17,7 @@ final case class File(
     uploadedTime: Option[Long] = None,
     createdTime: Long = 0,
     lastUpdatedTime: Long = 0,
-    uploadUrl: Option[String] = None,
+    uploadUrl: Option[String] = None
 ) extends WithId
 
 final case class CreateFile(
@@ -26,7 +26,7 @@ final case class CreateFile(
     externalId: Option[String] = None,
     mimeType: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
-    assetIds: Option[Seq[Long]] = None,
+    assetIds: Option[Seq[Long]] = None
 )
 
 class Files[F[_]](
@@ -36,7 +36,7 @@ class Files[F[_]](
     val containerItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[File]]],
     val containerItemsDecoder: Decoder[Id[Items[File]]],
     val writeDecoder: Decoder[CreateFile],
-    val writeEncoder: Encoder[CreateFile],
+    val writeEncoder: Encoder[CreateFile]
 ) extends ResourceV1[F]
     with ReadableResourceV1[File, F]
     with WritableResourceV1[File, CreateFile, F] {

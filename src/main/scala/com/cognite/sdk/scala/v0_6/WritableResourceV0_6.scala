@@ -8,7 +8,7 @@ import io.circe.generic.auto._
 
 trait WritableResourceV0_6[R, W, F[_]] extends WritableResource[R, W, F, Data, Long] {
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[Map[String, String]], Unit]] =
-    Decoders.eitherDecoder[CdpApiError[Map[String, String]], Unit]
+    EitherDecoder.eitherDecoder[CdpApiError[Map[String, String]], Unit]
   def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
   // TODO: group deletes by max deletion request size
   //       or assert that length of `ids` is less than max deletion request size

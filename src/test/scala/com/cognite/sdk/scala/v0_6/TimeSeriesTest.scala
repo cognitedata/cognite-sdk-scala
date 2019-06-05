@@ -8,8 +8,8 @@ class TimeSeriesTest extends SdkTest with ReadableResourceBehaviors {
   it should behave like readableResource(client.timeSeries, supportsMissingAndThrown = false)
   it should behave like writableResource(
     client.timeSeries,
-    Seq(TimeSeries(name = "scala-sdk-read-example-1"), TimeSeries(name = "scala-sdk-read-example-2")),
-    Seq(CreateTimeSeries(name = "scala-sdk-create-example-1"), CreateTimeSeries(name = "scala-sdk-create-example-2")),
+    Seq(TimeSeries(name = "scala-sdk-read-example-11"), TimeSeries(name = "scala-sdk-read-example-12")),
+    Seq(CreateTimeSeries(name = "scala-sdk-create-example-11"), CreateTimeSeries(name = "scala-sdk-create-example-12")),
     supportsMissingAndThrown = false
   )
 }
