@@ -16,7 +16,7 @@ final case class Event(
     source: Option[String] = None,
     externalId: Option[String] = None,
     createdTime: Long = 0,
-    lastUpdatedTime: Long = 0,
+    lastUpdatedTime: Long = 0
 ) extends WithId
 
 final case class CreateEvent(
@@ -28,7 +28,7 @@ final case class CreateEvent(
     metadata: Option[Map[String, String]] = None,
     assetIds: Option[Seq[Long]] = None,
     source: Option[String] = None,
-    externalId: Option[String] = None,
+    externalId: Option[String] = None
 )
 
 class Events[F[_]](

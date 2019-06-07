@@ -6,8 +6,8 @@ podTemplate(label: label,
                                            resourceRequestCpu: '1000m',
                                            resourceLimitCpu: '3800m',
                                            resourceLimitMemory: '3500Mi',
-                                           envVars: [secretEnvVar(key: 'TEST_API_KEY_WRITE', secretName: 'jetfire-test-api-key', secretKey: 'jetfireTestApiKey.txt'),
-                                                     secretEnvVar(key: 'TEST_API_KEY_READ', secretName: 'jetfire-test-api-key', secretKey: 'publicDataApiKey'),
+                                           envVars: [secretEnvVar(key: 'TEST_API_KEY_WRITE', secretName: 'jetfire-test-api-key', secretKey: 'playgroundApiKey'),
+                                                     secretEnvVar(key: 'TEST_API_KEY_READ', secretName: 'jetfire-test-api-key', secretKey: 'playgroundApiKey'),
                                                      secretEnvVar(key: 'TEST_API_KEY_GREENFIELD', secretName: 'jetfire-test-api-key', secretKey: 'greenfieldApiKey'),
                                                      secretEnvVar(key: 'CODECOV_TOKEN', secretName: 'codecov-token-cognite-sdk-scala', secretKey: 'token.txt'),
                                                      //secretEnvVar(key: 'GPG_KEY_PASSWORD', secretName: 'sbt-credentials', secretKey: 'gpg-key-password'),
@@ -42,17 +42,16 @@ podTemplate(label: label,
                     //sh('mkdir -p /root/.sbt/gpg && cp /sbt-credentials/pubring.asc /sbt-credentials/secring.asc /root/.sbt/gpg/')
                 }
                 stage('Run tests') {
-                    sh('sbt -Dsbt.log.noformat=true scalastyle test:scalastyle scalafmtCheck test:scalafmtCheck scalafix coverage +test coverageReport')
+                    sh('sbt -Dsbt.log.noformat=true scalastyle test:scalastyle scalafmtCheck scalafix coverage +test coverageReport')
                 }
                 stage("Upload report to codecov.io") {
                     sh('bash </codecov-script/upload-report.sh')
                 }
                 stage('Build JAR file') {
                     sh('sbt -Dsbt.log.noformat=true'
-                       + ' "set test in library := {}"'
+                       + ' "set test in Test := {}"'
                        + ' "set compile/skip := true"'
-                       + ' "set macroSub/skip := true"'
-                       + ' +library/package')
+                       + ' +package')
                 }
                 // if (env.BRANCH_NAME == 'master') {
                 //     stage('Deploy') {

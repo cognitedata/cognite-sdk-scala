@@ -12,9 +12,16 @@ trait ReadableResource[R, F[_], C[_], I] extends Resource[F, I] {
   implicit val extractor: Extractor[C]
   implicit val idEncoder: Encoder[I]
 
-  private def readWithCursor(cursor: Option[String], limit: Option[Long]): F[Response[ItemsWithCursor[R]]] =
+  private def readWithCursor(
+      cursor: Option[String],
+      limit: Option[Long]
+  ): F[Response[ItemsWithCursor[R]]] =
     request
-      .get(cursor.fold(baseUri)(baseUri.param("cursor", _)).param("limit", limit.getOrElse(defaultLimit).toString))
+      .get(
+        cursor
+          .fold(baseUri)(baseUri.param("cursor", _))
+          .param("limit", limit.getOrElse(defaultLimit).toString)
+      )
       .response(asJson[C[ItemsWithCursor[R]]])
       .mapResponse {
         case Left(value) => throw value.error
@@ -22,23 +29,32 @@ trait ReadableResource[R, F[_], C[_], I] extends Resource[F, I] {
       }
       .send()
 
-  def readFromCursor(cursor: String): F[Response[ItemsWithCursor[R]]] = readWithCursor(Some(cursor), None)
-  def readFromCursorWithLimit(cursor: String, limit: Long): F[Response[ItemsWithCursor[R]]] = readWithCursor(Some(cursor), Some(limit))
+  def readFromCursor(cursor: String): F[Response[ItemsWithCursor[R]]] =
+    readWithCursor(Some(cursor), None)
+  def readFromCursorWithLimit(cursor: String, limit: Long): F[Response[ItemsWithCursor[R]]] =
+    readWithCursor(Some(cursor), Some(limit))
   def read(): F[Response[ItemsWithCursor[R]]] = readWithCursor(None, None)
-  def readWithLimit(limit: Long): F[Response[ItemsWithCursor[R]]] = readWithCursor(None, Some(limit))
+  def readWithLimit(limit: Long): F[Response[ItemsWithCursor[R]]] =
+    readWithCursor(None, Some(limit))
 
   private def readWithNextCursor(cursor: Option[String], limit: Option[Long]): Iterator[F[Seq[R]]] =
     new NextCursorIterator[R, F](cursor, limit) {
-      def get(cursor: Option[String], remainingItems: Option[Long]): F[Response[ItemsWithCursor[R]]] =
+      def get(
+          cursor: Option[String],
+          remainingItems: Option[Long]
+      ): F[Response[ItemsWithCursor[R]]] =
         readWithCursor(cursor, remainingItems)
     }
 
-  def readAllFromCursor(cursor: String): Iterator[F[Seq[R]]] = readWithNextCursor(Some(cursor), None)
+  def readAllFromCursor(cursor: String): Iterator[F[Seq[R]]] =
+    readWithNextCursor(Some(cursor), None)
   def readAllWithLimit(limit: Long): Iterator[F[Seq[R]]] = readWithNextCursor(None, Some(limit))
-  def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[Seq[R]]] = readWithNextCursor(Some(cursor), Some(limit))
+  def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[Seq[R]]] =
+    readWithNextCursor(Some(cursor), Some(limit))
   def readAll(): Iterator[F[Seq[R]]] = readWithNextCursor(None, None)
 
-  implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] = Decoders.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
+  implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] =
+    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
   def retrieveByIds(ids: Seq[Long]): F[Response[Seq[R]]] =
     request
       .get(uri"$baseUri/byids")

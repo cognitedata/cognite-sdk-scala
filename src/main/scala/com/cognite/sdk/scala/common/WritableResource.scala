@@ -14,14 +14,19 @@ trait WritableResource[R, W, F[_], C[_], I] extends Resource[F, I] {
   implicit val containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
   implicit val extractor: Extractor[C]
 
+  implicit val errorOrStringDataPointsByIdResponseDecoder
+      : Decoder[Either[CdpApiError[CogniteId], C[ItemsWithCursor[R]]]] =
+    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[ItemsWithCursor[R]]]
   def createItems(items: Items[W]): F[Response[Seq[R]]] =
     request
       .post(baseUri)
       .body(items)
-      .response(asJson[C[ItemsWithCursor[R]]])
+      .response(asJson[Either[CdpApiError[CogniteId], C[ItemsWithCursor[R]]]])
       .mapResponse {
-        case Left(value) => throw value.error
-        case Right(value) => extractor.extract(value).items
+        case Left(value) =>
+          throw value.error
+        case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+        case Right(Right(value)) => extractor.extract(value).items
       }
       .send()
 
