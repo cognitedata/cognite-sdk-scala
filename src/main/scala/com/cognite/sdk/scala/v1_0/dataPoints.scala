@@ -5,6 +5,7 @@ import com.cognite.sdk.scala.common.{
   CdpApiError,
   CogniteId,
   DataPoint,
+  DataPointsResource,
   EitherDecoder,
   Items,
   StringDataPoint
@@ -59,7 +60,8 @@ final case class QueryRangeById(
 class DataPointsResourceV1[F[_]](
     implicit val auth: Auth,
     val sttpBackend: SttpBackend[F, _]
-) extends ResourceV1[F] {
+) extends ResourceV1[F]
+    with DataPointsResource[F, Long] {
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/playground/timeseries/data"
 
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
