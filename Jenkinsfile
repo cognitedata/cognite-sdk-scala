@@ -49,10 +49,9 @@ podTemplate(label: label,
                 }
                 stage('Build JAR file') {
                     sh('sbt -Dsbt.log.noformat=true'
-                       + ' "set test in library := {}"'
+                       + ' "set test in Test := {}"'
                        + ' "set compile/skip := true"'
-                       + ' "set macroSub/skip := true"'
-                       + ' +library/package')
+                       + ' +package')
                 }
                 // if (env.BRANCH_NAME == 'master') {
                 //     stage('Deploy') {
