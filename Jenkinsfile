@@ -42,7 +42,7 @@ podTemplate(label: label,
                     //sh('mkdir -p /root/.sbt/gpg && cp /sbt-credentials/pubring.asc /sbt-credentials/secring.asc /root/.sbt/gpg/')
                 }
                 stage('Run tests') {
-                    sh('sbt -Dsbt.log.noformat=true scalastyle test:scalastyle scalafmtCheck test:scalafmtCheck scalafix coverage +test coverageReport')
+                    sh('sbt -Dsbt.log.noformat=true scalastyle test:scalastyle scalafmtCheck scalafix coverage +test coverageReport')
                 }
                 stage("Upload report to codecov.io") {
                     sh('bash </codecov-script/upload-report.sh')

@@ -126,10 +126,11 @@ class DataPointsResourceV1[F[_]](
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) => extractor.extract(value).items.headOption match {
-          case Some(items) => items.datapoints
-          case None => Seq.empty
-        }
+        case Right(Right(value)) =>
+          extractor.extract(value).items.headOption match {
+            case Some(items) => items.datapoints
+            case None => Seq.empty
+          }
       }
       .send()
 
@@ -145,10 +146,11 @@ class DataPointsResourceV1[F[_]](
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) => extractor.extract(value).items.headOption match {
-          case Some(items) => items.datapoints
-          case None => Seq.empty
-        }
+        case Right(Right(value)) =>
+          extractor.extract(value).items.headOption match {
+            case Some(items) => items.datapoints
+            case None => Seq.empty
+          }
       }
       .send()
 
@@ -161,7 +163,8 @@ class DataPointsResourceV1[F[_]](
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) => extractor.extract(value).items.headOption.flatMap(_.datapoints.headOption)
+        case Right(Right(value)) =>
+          extractor.extract(value).items.headOption.flatMap(_.datapoints.headOption)
       }
       .send()
 
@@ -173,7 +176,8 @@ class DataPointsResourceV1[F[_]](
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) => extractor.extract(value).items.headOption.flatMap(_.datapoints.headOption)
+        case Right(Right(value)) =>
+          extractor.extract(value).items.headOption.flatMap(_.datapoints.headOption)
       }
       .send()
 }

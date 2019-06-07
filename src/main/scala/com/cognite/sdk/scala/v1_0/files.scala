@@ -42,7 +42,7 @@ class Files[F[_]](
     with WritableResourceV1[File, CreateFile, F] {
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/playground/files"
 
-  override def createItems(items: Items[CreateFile]): F[Response[Seq[File]]] = {
+  override def createItems(items: Items[CreateFile]): F[Response[Seq[File]]] =
     items.items match {
       case item :: Nil =>
         request
@@ -56,5 +56,4 @@ class Files[F[_]](
           .send()
       case _ => throw new RuntimeException("Files only support creating one file per call")
     }
-  }
 }

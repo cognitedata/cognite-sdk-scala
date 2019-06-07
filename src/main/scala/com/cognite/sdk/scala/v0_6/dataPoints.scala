@@ -31,10 +31,10 @@ class DataPointsResourceV0_6[F[_]](
       : Decoder[Either[CdpApiError[CogniteId], Data[Items[StringDataPointsByName]]]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Data[Items[StringDataPointsByName]]]
   implicit val errorOrDataPointResponseDecoder
-  : Decoder[Either[CdpApiError[CogniteId], Data[Items[DataPoint]]]] =
+      : Decoder[Either[CdpApiError[CogniteId], Data[Items[DataPoint]]]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Data[Items[DataPoint]]]
   implicit val errorOrStringDataPointResponseDecoder
-  : Decoder[Either[CdpApiError[CogniteId], Data[Items[StringDataPoint]]]] =
+      : Decoder[Either[CdpApiError[CogniteId], Data[Items[StringDataPoint]]]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Data[Items[StringDataPoint]]]
 
   def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Response[Unit]] =
@@ -89,10 +89,11 @@ class DataPointsResourceV0_6[F[_]](
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) => extractor.extract(value).items.headOption match {
-          case Some(items) => items.datapoints
-          case None => Seq.empty
-        }
+        case Right(Right(value)) =>
+          extractor.extract(value).items.headOption match {
+            case Some(items) => items.datapoints
+            case None => Seq.empty
+          }
       }
       .send()
 
@@ -112,10 +113,11 @@ class DataPointsResourceV0_6[F[_]](
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) => extractor.extract(value).items.headOption match {
-          case Some(items) => items.datapoints
-          case None => Seq.empty
-        }
+        case Right(Right(value)) =>
+          extractor.extract(value).items.headOption match {
+            case Some(items) => items.datapoints
+            case None => Seq.empty
+          }
       }
       .send()
 

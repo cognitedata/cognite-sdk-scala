@@ -39,7 +39,7 @@ class DataPointsTest extends SdkTest {
 //        |{"error": { "code": 100, "message": "some error" } }
 //      """.stripMargin)
     client.dataPoints.insertById(timeSeries.id, testDataPoints).isSuccess should be (true)
-    Thread.sleep(10000)
+    Thread.sleep(3000)
     val points = client.dataPoints.queryById(timeSeries.id, startTime, endTime + 1).unsafeBody
     points should have size testDataPoints.size.toLong
 
@@ -49,7 +49,7 @@ class DataPointsTest extends SdkTest {
     testDataPoints should contain (latestPoint)
 
     client.dataPoints.deleteRangeById(timeSeries.id, startTime, endTime + 1)
-    Thread.sleep(10000)
+    Thread.sleep(15000)
     val pointsAfterDelete = client.dataPoints.queryById(timeSeries.id, startTime, endTime + 1).unsafeBody
     pointsAfterDelete should have size 0
   }
@@ -57,7 +57,7 @@ class DataPointsTest extends SdkTest {
   it should "be possible to insert string data points" in withStringTimeSeries { stringTimeSeries =>
     client.dataPoints.insertStringsById(stringTimeSeries.id, testStringDataPoints).isSuccess should be (true)
 
-    Thread.sleep(10000)
+    Thread.sleep(3000)
     val points = client.dataPoints.queryStringsById(stringTimeSeries.id, startTime, endTime + 1).unsafeBody
     points should have size testDataPoints.size.toLong
 
@@ -67,7 +67,7 @@ class DataPointsTest extends SdkTest {
     testStringDataPoints should contain (latestPoint)
 
     client.dataPoints.deleteRangeById(stringTimeSeries.id, startTime, endTime + 1)
-    Thread.sleep(100000)
+    Thread.sleep(15000)
     val pointsAfterDelete = client.dataPoints.queryById(stringTimeSeries.id, startTime, endTime + 1).unsafeBody
     pointsAfterDelete should have size 0
   }

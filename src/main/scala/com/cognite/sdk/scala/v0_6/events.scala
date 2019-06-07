@@ -53,8 +53,8 @@ class Events[F[_]](
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
   def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
-  // TODO: group deletes by max deletion request size
-  //       or assert that length of `ids` is less than max deletion request size
+    // TODO: group deletes by max deletion request size
+    //       or assert that length of `ids` is less than max deletion request size
     request
       .post(uri"$baseUri/delete")
       .body(Items(ids))
