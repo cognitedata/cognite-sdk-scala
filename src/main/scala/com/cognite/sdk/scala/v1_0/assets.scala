@@ -1,8 +1,8 @@
 package com.cognite.sdk.scala.v1_0
 
-import com.cognite.sdk.scala.common.{Auth, Items, ItemsWithCursor, WithId}
+import com.cognite.sdk.scala.common.{Auth, WithId}
 import com.softwaremill.sttp._
-import io.circe.{Decoder, Encoder}
+import io.circe.generic.auto._
 
 final case class Asset(
     id: Long = 0,
@@ -30,11 +30,6 @@ final case class CreateAsset(
 class Assets[F[_]](
     implicit val auth: Auth,
     val sttpBackend: SttpBackend[F, _],
-    val readDecoder: Decoder[Asset],
-    val writeDecoder: Decoder[CreateAsset],
-    val writeEncoder: Encoder[CreateAsset],
-    val containerItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[Asset]]],
-    val containerItemsDecoder: Decoder[Id[Items[Asset]]]
 ) extends ReadWritableResourceV1[Asset, CreateAsset, F] with ResourceV1[F]{
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/playground/assets"
 }

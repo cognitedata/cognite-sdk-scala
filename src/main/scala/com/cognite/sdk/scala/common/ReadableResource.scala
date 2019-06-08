@@ -5,10 +5,9 @@ import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
 
-abstract class ReadableResource[R, F[_], C[_], I] extends Resource[F, I] {
-  implicit val readDecoder: Decoder[R]
-  implicit val containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
-  implicit val containerItemsDecoder: Decoder[C[Items[R]]]
+abstract class ReadableResource[R: Decoder, F[_], C[_], I](
+  implicit val containerItemsDecoder: Decoder[C[Items[R]]],
+  val containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]) extends Resource[F, I] {
   implicit val extractor: Extractor[C]
   implicit val idEncoder: Encoder[I]
 

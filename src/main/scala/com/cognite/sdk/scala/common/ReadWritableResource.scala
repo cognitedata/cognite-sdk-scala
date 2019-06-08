@@ -7,11 +7,10 @@ import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
-abstract class ReadWritableResource[R, W, F[_], C[_], I] extends ReadableResource[R, F, C, I] {
-  implicit val writeEncoder: Encoder[W]
-  implicit val writeDecoder: Decoder[W]
-  implicit val readDecoder: Decoder[R]
-  implicit val containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
+abstract class ReadWritableResource[R: Decoder, W: Decoder : Encoder, F[_], C[_], I](
+  override implicit val containerItemsDecoder: Decoder[C[Items[R]]],
+  override implicit val containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
+  ) extends ReadableResource[R, F, C, I] {
   implicit val extractor: Extractor[C]
 
   implicit val errorOrStringDataPointsByIdResponseDecoder

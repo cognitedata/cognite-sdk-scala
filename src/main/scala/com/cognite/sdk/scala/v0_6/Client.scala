@@ -2,7 +2,6 @@ package com.cognite.sdk.scala.v0_6
 
 import com.cognite.sdk.scala.common.{Auth, Login}
 import com.softwaremill.sttp._
-import io.circe.generic.auto._
 
 final case class Data[A](data: A)
 
