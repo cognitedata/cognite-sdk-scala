@@ -5,7 +5,7 @@ import com.softwaremill.sttp.Id
 import io.circe.Encoder
 import io.circe.generic.semiauto._
 
-abstract class ResourceV1[F[_]] extends Resource[F, CogniteId] {
+trait ResourceV1[F[_]] extends Resource[F, CogniteId] {
   def toId(id: Long): CogniteId = CogniteId(id)
   implicit val extractor: Extractor[Id] = ExtractorInstances.idExtractor
   implicit val idEncoder: Encoder[CogniteId] = deriveEncoder

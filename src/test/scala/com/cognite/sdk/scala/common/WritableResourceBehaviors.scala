@@ -7,7 +7,7 @@ import org.scalatest.{FlatSpec, Matchers}
 trait WritableResourceBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off method.length
   def writableResource[R <: WithId, W, C[_], I](
-      writable: WritableResource[R, W, Id, C, I],
+      writable: ReadWritableResource[R, W, Id, C, I],
       readExamples: Seq[R],
       createExamples: Seq[W],
       supportsMissingAndThrown: Boolean

@@ -35,8 +35,6 @@ class Assets[F[_]](
     val writeEncoder: Encoder[CreateAsset],
     val containerItemsWithCursorDecoder: Decoder[Data[ItemsWithCursor[Asset]]],
     val containerItemsDecoder: Decoder[Data[Items[Asset]]]
-) extends ResourceV0_6[F]
-    with ReadableResource[Asset, F, Data, Long]
-    with WritableResourceV0_6[Asset, CreateAsset, F] {
+) extends ReadWritableResourceV0_6[Asset, CreateAsset, F] with ResourceV0_6[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/assets"
 }

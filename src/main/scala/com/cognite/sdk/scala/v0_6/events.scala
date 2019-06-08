@@ -3,7 +3,6 @@ package com.cognite.sdk.scala.v0_6
 import com.cognite.sdk.scala.common._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
 
@@ -42,17 +41,10 @@ class Events[F[_]](
     val writeEncoder: Encoder[CreateEvent],
     val containerItemsWithCursorDecoder: Decoder[Data[ItemsWithCursor[Event]]],
     val containerItemsDecoder: Decoder[Data[Items[Event]]]
-) extends Resource[F, CogniteId]
-    with ReadableResource[Event, F, Data, CogniteId]
-    with WritableResource[Event, CreateEvent, F, Data, CogniteId] {
-  def toId(id: Long): CogniteId = CogniteId(id)
-  implicit val extractor: Extractor[Data] = ExtractorInstances.dataExtractor
-  implicit val idEncoder: Encoder[CogniteId] = deriveEncoder
+) extends ReadWritableResourceV0_6[Event, CreateEvent, F] with ResourceV0_6[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/events"
 
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
-  def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     request
@@ -63,6 +55,19 @@ class Events[F[_]](
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
         case Right(Right(_)) => ()
+      }
+      .send()
+
+  // 0.6 byids for events uses CogniteId
+  override def retrieveByIds(ids: Seq[Long]): F[Response[Seq[Event]]] =
+    request
+      .get(uri"$baseUri/byids")
+      .body(Items(ids.map(CogniteId)))
+      .response(asJson[Either[CdpApiError[CogniteId], Data[Items[Event]]]])
+      .mapResponse {
+        case Left(value) => throw value.error
+        case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
+        case Right(Right(value)) => extractor.extract(value).items
       }
       .send()
 }
