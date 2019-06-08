@@ -37,9 +37,7 @@ class Files[F[_]](
     val containerItemsDecoder: Decoder[Id[Items[File]]],
     val writeDecoder: Decoder[CreateFile],
     val writeEncoder: Encoder[CreateFile]
-) extends ResourceV1[F]
-    with ReadableResourceV1[File, F]
-    with WritableResourceV1[File, CreateFile, F] {
+) extends ReadWritableResourceV1[File, CreateFile, F] with ResourceV1[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/playground/files"
 
   override def createItems(items: Items[CreateFile]): F[Response[Seq[File]]] =

@@ -7,7 +7,7 @@ import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
-trait WritableResource[R, W, F[_], C[_], I] extends Resource[F, I] {
+abstract class ReadWritableResource[R, W, F[_], C[_], I] extends ReadableResource[R, F, C, I] {
   implicit val writeEncoder: Encoder[W]
   implicit val writeDecoder: Decoder[W]
   implicit val readDecoder: Decoder[R]

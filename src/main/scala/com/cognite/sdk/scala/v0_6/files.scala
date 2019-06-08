@@ -25,7 +25,6 @@ class FilesResource[F[_]](
     val readDecoder: Decoder[File],
     val containerItemsWithCursorDecoder: Decoder[Data[ItemsWithCursor[File]]],
     val containerItemsDecoder: Decoder[Data[Items[File]]]
-) extends ResourceV0_6[F]
-    with ReadableResource[File, F, Data, Long] {
+) extends ReadableResource[File, F, Data, Long] with ResourceV0_6[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/files"
 }

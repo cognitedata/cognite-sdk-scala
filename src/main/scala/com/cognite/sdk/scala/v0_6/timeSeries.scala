@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v0_6
 
-import com.cognite.sdk.scala.common.{Auth, Items, ItemsWithCursor, ReadableResource, WithId}
+import com.cognite.sdk.scala.common.{Auth, Items, ItemsWithCursor, WithId}
 import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 
@@ -29,7 +29,7 @@ final case class CreateTimeSeries(
     securityCategories: Option[Seq[Long]] = None
 )
 
-class TimeSeriesResource[F[_]](
+class TimeSeriesResourceRead[F[_]](
     implicit val auth: Auth,
     val sttpBackend: SttpBackend[F, _],
     val readDecoder: Decoder[TimeSeries],
@@ -37,8 +37,6 @@ class TimeSeriesResource[F[_]](
     val writeEncoder: Encoder[CreateTimeSeries],
     val containerItemsWithCursorDecoder: Decoder[Data[ItemsWithCursor[TimeSeries]]],
     val containerItemsDecoder: Decoder[Data[Items[TimeSeries]]]
-) extends ResourceV0_6[F]
-    with ReadableResource[TimeSeries, F, Data, Long]
-    with WritableResourceV0_6[TimeSeries, CreateTimeSeries, F] {
+) extends ReadWritableResourceV0_6[TimeSeries, CreateTimeSeries, F] with ResourceV0_6[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/timeseries"
 }

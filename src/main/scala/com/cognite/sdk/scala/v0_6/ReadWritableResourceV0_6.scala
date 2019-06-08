@@ -6,16 +6,16 @@ import com.softwaremill.sttp.circe._
 import io.circe.Decoder
 import io.circe.generic.auto._
 
-trait WritableResourceV0_6[R, W, F[_]] extends WritableResource[R, W, F, Data, Long] {
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[Map[String, String]], Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError[Map[String, String]], Unit]
+abstract class ReadWritableResourceV0_6[R, W, F[_]] extends ReadWritableResource[R, W, F, Data, Long] {
+  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
+    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
   def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     request
       .post(uri"$baseUri/delete")
       .body(Items(ids))
-      .response(asJson[Either[CdpApiError[Map[String, String]], Unit]])
+      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
       .mapResponse {
         case Left(value) =>
           throw value.error
