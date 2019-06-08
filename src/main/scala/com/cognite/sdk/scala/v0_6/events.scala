@@ -3,7 +3,6 @@ package com.cognite.sdk.scala.v0_6
 import com.cognite.sdk.scala.common._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
 
 final case class Event(
@@ -36,11 +35,6 @@ final case class CreateEvent(
 class Events[F[_]](
     implicit val auth: Auth,
     val sttpBackend: SttpBackend[F, _],
-    val readDecoder: Decoder[Event],
-    val writeDecoder: Decoder[CreateEvent],
-    val writeEncoder: Encoder[CreateEvent],
-    val containerItemsWithCursorDecoder: Decoder[Data[ItemsWithCursor[Event]]],
-    val containerItemsDecoder: Decoder[Data[Items[Event]]]
 ) extends ReadWritableResourceV0_6[Event, CreateEvent, F] with ResourceV0_6[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/events"
 

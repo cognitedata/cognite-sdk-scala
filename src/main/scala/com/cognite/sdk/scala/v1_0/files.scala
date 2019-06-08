@@ -1,9 +1,9 @@
 package com.cognite.sdk.scala.v1_0
 
-import com.cognite.sdk.scala.common.{Auth, Items, ItemsWithCursor, WithId}
+import com.cognite.sdk.scala.common.{Auth, Items, WithId}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.{Decoder, Encoder}
+import io.circe.generic.auto._
 
 final case class File(
     id: Long = 0,
@@ -32,11 +32,6 @@ final case class CreateFile(
 class Files[F[_]](
     implicit val auth: Auth,
     val sttpBackend: SttpBackend[F, _],
-    val readDecoder: Decoder[File],
-    val containerItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[File]]],
-    val containerItemsDecoder: Decoder[Id[Items[File]]],
-    val writeDecoder: Decoder[CreateFile],
-    val writeEncoder: Encoder[CreateFile]
 ) extends ReadWritableResourceV1[File, CreateFile, F] with ResourceV1[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/playground/files"
 
