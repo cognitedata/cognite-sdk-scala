@@ -8,8 +8,10 @@ import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
 abstract class ReadWritableResource[R: Decoder, W: Decoder : Encoder, F[_], C[_], I](
-  override implicit val containerItemsDecoder: Decoder[C[Items[R]]],
-  override implicit val containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
+  implicit auth: Auth,
+  sttpBackend: SttpBackend[F, _],
+  containerItemsDecoder: Decoder[C[Items[R]]],
+  containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
   ) extends ReadableResource[R, F, C, I] {
   implicit val extractor: Extractor[C]
 

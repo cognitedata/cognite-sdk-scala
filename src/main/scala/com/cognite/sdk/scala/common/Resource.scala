@@ -1,12 +1,9 @@
 package com.cognite.sdk.scala.common
 
-import com.softwaremill.sttp.{Empty, RequestT, SttpBackend, Uri, sttp}
+import com.softwaremill.sttp.{Empty, RequestT, Uri, sttp}
 import scala.concurrent.duration._
 
-abstract class Resource[F[_], I] {
-  implicit val auth: Auth
-  implicit val sttpBackend: SttpBackend[F, _]
-
+abstract class Resource[F[_], I](auth: Auth) {
   val request: RequestT[Empty, String, Nothing] = sttp
     .auth(auth)
     .contentType("application/json")
