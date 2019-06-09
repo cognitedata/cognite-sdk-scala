@@ -30,7 +30,8 @@ final case class CreateFile(
 )
 
 class Files[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _])
-  extends ReadWritableResourceV1[File, CreateFile, F] with ResourceV1[F] {
+    extends ReadWritableResourceV1[File, CreateFile, F]
+    with ResourceV1[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/playground/files"
 
   override def createItems(items: Items[CreateFile]): F[Response[Seq[File]]] =
