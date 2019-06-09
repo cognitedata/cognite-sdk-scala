@@ -6,8 +6,11 @@ import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
 
 abstract class ReadableResource[R: Decoder, F[_], C[_], I](
-  implicit val containerItemsDecoder: Decoder[C[Items[R]]],
-  val containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]) extends Resource[F, I] {
+  implicit auth: Auth,
+  containerItemsDecoder: Decoder[C[Items[R]]],
+  containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
+  sttpBackend: SttpBackend[F, _]
+) extends Resource[F, I](auth) {
   implicit val extractor: Extractor[C]
   implicit val idEncoder: Encoder[I]
 

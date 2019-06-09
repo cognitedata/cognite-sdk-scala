@@ -27,9 +27,8 @@ final case class CreateAsset(
     metadata: Option[Map[String, String]] = None
 )
 
-class Assets[F[_]](
-    implicit val auth: Auth,
-    val sttpBackend: SttpBackend[F, _],
-) extends ReadWritableResourceV0_6[Asset, CreateAsset, F] with ResourceV0_6[F] {
+class Assets[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _])
+    extends ReadWritableResourceV0_6[Asset, CreateAsset, F]
+    with ResourceV0_6[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/assets"
 }

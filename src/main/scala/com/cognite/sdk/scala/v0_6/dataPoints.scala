@@ -16,10 +16,8 @@ final case class StringDataPointsByName(
     datapoints: Seq[StringDataPoint]
 )
 
-class DataPointsResourceV0_6[F[_]](
-    implicit val auth: Auth,
-    val sttpBackend: SttpBackend[F, _]
-) extends ResourceV0_6[F]
+class DataPointsResourceV0_6[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _])
+  extends Resource[F, Long](auth) with ResourceV0_6[F]
     with DataPointsResource[F, Long] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/timeseries"
 
