@@ -38,7 +38,7 @@ abstract class ReadableResource[R: Decoder, F[_], C[_], InternalId, PrimitiveId]
   def readWithLimit(limit: Long): F[Response[ItemsWithCursor[R]]] =
     readWithCursor(None, Some(limit))
 
-  private def readWithNextCursor(cursor: Option[String], limit: Option[Long]): Iterator[F[Seq[R]]] =
+  private def readWithNextCursor(cursor: Option[String], limit: Option[Long]): Iterator[F[Response[Seq[R]]]] =
     new NextCursorIterator[R, F](cursor, limit) {
       def get(
           cursor: Option[String],
@@ -47,12 +47,12 @@ abstract class ReadableResource[R: Decoder, F[_], C[_], InternalId, PrimitiveId]
         readWithCursor(cursor, remainingItems)
     }
 
-  def readAllFromCursor(cursor: String): Iterator[F[Seq[R]]] =
+  def readAllFromCursor(cursor: String): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(Some(cursor), None)
-  def readAllWithLimit(limit: Long): Iterator[F[Seq[R]]] = readWithNextCursor(None, Some(limit))
-  def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[Seq[R]]] =
+  def readAllWithLimit(limit: Long): Iterator[F[Response[Seq[R]]]] = readWithNextCursor(None, Some(limit))
+  def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(Some(cursor), Some(limit))
-  def readAll(): Iterator[F[Seq[R]]] = readWithNextCursor(None, None)
+  def readAll(): Iterator[F[Response[Seq[R]]]] = readWithNextCursor(None, None)
 }
 
 abstract class ReadableResourceWithRetrieve[R: Decoder, F[_], C[_], InternalId, PrimitiveId](
