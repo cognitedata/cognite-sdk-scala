@@ -5,14 +5,13 @@ import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
 
-abstract class ReadableResource[R: Decoder, F[_], C[_], I](
+abstract class ReadableResource[R: Decoder, F[_], C[_], InternalId, PrimitiveId](
     implicit auth: Auth,
-    containerItemsDecoder: Decoder[C[Items[R]]],
     containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
     sttpBackend: SttpBackend[F, _]
-) extends Resource[F, I](auth) {
+) extends Resource[F, InternalId, PrimitiveId](auth) {
   implicit val extractor: Extractor[C]
-  implicit val idEncoder: Encoder[I]
+  implicit val idEncoder: Encoder[InternalId]
 
   private def readWithCursor(
       cursor: Option[String],
@@ -54,13 +53,20 @@ abstract class ReadableResource[R: Decoder, F[_], C[_], I](
   def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[Seq[R]]] =
     readWithNextCursor(Some(cursor), Some(limit))
   def readAll(): Iterator[F[Seq[R]]] = readWithNextCursor(None, None)
+}
 
+abstract class ReadableResourceWithRetrieve[R: Decoder, F[_], C[_], InternalId, PrimitiveId](
+  implicit auth: Auth,
+  containerItemsDecoder: Decoder[C[Items[R]]],
+  containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
+  sttpBackend: SttpBackend[F, _]
+) extends ReadableResource[R, F, C, InternalId, PrimitiveId] {
   implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
-  def retrieveByIds(ids: Seq[Long]): F[Response[Seq[R]]] =
+  def retrieveByIds(ids: Seq[PrimitiveId]): F[Response[Seq[R]]] =
     request
       .get(uri"$baseUri/byids")
-      .body(Items(ids.map(toId)))
+      .body(Items(ids.map(toInternalId)))
       .response(asJson[Either[CdpApiError[CogniteId], C[Items[R]]]])
       .mapResponse {
         case Left(value) => throw value.error

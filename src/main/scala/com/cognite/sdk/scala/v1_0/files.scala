@@ -19,7 +19,7 @@ final case class File(
     createdTime: Long = 0,
     lastUpdatedTime: Long = 0,
     uploadUrl: Option[String] = None
-) extends WithId
+) extends WithId[Long]
 
 final case class CreateFile(
     name: String,

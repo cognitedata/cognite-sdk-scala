@@ -6,7 +6,7 @@ import io.circe.Encoder
 import io.circe.generic.semiauto._
 
 trait ResourceV1[F[_]] {
-  def toId(id: Long): CogniteId = CogniteId(id)
+  def toInternalId(id: Long): CogniteId = CogniteId(id)
   implicit val extractor: Extractor[Id] = ExtractorInstances.idExtractor
   implicit val idEncoder: Encoder[CogniteId] = deriveEncoder
 }

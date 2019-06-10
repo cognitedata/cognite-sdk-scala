@@ -3,7 +3,7 @@ package com.cognite.sdk.scala.common
 import com.softwaremill.sttp.{Empty, RequestT, Uri, sttp}
 import scala.concurrent.duration._
 
-abstract class Resource[F[_], I](auth: Auth) {
+abstract class Resource[F[_], InternalId, PrimitiveId](auth: Auth) {
   val request: RequestT[Empty, String, Nothing] = sttp
     .auth(auth)
     .contentType("application/json")
@@ -11,5 +11,5 @@ abstract class Resource[F[_], I](auth: Auth) {
     .parseResponseIf(_ => true)
   val baseUri: Uri
   val defaultLimit: Long = 1000
-  def toId(id: Long): I
+  def toInternalId(id: PrimitiveId): InternalId
 }

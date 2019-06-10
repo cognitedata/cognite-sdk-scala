@@ -13,4 +13,7 @@ final class Client[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
   val files = new Files()
   val timeSeries = new TimeSeriesResourceRead()
   val dataPoints = new DataPointsResourceV1()
+  val rawDatabases = new RawDatabases()
+  def rawTables(database: String): RawTables[F] = new RawTables(database)
+  def rawRows(database: String, table: String): RawRows[F] = new RawRows(database, table)
 }

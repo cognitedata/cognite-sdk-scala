@@ -18,7 +18,7 @@ final case class Event(
     sourceId: Option[String] = None,
     createdTime: Long = 0,
     lastUpdatedTime: Long = 0
-) extends WithId
+) extends WithId[Long]
 
 final case class CreateEvent(
     startTime: Option[Long] = None,

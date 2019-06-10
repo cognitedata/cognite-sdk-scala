@@ -17,7 +17,7 @@ final case class TimeSeries(
     externalId: Option[String] = None,
     createdTime: Long = 0,
     lastUpdatedTime: Long = 0
-) extends WithId
+) extends WithId[Long]
 
 final case class CreateTimeSeries(
     name: String,

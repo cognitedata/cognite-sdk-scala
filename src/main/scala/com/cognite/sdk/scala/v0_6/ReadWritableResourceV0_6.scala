@@ -9,7 +9,7 @@ import io.circe.generic.auto._
 abstract class ReadWritableResourceV0_6[R: Decoder, W: Decoder: Encoder, F[_]](
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
-) extends ReadWritableResource[R, W, F, Data, Long] {
+) extends ReadWritableResource[R, W, F, Data, Long, Long] {
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
   def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
