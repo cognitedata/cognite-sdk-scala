@@ -9,13 +9,6 @@ class RawTest extends SdkTest with ReadableResourceBehaviors with WritableResour
   private val client = new Client()
   private val idsThatDoNotExist = Seq("nodatabase", "randomdatabase")
 
-  it should "read rows" in {
-    val rows = client.rawRows("dots", "with_dots").readAll().toSeq.flatten
-    rows.foreach { row =>
-      println(row) // scalastyle:ignore
-    }
-  }
-
   private def shortRandom() = UUID.randomUUID().toString.substring(0, 8)
   it should behave like readableResource(client.rawDatabases)
   it should behave like writableResource(
@@ -29,18 +22,6 @@ class RawTest extends SdkTest with ReadableResourceBehaviors with WritableResour
     idsThatDoNotExist,
     supportsMissingAndThrown = false
   )
-
-  def withDatabase(testCode: String => Any): Unit = {
-    val databaseId = client.rawDatabases.create(
-      Seq(RawDatabase(name = s"raw-test-${UUID.randomUUID().toString}"))
-    ).unsafeBody.head.id
-    try {
-      val _ = testCode(databaseId)
-    } finally {
-      val response = client.rawDatabases.deleteByIds(Seq(databaseId))
-      val _ = assert(response.isSuccess === true)
-    }
-  }
 
   def withDatabaseTables(testCode: (String, Seq[String]) => Any): Unit = {
     val database = s"raw-test-${shortRandom()}"
@@ -65,37 +46,32 @@ class RawTest extends SdkTest with ReadableResourceBehaviors with WritableResour
   }
 
   it should "allow creation and deletion of database tables" in withDatabaseTables { (database, tables) =>
-    val tablesResponse = client.rawTables(database).readAll().flatMap(_.toList)
+    val tablesResponse = client.rawTables(database).readAll().flatMap(_.unsafeBody.toList).toList
     assert(tablesResponse.size === tables.size)
 
-    // scalastyle:off
-    println("---")
-    tablesResponse.foreach(t => println(s"${database} ${t}"))
-    tables.foreach(println)
-    println("+++")
-    // scalastyle:on
     val deleteResponse = client.rawTables(database).deleteByIds(tables.take(1))
     assert(deleteResponse.isSuccess === true)
 
-    val tablesResponseAfterDelete = client.rawTables(database).readAll().flatMap(_.toList)
+    val tablesResponseAfterDelete = client.rawTables(database).readAll().flatMap(_.unsafeBody.toList).toList
     assert(tablesResponseAfterDelete.size === tables.size - 1)
   }
 
   it should "allow creation and deletion of rows" in withDatabaseTables { (database, tables) =>
     val table = tables.head
     val rows = client.rawRows(database, table)
-    println("first read")
-    val rowsResponse = rows.readAll().flatMap(_.toList)
+
+    println("read rows") // scalastyle:ignore
+    val rowsResponse = rows.readAll().flatMap(_.unsafeBody.toList).toList
     assert(rowsResponse.isEmpty)
-    println("read complete, now create")
+    println("read rows done") // scalastyle:ignore
+
     val createResponse = rows.create(Seq(
       RawRow("123", Map("abc" -> "foo".asJson)),
       RawRow("abc", Map("abc" -> Map("cde" -> 1).asJson))
     ))
     assert(createResponse.isSuccess === true)
-    println("create done") // scalastyle:ignore
-    val rowsResponseAfterCreate = rows.readAll().flatMap(_.toList).toList
-    println("read done") // scalastyle:ignore
+
+    val rowsResponseAfterCreate = rows.readAll().flatMap(_.unsafeBody.toList).toList
     assert(rowsResponseAfterCreate.size === 2)
     assert(rowsResponseAfterCreate.head.key === "123")
     assert(rowsResponseAfterCreate(1).key === "abc")
@@ -106,19 +82,17 @@ class RawTest extends SdkTest with ReadableResourceBehaviors with WritableResour
     assert(rowsResponseAfterCreate(1).columns("abc").as[Map[String, Int]].right.get === Map("cde" -> 1))
 
     val deleteResponse = rows.deleteByIds(Seq("123"))
-    println("delete done") // scalastyle:ignore
     assert(deleteResponse.isSuccess === true)
-    val rowsResponseAfterOneDelete = rows.readAll().flatMap(_.toList).toList
-    println("read after delete done") // scalastyle:ignore
+    val rowsResponseAfterOneDelete = rows.readAll().flatMap(_.unsafeBody.toList).toList
     assert(rowsResponseAfterOneDelete.size === 1)
   }
-
-  it should "list all databases and tables" in {
-    val databases = client.rawDatabases.readAll().toSeq.flatten
-    databases.foreach { database =>
-      println(database) // scalastyle:ignore
-      val tables = client.rawTables(database.name).readAll().toSeq.flatten
-      tables.foreach(t => println(s"  ${t}")) // scalastyle:ignore
-    }
-  }
+  // scalastyle:off
+//  it should "list all databases and tables" in {
+//    val databases = client.rawDatabases.readAll().flatMap(_.unsafeBody.toList).toList
+//    databases.foreach { database =>
+//      println(database)
+//      val tables = client.rawTables(database.name).readAll().flatMap(_.unsafeBody.toList).toList
+//      tables.foreach(t => println(s"  ${t}")) // scalastyle:ignore
+//    }
+//  }
 }

@@ -17,11 +17,11 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
     }
 
     it should "read all items" in {
-      val first1Length = readable.readAllWithLimit(1).map(_.length).sum
+      val first1Length = readable.readAllWithLimit(1).map(_.unsafeBody.length).sum
       first1Length should be (1)
-      val first2Length = readable.readAllWithLimit(2).map(_.length).sum
+      val first2Length = readable.readAllWithLimit(2).map(_.unsafeBody.length).sum
       first2Length should be (2)
-      val allLength = readable.readAllWithLimit(3).map(_.length).sum
+      val allLength = readable.readAllWithLimit(3).map(_.unsafeBody.length).sum
       allLength should be (3)
     }
   }
