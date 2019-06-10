@@ -5,7 +5,8 @@ import org.scalatest.{FlatSpec, Matchers}
 
 trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off method.length
-  def readableResource[R <: WithId, C[_], I](readable: ReadableResource[R, Id, C, I], supportsMissingAndThrown: Boolean): Unit = {
+  def readableResource[R <: WithId[PrimitiveId], C[_], InternalId, PrimitiveId](
+      readable: ReadableResource[R, Id, C, InternalId, PrimitiveId]): Unit = {
     it should "read items" in {
       readable.read().unsafeBody.items should not be empty
     }
@@ -23,7 +24,11 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
       val allLength = readable.readAllWithLimit(3).map(_.length).sum
       allLength should be (3)
     }
-
+  }
+  def readableResourceWithRetrieve[R <: WithId[PrimitiveId], C[_], InternalId, PrimitiveId](
+      readable: ReadableResourceWithRetrieve[R, Id, C, InternalId, PrimitiveId],
+      idsThatDoNotExist: Seq[PrimitiveId],
+      supportsMissingAndThrown: Boolean): Unit = {
     it should "support retrieving items by id" in {
       val firstTwoItemIds = readable.readWithLimit(2).unsafeBody.items.map(_.id)
       firstTwoItemIds should have size 2
@@ -34,7 +39,6 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
     }
 
     it should "return information about missing ids" in {
-      val idsThatDoNotExist = Seq(999991L, 999992L)
       val thrown = the[CdpApiException[CogniteId]] thrownBy readable
         .retrieveByIds(idsThatDoNotExist)
         .unsafeBody
@@ -45,7 +49,7 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
         notFoundIds should contain theSameElementsAs idsThatDoNotExist
       }
 
-      val sameIdsThatDoNotExist = Seq(999991L, 999991L)
+      val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
       val sameIdsThrown = the[CdpApiException[CogniteId]] thrownBy readable
         .retrieveByIds(sameIdsThatDoNotExist)
         .unsafeBody
@@ -65,5 +69,4 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
       }
     }
   }
-  // scalastyle:on method.length
 }

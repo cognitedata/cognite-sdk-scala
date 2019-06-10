@@ -11,7 +11,8 @@ final case class CdpApiErrorPayload[A](
     code: Int,
     message: String,
     missing: Option[Seq[A]],
-    duplicated: Option[Seq[A]]
+    duplicated: Option[Seq[A]],
+    missingFields: Option[Seq[Map[String, String]]]
 )
 final case class CdpApiError[A](error: CdpApiErrorPayload[A]) {
   def asException(url: Uri): CdpApiException[A] =
@@ -39,8 +40,8 @@ final case class StringDataPoint(
     value: String
 )
 
-trait WithId {
-  val id: Long
+trait WithId[I] {
+  val id: I
 }
 
 trait Extractor[C[_]] {

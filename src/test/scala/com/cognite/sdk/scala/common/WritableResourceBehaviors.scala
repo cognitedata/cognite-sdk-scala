@@ -6,14 +6,14 @@ import org.scalatest.{FlatSpec, Matchers}
 
 trait WritableResourceBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off method.length
-  def writableResource[R <: WithId, W, C[_], I](
-      writable: ReadWritableResource[R, W, Id, C, I],
+  def writableResource[R <: WithId[PrimitiveId], W, C[_], InternalId, PrimitiveId](
+      writable: ReadWritableResource[R, W, Id, C, InternalId, PrimitiveId],
       readExamples: Seq[R],
       createExamples: Seq[W],
+      idsThatDoNotExist: Seq[PrimitiveId],
       supportsMissingAndThrown: Boolean
   )(implicit t: Transformer[R, W]): Unit = {
     it should "be an error to delete using ids that does not exist" in {
-      val idsThatDoNotExist = Seq(999991L, 999992L)
       val thrown = the[CdpApiException[CogniteId]] thrownBy writable
         .deleteByIds(idsThatDoNotExist)
         .unsafeBody
@@ -23,7 +23,7 @@ trait WritableResourceBehaviors extends Matchers { this: FlatSpec =>
         missingIds should contain theSameElementsAs idsThatDoNotExist
       }
 
-      val sameIdsThatDoNotExist = Seq(999991L, 999991L)
+      val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
       val sameIdsThrown = the[CdpApiException[CogniteId]] thrownBy writable
         .deleteByIds(sameIdsThatDoNotExist)
         .unsafeBody
@@ -44,14 +44,16 @@ trait WritableResourceBehaviors extends Matchers { this: FlatSpec =>
       val createdItem = writable.create(readExamples.take(1)).unsafeBody
       createdItem should have size 1
       createdItem.head.id should not be 0
-      writable.deleteByIds(createdItem.map(_.id)).unsafeBody
+      val deleteSingle = writable.deleteByIds(createdItem.map(_.id))
+      deleteSingle.isSuccess should be (true)
 
       // create multiple items
       val createdItems = writable.create(readExamples).unsafeBody
       createdItems should have size readExamples.size.toLong
       val createdIds = createdItems.map(_.id)
       createdIds should have size readExamples.size.toLong
-      writable.deleteByIds(createdIds).unsafeBody
+      val delete = writable.deleteByIds(createdIds)
+      delete.isSuccess should be (true)
     }
 
     it should "create and delete items using the create class" in {
@@ -59,14 +61,16 @@ trait WritableResourceBehaviors extends Matchers { this: FlatSpec =>
       val createdItem = writable.create(createExamples.take(1)).unsafeBody
       createdItem should have size 1
       createdItem.head.id should not be 0
-      writable.deleteByIds(createdItem.map(_.id)).unsafeBody
+      val deleteSingle = writable.deleteByIds(createdItem.map(_.id))
+      deleteSingle.isSuccess should be (true)
 
       // create multiple items
       val createdItems = writable.create(createExamples).unsafeBody
       createdItems should have size createExamples.size.toLong
       val createdIds = createdItems.map(_.id)
       createdIds should have size createExamples.size.toLong
-      writable.deleteByIds(createdIds).unsafeBody
+      val delete = writable.deleteByIds(createdIds)
+      delete.isSuccess should be (true)
     }
     // TODO: test creating multiple items with the same external
     //       id in the same api call for V1

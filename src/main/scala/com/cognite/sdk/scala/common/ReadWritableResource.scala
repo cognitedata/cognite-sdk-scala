@@ -7,12 +7,12 @@ import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
-abstract class ReadWritableResource[R: Decoder, W: Decoder: Encoder, F[_], C[_], I](
+abstract class ReadWritableResource[R: Decoder, W: Decoder: Encoder, F[_], C[_], InternalId, PrimitiveId](
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _],
     containerItemsDecoder: Decoder[C[Items[R]]],
     containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
-) extends ReadableResource[R, F, C, I] {
+) extends ReadableResourceWithRetrieve[R, F, C, InternalId, PrimitiveId] {
   implicit val extractor: Extractor[C]
 
   implicit val errorOrStringDataPointsByIdResponseDecoder
@@ -34,5 +34,5 @@ abstract class ReadWritableResource[R: Decoder, W: Decoder: Encoder, F[_], C[_],
   def create[T](items: Seq[T])(implicit t: Transformer[T, W]): F[Response[Seq[R]]] =
     createItems(Items(items.map(_.transformInto[W])))
 
-  def deleteByIds(ids: Seq[Long]): F[Response[Unit]]
+  def deleteByIds(ids: Seq[PrimitiveId]): F[Response[Unit]]
 }

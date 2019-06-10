@@ -13,8 +13,9 @@ trait DataPointsResourceBehaviors[I] extends Matchers { this: FlatSpec =>
   def withStringTimeSeriesId(testCode: I => Any): Unit
 
   def dataPointsResource(dataPoints: DataPointsResource[Id, I]): Unit = {
-    it should "be possible to insert numerical data points" in withTimeSeriesId { timeSeriesId =>
+    it should "be possible to insert and delete numerical data points" in withTimeSeriesId { timeSeriesId =>
       dataPoints.insertById(timeSeriesId, testDataPoints).isSuccess should be (true)
+
       Thread.sleep(3000)
       val points = dataPoints.queryById(timeSeriesId, startTime, endTime + 1).unsafeBody
       points should have size testDataPoints.size.toLong
@@ -30,7 +31,7 @@ trait DataPointsResourceBehaviors[I] extends Matchers { this: FlatSpec =>
       pointsAfterDelete should have size 0
     }
 
-    it should "be possible to insert string data points" in withStringTimeSeriesId { stringTimeSeriesId =>
+    it should "be possible to insert and delete string data points" in withStringTimeSeriesId { stringTimeSeriesId =>
       dataPoints.insertStringsById(stringTimeSeriesId, testStringDataPoints).isSuccess should be (true)
 
       Thread.sleep(3000)

@@ -16,7 +16,7 @@ final case class Asset(
     externalId: Option[String] = None,
     createdTime: Option[Long] = None,
     lastUpdatedTime: Option[Long] = None
-) extends WithId
+) extends WithId[Long]
 
 final case class CreateAsset(
     name: String,

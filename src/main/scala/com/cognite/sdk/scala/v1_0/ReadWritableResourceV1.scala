@@ -16,7 +16,7 @@ import io.circe.generic.auto._
 abstract class ReadWritableResourceV1[R: Decoder, W: Decoder: Encoder, F[_]](
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
-) extends ReadWritableResource[R, W, F, Id, CogniteId] {
+) extends ReadWritableResource[R, W, F, Id, CogniteId, Long] {
   def deleteByExternalIds(externalIds: Seq[String]): F[Response[Unit]] =
     request
       .post(uri"$baseUri/delete")
@@ -31,7 +31,7 @@ abstract class ReadWritableResourceV1[R: Decoder, W: Decoder: Encoder, F[_]](
     //       or assert that length of `ids` is less than max deletion request size
     request
       .post(uri"$baseUri/delete")
-      .body(Items(ids.map(CogniteId)))
+      .body(Items(ids.map(toInternalId)))
       .response(asJson[Either[CdpApiError[CogniteId], Unit]])
       .mapResponse {
         case Left(value) => throw value.error
