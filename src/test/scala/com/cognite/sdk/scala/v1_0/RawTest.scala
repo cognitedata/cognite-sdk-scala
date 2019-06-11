@@ -54,16 +54,20 @@ class RawTest extends SdkTest with ReadableResourceBehaviors with WritableResour
 
     val tablesResponseAfterDelete = client.rawTables(database).readAll().flatMap(_.unsafeBody.toList).toList
     assert(tablesResponseAfterDelete.size === tables.size - 1)
+
+    val tablesCreateResponse = client.rawTables(database).create(Seq(RawTable(name = tables.head)))
+    assert(tablesCreateResponse.isSuccess === true)
+
+    val tablesResponseAfterCreate = client.rawTables(database).readAll().flatMap(_.unsafeBody.toList).toList
+    assert(tablesResponseAfterCreate.size === tables.size)
   }
 
   it should "allow creation and deletion of rows" in withDatabaseTables { (database, tables) =>
     val table = tables.head
     val rows = client.rawRows(database, table)
 
-    println("read rows") // scalastyle:ignore
     val rowsResponse = rows.readAll().flatMap(_.unsafeBody.toList).toList
     assert(rowsResponse.isEmpty)
-    println("read rows done") // scalastyle:ignore
 
     val createResponse = rows.create(Seq(
       RawRow("123", Map("abc" -> "foo".asJson)),
