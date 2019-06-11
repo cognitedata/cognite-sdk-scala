@@ -7,6 +7,7 @@ abstract class Resource[F[_], InternalId, PrimitiveId](auth: Auth) {
   val request: RequestT[Empty, String, Nothing] = sttp
     .auth(auth)
     .contentType("application/json")
+    .header("accept", "application/json")
     .readTimeout(90.seconds)
     .parseResponseIf(_ => true)
   val baseUri: Uri
