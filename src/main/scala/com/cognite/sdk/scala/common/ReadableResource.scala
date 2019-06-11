@@ -13,22 +13,26 @@ abstract class ReadableResource[R: Decoder, F[_], C[_], InternalId, PrimitiveId]
   implicit val extractor: Extractor[C]
   implicit val idEncoder: Encoder[InternalId]
 
+  implicit val errorOrItemsWithCursorDecoder: Decoder[Either[CdpApiError[Unit], C[ItemsWithCursor[R]]]] =
+    EitherDecoder.eitherDecoder[CdpApiError[Unit], C[ItemsWithCursor[R]]]
   private def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[R]]] =
+  ): F[Response[ItemsWithCursor[R]]] = {
+    val uriWithCursor = cursor
+      .fold(baseUri)(baseUri.param("cursor", _))
+      .param("limit", limit.getOrElse(defaultLimit).toString)
     request
-      .get(
-        cursor
-          .fold(baseUri)(baseUri.param("cursor", _))
-          .param("limit", limit.getOrElse(defaultLimit).toString)
-      )
-      .response(asJson[C[ItemsWithCursor[R]]])
+      .get(uriWithCursor)
+      .response(asJson[Either[CdpApiError[Unit], C[ItemsWithCursor[R]]]])
       .mapResponse {
         case Left(value) => throw value.error
-        case Right(value) => extractor.extract(value)
+        case Right(Left(cdpApiError)) => throw cdpApiError.asException(uriWithCursor)
+        case Right(Right(value)) => extractor.extract(value)
       }
       .send()
+  }
+
 
   def readFromCursor(cursor: String): F[Response[ItemsWithCursor[R]]] =
     readWithCursor(Some(cursor), None)
