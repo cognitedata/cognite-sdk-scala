@@ -1,6 +1,16 @@
 package com.cognite.sdk.scala.v1_0
 
-import com.cognite.sdk.scala.common.{Auth, CdpApiError, CogniteId, EitherDecoder, Extractor, ExtractorInstances, Items, ReadWritableResource, WithId}
+import com.cognite.sdk.scala.common.{
+  Auth,
+  CdpApiError,
+  CogniteId,
+  EitherDecoder,
+  Extractor,
+  ExtractorInstances,
+  Items,
+  ReadWritableResource,
+  WithId
+}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder, Json}
