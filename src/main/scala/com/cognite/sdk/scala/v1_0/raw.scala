@@ -27,13 +27,13 @@ final case class RawRow(
 )
 final case class RawRowKey(key: String)
 
-abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId, ExternalId: Encoder](
+abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId, PrimitiveId](
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
-) extends ReadWritableResource[R, W, F, Id, InternalId, ExternalId] {
+) extends ReadWritableResource[R, W, F, Id, InternalId, PrimitiveId] {
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
-  def deleteByIds(ids: Seq[ExternalId]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[PrimitiveId]): F[Response[Unit]] =
     request
       .post(uri"$baseUri/delete")
       .body(Items(ids.map(toInternalId)))
