@@ -47,28 +47,28 @@ abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId, Pr
       .send()
 }
 
-class RawDatabases[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _])
+class RawDatabases[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
     extends RawResource[RawDatabase, RawDatabase, F, RawDatabase, String] {
   def toInternalId(id: String): RawDatabase = RawDatabase(id)
   implicit val extractor: Extractor[Id] = ExtractorInstances.idExtractor
   implicit val idEncoder: Encoder[RawDatabase] = deriveEncoder
-  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/playground/raw/dbs"
+  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/raw/dbs"
 }
 
 final case class RawTable(name: String) extends WithId[String] {
   override val id: String = this.name
 }
 
-class RawTables[F[_]](database: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
+class RawTables[F[_]](project: String, database: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
     extends RawResource[RawTable, RawTable, F, RawTable, String] {
   def toInternalId(id: String): RawTable = RawTable(id)
   implicit val extractor: Extractor[Id] = ExtractorInstances.idExtractor
   implicit val idEncoder: Encoder[RawTable] = deriveEncoder
   override val baseUri =
-    uri"https://api.cognitedata.com/api/v1/projects/playground/raw/dbs/$database/tables"
+    uri"https://api.cognitedata.com/api/v1/projects/$project/raw/dbs/$database/tables"
 }
 
-class RawRows[F[_]](database: String, table: String)(
+class RawRows[F[_]](project: String, database: String, table: String)(
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
 ) extends RawResource[RawRow, RawRow, F, RawRowKey, String] {
@@ -76,7 +76,7 @@ class RawRows[F[_]](database: String, table: String)(
   implicit val extractor: Extractor[Id] = ExtractorInstances.idExtractor
   implicit val idEncoder: Encoder[RawRowKey] = deriveEncoder
   override val baseUri =
-    uri"https://api.cognitedata.com/api/v1/projects/playground/raw/dbs/$database/tables/$table/rows"
+    uri"https://api.cognitedata.com/api/v1/projects/$project/raw/dbs/$database/tables/$table/rows"
 
   // raw does not return the created rows in the response, so we'll always return an empty sequence.
   override def createItems(items: Items[RawRow]): F[Response[Seq[RawRow]]] =

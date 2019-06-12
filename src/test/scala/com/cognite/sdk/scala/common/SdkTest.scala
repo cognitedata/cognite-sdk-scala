@@ -27,7 +27,8 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
 }
 
 abstract class SdkTest extends FlatSpec with Matchers {
-  private val apiKey = System.getenv("TEST_API_KEY_READ")
+  private val apiKey = Option(System.getenv("TEST_API_KEY_READ"))
+    .getOrElse(throw new RuntimeException("TEST_API_KEY_READ not set"))
   //implicit val backend: SttpBackend[Id, Nothing] = new LoggingSttpBackend[Id, Nothing](HttpURLConnectionBackend())
   implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
     options = SttpBackendOptions.connectionTimeout(90.seconds)

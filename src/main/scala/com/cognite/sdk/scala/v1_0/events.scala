@@ -31,8 +31,8 @@ final case class CreateEvent(
     externalId: Option[String] = None
 )
 
-class Events[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _])
+class Events[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
     extends ReadWritableResourceV1[Event, CreateEvent, F]
     with ResourceV1[F] {
-  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/playground/events"
+  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/events"
 }

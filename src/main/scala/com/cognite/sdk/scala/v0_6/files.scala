@@ -19,8 +19,8 @@ final case class File(
     lastUpdatedTime: Option[Long] = None
 ) extends WithId[Long]
 
-class FilesResource[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _])
+class Files[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
     extends ReadableResourceWithRetrieve[File, F, Data, Long, Long]
     with ResourceV0_6[F] {
-  override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/files"
+  override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/$project/files"
 }

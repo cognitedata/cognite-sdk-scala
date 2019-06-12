@@ -58,11 +58,11 @@ final case class QueryRangeById(
     end: String
 )
 
-class DataPointsResourceV1[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _])
+class DataPointsResourceV1[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
     extends Resource[F, CogniteId, Long](auth)
     with ResourceV1[F]
     with DataPointsResource[F, Long] {
-  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/playground/timeseries/data"
+  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/timeseries/data"
 
   override def toInternalId(id: Long): CogniteId = CogniteId(id)
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
