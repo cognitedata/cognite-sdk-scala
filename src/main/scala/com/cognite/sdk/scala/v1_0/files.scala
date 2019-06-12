@@ -30,10 +30,10 @@ final case class CreateFile(
     assetIds: Option[Seq[Long]] = None
 )
 
-class Files[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _])
+class Files[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
     extends ReadWritableResourceV1[File, CreateFile, F]
     with ResourceV1[F] {
-  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/playground/files"
+  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/files"
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError[CogniteId], File]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], File]

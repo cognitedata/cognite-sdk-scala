@@ -32,10 +32,10 @@ final case class CreateEvent(
     sourceId: Option[String] = None
 )
 
-class Events[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _])
+class Events[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
     extends ReadWritableResourceV0_6[Event, CreateEvent, F]
     with ResourceV0_6[F] {
-  override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/playground/events"
+  override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/$project/events"
 
   override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
     // TODO: group deletes by max deletion request size
