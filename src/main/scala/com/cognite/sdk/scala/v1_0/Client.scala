@@ -1,18 +1,23 @@
 package com.cognite.sdk.scala.v1_0
 
-import com.cognite.sdk.scala.common.{Auth, Login}
+import com.cognite.sdk.scala.common.{Auth, InvalidAuthentication, Login}
 import com.softwaremill.sttp._
+
 import scala.concurrent.duration._
 
 final class Client[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
-  // TODO: auth once here instead of passing Auth down
-  //val sttp1 = sttp.auth(auth)
-
-  private val project = {
+  val project: String = auth.project.getOrElse {
     implicit val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
       options = SttpBackendOptions.connectionTimeout(90.seconds)
     )
-    new Login().status().unsafeBody.project
+
+    val loginStatus = new Login().status().unsafeBody
+
+    if (loginStatus.project.trim.isEmpty) {
+      throw InvalidAuthentication()
+    } else {
+      loginStatus.project
+    }
   }
   val login = new Login()
   val assets = new Assets(project)
