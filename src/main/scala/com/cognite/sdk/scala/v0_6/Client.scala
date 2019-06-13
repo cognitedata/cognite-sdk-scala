@@ -12,8 +12,14 @@ final class Client[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
     implicit val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
       options = SttpBackendOptions.connectionTimeout(90.seconds)
     )
+
     val loginStatus = new Login().status().unsafeBody
-    Option(loginStatus.project).getOrElse(throw InvalidAuthentication())
+
+    if (loginStatus.project.trim.isEmpty) {
+      throw InvalidAuthentication()
+    } else {
+      loginStatus.project
+    }
   }
   val login = new Login()
   val assets = new Assets(project)
