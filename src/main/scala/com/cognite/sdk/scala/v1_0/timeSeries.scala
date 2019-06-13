@@ -30,8 +30,10 @@ final case class CreateTimeSeries(
     securityCategories: Option[Seq[Long]] = None
 )
 
-class TimeSeriesResourceRead[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
-    extends ReadWritableResourceV1[TimeSeries, CreateTimeSeries, F]
+class TimeSeriesResourceRead[F[_]](project: String)(
+    implicit auth: Auth,
+    sttpBackend: SttpBackend[F, _]
+) extends ReadWritableResourceV1[TimeSeries, CreateTimeSeries, F]
     with ResourceV1[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/timeseries"
 }

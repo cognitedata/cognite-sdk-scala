@@ -59,8 +59,10 @@ final case class RawTable(name: String) extends WithId[String] {
   override val id: String = this.name
 }
 
-class RawTables[F[_]](project: String, database: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
-    extends RawResource[RawTable, RawTable, F, RawTable, String] {
+class RawTables[F[_]](project: String, database: String)(
+    implicit auth: Auth,
+    sttpBackend: SttpBackend[F, _]
+) extends RawResource[RawTable, RawTable, F, RawTable, String] {
   def toInternalId(id: String): RawTable = RawTable(id)
   implicit val extractor: Extractor[Id] = ExtractorInstances.idExtractor
   implicit val idEncoder: Encoder[RawTable] = deriveEncoder
