@@ -55,7 +55,7 @@ podTemplate(label: label,
                 }
                 if (env.BRANCH_NAME == 'master') {
                     stage('Deploy') {
-                        sh('sbt -Dsbt.log.noformat=true +library/publishSigned')
+                        sh('sbt -Dsbt.log.noformat=true +publishSigned')
                     }
                 }
             }
