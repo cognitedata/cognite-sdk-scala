@@ -6,8 +6,8 @@ import org.scalatest.{FlatSpec, Matchers}
 trait DataPointsResourceBehaviors[I] extends Matchers { this: FlatSpec =>
   private val startTime = System.currentTimeMillis()
   private val endTime = startTime + 20*1000
-  private val testDataPoints = (startTime to endTime by 1000).map(DataPoint(_, math.random().doubleValue()))
-  private val testStringDataPoints = (startTime to endTime by 1000).map(StringDataPoint(_, math.random().doubleValue().toString))
+  private val testDataPoints = (startTime to endTime by 1000).map(DataPoint(_, math.random))
+  private val testStringDataPoints = (startTime to endTime by 1000).map(StringDataPoint(_, math.random.toString))
 
   def withTimeSeriesId(testCode: I => Any): Unit
   def withStringTimeSeriesId(testCode: I => Any): Unit
@@ -23,7 +23,7 @@ trait DataPointsResourceBehaviors[I] extends Matchers { this: FlatSpec =>
       val latest = dataPoints.getLatestDataPointById(timeSeriesId).unsafeBody
       latest.isDefined should be (true)
       val latestPoint = latest.get
-      testDataPoints should contain (latestPoint)
+      testDataPoints.toStream should contain (latestPoint)
 
       dataPoints.deleteRangeById(timeSeriesId, startTime, endTime + 1)
       Thread.sleep(15000)
@@ -41,7 +41,7 @@ trait DataPointsResourceBehaviors[I] extends Matchers { this: FlatSpec =>
       val latest = dataPoints.getLatestStringDataPointById(stringTimeSeriesId).unsafeBody
       latest.isDefined should be (true)
       val latestPoint = latest.get
-      testStringDataPoints should contain (latestPoint)
+      testStringDataPoints.toStream should contain (latestPoint)
 
       dataPoints.deleteRangeById(stringTimeSeriesId, startTime, endTime + 1)
       Thread.sleep(15000)
