@@ -10,7 +10,7 @@ podTemplate(label: label,
                                                      secretEnvVar(key: 'TEST_API_KEY_READ', secretName: 'jetfire-test-api-key', secretKey: 'playgroundApiKey'),
                                                      secretEnvVar(key: 'TEST_API_KEY_GREENFIELD', secretName: 'jetfire-test-api-key', secretKey: 'greenfieldApiKey'),
                                                      secretEnvVar(key: 'CODECOV_TOKEN', secretName: 'codecov-token-cognite-sdk-scala', secretKey: 'token.txt'),
-                                                     //secretEnvVar(key: 'GPG_KEY_PASSWORD', secretName: 'sbt-credentials', secretKey: 'gpg-key-password'),
+                                                     secretEnvVar(key: 'GPG_KEY_PASSWORD', secretName: 'sbt-credentials', secretKey: 'gpg-key-password'),
                                                      // /codecov-script/upload-report.sh relies on the following
                                                      // Jenkins and GitHub environment variables.
                                                      envVar(key: 'JENKINS_URL', value: env.JENKINS_URL),
@@ -42,22 +42,22 @@ podTemplate(label: label,
                     //sh('mkdir -p /root/.sbt/gpg && cp /sbt-credentials/pubring.asc /sbt-credentials/secring.asc /root/.sbt/gpg/')
                 }
                 stage('Run tests') {
-                    sh('sbt -Dsbt.log.noformat=true scalastyle test:scalastyle scalafmtCheck scalafix coverage +test coverageReport')
+                    sh('cat /dev/null | sbt -Dsbt.log.noformat=true scalastyle test:scalastyle scalafmtCheck scalafix coverage +test coverageReport')
                 }
                 stage("Upload report to codecov.io") {
                     sh('bash </codecov-script/upload-report.sh')
                 }
                 stage('Build JAR file') {
-                    sh('sbt -Dsbt.log.noformat=true'
+                    sh('cat /dev/null | sbt -Dsbt.log.noformat=true'
                        + ' "set test in Test := {}"'
                        + ' "set compile/skip := true"'
                        + ' +package')
                 }
-                // if (env.BRANCH_NAME == 'master') {
-                //     stage('Deploy') {
-                //         sh('sbt -Dsbt.log.noformat=true +library/publishSigned')
-                //     }
-                // }
+                if (env.BRANCH_NAME == 'master') {
+                    stage('Deploy') {
+                        sh('sbt -Dsbt.log.noformat=true +library/publishSigned')
+                    }
+                }
             }
         }
     }
