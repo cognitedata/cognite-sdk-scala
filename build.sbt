@@ -1,4 +1,4 @@
-name := "cognite-sdk-scala"
+import wartremover.Wart
 
 val scala212 = "2.12.8"
 val scala211 = "2.11.12"
@@ -6,7 +6,6 @@ val supportedScalaVersions = List(scala212, scala211)
 
 val circeVersion = "0.11.1"
 val sttpVersion = "1.5.0"
-val jsoniterVersion = "0.46.0"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -45,7 +44,20 @@ lazy val commonSettings = Seq(
   pgpPassphrase := {
     if (gpgPass.isDefined) gpgPass.map(_.toCharArray)
     else None
-  }
+  },
+  wartremoverErrors in (Compile, compile) :=
+    (CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, minor)) if minor <= 11 =>
+        Seq.empty[wartremover.Wart]
+      case _ =>
+        Warts.allBut(
+          Wart.DefaultArguments,
+          Wart.Nothing,
+          Wart.Any,
+          Wart.Throw,
+          Wart.ImplicitParameter,
+          Wart.ToString)
+    }),
 )
 
 lazy val core = (project in file("."))
@@ -76,14 +88,6 @@ scalacOptions ++= List(
   "-Yrangepos",          // required by SemanticDB compiler plugin
   "-Ywarn-unused-import" // required by `RemoveUnused` rule
 )
-
-wartremoverErrors in (Compile, compile) ++= Warts.allBut(
-  Wart.DefaultArguments,
-  Wart.Nothing,
-  Wart.Any,
-  Wart.Throw,
-  Wart.ImplicitParameter,
-  Wart.ToString)
 
 scalastyleFailOnWarning := true
 
