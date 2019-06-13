@@ -16,12 +16,14 @@ object Auth {
   }
 }
 
-final case class ApiKeyAuth(apiKey: String, override val project: Option[String] = None) extends Auth {
+final case class ApiKeyAuth(apiKey: String, override val project: Option[String] = None)
+    extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     r.header("api-key", apiKey)
 }
 
-final case class BearerTokenAuth(bearerToken: String, override val project: Option[String] = None) extends Auth {
+final case class BearerTokenAuth(bearerToken: String, override val project: Option[String] = None)
+    extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     r.header("Authorization", s"Bearer $bearerToken")
 }
