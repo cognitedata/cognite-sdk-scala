@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.common
 
-import com.cognite.sdk.scala.v0_6.Data
+import com.cognite.sdk.scala.v06.Data
 import com.softwaremill.sttp.{Id, Uri}
 import io.circe.Decoder
 import io.scalaland.chimney.dsl._
