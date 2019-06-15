@@ -5,7 +5,7 @@ import java.util.UUID
 import com.cognite.sdk.scala.common.{DataPointsResourceBehaviors, SdkTest}
 
 class DataPointsTest extends SdkTest with DataPointsResourceBehaviors[Long] {
-  private val client = new Client()
+  private val client = new GenericClient()(auth, backend)
 
   override def withTimeSeriesId(testCode: Long => Any): Unit = {
     val timeSeriesId = client.timeSeries.create(

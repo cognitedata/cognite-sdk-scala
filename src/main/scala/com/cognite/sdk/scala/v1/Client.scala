@@ -5,7 +5,7 @@ import com.softwaremill.sttp._
 
 import scala.concurrent.duration._
 
-class GenericClient[F[_], S](implicit auth: Auth, sttpBackend: SttpBackend[F, S]) {
+class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
   val project: String = auth.project.getOrElse {
     implicit val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
       options = SttpBackendOptions.connectionTimeout(90.seconds)
