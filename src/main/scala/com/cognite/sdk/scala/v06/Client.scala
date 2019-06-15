@@ -29,4 +29,5 @@ class GenericClient[F[_], S]()(implicit auth: Auth, sttpBackend: SttpBackend[F, 
   val dataPoints = new DataPointsResourceV0_6(project)
 }
 
-final case class Client()(implicit sttpBackend: SttpBackend[Id, Nothing]) extends GenericClient[Id, Nothing]()
+final case class Client()(implicit sttpBackend: SttpBackend[Id, Nothing])
+    extends GenericClient[Id, Nothing]()

@@ -30,4 +30,5 @@ class GenericClient[F[_], S](implicit auth: Auth, sttpBackend: SttpBackend[F, S]
   def rawRows(database: String, table: String): RawRows[F] = new RawRows(project, database, table)
 }
 
-final case class Client()(implicit sttpBackend: SttpBackend[Id, Nothing]) extends GenericClient[Id, Nothing]()
+final case class Client()(implicit sttpBackend: SttpBackend[Id, Nothing])
+    extends GenericClient[Id, Nothing]()

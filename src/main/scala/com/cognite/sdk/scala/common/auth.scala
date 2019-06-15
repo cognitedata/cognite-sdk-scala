@@ -10,7 +10,9 @@ sealed trait Auth {
 }
 
 object Auth {
-  implicit val auth: Auth = ApiKeyAuth(Option(System.getenv("COGNITE_API_KEY")).getOrElse("not-set"))
+  implicit val auth: Auth = ApiKeyAuth(
+    Option(System.getenv("COGNITE_API_KEY")).getOrElse("not-set")
+  )
 
   implicit class AuthSttpExtension[U[_], T, +S](val r: RequestT[U, T, S]) {
     def auth(auth: Auth): RequestT[U, T, S] =
