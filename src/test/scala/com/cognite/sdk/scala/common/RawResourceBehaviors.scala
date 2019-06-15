@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.common
 
 import java.util.UUID
 
-import com.cognite.sdk.scala.v1_0.{RawDatabase, RawDatabases}
+import com.cognite.sdk.scala.v1.{RawDatabase, RawDatabases}
 import com.softwaremill.sttp.Id
 
 trait RawResourceBehaviors extends SdkTest {

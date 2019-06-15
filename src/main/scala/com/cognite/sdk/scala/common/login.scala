@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.common
 
-import com.cognite.sdk.scala.v0_6.Data
+import com.cognite.sdk.scala.v06.Data
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
