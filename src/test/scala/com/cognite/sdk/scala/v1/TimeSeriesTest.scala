@@ -1,9 +1,10 @@
 package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, WritableResourceBehaviors}
+import com.softwaremill.sttp.Id
 
 class TimeSeriesTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
-  private val client = new GenericClient()
+  private val client = new GenericClient[Id, Nothing]()(auth, backend)
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   it should behave like readableResource(client.timeSeries)
   it should behave like readableResourceWithRetrieve(client.timeSeries, idsThatDoNotExist, supportsMissingAndThrown = true)
