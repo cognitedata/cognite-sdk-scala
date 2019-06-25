@@ -6,7 +6,8 @@ import org.scalatest.{FlatSpec, Matchers}
 trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off method.length
   def readableResource[R <: WithId[PrimitiveId], C[_], InternalId, PrimitiveId](
-      readable: ReadableResource[R, Id, C, InternalId, PrimitiveId]): Unit = {
+      readable: ReadableResource[R, Id, C, InternalId, PrimitiveId]
+  ): Unit = {
     it should "read items" in {
       readable.read().unsafeBody.items should not be empty
     }
@@ -25,10 +26,13 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
       allLength should be (3)
     }
   }
-  def readableResourceWithRetrieve[R <: WithId[PrimitiveId], C[_], InternalId, PrimitiveId](
-      readable: ReadableResourceWithRetrieve[R, Id, C, InternalId, PrimitiveId],
+
+  def readableResourceWithRetrieve[R <: WithId[PrimitiveId], W, C[_], InternalId, PrimitiveId](
+      readable: ReadableResource[R, Id, C, InternalId, PrimitiveId]
+        with ResourceWithRetrieve[R, Id, PrimitiveId],
       idsThatDoNotExist: Seq[PrimitiveId],
-      supportsMissingAndThrown: Boolean): Unit = {
+      supportsMissingAndThrown: Boolean
+  ): Unit = {
     it should "support retrieving items by id" in {
       val firstTwoItemIds = readable.readWithLimit(2).unsafeBody.items.map(_.id)
       firstTwoItemIds should have size 2

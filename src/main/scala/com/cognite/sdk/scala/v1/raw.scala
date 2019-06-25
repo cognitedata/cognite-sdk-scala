@@ -8,7 +8,7 @@ import com.cognite.sdk.scala.common.{
   Extractor,
   ExtractorInstances,
   Items,
-  ReadWritableResource,
+  ReadWritableResourceWithRetrieve,
   WithId
 }
 import com.softwaremill.sttp._
@@ -30,7 +30,7 @@ final case class RawRowKey(key: String)
 abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId, PrimitiveId](
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
-) extends ReadWritableResource[R, W, F, Id, InternalId, PrimitiveId] {
+) extends ReadWritableResourceWithRetrieve[R, W, F, Id, InternalId, PrimitiveId] {
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
   override def deleteByIds(ids: Seq[PrimitiveId]): F[Response[Unit]] =
