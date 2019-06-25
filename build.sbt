@@ -34,11 +34,13 @@ lazy val commonSettings = Seq(
     )
   ),
   // Remove all additional repository other than Maven Central from POM
-  pomIncludeRepository := { _ => false },
+  pomIncludeRepository := { _ =>
+    false
+  },
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
-    else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    if (isSnapshot.value) Some("snapshots".at(nexus + "content/repositories/snapshots"))
+    else Some("releases".at(nexus + "service/local/staging/deploy/maven2"))
   },
   publishMavenStyle := true,
   pgpPassphrase := {
@@ -56,21 +58,22 @@ lazy val commonSettings = Seq(
           Wart.Any,
           Wart.Throw,
           Wart.ImplicitParameter,
-          Wart.ToString)
-    }),
+          Wart.ToString
+        )
+    })
 )
 
 lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "io.scalaland" %% "chimney" % "0.3.1",
+      "io.scalaland" %% "chimney" % "0.3.1"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps
   )
 
 val scalaTestDeps = Seq(
   "org.scalactic" %% "scalactic" % "3.0.5",
-  "org.scalatest" %% "scalatest" % "3.0.5" % "test",
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp" %% "core" % sttpVersion,
@@ -85,7 +88,7 @@ val circeDeps = Seq(
 
 addCompilerPlugin(scalafixSemanticdb)
 scalacOptions ++= List(
-  "-Yrangepos",          // required by SemanticDB compiler plugin
+  "-Yrangepos", // required by SemanticDB compiler plugin
   "-Ywarn-unused-import" // required by `RemoveUnused` rule
 )
 
@@ -97,5 +100,5 @@ lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 mainScalastyle := scalastyle.in(Compile).toTask("").value
 testScalastyle := scalastyle.in(Test).toTask("").value
 
-(test in Test) := ((test in Test) dependsOn testScalastyle).value
-(test in Test) := ((test in Test) dependsOn mainScalastyle).value
+(test in Test) := (test in Test).dependsOn(testScalastyle).value
+(test in Test) := (test in Test).dependsOn(mainScalastyle).value
