@@ -6,7 +6,7 @@ import com.cognite.sdk.scala.common.{
   CogniteId,
   EitherDecoder,
   Items,
-  ReadWritableResource
+  ReadWritableResourceWithRetrieve
 }
 import com.softwaremill.sttp.circe._
 import com.softwaremill.sttp._
@@ -16,7 +16,7 @@ import io.circe.generic.auto._
 abstract class ReadWritableResourceV1[R: Decoder, W: Decoder: Encoder, F[_]](
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
-) extends ReadWritableResource[R, W, F, Id, CogniteId, Long] {
+) extends ReadWritableResourceWithRetrieve[R, W, F, Id, CogniteId, Long] {
   def deleteByExternalIds(externalIds: Seq[String]): F[Response[Unit]] =
     request
       .post(uri"$baseUri/delete")

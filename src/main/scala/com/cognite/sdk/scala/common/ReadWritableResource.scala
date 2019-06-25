@@ -10,9 +10,8 @@ import io.scalaland.chimney.dsl._
 abstract class ReadWritableResource[R: Decoder, W: Decoder: Encoder, F[_], C[_], InternalId, PrimitiveId](
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _],
-    containerItemsDecoder: Decoder[C[Items[R]]],
     containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
-) extends ReadableResourceWithRetrieve[R, F, C, InternalId, PrimitiveId] {
+) extends ReadableResource[R, F, C, InternalId, PrimitiveId] {
   implicit val extractor: Extractor[C]
 
   implicit val errorOrStringDataPointsByIdResponseDecoder
@@ -35,4 +34,26 @@ abstract class ReadWritableResource[R: Decoder, W: Decoder: Encoder, F[_], C[_],
     createItems(Items(items.map(_.transformInto[W])))
 
   def deleteByIds(ids: Seq[PrimitiveId]): F[Response[Unit]]
+}
+
+abstract class ReadWritableResourceWithRetrieve[R: Decoder, W: Decoder: Encoder, F[_], C[_], InternalId, PrimitiveId](
+    implicit auth: Auth,
+    containerItemsDecoder: Decoder[C[Items[R]]],
+    containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
+    sttpBackend: SttpBackend[F, _]
+) extends ReadWritableResource[R, W, F, C, InternalId, PrimitiveId]
+    with ResourceWithRetrieve[R, F, PrimitiveId] {
+  implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] =
+    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
+  def retrieveByIds(ids: Seq[PrimitiveId]): F[Response[Seq[R]]] =
+    request
+      .get(uri"$baseUri/byids")
+      .body(Items(ids.map(toInternalId)))
+      .response(asJson[Either[CdpApiError[CogniteId], C[Items[R]]]])
+      .mapResponse {
+        case Left(value) => throw value.error
+        case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
+        case Right(Right(value)) => extractor.extract(value).items
+      }
+      .send()
 }
