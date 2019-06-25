@@ -26,6 +26,7 @@ class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]
   val timeSeries = new TimeSeriesResourceRead(project)
   val dataPoints = new DataPointsResourceV1(project)
   val rawDatabases = new RawDatabases(project)
+  val threeDModels = new ThreeDModels(project)
   def rawTables(database: String): RawTables[F] = new RawTables(project, database)
   def rawRows(database: String, table: String): RawRows[F] = new RawRows(project, database, table)
 }
