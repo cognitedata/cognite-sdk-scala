@@ -4,8 +4,8 @@ import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, Writabl
 
 class ThreeDTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
   private val client = new GenericClient()(auth, backend)
-  private val idsThatDoNotExist = Seq(999991L, 999992L)
-  (it should behave).like(readableResource(client.threeDModels))
+  private val idsThatDoNotExist = Seq(9999991L, 9999992L)
+  ("ThreeDModels" should behave).like(readableResource(client.threeDModels))
   (it should behave).like(
     writableResource(
       client.threeDModels,
@@ -19,6 +19,38 @@ class ThreeDTest extends SdkTest with ReadableResourceBehaviors with WritableRes
       ),
       idsThatDoNotExist,
       supportsMissingAndThrown = false
+    )
+  )
+  ("ThreeDRevisions" should behave).like(
+    readableResource(client.threeDRevisions(4222532244684431L))
+  )
+  (it should behave).like(
+    writableResource(
+      client.threeDRevisions(4222532244684431L),
+      Seq(
+        ThreeDRevision(
+          fileId = 6528506295318577L,
+          id = 7052773602935837L,
+          published = false,
+          status = "Done",
+          assetMappingCount = 0,
+          createdTime = 1550739713
+        ),
+        ThreeDRevision(
+          fileId = 8440701612364206L,
+          id = 8685851966685955L,
+          published = false,
+          status = "Done",
+          assetMappingCount = 0,
+          createdTime = 1550739711
+        )
+      ),
+      Seq(
+        CreateThreeDRevision(published = false, fileId = 8440701612364206L),
+        CreateThreeDRevision(published = false, fileId = 6528506295318577L)
+      ),
+      idsThatDoNotExist,
+      false
     )
   )
 }
