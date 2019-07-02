@@ -7,6 +7,7 @@ import com.cognite.sdk.scala.common.{
   EitherDecoder,
   Items,
   ReadWritableResource,
+  ReadableResource,
   WithId
 }
 import com.softwaremill.sttp._
@@ -105,4 +106,31 @@ class ThreeDRevisions[F[_]](project: String, modelId: Long)(
         case Right(Right(_)) => ()
       }
       .send()
+}
+
+final case class ThreeDAssetMapping(
+    nodeId: Long,
+    assetId: Long,
+    treeIndex: Option[Long] = None,
+    subtreeSize: Option[Long] = None
+)
+
+final case class CreateThreeDAssetMapping(
+    nodeId: Long,
+    assetId: Long
+)
+
+class ThreeDAssetMappings[F[_]](project: String, modelId: Long, revisionId: Long)(
+    implicit auth: Auth,
+    sttpBackend: SttpBackend[F, _]
+) extends ReadableResource[
+      ThreeDAssetMapping,
+      F,
+      Id,
+      CogniteId,
+      Long
+    ]
+    with ResourceV1[F] {
+  override val baseUri =
+    uri"https://api.cognitedata.com/api/v1/projects/$project/3d/models/$modelId/revisions/$revisionId/mappings"
 }
