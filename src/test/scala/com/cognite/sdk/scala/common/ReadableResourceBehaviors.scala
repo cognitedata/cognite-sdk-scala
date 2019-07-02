@@ -5,7 +5,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off method.length
-  def readableResource[R <: WithId[PrimitiveId], C[_], InternalId, PrimitiveId](
+  def readableResource[R, C[_], InternalId, PrimitiveId](
       readable: ReadableResource[R, Id, C, InternalId, PrimitiveId]
   ): Unit = {
     it should "read items" in {

@@ -53,4 +53,7 @@ class ThreeDTest extends SdkTest with ReadableResourceBehaviors with WritableRes
       false
     )
   )
+  ("ThreeDAssetMapping" should behave).like(
+    readableResource(client.threeDAssetMappings(1367881358941595L, 7901013305364074L))
+  )
 }
