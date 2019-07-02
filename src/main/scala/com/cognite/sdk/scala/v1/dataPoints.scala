@@ -80,17 +80,6 @@ class DataPointsResourceV1[F[_]](project: String)(
     request
       .post(baseUri)
       .body(Items(Seq(DataPointsById(id, dataPoints))))
-//      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
-//      .mapResponse {
-//        case Left(value) =>
-//          print("kaboom") // scalastyle:ignore
-//          print(value.original) // scalastyle:ignore
-//          print(value.error.toString) // scalastyle:ignore
-//          throw value.error
-//        case Right(Left(cdpApiError)) =>
-//          throw cdpApiError.asException(baseUri)
-//        case Right(Right(_)) => ()
-//      }
       .response(asJson[Either[CdpApiError[CogniteId], Unit]])
       .mapResponse {
         case Left(value) => throw value.error

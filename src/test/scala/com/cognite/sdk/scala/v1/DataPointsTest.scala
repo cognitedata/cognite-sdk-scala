@@ -3,9 +3,11 @@ package com.cognite.sdk.scala.v1
 import java.util.UUID
 
 import com.cognite.sdk.scala.common.{DataPointsResourceBehaviors, SdkTest}
+//import io.circe.generic.auto._
 
 class DataPointsTest extends SdkTest with DataPointsResourceBehaviors[Long] {
-  private val client = new GenericClient()(auth, backend)
+  private val client = new GenericClient()(auth, sttpBackend)
+  //import com.cognite.sdk.scala.common.ExtractorInstances._
 
   override def withTimeSeriesId(testCode: Long => Any): Unit = {
     val timeSeriesId = client.timeSeries.create(

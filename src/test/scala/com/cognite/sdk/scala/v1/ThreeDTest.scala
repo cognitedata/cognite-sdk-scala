@@ -3,7 +3,7 @@ package com.cognite.sdk.scala.v1
 import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, WritableResourceBehaviors}
 
 class ThreeDTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
-  private val client = new GenericClient()(auth, backend)
+  private val client = new GenericClient()(auth, sttpBackend)
   private val idsThatDoNotExist = Seq(9999991L, 9999992L)
   ("ThreeDModels" should behave).like(readableResource(client.threeDModels))
   (it should behave).like(

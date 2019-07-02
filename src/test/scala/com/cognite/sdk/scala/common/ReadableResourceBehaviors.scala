@@ -1,10 +1,10 @@
 package com.cognite.sdk.scala.common
 
-import com.softwaremill.sttp.Id
+import com.softwaremill.sttp.{Id, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
+import io.circe.{Decoder, Encoder}
 
 trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
-  // scalastyle:off method.length
   def readableResource[R, C[_], InternalId, PrimitiveId](
       readable: ReadableResource[R, Id, C, InternalId, PrimitiveId]
   ): Unit = {
@@ -27,12 +27,17 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
     }
   }
 
+  // scalastyle:off
   def readableResourceWithRetrieve[R <: WithId[PrimitiveId], W, C[_], InternalId, PrimitiveId](
       readable: ReadableResource[R, Id, C, InternalId, PrimitiveId]
-        with ResourceWithRetrieve[R, Id, PrimitiveId],
+        with RetrieveByIds[R, Id, C, InternalId, PrimitiveId],
       idsThatDoNotExist: Seq[PrimitiveId],
-      supportsMissingAndThrown: Boolean
-  ): Unit = {
+      supportsMissingAndThrown: Boolean)(implicit sttpBackend: SttpBackend[Id, _],
+        extractor: Extractor[C],
+        //decoder: Decoder[R],
+        errorDecoder: Decoder[CdpApiError[CogniteId]],
+        itemsDecoder: Decoder[C[Items[R]]],
+        d1: Encoder[Items[InternalId]]): Unit = {
     it should "support retrieving items by id" in {
       val firstTwoItemIds = readable.readWithLimit(2).unsafeBody.items.map(_.id)
       firstTwoItemIds should have size 2

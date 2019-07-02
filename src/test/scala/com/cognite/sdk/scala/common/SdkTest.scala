@@ -1,9 +1,7 @@
 package com.cognite.sdk.scala.common
 
-import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, MonadError, Request, Response, SttpBackend, SttpBackendOptions}
+import com.softwaremill.sttp.{MonadError, Request, Response, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
-
-import scala.concurrent.duration._
 
 class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBackend[R, S] {
 
@@ -29,9 +27,5 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
 abstract class SdkTest extends FlatSpec with Matchers {
   private val apiKey = Option(System.getenv("TEST_API_KEY_READ"))
     .getOrElse(throw new RuntimeException("TEST_API_KEY_READ not set"))
-  //implicit val backend: SttpBackend[Id, Nothing] = new LoggingSttpBackend[Id, Nothing](HttpURLConnectionBackend())
-  implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
-    options = SttpBackendOptions.connectionTimeout(90.seconds)
-  )
   implicit val auth: Auth = ApiKeyAuth(apiKey)
 }
