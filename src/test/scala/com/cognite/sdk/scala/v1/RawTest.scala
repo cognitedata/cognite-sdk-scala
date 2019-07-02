@@ -6,7 +6,7 @@ import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, Writabl
 import io.circe.syntax._
 
 class RawTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
-  private val client = new GenericClient()(auth, backend)
+  private val client = new GenericClient()(auth, sttpBackend)
   private val idsThatDoNotExist = Seq("nodatabase", "randomdatabase")
 
   private def shortRandom() = UUID.randomUUID().toString.substring(0, 8)

@@ -65,14 +65,26 @@ abstract class ReadableResource[R: Decoder, F[_], C[_], InternalId, PrimitiveId]
 
 abstract class ReadableResourceWithRetrieve[R: Decoder, F[_], C[_], InternalId, PrimitiveId](
     implicit auth: Auth,
-    containerItemsDecoder: Decoder[C[Items[R]]],
     containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
     sttpBackend: SttpBackend[F, _]
 ) extends ReadableResource[R, F, C, InternalId, PrimitiveId]
-    with ResourceWithRetrieve[R, F, PrimitiveId] {
-  implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] =
-    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
-  def retrieveByIds(ids: Seq[PrimitiveId]): F[Response[Seq[R]]] =
+    with RetrieveByIds[R, F, C, InternalId, PrimitiveId] {
+}
+
+trait RetrieveByIds[R, F[_], C[_], InternalId, PrimitiveId]
+  extends RequestSession
+    with BaseUri
+    with ToInternalId[InternalId, PrimitiveId] {
+
+  def retrieveByIds(ids: Seq[PrimitiveId])
+                   (implicit sttpBackend: SttpBackend[F, _],
+                    extractor: Extractor[C],
+                    errorDecoder: Decoder[CdpApiError[CogniteId]],
+                    itemsDecoder: Decoder[C[Items[R]]],
+                    d1: Encoder[Items[InternalId]]
+                   ): F[Response[Seq[R]]] = {
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] =
+      EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
     request
       .get(uri"$baseUri/byids")
       .body(Items(ids.map(toInternalId)))
@@ -83,8 +95,5 @@ abstract class ReadableResourceWithRetrieve[R: Decoder, F[_], C[_], InternalId, 
         case Right(Right(value)) => extractor.extract(value).items
       }
       .send()
-}
-
-trait ResourceWithRetrieve[R, F[_], PrimitiveId] {
-  def retrieveByIds(ids: Seq[PrimitiveId]): F[Response[Seq[R]]]
+  }
 }

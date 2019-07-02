@@ -38,22 +38,8 @@ abstract class ReadWritableResource[R: Decoder, W: Decoder: Encoder, F[_], C[_],
 
 abstract class ReadWritableResourceWithRetrieve[R: Decoder, W: Decoder: Encoder, F[_], C[_], InternalId, PrimitiveId](
     implicit auth: Auth,
-    containerItemsDecoder: Decoder[C[Items[R]]],
     containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
     sttpBackend: SttpBackend[F, _]
 ) extends ReadWritableResource[R, W, F, C, InternalId, PrimitiveId]
-    with ResourceWithRetrieve[R, F, PrimitiveId] {
-  implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] =
-    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
-  def retrieveByIds(ids: Seq[PrimitiveId]): F[Response[Seq[R]]] =
-    request
-      .get(uri"$baseUri/byids")
-      .body(Items(ids.map(toInternalId)))
-      .response(asJson[Either[CdpApiError[CogniteId], C[Items[R]]]])
-      .mapResponse {
-        case Left(value) => throw value.error
-        case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
-        case Right(Right(value)) => extractor.extract(value).items
-      }
-      .send()
+    with RetrieveByIds[R, F, C, InternalId, PrimitiveId] {
 }
