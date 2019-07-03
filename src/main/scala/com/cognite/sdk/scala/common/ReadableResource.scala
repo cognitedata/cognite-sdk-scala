@@ -2,27 +2,23 @@ package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
 
-abstract class ReadableResource[R: Decoder, F[_], C[_], InternalId, PrimitiveId](
-    implicit auth: Auth,
-    containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
-    sttpBackend: SttpBackend[F, _]
-) extends Resource[F, InternalId, PrimitiveId](auth) {
-  implicit val extractor: Extractor[C]
-  implicit val idEncoder: Encoder[InternalId]
-
-  implicit val errorOrItemsWithCursorDecoder
-      : Decoder[Either[CdpApiError[Unit], C[ItemsWithCursor[R]]]] =
-    EitherDecoder.eitherDecoder[CdpApiError[Unit], C[ItemsWithCursor[R]]]
+trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession with BaseUri {
   private def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
+  )(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[Unit]],
+      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): F[Response[ItemsWithCursor[R]]] = {
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[Unit], C[ItemsWithCursor[R]]]] =
+      EitherDecoder.eitherDecoder[CdpApiError[Unit], C[ItemsWithCursor[R]]]
     val uriWithCursor = cursor
       .fold(baseUri)(baseUri.param("cursor", _))
-      .param("limit", limit.getOrElse(defaultLimit).toString)
+      .param("limit", limit.getOrElse(Resource.defaultLimit).toString)
     request
       .get(uriWithCursor)
       .response(asJson[Either[CdpApiError[Unit], C[ItemsWithCursor[R]]]])
@@ -34,17 +30,42 @@ abstract class ReadableResource[R: Decoder, F[_], C[_], InternalId, PrimitiveId]
       .send()
   }
 
-  def readFromCursor(cursor: String): F[Response[ItemsWithCursor[R]]] =
+  def readFromCursor(cursor: String)(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[Unit]],
+      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+  ): F[Response[ItemsWithCursor[R]]] =
     readWithCursor(Some(cursor), None)
-  def readFromCursorWithLimit(cursor: String, limit: Long): F[Response[ItemsWithCursor[R]]] =
+  def readFromCursorWithLimit(cursor: String, limit: Long)(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[Unit]],
+      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+  ): F[Response[ItemsWithCursor[R]]] =
     readWithCursor(Some(cursor), Some(limit))
-  def read(): F[Response[ItemsWithCursor[R]]] = readWithCursor(None, None)
-  def readWithLimit(limit: Long): F[Response[ItemsWithCursor[R]]] =
+  def read()(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[Unit]],
+      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+  ): F[Response[ItemsWithCursor[R]]] = readWithCursor(None, None)
+  def readWithLimit(limit: Long)(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[Unit]],
+      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+  ): F[Response[ItemsWithCursor[R]]] =
     readWithCursor(None, Some(limit))
 
   private def readWithNextCursor(
       cursor: Option[String],
       limit: Option[Long]
+  )(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[Unit]],
+      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Iterator[F[Response[Seq[R]]]] =
     new NextCursorIterator[R, F](cursor, limit) {
       def get(
@@ -54,35 +75,62 @@ abstract class ReadableResource[R: Decoder, F[_], C[_], InternalId, PrimitiveId]
         readWithCursor(cursor, remainingItems)
     }
 
-  def readAllFromCursor(cursor: String): Iterator[F[Response[Seq[R]]]] =
+  def readAllFromCursor(cursor: String)(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[Unit]],
+      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+  ): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(Some(cursor), None)
-  def readAllWithLimit(limit: Long): Iterator[F[Response[Seq[R]]]] =
+  def readAllWithLimit(limit: Long)(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[Unit]],
+      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+  ): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(None, Some(limit))
-  def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[Response[Seq[R]]]] =
+  def readAllFromCursorWithLimit(cursor: String, limit: Long)(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[Unit]],
+      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+      //d1: Encoder[Items[InternalId]]
+  ): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(Some(cursor), Some(limit))
-  def readAll(): Iterator[F[Response[Seq[R]]]] = readWithNextCursor(None, None)
+  def readAll()(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[Unit]],
+      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+  ): Iterator[F[Response[Seq[R]]]] = readWithNextCursor(None, None)
 }
+
+abstract class ReadableResource[R: Decoder, F[_], C[_], InternalId, PrimitiveId](
+    implicit auth: Auth
+    //containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
+    //sttpBackend: SttpBackend[F, _]
+) extends Resource[F, InternalId, PrimitiveId](auth)
+    with Readable[R, F, C, InternalId, PrimitiveId] {}
 
 abstract class ReadableResourceWithRetrieve[R: Decoder, F[_], C[_], InternalId, PrimitiveId](
-    implicit auth: Auth,
-    containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
-    sttpBackend: SttpBackend[F, _]
+    implicit auth: Auth
+    //containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
+    //sttpBackend: SttpBackend[F, _]
 ) extends ReadableResource[R, F, C, InternalId, PrimitiveId]
-    with RetrieveByIds[R, F, C, InternalId, PrimitiveId] {
-}
+    with RetrieveByIds[R, F, C, InternalId, PrimitiveId] {}
 
 trait RetrieveByIds[R, F[_], C[_], InternalId, PrimitiveId]
-  extends RequestSession
+    extends RequestSession
     with BaseUri
     with ToInternalId[InternalId, PrimitiveId] {
 
-  def retrieveByIds(ids: Seq[PrimitiveId])
-                   (implicit sttpBackend: SttpBackend[F, _],
-                    extractor: Extractor[C],
-                    errorDecoder: Decoder[CdpApiError[CogniteId]],
-                    itemsDecoder: Decoder[C[Items[R]]],
-                    d1: Encoder[Items[InternalId]]
-                   ): F[Response[Seq[R]]] = {
+  def retrieveByIds(ids: Seq[PrimitiveId])(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      itemsDecoder: Decoder[C[Items[R]]],
+      d1: Encoder[Items[InternalId]]
+  ): F[Response[Seq[R]]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] =
       EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
     request

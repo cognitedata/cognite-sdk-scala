@@ -27,7 +27,7 @@ final case class RawRow(
 )
 final case class RawRowKey(key: String)
 
-abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId, PrimitiveId](
+abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: Encoder, PrimitiveId](
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
 ) extends ReadWritableResourceWithRetrieve[R, W, F, Id, InternalId, PrimitiveId] {

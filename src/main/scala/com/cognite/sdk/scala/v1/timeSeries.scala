@@ -30,7 +30,7 @@ final case class CreateTimeSeries(
     securityCategories: Option[Seq[Long]] = None
 )
 
-class TimeSeriesResourceRead[F[_]](project: String)(
+class TimeSeriesResource[F[_]](project: String)(
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
 ) extends ReadWritableResourceV1[TimeSeries, CreateTimeSeries, F]

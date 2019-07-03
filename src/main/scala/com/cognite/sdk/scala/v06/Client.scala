@@ -24,7 +24,7 @@ class GenericClient[F[_], _]()(implicit auth: Auth, sttpBackend: SttpBackend[F, 
   val login = new Login()
   val assets = new Assets(project)
   val events = new Events(project)
-  val files = new Files(project)
+  val files = new Files[F](project)
   val timeSeries = new TimeSeriesResource(project)
   val dataPoints = new DataPointsResourceV0_6(project)
 }

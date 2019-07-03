@@ -6,8 +6,8 @@ import io.circe.generic.auto._
 
 class TimeSeriesTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
   private val client = new GenericClient[Id, Nothing]()(auth, sttpBackend)
-  import com.cognite.sdk.scala.common.ExtractorInstances._
   private val idsThatDoNotExist = Seq(999991L, 999992L)
+
   it should behave like readableResource(client.timeSeries)
   it should behave like readableResourceWithRetrieve(client.timeSeries, idsThatDoNotExist, supportsMissingAndThrown = true)
   it should behave like writableResource(

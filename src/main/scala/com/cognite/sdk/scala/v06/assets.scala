@@ -29,7 +29,6 @@ final case class CreateAsset(
 
 class Assets[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
     extends ReadWritableResourceV0_6[Asset, CreateAsset, F]
-    with RetrieveByIds[Asset, F, Data, Long, Long]
     with ResourceV0_6[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/$project/assets"
 }
