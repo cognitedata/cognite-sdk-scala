@@ -2,17 +2,16 @@ package com.cognite.sdk.scala.v1
 
 import java.util.UUID
 
-import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, WritableResourceBehaviors}
-import com.cognite.sdk.scala.v1.resources.{RawDatabase, RawRow, RawTable}
+import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 import io.circe.syntax._
 
-class RawTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
+class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val client = new GenericClient()(auth, sttpBackend)
   private val idsThatDoNotExist = Seq("nodatabase", "randomdatabase")
 
   private def shortRandom() = UUID.randomUUID().toString.substring(0, 8)
-  it should behave like readableResource(client.rawDatabases)
-  it should behave like writableResource(
+  it should behave like readable(client.rawDatabases)
+  it should behave like writable(
       client.rawDatabases,
       Seq(
         RawDatabase(name = s"scala-sdk-${shortRandom()}"),

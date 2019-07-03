@@ -10,7 +10,6 @@ import com.cognite.sdk.scala.v06.resources.{
   File,
   TimeSeries
 }
-import com.cognite.sdk.scala.v1.resources.CreateFile
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
@@ -44,8 +43,8 @@ package object v06 {
     deriveDecoder[Data[ItemsWithCursor[File]]]
   implicit val fileItemsDecoder: Decoder[Data[Items[File]]] =
     deriveDecoder[Data[Items[File]]]
-  implicit val createFileItemsEncoder: Encoder[Items[CreateFile]] =
-    deriveEncoder[Items[CreateFile]]
+//  implicit val createFileItemsEncoder: Encoder[Items[CreateFile]] =
+//    deriveEncoder[Items[CreateFile]]
 
   implicit val timeSeriesItemsWithCursorDecoder: Decoder[Data[ItemsWithCursor[TimeSeries]]] =
     deriveDecoder[Data[ItemsWithCursor[TimeSeries]]]

@@ -15,9 +15,16 @@ abstract class ReadWritableResource[R: Decoder, W: Decoder: Encoder, F[_], C[_],
 trait DeleteByIds[F[_], InternalId, PrimitiveId] {
   def deleteByIds(ids: Seq[PrimitiveId])(
       implicit sttpBackend: SttpBackend[F, _],
-      // TODO: Check if it should be CogniteId or InternalId here
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[InternalId]]
+  ): F[Response[Unit]]
+}
+
+trait DeleteByExternalIds[F[_], InternalId, ExternalId] {
+  def deleteByExternalIds(externalIds: Seq[String])(
+      implicit sttpBackend: SttpBackend[F, _],
+      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      itemsEncoder: Encoder[Items[ExternalId]]
   ): F[Response[Unit]]
 }
 

@@ -1,20 +1,6 @@
 package com.cognite.sdk.scala
 
 import com.cognite.sdk.scala.common.{CdpApiError, CogniteId, Extractor, Items, ItemsWithCursor}
-import com.cognite.sdk.scala.v1.resources.{
-  Asset,
-  CreateAsset,
-  CreateEvent,
-  CreateFile,
-  CreateTimeSeries,
-  Event,
-  File,
-  RawDatabase,
-  RawRow,
-  RawRowKey,
-  RawTable,
-  TimeSeries
-}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._

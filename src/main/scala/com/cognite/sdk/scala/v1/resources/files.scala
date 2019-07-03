@@ -1,34 +1,11 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.v1.{CreateFile, File}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
-
-final case class File(
-    id: Long = 0,
-    name: String,
-    source: Option[String] = None,
-    externalId: Option[String] = None,
-    mimeType: Option[String] = None,
-    metadata: Option[Map[String, String]] = None,
-    assetIds: Option[Seq[Long]] = None,
-    uploaded: Boolean = false,
-    uploadedTime: Option[Long] = None,
-    createdTime: Long = 0,
-    lastUpdatedTime: Long = 0,
-    uploadUrl: Option[String] = None
-) extends WithId[Long]
-
-final case class CreateFile(
-    name: String,
-    source: Option[String] = None,
-    externalId: Option[String] = None,
-    mimeType: Option[String] = None,
-    metadata: Option[Map[String, String]] = None,
-    assetIds: Option[Seq[Long]] = None
-)
 
 class Files[F[_]](project: String)(implicit auth: Auth)
     extends ReadWritableResourceV1[File, CreateFile, F]

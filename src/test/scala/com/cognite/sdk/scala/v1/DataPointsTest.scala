@@ -3,7 +3,6 @@ package com.cognite.sdk.scala.v1
 import java.util.UUID
 
 import com.cognite.sdk.scala.common.{DataPointsResourceBehaviors, SdkTest}
-import com.cognite.sdk.scala.v1.resources.TimeSeries
 
 class DataPointsTest extends SdkTest with DataPointsResourceBehaviors[Long] {
   private val client = new GenericClient()(auth, sttpBackend)

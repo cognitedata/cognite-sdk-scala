@@ -1,16 +1,15 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, WritableResourceBehaviors}
-import com.cognite.sdk.scala.v1.resources.{CreateThreeDModel, CreateThreeDRevision, ThreeDModel, ThreeDRevision}
+import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 import io.circe.generic.auto._
 
-class ThreeDTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
+class ThreeDTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val client = new GenericClient()(auth, sttpBackend)
   private val idsThatDoNotExist = Seq(9999991L, 9999992L)
 
-  ("ThreeDModels" should behave).like(readableResource(client.threeDModels))
+  ("ThreeDModels" should behave).like(readable(client.threeDModels))
   (it should behave).like(
-    writableResource(
+    writable(
       client.threeDModels,
       Seq(
         ThreeDModel(name = "scala-sdk-threeD-read-example-1"),
@@ -25,10 +24,10 @@ class ThreeDTest extends SdkTest with ReadableResourceBehaviors with WritableRes
     )
   )
   ("ThreeDRevisions" should behave).like(
-    readableResource(client.threeDRevisions(4222532244684431L))
+    readable(client.threeDRevisions(4222532244684431L))
   )
   (it should behave).like(
-    writableResource(
+    writable(
       client.threeDRevisions(4222532244684431L),
       Seq(
         ThreeDRevision(
@@ -57,6 +56,6 @@ class ThreeDTest extends SdkTest with ReadableResourceBehaviors with WritableRes
     )
   )
   ("ThreeDAssetMapping" should behave).like(
-    readableResource(client.threeDAssetMappings(1367881358941595L, 7901013305364074L))
+    readable(client.threeDAssetMappings(1367881358941595L, 7901013305364074L))
   )
 }

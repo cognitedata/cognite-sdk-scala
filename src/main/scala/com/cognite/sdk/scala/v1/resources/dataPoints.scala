@@ -1,53 +1,19 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.extractor
+import com.cognite.sdk.scala.v1.{
+  DataPointsById,
+  DataPointsByIdResponse,
+  DeleteRangeById,
+  QueryRangeById,
+  StringDataPointsById,
+  StringDataPointsByIdResponse,
+  extractor
+}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.Decoder
 import io.circe.generic.auto._
-
-final case class DataPointsById(
-    id: Long,
-    datapoints: Seq[DataPoint]
-)
-
-final case class DataPointsByIdResponse(
-    id: Long,
-    externalId: Option[String],
-    isString: Boolean,
-    datapoints: Seq[DataPoint]
-)
-
-final case class StringDataPointsByIdResponse(
-    id: Long,
-    externalId: Option[String],
-    isString: Boolean,
-    datapoints: Seq[StringDataPoint]
-)
-
-final case class StringDataPointsById(
-    id: Long,
-    datapoints: Seq[StringDataPoint]
-)
-
-final case class DeleteRangeById(
-    id: Long,
-    inclusiveBegin: Long,
-    exclusiveEnd: Long
-)
-
-final case class DeleteRangeByExternalId(
-    id: String,
-    inclusiveBegin: Long,
-    exclusiveEnd: Long
-)
-
-final case class QueryRangeById(
-    id: Long,
-    start: String,
-    end: String
-)
 
 class DataPointsResourceV1[F[_]](project: String)(
     implicit auth: Auth,

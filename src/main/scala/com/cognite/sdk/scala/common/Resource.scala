@@ -6,15 +6,7 @@ import scala.concurrent.duration._
 abstract class Resource[F[_], InternalId, PrimitiveId](auth: Auth)
     extends BaseUri
     with RequestSession
-    with ToInternalId[InternalId, PrimitiveId] {
-  val request: RequestT[Empty, String, Nothing] = sttp
-    .auth(auth)
-    .contentType("application/json")
-    .header("accept", "application/json")
-    .readTimeout(90.seconds)
-    .parseResponseIf(_ => true)
-  val baseUri: Uri
-}
+    with ToInternalId[InternalId, PrimitiveId] {}
 
 object Resource {
   val defaultLimit: Long = 1000
@@ -25,7 +17,13 @@ trait BaseUri {
 }
 
 trait RequestSession {
-  val request: RequestT[Empty, String, Nothing]
+  def request(implicit auth: Auth): RequestT[Empty, String, Nothing] =
+    sttp
+      .auth(auth)
+      .contentType("application/json")
+      .header("accept", "application/json")
+      .readTimeout(90.seconds)
+      .parseResponseIf(_ => true)
 }
 
 trait ToInternalId[InternalId, PrimitiveId] {

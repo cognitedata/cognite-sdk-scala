@@ -5,10 +5,10 @@ import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import org.scalatest.{FlatSpec, Matchers}
 
-trait WritableResourceBehaviors extends Matchers { this: FlatSpec =>
+trait WritableBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off
-  def writableResource[R <: WithId[PrimitiveId], W, C[_], InternalId, PrimitiveId](
-      writable: ReadWritableResource[R, W, Id, C, InternalId, PrimitiveId],
+  def writable[R <: WithId[PrimitiveId], W, C[_], InternalId, PrimitiveId](
+      writable: Create[R, W, Id, C, InternalId, PrimitiveId] with DeleteByIds[Id, InternalId, PrimitiveId],
       readExamples: Seq[R],
       createExamples: Seq[W],
       idsThatDoNotExist: Seq[PrimitiveId],
