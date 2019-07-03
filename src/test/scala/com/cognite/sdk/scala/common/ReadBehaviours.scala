@@ -5,9 +5,9 @@ import org.scalatest.{FlatSpec, Matchers}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
 
-trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
-  def readableResource[R, C[_], InternalId, PrimitiveId](
-      readable: ReadableResource[R, Id, C, InternalId, PrimitiveId]
+trait ReadBehaviours extends Matchers { this: FlatSpec =>
+  def readable[R, C[_], InternalId, PrimitiveId](
+      readable: Readable[R, Id, C, InternalId, PrimitiveId]
   )(implicit sttpBackend: SttpBackend[Id, _],
     extractor: Extractor[C],
     itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
@@ -32,8 +32,8 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
   }
 
   // scalastyle:off
-  def readableResourceWithRetrieve[R <: WithId[PrimitiveId], W, C[_], InternalId, PrimitiveId](
-      readable: ReadableResource[R, Id, C, InternalId, PrimitiveId]
+  def readableWithRetrieve[R <: WithId[PrimitiveId], W, C[_], InternalId, PrimitiveId](
+      readable: Readable[R, Id, C, InternalId, PrimitiveId]
         with RetrieveByIds[R, Id, C, InternalId, PrimitiveId],
       idsThatDoNotExist: Seq[PrimitiveId],
       supportsMissingAndThrown: Boolean)(implicit sttpBackend: SttpBackend[Id, _],

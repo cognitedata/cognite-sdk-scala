@@ -43,19 +43,22 @@ class Events[F[_]](project: String)(implicit auth: Auth)
       implicit sttpBackend: SttpBackend[F, _],
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[Long]]
-  ): F[Response[Unit]] =
+  ): F[Response[Unit]] = {
+    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[Long], Unit]] =
+      EitherDecoder.eitherDecoder[CdpApiError[Long], Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     request
       .post(uri"$baseUri/delete")
       .body(Items(ids))
-      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
+      .response(asJson[Either[CdpApiError[Long], Unit]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
         case Right(Right(_)) => ()
       }
       .send()
+  }
 
   // 0.6 byids for events uses CogniteId in the request body
   override def retrieveByIds(ids: Seq[Long])(

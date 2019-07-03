@@ -1,21 +1,12 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.v1.{RawDatabase, RawRow, RawRowKey, RawTable}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.deriveEncoder
-import io.circe.{Decoder, Encoder, Json}
-
-final case class RawDatabase(name: String) extends WithId[String] {
-  override val id: String = this.name
-}
-final case class RawRow(
-    key: String,
-    columns: Map[String, Json],
-    lastUpdatedTime: Option[Long] = None
-)
-final case class RawRowKey(key: String)
+import io.circe.{Decoder, Encoder}
 
 abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: Encoder, PrimitiveId](
     implicit auth: Auth
@@ -46,10 +37,6 @@ class RawDatabases[F[_]](project: String)(implicit auth: Auth)
   def toInternalId(id: String): RawDatabase = RawDatabase(id)
   implicit val idEncoder: Encoder[RawDatabase] = deriveEncoder
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/raw/dbs"
-}
-
-final case class RawTable(name: String) extends WithId[String] {
-  override val id: String = this.name
 }
 
 class RawTables[F[_]](project: String, database: String)(

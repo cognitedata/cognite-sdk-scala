@@ -5,10 +5,7 @@ import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
 
 trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession with BaseUri {
-  private def readWithCursor(
-      cursor: Option[String],
-      limit: Option[Long]
-  )(
+  private def readWithCursor(cursor: Option[String], limit: Option[Long])(
       implicit sttpBackend: SttpBackend[F, _],
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
@@ -37,6 +34,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): F[Response[ItemsWithCursor[R]]] =
     readWithCursor(Some(cursor), None)
+
   def readFromCursorWithLimit(cursor: String, limit: Long)(
       implicit sttpBackend: SttpBackend[F, _],
       extractor: Extractor[C],
@@ -44,12 +42,14 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): F[Response[ItemsWithCursor[R]]] =
     readWithCursor(Some(cursor), Some(limit))
+
   def read()(
       implicit sttpBackend: SttpBackend[F, _],
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): F[Response[ItemsWithCursor[R]]] = readWithCursor(None, None)
+
   def readWithLimit(limit: Long)(
       implicit sttpBackend: SttpBackend[F, _],
       extractor: Extractor[C],
@@ -58,10 +58,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
   ): F[Response[ItemsWithCursor[R]]] =
     readWithCursor(None, Some(limit))
 
-  private def readWithNextCursor(
-      cursor: Option[String],
-      limit: Option[Long]
-  )(
+  private def readWithNextCursor(cursor: Option[String], limit: Option[Long])(
       implicit sttpBackend: SttpBackend[F, _],
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
@@ -82,6 +79,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(Some(cursor), None)
+
   def readAllWithLimit(limit: Long)(
       implicit sttpBackend: SttpBackend[F, _],
       extractor: Extractor[C],
@@ -89,6 +87,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(None, Some(limit))
+
   def readAllFromCursorWithLimit(cursor: String, limit: Long)(
       implicit sttpBackend: SttpBackend[F, _],
       extractor: Extractor[C],
@@ -96,6 +95,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(Some(cursor), Some(limit))
+
   def readAll()(
       implicit sttpBackend: SttpBackend[F, _],
       extractor: Extractor[C],
