@@ -1,4 +1,4 @@
-package com.cognite.sdk.scala.v1
+package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common.{CogniteId, ReadableResource}
 import com.softwaremill.sttp.Id

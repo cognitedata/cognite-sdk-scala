@@ -1,6 +1,13 @@
 package com.cognite.sdk.scala.v06
 
 import com.cognite.sdk.scala.common.{Auth, InvalidAuthentication, Login}
+import com.cognite.sdk.scala.v06.resources.{
+  Assets,
+  DataPointsResourceV0_6,
+  Events,
+  Files,
+  TimeSeriesResource
+}
 import com.softwaremill.sttp._
 
 import scala.concurrent.duration._

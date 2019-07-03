@@ -1,6 +1,21 @@
 package com.cognite.sdk.scala
 
-import com.cognite.sdk.scala.common.{CogniteId, Extractor, ExtractorInstances, Items, ItemsWithCursor}
+import com.cognite.sdk.scala.common.{
+  CdpApiError,
+  CogniteId,
+  Extractor,
+  Items,
+  ItemsWithCursor
+}
+import com.cognite.sdk.scala.v1.resources.{
+  Asset,
+  Event,
+  File,
+  RawDatabase,
+  RawRow,
+  RawTable,
+  TimeSeries
+}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
@@ -8,7 +23,9 @@ import io.circe.generic.auto._
 
 package object v1 {
   implicit val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
-  implicit val extractor: Extractor[Id] = ExtractorInstances.idExtractor
+  implicit val extractor: Extractor[Id] = new Extractor[Id] {
+    override def extract[A](c: Id[A]): A = c
+  }
 
   // this is unfortunately necessary if we don't want to force users to import
   // io.circe.generic.auto._ themselves, due to the derivation of
@@ -48,5 +65,8 @@ package object v1 {
   implicit val rawRowItemsDecoder: Decoder[Id[Items[RawRow]]] =
     deriveDecoder[Id[Items[RawRow]]]
 
-  implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder[CogniteId]
+  implicit val cdpApiErrorCogniteIdDecoder: Decoder[CdpApiError[CogniteId]] =
+    deriveDecoder[CdpApiError[CogniteId]]
+  implicit val cdpApiErrorUnitDecoder: Decoder[CdpApiError[Unit]] = deriveDecoder[CdpApiError[Unit]]
+  implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder[Items[CogniteId]]
 }

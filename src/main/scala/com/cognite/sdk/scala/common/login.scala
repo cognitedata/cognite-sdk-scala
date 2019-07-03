@@ -1,6 +1,5 @@
 package com.cognite.sdk.scala.common
 
-import com.cognite.sdk.scala.v06.Data
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
@@ -8,7 +7,7 @@ import io.circe.generic.auto._
 import scala.concurrent.duration._
 
 final case class LoginStatus(user: String, loggedIn: Boolean, project: String, projectId: Long)
-
+final case class DataLoginStatus(data: LoginStatus)
 class Login[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
   @SuppressWarnings(Array("org.wartremover.warts.EitherProjectionPartial"))
   def status(): F[Response[LoginStatus]] =
@@ -18,7 +17,7 @@ class Login[F[_]](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
       .header("accept", "application/json")
       .readTimeout(90.seconds)
       .get(uri"https://api.cognitedata.com/login/status")
-      .response(asJson[Data[LoginStatus]])
+      .response(asJson[DataLoginStatus])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(value) => value.data

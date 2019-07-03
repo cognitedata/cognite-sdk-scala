@@ -1,6 +1,6 @@
-package com.cognite.sdk.scala.v1
+package com.cognite.sdk.scala.v1.resources
 
-import com.cognite.sdk.scala.common.{Auth, CdpApiError, CogniteId, EitherDecoder, Items, WithId}
+import com.cognite.sdk.scala.common._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.Decoder
@@ -37,7 +37,9 @@ class Files[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBackend
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError[CogniteId], File]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], File]
-  override def createItems(items: Items[CreateFile]): F[Response[Seq[File]]] =
+  override def createItems(
+      items: Items[CreateFile]
+  )(implicit extractor: Extractor[Id]): F[Response[Seq[File]]] =
     items.items match {
       case item :: Nil =>
         request

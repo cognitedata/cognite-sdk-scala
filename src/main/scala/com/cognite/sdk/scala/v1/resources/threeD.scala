@@ -1,15 +1,6 @@
-package com.cognite.sdk.scala.v1
+package com.cognite.sdk.scala.v1.resources
 
-import com.cognite.sdk.scala.common.{
-  Auth,
-  CdpApiError,
-  CogniteId,
-  EitherDecoder,
-  Items,
-  ReadWritableResource,
-  ReadableResource,
-  WithId
-}
+import com.cognite.sdk.scala.common._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.Decoder

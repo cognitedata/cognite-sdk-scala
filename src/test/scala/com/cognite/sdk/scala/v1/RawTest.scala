@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.v1
 import java.util.UUID
 
 import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, WritableResourceBehaviors}
+import com.cognite.sdk.scala.v1.resources.{RawDatabase, RawRow, RawTable}
 import io.circe.syntax._
 
 class RawTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {

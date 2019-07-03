@@ -1,6 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, WritableResourceBehaviors}
+import com.cognite.sdk.scala.v1.resources.{CreateTimeSeries, TimeSeries}
 import com.softwaremill.sttp.Id
 
 class TimeSeriesTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
