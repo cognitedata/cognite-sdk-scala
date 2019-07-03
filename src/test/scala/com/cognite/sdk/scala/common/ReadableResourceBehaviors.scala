@@ -41,7 +41,8 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
         errorDecoder: Decoder[CdpApiError[CogniteId]],
         itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
         itemsDecoder: Decoder[C[Items[R]]],
-        d1: Encoder[Items[InternalId]]): Unit = {
+        d1: Encoder[Items[InternalId]]
+  ): Unit = {
     it should "support retrieving items by id" in {
       val firstTwoItemIds = readable.readWithLimit(2).unsafeBody.items.map(_.id)
       firstTwoItemIds should have size 2

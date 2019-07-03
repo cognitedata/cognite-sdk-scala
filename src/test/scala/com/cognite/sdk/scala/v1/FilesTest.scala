@@ -1,6 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, WritableResourceBehaviors}
+import com.cognite.sdk.scala.v1.resources.{CreateFile, File}
 
 class FilesTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
   private val client = new GenericClient()(auth, sttpBackend)

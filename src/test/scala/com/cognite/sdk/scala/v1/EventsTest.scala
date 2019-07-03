@@ -1,6 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, WritableResourceBehaviors}
+import com.cognite.sdk.scala.v1.resources.{CreateEvent, Event}
 
 class EventsTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
   private val client = new GenericClient()(auth, sttpBackend)

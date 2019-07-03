@@ -1,6 +1,19 @@
 package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{Auth, InvalidAuthentication, Login}
+import com.cognite.sdk.scala.v1.resources.{
+  Assets,
+  DataPointsResourceV1,
+  Events,
+  Files,
+  RawDatabases,
+  RawRows,
+  RawTables,
+  ThreeDAssetMappings,
+  ThreeDModels,
+  ThreeDRevisions,
+  TimeSeriesResource
+}
 import com.softwaremill.sttp._
 
 import scala.concurrent.duration._

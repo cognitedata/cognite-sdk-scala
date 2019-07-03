@@ -1,85 +1,49 @@
-package com.cognite.sdk.scala.v1
+package com.cognite.sdk.scala.v06.resources
 
-import com.cognite.sdk.scala.common.{
-  Auth,
-  CdpApiError,
-  CogniteId,
-  DataPoint,
-  DataPointsResource,
-  EitherDecoder,
-  Items,
-  Resource,
-  StringDataPoint
-}
+import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.v06.{Data, extractor}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.Decoder
 import io.circe.generic.auto._
 
-final case class DataPointsById(
-    id: Long,
+final case class DataPointsByName(
+    name: String,
     datapoints: Seq[DataPoint]
 )
 
-final case class DataPointsByIdResponse(
-    id: Long,
-    externalId: Option[String],
-    isString: Boolean,
-    datapoints: Seq[DataPoint]
-)
-
-final case class StringDataPointsByIdResponse(
-    id: Long,
-    externalId: Option[String],
-    isString: Boolean,
+final case class StringDataPointsByName(
+    name: String,
     datapoints: Seq[StringDataPoint]
 )
 
-final case class StringDataPointsById(
-    id: Long,
-    datapoints: Seq[StringDataPoint]
-)
-
-final case class DeleteRangeById(
-    id: Long,
-    inclusiveBegin: Long,
-    exclusiveEnd: Long
-)
-
-final case class DeleteRangeByExternalId(
-    id: String,
-    inclusiveBegin: Long,
-    exclusiveEnd: Long
-)
-
-final case class QueryRangeById(
-    id: Long,
-    start: String,
-    end: String
-)
-
-class DataPointsResourceV1[F[_]](project: String)(
+class DataPointsResourceV0_6[F[_]](project: String)(
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
-) extends Resource[F, CogniteId, Long](auth)
-    with ResourceV1[F]
+) extends Resource[F, Long, Long](auth)
+    with ResourceV0_6[F]
     with DataPointsResource[F, Long] {
-  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/timeseries/data"
+  override val baseUri = uri"https://api.cognitedata.com/api/0.6/projects/$project/timeseries"
 
-  override def toInternalId(id: Long): CogniteId = CogniteId(id)
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
-  implicit val errorOrDataPointsByIdResponseDecoder
-      : Decoder[Either[CdpApiError[CogniteId], Items[DataPointsByIdResponse]]] =
-    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Items[DataPointsByIdResponse]]
-  implicit val errorOrStringDataPointsByIdResponseDecoder
-      : Decoder[Either[CdpApiError[CogniteId], Items[StringDataPointsByIdResponse]]] =
-    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Items[StringDataPointsByIdResponse]]
+  implicit val errorOrDataPointsByNameResponseDecoder
+      : Decoder[Either[CdpApiError[CogniteId], Data[Items[DataPointsByName]]]] =
+    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Data[Items[DataPointsByName]]]
+  implicit val errorOrStringDataPointsByNameResponseDecoder
+      : Decoder[Either[CdpApiError[CogniteId], Data[Items[StringDataPointsByName]]]] =
+    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Data[Items[StringDataPointsByName]]]
+  implicit val errorOrDataPointResponseDecoder
+      : Decoder[Either[CdpApiError[CogniteId], Data[Items[DataPoint]]]] =
+    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Data[Items[DataPoint]]]
+  implicit val errorOrStringDataPointResponseDecoder
+      : Decoder[Either[CdpApiError[CogniteId], Data[Items[StringDataPoint]]]] =
+    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Data[Items[StringDataPoint]]]
 
   def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Response[Unit]] =
     request
-      .post(baseUri)
-      .body(Items(Seq(DataPointsById(id, dataPoints))))
+      .post(uri"$baseUri/$id/data")
+      .body(Items(dataPoints))
       .response(asJson[Either[CdpApiError[CogniteId], Unit]])
       .mapResponse {
         case Left(value) => throw value.error
@@ -90,8 +54,8 @@ class DataPointsResourceV1[F[_]](project: String)(
 
   def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Response[Unit]] =
     request
-      .post(baseUri)
-      .body(Items(Seq(StringDataPointsById(id, dataPoints))))
+      .post(uri"$baseUri/$id/data")
+      .body(Items(dataPoints))
       .response(asJson[Either[CdpApiError[CogniteId], Unit]])
       .mapResponse {
         case Left(value) => throw value.error
@@ -102,8 +66,12 @@ class DataPointsResourceV1[F[_]](project: String)(
 
   def deleteRangeById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Response[Unit]] =
     request
-      .post(uri"$baseUri/delete")
-      .body(Items(Seq(DeleteRangeById(id, inclusiveStart, exclusiveEnd))))
+      .delete(
+        uri"$baseUri/$id/data/deleterange".params(
+          ("timestampInclusiveBegin", inclusiveStart.toString),
+          ("timestampExclusiveEnd", exclusiveEnd.toString)
+        )
+      )
       .response(asJson[Either[CdpApiError[CogniteId], Unit]])
       .mapResponse {
         case Left(value) => throw value.error
@@ -114,9 +82,13 @@ class DataPointsResourceV1[F[_]](project: String)(
 
   def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Response[Seq[DataPoint]]] =
     request
-      .post(uri"$baseUri/list")
-      .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
-      .response(asJson[Either[CdpApiError[CogniteId], Items[DataPointsByIdResponse]]])
+      .get(
+        uri"$baseUri/$id/data".params(
+          ("start", inclusiveStart.toString),
+          ("end", exclusiveEnd.toString)
+        )
+      )
+      .response(asJson[Either[CdpApiError[CogniteId], Data[Items[DataPointsByName]]]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
@@ -134,9 +106,13 @@ class DataPointsResourceV1[F[_]](project: String)(
       exclusiveEnd: Long
   ): F[Response[Seq[StringDataPoint]]] =
     request
-      .post(uri"$baseUri/list")
-      .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
-      .response(asJson[Either[CdpApiError[CogniteId], Items[StringDataPointsByIdResponse]]])
+      .get(
+        uri"$baseUri/$id/data".params(
+          ("start", inclusiveStart.toString),
+          ("end", exclusiveEnd.toString)
+        )
+      )
+      .response(asJson[Either[CdpApiError[CogniteId], Data[Items[StringDataPointsByName]]]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
@@ -151,31 +127,23 @@ class DataPointsResourceV1[F[_]](project: String)(
   //def deleteRangeByExternalId(start: Long, end: Long, externalId: String): F[Response[Unit]]
   def getLatestDataPointById(id: Long): F[Response[Option[DataPoint]]] =
     request
-      .post(uri"$baseUri/latest")
-      .body(Items(Seq(CogniteId(id))))
-      .response(asJson[Either[CdpApiError[CogniteId], Items[DataPointsByIdResponse]]])
+      .get(uri"$baseUri/$id/latest")
+      .response(asJson[Either[CdpApiError[CogniteId], Data[Items[DataPoint]]]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) =>
-          extractor.extract(value).items.headOption.flatMap(_.datapoints.headOption)
+        case Right(Right(value)) => extractor.extract(value).items.headOption
       }
       .send()
 
   def getLatestStringDataPointById(id: Long): F[Response[Option[StringDataPoint]]] =
     request
-      .post(uri"$baseUri/latest")
-      .body(Items(Seq(CogniteId(id))))
-      .response(asJson[Either[CdpApiError[CogniteId], Items[StringDataPointsByIdResponse]]])
+      .get(uri"$baseUri/$id/latest")
+      .response(asJson[Either[CdpApiError[CogniteId], Data[Items[StringDataPoint]]]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) =>
-          extractor.extract(value).items.headOption.flatMap(_.datapoints.headOption)
+        case Right(Right(value)) => extractor.extract(value).items.headOption
       }
       .send()
-}
-
-object DataPointsResourceV1 {
-  // do something like add support for insert multiple?
 }

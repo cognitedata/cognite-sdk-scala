@@ -1,4 +1,4 @@
-package com.cognite.sdk.scala.v06
+package com.cognite.sdk.scala.v06.resources
 
 import com.cognite.sdk.scala.common.{Auth, WithId}
 import com.softwaremill.sttp._

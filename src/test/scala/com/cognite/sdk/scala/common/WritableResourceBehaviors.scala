@@ -12,7 +12,7 @@ trait WritableResourceBehaviors extends Matchers { this: FlatSpec =>
       createExamples: Seq[W],
       idsThatDoNotExist: Seq[PrimitiveId],
       supportsMissingAndThrown: Boolean
-  )(implicit t: Transformer[R, W]): Unit = {
+  )(implicit t: Transformer[R, W], extractor: Extractor[C]): Unit = {
     it should "be an error to delete using ids that does not exist" in {
       val thrown = the[CdpApiException[CogniteId]] thrownBy writable
         .deleteByIds(idsThatDoNotExist)

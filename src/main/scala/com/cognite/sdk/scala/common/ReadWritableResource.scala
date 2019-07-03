@@ -12,12 +12,11 @@ abstract class ReadWritableResource[R: Decoder, W: Decoder: Encoder, F[_], C[_],
     sttpBackend: SttpBackend[F, _],
     containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
 ) extends ReadableResource[R, F, C, InternalId, PrimitiveId] {
-  implicit val extractor: Extractor[C]
 
   implicit val errorOrStringDataPointsByIdResponseDecoder
       : Decoder[Either[CdpApiError[CogniteId], C[ItemsWithCursor[R]]]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[ItemsWithCursor[R]]]
-  def createItems(items: Items[W]): F[Response[Seq[R]]] =
+  def createItems(items: Items[W])(implicit extractor: Extractor[C]): F[Response[Seq[R]]] =
     request
       .post(baseUri)
       .body(items)
@@ -30,7 +29,9 @@ abstract class ReadWritableResource[R: Decoder, W: Decoder: Encoder, F[_], C[_],
       }
       .send()
 
-  def create[T](items: Seq[T])(implicit t: Transformer[T, W]): F[Response[Seq[R]]] =
+  def create[T](
+      items: Seq[T]
+  )(implicit t: Transformer[T, W], extractor: Extractor[C]): F[Response[Seq[R]]] =
     createItems(Items(items.map(_.transformInto[W])))
 
   def deleteByIds(ids: Seq[PrimitiveId]): F[Response[Unit]]

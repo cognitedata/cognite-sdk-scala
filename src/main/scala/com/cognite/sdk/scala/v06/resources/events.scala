@@ -1,10 +1,11 @@
-package com.cognite.sdk.scala.v06
+package com.cognite.sdk.scala.v06.resources
 
 import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.v06.Data
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
+import io.circe.{Decoder, Encoder}
 
 final case class Event(
     id: Long = 0,

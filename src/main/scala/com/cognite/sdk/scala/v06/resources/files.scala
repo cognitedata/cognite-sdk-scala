@@ -1,6 +1,7 @@
-package com.cognite.sdk.scala.v06
+package com.cognite.sdk.scala.v06.resources
 
 import com.cognite.sdk.scala.common.{Auth, ReadableResourceWithRetrieve, WithId}
+import com.cognite.sdk.scala.v06.Data
 import com.softwaremill.sttp._
 import io.circe.generic.auto._
 
