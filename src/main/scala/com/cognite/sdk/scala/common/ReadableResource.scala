@@ -94,7 +94,6 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
-      //d1: Encoder[Items[InternalId]]
   ): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(Some(cursor), Some(limit))
   def readAll()(
@@ -107,15 +106,11 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
 
 abstract class ReadableResource[R: Decoder, F[_], C[_], InternalId, PrimitiveId](
     implicit auth: Auth
-    //containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
-    //sttpBackend: SttpBackend[F, _]
 ) extends Resource[F, InternalId, PrimitiveId](auth)
     with Readable[R, F, C, InternalId, PrimitiveId] {}
 
 abstract class ReadableResourceWithRetrieve[R: Decoder, F[_], C[_], InternalId, PrimitiveId](
     implicit auth: Auth
-    //containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
-    //sttpBackend: SttpBackend[F, _]
 ) extends ReadableResource[R, F, C, InternalId, PrimitiveId]
     with RetrieveByIds[R, F, C, InternalId, PrimitiveId] {}
 
