@@ -41,5 +41,4 @@ abstract class ReadWritableResourceWithRetrieve[R: Decoder, W: Decoder: Encoder,
     containerItemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
     sttpBackend: SttpBackend[F, _]
 ) extends ReadWritableResource[R, W, F, C, InternalId, PrimitiveId]
-    with RetrieveByIds[R, F, C, InternalId, PrimitiveId] {
-}
+    with RetrieveByIds[R, F, C, InternalId, PrimitiveId] {}

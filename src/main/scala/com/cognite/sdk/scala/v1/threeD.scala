@@ -121,8 +121,7 @@ final case class CreateThreeDAssetMapping(
 )
 
 class ThreeDAssetMappings[F[_]](project: String, modelId: Long, revisionId: Long)(
-    implicit auth: Auth,
-    sttpBackend: SttpBackend[F, _]
+    implicit auth: Auth
 ) extends ReadableResource[
       ThreeDAssetMapping,
       F,

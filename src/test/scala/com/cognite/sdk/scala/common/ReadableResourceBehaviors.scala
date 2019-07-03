@@ -3,10 +3,14 @@ package com.cognite.sdk.scala.common
 import com.softwaremill.sttp.{Id, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
 import io.circe.{Decoder, Encoder}
+import io.circe.generic.auto._
 
 trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
   def readableResource[R, C[_], InternalId, PrimitiveId](
       readable: ReadableResource[R, Id, C, InternalId, PrimitiveId]
+  )(implicit sttpBackend: SttpBackend[Id, _],
+    extractor: Extractor[C],
+    itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Unit = {
     it should "read items" in {
       readable.read().unsafeBody.items should not be empty
@@ -34,8 +38,8 @@ trait ReadableResourceBehaviors extends Matchers { this: FlatSpec =>
       idsThatDoNotExist: Seq[PrimitiveId],
       supportsMissingAndThrown: Boolean)(implicit sttpBackend: SttpBackend[Id, _],
         extractor: Extractor[C],
-        //decoder: Decoder[R],
         errorDecoder: Decoder[CdpApiError[CogniteId]],
+        itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
         itemsDecoder: Decoder[C[Items[R]]],
         d1: Encoder[Items[InternalId]]): Unit = {
     it should "support retrieving items by id" in {
