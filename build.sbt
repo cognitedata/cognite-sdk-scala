@@ -92,6 +92,17 @@ scalacOptions ++= List(
   "-Ywarn-unused-import" // required by `RemoveUnused` rule
 )
 
+scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
+  case Some((2, minor)) if minor == 12 =>
+    // disable those in 2.12 due to invalid warnings
+    List(
+      "-Ywarn-unused:implicits",
+      "-Ywarn-unused:params"
+    )
+  case _ =>
+    List.empty[String]
+})
+
 scalastyleFailOnWarning := true
 
 lazy val mainScalastyle = taskKey[Unit]("mainScalastyle")
