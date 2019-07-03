@@ -1,7 +1,6 @@
 package com.cognite.sdk.scala.v06
 
 import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest}
-import io.circe.generic.auto._
 
 class FilesTest extends SdkTest with ReadableResourceBehaviors {
   private val client = new GenericClient()(auth, sttpBackend)

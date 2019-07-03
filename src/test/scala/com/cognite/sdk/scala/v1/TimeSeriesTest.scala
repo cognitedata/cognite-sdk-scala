@@ -2,7 +2,6 @@ package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, WritableResourceBehaviors}
 import com.softwaremill.sttp.Id
-import io.circe.generic.auto._
 
 class TimeSeriesTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
   private val client = new GenericClient[Id, Nothing]()(auth, sttpBackend)

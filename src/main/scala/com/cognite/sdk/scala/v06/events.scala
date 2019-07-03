@@ -52,13 +52,13 @@ class Events[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBacken
       }
       .send()
 
-  // 0.6 byids for events uses CogniteId
+  // 0.6 byids for events uses CogniteId in the request body
   override def retrieveByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
       extractor: Extractor[Data],
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsDecoder: Decoder[Data[Items[Event]]],
-      d1: Encoder[Items[Long]]
+      internalIdItemsEncoder: Encoder[Items[Long]]
   ): F[Response[Seq[Event]]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], Data[Items[Event]]]] =
       EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Data[Items[Event]]]
