@@ -1,7 +1,6 @@
 package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{ReadableResourceBehaviors, SdkTest, WritableResourceBehaviors}
-import io.circe.generic.auto._
 
 class AssetsTest extends SdkTest with ReadableResourceBehaviors with WritableResourceBehaviors {
   private val client = new GenericClient()(auth, sttpBackend)
