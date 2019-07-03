@@ -32,18 +32,18 @@ class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]
       loginStatus.project
     }
   }
-  val login = new Login()
-  val assets = new Assets(project)
-  val events = new Events(project)
-  val files = new Files(project)
-  val timeSeries = new TimeSeriesResource(project)
-  val dataPoints = new DataPointsResourceV1(project)
+  val login = new Login[F]()
+  val assets = new Assets[F](project)
+  val events = new Events[F](project)
+  val files = new Files[F](project)
+  val timeSeries = new TimeSeriesResource[F](project)
+  val dataPoints = new DataPointsResourceV1[F](project)
 
-  val rawDatabases = new RawDatabases(project)
+  val rawDatabases = new RawDatabases[F](project)
   def rawTables(database: String): RawTables[F] = new RawTables(project, database)
   def rawRows(database: String, table: String): RawRows[F] = new RawRows(project, database, table)
 
-  val threeDModels = new ThreeDModels(project)
+  val threeDModels = new ThreeDModels[F](project)
   def threeDRevisions(modelId: Long): ThreeDRevisions[F] = new ThreeDRevisions(project, modelId)
   def threeDAssetMappings(modelId: Long, revisionId: Long): ThreeDAssetMappings[F] =
     new ThreeDAssetMappings(project, modelId, revisionId)
