@@ -1,18 +1,26 @@
 package com.cognite.sdk.scala.common
 
-import com.softwaremill.sttp.Id
+import com.softwaremill.sttp.{Id, SttpBackend}
+import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import org.scalatest.{FlatSpec, Matchers}
 
 trait WritableResourceBehaviors extends Matchers { this: FlatSpec =>
-  // scalastyle:off method.length
+  // scalastyle:off
   def writableResource[R <: WithId[PrimitiveId], W, C[_], InternalId, PrimitiveId](
       writable: ReadWritableResource[R, W, Id, C, InternalId, PrimitiveId],
       readExamples: Seq[R],
       createExamples: Seq[W],
       idsThatDoNotExist: Seq[PrimitiveId],
       supportsMissingAndThrown: Boolean
-  )(implicit t: Transformer[R, W], extractor: Extractor[C]): Unit = {
+  )(implicit sttpBackend: SttpBackend[Id, _],
+    extractor: Extractor[C],
+    errorDecoder: Decoder[CdpApiError[CogniteId]],
+    itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
+    itemsDecoder: Decoder[C[Items[R]]],
+    itemsEncoder: Encoder[Items[W]],
+    d1: Encoder[Items[InternalId]],
+    t: Transformer[R, W]): Unit = {
     it should "be an error to delete using ids that does not exist" in {
       val thrown = the[CdpApiException[CogniteId]] thrownBy writable
         .deleteByIds(idsThatDoNotExist)

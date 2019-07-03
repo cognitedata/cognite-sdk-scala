@@ -14,7 +14,6 @@ abstract class Resource[F[_], InternalId, PrimitiveId](auth: Auth)
     .readTimeout(90.seconds)
     .parseResponseIf(_ => true)
   val baseUri: Uri
-  def toInternalId(id: PrimitiveId): InternalId
 }
 
 object Resource {

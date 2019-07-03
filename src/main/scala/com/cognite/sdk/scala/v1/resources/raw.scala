@@ -18,12 +18,16 @@ final case class RawRow(
 final case class RawRowKey(key: String)
 
 abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: Encoder, PrimitiveId](
-    implicit auth: Auth,
-    sttpBackend: SttpBackend[F, _]
-) extends ReadWritableResourceWithRetrieve[R, W, F, Id, InternalId, PrimitiveId] {
+    implicit auth: Auth
+) extends ReadWritableResourceWithRetrieve[R, W, F, Id, InternalId, PrimitiveId]
+    with DeleteByIdsV1[R, W, F, Id, InternalId, PrimitiveId] {
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
-  override def deleteByIds(ids: Seq[PrimitiveId]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[PrimitiveId])(
+      implicit sttpBackend: SttpBackend[F, _],
+      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      itemsEncoder: Encoder[Items[InternalId]]
+  ): F[Response[Unit]] =
     request
       .post(uri"$baseUri/delete")
       .body(Items(ids.map(toInternalId)))
@@ -37,7 +41,7 @@ abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: En
       .send()
 }
 
-class RawDatabases[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
+class RawDatabases[F[_]](project: String)(implicit auth: Auth)
     extends RawResource[RawDatabase, RawDatabase, F, RawDatabase, String] {
   def toInternalId(id: String): RawDatabase = RawDatabase(id)
   implicit val idEncoder: Encoder[RawDatabase] = deriveEncoder
@@ -49,8 +53,7 @@ final case class RawTable(name: String) extends WithId[String] {
 }
 
 class RawTables[F[_]](project: String, database: String)(
-    implicit auth: Auth,
-    sttpBackend: SttpBackend[F, _]
+    implicit auth: Auth
 ) extends RawResource[RawTable, RawTable, F, RawTable, String] {
   def toInternalId(id: String): RawTable = RawTable(id)
   implicit val idEncoder: Encoder[RawTable] = deriveEncoder
@@ -59,8 +62,7 @@ class RawTables[F[_]](project: String, database: String)(
 }
 
 class RawRows[F[_]](project: String, database: String, table: String)(
-    implicit auth: Auth,
-    sttpBackend: SttpBackend[F, _]
+    implicit auth: Auth
 ) extends RawResource[RawRow, RawRow, F, RawRowKey, String] {
   def toInternalId(id: String): RawRowKey = RawRowKey(id)
   implicit val idEncoder: Encoder[RawRowKey] = deriveEncoder
@@ -70,7 +72,13 @@ class RawRows[F[_]](project: String, database: String, table: String)(
   // raw does not return the created rows in the response, so we'll always return an empty sequence.
   override def createItems(
       items: Items[RawRow]
-  )(implicit extractor: Extractor[Id]): F[Response[Seq[RawRow]]] =
+  )(
+      implicit sttpBackend: SttpBackend[F, _],
+      extractor: Extractor[Id],
+      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      itemsEncoder: Encoder[Items[RawRow]],
+      itemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[RawRow]]]
+  ): F[Response[Seq[RawRow]]] =
     request
       .post(baseUri)
       .body(items)

@@ -28,12 +28,12 @@ class GenericClient[F[_], _]()(implicit auth: Auth, sttpBackend: SttpBackend[F, 
       loginStatus.project
     }
   }
-  val login = new Login()
-  val assets = new Assets(project)
-  val events = new Events(project)
+  val login = new Login[F]()
+  val assets = new Assets[F](project)
+  val events = new Events[F](project)
   val files = new Files[F](project)
-  val timeSeries = new TimeSeriesResource(project)
-  val dataPoints = new DataPointsResourceV0_6(project)
+  val timeSeries = new TimeSeriesResource[F](project)
+  val dataPoints = new DataPointsResourceV0_6[F](project)
 }
 
 final case class Client()(implicit sttpBackend: SttpBackend[Id, Nothing])

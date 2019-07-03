@@ -3,7 +3,7 @@ package com.cognite.sdk.scala.v1.resources
 import com.cognite.sdk.scala.common._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.Decoder
+import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
 
 final case class ThreeDModel(
@@ -18,14 +18,18 @@ final case class CreateThreeDModel(
     metadata: Option[Map[String, String]] = None
 )
 
-class ThreeDModels[F[_]](project: String)(implicit auth: Auth, sttpBackend: SttpBackend[F, _])
+class ThreeDModels[F[_]](project: String)(implicit auth: Auth)
     extends ReadWritableResource[ThreeDModel, CreateThreeDModel, F, Id, CogniteId, Long]
     with ResourceV1[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/3d/models"
 
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
-  def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
+  def deleteByIds(ids: Seq[Long])(
+      implicit sttpBackend: SttpBackend[F, _],
+      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      itemsEncoder: Encoder[Items[CogniteId]]
+  ): F[Response[Unit]] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     request
@@ -68,8 +72,7 @@ final case class CreateThreeDRevision(
 )
 
 class ThreeDRevisions[F[_]](project: String, modelId: Long)(
-    implicit auth: Auth,
-    sttpBackend: SttpBackend[F, _]
+    implicit auth: Auth
 ) extends ReadWritableResource[
       ThreeDRevision,
       CreateThreeDRevision,
@@ -84,7 +87,11 @@ class ThreeDRevisions[F[_]](project: String, modelId: Long)(
 
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
-  def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
+  def deleteByIds(ids: Seq[Long])(
+      implicit sttpBackend: SttpBackend[F, _],
+      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      itemsEncoder: Encoder[Items[CogniteId]]
+  ): F[Response[Unit]] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     request
