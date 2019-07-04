@@ -16,8 +16,9 @@ trait DeleteByExternalIdsV1[F[_]]
     extends RequestSession
     with BaseUri
     with DeleteByExternalIds[F, CogniteId, CogniteExternalId] {
-  def deleteByExternalIds(externalIds: Seq[String])(
+  override def deleteByExternalIds(externalIds: Seq[String])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[CogniteExternalId]]
   ): F[Response[Unit]] = {
@@ -43,8 +44,9 @@ trait DeleteByIdsV1[R, W, F[_], C[_], InternalId, PrimitiveId]
     with ToInternalId[InternalId, PrimitiveId]
     with BaseUri
     with DeleteByIds[F, InternalId, PrimitiveId] {
-  def deleteByIds(ids: Seq[PrimitiveId])(
+  override def deleteByIds(ids: Seq[PrimitiveId])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[InternalId]]
   ): F[Response[Unit]] = {

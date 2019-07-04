@@ -41,6 +41,7 @@ class Events[F[_]](project: String)(implicit auth: Auth)
 
   override def deleteByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[Long]]
   ): F[Response[Unit]] = {
@@ -63,6 +64,7 @@ class Events[F[_]](project: String)(implicit auth: Auth)
   // 0.6 byids for events uses CogniteId in the request body
   override def retrieveByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[Data],
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsDecoder: Decoder[Data[Items[Event]]],

@@ -7,6 +7,7 @@ import io.circe.{Decoder, Encoder}
 trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession with BaseUri {
   private def readWithCursor(cursor: Option[String], limit: Option[Long])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
@@ -29,6 +30,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
 
   def readFromCursor(cursor: String)(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
@@ -37,6 +39,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
 
   def readFromCursorWithLimit(cursor: String, limit: Long)(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
@@ -45,6 +48,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
 
   def read()(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
@@ -52,6 +56,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
 
   def readWithLimit(limit: Long)(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
@@ -60,6 +65,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
 
   private def readWithNextCursor(cursor: Option[String], limit: Option[Long])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
@@ -74,6 +80,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
 
   def readAllFromCursor(cursor: String)(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
@@ -82,6 +89,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
 
   def readAllWithLimit(limit: Long)(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
@@ -90,6 +98,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
 
   def readAllFromCursorWithLimit(cursor: String, limit: Long)(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
@@ -98,6 +107,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
 
   def readAll()(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[Unit]],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
@@ -121,6 +131,7 @@ trait RetrieveByIds[R, F[_], C[_], InternalId, PrimitiveId]
 
   def retrieveByIds(ids: Seq[PrimitiveId])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsDecoder: Decoder[C[Items[R]]],

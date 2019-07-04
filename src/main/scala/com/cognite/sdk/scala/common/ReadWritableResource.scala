@@ -15,6 +15,7 @@ abstract class ReadWritableResource[R: Decoder, W: Decoder: Encoder, F[_], C[_],
 trait DeleteByIds[F[_], InternalId, PrimitiveId] {
   def deleteByIds(ids: Seq[PrimitiveId])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[InternalId]]
   ): F[Response[Unit]]
@@ -23,6 +24,7 @@ trait DeleteByIds[F[_], InternalId, PrimitiveId] {
 trait DeleteByExternalIds[F[_], InternalId, ExternalId] {
   def deleteByExternalIds(externalIds: Seq[String])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[ExternalId]]
   ): F[Response[Unit]]
@@ -31,6 +33,7 @@ trait DeleteByExternalIds[F[_], InternalId, ExternalId] {
 trait Create[R, W, F[_], C[_], InternalId, PrimitiveId] extends RequestSession with BaseUri {
   def createItems(items: Items[W])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[W]],
@@ -54,6 +57,7 @@ trait Create[R, W, F[_], C[_], InternalId, PrimitiveId] extends RequestSession w
 
   def create[T](items: Seq[T])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[W]],

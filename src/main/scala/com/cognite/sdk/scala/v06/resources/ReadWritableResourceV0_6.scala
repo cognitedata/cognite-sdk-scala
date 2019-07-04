@@ -16,8 +16,9 @@ trait DeleteByIdsV0_6[F[_]]
     with ToInternalId[Long, Long]
     with BaseUri
     with DeleteByIds[F, Long, Long] {
-  def deleteByIds(ids: Seq[Long])(
+  override def deleteByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[Long]]
   ): F[Response[Unit]] = {
