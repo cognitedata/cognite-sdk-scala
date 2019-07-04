@@ -16,6 +16,7 @@ abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: En
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
   override def deleteByIds(ids: Seq[PrimitiveId])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[InternalId]]
   ): F[Response[Unit]] =
@@ -61,6 +62,7 @@ class RawRows[F[_]](project: String, database: String, table: String)(
       items: Items[RawRow]
   )(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[Id],
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[RawRow]],

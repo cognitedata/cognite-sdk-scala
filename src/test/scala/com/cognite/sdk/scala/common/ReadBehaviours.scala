@@ -8,26 +8,28 @@ import io.circe.generic.auto._
 trait ReadBehaviours extends Matchers { this: FlatSpec =>
   def readable[R, C[_], InternalId, PrimitiveId](
       readable: Readable[R, Id, C, InternalId, PrimitiveId]
-  )(implicit sttpBackend: SttpBackend[Id, _],
-    extractor: Extractor[C],
-    itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
+  )(
+      implicit sttpBackend: SttpBackend[Id, _],
+      auth: Auth,
+      extractor: Extractor[C],
+      itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Unit = {
     it should "read items" in {
       readable.read().unsafeBody.items should not be empty
     }
 
     it should "read items with limit" in {
-      readable.readWithLimit(1).unsafeBody.items should have length 1
-      readable.readWithLimit(2).unsafeBody.items should have length 2
+      (readable.readWithLimit(1).unsafeBody.items should have).length(1)
+      (readable.readWithLimit(2).unsafeBody.items should have).length(2)
     }
 
     it should "read all items" in {
       val first1Length = readable.readAllWithLimit(1).map(_.unsafeBody.length).sum
-      first1Length should be (1)
+      first1Length should be(1)
       val first2Length = readable.readAllWithLimit(2).map(_.unsafeBody.length).sum
-      first2Length should be (2)
+      first2Length should be(2)
       val allLength = readable.readAllWithLimit(3).map(_.unsafeBody.length).sum
-      allLength should be (3)
+      allLength should be(3)
     }
   }
 
@@ -36,12 +38,15 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       readable: Readable[R, Id, C, InternalId, PrimitiveId]
         with RetrieveByIds[R, Id, C, InternalId, PrimitiveId],
       idsThatDoNotExist: Seq[PrimitiveId],
-      supportsMissingAndThrown: Boolean)(implicit sttpBackend: SttpBackend[Id, _],
-        extractor: Extractor[C],
-        errorDecoder: Decoder[CdpApiError[CogniteId]],
-        itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
-        itemsDecoder: Decoder[C[Items[R]]],
-        d1: Encoder[Items[InternalId]]
+      supportsMissingAndThrown: Boolean
+  )(
+      implicit sttpBackend: SttpBackend[Id, _],
+      auth: Auth,
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
+      itemsDecoder: Decoder[C[Items[R]]],
+      d1: Encoder[Items[InternalId]]
   ): Unit = {
     it should "support retrieving items by id" in {
       val firstTwoItemIds = readable.readWithLimit(2).unsafeBody.items.map(_.id)

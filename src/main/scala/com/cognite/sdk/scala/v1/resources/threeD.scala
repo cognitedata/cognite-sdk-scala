@@ -21,6 +21,7 @@ class ThreeDModels[F[_]](project: String)(implicit auth: Auth)
     EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
   def deleteByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[CogniteId]]
   ): F[Response[Unit]] = {
@@ -58,6 +59,7 @@ class ThreeDRevisions[F[_]](project: String, modelId: Long)(
 
   def deleteByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[CogniteId]]
   ): F[Response[Unit]] = {

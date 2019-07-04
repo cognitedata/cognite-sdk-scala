@@ -49,5 +49,5 @@ class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]
     new ThreeDAssetMappings(project, modelId, revisionId)
 }
 
-final case class Client()(implicit sttpBackend: SttpBackend[Id, Nothing])
+final case class Client()(implicit auth: Auth, sttpBackend: SttpBackend[Id, Nothing])
     extends GenericClient[Id, Nothing]()

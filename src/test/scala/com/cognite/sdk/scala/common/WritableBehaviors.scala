@@ -14,6 +14,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       idsThatDoNotExist: Seq[PrimitiveId],
       supportsMissingAndThrown: Boolean
   )(implicit sttpBackend: SttpBackend[Id, _],
+    auth: Auth,
     extractor: Extractor[C],
     errorDecoder: Decoder[CdpApiError[CogniteId]],
     itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],

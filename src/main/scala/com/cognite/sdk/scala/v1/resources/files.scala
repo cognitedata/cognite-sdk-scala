@@ -18,6 +18,7 @@ class Files[F[_]](project: String)(implicit auth: Auth)
       items: Items[CreateFile]
   )(
       implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
       extractor: Extractor[Id],
       errorDecoder: Decoder[CdpApiError[CogniteId]],
       itemsEncoder: Encoder[Items[CreateFile]],
