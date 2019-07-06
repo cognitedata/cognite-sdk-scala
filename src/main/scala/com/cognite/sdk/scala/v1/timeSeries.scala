@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{NonNullableSetter, Setter, WithId}
+import com.cognite.sdk.scala.common.{NonNullableSetter, Setter, TimeRange, WithId}
 
 final case class TimeSeries(
     name: String,
@@ -38,3 +38,21 @@ final case class TimeSeriesUpdate(
     description: Option[Setter[String]] = None,
     securityCategories: Option[Setter[Seq[String]]] = None
 ) extends WithId[Long]
+
+final case class TimeSeriesFilter(
+    name: Option[String] = None,
+    unit: Option[String] = None,
+    isString: Option[Boolean] = None,
+    isStep: Option[Boolean] = None,
+    metadata: Option[Map[String, String]] = None,
+    assetIds: Option[Seq[Long]] = None,
+    externalIdPrefix: Option[String] = None,
+    createdTime: Option[TimeRange] = None,
+    lastUpdatedTime: Option[TimeRange] = None
+)
+
+final case class TimeSeriesSearch(
+    name: Option[String] = None,
+    description: Option[String] = None,
+    query: Option[String] = None
+)
