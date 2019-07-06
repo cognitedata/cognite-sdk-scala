@@ -7,7 +7,9 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
 
   it should behave like readable(client.events)
+
   it should behave like readableWithRetrieve(client.events, idsThatDoNotExist, supportsMissingAndThrown = true)
+
   it should behave like writable(
     client.events,
     Seq(Event(description = Some("scala-sdk-read-example-1")), Event(description = Some("scala-sdk-read-example-2"))),
@@ -17,13 +19,18 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   )
 
   private val eventsToCreate = Seq(
-    Event(description = Some("scala-sdk-update-1"), `type`=Some("test"), subtype=Some("test")),
-    Event(description = Some("scala-sdk-update-2"), `type`=Some("test"), subtype=Some("test"))
+    Event(description = Some("scala-sdk-update-1"), `type` = Some("test"), subtype = Some("test")),
+    Event(description = Some("scala-sdk-update-2"), `type` = Some("test"), subtype = Some("test"))
   )
   private val eventUpdates = Seq(
-    Event(description = Some("scala-sdk-update-1-1"), `type`=Some("testA"), subtype=Some(null)), // scalastyle:ignore null
-    Event(description = Some("scala-sdk-update-2-1"), `type`=Some("testA"), subtype=Some("test-1"))
+    Event(description = Some("scala-sdk-update-1-1"), `type` = Some("testA"), subtype = Some(null)), // scalastyle:ignore null
+    Event(
+      description = Some("scala-sdk-update-2-1"),
+      `type` = Some("testA"),
+      subtype = Some("test-1")
+    )
   )
+
   it should behave like updatable(
     client.events,
     eventsToCreate,
@@ -45,4 +52,63 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       ()
     }
   )
+
+  it should "support search" in {
+    val createdTimeSearchResults = client.events
+      .search(
+        EventsQuery(
+          filter = Some(EventsFilter(createdTime = Some(TimeRange(1541510008838L, 1541515508838L))))
+        )
+      )
+      .unsafeBody
+    assert(createdTimeSearchResults.length == 11)
+    val subtypeCreatedTimeSearchResults = client.events
+      .search(
+        EventsQuery(
+          filter = Some(
+            EventsFilter(
+              createdTime = Some(TimeRange(1541510008838L, 1541515508838L)),
+              `type` = Some("Workorder"),
+              subtype = Some("Foo")
+            )
+          )
+        )
+      )
+      .unsafeBody
+    assert(subtypeCreatedTimeSearchResults.length == 1)
+    val searchResults = client.events
+      .search(
+        EventsQuery(
+          filter = Some(
+            EventsFilter(
+              createdTime = Some(TimeRange(0L, 1541515508838L))
+            )
+          ),
+          search = Some(
+            EventsSearch(
+              description = Some("description")
+            )
+          )
+        )
+      )
+      .unsafeBody
+    assert(searchResults.length == 3)
+    val searchResults2 = client.events
+      .search(
+        EventsQuery(
+          filter = Some(
+            EventsFilter(
+              createdTime = Some(TimeRange(0L, 1552395929193L))
+            )
+          ),
+          search = Some(
+            EventsSearch(
+              description = Some("description")
+            )
+          )
+        )
+      )
+      .unsafeBody
+    assert(searchResults2.length == 7)
+  }
 }

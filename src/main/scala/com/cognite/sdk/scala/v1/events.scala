@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{NonNullableSetter, Setter, SearchQuery, TimeRange, WithId}
+import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithId}
 
 final case class Event(
     id: Long = 0,
@@ -49,7 +49,7 @@ final case class EventsFilter(
     assetIds: Option[Seq[Long]] = None,
     source: Option[String] = None,
     `type`: Option[String] = None,
-    subType: Option[String] = None,
+    subtype: Option[String] = None,
     createdTime: Option[TimeRange] = None,
     lastUpdatedTime: Option[TimeRange] = None,
     externalIdPrefix: Option[String] = None

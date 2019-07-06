@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.{CreateFile, File, FilesSearch, FileUpdate}
+import com.cognite.sdk.scala.v1.{CreateFile, File, FileUpdate, FilesFilter, FilesQuery}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
@@ -10,7 +10,8 @@ import io.circe.generic.auto._
 class Files[F[_]](project: String)(implicit auth: Auth)
     extends ReadWritableResourceV1[File, CreateFile, F]
     with ResourceV1[F]
-    with Search[File, FilesSearch, F, Id]
+    with Filter[File, FilesFilter, F, Id]
+    with Search[File, FilesQuery, F, Id]
     with Update[File, FileUpdate, F, Id] {
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/files"
 

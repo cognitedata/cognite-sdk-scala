@@ -38,6 +38,8 @@ package object v1 {
     deriveEncoder[EventUpdate]
   implicit val updateEventsItemsEncoder: Encoder[Items[EventUpdate]] =
     deriveEncoder[Items[EventUpdate]]
+  implicit val eventsQueryEncoder: Encoder[EventsQuery] =
+    deriveEncoder[EventsQuery]
 
   implicit val fileItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[File]]] =
     deriveDecoder[Id[ItemsWithCursor[File]]]
@@ -49,6 +51,8 @@ package object v1 {
     deriveEncoder[FileUpdate]
   implicit val updateFilesItemsEncoder: Encoder[Items[FileUpdate]] =
     deriveEncoder[Items[FileUpdate]]
+  implicit val filesQueryEncoder: Encoder[FilesQuery] =
+    deriveEncoder[FilesQuery]
 
   implicit val timeSeriesItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[TimeSeries]]] =
     deriveDecoder[Id[ItemsWithCursor[TimeSeries]]]
@@ -56,6 +60,8 @@ package object v1 {
     deriveDecoder[Id[Items[TimeSeries]]]
   implicit val createTimeSeriesItemsEncoder: Encoder[Items[CreateTimeSeries]] =
     deriveEncoder[Items[CreateTimeSeries]]
+  implicit val timeSeriesQueryEncoder: Encoder[TimeSeriesQuery] =
+    deriveEncoder[TimeSeriesQuery]
 
   implicit val rawDatabaseItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[RawDatabase]]] =
     deriveDecoder[Id[ItemsWithCursor[RawDatabase]]]

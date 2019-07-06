@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{NonNullableSetter, Setter, TimeRange, WithId}
+import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithId}
 
 final case class TimeSeries(
     name: String,
@@ -56,3 +56,9 @@ final case class TimeSeriesSearch(
     description: Option[String] = None,
     query: Option[String] = None
 )
+
+final case class TimeSeriesQuery(
+    filter: Option[TimeSeriesFilter] = None,
+    search: Option[TimeSeriesSearch] = None,
+    limit: Int = 100
+) extends SearchQuery[TimeSeriesFilter, TimeSeriesSearch]
