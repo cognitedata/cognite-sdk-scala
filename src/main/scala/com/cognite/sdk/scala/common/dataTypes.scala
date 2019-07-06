@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp.Uri
-import io.circe.Decoder
+import io.circe.{Decoder, Json, JsonObject}
 import io.scalaland.chimney.dsl._
 
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
@@ -52,5 +52,43 @@ object EitherDecoder {
     val l: Decoder[Either[A, B]] = a.map(Left.apply)
     val r: Decoder[Either[A, B]] = b.map(Right.apply)
     l.or(r)
+  }
+}
+
+object ToUpdate {
+  def apply(json: Json): Json = {
+    if (!json.isObject) {
+      throw new IllegalArgumentException(
+        s"Only JSON objects can be converted to updates, got $json"
+      )
+    }
+    json
+      .mapObject { o =>
+        // TODO: check id and externalId?
+//        val updateId = o("id") match {
+//          case Some(id) if id.isNumber => id
+//          case Some(id) =>
+//            throw new IllegalArgumentException(s"Invalid id ${id.toString()} for update")
+//          case None =>
+//            throw new IllegalArgumentException(s"Missing required field 'id' for update in $json")
+//        }
+        o.keys
+          .map { key =>
+            (key, o(key))
+          }
+          .foldLeft(JsonObject()) {
+            // skip id field
+            // TODO: skip externalId if we're updating based on that.
+            case (updateValue, ("id", _)) =>
+              updateValue
+            case (updateValue, (key, Some(value))) =>
+              val setValue = if (value.isNull) {
+                JsonObject("setNull" -> Json.fromBoolean(true))
+              } else {
+                JsonObject("set" -> value)
+              }
+              updateValue.add(key, Json.fromJsonObject(setValue))
+          }
+      }
   }
 }

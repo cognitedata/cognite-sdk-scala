@@ -28,3 +28,16 @@ final case class CreateEvent(
     source: Option[String] = None,
     externalId: Option[String] = None
 )
+
+final case class EventUpdate(
+    id: Long = 0,
+    startTime: Option[Long] = None,
+    endTime: Option[Long] = None,
+    description: Option[String] = None,
+    `type`: Option[String] = None,
+    subtype: Option[String] = None,
+    metadata: Option[Map[String, String]] = None,
+    assetIds: Option[Seq[Long]] = None,
+    source: Option[String] = None,
+    externalId: Option[String] = None
+) extends WithId[Long]
