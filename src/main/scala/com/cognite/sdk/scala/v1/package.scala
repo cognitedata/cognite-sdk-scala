@@ -25,6 +25,8 @@ package object v1 {
     deriveEncoder[AssetUpdate]
   implicit val updateAssetsItemsEncoder: Encoder[Items[AssetUpdate]] =
     deriveEncoder[Items[AssetUpdate]]
+  implicit val assetsQueryEncoder: Encoder[AssetsQuery] =
+    deriveEncoder[AssetsQuery]
 
   implicit val eventsItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[Event]]] =
     deriveDecoder[Id[ItemsWithCursor[Event]]]

@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{NonNullableSetter, Setter, WithId}
+import com.cognite.sdk.scala.common.{NonNullableSetter, Setter, SearchQuery, TimeRange, WithId}
 
 final case class File(
     id: Long = 0,
@@ -33,3 +33,26 @@ final case class FileUpdate(
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
     assetIds: Option[NonNullableSetter[Seq[Long]]] = None
 ) extends WithId[Long]
+
+final case class FilesFilter(
+    name: Option[String],
+    mimeType: Option[String],
+    metadata: Option[Map[String, String]] = None,
+    assetIds: Option[Seq[Long]] = None,
+    source: Option[String] = None,
+    createdTime: Option[TimeRange] = None,
+    lastUpdatedTime: Option[TimeRange] = None,
+    uploadedTime: Option[TimeRange] = None,
+    externalIdPrefix: Option[String] = None,
+    uploaded: Option[Boolean] = None
+)
+
+final case class FilesSearch(
+    name: Option[String]
+)
+
+final case class FilesQuery(
+    filter: Option[FilesFilter] = None,
+    search: Option[FilesSearch] = None,
+    limit: Int = 100
+) extends SearchQuery[FilesFilter, FilesSearch]
