@@ -24,3 +24,12 @@ final case class CreateAsset(
     externalId: Option[String] = None,
     metadata: Option[Map[String, String]] = None
 )
+
+final case class AssetUpdate(
+    id: Long,
+    name: Option[String] = None,
+    description: Option[String] = None,
+    source: Option[String] = None,
+    externalId: Option[String] = None,
+    metadata: Option[Map[String, String]] = None
+) extends WithId[Long]
