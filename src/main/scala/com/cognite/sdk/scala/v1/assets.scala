@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{NonNullableSetter, Setter, SearchQuery, TimeRange, WithId}
+import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithId}
 
 final case class Asset(
     id: Long = 0,

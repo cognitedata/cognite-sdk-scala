@@ -44,4 +44,37 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       ()
     }
   )
+
+  it should "support search" in {
+    val createdTimeSearchResults = client.assets
+      .search(
+        AssetsQuery(
+          filter = Some(AssetsFilter(createdTime = Some(TimeRange(1560756441301L, 1560756445000L))))
+        )
+      )
+      .unsafeBody
+    assert(createdTimeSearchResults.length == 84)
+    val valveResults = client.assets
+      .search(
+        AssetsQuery(
+          filter = Some(
+            AssetsFilter(
+              createdTime = Some(TimeRange(0, 1560756460294L)),
+              parentIds = Some(Seq(1790957171927257L, 2436611095973105L, 6078796607206585L))
+            )
+          ),
+          search = Some(AssetsSearch(description = Some("VALVE")))
+        )
+      )
+      .unsafeBody
+    assert(valveResults.length == 3)
+    val esdvResults = client.assets
+      .search(
+        AssetsQuery(
+          search = Some(AssetsSearch(name = Some("ESDV")))
+        )
+      )
+      .unsafeBody
+    assert(esdvResults.length == 20)
+  }
 }

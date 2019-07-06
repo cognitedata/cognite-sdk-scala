@@ -10,8 +10,11 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
 
   implicit val backend = new LoggingSttpBackend[Id, Nothing](sttpBackend)
+
   it should behave like readable(client.files)
+
   it should behave like readableWithRetrieve(client.files, idsThatDoNotExist, supportsMissingAndThrown = true)
+
   it should behave like writable(
     client.files,
     Seq(File(name = "scala-sdk-read-example-1")),
@@ -19,9 +22,15 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     idsThatDoNotExist,
     supportsMissingAndThrown = true
   )
+
   private val externalId = UUID.randomUUID().toString.substring(0, 8)
   private val filesToCreate = Seq(
-    File(name = "scala-sdk-update-1", source = Some("scala-sdk-update-1"), externalId = Some(externalId), metadata = Some(Map()), assetIds = Some(Seq[Long]())
+    File(
+      name = "scala-sdk-update-1",
+      source = Some("scala-sdk-update-1"),
+      externalId = Some(externalId),
+      metadata = Some(Map()),
+      assetIds = Some(Seq[Long]())
     )
   )
   private val fileUpdates = Seq(
@@ -46,4 +55,38 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       ()
     }
   )
+
+  it should "support search" in {
+    val createdTimeSearchResults = client.files
+      .search(
+        FilesQuery(
+          filter = Some(FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L))))
+        )
+      )
+      .unsafeBody
+    assert(createdTimeSearchResults.length == 40)
+    val mimeTypeTimeSearchResults = client.files
+      .search(
+        FilesQuery(
+          filter = Some(
+            FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L)), mimeType = Some("txt"))
+          )
+        )
+      )
+      .unsafeBody
+    assert(mimeTypeTimeSearchResults.length == 1)
+    val nameSearchResults = client.files
+      .search(
+        FilesQuery(
+          filter = Some(FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L)))),
+          search = Some(
+            FilesSearch(
+              name = Some("MyCadFile")
+            )
+          )
+        )
+      )
+      .unsafeBody
+    assert(nameSearchResults.length == 4)
+  }
 }
