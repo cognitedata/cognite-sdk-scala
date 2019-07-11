@@ -1,7 +1,8 @@
 package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp.Uri
-import io.circe.{Decoder, Json, JsonObject}
+import io.circe.{Decoder, Encoder, Json}
+import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
@@ -55,40 +56,68 @@ object EitherDecoder {
   }
 }
 
-object ToUpdate {
-  def apply(json: Json): Json = {
-    if (!json.isObject) {
-      throw new IllegalArgumentException(
-        s"Only JSON objects can be converted to updates, got $json"
-      )
-    }
-    json
-      .mapObject { o =>
-        // TODO: check id and externalId?
-//        val updateId = o("id") match {
-//          case Some(id) if id.isNumber => id
-//          case Some(id) =>
-//            throw new IllegalArgumentException(s"Invalid id ${id.toString()} for update")
-//          case None =>
-//            throw new IllegalArgumentException(s"Missing required field 'id' for update in $json")
-//        }
-        o.keys
-          .map { key =>
-            (key, o(key))
-          }
-          .foldLeft(JsonObject()) {
-            // skip id field
-            // TODO: skip externalId if we're updating based on that.
-            case (updateValue, ("id", _)) =>
-              updateValue
-            case (updateValue, (key, Some(value))) =>
-              val setValue = if (value.isNull) {
-                JsonObject("setNull" -> Json.fromBoolean(true))
-              } else {
-                JsonObject("set" -> value)
-              }
-              updateValue.add(key, Json.fromJsonObject(setValue))
-          }
+sealed trait Setter[+T]
+sealed trait NonNullableSetter[+T]
+final case class Set[+T](set: T) extends Setter[T] with NonNullableSetter[T]
+final case class SetNull[+T]() extends Setter[T]
+
+object Setter {
+  @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
+  implicit def optionToSetter[T: Manifest]: Transformer[Option[T], Option[Setter[T]]] =
+    new Transformer[Option[T], Option[Setter[T]]] {
+      override def transform(src: Option[T]) = src match {
+        case null => Some(SetNull()) // scalastyle:ignore null
+        case None => None
+        case Some(null) => Some(SetNull()) // scalastyle:ignore null
+        case Some(value: T) => Some(Set(value))
       }
+    }
+
+  implicit def encodeSetter[T](implicit encodeT: Encoder[T]): Encoder[Setter[T]] =
+    new Encoder[Setter[T]] {
+      final def apply(a: Setter[T]): Json = a match {
+        case Set(value) => Json.obj(("set", encodeT.apply(value)))
+        case SetNull() => Json.obj(("setNull", Json.True))
+      }
+    }
+}
+
+object NonNullableSetter {
+  @SuppressWarnings(
+    Array(
+      "org.wartremover.warts.Null",
+      "org.wartremover.warts.Equals",
+      "scalafix:DisableSyntax.null",
+      "scalafix:DisableSyntax.!="
+    )
+  )
+  implicit def optionToNonNullableSetter[T: Manifest]
+      : Transformer[Option[T], Option[NonNullableSetter[T]]] =
+    new Transformer[Option[T], Option[NonNullableSetter[T]]] {
+      override def transform(src: Option[T]): Option[NonNullableSetter[T]] = src match {
+        case None => None
+        case Some(value: T) =>
+          require(value != null, "Invalid null value for non-nullable field update") // scalastyle:ignore null
+          Some(Set(value))
+      }
+    }
+
+  implicit def toNonNullableSetter[T: Manifest]: Transformer[T, NonNullableSetter[T]] =
+    new Transformer[T, NonNullableSetter[T]] {
+      override def transform(value: T): NonNullableSetter[T] = Set(value)
+    }
+
+  implicit def toOptionNonNullableSetter[T: Manifest]
+      : Transformer[T, Option[NonNullableSetter[T]]] =
+    new Transformer[T, Option[NonNullableSetter[T]]] {
+      override def transform(value: T): Option[NonNullableSetter[T]] = Some(Set(value))
+    }
+
+  implicit def encodeNonNullableSetter[T](
+      implicit encodeT: Encoder[T]
+  ): Encoder[NonNullableSetter[T]] = new Encoder[NonNullableSetter[T]] {
+    final def apply(a: NonNullableSetter[T]): Json = a match {
+      case Set(value) => Json.obj(("set", encodeT.apply(value)))
+    }
   }
 }

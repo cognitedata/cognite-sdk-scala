@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.WithId
+import com.cognite.sdk.scala.common.{NonNullableSetter, Setter, WithId}
 
 final case class Asset(
     id: Long = 0,
@@ -27,9 +27,9 @@ final case class CreateAsset(
 
 final case class AssetUpdate(
     id: Long,
-    name: Option[String] = None,
-    description: Option[String] = None,
-    source: Option[String] = None,
-    externalId: Option[String] = None,
-    metadata: Option[Map[String, String]] = None
+    name: Option[NonNullableSetter[String]] = None,
+    description: Option[Setter[String]] = None,
+    source: Option[Setter[String]] = None,
+    externalId: Option[Setter[String]] = None,
+    metadata: Option[NonNullableSetter[Map[String, String]]] = None
 ) extends WithId[Long]
