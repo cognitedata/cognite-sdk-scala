@@ -1,10 +1,10 @@
 package com.cognite.sdk.scala
 
-import com.cognite.sdk.scala.common.{CdpApiError, CogniteId, Extractor, Items, ItemsWithCursor}
+import com.cognite.sdk.scala.common._
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto._
 import io.circe.generic.auto._
+import io.circe.generic.semiauto._
+import io.circe.{Decoder, Encoder}
 
 package object v1 {
   implicit val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
@@ -21,6 +21,10 @@ package object v1 {
     deriveDecoder[Id[Items[Asset]]]
   implicit val createAssetsItemsEncoder: Encoder[Items[CreateAsset]] =
     deriveEncoder[Items[CreateAsset]]
+  implicit val assetUpdateEncoder: Encoder[AssetUpdate] =
+    deriveEncoder[AssetUpdate]
+  implicit val updateAssetsItemsEncoder: Encoder[Items[AssetUpdate]] =
+    deriveEncoder[Items[AssetUpdate]]
 
   implicit val eventsItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[Event]]] =
     deriveDecoder[Id[ItemsWithCursor[Event]]]
@@ -71,4 +75,7 @@ package object v1 {
     deriveDecoder[CdpApiError[CogniteId]]
   implicit val cdpApiErrorUnitDecoder: Decoder[CdpApiError[Unit]] = deriveDecoder[CdpApiError[Unit]]
   implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder[Items[CogniteId]]
+
+//  implicit def toOption[T: Manifest]: Transformer[T, Option[T]] =
+//    (value: T) => Some(value)
 }
