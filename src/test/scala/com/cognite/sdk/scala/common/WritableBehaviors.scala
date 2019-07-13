@@ -96,7 +96,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       readExamples: Seq[R],
       updateExamples: Seq[R],
       updateId: (Long, R) => R,
-      compareUpdated: (R, R) => Boolean
+      compareUpdated: (Seq[R], Seq[R]) => Unit
   )(
       implicit sttpBackend: SttpBackend[Id, _],
       auth: Auth,
@@ -112,27 +112,26 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       t2: Transformer[R, U]
   ): Unit =
     it should "allow updates using the read class" in {
-      // create an item
-      val createdItem = updatable.create(readExamples.take(1)).unsafeBody
-      //createdItem should have size 1
-      createdItem.head.id should not be 0
+      // create items
+      val createdItems = updatable.create(readExamples).unsafeBody
+      assert(createdItems.size == readExamples.size)
+      createdItems.map(_.id) should not contain 0
 
-      val readItem = updatable.retrieveByIds(createdItem.map(_.id)).unsafeBody
+      val readItems = updatable.retrieveByIds(createdItems.map(_.id)).unsafeBody
 
       // update the item to current values
-      val updatedItem = updatable.update(readItem).unsafeBody
-      assert(updatedItem.head.id == createdItem.head.id)
-      assert(updatedItem.head.id == readItem.head.id)
+      val unchangedUpdatedItems = updatable.update(readItems).unsafeBody
+      assert(unchangedUpdatedItems.size == readItems.size)
+      assert(unchangedUpdatedItems.zip(readItems).forall { case (updated, read) => updated == read })
 
-      // update the item to updated values
-      val updatedItem1 = updatable.update(
-        updateExamples.take(1).map(updateId(readItem.head.id, _))).unsafeBody
-      assert(updatedItem1.head.id == createdItem.head.id)
-      assert(updatedItem1.head.id == readItem.head.id)
-      assert(compareUpdated(readItem.head, updatedItem1.head))
+      // update the item with new values
+      val updates = updateExamples.zip(readItems).map { case (updated, read) => updateId(read.id, updated) }
+      val updatedItems = updatable.update(updates).unsafeBody
+      assert(updatedItems.size == readItems.size)
+      compareUpdated(readItems, updatedItems)
 
       // delete it
-      val deleteSingle = updatable.deleteByIds(createdItem.map(_.id))
+      val deleteSingle = updatable.deleteByIds(createdItems.map(_.id))
       deleteSingle.isSuccess should be(true)
     }
 
