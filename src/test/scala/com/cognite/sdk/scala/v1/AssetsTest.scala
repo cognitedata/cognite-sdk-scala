@@ -20,13 +20,30 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     supportsMissingAndThrown = true
   )
 
+  val assetsToCreate: Seq[Asset] = Seq(
+    Asset(name = "scala-sdk-update-1", description = Some("description-1")),
+    Asset(name = "scala-sdk-update-2", description = Some("description-2"))
+  )
+  val assetUpdates: Seq[Asset] = Seq(
+    Asset(name = "scala-sdk-update-1-1", description = null), // scalastyle:ignore null
+    Asset(name = "scala-sdk-update-2-1")
+  )
   it should behave like updatable(
     client.assets,
-    Seq(Asset(name = "scala-sdk-update-1"), Asset(name = "scala-sdk-update-2")),
-    Seq(Asset(name = "scala-sdk-update-1-1", description = null), Asset(name = "scala-sdk-update-2-1")), // scalastyle:ignore null
-    (id: Long, update: Asset) => { update.copy(id = id) },
-    (read: Asset, updated: Asset) => {
-      s"${read.name}-1" == updated.name
+    assetsToCreate,
+    Seq(
+      Asset(name = "scala-sdk-update-1-1", description = null), // scalastyle:ignore null
+      Asset(name = "scala-sdk-update-2-1")
+    ),
+    (id: Long, item: Asset) => item.copy(id = id),
+    (readAssets: Seq[Asset], updatedAssets: Seq[Asset]) => {
+      assert(assetsToCreate.size == assetUpdates.size)
+      assert(readAssets.size == assetsToCreate.size)
+      assert(updatedAssets.size == updatedAssets.size)
+      assert(updatedAssets.zip(readAssets).forall { case (updated, read) =>  updated.name == s"${read.name}-1" })
+      assert(updatedAssets.head.description.isEmpty)
+      assert(updatedAssets(1).description == readAssets(1).description)
+      ()
     }
   )
 }
