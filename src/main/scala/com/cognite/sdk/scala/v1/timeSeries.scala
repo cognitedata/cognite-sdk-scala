@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.WithId
+import com.cognite.sdk.scala.common.{NonNullableSetter, Setter, WithId}
 
 final case class TimeSeries(
     name: String,
@@ -27,3 +27,14 @@ final case class CreateTimeSeries(
     description: Option[String] = None,
     securityCategories: Option[Seq[Long]] = None
 )
+
+final case class TimeSeriesUpdate(
+    id: Long = 0,
+    name: Option[Setter[String]] = None,
+    externalId: Option[Setter[String]] = None,
+    metadata: Option[NonNullableSetter[Map[String, String]]] = None,
+    unit: Option[Setter[String]] = None,
+    assetId: Option[Setter[Long]] = None,
+    description: Option[Setter[String]] = None,
+    securityCategories: Option[Setter[Seq[String]]] = None
+) extends WithId[Long]

@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.WithId
+import com.cognite.sdk.scala.common.{NonNullableSetter, Setter, WithId}
 
 final case class File(
     id: Long = 0,
@@ -25,3 +25,11 @@ final case class CreateFile(
     metadata: Option[Map[String, String]] = None,
     assetIds: Option[Seq[Long]] = None
 )
+
+final case class FileUpdate(
+    id: Long = 0,
+    externalId: Option[Setter[String]] = None,
+    source: Option[Setter[String]] = None,
+    metadata: Option[NonNullableSetter[Map[String, String]]] = None,
+    assetIds: Option[NonNullableSetter[Seq[Long]]] = None
+) extends WithId[Long]
