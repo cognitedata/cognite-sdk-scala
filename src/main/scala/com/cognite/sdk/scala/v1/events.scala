@@ -37,7 +37,7 @@ final case class EventUpdate(
     `type`: Option[Setter[String]] = None,
     subtype: Option[Setter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
-    assetIds: Option[NonNullableSetter[Long]] = None,
+    assetIds: Option[NonNullableSetter[Seq[Long]]] = None,
     source: Option[Setter[String]] = None,
     externalId: Option[Setter[String]] = None
 ) extends WithId[Long]
