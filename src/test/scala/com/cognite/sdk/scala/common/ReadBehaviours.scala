@@ -43,7 +43,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       implicit sttpBackend: SttpBackend[Id, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
       itemsDecoder: Decoder[C[Items[R]]],
       d1: Encoder[Items[InternalId]]
@@ -58,30 +58,33 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
     }
 
     it should "return information about missing ids" in {
-      val thrown = the[CdpApiException[CogniteId]] thrownBy readable
+      val thrown = the[CdpApiException] thrownBy readable
         .retrieveByIds(idsThatDoNotExist)
         .unsafeBody
       if (supportsMissingAndThrown) {
         val itemsNotFound = thrown.missing
-        val notFoundIds = itemsNotFound.get.map(_.id)
+
+        val notFoundIds = itemsNotFound.get.flatMap(jsonObj =>
+          jsonObj("id").get.asNumber.get.toLong)
         notFoundIds should have size idsThatDoNotExist.size.toLong
         notFoundIds should contain theSameElementsAs idsThatDoNotExist
       }
 
       val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
-      val sameIdsThrown = the[CdpApiException[CogniteId]] thrownBy readable
+      val sameIdsThrown = the[CdpApiException] thrownBy readable
         .retrieveByIds(sameIdsThatDoNotExist)
         .unsafeBody
       if (supportsMissingAndThrown) {
         sameIdsThrown.missing match {
           case Some(missingItems) =>
-            val sameNotFoundIds = missingItems.map(_.id).toSet
+            val sameNotFoundIds = missingItems.flatMap(jsonObj =>
+              jsonObj("id").get.asNumber.get.toLong).toSet
             // it's a bit funny that the same missing ids are returned duplicated,
             // but that's how it works as of 2019-06-02.
             //sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
             sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           case None =>
-            val duplicatedNotFoundIds = sameIdsThrown.duplicated.get.map(_.id).toSet
+            val duplicatedNotFoundIds = sameIdsThrown.duplicated.get.flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong).toSet
             //duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
             duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
         }

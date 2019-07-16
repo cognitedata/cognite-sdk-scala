@@ -17,28 +17,23 @@ trait Update[R <: WithId[Long], U <: WithId[Long], F[_], C[_]] extends RequestSe
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       updateEncoder: Encoder[U],
       items: Decoder[C[Items[R]]]
   ): F[Response[Seq[R]]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] =
-      EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
-//    implicit def decodeOptionOption[T](implicit decodeOpt: Decoder[Option[T]]): Decoder[Option[Option[T]]] =
-//      Decoder.withReattempt {
-//        c => if (c.succeeded) {
-//          c.as[Option[T]].map(Some(_))
-//        } else {
-//          Right(None)
-//        }
-//      }
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, C[Items[R]]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, C[Items[R]]]
     require(updates.forall(_.id > 0), "Update requires an id to be set")
-    implicit val p = Printer(dropNullValues = true, indent = "", preserveOrder = false)
+    implicit val printer: Printer = Printer(dropNullValues = true, indent = "", preserveOrder = false)
+    println(Items(updates.map { update => // scalastyle:ignore
+      UpdateRequest(update.asJson.mapObject(_.remove("id")), update.id)
+    }).asJson.pretty(printer))
     request
       .post(updateUri)
       .body(Items(updates.map { update =>
         UpdateRequest(update.asJson.mapObject(_.remove("id")), update.id)
       }))
-      .response(asJson[Either[CdpApiError[CogniteId], C[Items[R]]]])
+      .response(asJson[Either[CdpApiError, C[Items[R]]]])
       .mapResponse {
         case Left(value) =>
           throw value.error
@@ -53,7 +48,7 @@ trait Update[R <: WithId[Long], U <: WithId[Long], F[_], C[_]] extends RequestSe
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       updateEncoder: Encoder[U],
       itemsWithCursorDecoder: Decoder[C[Items[R]]],
       t: Transformer[T, U]

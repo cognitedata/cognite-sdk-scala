@@ -17,22 +17,22 @@ class ThreeDModels[F[_]](project: String)(implicit auth: Auth)
     with ResourceV1[F] {
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/3d/models"
 
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
+  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Unit]
   def deleteByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[CogniteId]]
   ): F[Response[Unit]] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
+    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     request
       .post(uri"$baseUri/delete")
       .body(Items(ids.map(toInternalId)))
-      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
+      .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
@@ -60,17 +60,17 @@ class ThreeDRevisions[F[_]](project: String, modelId: Long)(
   def deleteByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[CogniteId]]
   ): F[Response[Unit]] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
+    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     request
       .post(uri"$baseUri/delete")
       .body(Items(ids.map(toInternalId)))
-      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
+      .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")

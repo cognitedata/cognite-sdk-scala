@@ -18,7 +18,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       implicit sttpBackend: SttpBackend[Id, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
       itemsDecoder: Decoder[C[Items[R]]],
       itemsEncoder: Encoder[Items[W]],
@@ -26,25 +26,25 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       t: Transformer[R, W]
   ): Unit = {
     it should "be an error to delete using ids that does not exist" in {
-      val thrown = the[CdpApiException[CogniteId]] thrownBy writable
+      val thrown = the[CdpApiException] thrownBy writable
         .deleteByIds(idsThatDoNotExist)
         .unsafeBody
       if (supportsMissingAndThrown) {
-        val missingIds = thrown.missing.getOrElse(Seq.empty).map(_.id)
+        val missingIds = thrown.missing.getOrElse(Seq.empty).flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
         missingIds should have size idsThatDoNotExist.size.toLong
         missingIds should contain theSameElementsAs idsThatDoNotExist
       }
 
       val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
-      val sameIdsThrown = the[CdpApiException[CogniteId]] thrownBy writable
+      val sameIdsThrown = the[CdpApiException] thrownBy writable
         .deleteByIds(sameIdsThatDoNotExist)
         .unsafeBody
       if (supportsMissingAndThrown) {
         // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
         // if duplicated ids that do not exist are specified.
         val sameMissingIds = sameIdsThrown.duplicated match {
-          case Some(duplicatedIds) => duplicatedIds.map(_.id)
-          case None => sameIdsThrown.missing.getOrElse(Seq.empty).map(_.id)
+          case Some(duplicatedIds) => duplicatedIds.flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+          case None => sameIdsThrown.missing.getOrElse(Seq.empty).map(jsonObj => jsonObj("id").get.asNumber.get.toLong)
         }
         sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
         sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
@@ -96,12 +96,13 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       readExamples: Seq[R],
       updateExamples: Seq[R],
       updateId: (Long, R) => R,
-      compareUpdated: (Seq[R], Seq[R]) => Unit
+      compareItems: (R, R) => Boolean,
+      compareUpdated: (Seq[R], Seq[R]) => Unit,
   )(
       implicit sttpBackend: SttpBackend[Id, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
       itemsDecoder: Decoder[C[Items[R]]],
       itemsEncoder: Encoder[Items[W]],
@@ -122,7 +123,9 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       // update the item to current values
       val unchangedUpdatedItems = updatable.update(readItems).unsafeBody
       assert(unchangedUpdatedItems.size == readItems.size)
-      assert(unchangedUpdatedItems.zip(readItems).forall { case (updated, read) => updated == read })
+      assert(unchangedUpdatedItems.zip(readItems).forall { case (updated, read) =>
+        compareItems(updated, read)
+      })
 
       // update the item with new values
       val updates = updateExamples.zip(readItems).map { case (updated, read) => updateId(read.id, updated) }

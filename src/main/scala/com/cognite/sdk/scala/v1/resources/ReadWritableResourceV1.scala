@@ -19,17 +19,17 @@ trait DeleteByExternalIdsV1[F[_]]
   override def deleteByExternalIds(externalIds: Seq[String])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[CogniteExternalId]]
   ): F[Response[Unit]] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
+    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     request
       .post(uri"$baseUri/delete")
       .body(Items(externalIds.map(CogniteExternalId)))
-      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
+      .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
@@ -47,17 +47,17 @@ trait DeleteByIdsV1[R, W, F[_], C[_], InternalId, PrimitiveId]
   override def deleteByIds(ids: Seq[PrimitiveId])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[InternalId]]
   ): F[Response[Unit]] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
+    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     request
       .post(uri"$baseUri/delete")
       .body(Items(ids.map(toInternalId)))
-      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
+      .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")

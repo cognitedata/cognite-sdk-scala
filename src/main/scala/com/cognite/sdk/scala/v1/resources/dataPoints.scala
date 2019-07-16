@@ -24,20 +24,20 @@ class DataPointsResourceV1[F[_]](project: String)(
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/timeseries/data"
 
   override def toInternalId(id: Long): CogniteId = CogniteId(id)
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
+  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Unit]
   implicit val errorOrDataPointsByIdResponseDecoder
-      : Decoder[Either[CdpApiError[CogniteId], Items[DataPointsByIdResponse]]] =
-    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Items[DataPointsByIdResponse]]
+      : Decoder[Either[CdpApiError, Items[DataPointsByIdResponse]]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Items[DataPointsByIdResponse]]
   implicit val errorOrStringDataPointsByIdResponseDecoder
-      : Decoder[Either[CdpApiError[CogniteId], Items[StringDataPointsByIdResponse]]] =
-    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Items[StringDataPointsByIdResponse]]
+      : Decoder[Either[CdpApiError, Items[StringDataPointsByIdResponse]]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Items[StringDataPointsByIdResponse]]
 
   def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Response[Unit]] =
     request
       .post(baseUri)
       .body(Items(Seq(DataPointsById(id, dataPoints))))
-      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
+      .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
@@ -49,7 +49,7 @@ class DataPointsResourceV1[F[_]](project: String)(
     request
       .post(baseUri)
       .body(Items(Seq(StringDataPointsById(id, dataPoints))))
-      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
+      .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
@@ -61,7 +61,7 @@ class DataPointsResourceV1[F[_]](project: String)(
     request
       .post(uri"$baseUri/delete")
       .body(Items(Seq(DeleteRangeById(id, inclusiveStart, exclusiveEnd))))
-      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
+      .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
@@ -73,7 +73,7 @@ class DataPointsResourceV1[F[_]](project: String)(
     request
       .post(uri"$baseUri/list")
       .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
-      .response(asJson[Either[CdpApiError[CogniteId], Items[DataPointsByIdResponse]]])
+      .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
@@ -93,7 +93,7 @@ class DataPointsResourceV1[F[_]](project: String)(
     request
       .post(uri"$baseUri/list")
       .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
-      .response(asJson[Either[CdpApiError[CogniteId], Items[StringDataPointsByIdResponse]]])
+      .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
@@ -110,7 +110,7 @@ class DataPointsResourceV1[F[_]](project: String)(
     request
       .post(uri"$baseUri/latest")
       .body(Items(Seq(CogniteId(id))))
-      .response(asJson[Either[CdpApiError[CogniteId], Items[DataPointsByIdResponse]]])
+      .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
@@ -123,7 +123,7 @@ class DataPointsResourceV1[F[_]](project: String)(
     request
       .post(uri"$baseUri/latest")
       .body(Items(Seq(CogniteId(id))))
-      .response(asJson[Either[CdpApiError[CogniteId], Items[StringDataPointsByIdResponse]]])
+      .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)

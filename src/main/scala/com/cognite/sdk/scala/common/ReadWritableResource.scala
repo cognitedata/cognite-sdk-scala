@@ -16,7 +16,7 @@ trait DeleteByIds[F[_], InternalId, PrimitiveId] {
   def deleteByIds(ids: Seq[PrimitiveId])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[InternalId]]
   ): F[Response[Unit]]
 }
@@ -25,7 +25,7 @@ trait DeleteByExternalIds[F[_], InternalId, ExternalId] {
   def deleteByExternalIds(externalIds: Seq[String])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[ExternalId]]
   ): F[Response[Unit]]
 }
@@ -35,17 +35,17 @@ trait Create[R, W, F[_], C[_], InternalId, PrimitiveId] extends RequestSession w
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[W]],
       itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): F[Response[Seq[R]]] = {
     implicit val errorOrStringDataPointsByIdResponseDecoder
-        : Decoder[Either[CdpApiError[CogniteId], C[ItemsWithCursor[R]]]] =
-      EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[ItemsWithCursor[R]]]
+        : Decoder[Either[CdpApiError, C[ItemsWithCursor[R]]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, C[ItemsWithCursor[R]]]
     request
       .post(baseUri)
       .body(items)
-      .response(asJson[Either[CdpApiError[CogniteId], C[ItemsWithCursor[R]]]])
+      .response(asJson[Either[CdpApiError, C[ItemsWithCursor[R]]]])
       .mapResponse {
         case Left(value) =>
           throw value.error
@@ -59,7 +59,7 @@ trait Create[R, W, F[_], C[_], InternalId, PrimitiveId] extends RequestSession w
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[W]],
       itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
       t: Transformer[T, W]

@@ -12,18 +12,18 @@ abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: En
     implicit auth: Auth
 ) extends ReadWritableResourceWithRetrieve[R, W, F, Id, InternalId, PrimitiveId]
     with DeleteByIdsV1[R, W, F, Id, InternalId, PrimitiveId] {
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError[CogniteId], Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError[CogniteId], Unit]
+  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Unit]
   override def deleteByIds(ids: Seq[PrimitiveId])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[InternalId]]
   ): F[Response[Unit]] =
     request
       .post(uri"$baseUri/delete")
       .body(Items(ids.map(toInternalId)))
-      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
+      .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) =>
           throw value.error
@@ -64,14 +64,14 @@ class RawRows[F[_]](project: String, database: String, table: String)(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[Id],
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[RawRow]],
       itemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[RawRow]]]
   ): F[Response[Seq[RawRow]]] =
     request
       .post(baseUri)
       .body(items)
-      .response(asJson[Either[CdpApiError[CogniteId], Unit]])
+      .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")

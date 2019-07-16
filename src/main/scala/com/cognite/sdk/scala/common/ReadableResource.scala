@@ -9,17 +9,17 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[Unit]],
+      errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): F[Response[ItemsWithCursor[R]]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[Unit], C[ItemsWithCursor[R]]]] =
-      EitherDecoder.eitherDecoder[CdpApiError[Unit], C[ItemsWithCursor[R]]]
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, C[ItemsWithCursor[R]]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, C[ItemsWithCursor[R]]]
     val uriWithCursor = cursor
       .fold(baseUri)(baseUri.param("cursor", _))
       .param("limit", limit.getOrElse(Resource.defaultLimit).toString)
     request
       .get(uriWithCursor)
-      .response(asJson[Either[CdpApiError[Unit], C[ItemsWithCursor[R]]]])
+      .response(asJson[Either[CdpApiError, C[ItemsWithCursor[R]]]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(uriWithCursor)
@@ -32,7 +32,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[Unit]],
+      errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): F[Response[ItemsWithCursor[R]]] =
     readWithCursor(Some(cursor), None)
@@ -41,7 +41,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[Unit]],
+      errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): F[Response[ItemsWithCursor[R]]] =
     readWithCursor(Some(cursor), Some(limit))
@@ -50,7 +50,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[Unit]],
+      errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): F[Response[ItemsWithCursor[R]]] = readWithCursor(None, None)
 
@@ -58,7 +58,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[Unit]],
+      errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): F[Response[ItemsWithCursor[R]]] =
     readWithCursor(None, Some(limit))
@@ -67,7 +67,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[Unit]],
+      errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Iterator[F[Response[Seq[R]]]] =
     new NextCursorIterator[R, F](cursor, limit) {
@@ -82,7 +82,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[Unit]],
+      errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(Some(cursor), None)
@@ -91,7 +91,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[Unit]],
+      errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(None, Some(limit))
@@ -100,7 +100,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[Unit]],
+      errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Iterator[F[Response[Seq[R]]]] =
     readWithNextCursor(Some(cursor), Some(limit))
@@ -109,7 +109,7 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[Unit]],
+      errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Iterator[F[Response[Seq[R]]]] = readWithNextCursor(None, None)
 }
@@ -133,18 +133,21 @@ trait RetrieveByIds[R, F[_], C[_], InternalId, PrimitiveId]
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
-      errorDecoder: Decoder[CdpApiError[CogniteId]],
+      errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[Items[R]]],
       d1: Encoder[Items[InternalId]]
   ): F[Response[Seq[R]]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError[CogniteId], C[Items[R]]]] =
-      EitherDecoder.eitherDecoder[CdpApiError[CogniteId], C[Items[R]]]
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, C[Items[R]]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, C[Items[R]]]
     request
       .get(uri"$baseUri/byids")
       .body(Items(ids.map(toInternalId)))
-      .response(asJson[Either[CdpApiError[CogniteId], C[Items[R]]]])
+      .response(asJson[Either[CdpApiError, C[Items[R]]]])
       .mapResponse {
-        case Left(value) => throw value.error
+        case Left(value) =>
+          println(s"decoding failure on ${value.original}")
+          println(s"decoding failure message: ${value.message}")
+          throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
         case Right(Right(value)) => extractor.extract(value).items
       }
