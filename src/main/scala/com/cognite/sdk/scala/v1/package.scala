@@ -32,6 +32,10 @@ package object v1 {
     deriveDecoder[Id[Items[Event]]]
   implicit val createEventsItemsEncoder: Encoder[Items[CreateEvent]] =
     deriveEncoder[Items[CreateEvent]]
+  implicit val eventUpdateEncoder: Encoder[EventUpdate] =
+    deriveEncoder[EventUpdate]
+  implicit val updateEventsItemsEncoder: Encoder[Items[EventUpdate]] =
+    deriveEncoder[Items[EventUpdate]]
 
   implicit val fileItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[File]]] =
     deriveDecoder[Id[ItemsWithCursor[File]]]
@@ -39,6 +43,10 @@ package object v1 {
     deriveDecoder[Id[Items[File]]]
   implicit val createFileItemsEncoder: Encoder[Items[CreateFile]] =
     deriveEncoder[Items[CreateFile]]
+  implicit val fileUpdateEncoder: Encoder[FileUpdate] =
+    deriveEncoder[FileUpdate]
+  implicit val updateFilesItemsEncoder: Encoder[Items[FileUpdate]] =
+    deriveEncoder[Items[FileUpdate]]
 
   implicit val timeSeriesItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[TimeSeries]]] =
     deriveDecoder[Id[ItemsWithCursor[TimeSeries]]]
@@ -71,9 +79,9 @@ package object v1 {
   implicit val rawRowKeyEncoder: Encoder[Items[RawRowKey]] =
     deriveEncoder[Items[RawRowKey]]
 
-  implicit val cdpApiErrorCogniteIdDecoder: Decoder[CdpApiError[CogniteId]] =
-    deriveDecoder[CdpApiError[CogniteId]]
-  implicit val cdpApiErrorUnitDecoder: Decoder[CdpApiError[Unit]] = deriveDecoder[CdpApiError[Unit]]
+  implicit val cdpApiErrorDecoder: Decoder[CdpApiError] =
+    deriveDecoder[CdpApiError]
+  //implicit val cdpApiErrorUnitDecoder: Decoder[CdpApiError[Unit]] = deriveDecoder[CdpApiError[Unit]]
   implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder[Items[CogniteId]]
 
 //  implicit def toOption[T: Manifest]: Transformer[T, Option[T]] =

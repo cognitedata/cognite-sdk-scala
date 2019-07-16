@@ -15,4 +15,35 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     idsThatDoNotExist,
     supportsMissingAndThrown = true
   )
+
+  private val eventsToCreate = Seq(
+    Event(description = Some("scala-sdk-update-1"), `type`=Some("test"), subtype=Some("test")),
+    Event(description = Some("scala-sdk-update-2"), `type`=Some("test"), subtype=Some("test"))
+  )
+  private val eventUpdates = Seq(
+    Event(description = Some("scala-sdk-update-1-1"), `type`=Some("testA"), subtype=Some(null)), // scalastyle:ignore null
+    Event(description = Some("scala-sdk-update-2-1"), `type`=Some("testA"), subtype=Some("test-1"))
+  )
+  it should behave like updatable(
+    client.events,
+    eventsToCreate,
+    eventUpdates,
+    (id: Long, item: Event) => item.copy(id = id),
+    (a: Event, b: Event) => { a == b },
+    (readEvents: Seq[Event], updatedEvents: Seq[Event]) => {
+      assert(eventsToCreate.size == eventUpdates.size)
+      assert(readEvents.size == eventsToCreate.size)
+      assert(readEvents.size == updatedEvents.size)
+      assert(updatedEvents.zip(readEvents).forall { case (updated, read) =>
+        updated.description.nonEmpty &&
+          read.description.nonEmpty &&
+          updated.description.forall { description => description == s"${read.description.get}-1"}
+      })
+      assert(readEvents.head.subtype.isDefined)
+      // TODO: This doesn't work as of 2019-07-15, but it should be re-enabled when fix has been deployed
+      //assert(updatedEvents.head.subtype.isEmpty)
+      //assert(updatedEvents(1).subtype == eventUpdates(1).subtype)
+      ()
+    }
+  )
 }

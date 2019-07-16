@@ -1,32 +1,32 @@
 package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp.Uri
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Decoder, Encoder, Json, JsonObject}
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
 final case class Items[A](items: Seq[A])
-final case class CdpApiErrorPayload[A](
+final case class CdpApiErrorPayload(
     code: Int,
     message: String,
-    missing: Option[Seq[A]],
-    duplicated: Option[Seq[A]],
-    missingFields: Option[Seq[Map[String, String]]]
+    missing: Option[Seq[JsonObject]],
+    duplicated: Option[Seq[JsonObject]],
+    missingFields: Option[Seq[JsonObject]]
 )
-final case class CdpApiError[A](error: CdpApiErrorPayload[A]) {
-  def asException(url: Uri): CdpApiException[A] =
+final case class CdpApiError(error: CdpApiErrorPayload) {
+  def asException(url: Uri): CdpApiException =
     this.error
-      .into[CdpApiException[A]]
+      .into[CdpApiException]
       .withFieldConst(_.url, url)
       .transform
 }
-final case class CdpApiException[A](
+final case class CdpApiException(
     url: Uri,
     code: Int,
     message: String,
-    missing: Option[Seq[A]],
-    duplicated: Option[Seq[A]]
+    missing: Option[Seq[JsonObject]],
+    duplicated: Option[Seq[JsonObject]]
 ) extends Throwable(s"Request to ${url.toString()} failed with status $code: $message")
 final case class CogniteId(id: Long)
 

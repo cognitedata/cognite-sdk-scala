@@ -20,22 +20,20 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     supportsMissingAndThrown = true
   )
 
-  val assetsToCreate: Seq[Asset] = Seq(
+  private val assetsToCreate = Seq(
     Asset(name = "scala-sdk-update-1", description = Some("description-1")),
     Asset(name = "scala-sdk-update-2", description = Some("description-2"))
   )
-  val assetUpdates: Seq[Asset] = Seq(
+  private val assetUpdates = Seq(
     Asset(name = "scala-sdk-update-1-1", description = null), // scalastyle:ignore null
     Asset(name = "scala-sdk-update-2-1")
   )
   it should behave like updatable(
     client.assets,
     assetsToCreate,
-    Seq(
-      Asset(name = "scala-sdk-update-1-1", description = null), // scalastyle:ignore null
-      Asset(name = "scala-sdk-update-2-1")
-    ),
+    assetUpdates,
     (id: Long, item: Asset) => item.copy(id = id),
+    (a: Asset, b: Asset) => { a == b },
     (readAssets: Seq[Asset], updatedAssets: Seq[Asset]) => {
       assert(assetsToCreate.size == assetUpdates.size)
       assert(readAssets.size == assetsToCreate.size)
