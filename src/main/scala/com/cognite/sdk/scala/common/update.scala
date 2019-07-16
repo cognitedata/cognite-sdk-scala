@@ -24,10 +24,8 @@ trait Update[R <: WithId[Long], U <: WithId[Long], F[_], C[_]] extends RequestSe
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, C[Items[R]]]] =
       EitherDecoder.eitherDecoder[CdpApiError, C[Items[R]]]
     require(updates.forall(_.id > 0), "Update requires an id to be set")
-    implicit val printer: Printer = Printer(dropNullValues = true, indent = "", preserveOrder = false)
-    println(Items(updates.map { update => // scalastyle:ignore
-      UpdateRequest(update.asJson.mapObject(_.remove("id")), update.id)
-    }).asJson.pretty(printer))
+    implicit val printer: Printer =
+      Printer(dropNullValues = true, indent = "", preserveOrder = false)
     request
       .post(updateUri)
       .body(Items(updates.map { update =>
