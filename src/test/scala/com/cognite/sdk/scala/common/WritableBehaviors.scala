@@ -97,7 +97,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       updateExamples: Seq[R],
       updateId: (Long, R) => R,
       compareItems: (R, R) => Boolean,
-      compareUpdated: (Seq[R], Seq[R]) => Unit,
+      compareUpdated: (Seq[R], Seq[R]) => Unit
   )(
       implicit sttpBackend: SttpBackend[Id, _],
       auth: Auth,

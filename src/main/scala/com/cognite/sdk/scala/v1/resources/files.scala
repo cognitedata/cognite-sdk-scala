@@ -32,10 +32,7 @@ class Files[F[_]](project: String)(implicit auth: Auth)
           .body(item)
           .response(asJson[Either[CdpApiError, File]])
           .mapResponse {
-            case Left(value) =>
-              println(s"decoding failure on ${value.original}")
-              println(s"decoding failure message: ${value.message}")
-              throw value.error
+            case Left(value) => throw value.error
             case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
             case Right(Right(value)) => Seq(value)
           }
