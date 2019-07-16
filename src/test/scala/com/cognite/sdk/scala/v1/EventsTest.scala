@@ -40,9 +40,8 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           updated.description.forall { description => description == s"${read.description.get}-1"}
       })
       assert(readEvents.head.subtype.isDefined)
-      // TODO: This doesn't work as of 2019-07-15, but it should be re-enabled when fix has been deployed
-      //assert(updatedEvents.head.subtype.isEmpty)
-      //assert(updatedEvents(1).subtype == eventUpdates(1).subtype)
+      assert(updatedEvents.head.subtype.isEmpty)
+      assert(updatedEvents(1).subtype == eventUpdates(1).subtype)
       ()
     }
   )
