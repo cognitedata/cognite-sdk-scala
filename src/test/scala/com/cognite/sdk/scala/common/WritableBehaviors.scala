@@ -44,7 +44,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
         // if duplicated ids that do not exist are specified.
         val sameMissingIds = sameIdsThrown.duplicated match {
           case Some(duplicatedIds) => duplicatedIds.flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
-          case None => sameIdsThrown.missing.getOrElse(Seq.empty).map(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+          case None => sameIdsThrown.missing.getOrElse(Seq.empty).flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
         }
         sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
         sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
