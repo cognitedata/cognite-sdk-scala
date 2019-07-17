@@ -2,14 +2,11 @@ package com.cognite.sdk.scala.v1
 
 import java.util.UUID
 
-import com.cognite.sdk.scala.common.{LoggingSttpBackend, ReadBehaviours, SdkTest, WritableBehaviors}
-import com.softwaremill.sttp.Id
+import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
 class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
-  private val client = new GenericClient()(auth, new LoggingSttpBackend[Id, Nothing](sttpBackend))
+  private val client = new GenericClient()(auth, sttpBackend)
   private val idsThatDoNotExist = Seq(999991L, 999992L)
-
-  implicit val backend = new LoggingSttpBackend[Id, Nothing](sttpBackend)
 
   it should behave like readable(client.files)
 
