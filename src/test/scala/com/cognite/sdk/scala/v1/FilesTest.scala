@@ -53,6 +53,23 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     }
   )
 
+  it should "support filter" in {
+    val createdTimeFilterResults = client.files
+      .filter(
+        FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L)))
+      )
+      .flatMap(_.unsafeBody)
+    assert(createdTimeFilterResults.length == 40)
+
+    val createdTimeFilterResultsWithLimit = client.files
+      .filterWithLimit(
+        FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L))),
+        20
+      )
+      .flatMap(_.unsafeBody)
+    assert(createdTimeFilterResultsWithLimit.length == 20)
+  }
+
   it should "support search" in {
     val createdTimeSearchResults = client.files
       .search(

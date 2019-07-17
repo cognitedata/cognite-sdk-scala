@@ -45,6 +45,23 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     }
   )
 
+  it should "support filter" in {
+//    val createdTimeFilterResults = client.assets
+//      .filter(
+//        AssetsFilter(createdTime = Some(TimeRange(1560756441301L, 1560756445000L)))
+//      )
+//      .flatMap(_.unsafeBody)
+//    assert(createdTimeFilterResults.length == 84)
+
+    val createdTimeFilterResultsWithLimit = client.assets
+      .filterWithLimit(
+        AssetsFilter(createdTime = Some(TimeRange(1560756441301L, 1560756445000L))),
+        10
+      )
+      .flatMap(_.unsafeBody)
+    assert(createdTimeFilterResultsWithLimit.length == 10)
+  }
+
   it should "support search" in {
     val createdTimeSearchResults = client.assets
       .search(

@@ -25,6 +25,8 @@ package object v1 {
     deriveEncoder[AssetUpdate]
   implicit val updateAssetsItemsEncoder: Encoder[Items[AssetUpdate]] =
     deriveEncoder[Items[AssetUpdate]]
+  implicit val assetsFilterEncoder: Encoder[AssetsFilter] =
+    deriveEncoder[AssetsFilter]
   implicit val assetsQueryEncoder: Encoder[AssetsQuery] =
     deriveEncoder[AssetsQuery]
 
@@ -38,6 +40,8 @@ package object v1 {
     deriveEncoder[EventUpdate]
   implicit val updateEventsItemsEncoder: Encoder[Items[EventUpdate]] =
     deriveEncoder[Items[EventUpdate]]
+  implicit val eventsFilterEncoder: Encoder[EventsFilter] =
+    deriveEncoder[EventsFilter]
   implicit val eventsQueryEncoder: Encoder[EventsQuery] =
     deriveEncoder[EventsQuery]
 
@@ -51,6 +55,8 @@ package object v1 {
     deriveEncoder[FileUpdate]
   implicit val updateFilesItemsEncoder: Encoder[Items[FileUpdate]] =
     deriveEncoder[Items[FileUpdate]]
+  implicit val filesFilterEncoder: Encoder[FilesFilter] =
+    deriveEncoder[FilesFilter]
   implicit val filesQueryEncoder: Encoder[FilesQuery] =
     deriveEncoder[FilesQuery]
 
