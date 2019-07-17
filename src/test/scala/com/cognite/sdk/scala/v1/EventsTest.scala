@@ -53,6 +53,22 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     }
   )
 
+  it should "support filter" in {
+    val createdTimeFilterResults = client.events
+      .filter(
+        EventsFilter(createdTime = Some(TimeRange(1541510008838L, 1541515508838L)))
+      )
+      .flatMap(_.unsafeBody)
+    assert(createdTimeFilterResults.length == 11)
+    val createdTimeFilterResultsWithLimit = client.events
+      .filterWithLimit(
+        EventsFilter(createdTime = Some(TimeRange(1541510008838L, 1541515508838L))),
+        1
+      )
+      .flatMap(_.unsafeBody)
+    assert(createdTimeFilterResultsWithLimit.length == 1)
+  }
+
   it should "support search" in {
     val createdTimeSearchResults = client.events
       .search(

@@ -32,6 +32,7 @@ trait Filter[R, Fi, F[_], C[_]] extends RequestSession with BaseUri {
       }
       .send()
   }
+
   private def filterWithNextCursor(filter: Fi, cursor: Option[String], limit: Option[Long])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
@@ -50,6 +51,7 @@ trait Filter[R, Fi, F[_], C[_]] extends RequestSession with BaseUri {
         filterWithCursor(theFilter, cursor, remainingItems)
     }
   }
+
   def filter(filter: Fi)(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
@@ -59,4 +61,14 @@ trait Filter[R, Fi, F[_], C[_]] extends RequestSession with BaseUri {
       itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
   ): Iterator[F[Response[Seq[R]]]] =
     filterWithNextCursor(filter, None, None)
+
+  def filterWithLimit(filter: Fi, limit: Long)(
+      implicit sttpBackend: SttpBackend[F, _],
+      auth: Auth,
+      extractor: Extractor[C],
+      errorDecoder: Decoder[CdpApiError],
+      filterEncoder: Encoder[Fi],
+      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+  ): Iterator[F[Response[Seq[R]]]] =
+    filterWithNextCursor(filter, None, Some(limit))
 }
