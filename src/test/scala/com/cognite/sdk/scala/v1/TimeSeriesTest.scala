@@ -67,5 +67,16 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
         )
       ).unsafeBody
     assert(descriptionSearchResults.length == 51)
+
+    val limitDescriptionSearchResults = client.timeSeries.search(
+      TimeSeriesQuery(
+        limit = 5,
+        filter = Some(
+          TimeSeriesFilter(createdTime = Some(TimeRange(1553632871254L, 1553632871254L)))
+        ),
+        search = Some(TimeSeriesSearch(description = Some("Skarv")))
+      )
+    ).unsafeBody
+    assert(limitDescriptionSearchResults.length == 5)
   }
 }
