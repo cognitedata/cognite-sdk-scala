@@ -85,5 +85,14 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       )
       .unsafeBody
     assert(nameSearchResults.length == 4)
+    val limitTimeSearchResults = client.files
+      .search(
+        FilesQuery(
+          limit = 5,
+          filter = Some(FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L))))
+        )
+      )
+      .unsafeBody
+    assert(limitTimeSearchResults.length == 5)
   }
 }

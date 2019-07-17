@@ -110,5 +110,23 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       )
       .unsafeBody
     assert(searchResults2.length == 7)
+    val limitSearchResults = client.events
+      .search(
+        EventsQuery(
+          limit = 3,
+          filter = Some(
+            EventsFilter(
+              createdTime = Some(TimeRange(0L, 1552395929193L))
+            )
+          ),
+          search = Some(
+            EventsSearch(
+              description = Some("description")
+            )
+          )
+        )
+      )
+      .unsafeBody
+    assert(limitSearchResults.length == 3)
   }
 }
