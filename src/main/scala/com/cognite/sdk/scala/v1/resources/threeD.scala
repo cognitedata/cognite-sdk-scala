@@ -9,12 +9,11 @@ import com.cognite.sdk.scala.v1.{
 }
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
+import io.circe.{Decoder, Encoder}
 
 class ThreeDModels[F[_]](project: String)(implicit auth: Auth)
-    extends ReadWritableResource[ThreeDModel, CreateThreeDModel, F, Id, CogniteId, Long]
-    with ResourceV1[F] {
+    extends ReadWritableResource[ThreeDModel, CreateThreeDModel, F, Id, CogniteId, Long] {
   override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/3d/models"
 
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
@@ -29,9 +28,9 @@ class ThreeDModels[F[_]](project: String)(implicit auth: Auth)
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
-    request
+    requestSession.request
       .post(uri"$baseUri/delete")
-      .body(Items(ids.map(toInternalId)))
+      .body(Items(ids.map(CogniteId)))
       .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) => throw value.error
@@ -53,7 +52,7 @@ class ThreeDRevisions[F[_]](project: String, modelId: Long)(
       CogniteId,
       Long
     ]
-    with ResourceV1[F] {
+    with RequestSession {
   override val baseUri =
     uri"https://api.cognitedata.com/api/v1/projects/$project/3d/models/$modelId/revisions"
 
@@ -67,9 +66,9 @@ class ThreeDRevisions[F[_]](project: String, modelId: Long)(
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
-    request
+    requestSession.request
       .post(uri"$baseUri/delete")
-      .body(Items(ids.map(toInternalId)))
+      .body(Items(ids.map(CogniteId)))
       .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) => throw value.error
@@ -93,16 +92,9 @@ final case class CreateThreeDAssetMapping(
     assetId: Long
 )
 
-class ThreeDAssetMappings[F[_]](project: String, modelId: Long, revisionId: Long)(
-    implicit auth: Auth
-) extends ReadableResource[
-      ThreeDAssetMapping,
-      F,
-      Id,
-      CogniteId,
-      Long
-    ]
-    with ResourceV1[F] {
+class ThreeDAssetMappings[F[_]](val requestSession: RequestSession, modelId: Long, revisionId: Long)
+    extends WithRequestSession
+    with Readable[ThreeDAssetMapping, CreateThreeDAssetMapping, Id] {
   override val baseUri =
-    uri"https://api.cognitedata.com/api/v1/projects/$project/3d/models/$modelId/revisions/$revisionId/mappings"
+    uri"${requestSession.baseUri}/3d/models/$modelId/revisions/$revisionId/mappings"
 }

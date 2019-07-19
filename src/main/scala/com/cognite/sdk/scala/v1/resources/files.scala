@@ -1,19 +1,19 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.{CreateFile, File, FileUpdate, FilesFilter, FilesQuery}
+import com.cognite.sdk.scala.v1.{CreateEvent, CreateFile, Event, File, FileUpdate, FilesFilter, FilesQuery}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
 
-class Files[F[_]](project: String)(implicit auth: Auth)
-    extends ReadWritableResourceV1[File, CreateFile, F]
-    with ResourceV1[F]
-    with Filter[File, FilesFilter, F, Id]
+class Files[F[_]](val requestSession: RequestSession)
+    extends WithRequestSession
+    with DeleteByIdsV1[Event, CreateEvent, F, Id]
+    with DeleteByExternalIdsV1[F]    with Filter[File, FilesFilter, F, Id]
     with Search[File, FilesQuery, F, Id]
     with Update[File, FileUpdate, F, Id] {
-  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/files"
+  override val baseUri = uri"${requestSession.baseUri}/files"
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
     EitherDecoder.eitherDecoder[CdpApiError, File]
@@ -29,7 +29,8 @@ class Files[F[_]](project: String)(implicit auth: Auth)
   ): F[Response[Seq[File]]] =
     items.items match {
       case item :: Nil =>
-        request
+        requestSession
+          .request
           .post(baseUri)
           .body(item)
           .response(asJson[Either[CdpApiError, File]])

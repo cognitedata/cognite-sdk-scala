@@ -7,7 +7,7 @@ import io.circe.{Decoder, Encoder}
 
 final case class FilterRequest[T](filter: T, limit: Option[Long], cursor: Option[String])
 
-trait Filter[R, Fi, F[_], C[_]] extends RequestSession with BaseUri {
+trait Filter[R, Fi, F[_], C[_]] extends WithRequestSession with BaseUri {
   lazy val filterUri = uri"$baseUri/list"
 
   // scalastyle:off
@@ -21,7 +21,8 @@ trait Filter[R, Fi, F[_], C[_]] extends RequestSession with BaseUri {
   ): F[Response[ItemsWithCursor[R]]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, C[ItemsWithCursor[R]]]] =
       EitherDecoder.eitherDecoder[CdpApiError, C[ItemsWithCursor[R]]]
-    request
+    requestSession
+      .request
       .post(filterUri)
       .body(FilterRequest(filter, limit, cursor))
       .response(asJson[Either[CdpApiError, C[ItemsWithCursor[R]]]])

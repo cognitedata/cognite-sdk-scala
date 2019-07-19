@@ -10,7 +10,7 @@ import io.scalaland.chimney.dsl._
 
 final case class UpdateRequest(update: Json, id: Long)
 
-trait Update[R <: WithId[Long], U <: WithId[Long], F[_], C[_]] extends RequestSession with BaseUri {
+trait Update[R <: WithId[Long], U <: WithId[Long], F[_], C[_]] extends WithRequestSession with BaseUri {
   lazy val updateUri = uri"$baseUri/update"
 
   def updateItems(updates: Seq[U])(
@@ -26,7 +26,8 @@ trait Update[R <: WithId[Long], U <: WithId[Long], F[_], C[_]] extends RequestSe
     require(updates.forall(_.id > 0), "Update requires an id to be set")
     implicit val printer: Printer =
       Printer(dropNullValues = true, indent = "", preserveOrder = false)
-    request
+    requestSession
+      .request
       .post(updateUri)
       .body(Items(updates.map { update =>
         UpdateRequest(update.asJson.mapObject(_.remove("id")), update.id)

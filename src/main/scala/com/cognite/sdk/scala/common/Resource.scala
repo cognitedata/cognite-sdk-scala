@@ -1,12 +1,6 @@
 package com.cognite.sdk.scala.common
 
-import com.softwaremill.sttp.{Empty, RequestT, Uri, sttp}
-import scala.concurrent.duration._
-
-abstract class Resource[F[_], InternalId, PrimitiveId](auth: Auth)
-    extends BaseUri
-    with RequestSession
-    with ToInternalId[InternalId, PrimitiveId] {}
+import com.softwaremill.sttp.{Empty, RequestT, Uri}
 
 object Resource {
   val defaultLimit: Long = 1000
@@ -17,15 +11,10 @@ trait BaseUri {
 }
 
 trait RequestSession {
-  def request(implicit auth: Auth): RequestT[Empty, String, Nothing] =
-    sttp
-      .auth(auth)
-      .contentType("application/json")
-      .header("accept", "application/json")
-      .readTimeout(90.seconds)
-      .parseResponseIf(_ => true)
+  def request: RequestT[Empty, String, Nothing]
+  val baseUri: Uri
 }
 
-trait ToInternalId[InternalId, PrimitiveId] {
-  def toInternalId(id: PrimitiveId): InternalId
+trait WithRequestSession {
+  val requestSession: RequestSession
 }

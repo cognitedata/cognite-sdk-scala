@@ -6,16 +6,16 @@ import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
 
-abstract class ReadWritableResourceV1[R: Decoder, W: Decoder: Encoder, F[_]](
-    implicit auth: Auth
-) extends ReadWritableResourceWithRetrieve[R, W, F, Id, CogniteId, Long]
-    with DeleteByIdsV1[R, W, F, Id, CogniteId, Long]
-    with DeleteByExternalIdsV1[F] {}
+//abstract class ReadWritableResourceV1[R: Decoder, W: Decoder: Encoder, F[_]](
+//    implicit auth: Auth
+//) extends ReadWritableResourceWithRetrieve[R, W, F, Id, CogniteId, Long]
+//    with DeleteByIdsV1[R, W, F, Id, CogniteId, Long]
+//    with DeleteByExternalIdsV1[F] {}
 
 trait DeleteByExternalIdsV1[F[_]]
-    extends RequestSession
+    extends WithRequestSession
     with BaseUri
-    with DeleteByExternalIds[F, CogniteId, CogniteExternalId] {
+    with DeleteByExternalIds[F] {
   override def deleteByExternalIds(externalIds: Seq[String])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
@@ -26,7 +26,8 @@ trait DeleteByExternalIdsV1[F[_]]
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
-    request
+    requestSession
+      .request
       .post(uri"$baseUri/delete")
       .body(Items(externalIds.map(CogniteExternalId)))
       .response(asJson[Either[CdpApiError, Unit]])
@@ -39,24 +40,24 @@ trait DeleteByExternalIdsV1[F[_]]
   }
 }
 
-trait DeleteByIdsV1[R, W, F[_], C[_], InternalId, PrimitiveId]
-    extends RequestSession
-    with ToInternalId[InternalId, PrimitiveId]
+trait DeleteByIdsV1[R, W, F[_], C[_]]
+    extends WithRequestSession
     with BaseUri
-    with DeleteByIds[F, InternalId, PrimitiveId] {
-  override def deleteByIds(ids: Seq[PrimitiveId])(
+    with DeleteByIds[F] {
+  override def deleteByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       errorDecoder: Decoder[CdpApiError],
-      itemsEncoder: Encoder[Items[InternalId]]
+      itemsEncoder: Encoder[Items[CogniteId]]
   ): F[Response[Unit]] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
-    request
+    requestSession
+      .request
       .post(uri"$baseUri/delete")
-      .body(Items(ids.map(toInternalId)))
+      .body(Items(ids.map(CogniteId)))
       .response(asJson[Either[CdpApiError, Unit]])
       .mapResponse {
         case Left(value) => throw value.error
