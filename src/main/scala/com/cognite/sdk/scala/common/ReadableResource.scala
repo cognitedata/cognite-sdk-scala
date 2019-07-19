@@ -4,7 +4,7 @@ import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
 
-trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession with BaseUri {
+trait Readable[R, F[_], C[_]] extends WithRequestSession with BaseUri {
   private def readWithCursor(cursor: Option[String], limit: Option[Long])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
@@ -17,7 +17,8 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
     val uriWithCursor = cursor
       .fold(baseUri)(baseUri.param("cursor", _))
       .param("limit", limit.getOrElse(Resource.defaultLimit).toString)
-    request
+    requestSession
+      .request
       .get(uriWithCursor)
       .response(asJson[Either[CdpApiError, C[ItemsWithCursor[R]]]])
       .mapResponse {
@@ -114,34 +115,24 @@ trait Readable[R, F[_], C[_], InternalId, PrimitiveId] extends RequestSession wi
   ): Iterator[F[Response[Seq[R]]]] = readWithNextCursor(None, None)
 }
 
-abstract class ReadableResource[R: Decoder, F[_], C[_], InternalId, PrimitiveId](
-    implicit auth: Auth
-) extends Resource[F, InternalId, PrimitiveId](auth)
-    with Readable[R, F, C, InternalId, PrimitiveId] {}
+trait RetrieveByIds[R, F[_], C[_]]
+    extends WithRequestSession
+    with BaseUri {
 
-abstract class ReadableResourceWithRetrieve[R: Decoder, F[_], C[_], InternalId, PrimitiveId](
-    implicit auth: Auth
-) extends ReadableResource[R, F, C, InternalId, PrimitiveId]
-    with RetrieveByIds[R, F, C, InternalId, PrimitiveId] {}
-
-trait RetrieveByIds[R, F[_], C[_], InternalId, PrimitiveId]
-    extends RequestSession
-    with BaseUri
-    with ToInternalId[InternalId, PrimitiveId] {
-
-  def retrieveByIds(ids: Seq[PrimitiveId])(
+  def retrieveByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
       itemsDecoder: Decoder[C[Items[R]]],
-      d1: Encoder[Items[InternalId]]
+      d1: Encoder[Items[CogniteId]]
   ): F[Response[Seq[R]]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, C[Items[R]]]] =
       EitherDecoder.eitherDecoder[CdpApiError, C[Items[R]]]
-    request
+    requestSession
+      .request
       .get(uri"$baseUri/byids")
-      .body(Items(ids.map(toInternalId)))
+      .body(Items(ids.map(CogniteId)))
       .response(asJson[Either[CdpApiError, C[Items[R]]]])
       .mapResponse {
         case Left(value) => throw value.error

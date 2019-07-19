@@ -15,15 +15,14 @@ import com.softwaremill.sttp.circe._
 import io.circe.Decoder
 import io.circe.generic.auto._
 
-class DataPointsResourceV1[F[_]](project: String)(
+class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
-) extends Resource[F, CogniteId, Long](auth)
-    with ResourceV1[F]
+) extends WithRequestSession
+    with BaseUri
     with DataPointsResource[F, Long] {
-  override val baseUri = uri"https://api.cognitedata.com/api/v1/projects/$project/timeseries/data"
+  override val baseUri = uri"${requestSession.baseUri}/timeseries/data"
 
-  override def toInternalId(id: Long): CogniteId = CogniteId(id)
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
   implicit val errorOrDataPointsByIdResponseDecoder
@@ -34,7 +33,8 @@ class DataPointsResourceV1[F[_]](project: String)(
     EitherDecoder.eitherDecoder[CdpApiError, Items[StringDataPointsByIdResponse]]
 
   def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Response[Unit]] =
-    request
+    requestSession
+      .request
       .post(baseUri)
       .body(Items(Seq(DataPointsById(id, dataPoints))))
       .response(asJson[Either[CdpApiError, Unit]])
@@ -46,7 +46,8 @@ class DataPointsResourceV1[F[_]](project: String)(
       .send()
 
   def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Response[Unit]] =
-    request
+    requestSession
+      .request
       .post(baseUri)
       .body(Items(Seq(StringDataPointsById(id, dataPoints))))
       .response(asJson[Either[CdpApiError, Unit]])
@@ -58,7 +59,8 @@ class DataPointsResourceV1[F[_]](project: String)(
       .send()
 
   def deleteRangeById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Response[Unit]] =
-    request
+    requestSession
+      .request
       .post(uri"$baseUri/delete")
       .body(Items(Seq(DeleteRangeById(id, inclusiveStart, exclusiveEnd))))
       .response(asJson[Either[CdpApiError, Unit]])
@@ -70,7 +72,8 @@ class DataPointsResourceV1[F[_]](project: String)(
       .send()
 
   def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Response[Seq[DataPoint]]] =
-    request
+    requestSession
+      .request
       .post(uri"$baseUri/list")
       .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
       .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
@@ -90,7 +93,8 @@ class DataPointsResourceV1[F[_]](project: String)(
       inclusiveStart: Long,
       exclusiveEnd: Long
   ): F[Response[Seq[StringDataPoint]]] =
-    request
+    requestSession
+      .request
       .post(uri"$baseUri/list")
       .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
       .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
@@ -107,7 +111,8 @@ class DataPointsResourceV1[F[_]](project: String)(
 
   //def deleteRangeByExternalId(start: Long, end: Long, externalId: String): F[Response[Unit]]
   def getLatestDataPointById(id: Long): F[Response[Option[DataPoint]]] =
-    request
+    requestSession
+      .request
       .post(uri"$baseUri/latest")
       .body(Items(Seq(CogniteId(id))))
       .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
@@ -120,7 +125,8 @@ class DataPointsResourceV1[F[_]](project: String)(
       .send()
 
   def getLatestStringDataPointById(id: Long): F[Response[Option[StringDataPoint]]] =
-    request
+    requestSession
+      .request
       .post(uri"$baseUri/latest")
       .body(Items(Seq(CogniteId(id))))
       .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])

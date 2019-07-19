@@ -10,7 +10,7 @@ trait SearchQuery[F, S] {
   val limit: Int
 }
 
-trait Search[R, Q, F[_], C[_]] extends RequestSession with BaseUri {
+trait Search[R, Q, F[_], C[_]] extends WithRequestSession with BaseUri {
   lazy val searchUri = uri"$baseUri/search"
   def search(searchQuery: Q)(
       implicit sttpBackend: SttpBackend[F, _],
@@ -22,7 +22,8 @@ trait Search[R, Q, F[_], C[_]] extends RequestSession with BaseUri {
   ): F[Response[Seq[R]]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, C[Items[R]]]] =
       EitherDecoder.eitherDecoder[CdpApiError, C[Items[R]]]
-    request
+    requestSession
+      .request
       .post(searchUri)
       .body(searchQuery)
       .response(asJson[Either[CdpApiError, C[Items[R]]]])
