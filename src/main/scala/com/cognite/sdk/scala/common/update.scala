@@ -1,10 +1,12 @@
 package com.cognite.sdk.scala.common
 
+import com.cognite.sdk.scala.v1._
+
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder, Json, Printer}
-import io.circe.generic.auto._
 import io.circe.syntax._
+import io.circe.generic.semiauto._
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
@@ -15,12 +17,13 @@ trait Update[R <: WithId[Long], U <: WithId[Long], F[_]] extends WithRequestSess
 
   def updateItems(updates: Seq[U])(
       implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
       updateEncoder: Encoder[U],
-      items: Decoder[Items[R]]
+      itemsDecoder: Decoder[Items[R]]
   ): F[Response[Seq[R]]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
+    implicit val _: Encoder[UpdateRequest] = deriveEncoder[UpdateRequest]
+    implicit val updateRequestItemsEncoder: Encoder[Items[UpdateRequest]] = deriveEncoder[Items[UpdateRequest]]
     require(updates.forall(_.id > 0), "Update requires an id to be set")
     implicit val printer: Printer =
       Printer(dropNullValues = true, indent = "", preserveOrder = false)
@@ -43,9 +46,8 @@ trait Update[R <: WithId[Long], U <: WithId[Long], F[_]] extends WithRequestSess
   // scalastyle: off
   def update[T](items: Seq[T])(
       implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
       updateEncoder: Encoder[U],
-      itemsWithCursorDecoder: Decoder[Items[R]],
+      itemsDecoder: Decoder[Items[R]],
       t: Transformer[T, U]
   ): F[Response[Seq[R]]] =
     updateItems(items.map(_.transformInto[U]))

@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.generic.auto._
+import io.circe.generic.semiauto._
 import io.circe.{Decoder, Encoder}
 
 final case class FilterRequest[T](filter: T, limit: Option[Long], cursor: Option[String])
@@ -17,6 +17,7 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession with BaseUri {
       filterEncoder: Encoder[Fi],
       itemsDecoder: Decoder[ItemsWithCursor[R]]
   ): F[Response[ItemsWithCursor[R]]] = {
+    implicit val filterRequestEncoder: Encoder[FilterRequest[Fi]] = deriveEncoder[FilterRequest[Fi]]
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     requestSession

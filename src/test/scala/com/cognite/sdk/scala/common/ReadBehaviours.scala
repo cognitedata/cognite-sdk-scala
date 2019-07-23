@@ -3,7 +3,6 @@ package com.cognite.sdk.scala.common
 import com.softwaremill.sttp.{Id, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
 import io.circe.{Decoder, Encoder}
-import io.circe.generic.auto._
 
 trait ReadBehaviours extends Matchers { this: FlatSpec =>
   def readable[R, InternalId, PrimitiveId](

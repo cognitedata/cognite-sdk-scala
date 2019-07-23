@@ -1,10 +1,9 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.{RawDatabase, RawRow, RawRowKey, RawTable}
+import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.generic.auto._
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Decoder, Encoder}
 
@@ -15,12 +14,10 @@ abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: En
     with Create[R, W, F]
     with DeleteByIds[F, String] {
   def toInternalId(id: String): InternalId
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Unit]
+
+  implicit val internalIdItemsEncoder: Encoder[Items[InternalId]] = deriveEncoder[Items[InternalId]]
   override def deleteByIds(ids: Seq[String])(
-      implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
-      itemsEncoder: Encoder[Items[CogniteId]]
+      implicit sttpBackend: SttpBackend[F, _]
   ): F[Response[Unit]] =
     requestSession
       .request
@@ -58,14 +55,17 @@ class RawRows[F[_]](val requestSession: RequestSession, database: String, table:
   override val baseUri =
     uri"${requestSession.baseUri}/raw/dbs/$database/tables/$table/rows"
 
+  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Unit]
+
+  private implicit val rawRowItemsEncoder = deriveEncoder[Items[RawRow]]
   // raw does not return the created rows in the response, so we'll always return an empty sequence.
   override def createItems(
       items: Items[RawRow]
   )(
       implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
-      itemsEncoder: Encoder[Items[RawRow]],
-      itemsWithCursorDecoder: Decoder[ItemsWithCursor[RawRow]]
+      readDecoder: Decoder[ItemsWithCursor[RawRow]],
+      itemsEncoder: Encoder[Items[RawRow]]
   ): F[Response[Seq[RawRow]]] =
     requestSession
       .request
