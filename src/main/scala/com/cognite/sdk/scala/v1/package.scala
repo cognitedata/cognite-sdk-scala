@@ -3,6 +3,7 @@ package com.cognite.sdk.scala
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.resources.ThreeDAssetMapping
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
+import io.circe.generic.auto._
 import io.circe.generic.semiauto._
 import io.circe.{Decoder, Encoder}
 

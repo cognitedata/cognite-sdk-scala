@@ -1,11 +1,11 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.{CreateEvent, Event, EventUpdate, EventsFilter, EventsQuery}
+import com.cognite.sdk.scala.v1.{CreateEvent, Event, EventUpdate, EventsFilter, EventsQuery, RequestSession}
 import com.softwaremill.sttp._
 
-class Events[F[_]](val requestSession: RequestSession)
-    extends WithRequestSession
+class Events[F[_]](val requestSession: RequestSession[F])
+    extends WithRequestSession[F]
     with Readable[Event, F]
     with RetrieveByIds[Event, F]
     with Create[Event, CreateEvent, F]

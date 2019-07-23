@@ -7,13 +7,12 @@ import io.circe.{Decoder, Encoder}
 
 final case class FilterRequest[T](filter: T, limit: Option[Long], cursor: Option[String])
 
-trait Filter[R, Fi, F[_]] extends WithRequestSession with BaseUri {
+trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
   lazy val filterUri = uri"$baseUri/list"
 
   // scalastyle:off
   private def filterWithCursor(filter: Fi, cursor: Option[String], limit: Option[Long])(
-      implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
+      implicit errorDecoder: Decoder[CdpApiError],
       filterEncoder: Encoder[Fi],
       itemsDecoder: Decoder[ItemsWithCursor[R]]
   ): F[Response[ItemsWithCursor[R]]] = {
@@ -21,27 +20,27 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession with BaseUri {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     requestSession
-      .request
-      .post(filterUri)
-      .body(FilterRequest(filter, limit, cursor))
-      .response(asJson[Either[CdpApiError, ItemsWithCursor[R]]])
-      .mapResponse {
-        case Left(value) => throw value.error
-        case Right(Left(cdpApiError)) => throw cdpApiError.asException(filterUri)
-        case Right(Right(value)) => value
+      .send { request =>
+        request
+          .post(filterUri)
+          .body(FilterRequest(filter, limit, cursor))
+          .response(asJson[Either[CdpApiError, ItemsWithCursor[R]]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(filterUri)
+            case Right(Right(value)) => value
+          }
       }
-      .send()
   }
 
   private def filterWithNextCursor(filter: Fi, cursor: Option[String], limit: Option[Long])(
-      implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
+      implicit errorDecoder: Decoder[CdpApiError],
       filterEncoder: Encoder[Fi],
       itemsDecoder: Decoder[ItemsWithCursor[R]]
   ): NextCursorIterator[R, F] = {
     // filter is also a member of Iterator, so rename this here
     val theFilter = filter
-    new NextCursorIterator[R, F](cursor, limit) {
+    new NextCursorIterator[R, F](cursor, limit, requestSession.sttpBackend) {
       def get(
           cursor: Option[String],
           remainingItems: Option[Long]
@@ -51,16 +50,14 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession with BaseUri {
   }
 
   def filter(filter: Fi)(
-      implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
+      implicit errorDecoder: Decoder[CdpApiError],
       filterEncoder: Encoder[Fi],
       itemsDecoder: Decoder[ItemsWithCursor[R]]
   ): Iterator[F[Response[Seq[R]]]] =
     filterWithNextCursor(filter, None, None)
 
   def filterWithLimit(filter: Fi, limit: Long)(
-      implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
+      implicit errorDecoder: Decoder[CdpApiError],
       filterEncoder: Encoder[Fi],
       itemsDecoder: Decoder[ItemsWithCursor[R]]
   ): Iterator[F[Response[Seq[R]]]] =

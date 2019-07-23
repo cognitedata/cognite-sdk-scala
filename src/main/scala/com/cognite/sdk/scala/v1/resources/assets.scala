@@ -1,11 +1,11 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.{Asset, AssetUpdate, AssetsFilter, AssetsQuery, CreateAsset}
+import com.cognite.sdk.scala.v1.{Asset, AssetUpdate, AssetsFilter, AssetsQuery, CreateAsset, RequestSession}
 import com.softwaremill.sttp._
 
-class Assets[F[_]](val requestSession: RequestSession)
-    extends WithRequestSession
+class Assets[F[_]](val requestSession: RequestSession[F])
+    extends WithRequestSession[F]
     with Readable[Asset, F]
     with Create[Asset, CreateAsset, F]
     with RetrieveByIds[Asset, F]
