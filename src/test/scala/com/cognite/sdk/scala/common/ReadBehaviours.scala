@@ -6,13 +6,12 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
 
 trait ReadBehaviours extends Matchers { this: FlatSpec =>
-  def readable[R, C[_], InternalId, PrimitiveId](
-      readable: Readable[R, Id, C]
+  def readable[R, InternalId, PrimitiveId](
+      readable: Readable[R, Id]
   )(
       implicit sttpBackend: SttpBackend[Id, _],
       auth: Auth,
-      extractor: Extractor[C],
-      itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
+      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]
   ): Unit = {
     it should "read items" in {
       readable.read().unsafeBody.items should not be empty
@@ -34,18 +33,17 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
   }
 
   // scalastyle:off
-  def readableWithRetrieve[R <: WithId[Long], W, C[_]](
-      readable: Readable[R, Id, C]
-        with RetrieveByIds[R, Id, C],
+  def readableWithRetrieve[R <: WithId[Long], W](
+      readable: Readable[R, Id]
+        with RetrieveByIds[R, Id],
       idsThatDoNotExist: Seq[Long],
       supportsMissingAndThrown: Boolean
   )(
       implicit sttpBackend: SttpBackend[Id, _],
       auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
-      itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
-      itemsDecoder: Decoder[C[Items[R]]],
+      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
+      itemsDecoder: Decoder[Items[R]],
       d1: Encoder[Items[CogniteId]]
   ): Unit = {
     it should "support retrieving items by id" in {

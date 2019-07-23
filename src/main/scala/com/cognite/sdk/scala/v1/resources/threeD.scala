@@ -8,11 +8,11 @@ import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
 
 class ThreeDModels[F[_]](val requestSession: RequestSession)
-    extends Create[ThreeDModel, CreateThreeDModel, F, Id]
-    with RetrieveByIds[ThreeDModel, F, Id]
-    with Readable[ThreeDModel, F, Id]
-    with DeleteByIdsV1[ThreeDModel, CreateThreeDModel, F, Id]
-    with Update[ThreeDModel, ThreeDModelUpdate, F, Id]
+    extends Create[ThreeDModel, CreateThreeDModel, F]
+    with RetrieveByIds[ThreeDModel, F]
+    with Readable[ThreeDModel, F]
+    with DeleteByIdsV1[ThreeDModel, CreateThreeDModel, F]
+    with Update[ThreeDModel, ThreeDModelUpdate, F]
     with WithRequestSession {
   override val baseUri = uri"${requestSession.baseUri}/3d/models"
 
@@ -20,7 +20,6 @@ class ThreeDModels[F[_]](val requestSession: RequestSession)
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
   override def deleteByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
       errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[CogniteId]]
   ): F[Response[Unit]] = {
@@ -43,18 +42,17 @@ class ThreeDModels[F[_]](val requestSession: RequestSession)
 }
 
 class ThreeDRevisions[F[_]](val requestSession: RequestSession, modelId: Long)
-    extends Create[ThreeDRevision, CreateThreeDRevision, F, Id]
-    with RetrieveByIds[ThreeDRevision, F, Id]
-    with Readable[ThreeDRevision, F, Id]
-    with DeleteByIdsV1[ThreeDRevision, CreateThreeDRevision, F, Id]
-    with Update[ThreeDRevision, ThreeDRevisionUpdate, F, Id]
+    extends Create[ThreeDRevision, CreateThreeDRevision, F]
+    with RetrieveByIds[ThreeDRevision, F]
+    with Readable[ThreeDRevision, F]
+    with DeleteByIdsV1[ThreeDRevision, CreateThreeDRevision, F]
+    with Update[ThreeDRevision, ThreeDRevisionUpdate, F]
     with WithRequestSession {
   override val baseUri =
     uri"${requestSession.baseUri}/3d/models/$modelId/revisions"
 
   override def deleteByIds(ids: Seq[Long])(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
       errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[CogniteId]]
   ): F[Response[Unit]] = {
@@ -90,7 +88,7 @@ final case class CreateThreeDAssetMapping(
 
 class ThreeDAssetMappings[F[_]](val requestSession: RequestSession, modelId: Long, revisionId: Long)
     extends WithRequestSession
-    with Readable[ThreeDAssetMapping, F, Id] {
+    with Readable[ThreeDAssetMapping, F] {
   override val baseUri =
     uri"${requestSession.baseUri}/3d/models/$modelId/revisions/$revisionId/mappings"
 }

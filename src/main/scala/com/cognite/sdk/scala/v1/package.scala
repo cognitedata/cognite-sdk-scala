@@ -8,9 +8,6 @@ import io.circe.{Decoder, Encoder}
 
 package object v1 {
   implicit val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
-  implicit val extractor: Extractor[Id] = new Extractor[Id] {
-    override def extract[A](c: Id[A]): A = c
-  }
 
   // this is unfortunately necessary if we don't want to force users to import
   // io.circe.generic.auto._ themselves, due to the derivation of
@@ -47,8 +44,11 @@ package object v1 {
 
   implicit val fileItemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[File]]] =
     deriveDecoder[Id[ItemsWithCursor[File]]]
+  implicit val fileDecoder: Decoder[File] = deriveDecoder[File]
   implicit val fileItemsDecoder: Decoder[Id[Items[File]]] =
     deriveDecoder[Id[Items[File]]]
+  implicit val createFileEncoder: Encoder[CreateFile] =
+    deriveEncoder[CreateFile]
   implicit val createFileItemsEncoder: Encoder[Items[CreateFile]] =
     deriveEncoder[Items[CreateFile]]
   implicit val fileUpdateEncoder: Encoder[FileUpdate] =

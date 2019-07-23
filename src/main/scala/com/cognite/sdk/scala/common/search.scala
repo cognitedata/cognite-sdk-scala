@@ -10,28 +10,26 @@ trait SearchQuery[F, S] {
   val limit: Int
 }
 
-trait Search[R, Q, F[_], C[_]] extends WithRequestSession with BaseUri {
+trait Search[R, Q, F[_]] extends WithRequestSession with BaseUri {
   lazy val searchUri = uri"$baseUri/search"
   def search(searchQuery: Q)(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
       searchEncoder: Encoder[Q],
-      items: Decoder[C[Items[R]]]
+      items: Decoder[Items[R]]
   ): F[Response[Seq[R]]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, C[Items[R]]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, C[Items[R]]]
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
       .request
       .post(searchUri)
       .body(searchQuery)
-      .response(asJson[Either[CdpApiError, C[Items[R]]]])
+      .response(asJson[Either[CdpApiError, Items[R]]])
       .mapResponse {
         case Left(value) =>
           throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) => extractor.extract(value).items
+        case Right(Right(value)) => value.items
       }
       .send()
   }

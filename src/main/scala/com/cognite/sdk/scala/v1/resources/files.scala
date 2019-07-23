@@ -1,22 +1,21 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.{CreateFile, File, FileUpdate, FilesFilter, FilesQuery}
+import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
-import io.circe.generic.auto._
 
 class Files[F[_]](val requestSession: RequestSession)
     extends WithRequestSession
-    with Readable[File, F, Id]
-    with RetrieveByIds[File, F, Id]
-    with Create[File, CreateFile, F, Id]
-    with DeleteByIdsV1[File, CreateFile, F, Id]
+    with Readable[File, F]
+    with RetrieveByIds[File, F]
+    with Create[File, CreateFile, F]
+    with DeleteByIdsV1[File, CreateFile, F]
     with DeleteByExternalIdsV1[F]
-    with Filter[File, FilesFilter, F, Id]
-    with Search[File, FilesQuery, F, Id]
-    with Update[File, FileUpdate, F, Id] {
+    with Filter[File, FilesFilter, F]
+    with Search[File, FilesQuery, F]
+    with Update[File, FileUpdate, F] {
   override val baseUri = uri"${requestSession.baseUri}/files"
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
@@ -25,11 +24,9 @@ class Files[F[_]](val requestSession: RequestSession)
       items: Items[CreateFile]
   )(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
-      extractor: Extractor[Id],
       errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[CreateFile]],
-      itemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[File]]]
+      itemsWithCursorDecoder: Decoder[ItemsWithCursor[File]]
   ): F[Response[Seq[File]]] =
     items.items match {
       case item :: Nil =>

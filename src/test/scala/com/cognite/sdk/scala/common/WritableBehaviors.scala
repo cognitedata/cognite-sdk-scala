@@ -7,8 +7,8 @@ import org.scalatest.{FlatSpec, Matchers}
 
 trait WritableBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off
-  def writable[R <: WithId[PrimitiveId], W, PrimitiveId, C[_]](
-      writable: Create[R, W, Id, C]
+  def writable[R <: WithId[PrimitiveId], W, PrimitiveId](
+      writable: Create[R, W, Id]
         with DeleteByIds[Id, PrimitiveId],
       readExamples: Seq[R],
       createExamples: Seq[W],
@@ -17,10 +17,9 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
   )(
       implicit sttpBackend: SttpBackend[Id, _],
       auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
-      itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
-      itemsDecoder: Decoder[C[Items[R]]],
+      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
+      itemsDecoder: Decoder[Items[R]],
       itemsEncoder: Encoder[Items[W]],
       d1: Encoder[Items[CogniteId]],
       t: Transformer[R, W]
@@ -88,11 +87,11 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
     //       id in the same api call for V1
   }
 
-  def updatable[R <: WithId[Long], W, U <: WithId[Long], C[_]](
-      updatable: Create[R, W, Id, C]
+  def updatable[R <: WithId[Long], W, U <: WithId[Long]](
+      updatable: Create[R, W, Id]
         with DeleteByIds[Id, Long]
-        with Update[R, U, Id, C]
-        with RetrieveByIds[R, Id, C],
+        with Update[R, U, Id]
+        with RetrieveByIds[R, Id],
       readExamples: Seq[R],
       updateExamples: Seq[R],
       updateId: (Long, R) => R,
@@ -101,10 +100,9 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
   )(
       implicit sttpBackend: SttpBackend[Id, _],
       auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
-      itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
-      itemsDecoder: Decoder[C[Items[R]]],
+      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
+      itemsDecoder: Decoder[Items[R]],
       itemsEncoder: Encoder[Items[W]],
       itemsUpdateEncoder: Encoder[Items[U]],
       updateEncoder: Encoder[U],

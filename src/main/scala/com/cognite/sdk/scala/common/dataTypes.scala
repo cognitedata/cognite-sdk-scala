@@ -44,10 +44,6 @@ trait WithId[I] {
   val id: I
 }
 
-trait Extractor[C[_]] {
-  def extract[A](c: C[A]): A
-}
-
 object EitherDecoder {
   def eitherDecoder[A, B](implicit a: Decoder[A], b: Decoder[B]): Decoder[Either[A, B]] = {
     val l: Decoder[Either[A, B]] = a.map(Left.apply)

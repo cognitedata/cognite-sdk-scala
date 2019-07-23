@@ -6,13 +6,13 @@ import com.softwaremill.sttp._
 
 class Assets[F[_]](val requestSession: RequestSession)
     extends WithRequestSession
-    with Readable[Asset, F, Id]
-    with Create[Asset, CreateAsset, F, Id]
-    with RetrieveByIds[Asset, F, Id]
-    with DeleteByIdsV1[Asset, CreateAsset, F, Id]
+    with Readable[Asset, F]
+    with Create[Asset, CreateAsset, F]
+    with RetrieveByIds[Asset, F]
+    with DeleteByIdsV1[Asset, CreateAsset, F]
     with DeleteByExternalIdsV1[F]
-    with Filter[Asset, AssetsFilter, F, Id]
-    with Search[Asset, AssetsQuery, F, Id]
-    with Update[Asset, AssetUpdate, F, Id] {
+    with Filter[Asset, AssetsFilter, F]
+    with Search[Asset, AssetsQuery, F]
+    with Update[Asset, AssetUpdate, F] {
   override val baseUri = uri"${requestSession.baseUri}/assets"
 }

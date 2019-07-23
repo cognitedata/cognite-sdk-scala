@@ -10,7 +10,6 @@ import io.scalaland.chimney.dsl._
 trait DeleteByIds[F[_], PrimitiveId] {
   def deleteByIds(ids: Seq[PrimitiveId])(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
       errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[CogniteId]]
   ): F[Response[Unit]]
@@ -19,45 +18,40 @@ trait DeleteByIds[F[_], PrimitiveId] {
 trait DeleteByExternalIds[F[_]] {
   def deleteByExternalIds(externalIds: Seq[String])(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
       errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[CogniteExternalId]]
   ): F[Response[Unit]]
 }
 
-trait Create[R, W, F[_], C[_]] extends WithRequestSession with BaseUri {
+trait Create[R, W, F[_]] extends WithRequestSession with BaseUri {
   def createItems(items: Items[W])(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[W]],
-      itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]]
+      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]
   ): F[Response[Seq[R]]] = {
     implicit val errorOrStringDataPointsByIdResponseDecoder
-        : Decoder[Either[CdpApiError, C[ItemsWithCursor[R]]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, C[ItemsWithCursor[R]]]
+        : Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     requestSession
       .request
       .post(baseUri)
       .body(items)
-      .response(asJson[Either[CdpApiError, C[ItemsWithCursor[R]]]])
+      .response(asJson[Either[CdpApiError, ItemsWithCursor[R]]])
       .mapResponse {
         case Left(value) =>
           throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) => extractor.extract(value).items
+        case Right(Right(value)) => value.items
       }
       .send()
   }
 
   def create[T](items: Seq[T])(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[W]],
-      itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
+      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
       t: Transformer[T, W]
   ): F[Response[Seq[R]]] =
     createItems(Items(items.map(_.transformInto[W])))

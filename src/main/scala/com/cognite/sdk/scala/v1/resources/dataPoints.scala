@@ -7,8 +7,7 @@ import com.cognite.sdk.scala.v1.{
   DeleteRangeById,
   QueryRangeById,
   StringDataPointsById,
-  StringDataPointsByIdResponse,
-  extractor
+  StringDataPointsByIdResponse
 }
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
@@ -16,8 +15,7 @@ import io.circe.Decoder
 import io.circe.generic.auto._
 
 class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
-    implicit auth: Auth,
-    sttpBackend: SttpBackend[F, _]
+    implicit sttpBackend: SttpBackend[F, _]
 ) extends WithRequestSession
     with BaseUri
     with DataPointsResource[F, Long] {
@@ -81,7 +79,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
         case Right(Right(value)) =>
-          extractor.extract(value).items.headOption match {
+          value.items.headOption match {
             case Some(items) => items.datapoints
             case None => Seq.empty
           }
@@ -102,7 +100,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
         case Right(Right(value)) =>
-          extractor.extract(value).items.headOption match {
+          value.items.headOption match {
             case Some(items) => items.datapoints
             case None => Seq.empty
           }
@@ -120,7 +118,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
         case Right(Right(value)) =>
-          extractor.extract(value).items.headOption.flatMap(_.datapoints.headOption)
+          value.items.headOption.flatMap(_.datapoints.headOption)
       }
       .send()
 
@@ -134,7 +132,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
         case Right(Right(value)) =>
-          extractor.extract(value).items.headOption.flatMap(_.datapoints.headOption)
+          value.items.headOption.flatMap(_.datapoints.headOption)
       }
       .send()
 }
