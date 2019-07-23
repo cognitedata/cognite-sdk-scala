@@ -4,6 +4,8 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
+import io.circe.Decoder
+import io.circe.generic.auto._
 
 class ThreeDModels[F[_]](val requestSession: RequestSession[F])
     extends Create[ThreeDModel, CreateThreeDModel, F]
@@ -14,7 +16,9 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
     with WithRequestSession[F] {
   override val baseUri = uri"${requestSession.baseUri}/3d/models"
 
-  override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] = {
+    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
@@ -29,6 +33,7 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
             case Right(Right(_)) => ()
           }
       }
+  }
 
   override def readWithCursor(
       cursor: Option[String],
@@ -56,7 +61,9 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
   override val baseUri =
     uri"${requestSession.baseUri}/3d/models/$modelId/revisions"
 
-  override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] = {
+    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
@@ -71,6 +78,7 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
             case Right(Right(_)) => ()
           }
       }
+  }
 
   override def readWithCursor(
       cursor: Option[String],

@@ -6,7 +6,7 @@ import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder, Json, Printer}
 import io.circe.syntax._
-import io.circe.generic.semiauto._
+import io.circe.generic.auto._
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
@@ -28,14 +28,11 @@ object Update {
       baseUri: Uri,
       updates: Seq[U]
   )(implicit decodeReadItems: Decoder[Items[R]]): F[Response[Seq[R]]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
-    implicit val _: Encoder[UpdateRequest] = deriveEncoder[UpdateRequest]
-    implicit val updateRequestItemsEncoder: Encoder[Items[UpdateRequest]] =
-      deriveEncoder[Items[UpdateRequest]]
     require(updates.forall(_.id > 0), "Update requires an id to be set")
     implicit val printer: Printer =
       Printer(dropNullValues = true, indent = "", preserveOrder = false)
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
       .send { request =>
         request

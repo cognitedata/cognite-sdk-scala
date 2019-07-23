@@ -44,7 +44,6 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       assert(readFiles.size == filesToCreate.size)
       assert(readFiles.size == updatedFiles.size)
       assert(updatedFiles.zip(readFiles).forall { case (updated, read) =>
-        println(s"updated name is ${updated.externalId}, read name is ${read.externalId}") // scalastyle:ignore
         updated.externalId == read.externalId.map(id => s"${id}-1")
       })
       assert(readFiles.head.source.isDefined)

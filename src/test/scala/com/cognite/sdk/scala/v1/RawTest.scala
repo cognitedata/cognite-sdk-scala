@@ -90,13 +90,4 @@ class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val rowsResponseAfterOneDelete = rows.readAll().flatMap(_.unsafeBody.toList).toList
     assert(rowsResponseAfterOneDelete.size === 1)
   }
-  // scalastyle:off
-//  it should "list all databases and tables" in {
-//    val databases = client.rawDatabases.readAll().flatMap(_.unsafeBody.toList).toList
-//    databases.foreach { database =>
-//      println(database)
-//      val tables = client.rawTables(database.name).readAll().flatMap(_.unsafeBody.toList).toList
-//      tables.foreach(t => println(s"  ${t}")) // scalastyle:ignore
-//    }
-//  }
 }

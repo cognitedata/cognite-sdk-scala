@@ -10,6 +10,7 @@ import com.cognite.sdk.scala.v1.{
   RequestSession
 }
 import com.softwaremill.sttp._
+import io.circe.generic.auto._
 
 class Events[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -37,4 +38,14 @@ class Events[F[_]](val requestSession: RequestSession[F])
 
   override def updateItems(items: Seq[EventUpdate]): F[Response[Seq[Event]]] =
     Update.updateItems[F, Event, EventUpdate](requestSession, baseUri, items)
+
+  override def filterWithCursor(
+      filter: EventsFilter,
+      cursor: Option[String],
+      limit: Option[Long]
+  ): F[Response[ItemsWithCursor[Event]]] =
+    Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit)
+
+  override def search(searchQuery: EventsQuery): F[Response[Seq[Event]]] =
+    Search.search(requestSession, baseUri, searchQuery)
 }
