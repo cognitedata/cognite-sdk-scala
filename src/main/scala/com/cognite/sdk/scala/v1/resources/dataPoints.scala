@@ -5,11 +5,10 @@ import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.semiauto._
-import io.circe.{Encoder, Decoder}
+import io.circe.{Decoder, Encoder}
 
-class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
-    implicit sttpBackend: SttpBackend[F, _]
-) extends WithRequestSession
+class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
+    extends WithRequestSession[F]
     with BaseUri
     with DataPointsResource[F, Long] {
   override val baseUri = uri"${requestSession.baseUri}/timeseries/data"
@@ -18,35 +17,26 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
   implicit val stringDataPointDecoder: Decoder[StringDataPoint] = deriveDecoder[StringDataPoint]
   implicit val dataPointEncoder: Encoder[DataPoint] = deriveEncoder[DataPoint]
   implicit val stringDataPointEncoder: Encoder[StringDataPoint] = deriveEncoder[StringDataPoint]
-  implicit val dataPointsByIdResponseDecoder
-      : Decoder[DataPointsByIdResponse] =
+  implicit val dataPointsByIdResponseDecoder: Decoder[DataPointsByIdResponse] =
     deriveDecoder[DataPointsByIdResponse]
-  implicit val dataPointsByIdEncoder
-  : Encoder[DataPointsById] =
+  implicit val dataPointsByIdEncoder: Encoder[DataPointsById] =
     deriveEncoder[DataPointsById]
-  implicit val stringDataPointsByIdEncoder
-  : Encoder[StringDataPointsById] =
+  implicit val stringDataPointsByIdEncoder: Encoder[StringDataPointsById] =
     deriveEncoder[StringDataPointsById]
-  implicit val dataPointsByIdResponseEncoder
-  : Encoder[DataPointsByIdResponse] =
+  implicit val dataPointsByIdResponseEncoder: Encoder[DataPointsByIdResponse] =
     deriveEncoder[DataPointsByIdResponse]
-  implicit val dataPointsByIdResponseItemsEncoder
-  : Encoder[Items[DataPointsByIdResponse]] =
+  implicit val dataPointsByIdResponseItemsEncoder: Encoder[Items[DataPointsByIdResponse]] =
     deriveEncoder[Items[DataPointsByIdResponse]]
-  implicit val stringDataPointsByIdResponseDecoder
-  : Decoder[StringDataPointsByIdResponse] =
+  implicit val stringDataPointsByIdResponseDecoder: Decoder[StringDataPointsByIdResponse] =
     deriveDecoder[StringDataPointsByIdResponse]
-  implicit val dataPointsByIdResponseItemsDecoder
-  : Decoder[Items[DataPointsByIdResponse]] =
+  implicit val dataPointsByIdResponseItemsDecoder: Decoder[Items[DataPointsByIdResponse]] =
     deriveDecoder[Items[DataPointsByIdResponse]]
-  implicit val dataPointsByIdItemsEncoder
-  : Encoder[Items[DataPointsById]] =
+  implicit val dataPointsByIdItemsEncoder: Encoder[Items[DataPointsById]] =
     deriveEncoder[Items[DataPointsById]]
   implicit val stringDataPointsByIdResponseItemsDecoder
-  : Decoder[Items[StringDataPointsByIdResponse]] =
+      : Decoder[Items[StringDataPointsByIdResponse]] =
     deriveDecoder[Items[StringDataPointsByIdResponse]]
-  implicit val stringDataPointsByIdItemsEncoder
-  : Encoder[Items[StringDataPointsById]] =
+  implicit val stringDataPointsByIdItemsEncoder: Encoder[Items[StringDataPointsById]] =
     deriveEncoder[Items[StringDataPointsById]]
   implicit val errorOrDataPointsByIdResponseDecoder
       : Decoder[Either[CdpApiError, Items[DataPointsByIdResponse]]] =
@@ -57,29 +47,31 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
 
   def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Response[Unit]] =
     requestSession
-      .request
-      .post(baseUri)
-      .body(Items(Seq(DataPointsById(id, dataPoints))))
-      .response(asJson[Either[CdpApiError, Unit]])
-      .mapResponse {
-        case Left(value) => throw value.error
-        case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(_)) => ()
+      .send { request =>
+        request
+          .post(baseUri)
+          .body(Items(Seq(DataPointsById(id, dataPoints))))
+          .response(asJson[Either[CdpApiError, Unit]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Right(_)) => ()
+          }
       }
-      .send()
 
   def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Response[Unit]] =
     requestSession
-      .request
-      .post(baseUri)
-      .body(Items(Seq(StringDataPointsById(id, dataPoints))))
-      .response(asJson[Either[CdpApiError, Unit]])
-      .mapResponse {
-        case Left(value) => throw value.error
-        case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(_)) => ()
+      .send { request =>
+        request
+          .post(baseUri)
+          .body(Items(Seq(StringDataPointsById(id, dataPoints))))
+          .response(asJson[Either[CdpApiError, Unit]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Right(_)) => ()
+          }
       }
-      .send()
 
   implicit val deleteRangeByIdEncoder: Encoder[DeleteRangeById] =
     deriveEncoder[DeleteRangeById]
@@ -87,16 +79,17 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
     deriveEncoder[Items[DeleteRangeById]]
   def deleteRangeById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Response[Unit]] =
     requestSession
-      .request
-      .post(uri"$baseUri/delete")
-      .body(Items(Seq(DeleteRangeById(id, inclusiveStart, exclusiveEnd))))
-      .response(asJson[Either[CdpApiError, Unit]])
-      .mapResponse {
-        case Left(value) => throw value.error
-        case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(_)) => ()
+      .send { request =>
+        request
+          .post(uri"$baseUri/delete")
+          .body(Items(Seq(DeleteRangeById(id, inclusiveStart, exclusiveEnd))))
+          .response(asJson[Either[CdpApiError, Unit]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Right(_)) => ()
+          }
       }
-      .send()
 
   implicit val queryRangeByIdEncoder: Encoder[QueryRangeById] =
     deriveEncoder[QueryRangeById]
@@ -104,20 +97,21 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
     deriveEncoder[Items[QueryRangeById]]
   def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Response[Seq[DataPoint]]] =
     requestSession
-      .request
-      .post(uri"$baseUri/list")
-      .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
-      .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
-      .mapResponse {
-        case Left(value) => throw value.error
-        case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) =>
-          value.items.headOption match {
-            case Some(items) => items.datapoints
-            case None => Seq.empty
+      .send { request =>
+        request
+          .post(uri"$baseUri/list")
+          .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
+          .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Right(value)) =>
+              value.items.headOption match {
+                case Some(items) => items.datapoints
+                case None => Seq.empty
+              }
           }
       }
-      .send()
 
   def queryStringsById(
       id: Long,
@@ -125,49 +119,52 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession)(
       exclusiveEnd: Long
   ): F[Response[Seq[StringDataPoint]]] =
     requestSession
-      .request
-      .post(uri"$baseUri/list")
-      .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
-      .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
-      .mapResponse {
-        case Left(value) => throw value.error
-        case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) =>
-          value.items.headOption match {
-            case Some(items) => items.datapoints
-            case None => Seq.empty
+      .send { request =>
+        request
+          .post(uri"$baseUri/list")
+          .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
+          .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Right(value)) =>
+              value.items.headOption match {
+                case Some(items) => items.datapoints
+                case None => Seq.empty
+              }
           }
       }
-      .send()
 
   //def deleteRangeByExternalId(start: Long, end: Long, externalId: String): F[Response[Unit]]
   def getLatestDataPointById(id: Long): F[Response[Option[DataPoint]]] =
     requestSession
-      .request
-      .post(uri"$baseUri/latest")
-      .body(Items(Seq(CogniteId(id))))
-      .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
-      .mapResponse {
-        case Left(value) => throw value.error
-        case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) =>
-          value.items.headOption.flatMap(_.datapoints.headOption)
+      .send { request =>
+        request
+          .post(uri"$baseUri/latest")
+          .body(Items(Seq(CogniteId(id))))
+          .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Right(value)) =>
+              value.items.headOption.flatMap(_.datapoints.headOption)
+          }
       }
-      .send()
 
   def getLatestStringDataPointById(id: Long): F[Response[Option[StringDataPoint]]] =
     requestSession
-      .request
-      .post(uri"$baseUri/latest")
-      .body(Items(Seq(CogniteId(id))))
-      .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
-      .mapResponse {
-        case Left(value) => throw value.error
-        case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) =>
-          value.items.headOption.flatMap(_.datapoints.headOption)
+      .send { request =>
+        request
+          .post(uri"$baseUri/latest")
+          .body(Items(Seq(CogniteId(id))))
+          .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Right(value)) =>
+              value.items.headOption.flatMap(_.datapoints.headOption)
+          }
       }
-      .send()
 }
 
 object DataPointsResourceV1 {

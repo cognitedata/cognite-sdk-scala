@@ -1,11 +1,11 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.{CreateTimeSeries, TimeSeries, TimeSeriesQuery, TimeSeriesUpdate}
+import com.cognite.sdk.scala.v1.{CreateTimeSeries, RequestSession, TimeSeries, TimeSeriesQuery, TimeSeriesUpdate}
 import com.softwaremill.sttp._
 
-class TimeSeriesResource[F[_]](val requestSession: RequestSession)
-    extends WithRequestSession
+class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
+    extends WithRequestSession[F]
     with Readable[TimeSeries, F]
     with RetrieveByIds[TimeSeries, F]
     with Create[TimeSeries, CreateTimeSeries, F]

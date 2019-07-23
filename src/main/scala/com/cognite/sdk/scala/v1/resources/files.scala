@@ -6,8 +6,8 @@ import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
 
-class Files[F[_]](val requestSession: RequestSession)
-    extends WithRequestSession
+class Files[F[_]](val requestSession: RequestSession[F])
+    extends WithRequestSession[F]
     with Readable[File, F]
     with RetrieveByIds[File, F]
     with Create[File, CreateFile, F]
@@ -20,26 +20,24 @@ class Files[F[_]](val requestSession: RequestSession)
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
     EitherDecoder.eitherDecoder[CdpApiError, File]
-  override def createItems(
-      items: Items[CreateFile]
-  )(
-      implicit sttpBackend: SttpBackend[F, _],
-      readDecoder: Decoder[ItemsWithCursor[File]],
+  override def createItems(items: Items[CreateFile])(
+      implicit readDecoder: Decoder[ItemsWithCursor[File]],
       itemsEncoder: Encoder[Items[CreateFile]]
   ): F[Response[Seq[File]]] =
     items.items match {
       case item :: Nil =>
         requestSession
-          .request
-          .post(baseUri)
-          .body(item)
-          .response(asJson[Either[CdpApiError, File]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
-            case Right(Right(value)) => Seq(value)
+          .send { request =>
+            request
+              .post(baseUri)
+              .body(item)
+              .response(asJson[Either[CdpApiError, File]])
+              .mapResponse {
+                case Left(value) => throw value.error
+                case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
+                case Right(Right(value)) => Seq(value)
+              }
           }
-          .send()
       case _ => throw new RuntimeException("Files only support creating one file per call")
     }
 }

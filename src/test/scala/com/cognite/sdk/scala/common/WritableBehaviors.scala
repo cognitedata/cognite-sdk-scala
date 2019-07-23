@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.common
 
-import com.softwaremill.sttp.{Id, SttpBackend}
+import com.softwaremill.sttp.Id
 import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import org.scalatest.{FlatSpec, Matchers}
@@ -15,9 +15,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       idsThatDoNotExist: Seq[PrimitiveId],
       supportsMissingAndThrown: Boolean
   )(
-      implicit sttpBackend: SttpBackend[Id, _],
-      auth: Auth,
-      errorDecoder: Decoder[CdpApiError],
+      implicit errorDecoder: Decoder[CdpApiError],
       itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
       itemsDecoder: Decoder[Items[R]],
       itemsEncoder: Encoder[Items[W]],
@@ -98,9 +96,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       compareItems: (R, R) => Boolean,
       compareUpdated: (Seq[R], Seq[R]) => Unit
   )(
-      implicit sttpBackend: SttpBackend[Id, _],
-      auth: Auth,
-      errorDecoder: Decoder[CdpApiError],
+      implicit errorDecoder: Decoder[CdpApiError],
       itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
       itemsDecoder: Decoder[Items[R]],
       itemsEncoder: Encoder[Items[W]],
