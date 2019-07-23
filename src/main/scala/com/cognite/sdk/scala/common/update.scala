@@ -10,19 +10,17 @@ import io.scalaland.chimney.dsl._
 
 final case class UpdateRequest(update: Json, id: Long)
 
-trait Update[R <: WithId[Long], U <: WithId[Long], F[_], C[_]] extends WithRequestSession with BaseUri {
+trait Update[R <: WithId[Long], U <: WithId[Long], F[_]] extends WithRequestSession with BaseUri {
   lazy val updateUri = uri"$baseUri/update"
 
   def updateItems(updates: Seq[U])(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
       updateEncoder: Encoder[U],
-      items: Decoder[C[Items[R]]]
+      items: Decoder[Items[R]]
   ): F[Response[Seq[R]]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, C[Items[R]]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, C[Items[R]]]
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     require(updates.forall(_.id > 0), "Update requires an id to be set")
     implicit val printer: Printer =
       Printer(dropNullValues = true, indent = "", preserveOrder = false)
@@ -32,12 +30,12 @@ trait Update[R <: WithId[Long], U <: WithId[Long], F[_], C[_]] extends WithReque
       .body(Items(updates.map { update =>
         UpdateRequest(update.asJson.mapObject(_.remove("id")), update.id)
       }))
-      .response(asJson[Either[CdpApiError, C[Items[R]]]])
+      .response(asJson[Either[CdpApiError, Items[R]]])
       .mapResponse {
         case Left(value) =>
           throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-        case Right(Right(value)) => extractor.extract(value).items
+        case Right(Right(value)) => value.items
       }
       .send()
   }
@@ -45,11 +43,9 @@ trait Update[R <: WithId[Long], U <: WithId[Long], F[_], C[_]] extends WithReque
   // scalastyle: off
   def update[T](items: Seq[T])(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
       updateEncoder: Encoder[U],
-      itemsWithCursorDecoder: Decoder[C[Items[R]]],
+      itemsWithCursorDecoder: Decoder[Items[R]],
       t: Transformer[T, U]
   ): F[Response[Seq[R]]] =
     updateItems(items.map(_.transformInto[U]))

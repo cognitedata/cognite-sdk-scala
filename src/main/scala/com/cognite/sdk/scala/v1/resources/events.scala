@@ -6,13 +6,13 @@ import com.softwaremill.sttp._
 
 class Events[F[_]](val requestSession: RequestSession)
     extends WithRequestSession
-    with Readable[Event, F, Id]
-    with RetrieveByIds[Event, F, Id]
-    with Create[Event, CreateEvent, F, Id]
-    with DeleteByIdsV1[Event, CreateEvent, F, Id]
+    with Readable[Event, F]
+    with RetrieveByIds[Event, F]
+    with Create[Event, CreateEvent, F]
+    with DeleteByIdsV1[Event, CreateEvent, F]
     with DeleteByExternalIdsV1[F]
-    with Filter[Event, EventsFilter, F, Id]
-    with Search[Event, EventsQuery, F, Id]
-    with Update[Event, EventUpdate, F, Id] {
+    with Filter[Event, EventsFilter, F]
+    with Search[Event, EventsQuery, F]
+    with Update[Event, EventUpdate, F] {
   override val baseUri = uri"${requestSession.baseUri}/events"
 }

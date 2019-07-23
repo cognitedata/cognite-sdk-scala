@@ -7,40 +7,36 @@ import io.circe.{Decoder, Encoder}
 
 final case class FilterRequest[T](filter: T, limit: Option[Long], cursor: Option[String])
 
-trait Filter[R, Fi, F[_], C[_]] extends WithRequestSession with BaseUri {
+trait Filter[R, Fi, F[_]] extends WithRequestSession with BaseUri {
   lazy val filterUri = uri"$baseUri/list"
 
   // scalastyle:off
   private def filterWithCursor(filter: Fi, cursor: Option[String], limit: Option[Long])(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
       filterEncoder: Encoder[Fi],
-      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+      itemsDecoder: Decoder[ItemsWithCursor[R]]
   ): F[Response[ItemsWithCursor[R]]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, C[ItemsWithCursor[R]]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, C[ItemsWithCursor[R]]]
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     requestSession
       .request
       .post(filterUri)
       .body(FilterRequest(filter, limit, cursor))
-      .response(asJson[Either[CdpApiError, C[ItemsWithCursor[R]]]])
+      .response(asJson[Either[CdpApiError, ItemsWithCursor[R]]])
       .mapResponse {
         case Left(value) => throw value.error
         case Right(Left(cdpApiError)) => throw cdpApiError.asException(filterUri)
-        case Right(Right(value)) => extractor.extract(value)
+        case Right(Right(value)) => value
       }
       .send()
   }
 
   private def filterWithNextCursor(filter: Fi, cursor: Option[String], limit: Option[Long])(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
       filterEncoder: Encoder[Fi],
-      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+      itemsDecoder: Decoder[ItemsWithCursor[R]]
   ): NextCursorIterator[R, F] = {
     // filter is also a member of Iterator, so rename this here
     val theFilter = filter
@@ -55,21 +51,17 @@ trait Filter[R, Fi, F[_], C[_]] extends WithRequestSession with BaseUri {
 
   def filter(filter: Fi)(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
       filterEncoder: Encoder[Fi],
-      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+      itemsDecoder: Decoder[ItemsWithCursor[R]]
   ): Iterator[F[Response[Seq[R]]]] =
     filterWithNextCursor(filter, None, None)
 
   def filterWithLimit(filter: Fi, limit: Long)(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
-      extractor: Extractor[C],
       errorDecoder: Decoder[CdpApiError],
       filterEncoder: Encoder[Fi],
-      itemsDecoder: Decoder[C[ItemsWithCursor[R]]]
+      itemsDecoder: Decoder[ItemsWithCursor[R]]
   ): Iterator[F[Response[Seq[R]]]] =
     filterWithNextCursor(filter, None, Some(limit))
 }

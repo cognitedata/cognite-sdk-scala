@@ -11,15 +11,14 @@ import io.circe.{Decoder, Encoder}
 abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: Encoder](
     implicit auth: Auth
 ) extends WithRequestSession
-    with Readable[R, F, Id]
-    with Create[R, W, F, Id]
+    with Readable[R, F]
+    with Create[R, W, F]
     with DeleteByIds[F, String] {
   def toInternalId(id: String): InternalId
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
   override def deleteByIds(ids: Seq[String])(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
       errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[CogniteId]]
   ): F[Response[Unit]] =
@@ -44,18 +43,16 @@ class RawDatabases[F[_]](val requestSession: RequestSession)
   override val baseUri = uri"${requestSession.baseUri}/raw/dbs"
 }
 
-class RawTables[F[_]](val requestSession: RequestSession, database: String)(
-    implicit auth: Auth
-) extends RawResource[RawTable, RawTable, F, RawTable] {
+class RawTables[F[_]](val requestSession: RequestSession, database: String)
+    extends RawResource[RawTable, RawTable, F, RawTable] {
   def toInternalId(id: String): RawTable = RawTable(id)
   implicit val idEncoder: Encoder[RawTable] = deriveEncoder
   override val baseUri =
     uri"${requestSession.baseUri}/raw/dbs/$database/tables"
 }
 
-class RawRows[F[_]](val requestSession: RequestSession, database: String, table: String)(
-    implicit auth: Auth
-) extends RawResource[RawRow, RawRow, F, RawRowKey] {
+class RawRows[F[_]](val requestSession: RequestSession, database: String, table: String)
+    extends RawResource[RawRow, RawRow, F, RawRowKey] {
   def toInternalId(id: String): RawRowKey = RawRowKey(id)
   implicit val idEncoder: Encoder[RawRowKey] = deriveEncoder
   override val baseUri =
@@ -66,11 +63,9 @@ class RawRows[F[_]](val requestSession: RequestSession, database: String, table:
       items: Items[RawRow]
   )(
       implicit sttpBackend: SttpBackend[F, _],
-      auth: Auth,
-      extractor: Extractor[Id],
       errorDecoder: Decoder[CdpApiError],
       itemsEncoder: Encoder[Items[RawRow]],
-      itemsWithCursorDecoder: Decoder[Id[ItemsWithCursor[RawRow]]]
+      itemsWithCursorDecoder: Decoder[ItemsWithCursor[RawRow]]
   ): F[Response[Seq[RawRow]]] =
     requestSession
       .request
