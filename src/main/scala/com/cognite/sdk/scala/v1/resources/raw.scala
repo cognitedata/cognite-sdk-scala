@@ -36,6 +36,15 @@ class RawDatabases[F[_]](val requestSession: RequestSession[F])
   def toInternalId(id: String): RawDatabase = RawDatabase(id)
   implicit val idEncoder: Encoder[RawDatabase] = deriveEncoder
   override val baseUri = uri"${requestSession.baseUri}/raw/dbs"
+
+  override def readWithCursor(
+      cursor: Option[String],
+      limit: Option[Long]
+  ): F[Response[ItemsWithCursor[RawDatabase]]] =
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+
+  override def createItems(items: Items[RawDatabase]): F[Response[Seq[RawDatabase]]] =
+    Create.createItems[F, RawDatabase, RawDatabase](requestSession, baseUri, items)
 }
 
 class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
@@ -44,6 +53,15 @@ class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
   implicit val idEncoder: Encoder[RawTable] = deriveEncoder
   override val baseUri =
     uri"${requestSession.baseUri}/raw/dbs/$database/tables"
+
+  override def readWithCursor(
+      cursor: Option[String],
+      limit: Option[Long]
+  ): F[Response[ItemsWithCursor[RawTable]]] =
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+
+  override def createItems(items: Items[RawTable]): F[Response[Seq[RawTable]]] =
+    Create.createItems[F, RawTable, RawTable](requestSession, baseUri, items)
 }
 
 class RawRows[F[_]](val requestSession: RequestSession[F], database: String, table: String)
@@ -58,10 +76,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
 
   private implicit val rawRowItemsEncoder = deriveEncoder[Items[RawRow]]
   // raw does not return the created rows in the response, so we'll always return an empty sequence.
-  override def createItems(items: Items[RawRow])(
-      implicit readDecoder: Decoder[ItemsWithCursor[RawRow]],
-      itemsEncoder: Encoder[Items[RawRow]]
-  ): F[Response[Seq[RawRow]]] =
+  override def createItems(items: Items[RawRow]): F[Response[Seq[RawRow]]] =
     requestSession
       .send { request =>
         request
@@ -74,4 +89,10 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
             case Right(Right(_)) => Seq.empty[RawRow]
           }
       }
+
+  override def readWithCursor(
+      cursor: Option[String],
+      limit: Option[Long]
+  ): F[Response[ItemsWithCursor[RawRow]]] =
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
 }

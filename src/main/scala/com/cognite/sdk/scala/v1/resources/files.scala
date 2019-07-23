@@ -4,7 +4,7 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.{Decoder, Encoder}
+import io.circe.Decoder
 
 class Files[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -20,10 +20,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
     EitherDecoder.eitherDecoder[CdpApiError, File]
-  override def createItems(items: Items[CreateFile])(
-      implicit readDecoder: Decoder[ItemsWithCursor[File]],
-      itemsEncoder: Encoder[Items[CreateFile]]
-  ): F[Response[Seq[File]]] =
+  override def createItems(items: Items[CreateFile]): F[Response[Seq[File]]] =
     items.items match {
       case item :: Nil =>
         requestSession
@@ -40,4 +37,16 @@ class Files[F[_]](val requestSession: RequestSession[F])
           }
       case _ => throw new RuntimeException("Files only support creating one file per call")
     }
+
+  override def readWithCursor(
+      cursor: Option[String],
+      limit: Option[Long]
+  ): F[Response[ItemsWithCursor[File]]] =
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+
+  override def retrieveByIds(ids: Seq[Long]): F[Response[Seq[File]]] =
+    RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+
+  override def updateItems(items: Seq[FileUpdate]): F[Response[Seq[File]]] =
+    Update.updateItems[F, File, FileUpdate](requestSession, baseUri, items)
 }

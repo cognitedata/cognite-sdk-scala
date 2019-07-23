@@ -2,8 +2,11 @@ package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp._
 
-abstract class NextCursorIterator[A, F[_]](firstCursor: Option[String], limit: Option[Long], sttpBackend: SttpBackend[F, _])
-  extends Iterator[F[Response[Seq[A]]]] {
+abstract class NextCursorIterator[A, F[_]](
+    firstCursor: Option[String],
+    limit: Option[Long],
+    sttpBackend: SttpBackend[F, _]
+) extends Iterator[F[Response[Seq[A]]]] {
   // scalafix:off DisableSyntax.var
   @SuppressWarnings(Array("org.wartremover.warts.Var"))
   private var nextCursor = firstCursor

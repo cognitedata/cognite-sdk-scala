@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.{CreateTimeSeries, RequestSession, TimeSeries, TimeSeriesQuery, TimeSeriesUpdate}
+import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 
 class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
@@ -14,4 +14,19 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     with Search[TimeSeries, TimeSeriesQuery, F]
     with Update[TimeSeries, TimeSeriesUpdate, F] {
   override val baseUri = uri"${requestSession.baseUri}/timeseries"
+
+  override def readWithCursor(
+      cursor: Option[String],
+      limit: Option[Long]
+  ): F[Response[ItemsWithCursor[TimeSeries]]] =
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+
+  override def retrieveByIds(ids: Seq[Long]): F[Response[Seq[TimeSeries]]] =
+    RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+
+  override def createItems(items: Items[CreateTimeSeries]): F[Response[Seq[TimeSeries]]] =
+    Create.createItems[F, TimeSeries, CreateTimeSeries](requestSession, baseUri, items)
+
+  override def updateItems(items: Seq[TimeSeriesUpdate]): F[Response[Seq[TimeSeries]]] =
+    Update.updateItems[F, TimeSeries, TimeSeriesUpdate](requestSession, baseUri, items)
 }

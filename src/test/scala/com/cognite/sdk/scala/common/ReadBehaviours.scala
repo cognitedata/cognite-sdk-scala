@@ -2,12 +2,9 @@ package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp.Id
 import org.scalatest.{FlatSpec, Matchers}
-import io.circe.{Decoder, Encoder}
 
 trait ReadBehaviours extends Matchers { this: FlatSpec =>
-  def readable[R, InternalId, PrimitiveId](
-      readable: Readable[R, Id]
-  )(implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]): Unit = {
+  def readable[R, InternalId, PrimitiveId](readable: Readable[R, Id]): Unit = {
     it should "read items" in {
       readable.read().unsafeBody.items should not be empty
     }
@@ -32,11 +29,6 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       readable: Readable[R, Id] with RetrieveByIds[R, Id],
       idsThatDoNotExist: Seq[Long],
       supportsMissingAndThrown: Boolean
-  )(
-      implicit errorDecoder: Decoder[CdpApiError],
-      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
-      itemsDecoder: Decoder[Items[R]],
-      d1: Encoder[Items[CogniteId]]
   ): Unit = {
     it should "support retrieving items by id" in {
       val firstTwoItemIds = readable.readWithLimit(2).unsafeBody.items.map(_.id)
