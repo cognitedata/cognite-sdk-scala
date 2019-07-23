@@ -5,6 +5,7 @@ import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.semiauto.deriveEncoder
+import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
 
 abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: Encoder]
@@ -15,7 +16,10 @@ abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: En
   def toInternalId(id: String): InternalId
 
   implicit val internalIdItemsEncoder: Encoder[Items[InternalId]] = deriveEncoder[Items[InternalId]]
-  override def deleteByIds(ids: Seq[String]): F[Response[Unit]] =
+
+  override def deleteByIds(ids: Seq[String]): F[Response[Unit]] = {
+    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     requestSession
       .send { request =>
         request
@@ -29,6 +33,7 @@ abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: En
             case Right(Right(_)) => ()
           }
       }
+  }
 }
 
 class RawDatabases[F[_]](val requestSession: RequestSession[F])
@@ -71,12 +76,11 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
   override val baseUri =
     uri"${requestSession.baseUri}/raw/dbs/$database/tables/$table/rows"
 
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Unit]
-
   private implicit val rawRowItemsEncoder = deriveEncoder[Items[RawRow]]
   // raw does not return the created rows in the response, so we'll always return an empty sequence.
-  override def createItems(items: Items[RawRow]): F[Response[Seq[RawRow]]] =
+  override def createItems(items: Items[RawRow]): F[Response[Seq[RawRow]]] = {
+    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     requestSession
       .send { request =>
         request
@@ -89,6 +93,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
             case Right(Right(_)) => Seq.empty[RawRow]
           }
       }
+  }
 
   override def readWithCursor(
       cursor: Option[String],

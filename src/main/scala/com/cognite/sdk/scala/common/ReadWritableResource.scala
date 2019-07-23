@@ -4,6 +4,7 @@ import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
+import io.circe.generic.auto._
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 

@@ -10,6 +10,7 @@ import com.cognite.sdk.scala.v1.{
   RequestSession
 }
 import com.softwaremill.sttp._
+import io.circe.generic.auto._
 
 class Assets[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -37,4 +38,14 @@ class Assets[F[_]](val requestSession: RequestSession[F])
 
   override def updateItems(items: Seq[AssetUpdate]): F[Response[Seq[Asset]]] =
     Update.updateItems[F, Asset, AssetUpdate](requestSession, baseUri, items)
+
+  override def filterWithCursor(
+      filter: AssetsFilter,
+      cursor: Option[String],
+      limit: Option[Long]
+  ): F[Response[ItemsWithCursor[Asset]]] =
+    Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit)
+
+  override def search(searchQuery: AssetsQuery): F[Response[Seq[Asset]]] =
+    Search.search(requestSession, baseUri, searchQuery)
 }

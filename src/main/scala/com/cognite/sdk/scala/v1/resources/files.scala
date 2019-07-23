@@ -5,6 +5,7 @@ import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.Decoder
+import io.circe.generic.auto._
 
 class Files[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -49,4 +50,14 @@ class Files[F[_]](val requestSession: RequestSession[F])
 
   override def updateItems(items: Seq[FileUpdate]): F[Response[Seq[File]]] =
     Update.updateItems[F, File, FileUpdate](requestSession, baseUri, items)
+
+  override def filterWithCursor(
+      filter: FilesFilter,
+      cursor: Option[String],
+      limit: Option[Long]
+  ): F[Response[ItemsWithCursor[File]]] =
+    Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit)
+
+  override def search(searchQuery: FilesQuery): F[Response[Seq[File]]] =
+    Search.search(requestSession, baseUri, searchQuery)
 }

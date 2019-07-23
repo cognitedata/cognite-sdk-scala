@@ -4,8 +4,8 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.generic.semiauto._
-import io.circe.{Decoder, Encoder}
+import io.circe.generic.auto._
+import io.circe.Decoder
 
 class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -13,37 +13,14 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
     with DataPointsResource[F, Long] {
   override val baseUri = uri"${requestSession.baseUri}/timeseries/data"
 
-  implicit val dataPointDecoder: Decoder[DataPoint] = deriveDecoder[DataPoint]
-  implicit val stringDataPointDecoder: Decoder[StringDataPoint] = deriveDecoder[StringDataPoint]
-  implicit val dataPointEncoder: Encoder[DataPoint] = deriveEncoder[DataPoint]
-  implicit val stringDataPointEncoder: Encoder[StringDataPoint] = deriveEncoder[StringDataPoint]
-  implicit val dataPointsByIdResponseDecoder: Decoder[DataPointsByIdResponse] =
-    deriveDecoder[DataPointsByIdResponse]
-  implicit val dataPointsByIdEncoder: Encoder[DataPointsById] =
-    deriveEncoder[DataPointsById]
-  implicit val stringDataPointsByIdEncoder: Encoder[StringDataPointsById] =
-    deriveEncoder[StringDataPointsById]
-  implicit val dataPointsByIdResponseEncoder: Encoder[DataPointsByIdResponse] =
-    deriveEncoder[DataPointsByIdResponse]
-  implicit val dataPointsByIdResponseItemsEncoder: Encoder[Items[DataPointsByIdResponse]] =
-    deriveEncoder[Items[DataPointsByIdResponse]]
-  implicit val stringDataPointsByIdResponseDecoder: Decoder[StringDataPointsByIdResponse] =
-    deriveDecoder[StringDataPointsByIdResponse]
-  implicit val dataPointsByIdResponseItemsDecoder: Decoder[Items[DataPointsByIdResponse]] =
-    deriveDecoder[Items[DataPointsByIdResponse]]
-  implicit val dataPointsByIdItemsEncoder: Encoder[Items[DataPointsById]] =
-    deriveEncoder[Items[DataPointsById]]
-  implicit val stringDataPointsByIdResponseItemsDecoder
-      : Decoder[Items[StringDataPointsByIdResponse]] =
-    deriveDecoder[Items[StringDataPointsByIdResponse]]
-  implicit val stringDataPointsByIdItemsEncoder: Encoder[Items[StringDataPointsById]] =
-    deriveEncoder[Items[StringDataPointsById]]
   implicit val errorOrDataPointsByIdResponseDecoder
       : Decoder[Either[CdpApiError, Items[DataPointsByIdResponse]]] =
     EitherDecoder.eitherDecoder[CdpApiError, Items[DataPointsByIdResponse]]
   implicit val errorOrStringDataPointsByIdResponseDecoder
       : Decoder[Either[CdpApiError, Items[StringDataPointsByIdResponse]]] =
     EitherDecoder.eitherDecoder[CdpApiError, Items[StringDataPointsByIdResponse]]
+  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Unit]
 
   def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Response[Unit]] =
     requestSession
@@ -73,10 +50,6 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
           }
       }
 
-  implicit val deleteRangeByIdEncoder: Encoder[DeleteRangeById] =
-    deriveEncoder[DeleteRangeById]
-  implicit val deleteRangeByIdItemsEncoder: Encoder[Items[DeleteRangeById]] =
-    deriveEncoder[Items[DeleteRangeById]]
   def deleteRangeById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Response[Unit]] =
     requestSession
       .send { request =>
@@ -91,10 +64,6 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
           }
       }
 
-  implicit val queryRangeByIdEncoder: Encoder[QueryRangeById] =
-    deriveEncoder[QueryRangeById]
-  implicit val queryRangeByIdItemsEncoder: Encoder[Items[QueryRangeById]] =
-    deriveEncoder[Items[QueryRangeById]]
   def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Response[Seq[DataPoint]]] =
     requestSession
       .send { request =>
