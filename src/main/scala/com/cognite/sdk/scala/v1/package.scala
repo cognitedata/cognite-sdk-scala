@@ -73,6 +73,7 @@ package object v1 {
     deriveEncoder[FilesQuery]
 
   implicit val timeSeriesDecoder: Decoder[TimeSeries] = deriveDecoder[TimeSeries]
+  implicit val timeSeriesUpdateEncoder: Encoder[TimeSeriesUpdate] = deriveEncoder[TimeSeriesUpdate]
   implicit val timeSeriesItemsWithCursorDecoder: Decoder[ItemsWithCursor[TimeSeries]] =
     deriveDecoder[ItemsWithCursor[TimeSeries]]
   implicit val timeSeriesItemsDecoder: Decoder[Items[TimeSeries]] =
@@ -91,8 +92,8 @@ package object v1 {
     deriveDecoder[ItemsWithCursor[RawDatabase]]
   implicit val rawDatabaseItemsDecoder: Decoder[Items[RawDatabase]] =
     deriveDecoder[Items[RawDatabase]]
-  implicit val rawDatabaseItemsEncoder: Encoder[Items[RawDatabase]] =
-    deriveEncoder[Items[RawDatabase]]
+//  implicit val rawDatabaseItemsEncoder: Encoder[Items[RawDatabase]] =
+//    deriveEncoder[Items[RawDatabase]]
   implicit val rawDatabaseEncoder: Encoder[RawDatabase] = deriveEncoder[RawDatabase]
   implicit val rawDatabaseDecoder: Decoder[RawDatabase] = deriveDecoder[RawDatabase]
 
@@ -100,8 +101,8 @@ package object v1 {
     deriveDecoder[ItemsWithCursor[RawTable]]
   implicit val rawTableItemsDecoder: Decoder[Items[RawTable]] =
     deriveDecoder[Items[RawTable]]
-  implicit val rawTableItemsEncoder: Encoder[Items[RawTable]] =
-    deriveEncoder[Items[RawTable]]
+//  implicit val rawTableItemsEncoder: Encoder[Items[RawTable]] =
+//    deriveEncoder[Items[RawTable]]
   implicit val rawTableEncoder: Encoder[RawTable] = deriveEncoder[RawTable]
   implicit val rawTableDecoder: Decoder[RawTable] = deriveDecoder[RawTable]
 
@@ -119,17 +120,26 @@ package object v1 {
     deriveEncoder[Items[RawRowKey]]
 
   implicit val threeDModelDecoder: Decoder[ThreeDModel] = deriveDecoder[ThreeDModel]
-  implicit val threeDModelItemsDecoder: Decoder[Items[ThreeDModel]] = deriveDecoder[Items[ThreeDModel]]
-  implicit val threeDModelItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDModel]] = deriveDecoder[ItemsWithCursor[ThreeDModel]]
-  implicit val createThreeDModelDecoder: Decoder[CreateThreeDModel] = deriveDecoder[CreateThreeDModel]
-  implicit val createThreeDModelEncoder: Encoder[CreateThreeDModel] = deriveEncoder[CreateThreeDModel]
+  implicit val threeDModelUpdateEncoder: Encoder[ThreeDModelUpdate] =
+    deriveEncoder[ThreeDModelUpdate]
+  implicit val threeDModelItemsDecoder: Decoder[Items[ThreeDModel]] =
+    deriveDecoder[Items[ThreeDModel]]
+  implicit val threeDModelItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDModel]] =
+    deriveDecoder[ItemsWithCursor[ThreeDModel]]
+  implicit val createThreeDModelDecoder: Decoder[CreateThreeDModel] =
+    deriveDecoder[CreateThreeDModel]
+  implicit val createThreeDModelEncoder: Encoder[CreateThreeDModel] =
+    deriveEncoder[CreateThreeDModel]
   implicit val createThreeDModelItemsEncoder: Encoder[Items[CreateThreeDModel]] =
     deriveEncoder[Items[CreateThreeDModel]]
 
   implicit val threeDRevisionCameraDecoder: Decoder[Camera] = deriveDecoder[Camera]
   implicit val threeDRevisionCameraEncoder: Encoder[Camera] = deriveEncoder[Camera]
   implicit val threeDRevisionDecoder: Decoder[ThreeDRevision] = deriveDecoder[ThreeDRevision]
-  implicit val threeDRevisionItemsDecoder: Decoder[Items[ThreeDRevision]] = deriveDecoder[Items[ThreeDRevision]]
+  implicit val threeDRevisionUpdateEncoder: Encoder[ThreeDRevisionUpdate] =
+    deriveEncoder[ThreeDRevisionUpdate]
+  implicit val threeDRevisionItemsDecoder: Decoder[Items[ThreeDRevision]] =
+    deriveDecoder[Items[ThreeDRevision]]
   implicit val threeDRevisionItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDRevision]] =
     deriveDecoder[ItemsWithCursor[ThreeDRevision]]
   implicit val createThreeDRevisionDecoder: Decoder[CreateThreeDRevision] =
@@ -139,8 +149,10 @@ package object v1 {
   implicit val createThreeDRevisionItemsEncoder: Encoder[Items[CreateThreeDRevision]] =
     deriveEncoder[Items[CreateThreeDRevision]]
 
-  implicit val threeDAssetMappingDecoder: Decoder[ThreeDAssetMapping] = deriveDecoder[ThreeDAssetMapping]
-  implicit val threeDAssetMappingItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDAssetMapping]] =
+  implicit val threeDAssetMappingDecoder: Decoder[ThreeDAssetMapping] =
+    deriveDecoder[ThreeDAssetMapping]
+  implicit val threeDAssetMappingItemsWithCursorDecoder
+      : Decoder[ItemsWithCursor[ThreeDAssetMapping]] =
     deriveDecoder[ItemsWithCursor[ThreeDAssetMapping]]
 
   implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] =
@@ -149,9 +161,11 @@ package object v1 {
     deriveDecoder[CdpApiError]
   //implicit val cdpApiErrorUnitDecoder: Decoder[CdpApiError[Unit]] = deriveDecoder[CdpApiError[Unit]]
   implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder[CogniteId]
-  implicit val cogniteExternalIdEncoder: Encoder[CogniteExternalId] = deriveEncoder[CogniteExternalId]
+  implicit val cogniteExternalIdEncoder: Encoder[CogniteExternalId] =
+    deriveEncoder[CogniteExternalId]
   implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder[Items[CogniteId]]
-  implicit val cogniteExternalIdItemsEncoder: Encoder[Items[CogniteExternalId]] = deriveEncoder[Items[CogniteExternalId]]
+  implicit val cogniteExternalIdItemsEncoder: Encoder[Items[CogniteExternalId]] =
+    deriveEncoder[Items[CogniteExternalId]]
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
 

@@ -20,13 +20,14 @@ import scala.concurrent.duration._
 
 final case class RequestSession[F[_]](baseUri: Uri, sttpBackend: SttpBackend[F, _], auth: Auth) {
   def send[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[Response[R]] =
-    r(sttp
-      .auth(auth)
-      .contentType("application/json")
-      .header("accept", "application/json")
-      .readTimeout(90.seconds)
-      .parseResponseIf(_ => true))
-      .send()(sttpBackend, implicitly)
+    r(
+      sttp
+        .auth(auth)
+        .contentType("application/json")
+        .header("accept", "application/json")
+        .readTimeout(90.seconds)
+        .parseResponseIf(_ => true)
+    ).send()(sttpBackend, implicitly)
 }
 
 class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
@@ -35,7 +36,9 @@ class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]
       options = SttpBackendOptions.connectionTimeout(90.seconds)
     )
 
-    val loginStatus = new Login(RequestSession(uri"https://api.cognitedata.com", sttpBackend, auth)).status().unsafeBody
+    val loginStatus = new Login(RequestSession(uri"https://api.cognitedata.com", sttpBackend, auth))
+      .status()
+      .unsafeBody
 
     if (loginStatus.project.trim.isEmpty) {
       throw InvalidAuthentication()
@@ -44,8 +47,8 @@ class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]
     }
   }
 
-  val requestSession = RequestSession(uri"https://api.cognitedata.com/api/v1/projects/$project",
-    sttpBackend, auth)
+  val requestSession =
+    RequestSession(uri"https://api.cognitedata.com/api/v1/projects/$project", sttpBackend, auth)
   val login = new Login[F](requestSession.copy(baseUri = uri"https://api.cognitedata.com"))
   val assets = new Assets[F](requestSession)
   val events = new Events[F](requestSession)
@@ -55,10 +58,12 @@ class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]
 
   val rawDatabases = new RawDatabases[F](requestSession)
   def rawTables(database: String): RawTables[F] = new RawTables(requestSession, database)
-  def rawRows(database: String, table: String): RawRows[F] = new RawRows(requestSession, database, table)
+  def rawRows(database: String, table: String): RawRows[F] =
+    new RawRows(requestSession, database, table)
 
   val threeDModels = new ThreeDModels[F](requestSession)
-  def threeDRevisions(modelId: Long): ThreeDRevisions[F] = new ThreeDRevisions(requestSession, modelId)
+  def threeDRevisions(modelId: Long): ThreeDRevisions[F] =
+    new ThreeDRevisions(requestSession, modelId)
   def threeDAssetMappings(modelId: Long, revisionId: Long): ThreeDAssetMappings[F] =
     new ThreeDAssetMappings(requestSession, modelId, revisionId)
 }

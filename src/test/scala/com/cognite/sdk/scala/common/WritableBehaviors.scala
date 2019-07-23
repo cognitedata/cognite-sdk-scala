@@ -1,33 +1,26 @@
 package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp.Id
-import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import org.scalatest.{FlatSpec, Matchers}
 
 trait WritableBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off
   def writable[R <: WithId[PrimitiveId], W, PrimitiveId](
-      writable: Create[R, W, Id]
-        with DeleteByIds[Id, PrimitiveId],
+      writable: Create[R, W, Id] with DeleteByIds[Id, PrimitiveId],
       readExamples: Seq[R],
       createExamples: Seq[W],
       idsThatDoNotExist: Seq[PrimitiveId],
       supportsMissingAndThrown: Boolean
-  )(
-      implicit errorDecoder: Decoder[CdpApiError],
-      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
-      itemsDecoder: Decoder[Items[R]],
-      itemsEncoder: Encoder[Items[W]],
-      d1: Encoder[Items[CogniteId]],
-      t: Transformer[R, W]
-  ): Unit = {
+  )(implicit t: Transformer[R, W]): Unit = {
     it should "be an error to delete using ids that does not exist" in {
       val thrown = the[CdpApiException] thrownBy writable
         .deleteByIds(idsThatDoNotExist)
         .unsafeBody
       if (supportsMissingAndThrown) {
-        val missingIds = thrown.missing.getOrElse(Seq.empty).flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+        val missingIds = thrown.missing
+          .getOrElse(Seq.empty)
+          .flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
         missingIds should have size idsThatDoNotExist.size.toLong
         missingIds should contain theSameElementsAs idsThatDoNotExist
       }
@@ -40,8 +33,12 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
         // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
         // if duplicated ids that do not exist are specified.
         val sameMissingIds = sameIdsThrown.duplicated match {
-          case Some(duplicatedIds) => duplicatedIds.flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
-          case None => sameIdsThrown.missing.getOrElse(Seq.empty).flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+          case Some(duplicatedIds) =>
+            duplicatedIds.flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+          case None =>
+            sameIdsThrown.missing
+              .getOrElse(Seq.empty)
+              .flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
         }
         sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
         sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
@@ -95,17 +92,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       updateId: (Long, R) => R,
       compareItems: (R, R) => Boolean,
       compareUpdated: (Seq[R], Seq[R]) => Unit
-  )(
-      implicit errorDecoder: Decoder[CdpApiError],
-      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
-      itemsDecoder: Decoder[Items[R]],
-      itemsEncoder: Encoder[Items[W]],
-      itemsUpdateEncoder: Encoder[Items[U]],
-      updateEncoder: Encoder[U],
-      d1: Encoder[Items[CogniteId]],
-      t: Transformer[R, W],
-      t2: Transformer[R, U]
-  ): Unit =
+  )(implicit t: Transformer[R, W], t2: Transformer[R, U]): Unit =
     it should "allow updates using the read class" in {
       // create items
       val createdItems = updatable.create(readExamples).unsafeBody
@@ -117,12 +104,14 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       // update the item to current values
       val unchangedUpdatedItems = updatable.update(readItems).unsafeBody
       assert(unchangedUpdatedItems.size == readItems.size)
-      assert(unchangedUpdatedItems.zip(readItems).forall { case (updated, read) =>
-        compareItems(updated, read)
+      assert(unchangedUpdatedItems.zip(readItems).forall {
+        case (updated, read) =>
+          compareItems(updated, read)
       })
 
       // update the item with new values
-      val updates = updateExamples.zip(readItems).map { case (updated, read) => updateId(read.id, updated) }
+      val updates =
+        updateExamples.zip(readItems).map { case (updated, read) => updateId(read.id, updated) }
       val updatedItems = updatable.update(updates).unsafeBody
       assert(updatedItems.size == readItems.size)
       compareUpdated(readItems, updatedItems)

@@ -15,12 +15,19 @@ final case class UpdateRequest(update: Json, id: Long)
 trait Update[R <: WithId[Long], U <: WithId[Long], F[_]]
     extends WithRequestSession[F]
     with BaseUri {
-  lazy val updateUri = uri"$baseUri/update"
+  def updateItems(items: Seq[U]): F[Response[Seq[R]]]
 
-  def updateItems(updates: Seq[U])(
-      implicit updateEncoder: Encoder[U],
-      itemsDecoder: Decoder[Items[R]]
-  ): F[Response[Seq[R]]] = {
+  // scalastyle: off
+  def update[T](items: Seq[T])(implicit t: Transformer[T, U]): F[Response[Seq[R]]] =
+    updateItems(items.map(_.transformInto[U]))
+}
+
+object Update {
+  def updateItems[F[_], R, U <: WithId[Long]: Encoder](
+      requestSession: RequestSession[F],
+      baseUri: Uri,
+      updates: Seq[U]
+  )(implicit decodeReadItems: Decoder[Items[R]]): F[Response[Seq[R]]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     implicit val _: Encoder[UpdateRequest] = deriveEncoder[UpdateRequest]
@@ -32,7 +39,7 @@ trait Update[R <: WithId[Long], U <: WithId[Long], F[_]]
     requestSession
       .send { request =>
         request
-          .post(updateUri)
+          .post(uri"$baseUri/update")
           .body(Items(updates.map { update =>
             UpdateRequest(update.asJson.mapObject(_.remove("id")), update.id)
           }))
@@ -45,12 +52,4 @@ trait Update[R <: WithId[Long], U <: WithId[Long], F[_]]
           }
       }
   }
-
-  // scalastyle: off
-  def update[T](items: Seq[T])(
-      implicit updateEncoder: Encoder[U],
-      itemsDecoder: Decoder[Items[R]],
-      t: Transformer[T, U]
-  ): F[Response[Seq[R]]] =
-    updateItems(items.map(_.transformInto[U]))
 }

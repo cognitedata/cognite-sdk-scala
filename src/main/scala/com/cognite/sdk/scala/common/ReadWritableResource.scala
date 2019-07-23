@@ -16,7 +16,16 @@ trait DeleteByExternalIds[F[_]] {
 }
 
 trait Create[R, W, F[_]] extends WithRequestSession[F] with BaseUri {
-  def createItems(items: Items[W])(
+  def createItems(items: Items[W]): F[Response[Seq[R]]]
+
+  def create[T](items: Seq[T])(
+      implicit t: Transformer[T, W]
+  ): F[Response[Seq[R]]] =
+    createItems(Items(items.map(_.transformInto[W])))
+}
+
+object Create {
+  def createItems[F[_], R, W](requestSession: RequestSession[F], baseUri: Uri, items: Items[W])(
       implicit readDecoder: Decoder[ItemsWithCursor[R]],
       itemsEncoder: Encoder[Items[W]]
   ): F[Response[Seq[R]]] = {
@@ -36,11 +45,4 @@ trait Create[R, W, F[_]] extends WithRequestSession[F] with BaseUri {
           }
       }
   }
-
-  def create[T](items: Seq[T])(
-      implicit readDecoder: Decoder[ItemsWithCursor[R]],
-      itemsEncoder: Encoder[Items[W]],
-      t: Transformer[T, W]
-  ): F[Response[Seq[R]]] =
-    createItems(Items(items.map(_.transformInto[W])))
 }
