@@ -7,7 +7,7 @@ import io.circe.generic.auto._
 
 trait ReadBehaviours extends Matchers { this: FlatSpec =>
   def readable[R, C[_], InternalId, PrimitiveId](
-      readable: Readable[R, Id, C, InternalId, PrimitiveId]
+      readable: Readable[R, Id, C]
   )(
       implicit sttpBackend: SttpBackend[Id, _],
       auth: Auth,
@@ -34,10 +34,10 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
   }
 
   // scalastyle:off
-  def readableWithRetrieve[R <: WithId[PrimitiveId], W, C[_], InternalId, PrimitiveId](
-      readable: Readable[R, Id, C, InternalId, PrimitiveId]
-        with RetrieveByIds[R, Id, C, InternalId, PrimitiveId],
-      idsThatDoNotExist: Seq[PrimitiveId],
+  def readableWithRetrieve[R <: WithId[Long], W, C[_]](
+      readable: Readable[R, Id, C]
+        with RetrieveByIds[R, Id, C],
+      idsThatDoNotExist: Seq[Long],
       supportsMissingAndThrown: Boolean
   )(
       implicit sttpBackend: SttpBackend[Id, _],
@@ -46,7 +46,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       errorDecoder: Decoder[CdpApiError],
       itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
       itemsDecoder: Decoder[C[Items[R]]],
-      d1: Encoder[Items[InternalId]]
+      d1: Encoder[Items[CogniteId]]
   ): Unit = {
     it should "support retrieving items by id" in {
       val firstTwoItemIds = readable.readWithLimit(2).unsafeBody.items.map(_.id)

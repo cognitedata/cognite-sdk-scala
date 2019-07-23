@@ -7,14 +7,8 @@ import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
-//abstract class ReadWritableResource[R: Decoder, W: Decoder: Encoder, F[_], C[_], InternalId, PrimitiveId](
-//    implicit auth: Auth
-//) extends ReadableResource[R, F, C, InternalId, PrimitiveId]
-//    with Create[R, W, F, C, InternalId, PrimitiveId]
-//    with DeleteByIds[F] {}
-
-trait DeleteByIds[F[_]] {
-  def deleteByIds(ids: Seq[Long])(
+trait DeleteByIds[F[_], PrimitiveId] {
+  def deleteByIds(ids: Seq[PrimitiveId])(
       implicit sttpBackend: SttpBackend[F, _],
       auth: Auth,
       errorDecoder: Decoder[CdpApiError],
