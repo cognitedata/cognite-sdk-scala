@@ -1,11 +1,9 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.{CreateThreeDModel, CreateThreeDRevision, ThreeDModel, ThreeDModelUpdate, ThreeDRevision, ThreeDRevisionUpdate}
+import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.generic.auto._
-import io.circe.{Decoder, Encoder}
 
 class ThreeDModels[F[_]](val requestSession: RequestSession)
     extends Create[ThreeDModel, CreateThreeDModel, F]
@@ -16,15 +14,9 @@ class ThreeDModels[F[_]](val requestSession: RequestSession)
     with WithRequestSession {
   override val baseUri = uri"${requestSession.baseUri}/3d/models"
 
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Unit]
   override def deleteByIds(ids: Seq[Long])(
-      implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
-      itemsEncoder: Encoder[Items[CogniteId]]
+      implicit sttpBackend: SttpBackend[F, _]
   ): F[Response[Unit]] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.request
@@ -52,12 +44,8 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession, modelId: Long)
     uri"${requestSession.baseUri}/3d/models/$modelId/revisions"
 
   override def deleteByIds(ids: Seq[Long])(
-      implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
-      itemsEncoder: Encoder[Items[CogniteId]]
+      implicit sttpBackend: SttpBackend[F, _]
   ): F[Response[Unit]] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.request

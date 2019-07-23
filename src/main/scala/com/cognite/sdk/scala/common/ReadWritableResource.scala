@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.common
 
-import com.cognite.sdk.scala.v1.CogniteExternalId
+import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
@@ -9,28 +9,23 @@ import io.scalaland.chimney.dsl._
 
 trait DeleteByIds[F[_], PrimitiveId] {
   def deleteByIds(ids: Seq[PrimitiveId])(
-      implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
-      itemsEncoder: Encoder[Items[CogniteId]]
+      implicit sttpBackend: SttpBackend[F, _]
   ): F[Response[Unit]]
 }
 
 trait DeleteByExternalIds[F[_]] {
   def deleteByExternalIds(externalIds: Seq[String])(
-      implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
-      itemsEncoder: Encoder[Items[CogniteExternalId]]
+      implicit sttpBackend: SttpBackend[F, _]
   ): F[Response[Unit]]
 }
 
 trait Create[R, W, F[_]] extends WithRequestSession with BaseUri {
   def createItems(items: Items[W])(
       implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
-      itemsEncoder: Encoder[Items[W]],
-      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]
+      readDecoder: Decoder[ItemsWithCursor[R]],
+      itemsEncoder: Encoder[Items[W]]
   ): F[Response[Seq[R]]] = {
-    implicit val errorOrStringDataPointsByIdResponseDecoder
+    implicit val errorOrItemsWithCursorDecoder
         : Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     requestSession
@@ -49,9 +44,8 @@ trait Create[R, W, F[_]] extends WithRequestSession with BaseUri {
 
   def create[T](items: Seq[T])(
       implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
+      readDecoder: Decoder[ItemsWithCursor[R]],
       itemsEncoder: Encoder[Items[W]],
-      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
       t: Transformer[T, W]
   ): F[Response[Seq[R]]] =
     createItems(Items(items.map(_.transformInto[W])))

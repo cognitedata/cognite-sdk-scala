@@ -1,10 +1,9 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.CogniteExternalId
+import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.{Decoder, Encoder}
 
 //abstract class ReadWritableResourceV1[R: Decoder, W: Decoder: Encoder, F[_]](
 //    implicit auth: Auth
@@ -17,12 +16,8 @@ trait DeleteByExternalIdsV1[F[_]]
     with BaseUri
     with DeleteByExternalIds[F] {
   override def deleteByExternalIds(externalIds: Seq[String])(
-      implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
-      itemsEncoder: Encoder[Items[CogniteExternalId]]
+      implicit sttpBackend: SttpBackend[F, _]
   ): F[Response[Unit]] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
@@ -44,12 +39,8 @@ trait DeleteByIdsV1[R, W, F[_]]
     with BaseUri
     with DeleteByIds[F, Long] {
   override def deleteByIds(ids: Seq[Long])(
-      implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
-      itemsEncoder: Encoder[Items[CogniteId]]
+      implicit sttpBackend: SttpBackend[F, _]
   ): F[Response[Unit]] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession

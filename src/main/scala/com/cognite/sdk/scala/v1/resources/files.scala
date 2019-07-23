@@ -24,9 +24,8 @@ class Files[F[_]](val requestSession: RequestSession)
       items: Items[CreateFile]
   )(
       implicit sttpBackend: SttpBackend[F, _],
-      errorDecoder: Decoder[CdpApiError],
-      itemsEncoder: Encoder[Items[CreateFile]],
-      itemsWithCursorDecoder: Decoder[ItemsWithCursor[File]]
+      readDecoder: Decoder[ItemsWithCursor[File]],
+      itemsEncoder: Encoder[Items[CreateFile]]
   ): F[Response[Seq[File]]] =
     items.items match {
       case item :: Nil =>

@@ -1,7 +1,6 @@
 package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
-import io.circe.generic.auto._
 
 class ThreeDTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val client = new GenericClient()(auth, sttpBackend)
