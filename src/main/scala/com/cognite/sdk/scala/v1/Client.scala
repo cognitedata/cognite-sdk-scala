@@ -23,20 +23,20 @@ class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]
   }
 
   val login = new Login[F]()
-  val assets = new Assets[F]( this)
-  val events = new Events[F](project)
-  val files = new Files[F](project)
-  val timeSeries = new TimeSeriesResource[F](project)
-  val dataPoints = new DataPointsResourceV1[F](project)
+  val assets = new Assets[F](this)
+  val events = new Events[F](this)
+  val files = new Files[F](this)
+  val timeSeries = new TimeSeriesResource[F](this)
+  val dataPoints = new DataPointsResourceV1[F](this)
 
-  val rawDatabases = new RawDatabases[F](project)
-  def rawTables(database: String): RawTables[F] = new RawTables(project, database)
-  def rawRows(database: String, table: String): RawRows[F] = new RawRows(project, database, table)
+  val rawDatabases = new RawDatabases[F](this)
+  def rawTables(database: String): RawTables[F] = new RawTables(this, database)
+  def rawRows(database: String, table: String): RawRows[F] = new RawRows(this, database, table)
 
-  val threeDModels = new ThreeDModels[F](project)
-  def threeDRevisions(modelId: Long): ThreeDRevisions[F] = new ThreeDRevisions(project, modelId)
+  val threeDModels = new ThreeDModels[F](this)
+  def threeDRevisions(modelId: Long): ThreeDRevisions[F] = new ThreeDRevisions(this, modelId)
   def threeDAssetMappings(modelId: Long, revisionId: Long): ThreeDAssetMappings[F] =
-    new ThreeDAssetMappings(project, modelId, revisionId)
+    new ThreeDAssetMappings(this, modelId, revisionId)
 
   override def request: RequestT[Empty, String, Nothing] =
     sttp
@@ -46,7 +46,7 @@ class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]
       .readTimeout(90.seconds)
       .parseResponseIf(_ => true)
 
-  override val baseUri: Uri = uri"https://api.cognitedata.com/api/v1/projects/$project"
+  override lazy val baseUri: Uri = uri"https://api.cognitedata.com/api/v1/projects/$project"
 }
 
 final case class Client()(implicit auth: Auth, sttpBackend: SttpBackend[Id, Nothing])

@@ -7,9 +7,9 @@ import org.scalatest.{FlatSpec, Matchers}
 
 trait WritableBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off
-  def writable[R <: WithId[PrimitiveId], W, C[_], InternalId, PrimitiveId](
-      writable: Create[R, W, Id, C, InternalId, PrimitiveId]
-        with DeleteByIds[Id, InternalId, PrimitiveId],
+  def writable[R <: WithId[PrimitiveId], W, PrimitiveId, C[_]](
+      writable: Create[R, W, Id, C]
+        with DeleteByIds[Id, PrimitiveId],
       readExamples: Seq[R],
       createExamples: Seq[W],
       idsThatDoNotExist: Seq[PrimitiveId],
@@ -22,7 +22,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       itemsWithCursorDecoder: Decoder[C[ItemsWithCursor[R]]],
       itemsDecoder: Decoder[C[Items[R]]],
       itemsEncoder: Encoder[Items[W]],
-      d1: Encoder[Items[InternalId]],
+      d1: Encoder[Items[CogniteId]],
       t: Transformer[R, W]
   ): Unit = {
     it should "be an error to delete using ids that does not exist" in {
@@ -88,11 +88,11 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
     //       id in the same api call for V1
   }
 
-  def updatable[R <: WithId[Long], W, U <: WithId[Long], C[_], InternalId, PrimitiveId](
-      updatable: Create[R, W, Id, C, InternalId, Long]
-        with DeleteByIds[Id, InternalId, Long]
+  def updatable[R <: WithId[Long], W, U <: WithId[Long], C[_]](
+      updatable: Create[R, W, Id, C]
+        with DeleteByIds[Id, Long]
         with Update[R, U, Id, C]
-        with RetrieveByIds[R, Id, C, InternalId, Long],
+        with RetrieveByIds[R, Id, C],
       readExamples: Seq[R],
       updateExamples: Seq[R],
       updateId: (Long, R) => R,
@@ -108,7 +108,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       itemsEncoder: Encoder[Items[W]],
       itemsUpdateEncoder: Encoder[Items[U]],
       updateEncoder: Encoder[U],
-      d1: Encoder[Items[InternalId]],
+      d1: Encoder[Items[CogniteId]],
       t: Transformer[R, W],
       t2: Transformer[R, U]
   ): Unit =

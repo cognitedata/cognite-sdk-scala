@@ -18,7 +18,7 @@ final case class ThreeDModelUpdate(
     id: Long = 0,
     name: Option[NonNullableSetter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None
-)
+) extends WithId[Long]
 
 final case class Camera(
     target: Option[Array[Double]],
@@ -53,4 +53,4 @@ final case class ThreeDRevisionUpdate(
     rotation: Option[NonNullableSetter[Array[Double]]] = None,
     camera: Option[NonNullableSetter[Camera]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None
-)
+) extends WithId[Long]

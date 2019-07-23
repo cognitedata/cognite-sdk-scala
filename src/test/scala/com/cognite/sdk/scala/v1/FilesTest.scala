@@ -59,7 +59,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L)))
       )
       .flatMap(_.unsafeBody)
-    assert(createdTimeFilterResults.length == 40)
+    assert(createdTimeFilterResults.length == 35)
 
     val createdTimeFilterResultsWithLimit = client.files
       .filterWithLimit(
@@ -78,7 +78,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         )
       )
       .unsafeBody
-    assert(createdTimeSearchResults.length == 40)
+    assert(createdTimeSearchResults.length == 35)
     val mimeTypeTimeSearchResults = client.files
       .search(
         FilesQuery(
