@@ -4,7 +4,6 @@ import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
-import io.circe.generic.auto._
 
 trait SearchQuery[F, S] {
   val filter: Option[F]
@@ -18,8 +17,8 @@ trait Search[R, Q, F[_]] extends WithRequestSession[F] with BaseUri {
 
 object Search {
   def search[F[_], R, Q](requestSession: RequestSession[F], baseUri: Uri, searchQuery: Q)(
-    implicit itemsDecoder: Decoder[Items[R]],
-    searchQueryEncoder: Encoder[Q]
+      implicit itemsDecoder: Decoder[Items[R]],
+      searchQueryEncoder: Encoder[Q]
   ): F[Response[Seq[R]]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]

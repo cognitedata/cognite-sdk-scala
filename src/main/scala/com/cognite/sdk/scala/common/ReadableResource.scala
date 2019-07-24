@@ -3,8 +3,8 @@ package com.cognite.sdk.scala.common
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.Decoder
-import io.circe.generic.auto._
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.deriveEncoder
 
 trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
   def readWithCursor(cursor: Option[String], limit: Option[Long]): F[Response[ItemsWithCursor[R]]]
@@ -76,6 +76,9 @@ trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUri {
 }
 
 object RetrieveByIds {
+  implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
+  implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
+
   def retrieveByIds[F[_], R](requestSession: RequestSession[F], baseUri: Uri, ids: Seq[Long])(
       implicit itemsDecoder: Decoder[Items[R]]
   ): F[Response[Seq[R]]] = {

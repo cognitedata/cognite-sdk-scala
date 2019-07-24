@@ -4,27 +4,20 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.generic.semiauto.deriveEncoder
-import io.circe.generic.auto._
+import io.circe.generic.semiauto._
 import io.circe.{Decoder, Encoder}
 
-abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: Encoder]
-    extends WithRequestSession[F]
-    with Readable[R, F]
-    with Create[R, W, F]
-    with DeleteByIds[F, String] {
-  def toInternalId(id: String): InternalId
-
-  implicit val internalIdItemsEncoder: Encoder[Items[InternalId]] = deriveEncoder[Items[InternalId]]
-
-  override def deleteByIds(ids: Seq[String]): F[Response[Unit]] = {
+object RawResource {
+  def deleteByIds[F[_], I](requestSession: RequestSession[F], baseUri: Uri, ids: Seq[I])(
+      implicit idsItemsEncoder: Encoder[Items[I]]
+  ): F[Response[Unit]] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     requestSession
       .send { request =>
         request
           .post(uri"$baseUri/delete")
-          .body(Items(ids.map(toInternalId)))
+          .body(Items(ids))
           .response(asJson[Either[CdpApiError, Unit]])
           .mapResponse {
             case Left(value) =>
@@ -37,9 +30,11 @@ abstract class RawResource[R: Decoder, W: Decoder: Encoder, F[_], InternalId: En
 }
 
 class RawDatabases[F[_]](val requestSession: RequestSession[F])
-    extends RawResource[RawDatabase, RawDatabase, F, RawDatabase] {
-  def toInternalId(id: String): RawDatabase = RawDatabase(id)
-  implicit val idEncoder: Encoder[RawDatabase] = deriveEncoder
+    extends WithRequestSession[F]
+    with Readable[RawDatabase, F]
+    with Create[RawDatabase, RawDatabase, F]
+    with DeleteByIds[F, String] {
+  import RawDatabases._
   override val baseUri = uri"${requestSession.baseUri}/raw/dbs"
 
   override def readWithCursor(
@@ -50,12 +45,28 @@ class RawDatabases[F[_]](val requestSession: RequestSession[F])
 
   override def createItems(items: Items[RawDatabase]): F[Response[Seq[RawDatabase]]] =
     Create.createItems[F, RawDatabase, RawDatabase](requestSession, baseUri, items)
+
+  override def deleteByIds(ids: Seq[String]): F[Response[Unit]] =
+    RawResource.deleteByIds(requestSession, baseUri, ids.map(RawDatabase))
+}
+
+object RawDatabases {
+  implicit val rawDatabaseItemsWithCursorDecoder: Decoder[ItemsWithCursor[RawDatabase]] =
+    deriveDecoder[ItemsWithCursor[RawDatabase]]
+  implicit val rawDatabaseItemsDecoder: Decoder[Items[RawDatabase]] =
+    deriveDecoder[Items[RawDatabase]]
+  implicit val rawDatabaseItemsEncoder: Encoder[Items[RawDatabase]] =
+    deriveEncoder[Items[RawDatabase]]
+  implicit val rawDatabaseEncoder: Encoder[RawDatabase] = deriveEncoder[RawDatabase]
+  implicit val rawDatabaseDecoder: Decoder[RawDatabase] = deriveDecoder[RawDatabase]
 }
 
 class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
-    extends RawResource[RawTable, RawTable, F, RawTable] {
-  def toInternalId(id: String): RawTable = RawTable(id)
-  implicit val idEncoder: Encoder[RawTable] = deriveEncoder
+    extends WithRequestSession[F]
+    with Readable[RawTable, F]
+    with Create[RawTable, RawTable, F]
+    with DeleteByIds[F, String] {
+  import RawTables._
   override val baseUri =
     uri"${requestSession.baseUri}/raw/dbs/$database/tables"
 
@@ -67,16 +78,31 @@ class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
 
   override def createItems(items: Items[RawTable]): F[Response[Seq[RawTable]]] =
     Create.createItems[F, RawTable, RawTable](requestSession, baseUri, items)
+
+  override def deleteByIds(ids: Seq[String]): F[Response[Unit]] =
+    RawResource.deleteByIds(requestSession, baseUri, ids.map(RawTable))
+}
+
+object RawTables {
+  implicit val rawTableItemsWithCursorDecoder: Decoder[ItemsWithCursor[RawTable]] =
+    deriveDecoder[ItemsWithCursor[RawTable]]
+  implicit val rawTableItemsDecoder: Decoder[Items[RawTable]] =
+    deriveDecoder[Items[RawTable]]
+  implicit val rawTableItemsEncoder: Encoder[Items[RawTable]] =
+    deriveEncoder[Items[RawTable]]
+  implicit val rawTableEncoder: Encoder[RawTable] = deriveEncoder[RawTable]
+  implicit val rawTableDecoder: Decoder[RawTable] = deriveDecoder[RawTable]
 }
 
 class RawRows[F[_]](val requestSession: RequestSession[F], database: String, table: String)
-    extends RawResource[RawRow, RawRow, F, RawRowKey] {
-  def toInternalId(id: String): RawRowKey = RawRowKey(id)
-  implicit val idEncoder: Encoder[RawRowKey] = deriveEncoder
+    extends WithRequestSession[F]
+    with Readable[RawRow, F]
+    with Create[RawRow, RawRow, F]
+    with DeleteByIds[F, String] {
+  import RawRows._
   override val baseUri =
     uri"${requestSession.baseUri}/raw/dbs/$database/tables/$table/rows"
 
-  private implicit val rawRowItemsEncoder = deriveEncoder[Items[RawRow]]
   // raw does not return the created rows in the response, so we'll always return an empty sequence.
   override def createItems(items: Items[RawRow]): F[Response[Seq[RawRow]]] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
@@ -100,4 +126,22 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       limit: Option[Long]
   ): F[Response[ItemsWithCursor[RawRow]]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+
+  override def deleteByIds(ids: Seq[String]): F[Response[Unit]] =
+    RawResource.deleteByIds(requestSession, baseUri, ids.map(RawRowKey))
+}
+
+object RawRows {
+  implicit val rawRowEncoder: Encoder[RawRow] = deriveEncoder[RawRow]
+  implicit val rawRowDecoder: Decoder[RawRow] = deriveDecoder[RawRow]
+  implicit val rawRowItemsWithCursorDecoder: Decoder[ItemsWithCursor[RawRow]] =
+    deriveDecoder[ItemsWithCursor[RawRow]]
+  implicit val rawRowItemsDecoder: Decoder[Items[RawRow]] =
+    deriveDecoder[Items[RawRow]]
+  implicit val rawRowItemsEncoder: Encoder[Items[RawRow]] =
+    deriveEncoder[Items[RawRow]]
+
+  implicit val rawRowKeyEncoder: Encoder[RawRowKey] = deriveEncoder[RawRowKey]
+  implicit val rawRowKeyItemsEncoder: Encoder[Items[RawRowKey]] =
+    deriveEncoder[Items[RawRowKey]]
 }

@@ -6,7 +6,7 @@ import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder, Json, Printer}
 import io.circe.syntax._
-import io.circe.generic.auto._
+import io.circe.generic.semiauto._
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
@@ -23,6 +23,8 @@ trait Update[R <: WithId[Long], U <: WithId[Long], F[_]]
 }
 
 object Update {
+  implicit val updateRequestEncoder: Encoder[UpdateRequest] = deriveEncoder
+  implicit val updateRequestItemsEncoder: Encoder[Items[UpdateRequest]] = deriveEncoder
   def updateItems[F[_], R, U <: WithId[Long]: Encoder](
       requestSession: RequestSession[F],
       baseUri: Uri,
