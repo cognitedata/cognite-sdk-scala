@@ -39,7 +39,7 @@ podTemplate(label: label,
                 stage('Install SBT config and credentials') {
                     sh('mkdir -p /root/.sbt/1.0 && cp /sbt-credentials/credentials.sbt /root/.sbt/1.0/credentials.sbt')
                     sh('cp /sbt-credentials/repositories /root/.sbt/')
-                    //sh('mkdir -p /root/.sbt/gpg && cp /sbt-credentials/pubring.asc /sbt-credentials/secring.asc /root/.sbt/gpg/')
+                    sh('mkdir -p /root/.sbt/gpg && cp /sbt-credentials/pubring.asc /sbt-credentials/secring.asc /root/.sbt/gpg/')
                 }
                 stage('Run tests') {
                     sh('cat /dev/null | sbt -Dsbt.log.noformat=true scalastyle test:scalastyle scalafmtCheck scalafix coverage +test coverageReport')
