@@ -48,6 +48,10 @@ trait WithId[I] {
   val id: I
 }
 
+trait WithExternalId {
+  val externalId: Option[String]
+}
+
 object EitherDecoder {
   def eitherDecoder[A, B](implicit a: Decoder[A], b: Decoder[B]): Decoder[Either[A, B]] = {
     val l: Decoder[Either[A, B]] = a.map(Left.apply)

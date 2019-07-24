@@ -5,6 +5,7 @@ import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val client = new GenericClient()(auth, sttpBackend)
   private val idsThatDoNotExist = Seq(999991L, 999992L)
+  private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
   it should behave like readable(client.events)
 
@@ -15,6 +16,20 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     Seq(Event(description = Some("scala-sdk-read-example-1")), Event(description = Some("scala-sdk-read-example-2"))),
     Seq(CreateEvent(description = Some("scala-sdk-create-example-1")), CreateEvent(description = Some("scala-sdk-create-example-2"))),
     idsThatDoNotExist,
+    supportsMissingAndThrown = true
+  )
+
+  it should behave like writableWithExternalId(
+    client.events,
+    Seq(
+      Event(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
+      Event(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
+    ),
+    Seq(
+      CreateEvent(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
+      CreateEvent(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
+    ),
+    externalIdsThatDoNotExist,
     supportsMissingAndThrown = true
   )
 

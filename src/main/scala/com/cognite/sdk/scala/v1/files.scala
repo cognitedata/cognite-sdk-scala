@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithId}
+import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
 
 final case class File(
     id: Long = 0,
@@ -16,6 +16,7 @@ final case class File(
     lastUpdatedTime: Long = 0,
     uploadUrl: Option[String] = None
 ) extends WithId[Long]
+    with WithExternalId
 
 final case class CreateFile(
     name: String,

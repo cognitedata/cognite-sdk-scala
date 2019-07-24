@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithId}
+import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
 
 final case class Event(
     id: Long = 0,
@@ -16,6 +16,7 @@ final case class Event(
     createdTime: Long = 0,
     lastUpdatedTime: Long = 0
 ) extends WithId[Long]
+    with WithExternalId
 
 final case class CreateEvent(
     startTime: Option[Long] = None,
@@ -27,7 +28,7 @@ final case class CreateEvent(
     assetIds: Option[Seq[Long]] = None,
     source: Option[String] = None,
     externalId: Option[String] = None
-)
+) extends WithExternalId
 
 final case class EventUpdate(
     id: Long = 0,

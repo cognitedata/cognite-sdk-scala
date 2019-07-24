@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.common
 
+import java.util.UUID
+
 import com.softwaremill.sttp.{MonadError, Request, Response, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -25,6 +27,8 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
 }
 
 abstract class SdkTest extends FlatSpec with Matchers {
+  def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
+
   private val apiKey = Option(System.getenv("TEST_API_KEY_READ"))
     .getOrElse(throw new RuntimeException("TEST_API_KEY_READ not set"))
   implicit val auth: Auth = ApiKeyAuth(apiKey)
