@@ -19,6 +19,30 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
     supportsMissingAndThrown = true
   )
 
+  private val timeSeriesToCreate = Seq(
+    TimeSeries(name = "scala-sdk-read-example-1", description = Some("description-1")),
+    TimeSeries(name = "scala-sdk-read-example-2")
+  )
+  private val timeSeriesUpdates = Seq(
+    TimeSeries(name = "scala-sdk-read-example-1-1", description = Some(null)), // scalastyle:ignore null
+    TimeSeries(name = "scala-sdk-read-example-2-1", description = Some("scala-sdk-read-example-2"))
+  )
+  it should behave like updatable(
+    client.timeSeries,
+    timeSeriesToCreate,
+    timeSeriesUpdates,
+    (id: Long, item: TimeSeries) => item.copy(id = id),
+    (a: TimeSeries, b: TimeSeries) => { a.copy(lastUpdatedTime = 0) == b.copy(lastUpdatedTime = 0) },
+    (readTimeSeries: Seq[TimeSeries], updatedTimeSeries: Seq[TimeSeries]) => {
+      assert(readTimeSeries.size == timeSeriesUpdates.size)
+      assert(readTimeSeries.size == timeSeriesToCreate.size)
+      assert(updatedTimeSeries.size == timeSeriesUpdates.size)
+      assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) => updated.name == s"${read.name}-1" })
+      assert(updatedTimeSeries.head.description.isEmpty)
+      assert(updatedTimeSeries(1).description == timeSeriesUpdates(1).description)
+      ()
+    }
+  )
   it should "support search" in {
     val createdTimeSearchResults = client.timeSeries
       .search(

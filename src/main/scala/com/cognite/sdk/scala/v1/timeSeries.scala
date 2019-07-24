@@ -36,7 +36,7 @@ final case class TimeSeriesUpdate(
     unit: Option[Setter[String]] = None,
     assetId: Option[Setter[Long]] = None,
     description: Option[Setter[String]] = None,
-    securityCategories: Option[Setter[Seq[String]]] = None
+    securityCategories: Option[Setter[Seq[Long]]] = None
 ) extends WithId[Long]
 
 final case class TimeSeriesFilter(

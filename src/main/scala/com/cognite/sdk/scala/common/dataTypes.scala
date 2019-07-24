@@ -73,6 +73,15 @@ object Setter {
       }
     }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
+  implicit def anyToSetter[T]: Transformer[T, Option[Setter[T]]] =
+    new Transformer[T, Option[Setter[T]]] {
+      override def transform(src: T): Option[Setter[T]] = src match {
+        case null => Some(SetNull()) // scalastyle:ignore null
+        case value => Some(Set(value))
+      }
+    }
+
   implicit def encodeSetter[T](implicit encodeT: Encoder[T]): Encoder[Setter[T]] =
     new Encoder[Setter[T]] {
       final def apply(a: Setter[T]): Json = a match {
