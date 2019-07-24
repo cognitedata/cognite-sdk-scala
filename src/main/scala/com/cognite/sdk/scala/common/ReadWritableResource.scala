@@ -3,8 +3,8 @@ package com.cognite.sdk.scala.common
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
+import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Decoder, Encoder}
-import io.circe.generic.auto._
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
@@ -12,8 +12,56 @@ trait DeleteByIds[F[_], PrimitiveId] {
   def deleteByIds(ids: Seq[PrimitiveId]): F[Response[Unit]]
 }
 
+object DeleteByIds {
+  implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
+  implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
+
+  def deleteByIds[F[_]](requestSession: RequestSession[F], baseUri: Uri, ids: Seq[Long]): F[Response[Unit]] = {
+    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Unit]
+    // TODO: group deletes by max deletion request size
+    //       or assert that length of `ids` is less than max deletion request size
+    requestSession
+      .send { request =>
+        request
+          .post(uri"$baseUri/delete")
+          .body(Items(ids.map(CogniteId)))
+          .response(asJson[Either[CdpApiError, Unit]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
+            case Right(Right(_)) => ()
+          }
+      }
+  }
+}
+
 trait DeleteByExternalIds[F[_]] {
   def deleteByExternalIds(externalIds: Seq[String]): F[Response[Unit]]
+}
+
+object DeleteByExternalIds {
+  implicit val cogniteExternalIdEncoder: Encoder[CogniteExternalId] = deriveEncoder
+  implicit val cogniteExternalIdItemsEncoder: Encoder[Items[CogniteExternalId]] = deriveEncoder
+  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Unit]
+
+  def deleteByExternalIds[F[_]](requestSession: RequestSession[F], baseUri: Uri, externalIds: Seq[String]): F[Response[Unit]] = {
+    // TODO: group deletes by max deletion request size
+    //       or assert that length of `ids` is less than max deletion request size
+    requestSession
+      .send { request =>
+        request
+          .post(uri"$baseUri/delete")
+          .body(Items(externalIds.map(CogniteExternalId)))
+          .response(asJson[Either[CdpApiError, Unit]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
+            case Right(Right(_)) => ()
+          }
+      }
+  }
 }
 
 trait Create[R, W, F[_]] extends WithRequestSession[F] with BaseUri {

@@ -54,3 +54,15 @@ final case class ThreeDRevisionUpdate(
     camera: Option[NonNullableSetter[Camera]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None
 ) extends WithId[Long]
+
+final case class ThreeDAssetMapping(
+    nodeId: Long,
+    assetId: Long,
+    treeIndex: Option[Long] = None,
+    subtreeSize: Option[Long] = None
+)
+
+final case class CreateThreeDAssetMapping(
+    nodeId: Long,
+    assetId: Long
+)

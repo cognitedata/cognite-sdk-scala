@@ -2,6 +2,7 @@ package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp.Uri
 import io.circe.{Decoder, Encoder, Json, JsonObject}
+import io.circe.generic.semiauto._
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
@@ -21,6 +22,10 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
       .withFieldConst(_.url, url)
       .transform
 }
+object CdpApiError {
+  implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
+  implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
+}
 final case class CdpApiException(
     url: Uri,
     code: Int,
@@ -29,7 +34,6 @@ final case class CdpApiException(
     duplicated: Option[Seq[JsonObject]]
 ) extends Throwable(s"Request to ${url.toString()} failed with status $code: $message")
 final case class CogniteId(id: Long)
-
 final case class DataPoint(
     timestamp: Long,
     value: Double

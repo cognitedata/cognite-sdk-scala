@@ -4,16 +4,17 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.Decoder
-import io.circe.generic.auto._
+import io.circe.generic.semiauto._
+import io.circe.{Decoder, Encoder}
 
 class ThreeDModels[F[_]](val requestSession: RequestSession[F])
     extends Create[ThreeDModel, CreateThreeDModel, F]
     with RetrieveByIds[ThreeDModel, F]
     with Readable[ThreeDModel, F]
-    with DeleteByIdsV1[ThreeDModel, CreateThreeDModel, F]
+    with DeleteByIds[F, Long]
     with Update[ThreeDModel, ThreeDModelUpdate, F]
     with WithRequestSession[F] {
+  import ThreeDModels._
   override val baseUri = uri"${requestSession.baseUri}/3d/models"
 
   override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] = {
@@ -51,13 +52,32 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
     Update.updateItems[F, ThreeDModel, ThreeDModelUpdate](requestSession, baseUri, items)
 }
 
+object ThreeDModels {
+  implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
+  implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
+  implicit val threeDModelDecoder: Decoder[ThreeDModel] = deriveDecoder[ThreeDModel]
+  implicit val threeDModelUpdateEncoder: Encoder[ThreeDModelUpdate] =
+    deriveEncoder[ThreeDModelUpdate]
+  implicit val threeDModelItemsDecoder: Decoder[Items[ThreeDModel]] =
+    deriveDecoder[Items[ThreeDModel]]
+  implicit val threeDModelItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDModel]] =
+    deriveDecoder[ItemsWithCursor[ThreeDModel]]
+  implicit val createThreeDModelDecoder: Decoder[CreateThreeDModel] =
+    deriveDecoder[CreateThreeDModel]
+  implicit val createThreeDModelEncoder: Encoder[CreateThreeDModel] =
+    deriveEncoder[CreateThreeDModel]
+  implicit val createThreeDModelItemsEncoder: Encoder[Items[CreateThreeDModel]] =
+    deriveEncoder[Items[CreateThreeDModel]]
+}
+
 class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long)
     extends Create[ThreeDRevision, CreateThreeDRevision, F]
     with RetrieveByIds[ThreeDRevision, F]
     with Readable[ThreeDRevision, F]
-    with DeleteByIdsV1[ThreeDRevision, CreateThreeDRevision, F]
+    with DeleteByIds[F, Long]
     with Update[ThreeDRevision, ThreeDRevisionUpdate, F]
     with WithRequestSession[F] {
+  import ThreeDRevisions._
   override val baseUri =
     uri"${requestSession.baseUri}/3d/models/$modelId/revisions"
 
@@ -96,17 +116,25 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
     Update.updateItems[F, ThreeDRevision, ThreeDRevisionUpdate](requestSession, baseUri, items)
 }
 
-final case class ThreeDAssetMapping(
-    nodeId: Long,
-    assetId: Long,
-    treeIndex: Option[Long] = None,
-    subtreeSize: Option[Long] = None
-)
-
-final case class CreateThreeDAssetMapping(
-    nodeId: Long,
-    assetId: Long
-)
+object ThreeDRevisions {
+  implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
+  implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
+  implicit val threeDRevisionCameraDecoder: Decoder[Camera] = deriveDecoder[Camera]
+  implicit val threeDRevisionCameraEncoder: Encoder[Camera] = deriveEncoder[Camera]
+  implicit val threeDRevisionDecoder: Decoder[ThreeDRevision] = deriveDecoder[ThreeDRevision]
+  implicit val threeDRevisionUpdateEncoder: Encoder[ThreeDRevisionUpdate] =
+    deriveEncoder[ThreeDRevisionUpdate]
+  implicit val threeDRevisionItemsDecoder: Decoder[Items[ThreeDRevision]] =
+    deriveDecoder[Items[ThreeDRevision]]
+  implicit val threeDRevisionItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDRevision]] =
+    deriveDecoder[ItemsWithCursor[ThreeDRevision]]
+  implicit val createThreeDRevisionDecoder: Decoder[CreateThreeDRevision] =
+    deriveDecoder[CreateThreeDRevision]
+  implicit val createThreeDRevisionEncoder: Encoder[CreateThreeDRevision] =
+    deriveEncoder[CreateThreeDRevision]
+  implicit val createThreeDRevisionItemsEncoder: Encoder[Items[CreateThreeDRevision]] =
+    deriveEncoder[Items[CreateThreeDRevision]]
+}
 
 class ThreeDAssetMappings[F[_]](
     val requestSession: RequestSession[F],
@@ -114,6 +142,7 @@ class ThreeDAssetMappings[F[_]](
     revisionId: Long
 ) extends WithRequestSession[F]
     with Readable[ThreeDAssetMapping, F] {
+  import ThreeDAssetMappings._
   override val baseUri =
     uri"${requestSession.baseUri}/3d/models/$modelId/revisions/$revisionId/mappings"
 
@@ -122,4 +151,12 @@ class ThreeDAssetMappings[F[_]](
       limit: Option[Long]
   ): F[Response[ItemsWithCursor[ThreeDAssetMapping]]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+}
+
+object ThreeDAssetMappings {
+  implicit val threeDAssetMappingDecoder: Decoder[ThreeDAssetMapping] =
+    deriveDecoder[ThreeDAssetMapping]
+  implicit val threeDAssetMappingItemsWithCursorDecoder
+      : Decoder[ItemsWithCursor[ThreeDAssetMapping]] =
+    deriveDecoder[ItemsWithCursor[ThreeDAssetMapping]]
 }

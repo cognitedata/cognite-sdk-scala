@@ -4,7 +4,6 @@ import com.cognite.sdk.scala.v1.RequestSession
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
-import io.circe.generic.auto._
 
 final case class FilterRequest[T](filter: T, limit: Option[Long], cursor: Option[String])
 
@@ -46,7 +45,8 @@ object Filter {
       cursor: Option[String],
       limit: Option[Long]
   )(
-      implicit readItemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]
+      implicit readItemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
+      filterRequestEncoder: Encoder[FilterRequest[Fi]]
   ): F[Response[ItemsWithCursor[R]]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
