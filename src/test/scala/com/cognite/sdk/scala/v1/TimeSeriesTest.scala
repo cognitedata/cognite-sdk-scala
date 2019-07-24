@@ -6,6 +6,7 @@ import com.softwaremill.sttp.Id
 class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val client = new GenericClient[Id, Nothing]()(auth, sttpBackend)
   private val idsThatDoNotExist = Seq(999991L, 999992L)
+  private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
   it should behave like readable(client.timeSeries)
 
@@ -13,19 +14,39 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
 
   it should behave like writable(
     client.timeSeries,
-    Seq(TimeSeries(name = "scala-sdk-read-example-1"), TimeSeries(name = "scala-sdk-read-example-2")),
-    Seq(CreateTimeSeries(name = "scala-sdk-create-example-1"), CreateTimeSeries(name = "scala-sdk-create-example-2")),
+    Seq(
+      TimeSeries(name = "scala-sdk-write-example-1"),
+      TimeSeries(name = "scala-sdk-write-example-2")
+    ),
+    Seq(
+      CreateTimeSeries(name = "scala-sdk-create-example-1"),
+      CreateTimeSeries(name = "scala-sdk-create-example-2")
+    ),
     idsThatDoNotExist,
     supportsMissingAndThrown = true
   )
 
+  it should behave like writableWithExternalId(
+    client.timeSeries,
+    Seq(
+      TimeSeries(name = "scala-sdk-write-external-example-1", externalId = Some(shortRandom())),
+      TimeSeries(name = "scala-sdk-write-external-example-2", externalId = Some(shortRandom()))
+    ),
+    Seq(
+      CreateTimeSeries(name = "scala-sdk-create-external-example-1", externalId = Some(shortRandom())),
+      CreateTimeSeries(name = "scala-sdk-create-external-example-2", externalId = Some(shortRandom()))
+    ),
+    externalIdsThatDoNotExist,
+    supportsMissingAndThrown = true
+  )
+
   private val timeSeriesToCreate = Seq(
-    TimeSeries(name = "scala-sdk-read-example-1", description = Some("description-1")),
-    TimeSeries(name = "scala-sdk-read-example-2")
+    TimeSeries(name = "scala-sdk-write-example-1", description = Some("description-1")),
+    TimeSeries(name = "scala-sdk-write-example-2")
   )
   private val timeSeriesUpdates = Seq(
-    TimeSeries(name = "scala-sdk-read-example-1-1", description = Some(null)), // scalastyle:ignore null
-    TimeSeries(name = "scala-sdk-read-example-2-1", description = Some("scala-sdk-read-example-2"))
+    TimeSeries(name = "scala-sdk-write-example-1-1", description = Some(null)), // scalastyle:ignore null
+    TimeSeries(name = "scala-sdk-write-example-2-1", description = Some("scala-sdk-write-example-2"))
   )
   it should behave like updatable(
     client.timeSeries,

@@ -82,6 +82,82 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
     //       id in the same api call for V1
   }
 
+  def writableWithExternalId[R <: WithExternalId, W <: WithExternalId](
+      writable: Create[R, W, Id] with DeleteByExternalIds[Id],
+      readExamples: Seq[R],
+      createExamples: Seq[W],
+      externalIdsThatDoNotExist: Seq[String],
+      supportsMissingAndThrown: Boolean
+  )(implicit t: Transformer[R, W]): Unit = {
+    it should "be an error to delete using external ids that does not exist" in {
+      val thrown = the[CdpApiException] thrownBy writable
+        .deleteByExternalIds(externalIdsThatDoNotExist)
+        .unsafeBody
+      if (supportsMissingAndThrown) {
+        val missingIds = thrown.missing
+          .getOrElse(Seq.empty)
+          .flatMap(jsonObj => jsonObj("externalId").get.asString)
+        missingIds should have size externalIdsThatDoNotExist.size.toLong
+        missingIds should contain theSameElementsAs externalIdsThatDoNotExist
+      }
+
+      val sameIdsThatDoNotExist = Seq(externalIdsThatDoNotExist.head, externalIdsThatDoNotExist.head)
+      val sameIdsThrown = the[CdpApiException] thrownBy writable
+        .deleteByExternalIds(sameIdsThatDoNotExist)
+        .unsafeBody
+      if (supportsMissingAndThrown) {
+        // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
+        // if duplicated ids that do not exist are specified.
+        val sameMissingIds = sameIdsThrown.duplicated match {
+          case Some(duplicatedIds) =>
+            duplicatedIds.flatMap(jsonObj => jsonObj("externalId").get.asString)
+          case None =>
+            sameIdsThrown.missing
+              .getOrElse(Seq.empty)
+              .flatMap(jsonObj => jsonObj("externalId").get.asString)
+        }
+        sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+        sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+      }
+    }
+
+    it should "create and delete items using the read class and external ids" in {
+      // create a single item
+      val createdItem = writable.create(readExamples.take(1)).unsafeBody
+      createdItem should have size 1
+      createdItem.head.externalId should not be empty
+      val deleteSingle = writable.deleteByExternalIds(createdItem.map(_.externalId.get))
+      deleteSingle.isSuccess should be(true)
+
+      // create multiple items
+      val createdItems = writable.create(readExamples).unsafeBody
+      createdItems should have size readExamples.size.toLong
+      val createdExternalIds = createdItems.map(_.externalId.get)
+      createdExternalIds should have size readExamples.size.toLong
+      val delete = writable.deleteByExternalIds(createdExternalIds)
+      delete.isSuccess should be(true)
+    }
+
+    it should "create and delete items using the create class and external ids" in {
+      // create a single item
+      val createdItem = writable.create(createExamples.take(1)).unsafeBody
+      createdItem should have size 1
+      createdItem.head.externalId should not be empty
+      val deleteSingle = writable.deleteByExternalIds(createdItem.map(_.externalId.get))
+      deleteSingle.isSuccess should be(true)
+
+      // create multiple items
+      val createdItems = writable.create(createExamples).unsafeBody
+      createdItems should have size createExamples.size.toLong
+      val createdIds = createdItems.map(_.externalId.get)
+      createdIds should have size createExamples.size.toLong
+      val delete = writable.deleteByExternalIds(createdIds)
+      delete.isSuccess should be(true)
+    }
+    // TODO: test creating multiple items with the same external
+    //       id in the same api call for V1
+  }
+
   def updatable[R <: WithId[Long], W, U <: WithId[Long]](
       updatable: Create[R, W, Id]
         with DeleteByIds[Id, Long]

@@ -5,6 +5,7 @@ import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val client = new GenericClient()(auth, sttpBackend)
   private val idsThatDoNotExist = Seq(999991L, 999992L)
+  private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
   it should behave like readable(client.assets)
   it should behave like readableWithRetrieve(client.assets, idsThatDoNotExist, supportsMissingAndThrown = true)
@@ -13,6 +14,20 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     Seq(Asset(name = "scala-sdk-read-example-1"), Asset(name = "scala-sdk-read-example-2")),
     Seq(CreateAsset(name = "scala-sdk-create-example-1"), CreateAsset(name = "scala-sdk-create-example-2")),
     idsThatDoNotExist,
+    supportsMissingAndThrown = true
+  )
+
+  it should behave like writableWithExternalId(
+    client.assets,
+    Seq(
+      Asset(name = "scala-sdk-read-example-1", externalId = Some(shortRandom())),
+      Asset(name = "scala-sdk-read-example-2", externalId = Some(shortRandom()))
+    ),
+    Seq(
+      CreateAsset(name = "scala-sdk-create-example-1", externalId = Some(shortRandom())),
+      CreateAsset(name = "scala-sdk-create-example-2", externalId = Some(shortRandom()))
+    ),
+    externalIdsThatDoNotExist,
     supportsMissingAndThrown = true
   )
 

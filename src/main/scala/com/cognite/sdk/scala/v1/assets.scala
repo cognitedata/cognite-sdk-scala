@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithId}
+import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
 
 final case class Asset(
     id: Long = 0,
@@ -15,6 +15,7 @@ final case class Asset(
     createdTime: Option[Long] = None,
     lastUpdatedTime: Option[Long] = None
 ) extends WithId[Long]
+    with WithExternalId
 
 final case class CreateAsset(
     name: String,
@@ -23,7 +24,7 @@ final case class CreateAsset(
     source: Option[String] = None,
     externalId: Option[String] = None,
     metadata: Option[Map[String, String]] = None
-)
+) extends WithExternalId
 
 final case class AssetUpdate(
     id: Long,
