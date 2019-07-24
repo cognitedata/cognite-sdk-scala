@@ -4,7 +4,7 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.generic.semiauto._
+import io.circe.derivation.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
 class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
@@ -140,18 +140,24 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
 object DataPointsResourceV1 {
   implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
   implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
+  // WartRemover gets confused by circe-derivation
+  @SuppressWarnings(Array("org.wartremover.warts.AnyVal"))
   implicit val dataPointDecoder: Decoder[DataPoint] = deriveDecoder
   implicit val dataPointEncoder: Encoder[DataPoint] = deriveEncoder
   implicit val dataPointsByIdResponseDecoder: Decoder[DataPointsByIdResponse] = deriveDecoder
-  implicit val dataPointsByIdResponseItemsDecoder: Decoder[Items[DataPointsByIdResponse]] = deriveDecoder
+  implicit val dataPointsByIdResponseItemsDecoder: Decoder[Items[DataPointsByIdResponse]] =
+    deriveDecoder
   implicit val stringDataPointDecoder: Decoder[StringDataPoint] = deriveDecoder
   implicit val stringDataPointEncoder: Encoder[StringDataPoint] = deriveEncoder
-  implicit val stringDataPointsByIdResponseDecoder: Decoder[StringDataPointsByIdResponse] = deriveDecoder
-  implicit val stringDataPointsByIdResponseItemsDecoder: Decoder[Items[StringDataPointsByIdResponse]] = deriveDecoder
+  implicit val stringDataPointsByIdResponseDecoder: Decoder[StringDataPointsByIdResponse] =
+    deriveDecoder
+  implicit val stringDataPointsByIdResponseItemsDecoder
+      : Decoder[Items[StringDataPointsByIdResponse]] = deriveDecoder
   implicit val dataPointsByIdEncoder: Encoder[DataPointsById] = deriveEncoder
   implicit val dataPointsByIdItemsEncoder: Encoder[Items[DataPointsById]] = deriveEncoder
   implicit val stringDataPointsByIdEncoder: Encoder[StringDataPointsById] = deriveEncoder
-  implicit val stringDataPointsByIdItemsEncoder: Encoder[Items[StringDataPointsById]] = deriveEncoder
+  implicit val stringDataPointsByIdItemsEncoder: Encoder[Items[StringDataPointsById]] =
+    deriveEncoder
   implicit val deleteRangeByIdEncoder: Encoder[DeleteRangeById] = deriveEncoder
   implicit val deleteRangeByIdItemsEncoder: Encoder[Items[DeleteRangeById]] = deriveEncoder
   implicit val queryRangeByIdEncoder: Encoder[QueryRangeById] = deriveEncoder

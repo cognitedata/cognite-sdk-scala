@@ -3,7 +3,7 @@ package com.cognite.sdk.scala.common
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.generic.semiauto.deriveEncoder
+import io.circe.derivation.deriveEncoder
 import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
@@ -16,7 +16,11 @@ object DeleteByIds {
   implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
   implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
 
-  def deleteByIds[F[_]](requestSession: RequestSession[F], baseUri: Uri, ids: Seq[Long]): F[Response[Unit]] = {
+  def deleteByIds[F[_]](
+      requestSession: RequestSession[F],
+      baseUri: Uri,
+      ids: Seq[Long]
+  ): F[Response[Unit]] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
@@ -46,7 +50,11 @@ object DeleteByExternalIds {
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
 
-  def deleteByExternalIds[F[_]](requestSession: RequestSession[F], baseUri: Uri, externalIds: Seq[String]): F[Response[Unit]] = {
+  def deleteByExternalIds[F[_]](
+      requestSession: RequestSession[F],
+      baseUri: Uri,
+      externalIds: Seq[String]
+  ): F[Response[Unit]] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
@@ -61,7 +69,6 @@ object DeleteByExternalIds {
             case Right(Right(_)) => ()
           }
       }
-  }
 }
 
 trait Create[R, W, F[_]] extends WithRequestSession[F] with BaseUri {
