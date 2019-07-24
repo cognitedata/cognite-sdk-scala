@@ -4,7 +4,7 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto._
+import io.circe.derivation.{deriveDecoder, deriveEncoder}
 
 class Events[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]

@@ -3,7 +3,7 @@ package com.cognite.sdk.scala.common
 import com.cognite.sdk.scala.v1.RequestSession
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.generic.semiauto._
+import io.circe.derivation.deriveDecoder
 
 final case class LoginStatus(user: String, loggedIn: Boolean, project: String, projectId: Long)
 final case class DataLoginStatus(data: LoginStatus)

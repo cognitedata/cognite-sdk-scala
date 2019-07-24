@@ -3,7 +3,7 @@ package com.cognite.sdk.scala.v1.resources
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
-import io.circe.generic.semiauto._
+import io.circe.derivation.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
 class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])

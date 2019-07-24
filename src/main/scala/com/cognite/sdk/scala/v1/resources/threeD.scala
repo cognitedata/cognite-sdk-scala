@@ -4,7 +4,7 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.generic.semiauto._
+import io.circe.derivation.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
 class ThreeDModels[F[_]](val requestSession: RequestSession[F])
@@ -62,6 +62,8 @@ object ThreeDModels {
     deriveDecoder[Items[ThreeDModel]]
   implicit val threeDModelItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDModel]] =
     deriveDecoder[ItemsWithCursor[ThreeDModel]]
+  // WartRemover gets confused by circe-derivation
+  @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val createThreeDModelDecoder: Decoder[CreateThreeDModel] =
     deriveDecoder[CreateThreeDModel]
   implicit val createThreeDModelEncoder: Encoder[CreateThreeDModel] =

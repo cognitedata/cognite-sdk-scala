@@ -14,7 +14,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "0.0.2-SNAPSHOT",
+  version := "0.0.3-SNAPSHOT",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -82,7 +82,7 @@ val sttpDeps = Seq(
 
 val circeDeps = Seq(
   "io.circe" %% "circe-core" % circeVersion,
-  "io.circe" %% "circe-generic" % circeVersion,
+  "io.circe" %% "circe-derivation" % "0.11.0-M1",
   "io.circe" %% "circe-parser" % circeVersion
 )
 

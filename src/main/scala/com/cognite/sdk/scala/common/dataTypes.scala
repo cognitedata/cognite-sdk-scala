@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp.Uri
 import io.circe.{Decoder, Encoder, Json, JsonObject}
-import io.circe.generic.semiauto._
+import io.circe.derivation.deriveDecoder
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
