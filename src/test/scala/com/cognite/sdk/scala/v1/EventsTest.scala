@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1
 
+import java.time.Instant
+
 import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
@@ -72,12 +74,21 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   it should "support filter" in {
     val createdTimeFilterResults = client.events
       .filter(
-        EventsFilter(createdTime = Some(TimeRange(1541510008838L, 1541515508838L)))
-      ).flatMap(_.toList)
+        EventsFilter(
+          createdTime = Some(
+            TimeRange(Instant.ofEpochMilli(1541510008838L), Instant.ofEpochMilli(1541515508838L))
+          )
+        )
+      )
+      .flatMap(_.toList)
     assert(createdTimeFilterResults.length == 11)
     val createdTimeFilterResultsWithLimit = client.events
       .filterWithLimit(
-        EventsFilter(createdTime = Some(TimeRange(1541510008838L, 1541515508838L))),
+        EventsFilter(
+          createdTime = Some(
+            TimeRange(Instant.ofEpochMilli(1541510008838L), Instant.ofEpochMilli(1541515508838L))
+          )
+        ),
         1
       )
     assert(createdTimeFilterResultsWithLimit.length == 1)
@@ -87,7 +98,16 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val createdTimeSearchResults = client.events
       .search(
         EventsQuery(
-          filter = Some(EventsFilter(createdTime = Some(TimeRange(1541510008838L, 1541515508838L))))
+          filter = Some(
+            EventsFilter(
+              createdTime = Some(
+                TimeRange(
+                  Instant.ofEpochMilli(1541510008838L),
+                  Instant.ofEpochMilli(1541515508838L)
+                )
+              )
+            )
+          )
         )
       )
     assert(createdTimeSearchResults.length == 11)
@@ -96,7 +116,12 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         EventsQuery(
           filter = Some(
             EventsFilter(
-              createdTime = Some(TimeRange(1541510008838L, 1541515508838L)),
+              createdTime = Some(
+                TimeRange(
+                  Instant.ofEpochMilli(1541510008838L),
+                  Instant.ofEpochMilli(1541515508838L)
+                )
+              ),
               `type` = Some("Workorder"),
               subtype = Some("Foo")
             )
@@ -109,7 +134,8 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         EventsQuery(
           filter = Some(
             EventsFilter(
-              createdTime = Some(TimeRange(0L, 1541515508838L))
+              createdTime =
+                Some(TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1541515508838L)))
             )
           ),
           search = Some(
@@ -125,7 +151,8 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         EventsQuery(
           filter = Some(
             EventsFilter(
-              createdTime = Some(TimeRange(0L, 1552395929193L))
+              createdTime =
+                Some(TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1552395929193L)))
             )
           ),
           search = Some(
@@ -142,7 +169,8 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           limit = 3,
           filter = Some(
             EventsFilter(
-              createdTime = Some(TimeRange(0L, 1552395929193L))
+              createdTime =
+                Some(TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1552395929193L)))
             )
           ),
           search = Some(
