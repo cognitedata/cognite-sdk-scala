@@ -9,7 +9,7 @@ podTemplate(label: label,
                                            envVars: [secretEnvVar(key: 'TEST_API_KEY_WRITE', secretName: 'jetfire-test-api-key', secretKey: 'playgroundApiKey'),
                                                      secretEnvVar(key: 'TEST_API_KEY_READ', secretName: 'jetfire-test-api-key', secretKey: 'playgroundApiKey'),
                                                      secretEnvVar(key: 'TEST_API_KEY_GREENFIELD', secretName: 'jetfire-test-api-key', secretKey: 'greenfieldApiKey'),
-                                                     secretEnvVar(key: 'CODECOV_TOKEN', secretName: 'codecov-token-cognite-sdk-scala', secretKey: 'token.txt'),
+                                                     secretEnvVar(key: 'CODECOV_TOKEN', secretName: 'codecov-tokens', secretKey: 'cognite-sdk-scala'),
                                                      secretEnvVar(key: 'GPG_KEY_PASSWORD', secretName: 'sbt-credentials', secretKey: 'gpg-key-password'),
                                                      // /codecov-script/upload-report.sh relies on the following
                                                      // Jenkins and GitHub environment variables.
