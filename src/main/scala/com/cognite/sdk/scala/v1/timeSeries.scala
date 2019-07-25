@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1
 
+import java.time.Instant
+
 import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
 
 final case class TimeSeries(
@@ -13,8 +15,8 @@ final case class TimeSeries(
     securityCategories: Option[Seq[Long]] = None,
     id: Long = 0,
     externalId: Option[String] = None,
-    createdTime: Long = 0,
-    lastUpdatedTime: Long = 0
+    createdTime: Instant = Instant.ofEpochMilli(0),
+    lastUpdatedTime: Instant = Instant.ofEpochMilli(0)
 ) extends WithId[Long]
     with WithExternalId
 

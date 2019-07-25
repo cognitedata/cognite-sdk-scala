@@ -55,7 +55,7 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
     timeSeriesToCreate,
     timeSeriesUpdates,
     (id: Long, item: TimeSeries) => item.copy(id = id),
-    (a: TimeSeries, b: TimeSeries) => { a.copy(lastUpdatedTime = 0) == b.copy(lastUpdatedTime = 0) },
+    (a: TimeSeries, b: TimeSeries) => { a.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) == b.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) },
     (readTimeSeries: Seq[TimeSeries], updatedTimeSeries: Seq[TimeSeries]) => {
       assert(readTimeSeries.size == timeSeriesUpdates.size)
       assert(readTimeSeries.size == timeSeriesToCreate.size)
@@ -87,7 +87,7 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
         TimeSeriesQuery(
           filter = Some(
             TimeSeriesFilter(unit = Some("m"),
-              createdTime = Some(TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1549638383707L))))
+              createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1549638383707L))))
           )
         )
       )
@@ -98,7 +98,7 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
         TimeSeriesQuery(
           filter = Some(
             TimeSeriesFilter(unit = Some("m"),
-              createdTime = Some(TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1549638383707L))))
+              createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1549638383707L))))
           ),
           search = Some(TimeSeriesSearch(name = Some("W0405")))
         )

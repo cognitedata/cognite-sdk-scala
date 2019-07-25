@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1
 
+import java.time.Instant
+
 import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
 
 final case class File(
@@ -11,9 +13,9 @@ final case class File(
     metadata: Option[Map[String, String]] = None,
     assetIds: Option[Seq[Long]] = None,
     uploaded: Boolean = false,
-    uploadedTime: Option[Long] = None,
-    createdTime: Long = 0,
-    lastUpdatedTime: Long = 0,
+    uploadedTime: Option[Instant] = None,
+    createdTime: Instant = Instant.ofEpochMilli(0),
+    lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
     uploadUrl: Option[String] = None
 ) extends WithId[Long]
     with WithExternalId

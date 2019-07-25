@@ -1,19 +1,19 @@
 package com.cognite.sdk.scala.v1
 
+import java.time.Instant
+
 import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
 
 final case class Asset(
-    id: Long = 0,
-    path: Option[Seq[Long]] = None,
-    depth: Option[Long] = None,
+    externalId: Option[String] = None,
     name: String,
     parentId: Option[Long] = None,
     description: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
     source: Option[String] = None,
-    externalId: Option[String] = None,
-    createdTime: Option[Long] = None,
-    lastUpdatedTime: Option[Long] = None
+    id: Long = 0,
+    createdTime: Instant = Instant.ofEpochMilli(0),
+    lastUpdatedTime: Instant = Instant.ofEpochMilli(0)
 ) extends WithId[Long]
     with WithExternalId
 
