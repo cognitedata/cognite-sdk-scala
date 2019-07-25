@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1.resources
 
+import java.time.Instant
+
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
@@ -70,6 +72,9 @@ class Files[F[_]](val requestSession: RequestSession[F])
 }
 
 object Files {
+  implicit val instantEncoder: Encoder[Instant] = Encoder.encodeLong.contramap(_.toEpochMilli)
+  implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
+
   implicit val fileItemsWithCursorDecoder: Decoder[ItemsWithCursor[File]] =
     deriveDecoder[ItemsWithCursor[File]]
   implicit val fileDecoder: Decoder[File] = deriveDecoder[File]

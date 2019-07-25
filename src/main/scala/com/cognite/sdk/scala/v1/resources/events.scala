@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1.resources
 
+import java.time.Instant
+
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
@@ -52,6 +54,9 @@ class Events[F[_]](val requestSession: RequestSession[F])
 }
 
 object Events {
+  implicit val instantEncoder: Encoder[Instant] = Encoder.encodeLong.contramap(_.toEpochMilli)
+  implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
+
   implicit val eventDecoder: Decoder[Event] = deriveDecoder[Event]
   implicit val eventsItemsWithCursorDecoder: Decoder[ItemsWithCursor[Event]] =
     deriveDecoder[ItemsWithCursor[Event]]

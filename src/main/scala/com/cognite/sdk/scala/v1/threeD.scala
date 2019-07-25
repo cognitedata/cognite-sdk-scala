@@ -1,11 +1,13 @@
 package com.cognite.sdk.scala.v1
 
+import java.time.Instant
+
 import com.cognite.sdk.scala.common.{NonNullableSetter, WithId}
 
 final case class ThreeDModel(
     name: String,
     id: Long = 0,
-    createdTime: Option[Long] = None,
+    createdTime: Instant = Instant.ofEpochMilli(0),
     metadata: Option[Map[String, String]] = None
 ) extends WithId[Long]
 
@@ -26,17 +28,17 @@ final case class Camera(
 )
 
 final case class ThreeDRevision(
-    id: Long,
+    id: Long = 0,
     fileId: Long,
-    published: Boolean,
+    published: Boolean = false,
     rotation: Option[Array[Double]] = None,
     camera: Option[Camera] = None,
-    status: String,
+    status: String = "",
     metadata: Option[Map[String, String]] = None,
     thumbnailThreedFileId: Option[Long] = None,
     thumbnailURL: Option[String] = None,
-    assetMappingCount: Long,
-    createdTime: Long
+    assetMappingCount: Long = 0,
+    createdTime: Instant = Instant.ofEpochMilli(0)
 ) extends WithId[Long]
 
 final case class CreateThreeDRevision(
@@ -58,8 +60,8 @@ final case class ThreeDRevisionUpdate(
 final case class ThreeDAssetMapping(
     nodeId: Long,
     assetId: Long,
-    treeIndex: Option[Long] = None,
-    subtreeSize: Option[Long] = None
+    treeIndex: Long = 0,
+    subtreeSize: Long = 0
 )
 
 final case class CreateThreeDAssetMapping(

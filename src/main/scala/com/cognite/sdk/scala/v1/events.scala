@@ -1,11 +1,13 @@
 package com.cognite.sdk.scala.v1
 
+import java.time.Instant
+
 import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
 
 final case class Event(
     id: Long = 0,
-    startTime: Option[Long] = None,
-    endTime: Option[Long] = None,
+    startTime: Option[Instant] = None,
+    endTime: Option[Instant] = None,
     description: Option[String] = None,
     `type`: Option[String] = None,
     subtype: Option[String] = None,
@@ -13,14 +15,14 @@ final case class Event(
     assetIds: Option[Seq[Long]] = None,
     source: Option[String] = None,
     externalId: Option[String] = None,
-    createdTime: Long = 0,
-    lastUpdatedTime: Long = 0
+    createdTime: Instant = Instant.ofEpochMilli(0),
+    lastUpdatedTime: Instant = Instant.ofEpochMilli(0)
 ) extends WithId[Long]
     with WithExternalId
 
 final case class CreateEvent(
-    startTime: Option[Long] = None,
-    endTime: Option[Long] = None,
+    startTime: Option[Instant] = None,
+    endTime: Option[Instant] = None,
     description: Option[String] = None,
     `type`: Option[String] = None,
     subtype: Option[String] = None,
@@ -32,8 +34,8 @@ final case class CreateEvent(
 
 final case class EventUpdate(
     id: Long = 0,
-    startTime: Option[Setter[Long]] = None,
-    endTime: Option[Setter[Long]] = None,
+    startTime: Option[Setter[Instant]] = None,
+    endTime: Option[Setter[Instant]] = None,
     description: Option[Setter[String]] = None,
     `type`: Option[Setter[String]] = None,
     subtype: Option[Setter[String]] = None,

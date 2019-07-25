@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1.resources
 
+import java.time.Instant
+
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
@@ -44,6 +46,9 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
 }
 
 object TimeSeriesResource {
+  implicit val instantEncoder: Encoder[Instant] = Encoder.encodeLong.contramap(_.toEpochMilli)
+  implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
+
   implicit val timeSeriesDecoder: Decoder[TimeSeries] = deriveDecoder[TimeSeries]
   implicit val timeSeriesUpdateEncoder: Encoder[TimeSeriesUpdate] = deriveEncoder[TimeSeriesUpdate]
   implicit val timeSeriesItemsWithCursorDecoder: Decoder[ItemsWithCursor[TimeSeries]] =

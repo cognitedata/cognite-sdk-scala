@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1
 
+import java.time.Instant
+
 import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
@@ -36,7 +38,7 @@ class ThreeDTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           published = false,
           status = "Done",
           assetMappingCount = 0,
-          createdTime = 1550739713
+          createdTime = Instant.ofEpochMilli(1550739713000L)
         ),
         ThreeDRevision(
           fileId = 8440701612364206L,
@@ -44,7 +46,7 @@ class ThreeDTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           published = false,
           status = "Done",
           assetMappingCount = 0,
-          createdTime = 1550739711
+          createdTime = Instant.ofEpochMilli(1550739711000L)
         )
       ),
       Seq(

@@ -135,7 +135,7 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1541515508838L)))
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1541515508838L)))
             )
           ),
           search = Some(
@@ -152,7 +152,7 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1552395929193L)))
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1552395929193L)))
             )
           ),
           search = Some(
@@ -170,7 +170,7 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1552395929193L)))
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1552395929193L)))
             )
           ),
           search = Some(
