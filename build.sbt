@@ -1,11 +1,23 @@
 import wartremover.Wart
 
+val scala213 = "2.13.0"
 val scala212 = "2.12.8"
 val scala211 = "2.11.12"
-val supportedScalaVersions = List(scala212, scala211)
+val supportedScalaVersions = List(scala212, scala213, scala211)
 
-val circeVersion = "0.11.1"
-val sttpVersion = "1.5.0"
+val sttpVersion = "1.6.3"
+val circeVersion: Option[(Long, Long)] => String = {
+  case Some((2, 13)) => "0.12.0-M4"
+  case _             => "0.11.1"
+}
+val circeDerivationVersion: Option[(Long, Long)] => String = {
+  case Some((2, 13)) => "0.12.0-M4"
+  case _             => "0.11.0-M1"
+}
+val catsEffectVersion: Option[(Long, Long)] => String = {
+  case Some((2, 13)) => "2.0.0-M4"
+  case _             => "1.3.1"
+}
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -67,29 +79,31 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "io.scalaland" %% "chimney" % "0.3.1"
-    ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps
+      "io.scalaland" %% "chimney" % "0.3.2"
+    ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value))
   )
 
 val scalaTestDeps = Seq(
-  "org.scalactic" %% "scalactic" % "3.0.5",
-  "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+  "org.scalactic" %% "scalactic" % "3.0.8",
+  "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp" %% "core" % sttpVersion,
   "com.softwaremill.sttp" %% "circe" % sttpVersion
 )
 
-val circeDeps = Seq(
-  "io.circe" %% "circe-core" % circeVersion,
-  "io.circe" %% "circe-derivation" % "0.11.0-M1",
-  "io.circe" %% "circe-parser" % circeVersion
-)
+def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] = {
+  Seq(
+    "io.circe" %% "circe-core" % circeVersion(scalaVersion),
+    "io.circe" %% "circe-derivation" % circeDerivationVersion(scalaVersion),
+    "io.circe" %% "circe-parser" % circeVersion(scalaVersion)
+  )
+}
 
-addCompilerPlugin(scalafixSemanticdb)
+//addCompilerPlugin(scalafixSemanticdb)
 scalacOptions ++= List(
   "-Yrangepos", // required by SemanticDB compiler plugin
-  "-Ywarn-unused-import" // required by `RemoveUnused` rule
+  //"-Ywarn-unused-import" // required by `RemoveUnused` rule
 )
 
 scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
