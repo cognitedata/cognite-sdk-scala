@@ -27,7 +27,7 @@ trait DataPointsResourceBehaviors[I] extends Matchers { this: FlatSpec =>
       val latest = dataPoints.getLatestDataPointById(timeSeriesId)
       latest.isDefined should be (true)
       val latestPoint = latest.get
-      testDataPoints.toStream should contain (latestPoint)
+      testDataPoints.toList should contain (latestPoint)
 
       dataPoints.deleteRangeById(timeSeriesId, startTime, endTime + 1)
       Thread.sleep(15000)
@@ -45,7 +45,7 @@ trait DataPointsResourceBehaviors[I] extends Matchers { this: FlatSpec =>
       val latest = dataPoints.getLatestStringDataPointById(stringTimeSeriesId)
       latest.isDefined should be (true)
       val latestPoint = latest.get
-      testStringDataPoints.toStream should contain (latestPoint)
+      testStringDataPoints.toList should contain (latestPoint)
 
       dataPoints.deleteRangeById(stringTimeSeriesId, startTime, endTime + 1)
       Thread.sleep(15000)
