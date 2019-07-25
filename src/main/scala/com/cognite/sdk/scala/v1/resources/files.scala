@@ -22,7 +22,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
     EitherDecoder.eitherDecoder[CdpApiError, File]
-  override def createItems(items: Items[CreateFile]): F[Response[Seq[File]]] =
+  override def createItems(items: Items[CreateFile]): F[Seq[File]] =
     items.items match {
       case item :: Nil =>
         requestSession
@@ -43,29 +43,29 @@ class Files[F[_]](val requestSession: RequestSession[F])
   override def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[File]]] =
+  ): F[ItemsWithCursor[File]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
 
-  override def retrieveByIds(ids: Seq[Long]): F[Response[Seq[File]]] =
+  override def retrieveByIds(ids: Seq[Long]): F[Seq[File]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def updateItems(items: Seq[FileUpdate]): F[Response[Seq[File]]] =
+  override def updateItems(items: Seq[FileUpdate]): F[Seq[File]] =
     Update.updateItems[F, File, FileUpdate](requestSession, baseUri, items)
 
-  override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUri, ids)
 
-  override def deleteByExternalIds(externalIds: Seq[String]): F[Response[Unit]] =
+  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUri, externalIds)
 
   override def filterWithCursor(
       filter: FilesFilter,
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[File]]] =
+  ): F[ItemsWithCursor[File]] =
     Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit)
 
-  override def search(searchQuery: FilesQuery): F[Response[Seq[File]]] =
+  override def search(searchQuery: FilesQuery): F[Seq[File]] =
     Search.search(requestSession, baseUri, searchQuery)
 }
 

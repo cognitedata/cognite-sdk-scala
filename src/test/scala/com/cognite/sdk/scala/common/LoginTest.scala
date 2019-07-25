@@ -11,7 +11,7 @@ class LoginTest extends SdkTest {
   )
   it should "read login status" in {
     val login = new Login(RequestSession(uri"https://api.cognitedata.com", backend, auth))
-    val status = login.status().unsafeBody
+    val status = login.status()
     status.loggedIn should be (true)
     status.project should not be empty
   }

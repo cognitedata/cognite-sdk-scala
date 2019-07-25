@@ -6,20 +6,20 @@ import org.scalatest.{FlatSpec, Matchers}
 trait ReadBehaviours extends Matchers { this: FlatSpec =>
   def readable[R, InternalId, PrimitiveId](readable: Readable[R, Id]): Unit = {
     it should "read items" in {
-      readable.read().unsafeBody.items should not be empty
+      readable.read().items should not be empty
     }
 
     it should "read items with limit" in {
-      (readable.readWithLimit(1).unsafeBody.items should have).length(1)
-      (readable.readWithLimit(2).unsafeBody.items should have).length(2)
+      (readable.readWithLimit(1).items should have).length(1)
+      (readable.readWithLimit(2).items should have).length(2)
     }
 
     it should "read all items" in {
-      val first1Length = readable.readAllWithLimit(1).map(_.unsafeBody.length).sum
+      val first1Length = readable.readAllWithLimit(1).map(_.length).sum
       first1Length should be(1)
-      val first2Length = readable.readAllWithLimit(2).map(_.unsafeBody.length).sum
+      val first2Length = readable.readAllWithLimit(2).map(_.length).sum
       first2Length should be(2)
-      val allLength = readable.readAllWithLimit(3).map(_.unsafeBody.length).sum
+      val allLength = readable.readAllWithLimit(3).map(_.length).sum
       allLength should be(3)
     }
   }
@@ -31,9 +31,9 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       supportsMissingAndThrown: Boolean
   ): Unit = {
     it should "support retrieving items by id" in {
-      val firstTwoItemIds = readable.readWithLimit(2).unsafeBody.items.map(_.id)
+      val firstTwoItemIds = readable.readWithLimit(2).items.map(_.id)
       firstTwoItemIds should have size 2
-      val maybeItemsRead = readable.retrieveByIds(firstTwoItemIds).unsafeBody
+      val maybeItemsRead = readable.retrieveByIds(firstTwoItemIds)
       val itemsReadIds = maybeItemsRead.map(_.id)
       itemsReadIds should have size firstTwoItemIds.size.toLong
       itemsReadIds should contain theSameElementsAs firstTwoItemIds
@@ -42,7 +42,6 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
     it should "return information about missing ids" in {
       val thrown = the[CdpApiException] thrownBy readable
         .retrieveByIds(idsThatDoNotExist)
-        .unsafeBody
       if (supportsMissingAndThrown) {
         val itemsNotFound = thrown.missing
 
@@ -55,7 +54,6 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
       val sameIdsThrown = the[CdpApiException] thrownBy readable
         .retrieveByIds(sameIdsThatDoNotExist)
-        .unsafeBody
       if (supportsMissingAndThrown) {
         sameIdsThrown.missing match {
           case Some(missingItems) =>

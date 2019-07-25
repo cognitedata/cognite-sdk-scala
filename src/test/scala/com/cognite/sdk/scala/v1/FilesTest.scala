@@ -2,10 +2,11 @@ package com.cognite.sdk.scala.v1
 
 import java.util.UUID
 
+import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
 class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
-  private val client = new GenericClient()(auth, sttpBackend)
+  private val client = new GenericClient()(implicitly[Functor[Id]], auth, sttpBackend)
   private val idsThatDoNotExist = Seq(999991L, 999992L)
 
   it should behave like readable(client.files)
@@ -56,8 +57,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val createdTimeFilterResults = client.files
       .filter(
         FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L)))
-      )
-      .flatMap(_.unsafeBody)
+      ).flatMap(_.toList)
     assert(createdTimeFilterResults.length == 30)
 
     val createdTimeFilterResultsWithLimit = client.files
@@ -65,7 +65,6 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L))),
         20
       )
-      .flatMap(_.unsafeBody)
     assert(createdTimeFilterResultsWithLimit.length == 20)
   }
 
@@ -76,7 +75,6 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           filter = Some(FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L))))
         )
       )
-      .unsafeBody
     assert(createdTimeSearchResults.length == 30)
     val mimeTypeTimeSearchResults = client.files
       .search(
@@ -86,7 +84,6 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           )
         )
       )
-      .unsafeBody
     assert(mimeTypeTimeSearchResults.length == 1)
     val nameSearchResults = client.files
       .search(
@@ -99,7 +96,6 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           )
         )
       )
-      .unsafeBody
     assert(nameSearchResults.length == 4)
     val limitTimeSearchResults = client.files
       .search(
@@ -108,7 +104,6 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           filter = Some(FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L))))
         )
       )
-      .unsafeBody
     assert(limitTimeSearchResults.length == 5)
   }
 }

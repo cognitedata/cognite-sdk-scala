@@ -1,10 +1,10 @@
 package com.cognite.sdk.scala.v1
 
+import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
-import com.softwaremill.sttp.Id
 
 class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
-  private val client = new GenericClient[Id, Nothing]()(auth, sttpBackend)
+  private val client = new GenericClient()(implicitly[Functor[Id]], auth, sttpBackend)
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
@@ -71,7 +71,6 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
           filter = Some(TimeSeriesFilter(createdTime = Some(TimeRange(0, 0))))
         )
       )
-      .unsafeBody
     assert(createdTimeSearchResults.length == 22)
     val createdTimeSearchResults2 = client.timeSeries.search(
         TimeSeriesQuery(
@@ -79,7 +78,6 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
             Some(TimeSeriesFilter(createdTime = Some(TimeRange(1535964900000L, 1549000000000L))))
         )
       )
-      .unsafeBody
     assert(createdTimeSearchResults2.length == 37)
 
     val unitSearchResults = client.timeSeries.search(
@@ -88,7 +86,7 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
             TimeSeriesFilter(unit = Some("m"), createdTime = Some(TimeRange(0L, 1549638383707L)))
           )
         )
-      ).unsafeBody
+      )
     assert(unitSearchResults.length == 33)
 
     val nameSearchResults = client.timeSeries
@@ -100,7 +98,6 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
           search = Some(TimeSeriesSearch(name = Some("W0405")))
         )
       )
-      .unsafeBody
     assert(nameSearchResults.length == 12)
 
     val descriptionSearchResults = client.timeSeries.search(
@@ -110,7 +107,7 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
           ),
           search = Some(TimeSeriesSearch(description = Some("Skarv")))
         )
-      ).unsafeBody
+      )
     assert(descriptionSearchResults.length == 51)
 
     val limitDescriptionSearchResults = client.timeSeries.search(
@@ -121,7 +118,7 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
         ),
         search = Some(TimeSeriesSearch(description = Some("Skarv")))
       )
-    ).unsafeBody
+    )
     assert(limitDescriptionSearchResults.length == 5)
   }
 }

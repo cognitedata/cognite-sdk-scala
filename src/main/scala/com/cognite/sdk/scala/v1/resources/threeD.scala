@@ -17,7 +17,7 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
   import ThreeDModels._
   override val baseUri = uri"${requestSession.baseUri}/3d/models"
 
-  override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] = {
+  override def deleteByIds(ids: Seq[Long]): F[Unit] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
@@ -39,16 +39,16 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
   override def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[ThreeDModel]]] =
+  ): F[ItemsWithCursor[ThreeDModel]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
 
-  override def retrieveByIds(ids: Seq[Long]): F[Response[Seq[ThreeDModel]]] =
+  override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDModel]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def createItems(items: Items[CreateThreeDModel]): F[Response[Seq[ThreeDModel]]] =
+  override def createItems(items: Items[CreateThreeDModel]): F[Seq[ThreeDModel]] =
     Create.createItems[F, ThreeDModel, CreateThreeDModel](requestSession, baseUri, items)
 
-  override def updateItems(items: Seq[ThreeDModelUpdate]): F[Response[Seq[ThreeDModel]]] =
+  override def updateItems(items: Seq[ThreeDModelUpdate]): F[Seq[ThreeDModel]] =
     Update.updateItems[F, ThreeDModel, ThreeDModelUpdate](requestSession, baseUri, items)
 }
 
@@ -83,7 +83,7 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
   override val baseUri =
     uri"${requestSession.baseUri}/3d/models/$modelId/revisions"
 
-  override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] = {
+  override def deleteByIds(ids: Seq[Long]): F[Unit] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
@@ -105,16 +105,16 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
   override def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[ThreeDRevision]]] =
+  ): F[ItemsWithCursor[ThreeDRevision]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
 
-  override def retrieveByIds(ids: Seq[Long]): F[Response[Seq[ThreeDRevision]]] =
+  override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDRevision]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def createItems(items: Items[CreateThreeDRevision]): F[Response[Seq[ThreeDRevision]]] =
+  override def createItems(items: Items[CreateThreeDRevision]): F[Seq[ThreeDRevision]] =
     Create.createItems[F, ThreeDRevision, CreateThreeDRevision](requestSession, baseUri, items)
 
-  override def updateItems(items: Seq[ThreeDRevisionUpdate]): F[Response[Seq[ThreeDRevision]]] =
+  override def updateItems(items: Seq[ThreeDRevisionUpdate]): F[Seq[ThreeDRevision]] =
     Update.updateItems[F, ThreeDRevision, ThreeDRevisionUpdate](requestSession, baseUri, items)
 }
 
@@ -151,7 +151,7 @@ class ThreeDAssetMappings[F[_]](
   override def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[ThreeDAssetMapping]]] =
+  ): F[ItemsWithCursor[ThreeDAssetMapping]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
 }
 

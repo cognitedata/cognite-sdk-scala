@@ -22,32 +22,32 @@ class Events[F[_]](val requestSession: RequestSession[F])
   override def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[Event]]] =
+  ): F[ItemsWithCursor[Event]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
 
-  override def retrieveByIds(ids: Seq[Long]): F[Response[Seq[Event]]] =
+  override def retrieveByIds(ids: Seq[Long]): F[Seq[Event]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def createItems(items: Items[CreateEvent]): F[Response[Seq[Event]]] =
+  override def createItems(items: Items[CreateEvent]): F[Seq[Event]] =
     Create.createItems[F, Event, CreateEvent](requestSession, baseUri, items)
 
-  override def updateItems(items: Seq[EventUpdate]): F[Response[Seq[Event]]] =
+  override def updateItems(items: Seq[EventUpdate]): F[Seq[Event]] =
     Update.updateItems[F, Event, EventUpdate](requestSession, baseUri, items)
 
-  override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUri, ids)
 
-  override def deleteByExternalIds(externalIds: Seq[String]): F[Response[Unit]] =
+  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUri, externalIds)
 
   override def filterWithCursor(
       filter: EventsFilter,
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[Event]]] =
+  ): F[ItemsWithCursor[Event]] =
     Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit)
 
-  override def search(searchQuery: EventsQuery): F[Response[Seq[Event]]] =
+  override def search(searchQuery: EventsQuery): F[Seq[Event]] =
     Search.search(requestSession, baseUri, searchQuery)
 }
 

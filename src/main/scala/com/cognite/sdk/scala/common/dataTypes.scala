@@ -32,8 +32,10 @@ final case class CdpApiException(
     message: String,
     missing: Option[Seq[JsonObject]],
     duplicated: Option[Seq[JsonObject]]
-) extends Throwable(s"Request to ${url.toString()} failed with status $code: $message")
+) extends Throwable(s"Request to ${url.toString()} failed with status ${code.toString}: $message")
+
 final case class CogniteId(id: Long)
+
 final case class DataPoint(
     timestamp: Long,
     value: Double

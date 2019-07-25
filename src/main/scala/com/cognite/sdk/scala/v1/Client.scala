@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1
 
+import cats.Functor
+import cats.implicits._
 import com.cognite.sdk.scala.common.{Auth, InvalidAuthentication, Login}
 import com.cognite.sdk.scala.v1.resources.{
   Assets,
@@ -18,8 +20,12 @@ import com.softwaremill.sttp._
 
 import scala.concurrent.duration._
 
-final case class RequestSession[F[_]](baseUri: Uri, sttpBackend: SttpBackend[F, _], auth: Auth) {
-  def send[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[Response[R]] =
+final case class RequestSession[F[_]: Functor](
+    baseUri: Uri,
+    sttpBackend: SttpBackend[F, _],
+    auth: Auth
+) {
+  def send[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[R] =
     r(
       sttp
         .auth(auth)
@@ -27,10 +33,10 @@ final case class RequestSession[F[_]](baseUri: Uri, sttpBackend: SttpBackend[F, 
         .header("accept", "application/json")
         .readTimeout(90.seconds)
         .parseResponseIf(_ => true)
-    ).send()(sttpBackend, implicitly)
+    ).send()(sttpBackend, implicitly).map(_.unsafeBody)
 }
 
-class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
+class GenericClient[F[_]: Functor, _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
   val project: String = auth.project.getOrElse {
     val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
       options = SttpBackendOptions.connectionTimeout(90.seconds)
@@ -38,7 +44,6 @@ class GenericClient[F[_], _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]
 
     val loginStatus = new Login(RequestSession(uri"https://api.cognitedata.com", sttpBackend, auth))
       .status()
-      .unsafeBody
 
     if (loginStatus.project.trim.isEmpty) {
       throw InvalidAuthentication()

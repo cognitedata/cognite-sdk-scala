@@ -1,9 +1,10 @@
 package com.cognite.sdk.scala.v1
 
+import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
 class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
-  private val client = new GenericClient()(auth, sttpBackend)
+  private val client = new GenericClient()(implicitly[Functor[Id]], auth, sttpBackend)
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
@@ -60,8 +61,7 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val createdTimeFilterResults = client.assets
       .filter(
         AssetsFilter(createdTime = Some(TimeRange(1560756441301L, 1560756445000L)))
-      )
-      .flatMap(_.unsafeBody)
+      ).flatMap(_.toList)
     assert(createdTimeFilterResults.length == 84)
 
     val createdTimeFilterResultsWithLimit = client.assets
@@ -69,7 +69,6 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         AssetsFilter(createdTime = Some(TimeRange(1560756441301L, 1560756445000L))),
         10
       )
-      .flatMap(_.unsafeBody)
     assert(createdTimeFilterResultsWithLimit.length == 10)
   }
 
@@ -80,7 +79,6 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           filter = Some(AssetsFilter(createdTime = Some(TimeRange(1560756441301L, 1560756445000L))))
         )
       )
-      .unsafeBody
     assert(createdTimeSearchResults.length == 84)
     val valveResults = client.assets
       .search(
@@ -94,7 +92,6 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           search = Some(AssetsSearch(description = Some("VALVE")))
         )
       )
-      .unsafeBody
     assert(valveResults.length == 3)
     val esdvResults = client.assets
       .search(
@@ -102,7 +99,6 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           search = Some(AssetsSearch(name = Some("ESDV")))
         )
       )
-      .unsafeBody
     assert(esdvResults.length == 20)
     val esdvLimitResults = client.assets
       .search(
@@ -111,7 +107,6 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           search = Some(AssetsSearch(name = Some("ESDV")))
         )
       )
-      .unsafeBody
     assert(esdvLimitResults.length == 10)
   }
 }

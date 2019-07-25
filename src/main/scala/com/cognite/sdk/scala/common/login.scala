@@ -11,7 +11,7 @@ class Login[F[_]](val requestSession: RequestSession[F]) {
   @SuppressWarnings(Array("org.wartremover.warts.EitherProjectionPartial"))
   implicit val loginStatusDecoder = deriveDecoder[LoginStatus]
   implicit val dataLoginStatusDecoder = deriveDecoder[DataLoginStatus]
-  def status(): F[Response[LoginStatus]] =
+  def status(): F[LoginStatus] =
     requestSession
       .send { request =>
         request

@@ -21,25 +21,25 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
   override def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[TimeSeries]]] =
+  ): F[ItemsWithCursor[TimeSeries]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
 
-  override def retrieveByIds(ids: Seq[Long]): F[Response[Seq[TimeSeries]]] =
+  override def retrieveByIds(ids: Seq[Long]): F[Seq[TimeSeries]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def createItems(items: Items[CreateTimeSeries]): F[Response[Seq[TimeSeries]]] =
+  override def createItems(items: Items[CreateTimeSeries]): F[Seq[TimeSeries]] =
     Create.createItems[F, TimeSeries, CreateTimeSeries](requestSession, baseUri, items)
 
-  override def updateItems(items: Seq[TimeSeriesUpdate]): F[Response[Seq[TimeSeries]]] =
+  override def updateItems(items: Seq[TimeSeriesUpdate]): F[Seq[TimeSeries]] =
     Update.updateItems[F, TimeSeries, TimeSeriesUpdate](requestSession, baseUri, items)
 
-  override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUri, ids)
 
-  override def deleteByExternalIds(externalIds: Seq[String]): F[Response[Unit]] =
+  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUri, externalIds)
 
-  override def search(searchQuery: TimeSeriesQuery): F[Response[Seq[TimeSeries]]] =
+  override def search(searchQuery: TimeSeriesQuery): F[Seq[TimeSeries]] =
     Search.search(requestSession, baseUri, searchQuery)
 }
 

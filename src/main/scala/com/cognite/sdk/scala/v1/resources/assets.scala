@@ -22,32 +22,32 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   override def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[Asset]]] =
+  ): F[ItemsWithCursor[Asset]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
 
-  override def retrieveByIds(ids: Seq[Long]): F[Response[Seq[Asset]]] =
+  override def retrieveByIds(ids: Seq[Long]): F[Seq[Asset]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def createItems(items: Items[CreateAsset]): F[Response[Seq[Asset]]] =
+  override def createItems(items: Items[CreateAsset]): F[Seq[Asset]] =
     Create.createItems[F, Asset, CreateAsset](requestSession, baseUri, items)
 
-  override def updateItems(items: Seq[AssetUpdate]): F[Response[Seq[Asset]]] =
+  override def updateItems(items: Seq[AssetUpdate]): F[Seq[Asset]] =
     Update.updateItems[F, Asset, AssetUpdate](requestSession, baseUri, items)
 
-  override def deleteByIds(ids: Seq[Long]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUri, ids)
 
-  override def deleteByExternalIds(externalIds: Seq[String]): F[Response[Unit]] =
+  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUri, externalIds)
 
   override def filterWithCursor(
       filter: AssetsFilter,
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[Asset]]] =
+  ): F[ItemsWithCursor[Asset]] =
     Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit)
 
-  override def search(searchQuery: AssetsQuery): F[Response[Seq[Asset]]] =
+  override def search(searchQuery: AssetsQuery): F[Seq[Asset]] =
     Search.search(requestSession, baseUri, searchQuery)
 }
 

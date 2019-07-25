@@ -15,10 +15,10 @@ final case class UpdateRequest(update: Json, id: Long)
 trait Update[R <: WithId[Long], U <: WithId[Long], F[_]]
     extends WithRequestSession[F]
     with BaseUri {
-  def updateItems(items: Seq[U]): F[Response[Seq[R]]]
+  def updateItems(items: Seq[U]): F[Seq[R]]
 
   // scalastyle: off
-  def update[T](items: Seq[T])(implicit t: Transformer[T, U]): F[Response[Seq[R]]] =
+  def update[T](items: Seq[T])(implicit t: Transformer[T, U]): F[Seq[R]] =
     updateItems(items.map(_.transformInto[U]))
 }
 
@@ -29,10 +29,9 @@ object Update {
       requestSession: RequestSession[F],
       baseUri: Uri,
       updates: Seq[U]
-  )(implicit decodeReadItems: Decoder[Items[R]]): F[Response[Seq[R]]] = {
+  )(implicit decodeReadItems: Decoder[Items[R]]): F[Seq[R]] = {
     require(updates.forall(_.id > 0), "Update requires an id to be set")
-    implicit val printer: Printer =
-      Printer(dropNullValues = true, indent = "", preserveOrder = false)
+    implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
