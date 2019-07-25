@@ -12,7 +12,7 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
       filter: Fi,
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[R]]]
+  ): F[ItemsWithCursor[R]]
 
   private def filterWithNextCursor(
       filter: Fi,
@@ -25,15 +25,15 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
       def get(
           cursor: Option[String],
           remainingItems: Option[Long]
-      ): F[Response[ItemsWithCursor[R]]] =
+      ): F[ItemsWithCursor[R]] =
         filterWithCursor(theFilter, cursor, remainingItems)
     }
   }
 
-  def filter(filter: Fi): Iterator[F[Response[Seq[R]]]] =
+  def filter(filter: Fi): Iterator[F[Seq[R]]] =
     filterWithNextCursor(filter, None, None)
 
-  def filterWithLimit(filter: Fi, limit: Long): Iterator[F[Response[Seq[R]]]] =
+  def filterWithLimit(filter: Fi, limit: Long): Iterator[F[Seq[R]]] =
     filterWithNextCursor(filter, None, Some(limit))
 }
 
@@ -47,7 +47,7 @@ object Filter {
   )(
       implicit readItemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
       filterRequestEncoder: Encoder[FilterRequest[Fi]]
-  ): F[Response[ItemsWithCursor[R]]] = {
+  ): F[ItemsWithCursor[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     requestSession

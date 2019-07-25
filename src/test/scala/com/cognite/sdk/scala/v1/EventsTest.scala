@@ -1,9 +1,10 @@
 package com.cognite.sdk.scala.v1
 
+import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
 class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
-  private val client = new GenericClient()(auth, sttpBackend)
+  private val client = new GenericClient()(implicitly[Functor[Id]], auth, sttpBackend)
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
@@ -72,15 +73,13 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val createdTimeFilterResults = client.events
       .filter(
         EventsFilter(createdTime = Some(TimeRange(1541510008838L, 1541515508838L)))
-      )
-      .flatMap(_.unsafeBody)
+      ).flatMap(_.toList)
     assert(createdTimeFilterResults.length == 11)
     val createdTimeFilterResultsWithLimit = client.events
       .filterWithLimit(
         EventsFilter(createdTime = Some(TimeRange(1541510008838L, 1541515508838L))),
         1
       )
-      .flatMap(_.unsafeBody)
     assert(createdTimeFilterResultsWithLimit.length == 1)
   }
 
@@ -91,7 +90,6 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           filter = Some(EventsFilter(createdTime = Some(TimeRange(1541510008838L, 1541515508838L))))
         )
       )
-      .unsafeBody
     assert(createdTimeSearchResults.length == 11)
     val subtypeCreatedTimeSearchResults = client.events
       .search(
@@ -105,7 +103,6 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           )
         )
       )
-      .unsafeBody
     assert(subtypeCreatedTimeSearchResults.length == 1)
     val searchResults = client.events
       .search(
@@ -122,7 +119,6 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           )
         )
       )
-      .unsafeBody
     assert(searchResults.length == 3)
     val searchResults2 = client.events
       .search(
@@ -139,7 +135,6 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           )
         )
       )
-      .unsafeBody
     assert(searchResults2.length == 7)
     val limitSearchResults = client.events
       .search(
@@ -157,7 +152,6 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           )
         )
       )
-      .unsafeBody
     assert(limitSearchResults.length == 3)
   }
 }

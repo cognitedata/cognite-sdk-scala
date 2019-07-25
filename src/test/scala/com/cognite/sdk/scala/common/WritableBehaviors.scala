@@ -16,7 +16,6 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
     it should "be an error to delete using ids that does not exist" in {
       val thrown = the[CdpApiException] thrownBy writable
         .deleteByIds(idsThatDoNotExist)
-        .unsafeBody
       if (supportsMissingAndThrown) {
         val missingIds = thrown.missing
           .getOrElse(Seq.empty)
@@ -28,7 +27,6 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
       val sameIdsThrown = the[CdpApiException] thrownBy writable
         .deleteByIds(sameIdsThatDoNotExist)
-        .unsafeBody
       if (supportsMissingAndThrown) {
         // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
         // if duplicated ids that do not exist are specified.
@@ -47,36 +45,32 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
 
     it should "create and delete items using the read class" in {
       // create a single item
-      val createdItem = writable.create(readExamples.take(1)).unsafeBody
+      val createdItem = writable.create(readExamples.take(1))
       createdItem should have size 1
       createdItem.head.id should not be 0
-      val deleteSingle = writable.deleteByIds(createdItem.map(_.id))
-      deleteSingle.isSuccess should be(true)
+      writable.deleteByIds(createdItem.map(_.id))
 
       // create multiple items
-      val createdItems = writable.create(readExamples).unsafeBody
+      val createdItems = writable.create(readExamples)
       createdItems should have size readExamples.size.toLong
       val createdIds = createdItems.map(_.id)
       createdIds should have size readExamples.size.toLong
-      val delete = writable.deleteByIds(createdIds)
-      delete.isSuccess should be(true)
+      writable.deleteByIds(createdIds)
     }
 
     it should "create and delete items using the create class" in {
       // create a single item
-      val createdItem = writable.create(createExamples.take(1)).unsafeBody
+      val createdItem = writable.create(createExamples.take(1))
       createdItem should have size 1
       createdItem.head.id should not be 0
-      val deleteSingle = writable.deleteByIds(createdItem.map(_.id))
-      deleteSingle.isSuccess should be(true)
+      writable.deleteByIds(createdItem.map(_.id))
 
       // create multiple items
-      val createdItems = writable.create(createExamples).unsafeBody
+      val createdItems = writable.create(createExamples)
       createdItems should have size createExamples.size.toLong
       val createdIds = createdItems.map(_.id)
       createdIds should have size createExamples.size.toLong
-      val delete = writable.deleteByIds(createdIds)
-      delete.isSuccess should be(true)
+      writable.deleteByIds(createdIds)
     }
     // TODO: test creating multiple items with the same external
     //       id in the same api call for V1
@@ -92,7 +86,6 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
     it should "be an error to delete using external ids that does not exist" in {
       val thrown = the[CdpApiException] thrownBy writable
         .deleteByExternalIds(externalIdsThatDoNotExist)
-        .unsafeBody
       if (supportsMissingAndThrown) {
         val missingIds = thrown.missing
           .getOrElse(Seq.empty)
@@ -104,7 +97,6 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       val sameIdsThatDoNotExist = Seq(externalIdsThatDoNotExist.head, externalIdsThatDoNotExist.head)
       val sameIdsThrown = the[CdpApiException] thrownBy writable
         .deleteByExternalIds(sameIdsThatDoNotExist)
-        .unsafeBody
       if (supportsMissingAndThrown) {
         // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
         // if duplicated ids that do not exist are specified.
@@ -123,36 +115,32 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
 
     it should "create and delete items using the read class and external ids" in {
       // create a single item
-      val createdItem = writable.create(readExamples.take(1)).unsafeBody
+      val createdItem = writable.create(readExamples.take(1))
       createdItem should have size 1
       createdItem.head.externalId should not be empty
-      val deleteSingle = writable.deleteByExternalIds(createdItem.map(_.externalId.get))
-      deleteSingle.isSuccess should be(true)
+      writable.deleteByExternalIds(createdItem.map(_.externalId.get))
 
       // create multiple items
-      val createdItems = writable.create(readExamples).unsafeBody
+      val createdItems = writable.create(readExamples)
       createdItems should have size readExamples.size.toLong
       val createdExternalIds = createdItems.map(_.externalId.get)
       createdExternalIds should have size readExamples.size.toLong
-      val delete = writable.deleteByExternalIds(createdExternalIds)
-      delete.isSuccess should be(true)
+      writable.deleteByExternalIds(createdExternalIds)
     }
 
     it should "create and delete items using the create class and external ids" in {
       // create a single item
-      val createdItem = writable.create(createExamples.take(1)).unsafeBody
+      val createdItem = writable.create(createExamples.take(1))
       createdItem should have size 1
       createdItem.head.externalId should not be empty
-      val deleteSingle = writable.deleteByExternalIds(createdItem.map(_.externalId.get))
-      deleteSingle.isSuccess should be(true)
+      writable.deleteByExternalIds(createdItem.map(_.externalId.get))
 
       // create multiple items
-      val createdItems = writable.create(createExamples).unsafeBody
+      val createdItems = writable.create(createExamples)
       createdItems should have size createExamples.size.toLong
       val createdIds = createdItems.map(_.externalId.get)
       createdIds should have size createExamples.size.toLong
-      val delete = writable.deleteByExternalIds(createdIds)
-      delete.isSuccess should be(true)
+      writable.deleteByExternalIds(createdIds)
     }
     // TODO: test creating multiple items with the same external
     //       id in the same api call for V1
@@ -171,14 +159,14 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
   )(implicit t: Transformer[R, W], t2: Transformer[R, U]): Unit =
     it should "allow updates using the read class" in {
       // create items
-      val createdItems = updatable.create(readExamples).unsafeBody
+      val createdItems = updatable.create(readExamples)
       assert(createdItems.size == readExamples.size)
       createdItems.map(_.id) should not contain 0
 
-      val readItems = updatable.retrieveByIds(createdItems.map(_.id)).unsafeBody
+      val readItems = updatable.retrieveByIds(createdItems.map(_.id))
 
       // update the item to current values
-      val unchangedUpdatedItems = updatable.update(readItems).unsafeBody
+      val unchangedUpdatedItems = updatable.update(readItems)
       assert(unchangedUpdatedItems.size == readItems.size)
       assert(unchangedUpdatedItems.zip(readItems).forall {
         case (updated, read) =>
@@ -188,13 +176,12 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       // update the item with new values
       val updates =
         updateExamples.zip(readItems).map { case (updated, read) => updateId(read.id, updated) }
-      val updatedItems = updatable.update(updates).unsafeBody
+      val updatedItems = updatable.update(updates)
       assert(updatedItems.size == readItems.size)
       compareUpdated(readItems, updatedItems)
 
       // delete it
-      val deleteSingle = updatable.deleteByIds(createdItems.map(_.id))
-      deleteSingle.isSuccess should be(true)
+      updatable.deleteByIds(createdItems.map(_.id))
     }
 
 //    it should "create and delete items using the create class" in {

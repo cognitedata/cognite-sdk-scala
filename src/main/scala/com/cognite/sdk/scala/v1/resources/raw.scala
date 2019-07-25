@@ -10,7 +10,7 @@ import io.circe.{Decoder, Encoder}
 object RawResource {
   def deleteByIds[F[_], I](requestSession: RequestSession[F], baseUri: Uri, ids: Seq[I])(
       implicit idsItemsEncoder: Encoder[Items[I]]
-  ): F[Response[Unit]] = {
+  ): F[Unit] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     requestSession
@@ -40,13 +40,13 @@ class RawDatabases[F[_]](val requestSession: RequestSession[F])
   override def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[RawDatabase]]] =
+  ): F[ItemsWithCursor[RawDatabase]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
 
-  override def createItems(items: Items[RawDatabase]): F[Response[Seq[RawDatabase]]] =
+  override def createItems(items: Items[RawDatabase]): F[Seq[RawDatabase]] =
     Create.createItems[F, RawDatabase, RawDatabase](requestSession, baseUri, items)
 
-  override def deleteByIds(ids: Seq[String]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[String]): F[Unit] =
     RawResource.deleteByIds(requestSession, baseUri, ids.map(RawDatabase))
 }
 
@@ -73,13 +73,13 @@ class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
   override def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[RawTable]]] =
+  ): F[ItemsWithCursor[RawTable]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
 
-  override def createItems(items: Items[RawTable]): F[Response[Seq[RawTable]]] =
+  override def createItems(items: Items[RawTable]): F[Seq[RawTable]] =
     Create.createItems[F, RawTable, RawTable](requestSession, baseUri, items)
 
-  override def deleteByIds(ids: Seq[String]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[String]): F[Unit] =
     RawResource.deleteByIds(requestSession, baseUri, ids.map(RawTable))
 }
 
@@ -104,7 +104,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
     uri"${requestSession.baseUri}/raw/dbs/$database/tables/$table/rows"
 
   // raw does not return the created rows in the response, so we'll always return an empty sequence.
-  override def createItems(items: Items[RawRow]): F[Response[Seq[RawRow]]] = {
+  override def createItems(items: Items[RawRow]): F[Seq[RawRow]] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     requestSession
@@ -124,10 +124,10 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
   override def readWithCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): F[Response[ItemsWithCursor[RawRow]]] =
+  ): F[ItemsWithCursor[RawRow]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit)
 
-  override def deleteByIds(ids: Seq[String]): F[Response[Unit]] =
+  override def deleteByIds(ids: Seq[String]): F[Unit] =
     RawResource.deleteByIds(requestSession, baseUri, ids.map(RawRowKey))
 }
 

@@ -1,9 +1,10 @@
 package com.cognite.sdk.scala.v1
 
+import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
 class ThreeDTest extends SdkTest with ReadBehaviours with WritableBehaviors {
-  private val client = new GenericClient()(auth, sttpBackend)
+  private val client = new GenericClient()(implicitly[Functor[Id]], auth, sttpBackend)
   private val idsThatDoNotExist = Seq(9999991L, 9999992L)
 
   ("ThreeDModels" should behave).like(readable(client.threeDModels))

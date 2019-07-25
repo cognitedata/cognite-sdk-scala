@@ -23,7 +23,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
 
-  def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Response[Unit]] =
+  def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Unit] =
     requestSession
       .send { request =>
         request
@@ -37,7 +37,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
           }
       }
 
-  def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Response[Unit]] =
+  def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Unit] =
     requestSession
       .send { request =>
         request
@@ -51,7 +51,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
           }
       }
 
-  def deleteRangeById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Response[Unit]] =
+  def deleteRangeById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Unit] =
     requestSession
       .send { request =>
         request
@@ -65,7 +65,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
           }
       }
 
-  def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Response[Seq[DataPoint]]] =
+  def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]] =
     requestSession
       .send { request =>
         request
@@ -87,7 +87,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
       id: Long,
       inclusiveStart: Long,
       exclusiveEnd: Long
-  ): F[Response[Seq[StringDataPoint]]] =
+  ): F[Seq[StringDataPoint]] =
     requestSession
       .send { request =>
         request
@@ -106,7 +106,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
       }
 
   //def deleteRangeByExternalId(start: Long, end: Long, externalId: String): F[Response[Unit]]
-  def getLatestDataPointById(id: Long): F[Response[Option[DataPoint]]] =
+  def getLatestDataPointById(id: Long): F[Option[DataPoint]] =
     requestSession
       .send { request =>
         request
@@ -121,7 +121,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
           }
       }
 
-  def getLatestStringDataPointById(id: Long): F[Response[Option[StringDataPoint]]] =
+  def getLatestStringDataPointById(id: Long): F[Option[StringDataPoint]] =
     requestSession
       .send { request =>
         request
@@ -140,13 +140,13 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
 object DataPointsResourceV1 {
   implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
   implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
-  // WartRemover gets confused by circe-derivation
-  @SuppressWarnings(Array("org.wartremover.warts.AnyVal"))
   implicit val dataPointDecoder: Decoder[DataPoint] = deriveDecoder
   implicit val dataPointEncoder: Encoder[DataPoint] = deriveEncoder
   implicit val dataPointsByIdResponseDecoder: Decoder[DataPointsByIdResponse] = deriveDecoder
   implicit val dataPointsByIdResponseItemsDecoder: Decoder[Items[DataPointsByIdResponse]] =
     deriveDecoder
+  // WartRemover gets confused by circe-derivation
+  @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val stringDataPointDecoder: Decoder[StringDataPoint] = deriveDecoder
   implicit val stringDataPointEncoder: Encoder[StringDataPoint] = deriveEncoder
   implicit val stringDataPointsByIdResponseDecoder: Decoder[StringDataPointsByIdResponse] =

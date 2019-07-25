@@ -1,10 +1,11 @@
 package com.cognite.sdk.scala.v1
 
+import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 import io.circe.syntax._
 
 class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
-  private val client = new GenericClient()(auth, sttpBackend)
+  private val client = new GenericClient()(implicitly[Functor[Id]], auth, sttpBackend)
   private val idsThatDoNotExist = Seq("nodatabase", "randomdatabase")
 
   it should behave like readable(client.rawDatabases)
@@ -22,40 +23,35 @@ class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
 
   def withDatabaseTables(testCode: (String, Seq[String]) => Any): Unit = {
     val database = s"raw-test-${shortRandom()}"
-    val databaseCreateResponse = client.rawDatabases.create(Seq(RawDatabase(name = database)))
-    databaseCreateResponse.isSuccess should be (true)
+    client.rawDatabases.create(Seq(RawDatabase(name = database)))
     val tables = client.rawTables(database).create(
       Seq(
         RawTable(name = s"raw-test-${shortRandom()}"),
         RawTable(name = s"raw-test-${shortRandom()}"))
-    ).unsafeBody.map(_.id)
+    ).map(_.id)
     try {
       val _ = testCode(database, tables)
     } finally {
       try {
-        val response = client.rawTables(database).deleteByIds(tables)
-        val _ = assert(response.isSuccess === true)
+        client.rawTables(database).deleteByIds(tables)
       } finally {
-        val response = client.rawDatabases.deleteByIds(Seq(database))
-        val _ = assert(response.isSuccess === true)
+        client.rawDatabases.deleteByIds(Seq(database))
       }
     }
   }
 
   it should "allow creation and deletion of database tables" in withDatabaseTables { (database, tables) =>
-    val tablesResponse = client.rawTables(database).readAll().flatMap(_.unsafeBody.toList).toList
+    val tablesResponse = client.rawTables(database).readAll().flatMap(_.toList).toList
     assert(tablesResponse.size === tables.size)
 
-    val deleteResponse = client.rawTables(database).deleteByIds(tables.take(1))
-    assert(deleteResponse.isSuccess === true)
+    client.rawTables(database).deleteByIds(tables.take(1))
 
-    val tablesResponseAfterDelete = client.rawTables(database).readAll().flatMap(_.unsafeBody.toList).toList
+    val tablesResponseAfterDelete = client.rawTables(database).readAll().flatMap(_.toList).toList
     assert(tablesResponseAfterDelete.size === tables.size - 1)
 
-    val tablesCreateResponse = client.rawTables(database).create(Seq(RawTable(name = tables.head)))
-    assert(tablesCreateResponse.isSuccess === true)
+    client.rawTables(database).create(Seq(RawTable(name = tables.head)))
 
-    val tablesResponseAfterCreate = client.rawTables(database).readAll().flatMap(_.unsafeBody.toList).toList
+    val tablesResponseAfterCreate = client.rawTables(database).readAll().flatMap(_.toList).toList
     assert(tablesResponseAfterCreate.size === tables.size)
   }
 
@@ -63,16 +59,15 @@ class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val table = tables.head
     val rows = client.rawRows(database, table)
 
-    val rowsResponse = rows.readAll().flatMap(_.unsafeBody.toList).toList
+    val rowsResponse = rows.readAll().flatMap(_.toList).toList
     assert(rowsResponse.isEmpty)
 
-    val createResponse = rows.create(Seq(
+    rows.create(Seq(
       RawRow("123", Map("abc" -> "foo".asJson)),
       RawRow("abc", Map("abc" -> Map("cde" -> 1).asJson))
     ))
-    assert(createResponse.isSuccess === true)
 
-    val rowsResponseAfterCreate = rows.readAll().flatMap(_.unsafeBody.toList).toList
+    val rowsResponseAfterCreate = rows.readAll().flatMap(_.toList).toList
     assert(rowsResponseAfterCreate.size === 2)
     assert(rowsResponseAfterCreate.head.key === "123")
     assert(rowsResponseAfterCreate(1).key === "abc")
@@ -82,9 +77,8 @@ class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     assert(rowsResponseAfterCreate(1).columns.keys.head === "abc")
     assert(rowsResponseAfterCreate(1).columns("abc").as[Map[String, Int]].right.get === Map("cde" -> 1))
 
-    val deleteResponse = rows.deleteByIds(Seq("123"))
-    assert(deleteResponse.isSuccess === true)
-    val rowsResponseAfterOneDelete = rows.readAll().flatMap(_.unsafeBody.toList).toList
+    rows.deleteByIds(Seq("123"))
+    val rowsResponseAfterOneDelete = rows.readAll().flatMap(_.toList).toList
     assert(rowsResponseAfterOneDelete.size === 1)
   }
 }

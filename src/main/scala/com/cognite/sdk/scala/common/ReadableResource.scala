@@ -7,41 +7,41 @@ import io.circe.{Decoder, Encoder}
 import io.circe.derivation.deriveEncoder
 
 trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
-  def readWithCursor(cursor: Option[String], limit: Option[Long]): F[Response[ItemsWithCursor[R]]]
+  def readWithCursor(cursor: Option[String], limit: Option[Long]): F[ItemsWithCursor[R]]
 
-  def readFromCursor(cursor: String): F[Response[ItemsWithCursor[R]]] =
+  def readFromCursor(cursor: String): F[ItemsWithCursor[R]] =
     readWithCursor(Some(cursor), None)
 
-  def readFromCursorWithLimit(cursor: String, limit: Long): F[Response[ItemsWithCursor[R]]] =
+  def readFromCursorWithLimit(cursor: String, limit: Long): F[ItemsWithCursor[R]] =
     readWithCursor(Some(cursor), Some(limit))
 
-  def read(): F[Response[ItemsWithCursor[R]]] = readWithCursor(None, None)
+  def read(): F[ItemsWithCursor[R]] = readWithCursor(None, None)
 
-  def readWithLimit(limit: Long): F[Response[ItemsWithCursor[R]]] =
+  def readWithLimit(limit: Long): F[ItemsWithCursor[R]] =
     readWithCursor(None, Some(limit))
 
   private def readWithNextCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): Iterator[F[Response[Seq[R]]]] =
+  ): Iterator[F[Seq[R]]] =
     new NextCursorIterator[R, F](cursor, limit, requestSession.sttpBackend) {
       def get(
           cursor: Option[String],
           remainingItems: Option[Long]
-      ): F[Response[ItemsWithCursor[R]]] =
+      ): F[ItemsWithCursor[R]] =
         readWithCursor(cursor, remainingItems)
     }
 
-  def readAllFromCursor(cursor: String): Iterator[F[Response[Seq[R]]]] =
+  def readAllFromCursor(cursor: String): Iterator[F[Seq[R]]] =
     readWithNextCursor(Some(cursor), None)
 
-  def readAllWithLimit(limit: Long): Iterator[F[Response[Seq[R]]]] =
+  def readAllWithLimit(limit: Long): Iterator[F[Seq[R]]] =
     readWithNextCursor(None, Some(limit))
 
-  def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[Response[Seq[R]]]] =
+  def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[Seq[R]]] =
     readWithNextCursor(Some(cursor), Some(limit))
 
-  def readAll(): Iterator[F[Response[Seq[R]]]] = readWithNextCursor(None, None)
+  def readAll(): Iterator[F[Seq[R]]] = readWithNextCursor(None, None)
 }
 
 object Readable {
@@ -52,7 +52,7 @@ object Readable {
       limit: Option[Long]
   )(
       implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]
-  ): F[Response[ItemsWithCursor[R]]] = {
+  ): F[ItemsWithCursor[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     val uriWithCursor = cursor
@@ -72,7 +72,7 @@ object Readable {
   }
 }
 trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUri {
-  def retrieveByIds(ids: Seq[Long]): F[Response[Seq[R]]]
+  def retrieveByIds(ids: Seq[Long]): F[Seq[R]]
 }
 
 object RetrieveByIds {
@@ -81,7 +81,7 @@ object RetrieveByIds {
 
   def retrieveByIds[F[_], R](requestSession: RequestSession[F], baseUri: Uri, ids: Seq[Long])(
       implicit itemsDecoder: Decoder[Items[R]]
-  ): F[Response[Seq[R]]] = {
+  ): F[Seq[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
