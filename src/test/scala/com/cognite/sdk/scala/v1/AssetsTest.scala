@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1
 
+import java.time.Instant
+
 import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
@@ -60,15 +62,19 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   it should "support filter" in {
     val createdTimeFilterResults = client.assets
       .filter(
-        AssetsFilter(createdTime = Some(TimeRange(1560756441301L, 1560756445000L)))
+        AssetsFilter(
+          createdTime = Some(
+            TimeRange(Instant.ofEpochMilli(1560756441301L), Instant.ofEpochMilli(1560756445000L))))
       ).flatMap(_.toList)
     assert(createdTimeFilterResults.length == 84)
 
     val createdTimeFilterResultsWithLimit = client.assets
       .filterWithLimit(
-        AssetsFilter(createdTime = Some(TimeRange(1560756441301L, 1560756445000L))),
+        AssetsFilter(
+          createdTime = Some(
+            TimeRange(Instant.ofEpochMilli(1560756441301L), Instant.ofEpochMilli(1560756445000L)))),
         10
-      )
+      ).flatMap(_.toList)
     assert(createdTimeFilterResultsWithLimit.length == 10)
   }
 
@@ -76,7 +82,16 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val createdTimeSearchResults = client.assets
       .search(
         AssetsQuery(
-          filter = Some(AssetsFilter(createdTime = Some(TimeRange(1560756441301L, 1560756445000L))))
+          filter = Some(
+            AssetsFilter(
+              createdTime = Some(
+                TimeRange(
+                  Instant.ofEpochMilli(1560756441301L),
+                  Instant.ofEpochMilli(1560756445000L)
+                )
+              )
+            )
+          )
         )
       )
     assert(createdTimeSearchResults.length == 84)
@@ -85,7 +100,8 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         AssetsQuery(
           filter = Some(
             AssetsFilter(
-              createdTime = Some(TimeRange(0, 1560756460294L)),
+              createdTime =
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1560756460294L))),
               parentIds = Some(Seq(1790957171927257L, 2436611095973105L, 6078796607206585L))
             )
           ),

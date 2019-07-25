@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1
 
+import java.time.Instant
+
 import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
@@ -68,14 +70,15 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
     val createdTimeSearchResults = client.timeSeries
       .search(
         TimeSeriesQuery(
-          filter = Some(TimeSeriesFilter(createdTime = Some(TimeRange(0, 0))))
+          filter = Some(TimeSeriesFilter(createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(0)))))
         )
       )
     assert(createdTimeSearchResults.length == 22)
     val createdTimeSearchResults2 = client.timeSeries.search(
         TimeSeriesQuery(
-          filter =
-            Some(TimeSeriesFilter(createdTime = Some(TimeRange(1535964900000L, 1549000000000L))))
+          filter = Some(
+            TimeSeriesFilter(createdTime = Some(
+              TimeRange(Instant.ofEpochMilli(1535964900000L), Instant.ofEpochMilli(1549000000000L)))))
         )
       )
     assert(createdTimeSearchResults2.length == 37)
@@ -83,7 +86,8 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
     val unitSearchResults = client.timeSeries.search(
         TimeSeriesQuery(
           filter = Some(
-            TimeSeriesFilter(unit = Some("m"), createdTime = Some(TimeRange(0L, 1549638383707L)))
+            TimeSeriesFilter(unit = Some("m"),
+              createdTime = Some(TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1549638383707L))))
           )
         )
       )
@@ -93,7 +97,8 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
       .search(
         TimeSeriesQuery(
           filter = Some(
-            TimeSeriesFilter(unit = Some("m"), createdTime = Some(TimeRange(0L, 1549638383707L)))
+            TimeSeriesFilter(unit = Some("m"),
+              createdTime = Some(TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1549638383707L))))
           ),
           search = Some(TimeSeriesSearch(name = Some("W0405")))
         )
@@ -101,20 +106,28 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
     assert(nameSearchResults.length == 12)
 
     val descriptionSearchResults = client.timeSeries.search(
-        TimeSeriesQuery(
-          filter = Some(
-            TimeSeriesFilter(createdTime = Some(TimeRange(1553632871254L, 1553632871254L)))
-          ),
-          search = Some(TimeSeriesSearch(description = Some("Skarv")))
-        )
+      TimeSeriesQuery(
+        filter = Some(
+          TimeSeriesFilter(
+            createdTime = Some(
+              TimeRange(Instant.ofEpochMilli(1553632871254L), Instant.ofEpochMilli(1553632871254L))
+            )
+          )
+        ),
+        search = Some(TimeSeriesSearch(description = Some("Skarv")))
       )
+    )
     assert(descriptionSearchResults.length == 51)
 
     val limitDescriptionSearchResults = client.timeSeries.search(
       TimeSeriesQuery(
         limit = 5,
         filter = Some(
-          TimeSeriesFilter(createdTime = Some(TimeRange(1553632871254L, 1553632871254L)))
+          TimeSeriesFilter(
+            createdTime = Some(
+              TimeRange(Instant.ofEpochMilli(1553632871254L), Instant.ofEpochMilli(1553632871254L))
+            )
+          )
         ),
         search = Some(TimeSeriesSearch(description = Some("Skarv")))
       )

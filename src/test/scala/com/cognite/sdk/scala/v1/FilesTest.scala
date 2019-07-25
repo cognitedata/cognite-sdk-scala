@@ -1,5 +1,6 @@
 package com.cognite.sdk.scala.v1
 
+import java.time.Instant
 import java.util.UUID
 
 import cats.{Functor, Id}
@@ -56,15 +57,17 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   it should "support filter" in {
     val createdTimeFilterResults = client.files
       .filter(
-        FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L)))
+        FilesFilter(
+          createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L))))
       ).flatMap(_.toList)
     assert(createdTimeFilterResults.length == 30)
 
     val createdTimeFilterResultsWithLimit = client.files
       .filterWithLimit(
-        FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L))),
+        FilesFilter(
+          createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))),
         20
-      )
+      ).flatMap(_.toList)
     assert(createdTimeFilterResultsWithLimit.length == 20)
   }
 
@@ -72,7 +75,12 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val createdTimeSearchResults = client.files
       .search(
         FilesQuery(
-          filter = Some(FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L))))
+          filter = Some(
+            FilesFilter(
+              createdTime =
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+            )
+          )
         )
       )
     assert(createdTimeSearchResults.length == 30)
@@ -80,7 +88,11 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       .search(
         FilesQuery(
           filter = Some(
-            FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L)), mimeType = Some("txt"))
+            FilesFilter(
+              createdTime =
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L))),
+              mimeType = Some("txt")
+            )
           )
         )
       )
@@ -88,7 +100,12 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val nameSearchResults = client.files
       .search(
         FilesQuery(
-          filter = Some(FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L)))),
+          filter = Some(
+            FilesFilter(
+              createdTime =
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+            )
+          ),
           search = Some(
             FilesSearch(
               name = Some("MyCadFile")
@@ -101,7 +118,12 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       .search(
         FilesQuery(
           limit = 5,
-          filter = Some(FilesFilter(createdTime = Some(TimeRange(0, 1563284224550L))))
+          filter = Some(
+            FilesFilter(
+              createdTime =
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+            )
+          )
         )
       )
     assert(limitTimeSearchResults.length == 5)

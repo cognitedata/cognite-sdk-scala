@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.common
 
+import java.time.Instant
+
 import com.softwaremill.sttp.Uri
 import io.circe.{Decoder, Encoder, Json, JsonObject}
 import io.circe.derivation.deriveDecoder
@@ -37,12 +39,12 @@ final case class CdpApiException(
 final case class CogniteId(id: Long)
 
 final case class DataPoint(
-    timestamp: Long,
+    timestamp: Instant,
     value: Double
 )
 
 final case class StringDataPoint(
-    timestamp: Long,
+    timestamp: Instant,
     value: String
 )
 

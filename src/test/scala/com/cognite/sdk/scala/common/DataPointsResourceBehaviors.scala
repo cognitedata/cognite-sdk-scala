@@ -1,13 +1,17 @@
 package com.cognite.sdk.scala.common
 
+import java.time.Instant
+
 import com.softwaremill.sttp.Id
 import org.scalatest.{FlatSpec, Matchers}
 
 trait DataPointsResourceBehaviors[I] extends Matchers { this: FlatSpec =>
   private val startTime = System.currentTimeMillis()
   private val endTime = startTime + 20*1000
-  private val testDataPoints = (startTime to endTime by 1000).map(DataPoint(_, math.random))
-  private val testStringDataPoints = (startTime to endTime by 1000).map(StringDataPoint(_, math.random.toString))
+  private val testDataPoints = (startTime to endTime by 1000).map(t =>
+    DataPoint(Instant.ofEpochMilli(t), math.random))
+  private val testStringDataPoints = (startTime to endTime by 1000).map(t =>
+    StringDataPoint(Instant.ofEpochMilli(t), math.random.toString))
 
   def withTimeSeriesId(testCode: I => Any): Unit
   def withStringTimeSeriesId(testCode: I => Any): Unit
