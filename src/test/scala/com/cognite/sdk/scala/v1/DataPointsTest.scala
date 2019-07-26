@@ -9,7 +9,7 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors[Long] {
   private val client = new GenericClient()(implicitly[Functor[Id]], auth, sttpBackend)
 
   override def withTimeSeriesId(testCode: Long => Any): Unit = {
-    val timeSeriesId = client.timeSeries.create(
+    val timeSeriesId = client.timeSeries.createFromRead(
       Seq(TimeSeries(name = s"data-points-test-${UUID.randomUUID().toString}"))
     ).head.id
     try {
@@ -20,7 +20,7 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors[Long] {
   }
 
   override def withStringTimeSeriesId(testCode: Long => Any): Unit = {
-    val timeSeriesId = client.timeSeries.create(
+    val timeSeriesId = client.timeSeries.createFromRead(
       Seq(TimeSeries(name = s"string-data-points-test-${UUID.randomUUID().toString}", isString = true))
     ).head.id
     try {

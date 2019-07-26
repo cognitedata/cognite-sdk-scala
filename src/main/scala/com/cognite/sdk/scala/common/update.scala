@@ -15,17 +15,40 @@ final case class UpdateRequest(update: Json, id: Long)
 trait Update[R <: WithId[Long], U <: WithId[Long], F[_]]
     extends WithRequestSession[F]
     with BaseUri {
-  def updateItems(items: Seq[U]): F[Seq[R]]
+  def update(items: Seq[U]): F[Seq[R]]
 
-  // scalastyle: off
-  def update[T](items: Seq[T])(implicit t: Transformer[T, U]): F[Seq[R]] =
-    updateItems(items.map(_.transformInto[U]))
+  def updateFromRead(items: Seq[R])(
+      implicit t: Transformer[R, U]
+  ): F[Seq[R]] =
+    update(items.map(_.transformInto[U]))
+
+  def updateOne(item: U): F[R] =
+    requestSession.map(
+      update(Seq(item)),
+      (r1: Seq[R]) =>
+        r1.headOption match {
+          case Some(value) => value
+          case None => throw SdkException("Unexpected empty response when updating item")
+        }
+    )
+
+  def updateOneFromRead(item: R)(
+      implicit t: Transformer[R, U]
+  ): F[R] =
+    requestSession.map(
+      updateFromRead(Seq(item)),
+      (r1: Seq[R]) =>
+        r1.headOption match {
+          case Some(value) => value
+          case None => throw SdkException("Unexpected empty response when updating item")
+        }
+    )
 }
 
 object Update {
   implicit val updateRequestEncoder: Encoder[UpdateRequest] = deriveEncoder
   implicit val updateRequestItemsEncoder: Encoder[Items[UpdateRequest]] = deriveEncoder
-  def updateItems[F[_], R, U <: WithId[Long]: Encoder](
+  def update[F[_], R, U <: WithId[Long]: Encoder](
       requestSession: RequestSession[F],
       baseUri: Uri,
       updates: Seq[U]

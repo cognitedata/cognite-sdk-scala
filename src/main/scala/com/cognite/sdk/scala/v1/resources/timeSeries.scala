@@ -32,8 +32,8 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
   override def createItems(items: Items[CreateTimeSeries]): F[Seq[TimeSeries]] =
     Create.createItems[F, TimeSeries, CreateTimeSeries](requestSession, baseUri, items)
 
-  override def updateItems(items: Seq[TimeSeriesUpdate]): F[Seq[TimeSeries]] =
-    Update.updateItems[F, TimeSeries, TimeSeriesUpdate](requestSession, baseUri, items)
+  override def update(items: Seq[TimeSeriesUpdate]): F[Seq[TimeSeries]] =
+    Update.update[F, TimeSeries, TimeSeriesUpdate](requestSession, baseUri, items)
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUri, ids)

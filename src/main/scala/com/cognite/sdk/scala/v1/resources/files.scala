@@ -51,8 +51,8 @@ class Files[F[_]](val requestSession: RequestSession[F])
   override def retrieveByIds(ids: Seq[Long]): F[Seq[File]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def updateItems(items: Seq[FileUpdate]): F[Seq[File]] =
-    Update.updateItems[F, File, FileUpdate](requestSession, baseUri, items)
+  override def update(items: Seq[FileUpdate]): F[Seq[File]] =
+    Update.update[F, File, FileUpdate](requestSession, baseUri, items)
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUri, ids)

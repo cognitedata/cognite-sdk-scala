@@ -34,6 +34,8 @@ final case class RequestSession[F[_]: Functor](
         .readTimeout(90.seconds)
         .parseResponseIf(_ => true)
     ).send()(sttpBackend, implicitly).map(_.unsafeBody)
+
+  def map[R, R1](r: F[R], f: R => R1): F[R1] = r.map(f)
 }
 
 class GenericClient[F[_]: Functor, _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {

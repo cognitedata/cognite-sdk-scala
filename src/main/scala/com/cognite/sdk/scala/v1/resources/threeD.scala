@@ -50,8 +50,8 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
   override def createItems(items: Items[CreateThreeDModel]): F[Seq[ThreeDModel]] =
     Create.createItems[F, ThreeDModel, CreateThreeDModel](requestSession, baseUri, items)
 
-  override def updateItems(items: Seq[ThreeDModelUpdate]): F[Seq[ThreeDModel]] =
-    Update.updateItems[F, ThreeDModel, ThreeDModelUpdate](requestSession, baseUri, items)
+  override def update(items: Seq[ThreeDModelUpdate]): F[Seq[ThreeDModel]] =
+    Update.update[F, ThreeDModel, ThreeDModelUpdate](requestSession, baseUri, items)
 }
 
 object ThreeDModels {
@@ -119,8 +119,8 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
   override def createItems(items: Items[CreateThreeDRevision]): F[Seq[ThreeDRevision]] =
     Create.createItems[F, ThreeDRevision, CreateThreeDRevision](requestSession, baseUri, items)
 
-  override def updateItems(items: Seq[ThreeDRevisionUpdate]): F[Seq[ThreeDRevision]] =
-    Update.updateItems[F, ThreeDRevision, ThreeDRevisionUpdate](requestSession, baseUri, items)
+  override def update(items: Seq[ThreeDRevisionUpdate]): F[Seq[ThreeDRevision]] =
+    Update.update[F, ThreeDRevision, ThreeDRevisionUpdate](requestSession, baseUri, items)
 }
 
 object ThreeDRevisions {

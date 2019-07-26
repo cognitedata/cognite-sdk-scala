@@ -10,6 +10,7 @@ import io.scalaland.chimney.dsl._
 
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
 final case class Items[A](items: Seq[A])
+final case class SdkException(message: String) extends Throwable(message)
 final case class CdpApiErrorPayload(
     code: Int,
     message: String,

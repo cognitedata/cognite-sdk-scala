@@ -33,8 +33,8 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   override def createItems(items: Items[CreateAsset]): F[Seq[Asset]] =
     Create.createItems[F, Asset, CreateAsset](requestSession, baseUri, items)
 
-  override def updateItems(items: Seq[AssetUpdate]): F[Seq[Asset]] =
-    Update.updateItems[F, Asset, AssetUpdate](requestSession, baseUri, items)
+  override def update(items: Seq[AssetUpdate]): F[Seq[Asset]] =
+    Update.update[F, Asset, AssetUpdate](requestSession, baseUri, items)
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUri, ids)
