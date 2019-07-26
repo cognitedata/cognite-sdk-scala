@@ -17,7 +17,7 @@ final case class Asset(
 ) extends WithId[Long]
     with WithExternalId
 
-final case class CreateAsset(
+final case class AssetCreate(
     name: String,
     parentId: Option[Long] = None,
     description: Option[String] = None,

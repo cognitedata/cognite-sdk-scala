@@ -17,7 +17,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   it should behave like writable(
     client.files,
     Seq(File(name = "scala-sdk-read-example-1")),
-    Seq(CreateFile(name = "scala-sdk-read-example-1")),
+    Seq(FileCreate(name = "scala-sdk-read-example-1")),
     idsThatDoNotExist,
     supportsMissingAndThrown = true
   )

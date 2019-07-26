@@ -10,7 +10,7 @@ import io.circe.derivation.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
 class ThreeDModels[F[_]](val requestSession: RequestSession[F])
-    extends Create[ThreeDModel, CreateThreeDModel, F]
+    extends Create[ThreeDModel, ThreeDModelCreate, F]
     with RetrieveByIds[ThreeDModel, F]
     with Readable[ThreeDModel, F]
     with DeleteByIds[F, Long]
@@ -47,8 +47,8 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDModel]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def createItems(items: Items[CreateThreeDModel]): F[Seq[ThreeDModel]] =
-    Create.createItems[F, ThreeDModel, CreateThreeDModel](requestSession, baseUri, items)
+  override def createItems(items: Items[ThreeDModelCreate]): F[Seq[ThreeDModel]] =
+    Create.createItems[F, ThreeDModel, ThreeDModelCreate](requestSession, baseUri, items)
 
   override def update(items: Seq[ThreeDModelUpdate]): F[Seq[ThreeDModel]] =
     Update.update[F, ThreeDModel, ThreeDModelUpdate](requestSession, baseUri, items)
@@ -69,16 +69,16 @@ object ThreeDModels {
     deriveDecoder[ItemsWithCursor[ThreeDModel]]
   // WartRemover gets confused by circe-derivation
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
-  implicit val createThreeDModelDecoder: Decoder[CreateThreeDModel] =
-    deriveDecoder[CreateThreeDModel]
-  implicit val createThreeDModelEncoder: Encoder[CreateThreeDModel] =
-    deriveEncoder[CreateThreeDModel]
-  implicit val createThreeDModelItemsEncoder: Encoder[Items[CreateThreeDModel]] =
-    deriveEncoder[Items[CreateThreeDModel]]
+  implicit val createThreeDModelDecoder: Decoder[ThreeDModelCreate] =
+    deriveDecoder[ThreeDModelCreate]
+  implicit val createThreeDModelEncoder: Encoder[ThreeDModelCreate] =
+    deriveEncoder[ThreeDModelCreate]
+  implicit val createThreeDModelItemsEncoder: Encoder[Items[ThreeDModelCreate]] =
+    deriveEncoder[Items[ThreeDModelCreate]]
 }
 
 class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long)
-    extends Create[ThreeDRevision, CreateThreeDRevision, F]
+    extends Create[ThreeDRevision, ThreeDRevisionCreate, F]
     with RetrieveByIds[ThreeDRevision, F]
     with Readable[ThreeDRevision, F]
     with DeleteByIds[F, Long]
@@ -116,8 +116,8 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDRevision]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def createItems(items: Items[CreateThreeDRevision]): F[Seq[ThreeDRevision]] =
-    Create.createItems[F, ThreeDRevision, CreateThreeDRevision](requestSession, baseUri, items)
+  override def createItems(items: Items[ThreeDRevisionCreate]): F[Seq[ThreeDRevision]] =
+    Create.createItems[F, ThreeDRevision, ThreeDRevisionCreate](requestSession, baseUri, items)
 
   override def update(items: Seq[ThreeDRevisionUpdate]): F[Seq[ThreeDRevision]] =
     Update.update[F, ThreeDRevision, ThreeDRevisionUpdate](requestSession, baseUri, items)
@@ -138,12 +138,12 @@ object ThreeDRevisions {
     deriveDecoder[Items[ThreeDRevision]]
   implicit val threeDRevisionItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDRevision]] =
     deriveDecoder[ItemsWithCursor[ThreeDRevision]]
-  implicit val createThreeDRevisionDecoder: Decoder[CreateThreeDRevision] =
-    deriveDecoder[CreateThreeDRevision]
-  implicit val createThreeDRevisionEncoder: Encoder[CreateThreeDRevision] =
-    deriveEncoder[CreateThreeDRevision]
-  implicit val createThreeDRevisionItemsEncoder: Encoder[Items[CreateThreeDRevision]] =
-    deriveEncoder[Items[CreateThreeDRevision]]
+  implicit val createThreeDRevisionDecoder: Decoder[ThreeDRevisionCreate] =
+    deriveDecoder[ThreeDRevisionCreate]
+  implicit val createThreeDRevisionEncoder: Encoder[ThreeDRevisionCreate] =
+    deriveEncoder[ThreeDRevisionCreate]
+  implicit val createThreeDRevisionItemsEncoder: Encoder[Items[ThreeDRevisionCreate]] =
+    deriveEncoder[Items[ThreeDRevisionCreate]]
 }
 
 class ThreeDAssetMappings[F[_]](

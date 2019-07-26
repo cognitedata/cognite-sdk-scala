@@ -21,8 +21,8 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
       TimeSeries(name = "scala-sdk-write-example-2")
     ),
     Seq(
-      CreateTimeSeries(name = "scala-sdk-create-example-1"),
-      CreateTimeSeries(name = "scala-sdk-create-example-2")
+      TimeSeriesCreate(name = "scala-sdk-create-example-1"),
+      TimeSeriesCreate(name = "scala-sdk-create-example-2")
     ),
     idsThatDoNotExist,
     supportsMissingAndThrown = true
@@ -35,8 +35,8 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
       TimeSeries(name = "scala-sdk-write-external-example-2", externalId = Some(shortRandom()))
     ),
     Seq(
-      CreateTimeSeries(name = "scala-sdk-create-external-example-1", externalId = Some(shortRandom())),
-      CreateTimeSeries(name = "scala-sdk-create-external-example-2", externalId = Some(shortRandom()))
+      TimeSeriesCreate(name = "scala-sdk-create-external-example-1", externalId = Some(shortRandom())),
+      TimeSeriesCreate(name = "scala-sdk-create-external-example-2", externalId = Some(shortRandom()))
     ),
     externalIdsThatDoNotExist,
     supportsMissingAndThrown = true

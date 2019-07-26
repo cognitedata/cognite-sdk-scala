@@ -11,7 +11,7 @@ import io.circe.derivation.{deriveDecoder, deriveEncoder}
 class Assets[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[Asset, F]
-    with Create[Asset, CreateAsset, F]
+    with Create[Asset, AssetCreate, F]
     with RetrieveByIds[Asset, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
@@ -30,8 +30,8 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   override def retrieveByIds(ids: Seq[Long]): F[Seq[Asset]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def createItems(items: Items[CreateAsset]): F[Seq[Asset]] =
-    Create.createItems[F, Asset, CreateAsset](requestSession, baseUri, items)
+  override def createItems(items: Items[AssetCreate]): F[Seq[Asset]] =
+    Create.createItems[F, Asset, AssetCreate](requestSession, baseUri, items)
 
   override def update(items: Seq[AssetUpdate]): F[Seq[Asset]] =
     Update.update[F, Asset, AssetUpdate](requestSession, baseUri, items)
@@ -62,9 +62,9 @@ object Assets {
     deriveDecoder[ItemsWithCursor[Asset]]
   implicit val assetsItemsDecoder: Decoder[Items[Asset]] =
     deriveDecoder[Items[Asset]]
-  implicit val createAssetEncoder: Encoder[CreateAsset] = deriveEncoder[CreateAsset]
-  implicit val createAssetsItemsEncoder: Encoder[Items[CreateAsset]] =
-    deriveEncoder[Items[CreateAsset]]
+  implicit val createAssetEncoder: Encoder[AssetCreate] = deriveEncoder[AssetCreate]
+  implicit val createAssetsItemsEncoder: Encoder[Items[AssetCreate]] =
+    deriveEncoder[Items[AssetCreate]]
   implicit val assetUpdateEncoder: Encoder[AssetUpdate] =
     deriveEncoder[AssetUpdate]
   implicit val updateAssetsItemsEncoder: Encoder[Items[AssetUpdate]] =

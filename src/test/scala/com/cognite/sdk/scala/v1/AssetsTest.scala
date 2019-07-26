@@ -15,7 +15,7 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   it should behave like writable(
     client.assets,
     Seq(Asset(name = "scala-sdk-read-example-1"), Asset(name = "scala-sdk-read-example-2")),
-    Seq(CreateAsset(name = "scala-sdk-create-example-1"), CreateAsset(name = "scala-sdk-create-example-2")),
+    Seq(AssetCreate(name = "scala-sdk-create-example-1"), AssetCreate(name = "scala-sdk-create-example-2")),
     idsThatDoNotExist,
     supportsMissingAndThrown = true
   )
@@ -27,8 +27,8 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       Asset(name = "scala-sdk-read-example-2", externalId = Some(shortRandom()))
     ),
     Seq(
-      CreateAsset(name = "scala-sdk-create-example-1", externalId = Some(shortRandom())),
-      CreateAsset(name = "scala-sdk-create-example-2", externalId = Some(shortRandom()))
+      AssetCreate(name = "scala-sdk-create-example-1", externalId = Some(shortRandom())),
+      AssetCreate(name = "scala-sdk-create-example-2", externalId = Some(shortRandom()))
     ),
     externalIdsThatDoNotExist,
     supportsMissingAndThrown = true

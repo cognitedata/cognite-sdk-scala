@@ -20,7 +20,7 @@ final case class Event(
 ) extends WithId[Long]
     with WithExternalId
 
-final case class CreateEvent(
+final case class EventCreate(
     startTime: Option[Instant] = None,
     endTime: Option[Instant] = None,
     description: Option[String] = None,

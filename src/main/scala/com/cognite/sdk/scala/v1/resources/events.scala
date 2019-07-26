@@ -12,7 +12,7 @@ class Events[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[Event, F]
     with RetrieveByIds[Event, F]
-    with Create[Event, CreateEvent, F]
+    with Create[Event, EventCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
     with Filter[Event, EventsFilter, F]
@@ -30,8 +30,8 @@ class Events[F[_]](val requestSession: RequestSession[F])
   override def retrieveByIds(ids: Seq[Long]): F[Seq[Event]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def createItems(items: Items[CreateEvent]): F[Seq[Event]] =
-    Create.createItems[F, Event, CreateEvent](requestSession, baseUri, items)
+  override def createItems(items: Items[EventCreate]): F[Seq[Event]] =
+    Create.createItems[F, Event, EventCreate](requestSession, baseUri, items)
 
   override def update(items: Seq[EventUpdate]): F[Seq[Event]] =
     Update.update[F, Event, EventUpdate](requestSession, baseUri, items)
@@ -62,9 +62,9 @@ object Events {
     deriveDecoder[ItemsWithCursor[Event]]
   implicit val eventsItemsDecoder: Decoder[Items[Event]] =
     deriveDecoder[Items[Event]]
-  implicit val createEventEncoder: Encoder[CreateEvent] = deriveEncoder[CreateEvent]
-  implicit val createEventsItemsEncoder: Encoder[Items[CreateEvent]] =
-    deriveEncoder[Items[CreateEvent]]
+  implicit val createEventEncoder: Encoder[EventCreate] = deriveEncoder[EventCreate]
+  implicit val createEventsItemsEncoder: Encoder[Items[EventCreate]] =
+    deriveEncoder[Items[EventCreate]]
   implicit val eventUpdateEncoder: Encoder[EventUpdate] =
     deriveEncoder[EventUpdate]
   implicit val updateEventsItemsEncoder: Encoder[Items[EventUpdate]] =
