@@ -20,7 +20,7 @@ final case class TimeSeries(
 ) extends WithId[Long]
     with WithExternalId
 
-final case class CreateTimeSeries(
+final case class TimeSeriesCreate(
     externalId: Option[String] = None,
     name: String,
     legacyName: Option[String] = None,

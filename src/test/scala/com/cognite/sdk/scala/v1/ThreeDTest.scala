@@ -18,8 +18,8 @@ class ThreeDTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         ThreeDModel(name = "scala-sdk-threeD-read-example-2")
       ),
       Seq(
-        CreateThreeDModel(name = "scala-sdk-threeD-create-example-1"),
-        CreateThreeDModel(name = "scala-sdk-threeD-create-example-2")
+        ThreeDModelCreate(name = "scala-sdk-threeD-create-example-1"),
+        ThreeDModelCreate(name = "scala-sdk-threeD-create-example-2")
       ),
       idsThatDoNotExist,
       supportsMissingAndThrown = false
@@ -50,8 +50,8 @@ class ThreeDTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         )
       ),
       Seq(
-        CreateThreeDRevision(published = false, fileId = 8440701612364206L),
-        CreateThreeDRevision(published = false, fileId = 6528506295318577L)
+        ThreeDRevisionCreate(published = false, fileId = 8440701612364206L),
+        ThreeDRevisionCreate(published = false, fileId = 6528506295318577L)
       ),
       idsThatDoNotExist,
       false

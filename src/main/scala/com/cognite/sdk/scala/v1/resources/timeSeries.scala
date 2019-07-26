@@ -12,7 +12,7 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[TimeSeries, F]
     with RetrieveByIds[TimeSeries, F]
-    with Create[TimeSeries, CreateTimeSeries, F]
+    with Create[TimeSeries, TimeSeriesCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
     with Search[TimeSeries, TimeSeriesQuery, F]
@@ -29,8 +29,8 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
   override def retrieveByIds(ids: Seq[Long]): F[Seq[TimeSeries]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
 
-  override def createItems(items: Items[CreateTimeSeries]): F[Seq[TimeSeries]] =
-    Create.createItems[F, TimeSeries, CreateTimeSeries](requestSession, baseUri, items)
+  override def createItems(items: Items[TimeSeriesCreate]): F[Seq[TimeSeries]] =
+    Create.createItems[F, TimeSeries, TimeSeriesCreate](requestSession, baseUri, items)
 
   override def update(items: Seq[TimeSeriesUpdate]): F[Seq[TimeSeries]] =
     Update.update[F, TimeSeries, TimeSeriesUpdate](requestSession, baseUri, items)
@@ -55,9 +55,9 @@ object TimeSeriesResource {
     deriveDecoder[ItemsWithCursor[TimeSeries]]
   implicit val timeSeriesItemsDecoder: Decoder[Items[TimeSeries]] =
     deriveDecoder[Items[TimeSeries]]
-  implicit val createTimeSeriesEncoder: Encoder[CreateTimeSeries] = deriveEncoder[CreateTimeSeries]
-  implicit val createTimeSeriesItemsEncoder: Encoder[Items[CreateTimeSeries]] =
-    deriveEncoder[Items[CreateTimeSeries]]
+  implicit val createTimeSeriesEncoder: Encoder[TimeSeriesCreate] = deriveEncoder[TimeSeriesCreate]
+  implicit val createTimeSeriesItemsEncoder: Encoder[Items[TimeSeriesCreate]] =
+    deriveEncoder[Items[TimeSeriesCreate]]
   implicit val timeSeriesFilterEncoder: Encoder[TimeSeriesFilter] =
     deriveEncoder[TimeSeriesFilter]
   implicit val timeSeriesSearchEncoder: Encoder[TimeSeriesSearch] =

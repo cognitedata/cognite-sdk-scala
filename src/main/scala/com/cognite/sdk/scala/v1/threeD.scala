@@ -11,7 +11,7 @@ final case class ThreeDModel(
     metadata: Option[Map[String, String]] = None
 ) extends WithId[Long]
 
-final case class CreateThreeDModel(
+final case class ThreeDModelCreate(
     name: String,
     metadata: Option[Map[String, String]] = None
 )
@@ -41,7 +41,7 @@ final case class ThreeDRevision(
     createdTime: Instant = Instant.ofEpochMilli(0)
 ) extends WithId[Long]
 
-final case class CreateThreeDRevision(
+final case class ThreeDRevisionCreate(
     published: Boolean,
     rotation: Option[Array[Double]] = None,
     metadata: Option[Map[String, String]] = None,
@@ -64,7 +64,7 @@ final case class ThreeDAssetMapping(
     subtreeSize: Long = 0
 )
 
-final case class CreateThreeDAssetMapping(
+final case class ThreeDAssetMappingCreate(
     nodeId: Long,
     assetId: Long
 )

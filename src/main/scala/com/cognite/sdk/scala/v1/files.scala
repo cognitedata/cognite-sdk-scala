@@ -20,7 +20,7 @@ final case class File(
 ) extends WithId[Long]
     with WithExternalId
 
-final case class CreateFile(
+final case class FileCreate(
     name: String,
     source: Option[String] = None,
     externalId: Option[String] = None,

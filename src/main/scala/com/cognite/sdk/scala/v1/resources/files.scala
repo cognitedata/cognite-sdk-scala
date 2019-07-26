@@ -13,7 +13,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[File, F]
     with RetrieveByIds[File, F]
-    with Create[File, CreateFile, F]
+    with Create[File, FileCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
     with Filter[File, FilesFilter, F]
@@ -24,7 +24,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
     EitherDecoder.eitherDecoder[CdpApiError, File]
-  override def createItems(items: Items[CreateFile]): F[Seq[File]] =
+  override def createItems(items: Items[FileCreate]): F[Seq[File]] =
     items.items match {
       case item :: Nil =>
         requestSession
@@ -80,10 +80,10 @@ object Files {
   implicit val fileDecoder: Decoder[File] = deriveDecoder[File]
   implicit val fileItemsDecoder: Decoder[Items[File]] =
     deriveDecoder[Items[File]]
-  implicit val createFileEncoder: Encoder[CreateFile] =
-    deriveEncoder[CreateFile]
-  implicit val createFileItemsEncoder: Encoder[Items[CreateFile]] =
-    deriveEncoder[Items[CreateFile]]
+  implicit val createFileEncoder: Encoder[FileCreate] =
+    deriveEncoder[FileCreate]
+  implicit val createFileItemsEncoder: Encoder[Items[FileCreate]] =
+    deriveEncoder[Items[FileCreate]]
   implicit val fileUpdateEncoder: Encoder[FileUpdate] =
     deriveEncoder[FileUpdate]
   implicit val updateFilesItemsEncoder: Encoder[Items[FileUpdate]] =

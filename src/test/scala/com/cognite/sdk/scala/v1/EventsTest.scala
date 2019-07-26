@@ -17,7 +17,7 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   it should behave like writable(
     client.events,
     Seq(Event(description = Some("scala-sdk-read-example-1")), Event(description = Some("scala-sdk-read-example-2"))),
-    Seq(CreateEvent(description = Some("scala-sdk-create-example-1")), CreateEvent(description = Some("scala-sdk-create-example-2"))),
+    Seq(EventCreate(description = Some("scala-sdk-create-example-1")), EventCreate(description = Some("scala-sdk-create-example-2"))),
     idsThatDoNotExist,
     supportsMissingAndThrown = true
   )
@@ -29,8 +29,8 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       Event(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
     ),
     Seq(
-      CreateEvent(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
-      CreateEvent(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
+      EventCreate(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
+      EventCreate(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
     ),
     externalIdsThatDoNotExist,
     supportsMissingAndThrown = true
