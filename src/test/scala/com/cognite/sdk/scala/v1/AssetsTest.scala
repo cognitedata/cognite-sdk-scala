@@ -115,7 +115,7 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           search = Some(AssetsSearch(name = Some("ESDV")))
         )
       )
-    assert(esdvResults.length == 20)
+    assert(esdvResults.length == 15)
     val esdvLimitResults = client.assets
       .search(
         AssetsQuery(
