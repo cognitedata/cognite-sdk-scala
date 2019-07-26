@@ -33,8 +33,8 @@ class Events[F[_]](val requestSession: RequestSession[F])
   override def createItems(items: Items[CreateEvent]): F[Seq[Event]] =
     Create.createItems[F, Event, CreateEvent](requestSession, baseUri, items)
 
-  override def updateItems(items: Seq[EventUpdate]): F[Seq[Event]] =
-    Update.updateItems[F, Event, EventUpdate](requestSession, baseUri, items)
+  override def update(items: Seq[EventUpdate]): F[Seq[Event]] =
+    Update.update[F, Event, EventUpdate](requestSession, baseUri, items)
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUri, ids)

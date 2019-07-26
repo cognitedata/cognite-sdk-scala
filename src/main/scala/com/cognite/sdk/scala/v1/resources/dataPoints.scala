@@ -62,7 +62,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
           .response(asJson[Either[CdpApiError, Unit]])
           .mapResponse {
             case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
             case Right(Right(_)) => ()
           }
       }
@@ -76,7 +76,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
           .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
           .mapResponse {
             case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
             case Right(Right(value)) =>
               value.items.headOption match {
                 case Some(items) => items.datapoints
@@ -98,7 +98,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
           .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
           .mapResponse {
             case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
             case Right(Right(value)) =>
               value.items.headOption match {
                 case Some(items) => items.datapoints
@@ -109,32 +109,62 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
 
   //def deleteRangeByExternalId(start: Long, end: Long, externalId: String): F[Response[Unit]]
   def getLatestDataPointById(id: Long): F[Option[DataPoint]] =
+    requestSession.map(
+      getLatestDataPointsByIds(Seq(id)),
+      (idToLatest: Map[Long, Option[DataPoint]]) =>
+        idToLatest.get(id) match {
+          case Some(latest) => latest
+          case None =>
+            throw SdkException(
+              s"Unexpected missing id ${id.toString} when retrieving latest data point"
+            )
+        }
+    )
+
+  def getLatestDataPointsByIds(ids: Seq[Long]): F[Map[Long, Option[DataPoint]]] =
     requestSession
       .send { request =>
         request
           .post(uri"$baseUri/latest")
-          .body(Items(Seq(CogniteId(id))))
+          .body(Items(ids.map(CogniteId)))
           .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
           .mapResponse {
             case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/latest")
             case Right(Right(value)) =>
-              value.items.headOption.flatMap(_.datapoints.headOption)
+              value.items.map { item =>
+                item.id -> item.datapoints.headOption
+              }.toMap
           }
       }
 
   def getLatestStringDataPointById(id: Long): F[Option[StringDataPoint]] =
+    requestSession.map(
+      getLatestStringDataPointByIds(Seq(id)),
+      (idToLatest: Map[Long, Option[StringDataPoint]]) =>
+        idToLatest.get(id) match {
+          case Some(latest) => latest
+          case None =>
+            throw SdkException(
+              s"Unexpected missing id ${id.toString} when retrieving latest data point"
+            )
+        }
+    )
+
+  def getLatestStringDataPointByIds(ids: Seq[Long]): F[Map[Long, Option[StringDataPoint]]] =
     requestSession
       .send { request =>
         request
           .post(uri"$baseUri/latest")
-          .body(Items(Seq(CogniteId(id))))
+          .body(Items(ids.map(CogniteId)))
           .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
           .mapResponse {
             case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/latest")
             case Right(Right(value)) =>
-              value.items.headOption.flatMap(_.datapoints.headOption)
+              value.items.map { item =>
+                item.id -> item.datapoints.headOption
+              }.toMap
           }
       }
 }

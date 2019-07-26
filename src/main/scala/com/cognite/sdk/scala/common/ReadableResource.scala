@@ -73,6 +73,8 @@ object Readable {
 }
 trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUri {
   def retrieveByIds(ids: Seq[Long]): F[Seq[R]]
+  def retrieveById(id: Long): F[Option[R]] =
+    requestSession.map(retrieveByIds(Seq(id)), (r1: Seq[R]) => r1.headOption)
 }
 
 object RetrieveByIds {

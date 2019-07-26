@@ -45,13 +45,13 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
 
     it should "create and delete items using the read class" in {
       // create a single item
-      val createdItem = writable.create(readExamples.take(1))
+      val createdItem = writable.createFromRead(readExamples.take(1))
       createdItem should have size 1
       createdItem.head.id should not be 0
       writable.deleteByIds(createdItem.map(_.id))
 
       // create multiple items
-      val createdItems = writable.create(readExamples)
+      val createdItems = writable.createFromRead(readExamples)
       createdItems should have size readExamples.size.toLong
       val createdIds = createdItems.map(_.id)
       createdIds should have size readExamples.size.toLong
@@ -115,13 +115,13 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
 
     it should "create and delete items using the read class and external ids" in {
       // create a single item
-      val createdItem = writable.create(readExamples.take(1))
+      val createdItem = writable.createFromRead(readExamples.take(1))
       createdItem should have size 1
       createdItem.head.externalId should not be empty
       writable.deleteByExternalIds(createdItem.map(_.externalId.get))
 
       // create multiple items
-      val createdItems = writable.create(readExamples)
+      val createdItems = writable.createFromRead(readExamples)
       createdItems should have size readExamples.size.toLong
       val createdExternalIds = createdItems.map(_.externalId.get)
       createdExternalIds should have size readExamples.size.toLong
@@ -159,14 +159,14 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
   )(implicit t: Transformer[R, W], t2: Transformer[R, U]): Unit =
     it should "allow updates using the read class" in {
       // create items
-      val createdItems = updatable.create(readExamples)
+      val createdItems = updatable.createFromRead(readExamples)
       assert(createdItems.size == readExamples.size)
       createdItems.map(_.id) should not contain 0
 
       val readItems = updatable.retrieveByIds(createdItems.map(_.id))
 
       // update the item to current values
-      val unchangedUpdatedItems = updatable.update(readItems)
+      val unchangedUpdatedItems = updatable.updateFromRead(readItems)
       assert(unchangedUpdatedItems.size == readItems.size)
       assert(unchangedUpdatedItems.zip(readItems).forall {
         case (updated, read) =>
@@ -176,7 +176,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       // update the item with new values
       val updates =
         updateExamples.zip(readItems).map { case (updated, read) => updateId(read.id, updated) }
-      val updatedItems = updatable.update(updates)
+      val updatedItems = updatable.updateFromRead(updates)
       assert(updatedItems.size == readItems.size)
       compareUpdated(readItems, updatedItems)
 

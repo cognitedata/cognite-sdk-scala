@@ -10,6 +10,8 @@ import io.scalaland.chimney.dsl._
 
 trait DeleteByIds[F[_], PrimitiveId] {
   def deleteByIds(ids: Seq[PrimitiveId]): F[Unit]
+
+  def deleteById(id: PrimitiveId): F[Unit] = deleteByIds(Seq(id))
 }
 
 object DeleteByIds {
@@ -42,6 +44,8 @@ object DeleteByIds {
 
 trait DeleteByExternalIds[F[_]] {
   def deleteByExternalIds(externalIds: Seq[String]): F[Unit]
+
+  def deleteByExternalId(externalId: String): F[Unit] = deleteByExternalIds(Seq(externalId))
 }
 
 object DeleteByExternalIds {
@@ -74,10 +78,35 @@ object DeleteByExternalIds {
 trait Create[R, W, F[_]] extends WithRequestSession[F] with BaseUri {
   def createItems(items: Items[W]): F[Seq[R]]
 
-  def create[T](items: Seq[T])(
-      implicit t: Transformer[T, W]
+  def create(items: Seq[W]): F[Seq[R]] =
+    createItems(Items(items))
+
+  def createFromRead(items: Seq[R])(
+      implicit t: Transformer[R, W]
   ): F[Seq[R]] =
     createItems(Items(items.map(_.transformInto[W])))
+
+  def createOne(item: W): F[R] =
+    requestSession.map(
+      create(Seq(item)),
+      (r1: Seq[R]) =>
+        r1.headOption match {
+          case Some(value) => value
+          case None => throw SdkException("Unexpected empty response when creating item")
+        }
+    )
+
+  def createOneFromRead(item: R)(
+      implicit t: Transformer[R, W]
+  ): F[R] =
+    requestSession.map(
+      createFromRead(Seq(item)),
+      (r1: Seq[R]) =>
+        r1.headOption match {
+          case Some(value) => value
+          case None => throw SdkException("Unexpected empty response when creating item")
+        }
+    )
 }
 
 object Create {
