@@ -23,7 +23,7 @@ trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
   private def readWithNextCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): Iterator[F[Seq[R]]] =
+  ): Iterator[F[R]] =
     new NextCursorIterator[R, F](cursor, limit, requestSession.sttpBackend) {
       def get(
           cursor: Option[String],
@@ -32,16 +32,16 @@ trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
         readWithCursor(cursor, remainingItems)
     }
 
-  def readAllFromCursor(cursor: String): Iterator[F[Seq[R]]] =
+  def readAllFromCursor(cursor: String): Iterator[F[R]] =
     readWithNextCursor(Some(cursor), None)
 
-  def readAllWithLimit(limit: Long): Iterator[F[Seq[R]]] =
+  def readAllWithLimit(limit: Long): Iterator[F[R]] =
     readWithNextCursor(None, Some(limit))
 
-  def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[Seq[R]]] =
+  def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[R]] =
     readWithNextCursor(Some(cursor), Some(limit))
 
-  def readAll(): Iterator[F[Seq[R]]] = readWithNextCursor(None, None)
+  def readAll(): Iterator[F[R]] = readWithNextCursor(None, None)
 }
 
 object Readable {

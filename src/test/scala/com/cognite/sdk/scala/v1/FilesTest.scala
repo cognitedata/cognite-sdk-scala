@@ -59,7 +59,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       .filter(
         FilesFilter(
           createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L))))
-      ).flatMap(_.toList)
+      )
     assert(createdTimeFilterResults.length == 29)
 
     val createdTimeFilterResultsWithLimit = client.files
@@ -67,7 +67,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         FilesFilter(
           createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))),
         20
-      ).flatMap(_.toList)
+      )
     assert(createdTimeFilterResultsWithLimit.length == 20)
   }
 

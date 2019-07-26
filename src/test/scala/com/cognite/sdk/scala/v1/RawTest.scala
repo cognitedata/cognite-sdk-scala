@@ -42,17 +42,17 @@ class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   }
 
   it should "allow creation and deletion of database tables" in withDatabaseTables { (database, tables) =>
-    val tablesResponse = client.rawTables(database).readAll().flatMap(_.toList).toList
+    val tablesResponse = client.rawTables(database).readAll().toList
     assert(tablesResponse.size === tables.size)
 
     client.rawTables(database).deleteByIds(tables.take(1))
 
-    val tablesResponseAfterDelete = client.rawTables(database).readAll().flatMap(_.toList).toList
+    val tablesResponseAfterDelete = client.rawTables(database).readAll().toList
     assert(tablesResponseAfterDelete.size === tables.size - 1)
 
     client.rawTables(database).create(Seq(RawTable(name = tables.head)))
 
-    val tablesResponseAfterCreate = client.rawTables(database).readAll().flatMap(_.toList).toList
+    val tablesResponseAfterCreate = client.rawTables(database).readAll().toList
     assert(tablesResponseAfterCreate.size === tables.size)
   }
 
@@ -60,7 +60,7 @@ class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val table = tables.head
     val rows = client.rawRows(database, table)
 
-    val rowsResponse = rows.readAll().flatMap(_.toList).toList
+    val rowsResponse = rows.readAll().toList
     assert(rowsResponse.isEmpty)
 
     rows.create(Seq(
@@ -74,7 +74,7 @@ class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val either: Either[String, String] = Either.right("asdf")
     assert(either.forall(_ == "asdf"))
 
-    val rowsResponseAfterCreate = rows.readAll().flatMap(_.toList).toList
+    val rowsResponseAfterCreate = rows.readAll().toList
     assert(rowsResponseAfterCreate.size === 2)
     assert(rowsResponseAfterCreate.head.key === "123")
     assert(rowsResponseAfterCreate(1).key === "abc")
@@ -85,7 +85,7 @@ class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     assert(rowsResponseAfterCreate(1).columns("abc").as[Map[String, Int]].forall(_ === Map("cde" -> 1)))
 
     rows.deleteByIds(Seq("123"))
-    val rowsResponseAfterOneDelete = rows.readAll().flatMap(_.toList).toList
+    val rowsResponseAfterOneDelete = rows.readAll().toList
     assert(rowsResponseAfterOneDelete.size === 1)
   }
 }

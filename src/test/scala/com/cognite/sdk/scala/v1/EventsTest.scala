@@ -80,7 +80,6 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           )
         )
       )
-      .flatMap(_.toList)
     assert(createdTimeFilterResults.length == 11)
     val createdTimeFilterResultsWithLimit = client.events
       .filterWithLimit(

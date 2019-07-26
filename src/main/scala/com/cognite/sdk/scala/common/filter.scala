@@ -30,10 +30,10 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
     }
   }
 
-  def filter(filter: Fi): Iterator[F[Seq[R]]] =
+  def filter(filter: Fi): Iterator[F[R]] =
     filterWithNextCursor(filter, None, None)
 
-  def filterWithLimit(filter: Fi, limit: Long): Iterator[F[Seq[R]]] =
+  def filterWithLimit(filter: Fi, limit: Long): Iterator[F[R]] =
     filterWithNextCursor(filter, None, Some(limit))
 }
 
