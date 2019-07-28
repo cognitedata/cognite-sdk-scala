@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.common
 import com.cognite.sdk.scala.v1.RequestSession
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
+import fs2._
 import io.circe.{Decoder, Encoder}
 
 final case class FilterRequest[T](filter: T, limit: Option[Long], cursor: Option[String])
@@ -18,22 +19,13 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
       filter: Fi,
       cursor: Option[String],
       limit: Option[Long]
-  ): NextCursorIterator[R, F] = {
-    // filter is also a member of Iterator, so rename this here
-    val theFilter = filter
-    new NextCursorIterator[R, F](cursor, limit, requestSession.sttpBackend) {
-      def get(
-          cursor: Option[String],
-          remainingItems: Option[Long]
-      ): F[ItemsWithCursor[R]] =
-        filterWithCursor(theFilter, cursor, remainingItems)
-    }
-  }
+  ): Stream[F, R] =
+    Readable.pullFromCursorWithLimit(cursor, limit, filterWithCursor(filter, _, _)).stream
 
-  def filter(filter: Fi): Iterator[F[Seq[R]]] =
+  def filter(filter: Fi): Stream[F, R] =
     filterWithNextCursor(filter, None, None)
 
-  def filterWithLimit(filter: Fi, limit: Long): Iterator[F[Seq[R]]] =
+  def filterWithLimit(filter: Fi, limit: Long): Stream[F, R] =
     filterWithNextCursor(filter, None, Some(limit))
 }
 

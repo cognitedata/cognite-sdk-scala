@@ -65,7 +65,9 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         AssetsFilter(
           createdTime = Some(
             TimeRange(Instant.ofEpochMilli(1560756441301L), Instant.ofEpochMilli(1560756445000L))))
-      ).flatMap(_.toList)
+      )
+      .compile
+      .toList
     assert(createdTimeFilterResults.length == 84)
 
     val createdTimeFilterResultsWithLimit = client.assets
@@ -74,7 +76,9 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           createdTime = Some(
             TimeRange(Instant.ofEpochMilli(1560756441301L), Instant.ofEpochMilli(1560756445000L)))),
         10
-      ).flatMap(_.toList)
+      )
+      .compile
+      .toList
     assert(createdTimeFilterResultsWithLimit.length == 10)
   }
 
