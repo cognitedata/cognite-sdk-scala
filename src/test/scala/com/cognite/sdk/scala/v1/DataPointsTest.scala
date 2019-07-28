@@ -19,16 +19,5 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors[Long] {
     }
   }
 
-  override def withStringTimeSeriesId(testCode: Long => Any): Unit = {
-    val timeSeriesId = client.timeSeries.createFromRead(
-      Seq(TimeSeries(name = s"string-data-points-test-${UUID.randomUUID().toString}", isString = true))
-    ).head.id
-    try {
-      val _ = testCode(timeSeriesId)
-    } finally {
-      client.timeSeries.deleteByIds(Seq(timeSeriesId))
-    }
-  }
-
   it should behave like dataPointsResource(client.dataPoints)
 }
