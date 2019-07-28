@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.common
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
+import fs2._
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.deriveEncoder
 
@@ -23,28 +24,39 @@ trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
   private def readWithNextCursor(
       cursor: Option[String],
       limit: Option[Long]
-  ): Iterator[F[Seq[R]]] =
-    new NextCursorIterator[R, F](cursor, limit, requestSession.sttpBackend) {
-      def get(
-          cursor: Option[String],
-          remainingItems: Option[Long]
-      ): F[ItemsWithCursor[R]] =
-        readWithCursor(cursor, remainingItems)
-    }
+  ): Stream[F, R] =
+    Readable.pullFromCursorWithLimit(cursor, limit, readWithCursor).stream
 
-  def readAllFromCursor(cursor: String): Iterator[F[Seq[R]]] =
+  def readAllFromCursor(cursor: String): Stream[F, R] =
     readWithNextCursor(Some(cursor), None)
 
-  def readAllWithLimit(limit: Long): Iterator[F[Seq[R]]] =
+  def readAllWithLimit(limit: Long): Stream[F, R] =
     readWithNextCursor(None, Some(limit))
 
-  def readAllFromCursorWithLimit(cursor: String, limit: Long): Iterator[F[Seq[R]]] =
+  def readAllFromCursorWithLimit(cursor: String, limit: Long): Stream[F, R] =
     readWithNextCursor(Some(cursor), Some(limit))
 
-  def readAll(): Iterator[F[Seq[R]]] = readWithNextCursor(None, None)
+  def readAll(): Stream[F, R] = readWithNextCursor(None, None)
 }
 
 object Readable {
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
+  private[common] def pullFromCursorWithLimit[F[_], R](
+      cursor: Option[String],
+      limit: Option[Long],
+      get: (Option[String], Option[Long]) => F[ItemsWithCursor[R]]
+  ): Pull[F, R, Unit] =
+    if (limit.exists(_ <= 0)) {
+      Pull.done
+    } else {
+      Pull.eval(get(cursor, limit)).flatMap { items =>
+        Pull.output(Chunk.seq(items.items)) >>
+          items.nextCursor
+            .map(s => pullFromCursorWithLimit(Some(s), limit.map(_ - items.items.size), get))
+            .getOrElse(Pull.done)
+      }
+    }
+
   def readWithCursor[F[_], R](
       requestSession: RequestSession[F],
       baseUri: Uri,

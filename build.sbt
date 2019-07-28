@@ -18,6 +18,10 @@ val catsEffectVersion: Option[(Long, Long)] => String = {
   case Some((2, 13)) => "2.0.0-M4"
   case _             => "1.3.1"
 }
+val fs2Version: Option[(Long, Long)] => String = {
+  case Some((2, 13)) => "1.1.0-M1"
+  case _             => "1.0.5"
+}
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -79,7 +83,8 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "io.scalaland" %% "chimney" % "0.3.2"
+      "io.scalaland" %% "chimney" % "0.3.2",
+      "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value))
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value))
   )
 
