@@ -2,11 +2,9 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 
-import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
 class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
-  private val client = new GenericClient()(implicitly[Functor[Id]], auth, sttpBackend)
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 

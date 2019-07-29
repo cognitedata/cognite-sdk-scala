@@ -1,5 +1,6 @@
 package com.cognite.sdk.scala.v1
 
+import BuildInfo.BuildInfo
 import cats.Functor
 import cats.implicits._
 import com.cognite.sdk.scala.common.{Auth, InvalidAuthentication, Login}
@@ -21,6 +22,7 @@ import com.softwaremill.sttp._
 import scala.concurrent.duration._
 
 final case class RequestSession[F[_]: Functor](
+    applicationName: String,
     baseUri: Uri,
     sttpBackend: SttpBackend[F, _],
     auth: Auth
@@ -31,6 +33,8 @@ final case class RequestSession[F[_]: Functor](
         .auth(auth)
         .contentType("application/json")
         .header("accept", "application/json")
+        .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
+        .header("x-cdp-app", applicationName)
         .readTimeout(90.seconds)
         .parseResponseIf(_ => true)
     ).send()(sttpBackend, implicitly).map(_.unsafeBody)
@@ -38,14 +42,18 @@ final case class RequestSession[F[_]: Functor](
   def map[R, R1](r: F[R], f: R => R1): F[R1] = r.map(f)
 }
 
-class GenericClient[F[_]: Functor, _](implicit auth: Auth, sttpBackend: SttpBackend[F, _]) {
+class GenericClient[F[_]: Functor, _](applicationName: String)(
+    implicit auth: Auth,
+    sttpBackend: SttpBackend[F, _]
+) {
   val project: String = auth.project.getOrElse {
     val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
       options = SttpBackendOptions.connectionTimeout(90.seconds)
     )
 
-    val loginStatus = new Login(RequestSession(uri"https://api.cognitedata.com", sttpBackend, auth))
-      .status()
+    val loginStatus = new Login(
+      RequestSession(applicationName, uri"https://api.cognitedata.com", sttpBackend, auth)
+    ).status()
 
     if (loginStatus.project.trim.isEmpty) {
       throw InvalidAuthentication()
@@ -55,7 +63,12 @@ class GenericClient[F[_]: Functor, _](implicit auth: Auth, sttpBackend: SttpBack
   }
 
   val requestSession =
-    RequestSession(uri"https://api.cognitedata.com/api/v1/projects/$project", sttpBackend, auth)
+    RequestSession(
+      applicationName,
+      uri"https://api.cognitedata.com/api/v1/projects/$project",
+      sttpBackend,
+      auth
+    )
   val login = new Login[F](requestSession.copy(baseUri = uri"https://api.cognitedata.com"))
   val assets = new Assets[F](requestSession)
   val events = new Events[F](requestSession)
@@ -75,5 +88,7 @@ class GenericClient[F[_]: Functor, _](implicit auth: Auth, sttpBackend: SttpBack
     new ThreeDAssetMappings(requestSession, modelId, revisionId)
 }
 
-final case class Client()(implicit auth: Auth, sttpBackend: SttpBackend[Id, Nothing])
-    extends GenericClient[Id, Nothing]()
+final case class Client(applicationName: String)(
+    implicit auth: Auth,
+    sttpBackend: SttpBackend[Id, Nothing]
+) extends GenericClient[Id, Nothing](applicationName)

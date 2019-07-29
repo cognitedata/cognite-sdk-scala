@@ -17,7 +17,7 @@ trait DataPointsResourceBehaviors[I] extends Matchers { this: FlatSpec =>
     it should "be possible to insert and delete numerical data points" in withTimeSeriesId { timeSeriesId =>
       dataPoints.insertById(timeSeriesId, testDataPoints)
 
-      Thread.sleep(2000)
+      Thread.sleep(3000)
       val points = dataPoints.queryById(timeSeriesId, startTime, endTime + 1)
       points should have size testDataPoints.size.toLong
 

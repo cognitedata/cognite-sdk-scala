@@ -1,12 +1,10 @@
 package com.cognite.sdk.scala.v1
 
-import cats.{Functor, Id}
 import cats.syntax.either._
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 import io.circe.syntax._
 
 class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
-  private val client = new GenericClient()(implicitly[Functor[Id]], auth, sttpBackend)
   private val idsThatDoNotExist = Seq("nodatabase", "randomdatabase")
 
   it should behave like readable(client.rawDatabases)
