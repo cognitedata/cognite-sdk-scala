@@ -3,11 +3,9 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 import java.util.UUID
 
-import cats.{Functor, Id}
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
 class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
-  private val client = new GenericClient()(implicitly[Functor[Id]], auth, sttpBackend)
   private val idsThatDoNotExist = Seq(999991L, 999992L)
 
   it should behave like readable(client.files)

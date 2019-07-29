@@ -10,7 +10,8 @@ class LoginTest extends SdkTest {
     options = SttpBackendOptions.connectionTimeout(90.seconds)
   )
   it should "read login status" in {
-    val login = new Login(RequestSession(uri"https://api.cognitedata.com", backend, auth))
+    val login = new Login(RequestSession(
+      "scala-sdk-test", uri"https://api.cognitedata.com", backend, auth))
     val status = login.status()
     status.loggedIn should be (true)
     status.project should not be empty

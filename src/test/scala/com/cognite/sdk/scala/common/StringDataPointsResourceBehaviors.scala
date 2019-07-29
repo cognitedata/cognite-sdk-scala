@@ -17,7 +17,7 @@ trait StringDataPointsResourceBehaviors[I] extends Matchers { this: FlatSpec =>
     it should "be possible to insert and delete string data points" in withStringTimeSeriesId { stringTimeSeriesId =>
       dataPoints.insertStringsById(stringTimeSeriesId, testStringDataPoints)
 
-      Thread.sleep(2000)
+      Thread.sleep(3000)
       val points = dataPoints.queryStringsById(stringTimeSeriesId, startTime, endTime + 1)
       points should have size testStringDataPoints.size.toLong
 

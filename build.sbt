@@ -87,6 +87,11 @@ lazy val core = (project in file("."))
       "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value))
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value))
   )
+  .enablePlugins(BuildInfoPlugin).
+  settings(
+    buildInfoKeys := Seq[BuildInfoKey](organization, version, organizationName),
+    buildInfoPackage := "BuildInfo"
+  )
 
 val scalaTestDeps = Seq(
   "org.scalactic" %% "scalactic" % "3.0.8",
