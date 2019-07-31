@@ -9,6 +9,8 @@ import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 
+import java.io.FileInputStream
+
 class Files[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[File, F]
@@ -24,23 +26,59 @@ class Files[F[_]](val requestSession: RequestSession[F])
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
     EitherDecoder.eitherDecoder[CdpApiError, File]
+
   override def createItems(items: Items[FileCreate]): F[Seq[File]] =
     items.items match {
-      case item :: Nil =>
+      case item :: Nil => {
         requestSession
-          .send { request =>
+          .sendCdf { request =>
             request
               .post(baseUri)
               .body(item)
               .response(asJson[Either[CdpApiError, File]])
               .mapResponse {
                 case Left(value) => throw value.error
-                case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
+                case Right(Left(cdpApiError)) =>
+                  throw cdpApiError.asException(uri"$baseUri/byids")
                 case Right(Right(value)) => Seq(value)
               }
           }
+      }
       case _ => throw new RuntimeException("Files only support creating one file per call")
     }
+
+  def uploadWithName(file: java.io.File, name: String): F[File] = {
+    val inputStream = new FileInputStream(file)
+    val item = FileCreate(name = name)
+    requestSession.flatMap(
+      createOne(item),
+      (file: File) =>
+        file.uploadUrl match {
+          case Some(uploadUrl) =>
+            val response = requestSession.send { request =>
+              request
+                .body(inputStream)
+                .put(uri"$uploadUrl")
+            }
+            requestSession.map(
+              response,
+              (res: Response[String]) =>
+                if (res.isSuccess) {
+                  file
+                } else {
+                  throw SdkException(
+                    s"File upload of file ${file.name} failed with error code ${res.code.toString()}"
+                  )
+                }
+            )
+          case None =>
+            throw SdkException(s"File upload of file ${file.name} did not return uploadUrl")
+        }
+    )
+  }
+
+  def upload(file: java.io.File): F[File] =
+    uploadWithName(file, file.getName())
 
   override def readWithCursor(
       cursor: Option[String],

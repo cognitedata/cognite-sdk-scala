@@ -27,7 +27,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
 
   def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Unit] =
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(baseUri)
           .body(Items(Seq(DataPointsById(id, dataPoints))))
@@ -41,7 +41,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
 
   def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Unit] =
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(baseUri)
           .body(Items(Seq(StringDataPointsById(id, dataPoints))))
@@ -55,7 +55,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
 
   def deleteRangeById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Unit] =
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(uri"$baseUri/delete")
           .body(Items(Seq(DeleteRangeById(id, inclusiveStart, exclusiveEnd))))
@@ -69,7 +69,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
 
   def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]] =
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(uri"$baseUri/list")
           .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
@@ -91,7 +91,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
       exclusiveEnd: Long
   ): F[Seq[StringDataPoint]] =
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(uri"$baseUri/list")
           .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
@@ -123,7 +123,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
 
   def getLatestDataPointsByIds(ids: Seq[Long]): F[Map[Long, Option[DataPoint]]] =
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(uri"$baseUri/latest")
           .body(Items(ids.map(CogniteId)))
@@ -153,7 +153,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
 
   def getLatestStringDataPointByIds(ids: Seq[Long]): F[Map[Long, Option[StringDataPoint]]] =
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(uri"$baseUri/latest")
           .body(Items(ids.map(CogniteId)))

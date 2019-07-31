@@ -16,7 +16,7 @@ object RawResource {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(uri"$baseUri/delete")
           .body(Items(ids))
@@ -110,7 +110,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(baseUri)
           .body(items)

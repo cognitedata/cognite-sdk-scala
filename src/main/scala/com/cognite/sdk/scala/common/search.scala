@@ -23,7 +23,7 @@ object Search {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(uri"$baseUri/search")
           .body(searchQuery)

@@ -13,7 +13,7 @@ class Login[F[_]](val requestSession: RequestSession[F]) {
   implicit val dataLoginStatusDecoder = deriveDecoder[DataLoginStatus]
   def status(): F[LoginStatus] =
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .get(uri"${requestSession.baseUri}/login/status")
           .response(asJson[DataLoginStatus])
