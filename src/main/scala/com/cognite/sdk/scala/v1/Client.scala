@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import BuildInfo.BuildInfo
-import cats.Functor
+import cats.Monad
 import cats.implicits._
 import com.cognite.sdk.scala.common.{Auth, InvalidAuthentication, Login}
 import com.cognite.sdk.scala.v1.resources.{
@@ -21,13 +21,19 @@ import com.softwaremill.sttp._
 
 import scala.concurrent.duration._
 
-final case class RequestSession[F[_]: Functor](
+final case class RequestSession[F[_]: Monad](
     applicationName: String,
     baseUri: Uri,
     sttpBackend: SttpBackend[F, _],
     auth: Auth
 ) {
-  def send[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[R] =
+  def send[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[Response[R]] =
+    r(
+      sttp
+        .readTimeout(90.seconds)
+    ).send()(sttpBackend, implicitly)
+
+  def sendCdf[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[R] =
     r(
       sttp
         .auth(auth)
@@ -40,9 +46,10 @@ final case class RequestSession[F[_]: Functor](
     ).send()(sttpBackend, implicitly).map(_.unsafeBody)
 
   def map[R, R1](r: F[R], f: R => R1): F[R1] = r.map(f)
+  def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
-class GenericClient[F[_]: Functor, _](applicationName: String)(
+class GenericClient[F[_]: Monad, _](applicationName: String)(
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
 ) {

@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.common
 
 import java.util.UUID
 
-import cats.{Functor, Id}
+import cats.{Id, Monad}
 import com.cognite.sdk.scala.v1.{GenericClient, sttpBackend}
 import com.softwaremill.sttp.{MonadError, Request, Response, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
@@ -29,8 +29,7 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
 }
 
 abstract class SdkTest extends FlatSpec with Matchers {
-  val client = new GenericClient("scala-sdk-test")(
-    implicitly[Functor[Id]], auth, sttpBackend)
+  val client = new GenericClient("scala-sdk-test")(implicitly[Monad[Id]], auth, sttpBackend)
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
 

@@ -71,7 +71,7 @@ object Readable {
       .fold(baseUri)(baseUri.param("cursor", _))
       .param("limit", limit.getOrElse(Resource.defaultLimit).toString)
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .get(uriWithCursor)
           .response(asJson[Either[CdpApiError, ItemsWithCursor[R]]])
@@ -99,7 +99,7 @@ object RetrieveByIds {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .get(uri"$baseUri/byids")
           .body(Items(ids.map(CogniteId)))

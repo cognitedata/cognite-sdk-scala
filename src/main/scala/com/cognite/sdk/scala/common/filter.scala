@@ -43,7 +43,7 @@ object Filter {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(uri"$baseUri/list")
           .body(FilterRequest(filter, limit, cursor))

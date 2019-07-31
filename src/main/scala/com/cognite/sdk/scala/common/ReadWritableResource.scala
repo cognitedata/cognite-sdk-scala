@@ -28,7 +28,7 @@ object DeleteByIds {
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(uri"$baseUri/delete")
           .body(Items(ids.map(CogniteId)))
@@ -62,7 +62,7 @@ object DeleteByExternalIds {
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(uri"$baseUri/delete")
           .body(Items(externalIds.map(CogniteExternalId)))
@@ -117,7 +117,7 @@ object Create {
     implicit val errorOrItemsWithCursorDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     requestSession
-      .send { request =>
+      .sendCdf { request =>
         request
           .post(baseUri)
           .body(items)

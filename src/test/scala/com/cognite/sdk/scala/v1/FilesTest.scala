@@ -10,7 +10,11 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
 
   it should behave like readable(client.files)
 
-  it should behave like readableWithRetrieve(client.files, idsThatDoNotExist, supportsMissingAndThrown = true)
+  it should behave like readableWithRetrieve(
+    client.files,
+    idsThatDoNotExist,
+    supportsMissingAndThrown = true
+  )
 
   it should behave like writable(
     client.files,
@@ -33,6 +37,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val fileUpdates = Seq(
     File(name = "scala-sdk-update-1-1", source = Some(null), externalId = Some(s"${externalId}-1")) // scalastyle:ignore null
   )
+
   it should behave like updatable(
     client.files,
     filesToCreate,
@@ -43,8 +48,9 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       assert(filesToCreate.size == fileUpdates.size)
       assert(readFiles.size == filesToCreate.size)
       assert(readFiles.size == updatedFiles.size)
-      assert(updatedFiles.zip(readFiles).forall { case (updated, read) =>
-        updated.externalId == read.externalId.map(id => s"${id}-1")
+      assert(updatedFiles.zip(readFiles).forall {
+        case (updated, read) =>
+          updated.externalId == read.externalId.map(id => s"${id}-1")
       })
       assert(readFiles.head.source.isDefined)
       assert(updatedFiles.head.source.isEmpty)
@@ -56,16 +62,20 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     val createdTimeFilterResults = client.files
       .filter(
         FilesFilter(
-          createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L))))
+          createdTime =
+            Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+        )
       )
       .compile
       .toList
-    assert(createdTimeFilterResults.length == 29)
+    assert(createdTimeFilterResults.length == 25)
 
     val createdTimeFilterResultsWithLimit = client.files
       .filterWithLimit(
         FilesFilter(
-          createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))),
+          createdTime =
+            Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+        ),
         20
       )
       .compile
@@ -85,7 +95,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           )
         )
       )
-    assert(createdTimeSearchResults.length == 29)
+    assert(createdTimeSearchResults.length == 25)
     val mimeTypeTimeSearchResults = client.files
       .search(
         FilesQuery(
@@ -129,5 +139,16 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         )
       )
     assert(limitTimeSearchResults.length == 5)
+  }
+  it should "support upload" in {
+    val file =
+      client.files.uploadWithName(
+        new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt"),
+        "uploadTest123.txt"
+      )
+
+    client.files.deleteById(file.id)
+
+    assert(file.name == "uploadTest123.txt")
   }
 }
