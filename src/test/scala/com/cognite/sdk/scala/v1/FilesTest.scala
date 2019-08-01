@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1
 
+import java.io.{BufferedInputStream, ByteArrayOutputStream, FileInputStream}
+import java.nio.file.{Files, Paths}
 import java.time.Instant
 import java.util.UUID
 
@@ -10,12 +12,14 @@ import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, SdkTest, W
 class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with Matchers {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
 
-  it should behave like readable(client.files)
+  (it should behave).like(readable(client.files))
 
-  it should behave like readableWithRetrieve(
-    client.files,
-    idsThatDoNotExist,
-    supportsMissingAndThrown = true
+  (it should behave).like(
+    readableWithRetrieve(
+      client.files,
+      idsThatDoNotExist,
+      supportsMissingAndThrown = true
+    )
   )
 
   private val externalId = UUID.randomUUID().toString.substring(0, 8)
@@ -173,14 +177,48 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with 
     assert(limitTimeSearchResults.length == 5)
   }
   it should "support upload" in {
+
+    val inputStream = new BufferedInputStream(
+      new FileInputStream(
+        new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
+      )
+    )
     val file =
       client.files.uploadWithName(
-        new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt"),
+        inputStream,
         "uploadTest123.txt"
       )
 
     client.files.deleteById(file.id)
 
     assert(file.name == "uploadTest123.txt")
+  }
+  it should "support download" in {
+    val file =
+      client.files.upload(
+        new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
+      )
+
+    var uploadedFile = client.files.retrieveByIds(Seq(file.id))
+    var retryCount = 0
+    while (!uploadedFile.headOption
+        .getOrElse(throw new RuntimeException("File was not uploaded in test"))
+        .uploaded) {
+      retryCount += 1
+      Thread.sleep(500)
+      uploadedFile = client.files.retrieveByIds(Seq(file.id))
+      if (retryCount > 10) {
+        throw new RuntimeException("File is not uploaded after 10 retries in test")
+      }
+    }
+
+    val out = new ByteArrayOutputStream()
+    client.files.download(FileDownloadId(file.id), out)
+
+    val expected =
+      Files.readAllBytes(Paths.get("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt"))
+
+    assert(out.toByteArray().sameElements(expected))
+    client.files.deleteById(file.id)
   }
 }

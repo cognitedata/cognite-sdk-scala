@@ -1,15 +1,15 @@
 package com.cognite.sdk.scala.v1.resources
 
 import java.time.Instant
+import java.io.{BufferedInputStream, FileInputStream}
 
+import cats.syntax.functor._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
-
-import java.io.FileInputStream
 
 class Files[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -42,8 +42,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
           }
       }
 
-  def uploadWithName(file: java.io.File, name: String): F[File] = {
-    val inputStream = new FileInputStream(file)
+  def uploadWithName(input: java.io.InputStream, name: String): F[File] = {
     val item = FileCreate(name = name)
     requestSession.flatMap(
       createOne(item),
@@ -52,7 +51,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
           case Some(uploadUrl) =>
             val response = requestSession.send { request =>
               request
-                .body(inputStream)
+                .body(input)
                 .put(uri"$uploadUrl")
             }
             requestSession.map(
@@ -72,8 +71,10 @@ class Files[F[_]](val requestSession: RequestSession[F])
     )
   }
 
-  def upload(file: java.io.File): F[File] =
-    uploadWithName(file, file.getName())
+  def upload(file: java.io.File): F[File] = {
+    val inputStream = new BufferedInputStream(new FileInputStream(file))
+    uploadWithName(inputStream, file.getName())
+  }
 
   override def readWithCursor(
       cursor: Option[String],
@@ -102,6 +103,51 @@ class Files[F[_]](val requestSession: RequestSession[F])
 
   override def search(searchQuery: FilesQuery): F[Seq[File]] =
     Search.search(requestSession, baseUri, searchQuery)
+
+  def download(item: FileDownload, out: java.io.OutputStream): F[Unit] = {
+    val request =
+      requestSession
+        .sendCdf { request =>
+          request
+            .post(uri"${baseUri.toString()}/downloadlink")
+            .body(Items(Seq(item)))
+            .response(asJson[Either[CdpApiError, Items[FileDownloadLink]]])
+            .mapResponse {
+              case Left(value) => throw value.error
+              case Right(Left(cdpApiError)) =>
+                throw cdpApiError.asException(uri"${baseUri.toString()}/downloadlink")
+              case Right(Right(values)) => values
+
+            }
+        }
+
+    requestSession.flatMap(
+      request,
+      (files: Items[FileDownloadLink]) => {
+        val response = requestSession.send { request =>
+          request
+            .get(
+              uri"${files.items
+                .map(_.downloadUrl)
+                .headOption
+                .getOrElse(throw SdkException(s"File download of ${item.toString()} did not return download url"))}"
+            )
+            .response(asByteArray)
+        }
+        requestSession.map(
+          response,
+          (res: Response[Array[Byte]]) =>
+            if (res.isSuccess) {
+              out.write(res.unsafeBody)
+            } else {
+              throw SdkException(
+                s"File download of file ${item.toString()} failed with error code ${res.code.toString()}"
+              )
+            }
+        )
+      }
+    )
+  }
 }
 
 object Files {
@@ -129,4 +175,25 @@ object Files {
     deriveEncoder[FilesQuery]
   implicit val filesFilterRequestEncoder: Encoder[FilterRequest[FilesFilter]] =
     deriveEncoder[FilterRequest[FilesFilter]]
+  implicit val fileDownloadLinkIdDecoder: Decoder[FileDownloadLinkId] =
+    deriveDecoder[FileDownloadLinkId]
+  implicit val fileDownloadLinkExternalIdDecoder: Decoder[FileDownloadLinkExternalId] =
+    deriveDecoder[FileDownloadLinkExternalId]
+  implicit val fileDownloadIdEncoder: Encoder[FileDownloadId] =
+    deriveEncoder[FileDownloadId]
+  implicit val fileDownloadExternalIdEncoder: Encoder[FileDownloadExternalId] =
+    deriveEncoder[FileDownloadExternalId]
+  implicit val fileDownloadEncoder: Encoder[FileDownload] = Encoder.instance {
+    case downloadId @ FileDownloadId(_) => fileDownloadIdEncoder(downloadId)
+    case downloadExternalId @ FileDownloadExternalId(_) =>
+      fileDownloadExternalIdEncoder(downloadExternalId)
+  }
+  implicit val fileDownloadLinkDecoder: Decoder[FileDownloadLink] =
+    fileDownloadLinkIdDecoder.widen.or(fileDownloadLinkExternalIdDecoder.widen)
+  implicit val fileDownloadItemsEncoder: Encoder[Items[FileDownload]] =
+    deriveEncoder[Items[FileDownload]]
+  implicit val fileDownloadItemsDecoder: Decoder[Items[FileDownloadLink]] =
+    deriveDecoder[Items[FileDownloadLink]]
+  implicit val fileDownloadResponseDecoder: Decoder[Either[CdpApiError, Items[FileDownloadLink]]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Items[FileDownloadLink]]
 }

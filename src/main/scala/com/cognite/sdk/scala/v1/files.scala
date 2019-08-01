@@ -59,3 +59,20 @@ final case class FilesQuery(
     search: Option[FilesSearch] = None,
     limit: Int = 100
 ) extends SearchQuery[FilesFilter, FilesSearch]
+
+sealed trait FileDownload
+final case class FileDownloadId(id: Long) extends FileDownload
+final case class FileDownloadExternalId(externalId: String) extends FileDownload
+
+sealed trait FileDownloadLink {
+  def downloadUrl: String
+}
+final case class FileDownloadLinkId(
+    id: Long,
+    downloadUrl: String
+) extends FileDownloadLink
+
+final case class FileDownloadLinkExternalId(
+    externalId: String,
+    downloadUrl: String
+) extends FileDownloadLink
