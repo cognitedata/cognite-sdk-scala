@@ -7,7 +7,7 @@ import org.scalatest.{FlatSpec, Matchers}
 trait WritableBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off
   def writable[R <: WithId[PrimitiveId], W, PrimitiveId](
-      writable: Create[R, W, Id] with DeleteByIds[Id, PrimitiveId],
+      writable: Create[R, W, Id] with CreateOne[R, W, Id] with DeleteByIds[Id, PrimitiveId],
       readExamples: Seq[R],
       createExamples: Seq[W],
       idsThatDoNotExist: Seq[PrimitiveId],
@@ -94,7 +94,8 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
         missingIds should contain theSameElementsAs externalIdsThatDoNotExist
       }
 
-      val sameIdsThatDoNotExist = Seq(externalIdsThatDoNotExist.head, externalIdsThatDoNotExist.head)
+      val sameIdsThatDoNotExist =
+        Seq(externalIdsThatDoNotExist.head, externalIdsThatDoNotExist.head)
       val sameIdsThrown = the[CdpApiException] thrownBy writable
         .deleteByExternalIds(sameIdsThatDoNotExist)
       if (supportsMissingAndThrown) {
