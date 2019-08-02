@@ -75,7 +75,7 @@ object DeleteByExternalIds {
       }
 }
 
-trait Create[R, W, F[_]] extends WithRequestSession[F] with BaseUri {
+trait Create[R, W, F[_]] extends WithRequestSession[F] with CreateOne[R, W, F] with BaseUri {
   def createItems(items: Items[W]): F[Seq[R]]
 
   def create(items: Seq[W]): F[Seq[R]] =
@@ -89,18 +89,6 @@ trait Create[R, W, F[_]] extends WithRequestSession[F] with BaseUri {
   def createOne(item: W): F[R] =
     requestSession.map(
       create(Seq(item)),
-      (r1: Seq[R]) =>
-        r1.headOption match {
-          case Some(value) => value
-          case None => throw SdkException("Unexpected empty response when creating item")
-        }
-    )
-
-  def createOneFromRead(item: R)(
-      implicit t: Transformer[R, W]
-  ): F[R] =
-    requestSession.map(
-      createFromRead(Seq(item)),
       (r1: Seq[R]) =>
         r1.headOption match {
           case Some(value) => value
@@ -127,6 +115,38 @@ object Create {
               throw value.error
             case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
             case Right(Right(value)) => value.items
+          }
+      }
+  }
+}
+
+trait CreateOne[R, W, F[_]] extends WithRequestSession[F] with BaseUri {
+  def createOne(item: W): F[R]
+
+  def createOneFromRead(item: R)(
+      implicit t: Transformer[R, W]
+  ): F[R] = createOne(item.transformInto[W])
+
+}
+
+object CreateOne {
+  def createOne[F[_], R, W](requestSession: RequestSession[F], baseUri: Uri, item: W)(
+      implicit readDecoder: Decoder[R],
+      itemsEncoder: Encoder[W]
+  ): F[R] = {
+    implicit val errorOrItemsWithCursorDecoder: Decoder[Either[CdpApiError, R]] =
+      EitherDecoder.eitherDecoder[CdpApiError, R]
+    requestSession
+      .sendCdf { request =>
+        request
+          .post(baseUri)
+          .body(item)
+          .response(asJson[Either[CdpApiError, R]])
+          .mapResponse {
+            case Left(value) =>
+              throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Right(value)) => value
           }
       }
   }

@@ -3,9 +3,11 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 import java.util.UUID
 
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
+import org.scalatest.Matchers
 
-class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
+import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, SdkTest, WritableBehaviors}
+
+class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with Matchers {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
 
   it should behave like readable(client.files)
@@ -16,47 +18,77 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     supportsMissingAndThrown = true
   )
 
-  it should behave like writable(
-    client.files,
-    Seq(File(name = "scala-sdk-read-example-1")),
-    Seq(FileCreate(name = "scala-sdk-read-example-1")),
-    idsThatDoNotExist,
-    supportsMissingAndThrown = true
-  )
-
   private val externalId = UUID.randomUUID().toString.substring(0, 8)
-  private val filesToCreate = Seq(
-    File(
-      name = "scala-sdk-update-1",
-      source = Some("scala-sdk-update-1"),
-      externalId = Some(externalId),
-      metadata = Some(Map()),
-      assetIds = Some(Seq[Long]())
-    )
-  )
-  private val fileUpdates = Seq(
-    File(name = "scala-sdk-update-1-1", source = Some(null), externalId = Some(s"${externalId}-1")) // scalastyle:ignore null
-  )
 
-  it should behave like updatable(
-    client.files,
-    filesToCreate,
-    fileUpdates,
-    (id: Long, item: File) => item.copy(id = id),
-    (a: File, b: File) => { a.copy(lastUpdatedTime = b.lastUpdatedTime) == b },
-    (readFiles: Seq[File], updatedFiles: Seq[File]) => {
-      assert(filesToCreate.size == fileUpdates.size)
-      assert(readFiles.size == filesToCreate.size)
-      assert(readFiles.size == updatedFiles.size)
-      assert(updatedFiles.zip(readFiles).forall {
-        case (updated, read) =>
-          updated.externalId == read.externalId.map(id => s"${id}-1")
-      })
-      assert(readFiles.head.source.isDefined)
-      assert(updatedFiles.head.source.isEmpty)
-      ()
+  it should "be an error to delete using ids that does not exist" in {
+    val thrown = the[CdpApiException] thrownBy client.files
+      .deleteByIds(idsThatDoNotExist)
+    val missingIds = thrown.missing
+      .getOrElse(Seq.empty)
+      .flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+    missingIds should have size idsThatDoNotExist.size.toLong
+    missingIds should contain theSameElementsAs idsThatDoNotExist
+
+    val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
+    val sameIdsThrown = the[CdpApiException] thrownBy client.files
+      .deleteByIds(sameIdsThatDoNotExist)
+    // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
+    // if duplicated ids that do not exist are specified.
+    val sameMissingIds = sameIdsThrown.duplicated match {
+      case Some(duplicatedIds) =>
+        duplicatedIds.flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+      case None =>
+        sameIdsThrown.missing
+          .getOrElse(Seq.empty)
+          .flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
     }
-  )
+    sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+    sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+  }
+
+  it should "create and delete items using the read class" in {
+    // create a single item
+    val testFile = File(name = "scala-sdk-read-example-1")
+    val createdItem = client.files.createOneFromRead(testFile)
+    createdItem.name shouldBe testFile.name
+    client.files.deleteByIds(Seq(createdItem.id))
+    an[CdpApiException] should be thrownBy client.files.retrieveByIds(Seq(createdItem.id))
+  }
+
+  it should "create and delete items using the create class" in {
+    // create a single item
+    val testFile = FileCreate(name = "scala-sdk-read-example-1")
+    val createdItem = client.files.createOne(testFile)
+    createdItem.name shouldBe testFile.name
+    client.files.deleteByIds(Seq(createdItem.id))
+    an[CdpApiException] should be thrownBy client.files.retrieveByIds(Seq(createdItem.id))
+  }
+
+  it should "allow updates using the read class" in {
+    // create items
+    val testFile = File(name = "scala-sdk-read-example-1")
+    val createdItem = client.files.createOneFromRead(testFile)
+    assert(createdItem.name == testFile.name)
+    createdItem.id should not be 0
+
+    val readItems = client.files.retrieveByIds(Seq(createdItem.id))
+
+    // update the item with new values
+    val updateFile =
+      File(
+        name = "scala-sdk-update-1-1",
+        id = createdItem.id,
+        externalId = Some(s"${externalId}-1")
+      )
+    val updatedItems = client.files.updateFromRead(Seq(updateFile))
+    assert(updatedItems.size == readItems.size)
+    assert(updatedItems.forall {
+      case (updated) => updated.externalId == updateFile.externalId
+    })
+
+    // delete it
+    client.files.deleteByIds(Seq(createdItem.id))
+  }
 
   it should "support filter" in {
     val createdTimeFilterResults = client.files

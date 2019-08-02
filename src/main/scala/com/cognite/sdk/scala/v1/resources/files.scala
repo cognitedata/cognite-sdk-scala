@@ -15,7 +15,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[File, F]
     with RetrieveByIds[File, F]
-    with Create[File, FileCreate, F]
+    with CreateOne[File, FileCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
     with Filter[File, FilesFilter, F]
@@ -27,25 +27,20 @@ class Files[F[_]](val requestSession: RequestSession[F])
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
     EitherDecoder.eitherDecoder[CdpApiError, File]
 
-  override def createItems(items: Items[FileCreate]): F[Seq[File]] =
-    items.items match {
-      case item :: Nil => {
-        requestSession
-          .sendCdf { request =>
-            request
-              .post(baseUri)
-              .body(item)
-              .response(asJson[Either[CdpApiError, File]])
-              .mapResponse {
-                case Left(value) => throw value.error
-                case Right(Left(cdpApiError)) =>
-                  throw cdpApiError.asException(uri"$baseUri/byids")
-                case Right(Right(value)) => Seq(value)
-              }
+  override def createOne(item: FileCreate): F[File] =
+    requestSession
+      .sendCdf { request =>
+        request
+          .post(baseUri)
+          .body(item)
+          .response(asJson[Either[CdpApiError, File]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) =>
+              throw cdpApiError.asException(uri"$baseUri/byids")
+            case Right(Right(value)) => value
           }
       }
-      case _ => throw new RuntimeException("Files only support creating one file per call")
-    }
 
   def uploadWithName(file: java.io.File, name: String): F[File] = {
     val inputStream = new FileInputStream(file)
