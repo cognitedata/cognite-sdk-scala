@@ -15,11 +15,11 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
     }
 
     it should "read all items" in {
-      val first1Length = readable.readAll().take(1).compile.toList.length
+      val first1Length = readable.list().take(1).compile.toList.length
       first1Length should be(1)
-      val first2Length = readable.readAllWithLimit(2).compile.toList.length
+      val first2Length = readable.listWithLimit(2).compile.toList.length
       first2Length should be(2)
-      val allLength = readable.readAllWithLimit(3).compile.toList.length
+      val allLength = readable.listWithLimit(3).compile.toList.length
       allLength should be(3)
     }
   }

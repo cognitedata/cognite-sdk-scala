@@ -104,7 +104,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with 
       )
       .compile
       .toList
-    assert(createdTimeFilterResults.length == 25)
+    assert(createdTimeFilterResults.length == 23)
 
     val createdTimeFilterResultsWithLimit = client.files
       .filterWithLimit(
@@ -131,7 +131,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with 
           )
         )
       )
-    assert(createdTimeSearchResults.length == 25)
+    assert(createdTimeSearchResults.length == 23)
     val mimeTypeTimeSearchResults = client.files
       .search(
         FilesQuery(
