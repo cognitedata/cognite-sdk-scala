@@ -23,7 +23,8 @@ final case class AssetCreate(
     description: Option[String] = None,
     source: Option[String] = None,
     externalId: Option[String] = None,
-    metadata: Option[Map[String, String]] = None
+    metadata: Option[Map[String, String]] = None,
+    parentExternalId: Option[String] = None
 ) extends WithExternalId
 
 final case class AssetUpdate(
