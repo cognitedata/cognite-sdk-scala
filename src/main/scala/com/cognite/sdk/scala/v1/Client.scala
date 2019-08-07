@@ -2,6 +2,7 @@ package com.cognite.sdk.scala.v1
 
 import BuildInfo.BuildInfo
 import cats.Monad
+import cats.Id
 import cats.implicits._
 import com.cognite.sdk.scala.common.{Auth, InvalidAuthentication, Login}
 import com.cognite.sdk.scala.v1.resources.{
@@ -17,7 +18,7 @@ import com.cognite.sdk.scala.v1.resources.{
   ThreeDRevisions,
   TimeSeriesResource
 }
-import com.softwaremill.sttp._
+import com.softwaremill.sttp.{Id => _, _}
 
 import scala.concurrent.duration._
 
