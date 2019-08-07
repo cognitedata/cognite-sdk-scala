@@ -21,22 +21,22 @@ trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
   def readWithLimit(limit: Long): F[ItemsWithCursor[R]] =
     readWithCursor(None, Some(limit))
 
-  private def readWithNextCursor(
+  private def listWithNextCursor(
       cursor: Option[String],
       limit: Option[Long]
   ): Stream[F, R] =
     Readable.pullFromCursorWithLimit(cursor, limit, readWithCursor).stream
 
-  def readAllFromCursor(cursor: String): Stream[F, R] =
-    readWithNextCursor(Some(cursor), None)
+  def listFromCursor(cursor: String): Stream[F, R] =
+    listWithNextCursor(Some(cursor), None)
 
-  def readAllWithLimit(limit: Long): Stream[F, R] =
-    readWithNextCursor(None, Some(limit))
+  def listWithLimit(limit: Long): Stream[F, R] =
+    listWithNextCursor(None, Some(limit))
 
-  def readAllFromCursorWithLimit(cursor: String, limit: Long): Stream[F, R] =
-    readWithNextCursor(Some(cursor), Some(limit))
+  def listFromCursorWithLimit(cursor: String, limit: Long): Stream[F, R] =
+    listWithNextCursor(Some(cursor), Some(limit))
 
-  def readAll(): Stream[F, R] = readWithNextCursor(None, None)
+  def list(): Stream[F, R] = listWithNextCursor(None, None)
 }
 
 object Readable {
