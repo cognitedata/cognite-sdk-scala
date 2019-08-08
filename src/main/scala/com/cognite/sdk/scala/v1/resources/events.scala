@@ -12,6 +12,7 @@ class Events[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[Event, F]
     with RetrieveByIds[Event, F]
+    with RetrieveByExternalIds[Event, F]
     with Create[Event, EventCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
@@ -29,6 +30,9 @@ class Events[F[_]](val requestSession: RequestSession[F])
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[Event]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+
+  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[Event]] =
+    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUri, externalIds)
 
   override def createItems(items: Items[EventCreate]): F[Seq[Event]] =
     Create.createItems[F, Event, EventCreate](requestSession, baseUri, items)

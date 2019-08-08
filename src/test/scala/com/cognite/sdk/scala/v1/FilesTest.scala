@@ -11,6 +11,7 @@ import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, SdkTest, W
 
 class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with Matchers {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
+  private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
   (it should behave).like(readable(client.files))
 
@@ -21,6 +22,8 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with 
       supportsMissingAndThrown = true
     )
   )
+
+  it should behave like readableWithRetrieveByExternalId(client.files, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
   private val externalId = UUID.randomUUID().toString.substring(0, 8)
 
@@ -104,7 +107,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with 
       )
       .compile
       .toList
-    assert(createdTimeFilterResults.length == 23)
+    assert(createdTimeFilterResults.length == 22)
 
     val createdTimeFilterResultsWithLimit = client.files
       .filterWithLimit(
@@ -131,7 +134,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with 
           )
         )
       )
-    assert(createdTimeSearchResults.length == 23)
+    assert(createdTimeSearchResults.length == 22)
     val mimeTypeTimeSearchResults = client.files
       .search(
         FilesQuery(
@@ -161,7 +164,7 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with 
           )
         )
       )
-    assert(nameSearchResults.length == 4)
+    assert(nameSearchResults.length == 3)
     val limitTimeSearchResults = client.files
       .search(
         FilesQuery(

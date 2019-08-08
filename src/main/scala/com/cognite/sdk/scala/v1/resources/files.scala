@@ -15,6 +15,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[File, F]
     with RetrieveByIds[File, F]
+    with RetrieveByExternalIds[File, F]
     with CreateOne[File, FileCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
@@ -84,6 +85,9 @@ class Files[F[_]](val requestSession: RequestSession[F])
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[File]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+
+  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[File]] =
+    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUri, externalIds)
 
   override def update(items: Seq[FileUpdate]): F[Seq[File]] =
     Update.update[F, File, FileUpdate](requestSession, baseUri, items)

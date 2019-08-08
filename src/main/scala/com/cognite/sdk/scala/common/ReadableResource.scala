@@ -83,6 +83,7 @@ object Readable {
       }
   }
 }
+
 trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUri {
   def retrieveByIds(ids: Seq[Long]): F[Seq[R]]
   def retrieveById(id: Long): F[Option[R]] =
@@ -103,6 +104,40 @@ object RetrieveByIds {
         request
           .get(uri"$baseUri/byids")
           .body(Items(ids.map(CogniteId)))
+          .response(asJson[Either[CdpApiError, Items[R]]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
+            case Right(Right(value)) => value.items
+          }
+      }
+  }
+}
+
+trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUri {
+  def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[R]]
+  def retrieveByExternalId(externalIds: String): F[Option[R]] =
+    requestSession.map(retrieveByExternalIds(Seq(externalIds)), (r1: Seq[R]) => r1.headOption)
+}
+
+object RetrieveByExternalIds {
+  implicit val cogniteExternalIdEncoder: Encoder[CogniteExternalId] = deriveEncoder
+  implicit val cogniteExternalIdItemsEncoder: Encoder[Items[CogniteExternalId]] = deriveEncoder
+
+  def retrieveByExternalIds[F[_], R](
+      requestSession: RequestSession[F],
+      baseUri: Uri,
+      externalIds: Seq[String]
+  )(
+      implicit itemsDecoder: Decoder[Items[R]]
+  ): F[Seq[R]] = {
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
+    requestSession
+      .sendCdf { request =>
+        request
+          .get(uri"$baseUri/byids")
+          .body(Items(externalIds.map(CogniteExternalId)))
           .response(asJson[Either[CdpApiError, Items[R]]])
           .mapResponse {
             case Left(value) => throw value.error
