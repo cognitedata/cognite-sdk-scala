@@ -12,6 +12,8 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
 
   it should behave like readableWithRetrieve(client.events, idsThatDoNotExist, supportsMissingAndThrown = true)
 
+  it should behave like readableWithRetrieveByExternalId(client.events, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
+
   it should behave like writable(
     client.events,
     Seq(Event(description = Some("scala-sdk-read-example-1")), Event(description = Some("scala-sdk-read-example-2"))),

@@ -73,4 +73,53 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       }
     }
   }
+
+  def readableWithRetrieveByExternalId[R <: WithExternalId, W](
+      readable: Readable[R, Id] with RetrieveByExternalIds[R, Id],
+      idsThatDoNotExist: Seq[String],
+      supportsMissingAndThrown: Boolean
+  ): Unit = {
+    it should "support retrieving items by external id" in {
+      val firstTwoItemIds = readable.list().filter(_.externalId.isDefined).take(2).map(_.externalId.get).compile.toList
+      firstTwoItemIds should have size 2
+      val maybeItemsRead = readable.retrieveByExternalIds(firstTwoItemIds)
+      val itemsReadIds = maybeItemsRead.map(_.externalId.get)
+      itemsReadIds should have size firstTwoItemIds.size.toLong
+      itemsReadIds should contain theSameElementsAs firstTwoItemIds
+    }
+
+    it should "return information about missing external ids" in {
+      val thrown = the[CdpApiException] thrownBy readable
+        .retrieveByExternalIds(idsThatDoNotExist)
+      if (supportsMissingAndThrown) {
+        val itemsNotFound = thrown.missing
+
+        val notFoundIds =
+          itemsNotFound.get.map(jsonObj => jsonObj("externalId").get.asString.get)
+        notFoundIds should have size idsThatDoNotExist.size.toLong
+        notFoundIds should contain theSameElementsAs idsThatDoNotExist
+      }
+
+      val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
+      val sameIdsThrown = the[CdpApiException] thrownBy readable
+        .retrieveByExternalIds(sameIdsThatDoNotExist)
+      if (supportsMissingAndThrown) {
+        sameIdsThrown.missing match {
+          case Some(missingItems) =>
+            val sameNotFoundIds =
+              missingItems.map(jsonObj => jsonObj("externalId").get.asString.get).toSet
+            // it's a bit funny that the same missing ids are returned duplicated,
+            // but that's how it works as of 2019-06-02.
+            //sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
+            sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+          case None =>
+            val duplicatedNotFoundIds = sameIdsThrown.duplicated.get
+              .map(jsonObj => jsonObj("externalId").get.asString.get)
+              .toSet
+            //duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+            duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+        }
+      }
+    }
+  }
 }

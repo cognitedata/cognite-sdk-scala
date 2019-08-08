@@ -12,6 +12,7 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[TimeSeries, F]
     with RetrieveByIds[TimeSeries, F]
+    with RetrieveByExternalIds[TimeSeries, F]
     with Create[TimeSeries, TimeSeriesCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
@@ -28,6 +29,9 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[TimeSeries]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+
+  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[TimeSeries]] =
+    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUri, externalIds)
 
   override def createItems(items: Items[TimeSeriesCreate]): F[Seq[TimeSeries]] =
     Create.createItems[F, TimeSeries, TimeSeriesCreate](requestSession, baseUri, items)

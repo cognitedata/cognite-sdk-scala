@@ -13,6 +13,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
     with Readable[Asset, F]
     with Create[Asset, AssetCreate, F]
     with RetrieveByIds[Asset, F]
+    with RetrieveByExternalIds[Asset, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
     with Filter[Asset, AssetsFilter, F]
@@ -29,6 +30,9 @@ class Assets[F[_]](val requestSession: RequestSession[F])
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[Asset]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+
+  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[Asset]] =
+    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUri, externalIds)
 
   override def createItems(items: Items[AssetCreate]): F[Seq[Asset]] =
     Create.createItems[F, Asset, AssetCreate](requestSession, baseUri, items)

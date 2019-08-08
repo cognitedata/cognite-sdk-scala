@@ -10,6 +10,9 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
 
   it should behave like readable(client.assets)
   it should behave like readableWithRetrieve(client.assets, idsThatDoNotExist, supportsMissingAndThrown = true)
+
+  it should behave like readableWithRetrieveByExternalId(client.assets, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
+
   it should behave like writable(
     client.assets,
     Seq(Asset(name = "scala-sdk-read-example-1"), Asset(name = "scala-sdk-read-example-2")),
