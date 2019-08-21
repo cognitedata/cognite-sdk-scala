@@ -68,7 +68,7 @@ object Update {
           .mapResponse {
             case Left(value) =>
               throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/update")
             case Right(Right(value)) => value.items
           }
       }
