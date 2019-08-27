@@ -29,6 +29,7 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
 }
 
 abstract class SdkTest extends FlatSpec with Matchers {
+  // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
   val client = new GenericClient("scala-sdk-test")(implicitly[Monad[Id]], auth, sttpBackend)
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
