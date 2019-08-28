@@ -12,6 +12,7 @@ import com.cognite.sdk.scala.v1.resources.{
   RawDatabases,
   RawRows,
   RawTables,
+  SequenceRows,
   SequencesResource,
   ThreeDAssetMappings,
   ThreeDModels,
@@ -84,6 +85,7 @@ class GenericClient[F[_]: Monad, _](applicationName: String)(
   val timeSeries = new TimeSeriesResource[F](requestSession)
   val dataPoints = new DataPointsResourceV1[F](requestSession)
   val sequences = new SequencesResource[F](requestSession)
+  val sequenceRows = new SequenceRows[F](requestSession)
 
   val rawDatabases = new RawDatabases[F](requestSession)
   def rawTables(database: String): RawTables[F] = new RawTables(requestSession, database)

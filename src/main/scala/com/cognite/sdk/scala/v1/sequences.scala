@@ -6,6 +6,7 @@ import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
 
 final case class SequenceColumn(
+    id: Long,
     name: Option[String] = None,
     externalId: Option[String] = None,
     description: Option[String] = None,
@@ -13,7 +14,9 @@ final case class SequenceColumn(
     //       See https://github.com/circe/circe-derivation/issues/8
     //       and https://github.com/circe/circe-derivation/pull/91
     valueType: String = "STRING",
-    metadata: Option[Map[String, String]] = None
+    metadata: Option[Map[String, String]] = None,
+    createdTime: Instant,
+    lastUpdatedTime: Instant
 )
 
 final case class Sequence(
