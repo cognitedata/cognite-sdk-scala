@@ -259,6 +259,9 @@ object SequenceRows {
     deriveEncoder
   implicit val sequenceRowsQueryByExternalIdItemsEncoder
       : Encoder[Items[SequenceRowsQueryByExternalId]] = deriveEncoder
+  @SuppressWarnings(
+    Array("org.wartremover.warts.Product", "org.wartremover.warts.Serializable")
+  )
   implicit val sequenceRowsResponseDecoder: Decoder[SequenceRowsResponse] = deriveDecoder
   implicit val sequenceRowsResponseItemsDecoder: Decoder[Items[SequenceRowsResponse]] =
     deriveDecoder
