@@ -1,6 +1,5 @@
 package com.cognite.sdk.scala.v1
 
-import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common.CogniteId
 import io.circe.Json
 
@@ -29,6 +28,6 @@ final case class SequenceRowsQueryByExternalId(
     columns: Option[Seq[String]]
 )
 final case class SequenceRowsResponse(
-    columns: NonEmptyList[SequenceColumnId],
+    columns: Seq[SequenceColumnId], // this can be empty if no data is returned
     rows: Seq[SequenceRow]
 )
