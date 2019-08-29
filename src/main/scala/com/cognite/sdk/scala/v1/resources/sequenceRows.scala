@@ -63,12 +63,12 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
     requestSession
       .sendCdf { request =>
         request
-          .post(baseUri)
+          .post(uri"$baseUri/delete")
           .body(Items(Seq(SequenceRowsDeleteById(id, rows))))
           .response(asJson[Either[CdpApiError, Unit]])
           .mapResponse {
             case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
             case Right(Right(_)) => ()
           }
       }
@@ -77,12 +77,12 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
     requestSession
       .sendCdf { request =>
         request
-          .post(baseUri)
+          .post(uri"$baseUri/delete")
           .body(Items(Seq(SequenceRowsDeleteByExternalId(externalId, rows))))
           .response(asJson[Either[CdpApiError, Unit]])
           .mapResponse {
             case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
             case Right(Right(_)) => ()
           }
       }
