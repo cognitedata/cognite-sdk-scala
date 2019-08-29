@@ -55,6 +55,7 @@ object SequencesResource {
   implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
 
   implicit val sequenceColumnEncoder: Encoder[SequenceColumn] = deriveEncoder
+  implicit val sequenceColumnCreateEncoder: Encoder[SequenceColumnCreate] = deriveEncoder
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val sequenceColumnDecoder: Decoder[SequenceColumn] = deriveDecoder
   implicit val sequenceDecoder: Decoder[Sequence] = deriveDecoder[Sequence]
