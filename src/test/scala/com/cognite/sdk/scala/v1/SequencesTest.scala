@@ -40,13 +40,21 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         )
       ),
       Seq(
-        SequenceCreate(name = Some("scala-sdk-create-example-1"),
-          columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some("ext2")))),
+        SequenceCreate(
+          name = Some("scala-sdk-create-example-1"),
+          columns = NonEmptyList.of(
+            SequenceColumnCreate(name = Some("string-column"), externalId = Some("ext2"))
+          )
+        ),
         SequenceCreate(
           name = Some("scala-sdk-create-example-2"),
           columns = NonEmptyList.of(
-            SequenceColumn(name = Some("string-column"), externalId = Some("string1")),
-            SequenceColumn(name = Some("long-column"), externalId = Some("long1"), valueType = "LONG")
+            SequenceColumnCreate(name = Some("string-column"), externalId = Some("string1")),
+            SequenceColumnCreate(
+              name = Some("long-column"),
+              externalId = Some("long1"),
+              valueType = "LONG"
+            )
           )
         )
       ),
@@ -62,24 +70,26 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         Sequence(
           name = Some("scala-sdk-write-external-example-1"),
           externalId = Some(shortRandom()),
-          columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some("ext2")))
+          columns =
+            NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some("ext2")))
         ),
         Sequence(
           name = Some("scala-sdk-write-external-example-2"),
           externalId = Some(shortRandom()),
-          columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some("ext2")))
+          columns =
+            NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some("ext2")))
         )
       ),
       Seq(
         SequenceCreate(
           name = Some("scala-sdk-create-external-example-1"),
           externalId = Some(shortRandom()),
-          columns = NonEmptyList.of(SequenceColumn(name = Some("string-column")))
+          columns = NonEmptyList.of(SequenceColumnCreate(name = Some("string-column")))
         ),
         SequenceCreate(
           name = Some("scala-sdk-create-external-example-2"),
           externalId = Some(shortRandom()),
-          columns = NonEmptyList.of(SequenceColumn(name = Some("string-column")))
+          columns = NonEmptyList.of(SequenceColumnCreate(name = Some("string-column")))
         )
       ),
       externalIdsThatDoNotExist,
@@ -151,7 +161,8 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         SequenceQuery(
           filter = Some(
             SequenceFilter(
-              createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1566911825370L)))
+              createdTime =
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1566911825370L)))
             )
           )
         )
