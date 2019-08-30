@@ -102,7 +102,7 @@ object RetrieveByIds {
     requestSession
       .sendCdf { request =>
         request
-          .get(uri"$baseUri/byids")
+          .post(uri"$baseUri/byids")
           .body(Items(ids.map(CogniteId)))
           .response(asJson[Either[CdpApiError, Items[R]]])
           .mapResponse {
@@ -136,7 +136,7 @@ object RetrieveByExternalIds {
     requestSession
       .sendCdf { request =>
         request
-          .get(uri"$baseUri/byids")
+          .post(uri"$baseUri/byids")
           .body(Items(externalIds.map(CogniteExternalId)))
           .response(asJson[Either[CdpApiError, Items[R]]])
           .mapResponse {
