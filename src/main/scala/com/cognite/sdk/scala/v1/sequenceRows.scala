@@ -15,15 +15,15 @@ final case class SequenceRowsDeleteById(id: Long, rows: Seq[Long])
 final case class SequenceRowsDeleteByExternalId(externalId: String, rows: Seq[Long])
 final case class SequenceRowsQueryById(
     id: Long,
-    inclusiveFrom: Long,
-    exclusiveTo: Long,
+    start: Long,
+    end: Long,
     limit: Int,
     columns: Option[Seq[Long]]
 )
 final case class SequenceRowsQueryByExternalId(
     externalId: String,
-    inclusiveFrom: Long,
-    exclusiveTo: Long,
+    start: Long,
+    end: Long,
     limit: Int,
     columns: Option[Seq[String]]
 )
