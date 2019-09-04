@@ -38,6 +38,7 @@ final case class RequestSession[F[_]: Monad](
   def sendCdf[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[R] =
     r(
       sttp
+        .followRedirects(false)
         .auth(auth)
         .contentType("application/json")
         .header("accept", "application/json")
