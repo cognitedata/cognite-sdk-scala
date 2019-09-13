@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{DataPoint, StringDataPoint}
+import com.cognite.sdk.scala.common.{AggregateDataPoint, DataPoint, StringDataPoint}
 
 final case class DataPointsById(
     id: Long,
@@ -42,4 +42,26 @@ final case class QueryRangeById(
     id: Long,
     start: String,
     end: String
+)
+
+final case class QueryAggregatesById(
+    id: Long,
+    start: String,
+    end: String,
+    granularity: String,
+    aggregates: Seq[String]
+)
+
+final case class QueryAggregatesByIdResponse(
+    id: Long,
+    externalId: Option[String],
+    datapoints: Seq[AggregateDataPoint]
+)
+
+final case class QueryAggregatesByExternalId(
+    externalId: String,
+    start: String,
+    end: String,
+    granularity: String,
+    aggregates: Seq[String]
 )

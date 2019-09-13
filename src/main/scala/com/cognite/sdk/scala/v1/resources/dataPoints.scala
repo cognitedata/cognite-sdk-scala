@@ -13,7 +13,9 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUri
     with DataPointsResource[F, Long] {
+
   import DataPointsResourceV1._
+
   override val baseUri = uri"${requestSession.baseUri}/timeseries/data"
 
   implicit val errorOrDataPointsByIdResponseDecoder
@@ -24,6 +26,9 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
     EitherDecoder.eitherDecoder[CdpApiError, Items[StringDataPointsByIdResponse]]
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
+  implicit val errorOrAggregateDataPointsByAggregateResponseDecoder
+      : Decoder[Either[CdpApiError, Items[QueryAggregatesByIdResponse]]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Items[QueryAggregatesByIdResponse]]
 
   def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Unit] =
     requestSession
@@ -84,6 +89,112 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
               }
           }
       }
+
+  def queryAggregatesById(
+      id: Long,
+      inclusiveStart: Long,
+      exclusiveEnd: Long,
+      granularity: String,
+      aggregates: Seq[String]
+  ): F[Map[String, Seq[DataPoint]]] =
+    requestSession
+      .sendCdf { request =>
+        request
+          .post(uri"$baseUri/list")
+          .body(
+            Items(
+              Seq(
+                QueryAggregatesById(
+                  id,
+                  inclusiveStart.toString,
+                  exclusiveEnd.toString,
+                  granularity,
+                  aggregates
+                )
+              )
+            )
+          )
+          .response(asJson[Either[CdpApiError, Items[QueryAggregatesByIdResponse]]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
+            case Right(Right(value)) =>
+              value.items.headOption
+                .map(i => toAggregateMap(i.datapoints))
+                .getOrElse(Map.empty)
+          }
+      }
+
+  def queryAggregatesByExternalId(
+      externalId: String,
+      inclusiveStart: Long,
+      exclusiveEnd: Long,
+      granularity: String,
+      aggregates: Seq[String]
+  ): F[Map[String, Seq[DataPoint]]] =
+    requestSession
+      .sendCdf { request =>
+        request
+          .post(uri"$baseUri/list")
+          .body(
+            Items(
+              Seq(
+                QueryAggregatesByExternalId(
+                  externalId,
+                  inclusiveStart.toString,
+                  exclusiveEnd.toString,
+                  granularity,
+                  aggregates
+                )
+              )
+            )
+          )
+          .response(asJson[Either[CdpApiError, Items[QueryAggregatesByIdResponse]]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
+            case Right(Right(value)) =>
+              value.items.headOption
+                .map(i => toAggregateMap(i.datapoints))
+                .getOrElse(Map.empty)
+          }
+      }
+
+  private def toAggregateMap(
+      aggregateDataPoints: Seq[AggregateDataPoint]
+  ): Map[String, Seq[DataPoint]] =
+    Map(
+      "average" ->
+        aggregateDataPoints.flatMap(p => p.average.toList.map(v => DataPoint(p.timestamp, v))),
+      "max" ->
+        aggregateDataPoints.flatMap(p => p.max.toList.map(v => DataPoint(p.timestamp, v))),
+      "min" ->
+        aggregateDataPoints.flatMap(p => p.min.toList.map(v => DataPoint(p.timestamp, v))),
+      "count" ->
+        aggregateDataPoints.flatMap(p => p.count.toList.map(v => DataPoint(p.timestamp, v))),
+      "sum" ->
+        aggregateDataPoints.flatMap(p => p.sum.toList.map(v => DataPoint(p.timestamp, v))),
+      "interpolation" ->
+        aggregateDataPoints.flatMap(
+          p => p.interpolation.toList.map(v => DataPoint(p.timestamp, v))
+        ),
+      "stepInterpolation" ->
+        aggregateDataPoints.flatMap(
+          p => p.stepInterpolation.toList.map(v => DataPoint(p.timestamp, v))
+        ),
+      "continuousVariance" ->
+        aggregateDataPoints.flatMap(
+          p => p.continuousVariance.toList.map(v => DataPoint(p.timestamp, v))
+        ),
+      "discreteVariance" ->
+        aggregateDataPoints.flatMap(
+          p => p.discreteVariance.toList.map(v => DataPoint(p.timestamp, v))
+        ),
+      "totalVariation" ->
+        aggregateDataPoints.flatMap(
+          p => p.totalVariation.toList.map(v => DataPoint(p.timestamp, v))
+        )
+    ).filter(kv => kv._2.nonEmpty)
 
   def queryStringsById(
       id: Long,
@@ -180,6 +291,7 @@ object DataPointsResourceV1 {
   implicit val dataPointsByIdResponseDecoder: Decoder[DataPointsByIdResponse] = deriveDecoder
   implicit val dataPointsByIdResponseItemsDecoder: Decoder[Items[DataPointsByIdResponse]] =
     deriveDecoder
+
   // WartRemover gets confused by circe-derivation
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val stringDataPointDecoder: Decoder[StringDataPoint] = deriveDecoder
@@ -197,4 +309,21 @@ object DataPointsResourceV1 {
   implicit val deleteRangeByIdItemsEncoder: Encoder[Items[DeleteRangeById]] = deriveEncoder
   implicit val queryRangeByIdEncoder: Encoder[QueryRangeById] = deriveEncoder
   implicit val queryRangeByIdItemsEncoder: Encoder[Items[QueryRangeById]] = deriveEncoder
+  @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
+  implicit val aggregateDataPointDecoder: Decoder[AggregateDataPoint] = deriveDecoder
+  implicit val aggregateDataPointEncoder: Encoder[AggregateDataPoint] = deriveEncoder
+  implicit val queryAggregatesByIdResponseEncoder: Encoder[QueryAggregatesByIdResponse] =
+    deriveEncoder
+  implicit val queryAggregatesByIdResponseDecoder: Decoder[QueryAggregatesByIdResponse] =
+    deriveDecoder
+  implicit val queryAggregatesByIdEncoder: Encoder[QueryAggregatesById] = deriveEncoder
+  implicit val queryAggregatesByExternalIdEncoder: Encoder[QueryAggregatesByExternalId] =
+    deriveEncoder
+  implicit val queryAggregatesByIdItemsEncoder: Encoder[Items[QueryAggregatesById]] = deriveEncoder
+  implicit val queryAggregatesByExternalIdItemsEncoder
+      : Encoder[Items[QueryAggregatesByExternalId]] = deriveEncoder
+  implicit val queryAggregatesByIdResponseItemsDecoder
+      : Decoder[Items[QueryAggregatesByIdResponse]] =
+    deriveDecoder
+
 }

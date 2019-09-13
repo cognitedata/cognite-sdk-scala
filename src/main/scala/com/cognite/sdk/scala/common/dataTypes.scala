@@ -45,6 +45,20 @@ final case class DataPoint(
     value: Double
 )
 
+final case class AggregateDataPoint(
+    timestamp: Instant,
+    average: Option[Double],
+    max: Option[Double],
+    min: Option[Double],
+    count: Option[Double],
+    sum: Option[Double],
+    interpolation: Option[Double],
+    stepInterpolation: Option[Double],
+    totalVariation: Option[Double],
+    continuousVariance: Option[Double],
+    discreteVariance: Option[Double]
+)
+
 final case class StringDataPoint(
     timestamp: Instant,
     value: String

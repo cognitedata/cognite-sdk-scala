@@ -12,4 +12,18 @@ trait DataPointsResource[F[_], I] {
   ): F[Seq[StringDataPoint]]
   def getLatestDataPointById(id: I): F[Option[DataPoint]]
   def getLatestStringDataPointById(id: I): F[Option[StringDataPoint]]
+  def queryAggregatesById(
+      id: Long,
+      inclusiveStart: Long,
+      exclusiveEnd: Long,
+      granularity: String,
+      aggregateFunctions: Seq[String]
+  ): F[Map[String, Seq[DataPoint]]]
+  def queryAggregatesByExternalId(
+      externalId: String,
+      inclusiveStart: Long,
+      exclusiveStart: Long,
+      granularity: String,
+      aggregateFunctions: Seq[String]
+  ): F[Map[String, Seq[DataPoint]]]
 }
