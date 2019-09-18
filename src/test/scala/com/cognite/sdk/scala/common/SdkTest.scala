@@ -29,12 +29,26 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
 }
 
 abstract class SdkTest extends FlatSpec with Matchers {
-  // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
-  val client = new GenericClient("scala-sdk-test")(implicitly[Monad[Id]], auth, sttpBackend)
+  val client = new GenericClient("scala-sdk-test")(
+    implicitly[Monad[Id]],
+    auth,
+    // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
+    sttpBackend
+  )
+
+  val greenfieldClient = new GenericClient(
+    "cdp-spark-datasource-test", "https://greenfield.cognitedata.com")(
+    implicitly[Monad[Id]],
+    greenfieldAuth,
+    sttpBackend
+  )
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
 
   private lazy val apiKey = Option(System.getenv("TEST_API_KEY_READ"))
     .getOrElse(throw new RuntimeException("TEST_API_KEY_READ not set"))
   implicit lazy val auth: Auth = ApiKeyAuth(apiKey)
+  private lazy val greenfieldApiKey = Option(System.getenv("TEST_API_KEY_GREENFIELD"))
+    .getOrElse(throw new RuntimeException("TEST_API_KEY_GREENFIELD not set"))
+  implicit lazy val greenfieldAuth: Auth = ApiKeyAuth(greenfieldApiKey)
 }

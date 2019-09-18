@@ -52,17 +52,21 @@ final case class RequestSession[F[_]: Monad](
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
-class GenericClient[F[_]: Monad, _](applicationName: String)(
+class GenericClient[F[_]: Monad, _](
+    applicationName: String,
+    baseUri: String =
+      Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com")
+)(
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
 ) {
+
   val project: String = auth.project.getOrElse {
     val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
       options = SttpBackendOptions.connectionTimeout(90.seconds)
     )
-
     val loginStatus = new Login(
-      RequestSession(applicationName, uri"https://api.cognitedata.com", sttpBackend, auth)
+      RequestSession(applicationName, uri"$baseUri", sttpBackend, auth)
     ).status()
 
     if (loginStatus.project.trim.isEmpty) {
@@ -75,11 +79,11 @@ class GenericClient[F[_]: Monad, _](applicationName: String)(
   val requestSession =
     RequestSession(
       applicationName,
-      uri"https://api.cognitedata.com/api/v1/projects/$project",
+      uri"$baseUri/api/v1/projects/$project",
       sttpBackend,
       auth
     )
-  val login = new Login[F](requestSession.copy(baseUri = uri"https://api.cognitedata.com"))
+  val login = new Login[F](requestSession.copy(baseUri = uri"$baseUri"))
   val assets = new Assets[F](requestSession)
   val events = new Events[F](requestSession)
   val files = new Files[F](requestSession)
@@ -100,7 +104,11 @@ class GenericClient[F[_]: Monad, _](applicationName: String)(
     new ThreeDAssetMappings(requestSession, modelId, revisionId)
 }
 
-final case class Client(applicationName: String)(
+final case class Client(
+    applicationName: String,
+    baseUri: String =
+      Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com")
+)(
     implicit auth: Auth,
     sttpBackend: SttpBackend[Id, Nothing]
-) extends GenericClient[Id, Nothing](applicationName)
+) extends GenericClient[Id, Nothing](applicationName, baseUri)
