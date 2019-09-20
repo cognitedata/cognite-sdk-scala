@@ -30,29 +30,29 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         Sequence(
           name = Some("scala-sdk-write-example-1"),
           columns = NonEmptyList.of(
-            SequenceColumn(name = Some("col1"), externalId = Some("ext1"), valueType = "DOUBLE"),
-            SequenceColumn(name = Some("col2"), externalId = Some("ext2"))
+            SequenceColumn(name = Some("col1"), externalId = "ext1", valueType = "DOUBLE"),
+            SequenceColumn(name = Some("col2"), externalId = "ext2")
           )
         ),
         Sequence(
           name = Some("scala-sdk-write-example-2"),
-          columns = NonEmptyList.of(SequenceColumn(name = Some("col1"), valueType = "LONG"))
+          columns = NonEmptyList.of(SequenceColumn(name = Some("col1"), externalId = "ext1", valueType = "LONG"))
         )
       ),
       Seq(
         SequenceCreate(
           name = Some("scala-sdk-create-example-1"),
           columns = NonEmptyList.of(
-            SequenceColumnCreate(name = Some("string-column"), externalId = Some("ext2"))
+            SequenceColumnCreate(name = Some("string-column"), externalId = "ext2")
           )
         ),
         SequenceCreate(
           name = Some("scala-sdk-create-example-2"),
           columns = NonEmptyList.of(
-            SequenceColumnCreate(name = Some("string-column"), externalId = Some("string1")),
+            SequenceColumnCreate(name = Some("string-column"), externalId = "string1"),
             SequenceColumnCreate(
               name = Some("long-column"),
-              externalId = Some("long1"),
+              externalId = "long1",
               valueType = "LONG"
             )
           )
@@ -71,25 +71,25 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           name = Some("scala-sdk-write-external-example-1"),
           externalId = Some(shortRandom()),
           columns =
-            NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some("ext2")))
+            NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "ext2"))
         ),
         Sequence(
           name = Some("scala-sdk-write-external-example-2"),
           externalId = Some(shortRandom()),
           columns =
-            NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some("ext2")))
+            NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "ext2"))
         )
       ),
       Seq(
         SequenceCreate(
           name = Some("scala-sdk-create-external-example-1"),
           externalId = Some(shortRandom()),
-          columns = NonEmptyList.of(SequenceColumnCreate(name = Some("string-column")))
+          columns = NonEmptyList.of(SequenceColumnCreate(name = Some("string-column"), externalId = "string-column"))
         ),
         SequenceCreate(
           name = Some("scala-sdk-create-external-example-2"),
           externalId = Some(shortRandom()),
-          columns = NonEmptyList.of(SequenceColumnCreate(name = Some("string-column")))
+          columns = NonEmptyList.of(SequenceColumnCreate(name = Some("string-column"), externalId = "string-column"))
         )
       ),
       externalIdsThatDoNotExist,
@@ -101,23 +101,23 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     Sequence(
       name = Some("scala-sdk-write-example-1"),
       description = Some("description-1"),
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column")))
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "string-column"))
     ),
     Sequence(
       name = Some("scala-sdk-write-example-2"),
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column")))
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "string-column"))
     )
   )
   private val sequencesUpdates = Seq(
     Sequence(
       name = Some("scala-sdk-write-example-1-1"),
       description = Some(null), // scalastyle:ignore null
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column")))
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "string-column"))
     ),
     Sequence(
       name = Some("scala-sdk-write-example-2-1"),
       description = Some("scala-sdk-write-example-2"),
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column")))
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "string-column"))
     )
   )
   (it should behave).like(

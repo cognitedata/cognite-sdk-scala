@@ -9,8 +9,6 @@ import com.softwaremill.sttp.circe._
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
-class sequenceData {}
-
 class SequenceRows[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUri {
@@ -18,17 +16,17 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
   override val baseUri = uri"${requestSession.baseUri}/sequences/data"
 
   implicit val errorOrItemsSequenceRowsResponseDecoder
-      : Decoder[Either[CdpApiError, Items[SequenceRowsResponse]]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Items[SequenceRowsResponse]]
+      : Decoder[Either[CdpApiError, SequenceRowsResponse]] =
+    EitherDecoder.eitherDecoder[CdpApiError, SequenceRowsResponse]
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
 
-  def insertById(id: Long, columns: Seq[Long], rows: Seq[SequenceRow]): F[Unit] =
+  def insertById(id: Long, columns: Seq[String], rows: Seq[SequenceRow]): F[Unit] =
     requestSession
       .sendCdf { request =>
         request
           .post(baseUri)
-          .body(Items(Seq(SequenceRowsInsertById(id, columns.map(CogniteId), rows))))
+          .body(Items(Seq(SequenceRowsInsertById(id, columns, rows))))
           .response(asJson[Either[CdpApiError, Unit]])
           .mapResponse {
             case Left(value) => throw value.error
@@ -48,7 +46,7 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
           .post(baseUri)
           .body(
             Items(
-              Seq(SequenceRowsInsertByExternalId(externalId, columns.map(CogniteExternalId), rows))
+              Seq(SequenceRowsInsertByExternalId(externalId, columns, rows))
             )
           )
           .response(asJson[Either[CdpApiError, Unit]])
@@ -130,16 +128,12 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
       .sendCdf { request =>
         request
           .post(uri"$baseUri/list")
-          .body(Items(Seq(SequenceRowsQueryById(id, inclusiveStart, exclusiveEnd, limit, columns))))
-          .response(asJson[Either[CdpApiError, Items[SequenceRowsResponse]]])
+          .body(SequenceRowsQueryById(id, inclusiveStart, exclusiveEnd, limit, columns))
+          .response(asJson[Either[CdpApiError, SequenceRowsResponse]])
           .mapResponse {
             case Left(value) => throw value.error
             case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
-            case Right(Right(value)) =>
-              value.items.headOption match {
-                case Some(items) => (items.columns.toList, items.rows)
-                case None => (Seq.empty, Seq.empty)
-              }
+            case Right(Right(value)) => (value.columns.toList, value.rows)
           }
       }
 
@@ -203,27 +197,19 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
         request
           .post(uri"$baseUri/list")
           .body(
-            Items(
-              Seq(
-                SequenceRowsQueryByExternalId(
-                  externalId,
-                  inclusiveStart,
-                  exclusiveEnd,
-                  limit,
-                  columns
-                )
-              )
+            SequenceRowsQueryByExternalId(
+              externalId,
+              inclusiveStart,
+              exclusiveEnd,
+              limit,
+              columns
             )
           )
-          .response(asJson[Either[CdpApiError, Items[SequenceRowsResponse]]])
+          .response(asJson[Either[CdpApiError, SequenceRowsResponse]])
           .mapResponse {
             case Left(value) => throw value.error
             case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
-            case Right(Right(value)) =>
-              value.items.headOption match {
-                case Some(items) => (items.columns.toList, items.rows)
-                case None => (Seq.empty, Seq.empty)
-              }
+            case Right(Right(value)) => (value.columns.toList, value.rows)
           }
       }
 }
@@ -263,6 +249,4 @@ object SequenceRows {
     Array("org.wartremover.warts.Product", "org.wartremover.warts.Serializable")
   )
   implicit val sequenceRowsResponseDecoder: Decoder[SequenceRowsResponse] = deriveDecoder
-  implicit val sequenceRowsResponseItemsDecoder: Decoder[Items[SequenceRowsResponse]] =
-    deriveDecoder
 }
