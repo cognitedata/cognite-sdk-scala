@@ -14,8 +14,8 @@ class SequenceRowsTest extends SdkTest with ParallelTestExecution {
         externalId = Some(externalId),
         columns =
           NonEmptyList.of(
-            SequenceColumn(name = Some("string-column"), externalId = Some("ext1")),
-            SequenceColumn(name = Some("long-column"), externalId = Some("ext2"), valueType = "LONG")
+            SequenceColumn(name = Some("string-column"), externalId = "ext1"),
+            SequenceColumn(name = Some("long-column"), externalId = "ext2", valueType = "LONG")
           )
       )
     )
@@ -34,7 +34,7 @@ class SequenceRowsTest extends SdkTest with ParallelTestExecution {
   private val maxRow = testRows.map(_.rowNumber).max
 
   it should "be possible to insert, update, and delete sequence rows" in withSequenceId { sequence =>
-    client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.id).toList, testRows)
+    client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.externalId).toList, testRows)
     Thread.sleep(2000)
     val (_, rows) = client.sequenceRows.queryById(
       sequence.id, minRow, maxRow + 1)
@@ -43,7 +43,7 @@ class SequenceRowsTest extends SdkTest with ParallelTestExecution {
     val updateRows = testRows.map { row =>
       row.copy(values = row.values.updated(0, row.values.head.mapString(s => s"${s}-updated")))
     }
-    client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.id).toList, updateRows)
+    client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.externalId).toList, updateRows)
     Thread.sleep(2000)
     val (_, rowsAfterUpdate) = client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)
     rowsAfterUpdate should contain theSameElementsAs updateRows
@@ -61,7 +61,7 @@ class SequenceRowsTest extends SdkTest with ParallelTestExecution {
 
   it should "be possible to insert, update and delete sequence rows using externalId" in withSequenceId { sequence =>
     val externalId = sequence.externalId.get
-    client.sequenceRows.insertByExternalId(externalId, sequence.columns.map(_.externalId.get).toList, testRows)
+    client.sequenceRows.insertByExternalId(externalId, sequence.columns.map(_.externalId).toList, testRows)
     Thread.sleep(2000)
     val (_, rows) = client.sequenceRows.queryByExternalId(externalId, minRow, maxRow + 1)
     rows should contain theSameElementsAs testRows

@@ -6,9 +6,8 @@ import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
 
 final case class SequenceColumn(
-    id: Long = 0,
     name: Option[String] = None,
-    externalId: Option[String] = None,
+    externalId: String,
     description: Option[String] = None,
     // TODO: Turn this into an enum.
     //       See https://github.com/circe/circe-derivation/issues/8
@@ -21,7 +20,7 @@ final case class SequenceColumn(
 
 final case class SequenceColumnCreate(
     name: Option[String] = None,
-    externalId: Option[String] = None,
+    externalId: String,
     description: Option[String] = None,
     // TODO: Turn this into an enum.
     //       See https://github.com/circe/circe-derivation/issues/8

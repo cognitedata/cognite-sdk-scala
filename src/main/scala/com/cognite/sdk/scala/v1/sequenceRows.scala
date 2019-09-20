@@ -1,14 +1,13 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.CogniteId
 import io.circe.Json
 
-final case class SequenceColumnId(id: Long, externalId: Option[String])
+final case class SequenceColumnId(externalId: String)
 final case class SequenceRow(rowNumber: Long, values: Seq[Json])
-final case class SequenceRowsInsertById(id: Long, columns: Seq[CogniteId], rows: Seq[SequenceRow])
+final case class SequenceRowsInsertById(id: Long, columns: Seq[String], rows: Seq[SequenceRow])
 final case class SequenceRowsInsertByExternalId(
     externalId: String,
-    columns: Seq[CogniteExternalId],
+    columns: Seq[String],
     rows: Seq[SequenceRow]
 )
 final case class SequenceRowsDeleteById(id: Long, rows: Seq[Long])
