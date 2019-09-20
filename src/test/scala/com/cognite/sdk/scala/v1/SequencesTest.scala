@@ -162,7 +162,7 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           filter = Some(
             SequenceFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1566911825370L)))
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1568975105000L)))
             )
           )
         )
@@ -173,13 +173,13 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         filter = Some(
           SequenceFilter(
             createdTime = Some(
-              TimeRange(Instant.ofEpochMilli(1535964900000L), Instant.ofEpochMilli(1566979600295L))
+              TimeRange(Instant.ofEpochMilli(1535964900000L), Instant.ofEpochMilli(1568979128000L))
             )
           )
         )
       )
     )
-    assert(createdTimeSearchResults2.length == 8)
+    assert(createdTimeSearchResults2.length == 5)
 
     val externalIdPrefixSearchResults = client.sequences.search(
       SequenceQuery(
@@ -187,26 +187,25 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           SequenceFilter(
             externalIdPrefix = Some("test"),
             createdTime =
-              Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1566979600295L)))
+              Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1568980123000L)))
           )
         )
       )
     )
     assert(externalIdPrefixSearchResults.length == 2)
 
-    val nameSearchResults = client.sequences
-      .search(
-        SequenceQuery(
-          filter = Some(
-            SequenceFilter(
-              externalIdPrefix = Some("test"),
-              createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1566979600295L)))
-            )
-          ),
-          search = Some(SequenceSearch(name = Some("relevant")))
-        )
+    val nameSearchResults = client.sequences.search(
+      SequenceQuery(
+        filter = Some(
+          SequenceFilter(
+            externalIdPrefix = Some("test"),
+            createdTime =
+              Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1568980123000L)))
+          )
+        ),
+        search = Some(SequenceSearch(name = Some("relevant")))
       )
+    )
     assert(nameSearchResults.length == 1)
 
     val descriptionSearchResults = client.sequences.search(
@@ -214,11 +213,11 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
         filter = Some(
           SequenceFilter(
             createdTime = Some(
-              TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1566979600295L))
+              TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1568979128000L))
             )
           )
         ),
-        search = Some(SequenceSearch(description = Some("Optional")))
+        search = Some(SequenceSearch(description = Some("description")))
       )
     )
     assert(descriptionSearchResults.length == 1)
@@ -230,7 +229,7 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           SequenceFilter(
             externalIdPrefix = Some("test"),
             createdTime =
-              Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1566979600295L)))
+              Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1568980123000L)))
           )
         )
       )
