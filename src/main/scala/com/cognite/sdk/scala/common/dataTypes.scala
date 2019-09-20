@@ -16,7 +16,7 @@ final case class CdpApiErrorPayload(
     message: String,
     missing: Option[Seq[JsonObject]],
     duplicated: Option[Seq[JsonObject]],
-    missingFields: Option[Seq[JsonObject]]
+    missingFields: Option[Seq[String]]
 )
 final case class CdpApiError(error: CdpApiErrorPayload) {
   def asException(url: Uri): CdpApiException =
@@ -34,7 +34,8 @@ final case class CdpApiException(
     code: Int,
     message: String,
     missing: Option[Seq[JsonObject]],
-    duplicated: Option[Seq[JsonObject]]
+    duplicated: Option[Seq[JsonObject]],
+    missingFields: Option[Seq[String]]
 ) extends Throwable(s"Request to ${url.toString()} failed with status ${code.toString}: $message")
 
 final case class CogniteId(id: Long)
