@@ -22,11 +22,12 @@ class SequencesResource[F[_]](val requestSession: RequestSession[F])
 
   override val baseUri = uri"${requestSession.baseUri}/sequences"
 
-  override def readWithCursor(
+  override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[Sequence]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[Sequence]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)

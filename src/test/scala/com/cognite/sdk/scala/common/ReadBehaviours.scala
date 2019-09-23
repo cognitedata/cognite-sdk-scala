@@ -24,6 +24,46 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
     }
   }
 
+  def partitionedReadable[R, InternalId, PrimitiveId](readable: PartitionedReadable[R, Id]): Unit = {
+    it should "read items with partitions" in {
+      val partitionStreams = readable.listPartitions(2)
+      val partitionStreams10 = readable.listPartitions(10)
+      partitionStreams should have length 2
+      partitionStreams10 should have length 10
+      val partition1Items = partitionStreams.head.take(2).compile.toList
+      val partition2Items = partitionStreams(1).take(2).compile.toList
+      partition1Items.size should be <= 2
+      partition2Items.size should be <= 2
+      partition1Items.headOption should not be (partition2Items.headOption)
+    }
+
+    it should "read item partitions with limit" in {
+      val partitionStreams = readable.listPartitionsWithLimit(2, 2)
+      partitionStreams should have length 2
+      val partition1Items = partitionStreams.head.compile.toList
+      val partition2Items = partitionStreams(1).compile.toList
+      partition1Items.size should be <= 2
+      partition2Items.size should be <= 2
+    }
+
+    it should "read all items using partitions" in {
+      val first1Length = readable.list().take(1).compile.toList.length
+      first1Length should be(1)
+      val first2Length = readable.listWithLimit(2).compile.toList.length
+      first2Length should be(2)
+      val allLength = readable.listWithLimit(3).compile.toList.length
+      allLength should be(3)
+      val unlimitedLength = readable.list().map(_ => 1).compile.toList.length
+      val partitionsLength = readable.listPartitions(40)
+        .reduce(_ ++ _)
+        .map(_ => 1)
+        .compile
+        .toList
+        .length
+      assert(unlimitedLength == partitionsLength)
+    }
+  }
+
   // scalastyle:off
   def readableWithRetrieve[R <: WithId[Long], W](
       readable: Readable[R, Id] with RetrieveByIds[R, Id],

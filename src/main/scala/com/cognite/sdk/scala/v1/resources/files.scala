@@ -77,11 +77,12 @@ class Files[F[_]](val requestSession: RequestSession[F])
     uploadWithName(inputStream, file.getName())
   }
 
-  override def readWithCursor(
+  override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[File]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[File]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
@@ -98,12 +99,13 @@ class Files[F[_]](val requestSession: RequestSession[F])
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUri, externalIds)
 
-  override def filterWithCursor(
+  private[sdk] def filterWithCursor(
       filter: FilesFilter,
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[File]] =
-    Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit)
+    Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit, None)
 
   override def search(searchQuery: FilesQuery): F[Seq[File]] =
     Search.search(requestSession, baseUri, searchQuery)

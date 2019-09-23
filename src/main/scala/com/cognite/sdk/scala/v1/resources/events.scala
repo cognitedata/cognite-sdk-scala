@@ -10,23 +10,24 @@ import io.circe.derivation.{deriveDecoder, deriveEncoder}
 
 class Events[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with Readable[Event, F]
+    with PartitionedReadable[Event, F]
     with RetrieveByIds[Event, F]
     with RetrieveByExternalIds[Event, F]
     with Create[Event, EventCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
-    with Filter[Event, EventsFilter, F]
+    with PartitionedFilter[Event, EventsFilter, F]
     with Search[Event, EventsQuery, F]
     with Update[Event, EventUpdate, F] {
   import Events._
   override val baseUri = uri"${requestSession.baseUri}/events"
 
-  override def readWithCursor(
+  override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[Event]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, partition)
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[Event]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
@@ -46,12 +47,13 @@ class Events[F[_]](val requestSession: RequestSession[F])
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUri, externalIds)
 
-  override def filterWithCursor(
+  private[sdk] def filterWithCursor(
       filter: EventsFilter,
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[Event]] =
-    Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit)
+    Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit, partition)
 
   override def search(searchQuery: EventsQuery): F[Seq[Event]] =
     Search.search(requestSession, baseUri, searchQuery)

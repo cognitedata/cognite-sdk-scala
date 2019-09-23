@@ -38,11 +38,12 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
       }
   }
 
-  override def readWithCursor(
+  override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[ThreeDModel]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDModel]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
@@ -107,11 +108,12 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
       }
   }
 
-  override def readWithCursor(
+  override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[ThreeDRevision]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDRevision]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
@@ -156,11 +158,12 @@ class ThreeDAssetMappings[F[_]](
   override val baseUri =
     uri"${requestSession.baseUri}/3d/models/$modelId/revisions/$revisionId/mappings"
 
-  override def readWithCursor(
+  override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[ThreeDAssetMapping]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
 }
 
 object ThreeDAssetMappings {

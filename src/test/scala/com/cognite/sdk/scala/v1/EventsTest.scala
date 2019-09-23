@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
+import fs2._
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
 
 class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
@@ -9,6 +9,8 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
   it should behave like readable(client.events)
+
+  it should behave like partitionedReadable(client.events)
 
   it should behave like readableWithRetrieve(client.events, idsThatDoNotExist, supportsMissingAndThrown = true)
 
@@ -76,18 +78,30 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       .filter(
         EventsFilter(
           createdTime = Some(
-            TimeRange(Instant.ofEpochMilli(1541510008838L), Instant.ofEpochMilli(1541515508838L))
+            TimeRange(Instant.ofEpochMilli(1500510008838L), Instant.ofEpochMilli(1550300000000L))
           )
         )
       )
       .compile
       .toList
-    assert(createdTimeFilterResults.length == 11)
+    assert(createdTimeFilterResults.length == 3)
+    val createdTimeFilterPartitionsResults = client.events
+      .filterPartitions(
+        EventsFilter(
+          createdTime = Some(
+            TimeRange(Instant.ofEpochMilli(1500510008838L), Instant.ofEpochMilli(1550300000000L))
+          )
+        ), 20
+      )
+      .fold(Stream.empty)(_ ++ _)
+      .compile
+      .toList
+    assert(createdTimeFilterPartitionsResults.length == 3)
     val createdTimeFilterResultsWithLimit = client.events
       .filterWithLimit(
         EventsFilter(
           createdTime = Some(
-            TimeRange(Instant.ofEpochMilli(1541510008838L), Instant.ofEpochMilli(1541515508838L))
+            TimeRange(Instant.ofEpochMilli(1500510008838L), Instant.ofEpochMilli(1550300000000L))
           )
         ),
         1
@@ -105,15 +119,15 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
             EventsFilter(
               createdTime = Some(
                 TimeRange(
-                  Instant.ofEpochMilli(1541510008838L),
-                  Instant.ofEpochMilli(1541515508838L)
+                  Instant.ofEpochMilli(1500510008838L),
+                  Instant.ofEpochMilli(1550300000000L)
                 )
               )
             )
           )
         )
       )
-    assert(createdTimeSearchResults.length == 11)
+    assert(createdTimeSearchResults.length == 3)
     val subtypeCreatedTimeSearchResults = client.events
       .search(
         EventsQuery(
@@ -121,12 +135,12 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
             EventsFilter(
               createdTime = Some(
                 TimeRange(
-                  Instant.ofEpochMilli(1541510008838L),
-                  Instant.ofEpochMilli(1541515508838L)
+                  Instant.ofEpochMilli(1500510008838L),
+                  Instant.ofEpochMilli(1550300000000L)
                 )
               ),
-              `type` = Some("Workorder"),
-              subtype = Some("Foo")
+              `type` = Some("test"),
+              subtype = Some("test1")
             )
           )
         )
@@ -138,42 +152,42 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1541515508838L)))
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1549011100999L)))
             )
           ),
           search = Some(
             EventsSearch(
-              description = Some("description")
+              description = Some("wjoel")
             )
           )
         )
       )
-    assert(searchResults.length == 3)
+    assert(searchResults.length == 1)
     val searchResults2 = client.events
       .search(
         EventsQuery(
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1552395929193L)))
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1552395929199L)))
             )
           ),
           search = Some(
             EventsSearch(
-              description = Some("description")
+              description = Some("test event wjoel")
             )
           )
         )
       )
-    assert(searchResults2.length == 7)
+    assert(searchResults2.length == 2)
     val limitSearchResults = client.events
       .search(
         EventsQuery(
-          limit = 3,
+          limit = 1,
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1552395929193L)))
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1552395929199L)))
             )
           ),
           search = Some(
@@ -183,6 +197,6 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
           )
         )
       )
-    assert(limitSearchResults.length == 3)
+    assert(limitSearchResults.length == 1)
   }
 }
