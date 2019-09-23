@@ -1,5 +1,6 @@
 package com.cognite.sdk.scala.common
 
+import cats.effect.Concurrent
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
@@ -7,25 +8,40 @@ import fs2._
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.deriveEncoder
 
+// TODO: Verify that index and numPartitions are valid
+final case class Partition(index: Int = 1, numPartitions: Int = 1) {
+  override def toString: String = s"${index.toString}/${numPartitions.toString}"
+}
+
 trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
-  def readWithCursor(cursor: Option[String], limit: Option[Long]): F[ItemsWithCursor[R]]
+  private[sdk] def readWithCursor(
+      cursor: Option[String],
+      limit: Option[Long],
+      partition: Option[Partition]
+  ): F[ItemsWithCursor[R]]
 
   def readFromCursor(cursor: String): F[ItemsWithCursor[R]] =
-    readWithCursor(Some(cursor), None)
+    readWithCursor(Some(cursor), None, None)
 
-  def readFromCursorWithLimit(cursor: String, limit: Long): F[ItemsWithCursor[R]] =
-    readWithCursor(Some(cursor), Some(limit))
+  def readFromCursorWithLimit(
+      cursor: String,
+      limit: Long
+  ): F[ItemsWithCursor[R]] =
+    readWithCursor(Some(cursor), Some(limit), None)
 
-  def read(): F[ItemsWithCursor[R]] = readWithCursor(None, None)
+  def read(): F[ItemsWithCursor[R]] =
+    readWithCursor(None, None, None)
 
   def readWithLimit(limit: Long): F[ItemsWithCursor[R]] =
-    readWithCursor(None, Some(limit))
+    readWithCursor(None, Some(limit), None)
 
-  private def listWithNextCursor(
+  private[sdk] def listWithNextCursor(
       cursor: Option[String],
       limit: Option[Long]
   ): Stream[F, R] =
-    Readable.pullFromCursorWithLimit(cursor, limit, readWithCursor).stream
+    Readable
+      .pullFromCursorWithLimit(cursor, limit, None, readWithCursor)
+      .stream
 
   def listFromCursor(cursor: String): Stream[F, R] =
     listWithNextCursor(Some(cursor), None)
@@ -33,51 +49,95 @@ trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
   def listWithLimit(limit: Long): Stream[F, R] =
     listWithNextCursor(None, Some(limit))
 
-  def listFromCursorWithLimit(cursor: String, limit: Long): Stream[F, R] =
+  def listFromCursorWithLimit(
+      cursor: String,
+      limit: Long
+  ): Stream[F, R] =
     listWithNextCursor(Some(cursor), Some(limit))
 
-  def list(): Stream[F, R] = listWithNextCursor(None, None)
+  def list(): Stream[F, R] =
+    listWithNextCursor(None, None)
+}
+
+trait PartitionedReadable[R, F[_]] extends Readable[R, F] {
+  private def listPartitionsMaybeWithLimit(numPartitions: Int, limitPerPartition: Option[Long]) =
+    1.to(numPartitions).map { i =>
+      Readable
+        .pullFromCursorWithLimit(
+          None,
+          limitPerPartition,
+          Some(Partition(i, numPartitions)),
+          readWithCursor
+        )
+        .stream
+    }
+
+  def listPartitions(numPartitions: Int): Seq[Stream[F, R]] =
+    listPartitionsMaybeWithLimit(numPartitions, None)
+
+  def listPartitionsWithLimit(numPartitions: Int, limitPerPartition: Long): Seq[Stream[F, R]] =
+    listPartitionsMaybeWithLimit(numPartitions, Some(limitPerPartition))
+
+  def listParallel(numPartitions: Int)(implicit c: Concurrent[F]): Stream[F, R] =
+    listPartitions(numPartitions).fold(Stream.empty)(_.merge(_))
+
+  def listParallelWithLimit(numPartitions: Int, limitPerPartition: Long)(
+      implicit c: Concurrent[F]
+  ): Stream[F, R] =
+    listPartitionsWithLimit(numPartitions, limitPerPartition).fold(Stream.empty)(_.merge(_))
 }
 
 object Readable {
   @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-  private[common] def pullFromCursorWithLimit[F[_], R](
+  private[sdk] def pullFromCursorWithLimit[F[_], R](
       cursor: Option[String],
       limit: Option[Long],
-      get: (Option[String], Option[Long]) => F[ItemsWithCursor[R]]
+      partition: Option[Partition],
+      get: (Option[String], Option[Long], Option[Partition]) => F[ItemsWithCursor[R]]
   ): Pull[F, R, Unit] =
     if (limit.exists(_ <= 0)) {
       Pull.done
     } else {
-      Pull.eval(get(cursor, limit)).flatMap { items =>
+      Pull.eval(get(cursor, limit, partition)).flatMap { items =>
         Pull.output(Chunk.seq(items.items)) >>
           items.nextCursor
-            .map(s => pullFromCursorWithLimit(Some(s), limit.map(_ - items.items.size), get))
+            .map { s =>
+              pullFromCursorWithLimit(Some(s), limit.map(_ - items.items.size), partition, get)
+            }
             .getOrElse(Pull.done)
       }
     }
 
-  def readWithCursor[F[_], R](
+  private def uriWithCursorAndLimit(baseUri: Uri, cursor: Option[String], limit: Option[Long]) =
+    cursor
+      .fold(baseUri)(baseUri.param("cursor", _))
+      .param("limit", limit.getOrElse(Resource.defaultLimit).toString)
+
+  private[sdk] def readWithCursor[F[_], R](
       requestSession: RequestSession[F],
       baseUri: Uri,
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   )(
       implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]
   ): F[ItemsWithCursor[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
-    val uriWithCursor = cursor
-      .fold(baseUri)(baseUri.param("cursor", _))
-      .param("limit", limit.getOrElse(Resource.defaultLimit).toString)
+    val uriWithCursor = uriWithCursorAndLimit(baseUri, cursor, limit)
+    val uriWithCursorAndPartition = partition.fold(uriWithCursor) { p =>
+      uriWithCursor.param("partition", p.toString)
+    }
+
     requestSession
       .sendCdf { request =>
         request
-          .get(uriWithCursor)
+          .get(uriWithCursorAndPartition)
           .response(asJson[Either[CdpApiError, ItemsWithCursor[R]]])
           .mapResponse {
             case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uriWithCursor)
+            case Right(Left(cdpApiError)) =>
+              throw cdpApiError.asException(uriWithCursorAndPartition)
             case Right(Right(value)) => value
           }
       }

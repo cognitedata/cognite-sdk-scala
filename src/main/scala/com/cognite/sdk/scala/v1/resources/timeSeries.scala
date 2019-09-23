@@ -21,11 +21,12 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
   import TimeSeriesResource._
   override val baseUri = uri"${requestSession.baseUri}/timeseries"
 
-  override def readWithCursor(
+  override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[TimeSeries]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[TimeSeries]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)

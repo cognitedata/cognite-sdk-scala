@@ -9,6 +9,9 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
   it should behave like readable(client.assets)
+
+  it should behave like partitionedReadable(client.assets)
+
   it should behave like readableWithRetrieve(client.assets, idsThatDoNotExist, supportsMissingAndThrown = true)
 
   it should behave like readableWithRetrieveByExternalId(client.assets, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
@@ -71,6 +74,16 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       .toList
     assert(createdTimeFilterResults.length == 84)
 
+    val createdTimeFilterPartitionResults = client.assets
+      .filter(
+        AssetsFilter(
+          createdTime = Some(
+            TimeRange(Instant.ofEpochMilli(1560756441301L), Instant.ofEpochMilli(1560756445000L))))
+      )
+      .compile
+      .toList
+    assert(createdTimeFilterPartitionResults.length == 84)
+
     val createdTimeFilterResultsWithLimit = client.assets
       .filterWithLimit(
         AssetsFilter(
@@ -81,6 +94,7 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       .compile
       .toList
     assert(createdTimeFilterResultsWithLimit.length == 10)
+
   }
 
   it should "support search" in {

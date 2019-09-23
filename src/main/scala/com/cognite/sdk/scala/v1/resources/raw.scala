@@ -39,11 +39,12 @@ class RawDatabases[F[_]](val requestSession: RequestSession[F])
   import RawDatabases._
   override val baseUri = uri"${requestSession.baseUri}/raw/dbs"
 
-  override def readWithCursor(
+  override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[RawDatabase]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
 
   override def createItems(items: Items[RawDatabase]): F[Seq[RawDatabase]] =
     Create.createItems[F, RawDatabase, RawDatabase](requestSession, baseUri, items)
@@ -72,11 +73,12 @@ class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
   override val baseUri =
     uri"${requestSession.baseUri}/raw/dbs/$database/tables"
 
-  override def readWithCursor(
+  override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[RawTable]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
 
   override def createItems(items: Items[RawTable]): F[Seq[RawTable]] =
     Create.createItems[F, RawTable, RawTable](requestSession, baseUri, items)
@@ -123,11 +125,12 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       }
   }
 
-  override def readWithCursor(
+  override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Long],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[RawRow]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit)
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
 
   override def deleteByIds(ids: Seq[String]): F[Unit] =
     RawResource.deleteByIds(requestSession, baseUri, ids.map(RawRowKey))
