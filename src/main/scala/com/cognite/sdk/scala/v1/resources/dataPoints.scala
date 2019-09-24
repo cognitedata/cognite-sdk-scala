@@ -221,7 +221,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
   //def deleteRangeByExternalId(start: Long, end: Long, externalId: String): F[Response[Unit]]
   def getLatestDataPointById(id: Long): F[Option[DataPoint]] =
     requestSession.map(
-      getLatestDataPointsByIds(Seq(id)),
+      getLatestDataPointsByIds(Seq(id)),g
       (idToLatest: Map[Long, Option[DataPoint]]) =>
         idToLatest.get(id) match {
           case Some(latest) => latest
