@@ -7,9 +7,9 @@ import org.scalatest.{FlatSpec, Matchers}
 
 trait DataPointsResourceBehaviors[I] extends Matchers { this: FlatSpec =>
   private val startTime = System.currentTimeMillis()
-  private val endTime = startTime + 20 * 1000
-  private val testDataPoints =
-    (startTime to endTime by 1000).map(t => DataPoint(Instant.ofEpochMilli(t), math.random))
+  private val endTime = startTime + 20*1000
+  private val testDataPoints = (startTime to endTime by 1000).map(t =>
+    DataPoint(Instant.ofEpochMilli(t), math.random))
 
   def withTimeSeriesId(testCode: I => Any): Unit
 

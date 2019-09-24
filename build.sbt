@@ -1,4 +1,5 @@
 import wartremover.Wart
+import sbt.project
 
 val scala213 = "2.13.0"
 val scala212 = "2.12.9"
@@ -8,19 +9,19 @@ val supportedScalaVersions = List(scala212, scala213, scala211)
 val sttpVersion = "1.6.3"
 val circeVersion: Option[(Long, Long)] => String = {
   case Some((2, 13)) => "0.12.0-M4"
-  case _             => "0.11.1"
+  case _ => "0.11.1"
 }
 val circeDerivationVersion: Option[(Long, Long)] => String = {
   case Some((2, 13)) => "0.12.0-M4"
-  case _             => "0.11.0-M1"
+  case _ => "0.11.0-M1"
 }
 val catsEffectVersion: Option[(Long, Long)] => String = {
   case Some((2, 13)) => "2.0.0-M4"
-  case _             => "1.3.1"
+  case _ => "1.3.1"
 }
 val fs2Version: Option[(Long, Long)] => String = {
   case Some((2, 13)) => "1.1.0-M1"
-  case _             => "1.0.5"
+  case _ => "1.0.5"
 }
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
@@ -76,19 +77,26 @@ lazy val commonSettings = Seq(
           Wart.ImplicitParameter,
           Wart.ToString
         )
-    })
+    }),
+  wartremoverExcluded += baseDirectory.value / "target" / "protobuf-generated"
 )
+
+PB.targets in Compile := Seq(
+  scalapb.gen() -> (target.value / "protobuf-generated")
+)
+managedSourceDirectories in Compile += target.value / "protobuf-generated"
 
 lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
       "io.scalaland" %% "chimney" % "0.3.2",
+      "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
       "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value))
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value))
   )
-  .enablePlugins(BuildInfoPlugin).
-  settings(
+  .enablePlugins(BuildInfoPlugin)
+  .settings(
     buildInfoKeys := Seq[BuildInfoKey](organization, version, organizationName),
     buildInfoPackage := "BuildInfo"
   )
@@ -102,17 +110,16 @@ val sttpDeps = Seq(
   "com.softwaremill.sttp" %% "circe" % sttpVersion
 )
 
-def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] = {
+def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
   Seq(
     "io.circe" %% "circe-core" % circeVersion(scalaVersion),
     "io.circe" %% "circe-derivation" % circeDerivationVersion(scalaVersion),
     "io.circe" %% "circe-parser" % circeVersion(scalaVersion)
   )
-}
 
 //addCompilerPlugin(scalafixSemanticdb)
 scalacOptions ++= List(
-  "-Yrangepos", // required by SemanticDB compiler plugin
+  "-Yrangepos" // required by SemanticDB compiler plugin
   //"-Ywarn-unused-import" // required by `RemoveUnused` rule
 )
 
