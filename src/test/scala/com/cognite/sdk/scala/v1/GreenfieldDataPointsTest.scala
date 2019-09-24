@@ -1,7 +1,6 @@
 package com.cognite.sdk.scala.v1
 
 import java.util.UUID
-
 import com.cognite.sdk.scala.common.{DataPointsResourceBehaviors, SdkTest}
 
 class GreenfieldDataPointsTest extends SdkTest with DataPointsResourceBehaviors[Long] {

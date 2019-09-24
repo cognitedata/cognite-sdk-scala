@@ -1,17 +1,14 @@
 package com.cognite.sdk.scala.v1
 
 import java.util.UUID
-
 import com.cognite.sdk.scala.common.{CdpApiException, DataPointsResourceBehaviors, SdkTest}
 
 class DataPointsTest extends SdkTest with DataPointsResourceBehaviors[Long] {
+
   override def withTimeSeriesId(testCode: Long => Any): Unit = {
-    val timeSeriesId = client.timeSeries
-      .createFromRead(
+    val timeSeriesId = client.timeSeries.createFromRead(
         Seq(TimeSeries(name = s"data-points-test-${UUID.randomUUID().toString}"))
-      )
-      .head
-      .id
+    ).head.id
     try {
       val _ = testCode(timeSeriesId)
     } finally {
@@ -93,6 +90,38 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors[Long] {
         Seq.empty
       )
     }
-
   }
+
+  it should "correctly decode an error response as json instead of protobuf" in {
+    val missingId = 1345746392847240L
+    val caught = intercept[CdpApiException] {
+      client.dataPoints.queryById(
+        missingId,
+        0L,
+        1564272000000L
+      )
+    }
+    caught.missing.get.head.toMap("id").toString() shouldEqual missingId.toString
+
+    val sCaught = intercept[CdpApiException] {
+      client.dataPoints.queryById(
+        missingId,
+        0L,
+        1564272000000L
+      )
+    }
+    sCaught.missing.get.head.toMap("id").toString() shouldEqual missingId.toString
+
+    val aggregateCaught = intercept[CdpApiException] {
+      client.dataPoints.queryAggregatesById(
+        missingId,
+        0L,
+        1564272000000L,
+        "1d",
+        Seq("average")
+      )
+    }
+    aggregateCaught.missing.get.head.toMap("id").toString() shouldEqual missingId.toString
+  }
+
 }

@@ -35,13 +35,17 @@ final case class RequestSession[F[_]: Monad](
         .readTimeout(90.seconds)
     ).send()(sttpBackend, implicitly)
 
-  def sendCdf[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[R] =
+  def sendCdf[R](
+      r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing],
+      contentType: String = "application/json",
+      accept: String = "application/json"
+  ): F[R] =
     r(
       sttp
         .followRedirects(false)
         .auth(auth)
-        .contentType("application/json")
-        .header("accept", "application/json")
+        .contentType(contentType)
+        .header("accept", accept)
         .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
         .header("x-cdp-app", applicationName)
         .readTimeout(90.seconds)
