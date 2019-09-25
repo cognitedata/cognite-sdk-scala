@@ -78,10 +78,10 @@ trait PartitionedReadable[R, F[_]] extends Readable[R, F] {
   def listPartitionsWithLimit(numPartitions: Int, limitPerPartition: Long): Seq[Stream[F, R]] =
     listPartitionsMaybeWithLimit(numPartitions, Some(limitPerPartition))
 
-  def listParallel(numPartitions: Int)(implicit c: Concurrent[F]): Stream[F, R] =
+  def listConcurrently(numPartitions: Int)(implicit c: Concurrent[F]): Stream[F, R] =
     listPartitions(numPartitions).fold(Stream.empty)(_.merge(_))
 
-  def listParallelWithLimit(numPartitions: Int, limitPerPartition: Long)(
+  def listConcurrentlyWithLimit(numPartitions: Int, limitPerPartition: Long)(
       implicit c: Concurrent[F]
   ): Stream[F, R] =
     listPartitionsWithLimit(numPartitions, limitPerPartition).fold(Stream.empty)(_.merge(_))
