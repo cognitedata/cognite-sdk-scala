@@ -66,10 +66,10 @@ trait PartitionedFilter[R, Fi, F[_]] extends Filter[R, Fi, F] {
   ): Seq[Stream[F, R]] =
     filterPartitionsMaybeWithLimit(filter, numPartitions, Some(limitPerPartition))
 
-  def filterParallel(filter: Fi, numPartitions: Int)(implicit c: Concurrent[F]): Stream[F, R] =
+  def filterConcurrently(filter: Fi, numPartitions: Int)(implicit c: Concurrent[F]): Stream[F, R] =
     filterPartitions(filter, numPartitions).fold(Stream.empty)(_.merge(_))
 
-  def filterParallelWithLimit(filter: Fi, numPartitions: Int, limitPerPartition: Long)(
+  def filterConcurrentlyWithLimit(filter: Fi, numPartitions: Int, limitPerPartition: Long)(
       implicit c: Concurrent[F]
   ): Stream[F, R] =
     filterPartitionsWithLimit(filter, numPartitions, limitPerPartition).fold(Stream.empty)(
