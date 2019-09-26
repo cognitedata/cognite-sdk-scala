@@ -27,6 +27,19 @@ final case class Camera(
     position: Option[Array[Double]]
 )
 
+final case class BoundingBox(
+    max: Option[Array[Double]],
+    min: Option[Array[Double]]
+)
+
+final case class Properties(
+    properties: Map[String, PropertyCategory]
+)
+
+final case class PropertyCategory(
+    pairs: Map[String, String]
+)
+
 final case class ThreeDRevision(
     id: Long = 0,
     fileId: Long,
@@ -67,4 +80,22 @@ final case class ThreeDAssetMapping(
 final case class ThreeDAssetMappingCreate(
     nodeId: Long,
     assetId: Long
+)
+
+final case class ThreeDNode(
+    id: Long,
+    treeIndex: Long,
+    parentId: Option[Long],
+    depth: Long,
+    name: String,
+    subtreeSize: Long,
+    properties: Option[Properties],
+    boundingBox: BoundingBox
+)
+
+final case class ThreeDNodeFilter(
+    limit: Int,
+    depth: Int,
+    nodeId: Long,
+    properties: Properties
 )

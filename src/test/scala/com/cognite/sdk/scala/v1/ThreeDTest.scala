@@ -58,4 +58,16 @@ class ThreeDTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   ("ThreeDAssetMapping" should behave).like(
     readable(client.threeDAssetMappings(1367881358941595L, 7901013305364074L))
   )
+
+  ("ThreeDNode" should behave).like(
+    readable(client.threeDNodes(1367881358941595L, 7901013305364074L))
+  )
+
+  ("ThreeDNodeAncestor" should behave).like(
+    readable(
+      client
+        .threeDNodes(1367881358941595L, 7901013305364074L)
+        .ancestors(4655185550308983L)
+    )
+  )
 }
