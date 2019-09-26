@@ -204,6 +204,24 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
     })
   }
 
+  def queryByExternalId(externalId: String, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]] =
+    requestSession
+      .sendCdf { request =>
+        request
+          .post(uri"$baseUri/list")
+          .body(Items(Seq(QueryRangeByExternalId(externalId, inclusiveStart.toString, exclusiveEnd.toString))))
+          .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
+            case Right(Right(value)) =>
+              value.items.headOption match {
+                case Some(items) => items.datapoints
+                case None => Seq.empty
+              }
+          }
+      }
+
   def queryAggregatesById(
       id: Long,
       inclusiveStart: Long,
@@ -425,6 +443,8 @@ object DataPointsResourceV1 {
   implicit val deleteRangeByIdItemsEncoder: Encoder[Items[DeleteRangeById]] = deriveEncoder
   implicit val queryRangeByIdEncoder: Encoder[QueryRangeById] = deriveEncoder
   implicit val queryRangeByIdItemsEncoder: Encoder[Items[QueryRangeById]] = deriveEncoder
+  implicit val queryRangeByExternalIdEncoder: Encoder[QueryRangeByExternalId] = deriveEncoder
+  implicit val queryRangeByExternalIdItemsEncoder: Encoder[Items[QueryRangeByExternalId]] = deriveEncoder
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val aggregateDataPointDecoder: Decoder[AggregateDataPoint] = deriveDecoder
   implicit val aggregateDataPointEncoder: Encoder[AggregateDataPoint] = deriveEncoder
