@@ -44,6 +44,12 @@ final case class QueryRangeById(
     end: String
 )
 
+final case class QueryRangeByExternalId(
+    id: String,
+    start: String,
+    end: String
+                                       )
+
 final case class QueryAggregatesById(
     id: Long,
     start: String,
