@@ -7,9 +7,21 @@ final case class DataPointsById(
     datapoints: Seq[DataPoint]
 )
 
+final case class DataPointsByExternalId(
+    externalId: String,
+    datapoints: Seq[DataPoint]
+)
+
 final case class DataPointsByIdResponse(
     id: Long,
     externalId: Option[String],
+    isString: Boolean,
+    datapoints: Seq[DataPoint]
+)
+
+final case class DataPointsByExternalIdResponse(
+    id: Long,
+    externalId: String,
     isString: Boolean,
     datapoints: Seq[DataPoint]
 )
@@ -21,8 +33,20 @@ final case class StringDataPointsByIdResponse(
     datapoints: Seq[StringDataPoint]
 )
 
+final case class StringDataPointsByExternalIdResponse(
+    id: Long,
+    externalId: String,
+    isString: Boolean,
+    datapoints: Seq[StringDataPoint]
+)
+
 final case class StringDataPointsById(
     id: Long,
+    datapoints: Seq[StringDataPoint]
+)
+
+final case class StringDataPointsByExternalId(
+    externalId: String,
     datapoints: Seq[StringDataPoint]
 )
 
@@ -33,7 +57,7 @@ final case class DeleteRangeById(
 )
 
 final case class DeleteRangeByExternalId(
-    id: String,
+    externalId: String,
     inclusiveBegin: Long,
     exclusiveEnd: Long
 )
@@ -45,10 +69,10 @@ final case class QueryRangeById(
 )
 
 final case class QueryRangeByExternalId(
-    id: String,
+    externalId: String,
     start: String,
     end: String
-                                       )
+)
 
 final case class QueryAggregatesById(
     id: Long,

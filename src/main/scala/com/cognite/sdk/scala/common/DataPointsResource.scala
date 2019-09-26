@@ -1,17 +1,28 @@
 package com.cognite.sdk.scala.common
 
-trait DataPointsResource[F[_], I] {
-  def insertById(id: I, dataPoints: Seq[DataPoint]): F[Unit]
-  def insertStringsById(id: I, dataPoints: Seq[StringDataPoint]): F[Unit]
-  def deleteRangeById(id: I, inclusiveStart: Long, exclusiveEnd: Long): F[Unit]
-  def queryById(id: I, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]]
+trait DataPointsResource[F[_]] {
+  def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Unit]
+  def insertByExternalId(externalId: String, dataPoints: Seq[DataPoint]): F[Unit]
+  def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Unit]
+  def insertStringsByExternalId(id: String, dataPoints: Seq[StringDataPoint]): F[Unit]
+  def deleteRangeById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Unit]
+  def deleteRangeByExternalId(externalId: String, inclusiveStart: Long, exclusiveEnd: Long): F[Unit]
+  def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]]
+  def queryByExternalId(externalId: String, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]]
   def queryStringsById(
-      id: I,
+      id: Long,
       inclusiveStart: Long,
       exclusiveEnd: Long
   ): F[Seq[StringDataPoint]]
-  def getLatestDataPointById(id: I): F[Option[DataPoint]]
-  def getLatestStringDataPointById(id: I): F[Option[StringDataPoint]]
+  def queryStringsByExternalId(
+      externalId: String,
+      inclusiveStart: Long,
+      exclusiveEnd: Long
+  ): F[Seq[StringDataPoint]]
+  def getLatestDataPointById(id: Long): F[Option[DataPoint]]
+  def getLatestDataPointByExternalId(externalId: String): F[Option[DataPoint]]
+  def getLatestStringDataPointById(id: Long): F[Option[StringDataPoint]]
+  def getLatestStringDataPointByExternalId(externalId: String): F[Option[StringDataPoint]]
   def queryAggregatesById(
       id: Long,
       inclusiveStart: Long,

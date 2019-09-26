@@ -3,16 +3,18 @@ package com.cognite.sdk.scala.v1
 import java.util.UUID
 import com.cognite.sdk.scala.common.{CdpApiException, DataPointsResourceBehaviors, SdkTest}
 
-class DataPointsTest extends SdkTest with DataPointsResourceBehaviors[Long] {
-
-  override def withTimeSeriesId(testCode: Long => Any): Unit = {
-    val timeSeriesId = client.timeSeries.createFromRead(
-        Seq(TimeSeries(name = s"data-points-test-${UUID.randomUUID().toString}"))
-    ).head.id
+class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
+  override def withTimeSeries(testCode: TimeSeries => Any): Unit = {
+    val name = s"data-points-test-${UUID.randomUUID().toString}"
+    val timeSeries = client.timeSeries
+      .createFromRead(
+        Seq(TimeSeries(name = name, externalId = Some(name)))
+      )
+      .head
     try {
-      val _ = testCode(timeSeriesId)
+      val _ = testCode(timeSeries)
     } finally {
-      client.timeSeries.deleteByIds(Seq(timeSeriesId))
+      client.timeSeries.deleteByIds(Seq(timeSeries.id))
     }
   }
 
