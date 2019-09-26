@@ -7,6 +7,7 @@ import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
+import io.circe.syntax._
 
 class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -16,6 +17,7 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     with Create[TimeSeries, TimeSeriesCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
+    with Filter[TimeSeries, TimeSeriesFilter, F]
     with Search[TimeSeries, TimeSeriesQuery, F]
     with Update[TimeSeries, TimeSeriesUpdate, F] {
   import TimeSeriesResource._
@@ -46,6 +48,18 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUri, externalIds)
 
+  override private[sdk] def filterWithCursor(
+      filter: TimeSeriesFilter,
+      cursor: Option[String],
+      limit: Option[Long],
+      partition: Option[Partition]
+  ): F[ItemsWithCursor[TimeSeries]] = {
+    val uriWithAssetIds = filter.assetIds.fold(baseUri)(
+      assetIds => baseUri.param("assetIds", assetIds.asJson.toString())
+    )
+    Readable.readWithCursor(requestSession, uriWithAssetIds, cursor, limit, None)
+  }
+
   override def search(searchQuery: TimeSeriesQuery): F[Seq[TimeSeries]] =
     Search.search(requestSession, baseUri, searchQuery)
 }
@@ -63,8 +77,8 @@ object TimeSeriesResource {
   implicit val createTimeSeriesEncoder: Encoder[TimeSeriesCreate] = deriveEncoder[TimeSeriesCreate]
   implicit val createTimeSeriesItemsEncoder: Encoder[Items[TimeSeriesCreate]] =
     deriveEncoder[Items[TimeSeriesCreate]]
-  implicit val timeSeriesFilterEncoder: Encoder[TimeSeriesFilter] =
-    deriveEncoder[TimeSeriesFilter]
+  implicit val timeSeriesFilterEncoder: Encoder[TimeSeriesSearchFilter] =
+    deriveEncoder[TimeSeriesSearchFilter]
   implicit val timeSeriesSearchEncoder: Encoder[TimeSeriesSearch] =
     deriveEncoder[TimeSeriesSearch]
   implicit val timeSeriesQueryEncoder: Encoder[TimeSeriesQuery] =

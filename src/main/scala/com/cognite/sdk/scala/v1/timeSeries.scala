@@ -44,7 +44,7 @@ final case class TimeSeriesUpdate(
     securityCategories: Option[Setter[Seq[Long]]] = None
 ) extends WithId[Long]
 
-final case class TimeSeriesFilter(
+final case class TimeSeriesSearchFilter(
     name: Option[String] = None,
     unit: Option[String] = None,
     isString: Option[Boolean] = None,
@@ -56,6 +56,10 @@ final case class TimeSeriesFilter(
     lastUpdatedTime: Option[TimeRange] = None
 )
 
+final case class TimeSeriesFilter(
+    assetIds: Option[Seq[Long]] = None
+)
+
 final case class TimeSeriesSearch(
     name: Option[String] = None,
     description: Option[String] = None,
@@ -63,7 +67,7 @@ final case class TimeSeriesSearch(
 )
 
 final case class TimeSeriesQuery(
-    filter: Option[TimeSeriesFilter] = None,
+    filter: Option[TimeSeriesSearchFilter] = None,
     search: Option[TimeSeriesSearch] = None,
     limit: Int = 100
-) extends SearchQuery[TimeSeriesFilter, TimeSeriesSearch]
+) extends SearchQuery[TimeSeriesSearchFilter, TimeSeriesSearch]

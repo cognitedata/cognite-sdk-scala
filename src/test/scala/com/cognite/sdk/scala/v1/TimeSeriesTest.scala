@@ -66,39 +66,107 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
       ()
     }
   )
+
+  it should "support filter" in {
+    val manyTimeSeriesForAsset = client.timeSeries
+      .filter(
+        TimeSeriesFilter(
+          assetIds = Some(Seq(95453437348104L))
+        )
+      )
+      .compile
+      .toList
+    manyTimeSeriesForAsset.size should be (327)
+
+    val manyTimeSeriesForAssetWithLimit = client.timeSeries
+      .filterWithLimit(
+        TimeSeriesFilter(
+          assetIds = Some(Seq(95453437348104L))
+        ),
+        100
+      )
+      .compile
+      .toList
+    manyTimeSeriesForAssetWithLimit.size should be (100)
+
+    val fewTimeSeriesForOtherAsset = client.timeSeries
+      .filter(
+        TimeSeriesFilter(
+          assetIds = Some(Seq(4480618819297421L))
+        )
+      )
+      .compile
+      .toList
+    fewTimeSeriesForOtherAsset.size should be (1)
+
+    val timeSeriesForBothAssets = client.timeSeries
+      .filter(
+        TimeSeriesFilter(
+          assetIds = Some(Seq(4480618819297421L, 95453437348104L))
+        )
+      )
+      .compile
+      .toList
+    timeSeriesForBothAssets.size should be (manyTimeSeriesForAsset.size + fewTimeSeriesForOtherAsset.size)
+
+    val timeSeriesForUnknownAsset = client.timeSeries
+      .filter(
+        TimeSeriesFilter(
+          assetIds = Some(Seq(44444L))
+        )
+      )
+      .compile
+      .toList
+    timeSeriesForUnknownAsset.size should be (0)
+  }
+
   it should "support search" in {
     val createdTimeSearchResults = client.timeSeries
       .search(
         TimeSeriesQuery(
-          filter = Some(TimeSeriesFilter(createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(0)))))
+          filter = Some(
+            TimeSeriesSearchFilter(
+              createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(0)))
+            )
+          )
         )
       )
     assert(createdTimeSearchResults.length == 22)
     val createdTimeSearchResults2 = client.timeSeries.search(
-        TimeSeriesQuery(
-          filter = Some(
-            TimeSeriesFilter(createdTime = Some(
-              TimeRange(Instant.ofEpochMilli(1535964900000L), Instant.ofEpochMilli(1549000000000L)))))
-        )
-      )
-    assert(createdTimeSearchResults2.length == 37)
-
-    val unitSearchResults = client.timeSeries.search(
-        TimeSeriesQuery(
-          filter = Some(
-            TimeSeriesFilter(unit = Some("m"),
-              createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1549638383707L))))
+      TimeSeriesQuery(
+        filter = Some(
+          TimeSeriesSearchFilter(
+            createdTime = Some(
+              TimeRange(Instant.ofEpochMilli(1535964900000L), Instant.ofEpochMilli(1549000000000L))
+            )
           )
         )
       )
+    )
+    assert(createdTimeSearchResults2.length == 37)
+
+    val unitSearchResults = client.timeSeries.search(
+      TimeSeriesQuery(
+        filter = Some(
+          TimeSeriesSearchFilter(
+            unit = Some("m"),
+            createdTime =
+              Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1549638383707L)))
+          )
+        )
+      )
+    )
     assert(unitSearchResults.length == 33)
 
     val nameSearchResults = client.timeSeries
       .search(
         TimeSeriesQuery(
           filter = Some(
-            TimeSeriesFilter(unit = Some("m"),
-              createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1549638383707L))))
+            TimeSeriesSearchFilter(
+              unit = Some("m"),
+              createdTime =
+                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1549638383707L)))
+            )
           ),
           search = Some(TimeSeriesSearch(name = Some("W0405")))
         )
@@ -108,7 +176,7 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
     val descriptionSearchResults = client.timeSeries.search(
       TimeSeriesQuery(
         filter = Some(
-          TimeSeriesFilter(
+          TimeSeriesSearchFilter(
             createdTime = Some(
               TimeRange(Instant.ofEpochMilli(1553632871254L), Instant.ofEpochMilli(1553632871254L))
             )
@@ -123,7 +191,7 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
       TimeSeriesQuery(
         limit = 5,
         filter = Some(
-          TimeSeriesFilter(
+          TimeSeriesSearchFilter(
             createdTime = Some(
               TimeRange(Instant.ofEpochMilli(1553632871254L), Instant.ofEpochMilli(1553632871254L))
             )
