@@ -5,22 +5,23 @@ import org.scalatest.{FlatSpec, Matchers}
 
 trait ReadBehaviours extends Matchers { this: FlatSpec =>
   def readable[R, InternalId, PrimitiveId](readable: Readable[R, Id]): Unit = {
+    val listLength = readable.list().compile.toList.length
     it should "read items" in {
       readable.read().items should not be empty
     }
 
     it should "read items with limit" in {
-      (readable.readWithLimit(1).items should have).length(1)
-      (readable.readWithLimit(2).items should have).length(2)
+      (readable.readWithLimit(1).items should have).length(Math.min(listLength.toLong, 1))
+      (readable.readWithLimit(2).items should have).length(Math.min(listLength.toLong,2))
     }
 
     it should "read all items" in {
       val first1Length = readable.list().take(1).compile.toList.length
-      first1Length should be(1)
+      first1Length should be(Math.min(listLength, 1))
       val first2Length = readable.listWithLimit(2).compile.toList.length
-      first2Length should be(2)
+      first2Length should be(Math.min(listLength, 2))
       val allLength = readable.listWithLimit(3).compile.toList.length
-      allLength should be(3)
+      allLength should be(Math.min(listLength, 3))
     }
   }
 

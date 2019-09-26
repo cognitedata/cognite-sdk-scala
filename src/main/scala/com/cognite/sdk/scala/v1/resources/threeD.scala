@@ -78,6 +78,60 @@ object ThreeDModels {
     deriveEncoder[Items[ThreeDModelCreate]]
 }
 
+class ThreeDNodes[F[_]](val requestSession: RequestSession[F], modelId: Long, revisionId: Long)
+    extends Readable[ThreeDNode, F]
+    with RetrieveByIds[ThreeDNode, F]
+    with WithRequestSession[F] {
+  import ThreeDNodes._
+  override val baseUri =
+    uri"${requestSession.baseUri}/3d/models/$modelId/revisions/$revisionId/nodes"
+  override private[sdk] def readWithCursor(
+      cursor: Option[String],
+      limit: Option[Long],
+      partition: Option[Partition]
+  ): F[ItemsWithCursor[ThreeDNode]] =
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+
+  override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDNode]] =
+    RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+
+  def ancestors(nodeId: Long): ThreeDAncestorNodes[F] =
+    new ThreeDAncestorNodes(requestSession, modelId, revisionId, nodeId)
+}
+
+class ThreeDAncestorNodes[F[_]](
+    val requestSession: RequestSession[F],
+    modelId: Long,
+    revisionId: Long,
+    nodeId: Long
+) extends Readable[ThreeDNode, F]
+    with WithRequestSession[F] {
+  import ThreeDNodes._
+  override val baseUri =
+    uri"${requestSession.baseUri}/3d/models/$modelId/revisions/$revisionId/nodes/$nodeId/ancestors"
+  override private[sdk] def readWithCursor(
+      cursor: Option[String],
+      limit: Option[Long],
+      partition: Option[Partition]
+  ): F[ItemsWithCursor[ThreeDNode]] =
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+}
+
+object ThreeDNodes {
+  implicit val propertyCategoryEncoder: Encoder[PropertyCategory] = deriveEncoder[PropertyCategory]
+  implicit val propertyCategoryDecoder: Decoder[PropertyCategory] = deriveDecoder[PropertyCategory]
+  implicit val propertiesEncoder: Encoder[Properties] = deriveEncoder[Properties]
+  implicit val boundingBoxEncoder: Encoder[BoundingBox] = deriveEncoder[BoundingBox]
+  implicit val propertiesDecoder: Decoder[Properties] = deriveDecoder[Properties]
+  implicit val boundingBoxDecoder: Decoder[BoundingBox] = deriveDecoder[BoundingBox]
+  implicit val threeDNodeEncoder: Encoder[ThreeDNode] = deriveEncoder[ThreeDNode]
+  implicit val threeDNodeDecoder: Decoder[ThreeDNode] = deriveDecoder[ThreeDNode]
+  implicit val threeDNodeItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDNode]] =
+    deriveDecoder[ItemsWithCursor[ThreeDNode]]
+  implicit val threeDNodeItemsEncoder: Encoder[Items[ThreeDNode]] = deriveEncoder[Items[ThreeDNode]]
+  implicit val threeDNodeItemsDecoder: Decoder[Items[ThreeDNode]] = deriveDecoder[Items[ThreeDNode]]
+}
+
 class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long)
     extends Create[ThreeDRevision, ThreeDRevisionCreate, F]
     with RetrieveByIds[ThreeDRevision, F]

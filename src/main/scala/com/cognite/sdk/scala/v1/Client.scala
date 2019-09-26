@@ -16,6 +16,7 @@ import com.cognite.sdk.scala.v1.resources.{
   SequencesResource,
   ThreeDAssetMappings,
   ThreeDModels,
+  ThreeDNodes,
   ThreeDRevisions,
   TimeSeriesResource
 }
@@ -102,6 +103,8 @@ class GenericClient[F[_]: Monad, _](
     new ThreeDRevisions(requestSession, modelId)
   def threeDAssetMappings(modelId: Long, revisionId: Long): ThreeDAssetMappings[F] =
     new ThreeDAssetMappings(requestSession, modelId, revisionId)
+  def threeDNodes(modelId: Long, revisionId: Long): ThreeDNodes[F] =
+    new ThreeDNodes(requestSession, modelId, revisionId)
 }
 
 final case class Client(
