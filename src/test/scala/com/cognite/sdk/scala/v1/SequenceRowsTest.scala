@@ -62,7 +62,7 @@ class SequenceRowsTest extends SdkTest with ParallelTestExecution {
   it should "be possible to insert, update and delete sequence rows using externalId" in withSequenceId { sequence =>
     val externalId = sequence.externalId.get
     client.sequenceRows.insertByExternalId(externalId, sequence.columns.map(_.externalId).toList, testRows)
-    Thread.sleep(10000)
+    Thread.sleep(15000)
     val (_, rows) = client.sequenceRows.queryByExternalId(externalId, minRow, maxRow + 1)
     rows should contain theSameElementsAs testRows
 
@@ -72,7 +72,7 @@ class SequenceRowsTest extends SdkTest with ParallelTestExecution {
     rowsById should contain theSameElementsAs testRows
 
     client.sequenceRows.deleteByExternalId(externalId, rows.map(_.rowNumber))
-    Thread.sleep(10000)
+    Thread.sleep(15000)
     val (_, rowsAfterDeleteAll) = client.sequenceRows.queryByExternalId(externalId, minRow, maxRow + 1)
     rowsAfterDeleteAll shouldBe empty
   }
