@@ -8,7 +8,11 @@ trait DataPointsResource[F[_]] {
   def deleteRangeById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Unit]
   def deleteRangeByExternalId(externalId: String, inclusiveStart: Long, exclusiveEnd: Long): F[Unit]
   def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]]
-  def queryByExternalId(externalId: String, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]]
+  def queryByExternalId(
+      externalId: String,
+      inclusiveStart: Long,
+      exclusiveEnd: Long
+  ): F[Seq[DataPoint]]
   def queryStringsById(
       id: Long,
       inclusiveStart: Long,
