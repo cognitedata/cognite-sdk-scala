@@ -34,6 +34,45 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     val stepInterpolations = aggregates("stepInterpolation")
     averages.map(_.timestamp).tail should contain theSameElementsInOrderAs stepInterpolations.map(_.timestamp)
     averages.last.value should equal(73.9999423351708)
+
+    val limit = 10
+    val aggregatesWithLimit = client.dataPoints.queryAggregatesByIdWithLimit(
+      1580330145648L,
+      0L,
+      1564272000000L,
+      "1d",
+      Seq("average", "stepInterpolation"),
+      limit
+    )
+    val averagesWithLimit = aggregatesWithLimit("average")
+    val stepInterpolationsWithLimit = aggregatesWithLimit("stepInterpolation")
+    averagesWithLimit.size should be <= limit
+    stepInterpolationsWithLimit.size should be <= limit
+    averagesWithLimit.head.value should equal(averages.head.value)
+    stepInterpolationsWithLimit.head.value should equal(stepInterpolations.head.value)
+
+    val aggregatesWithZeroLimit = client.dataPoints.queryAggregatesByIdWithLimit(
+      1580330145648L,
+      0L,
+      1564272000000L,
+      "1d",
+      Seq("average", "stepInterpolation"),
+      0
+    )
+    aggregatesWithZeroLimit should equal (Map())
+
+    assertThrows[CdpApiException] {
+      // negative limit parameter is not allowed by the API
+      client.dataPoints.queryAggregatesByIdWithLimit(
+        1580330145648L,
+        0L,
+        1564272000000L,
+        "1d",
+        Seq("average", "stepInterpolation"),
+        -123
+      )
+    }
+
     val extAggregates = client.dataPoints.queryAggregatesByExternalId(
       "test__constant_74_with_noise",
       0L,
@@ -65,6 +104,46 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     sums2.last.value should equal(253965.25002673318)
     stepInterpolation2.head.value should equal(73.92400373499633)
     stepInterpolation2.last.value should equal(74.04062931032483)
+
+    val extAggregatesWithLimit = client.dataPoints.queryAggregatesByExternalIdWithLimit(
+      "test__constant_74_with_noise",
+      0L,
+      1564272000000L,
+      "1d",
+      Seq("average", "stepInterpolation"),
+      limit
+    )
+    val extAveragesWithLimit = extAggregatesWithLimit("average")
+    val extStepInterpolationWithLimit = extAggregatesWithLimit("stepInterpolation")
+    extAveragesWithLimit.size should be <= limit
+    extStepInterpolationWithLimit.size should be <= limit
+    extAveragesWithLimit.head.value should equal(extAverages.head.value)
+    extAveragesWithLimit.head.value should equal(averages.head.value)
+    extAveragesWithLimit.last.value should equal(averagesWithLimit.last.value)
+    extStepInterpolationWithLimit.head.value should equal(extStepInterpolation.head.value)
+    extStepInterpolationWithLimit.last.value should equal(stepInterpolationsWithLimit.last.value)
+    val extAggregatesWithZeroLimit = client.dataPoints.queryAggregatesByExternalIdWithLimit(
+      "test__constant_74_with_noise",
+      0L,
+      1564272000000L,
+      "1d",
+      Seq("average", "stepInterpolation"),
+      0
+    )
+    extAggregatesWithZeroLimit should equal (Map())
+
+    assertThrows[CdpApiException] {
+      // negative limit parameter is not allowed by the API
+      client.dataPoints.queryAggregatesByExternalIdWithLimit(
+        "test__constant_74_with_noise",
+        0L,
+        1564272000000L,
+        "1d",
+        Seq("average", "stepInterpolation"),
+        -1
+      )
+    }
+
     val extAggregates2 =
       client.dataPoints.queryAggregatesByExternalId(
         "test__constant_74_with_noise",
