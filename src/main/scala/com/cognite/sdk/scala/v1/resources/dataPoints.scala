@@ -219,70 +219,21 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
       }
 
   def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]] =
-    requestSession
-      .sendCdf(
-        { request =>
-          request
-            .post(uri"$baseUri/list")
-            .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
-            .response(asProtobufOrCdpApiError)
-            .mapResponse {
-              case Left(value) => throw value.error
-              case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-              case Right(Right(dataPointListResponse)) =>
-                parseNumericDataPoints(dataPointListResponse)
-            }
-        },
-        accept = "application/protobuf"
-      )
-
-  val asProtobufOrCdpApiError: ResponseAs[
-    Either[DeserializationError[io.circe.Error], Either[CdpApiError, DataPointListResponse]],
-    Nothing
-  ] = {
-    asByteArray.map(response => {
-      // TODO: Can use the HTTP headers in .mapWithMetaData to choose to parse as json or protbuf
-      try {
-        Right(Right(DataPointListResponse.parseFrom(response)))
-      } catch {
-        case _: Throwable =>
-          val s = new String(response, StandardCharsets.UTF_8)
-          decode[CdpApiError](s) match {
-            case Left(error) =>
-              Left(DeserializationError(s, error, Show[io.circe.Error].show(error)))
-            case Right(cdpApiError) => Right(Left(cdpApiError))
-          }
-      }
-    })
-  }
+    queryProtobuf(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString)))) {
+      dataPointListResponse =>
+        parseNumericDataPoints(dataPointListResponse)
+    }
 
   def queryByExternalId(
       externalId: String,
       inclusiveStart: Long,
       exclusiveEnd: Long
   ): F[Seq[DataPoint]] =
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/list")
-          .body(
-            Items(
-              Seq(
-                QueryRangeByExternalId(externalId, inclusiveStart.toString, exclusiveEnd.toString)
-              )
-            )
-          )
-          .response(asJson[Either[CdpApiError, Items[DataPointsByExternalIdResponse]]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
-            case Right(Right(value)) =>
-              value.items.headOption match {
-                case Some(items) => items.datapoints
-                case None => Seq.empty
-              }
-          }
-      }
+    queryProtobuf(
+      Items(Seq(QueryRangeByExternalId(externalId, inclusiveStart.toString, exclusiveEnd.toString)))
+    ) { dataPointListResponse =>
+      parseNumericDataPoints(dataPointListResponse)
+    }
 
   def queryAggregatesById(
       id: Long,
@@ -291,34 +242,47 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
       granularity: String,
       aggregates: Seq[String]
   ): F[Map[String, Seq[DataPoint]]] =
-    requestSession
-      .sendCdf(
-        { request =>
-          request
-            .post(uri"$baseUri/list")
-            .body(
-              Items(
-                Seq(
-                  QueryAggregatesById(
-                    id,
-                    inclusiveStart.toString,
-                    exclusiveEnd.toString,
-                    granularity,
-                    aggregates
-                  )
-                )
-              )
-            )
-            .response(asProtobufOrCdpApiError)
-            .mapResponse {
-              case Left(value) => throw value.error
-              case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
-              case Right(Right(dataPointListResponse)) =>
-                toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
-            }
-        },
-        accept = "application/protobuf"
+    queryProtobuf(
+      Items(
+        Seq(
+          QueryRangeById(
+            id,
+            inclusiveStart.toString,
+            exclusiveEnd.toString,
+            None,
+            Some(granularity),
+            Some(aggregates)
+          )
+        )
       )
+    ) { dataPointListResponse =>
+      toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
+    }
+
+  def queryAggregatesByIdWithLimit(
+      id: Long,
+      inclusiveStart: Long,
+      exclusiveEnd: Long,
+      granularity: String,
+      aggregates: Seq[String],
+      limit: Int
+  ): F[Map[String, Seq[DataPoint]]] =
+    queryProtobuf(
+      Items(
+        Seq(
+          QueryRangeById(
+            id,
+            inclusiveStart.toString,
+            exclusiveEnd.toString,
+            Some(limit),
+            Some(granularity),
+            Some(aggregates)
+          )
+        )
+      )
+    ) { dataPointListResponse =>
+      toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
+    }
 
   def queryAggregatesByExternalId(
       externalId: String,
@@ -327,30 +291,60 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
       granularity: String,
       aggregates: Seq[String]
   ): F[Map[String, Seq[DataPoint]]] =
+    queryProtobuf(
+      Items(
+        Seq(
+          QueryRangeByExternalId(
+            externalId,
+            inclusiveStart.toString,
+            exclusiveEnd.toString,
+            None,
+            Some(granularity),
+            Some(aggregates)
+          )
+        )
+      )
+    ) { dataPointListResponse =>
+      toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
+    }
+
+  def queryAggregatesByExternalIdWithLimit(
+      externalId: String,
+      inclusiveStart: Long,
+      exclusiveEnd: Long,
+      granularity: String,
+      aggregates: Seq[String],
+      limit: Int
+  ): F[Map[String, Seq[DataPoint]]] =
+    queryProtobuf(
+      Items(
+        Seq(
+          QueryRangeByExternalId(
+            externalId,
+            inclusiveStart.toString,
+            exclusiveEnd.toString,
+            Some(limit),
+            Some(granularity),
+            Some(aggregates)
+          )
+        )
+      )
+    ) { dataPointListResponse =>
+      toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
+    }
+
+  private def queryProtobuf[Q: Encoder, R](query: Q)(mapDataPointList: DataPointListResponse => R) =
     requestSession
       .sendCdf(
         { request =>
           request
             .post(uri"$baseUri/list")
-            .body(
-              Items(
-                Seq(
-                  QueryAggregatesByExternalId(
-                    externalId,
-                    inclusiveStart.toString,
-                    exclusiveEnd.toString,
-                    granularity,
-                    aggregates
-                  )
-                )
-              )
-            )
+            .body(query)
             .response(asProtobufOrCdpApiError)
             .mapResponse {
               case Left(value) => throw value.error
               case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
-              case Right(Right(dataPointListResponse)) =>
-                toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
+              case Right(Right(dataPointListResponse)) => mapDataPointList(dataPointListResponse)
             }
         },
         accept = "application/protobuf"
@@ -418,18 +412,30 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
       externalId: String,
       inclusiveStart: Long,
       exclusiveEnd: Long
-  ): F[Seq[StringDataPoint]] =
+  ): F[Seq[StringDataPoint]] = {
+    val query = QueryRangeByExternalId(externalId, inclusiveStart.toString, exclusiveEnd.toString)
+    queryProtobuf(Items(Seq(query))) { dataPointListResponse =>
+      parseStringDataPoints(dataPointListResponse)
+    }
+  }
+
+  def queryStringsByExternalIdWithLimit(
+      externalId: String,
+      inclusiveStart: Long,
+      exclusiveEnd: Long,
+      limit: Int
+  ): F[Seq[StringDataPoint]] = {
+    val query = QueryRangeByExternalId(
+      externalId,
+      inclusiveStart.toString,
+      exclusiveEnd.toString,
+      limit = Some(limit)
+    )
     requestSession
       .sendCdf { request =>
         request
           .post(uri"$baseUri/list")
-          .body(
-            Items(
-              Seq(
-                QueryRangeByExternalId(externalId, inclusiveStart.toString, exclusiveEnd.toString)
-              )
-            )
-          )
+          .body(Items(Seq(query)))
           .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
           .mapResponse {
             case Left(value) => throw value.error
@@ -441,6 +447,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
               }
           }
       }
+  }
 
   def getLatestDataPointById(id: Long): F[Option[DataPoint]] =
     requestSession.map(
@@ -463,7 +470,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
           case Some(latest) => latest
           case None =>
             throw SdkException(
-              s"Unexpected missing id ${externalId.toString} when retrieving latest data point"
+              s"Unexpected missing external id ${externalId.toString} when retrieving latest data point"
             )
         }
     )
@@ -626,13 +633,27 @@ object DataPointsResourceV1 {
     deriveEncoder
   implicit val queryAggregatesByIdResponseDecoder: Decoder[QueryAggregatesByIdResponse] =
     deriveDecoder
-  implicit val queryAggregatesByIdEncoder: Encoder[QueryAggregatesById] = deriveEncoder
-  implicit val queryAggregatesByExternalIdEncoder: Encoder[QueryAggregatesByExternalId] =
-    deriveEncoder
-  implicit val queryAggregatesByIdItemsEncoder: Encoder[Items[QueryAggregatesById]] = deriveEncoder
-  implicit val queryAggregatesByExternalIdItemsEncoder
-      : Encoder[Items[QueryAggregatesByExternalId]] = deriveEncoder
   implicit val queryAggregatesByIdResponseItemsDecoder
       : Decoder[Items[QueryAggregatesByIdResponse]] =
     deriveDecoder
+
+  val asProtobufOrCdpApiError: ResponseAs[
+    Either[DeserializationError[io.circe.Error], Either[CdpApiError, DataPointListResponse]],
+    Nothing
+  ] = {
+    asByteArray.map(response => {
+      // TODO: Can use the HTTP headers in .mapWithMetaData to choose to parse as json or protbuf
+      try {
+        Right(Right(DataPointListResponse.parseFrom(response)))
+      } catch {
+        case _: Throwable =>
+          val s = new String(response, StandardCharsets.UTF_8)
+          decode[CdpApiError](s) match {
+            case Left(error) =>
+              Left(DeserializationError(s, error, Show[io.circe.Error].show(error)))
+            case Right(cdpApiError) => Right(Left(cdpApiError))
+          }
+      }
+    })
+  }
 }

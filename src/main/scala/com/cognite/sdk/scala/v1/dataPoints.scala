@@ -65,33 +65,23 @@ final case class DeleteRangeByExternalId(
 final case class QueryRangeById(
     id: Long,
     start: String,
-    end: String
+    end: String,
+    limit: Option[Int] = None,
+    granularity: Option[String] = None,
+    aggregates: Option[Seq[String]] = None
 )
 
 final case class QueryRangeByExternalId(
     externalId: String,
     start: String,
-    end: String
-)
-
-final case class QueryAggregatesById(
-    id: Long,
-    start: String,
     end: String,
-    granularity: String,
-    aggregates: Seq[String]
+    limit: Option[Int] = None,
+    granularity: Option[String] = None,
+    aggregates: Option[Seq[String]] = None
 )
 
 final case class QueryAggregatesByIdResponse(
     id: Long,
     externalId: Option[String],
     datapoints: Seq[AggregateDataPoint]
-)
-
-final case class QueryAggregatesByExternalId(
-    externalId: String,
-    start: String,
-    end: String,
-    granularity: String,
-    aggregates: Seq[String]
 )
