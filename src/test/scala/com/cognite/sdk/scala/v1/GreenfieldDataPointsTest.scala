@@ -11,6 +11,8 @@ class GreenfieldDataPointsTest extends SdkTest with DataPointsResourceBehaviors 
     ).head
     try {
       val _ = testCode(timeSeries)
+    } catch {
+      case t: Throwable => throw t
     } finally {
       greenfieldClient.timeSeries.deleteByIds(Seq(timeSeries.id))
     }

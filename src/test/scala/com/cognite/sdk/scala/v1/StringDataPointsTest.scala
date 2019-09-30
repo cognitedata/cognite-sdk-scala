@@ -11,6 +11,8 @@ class StringDataPointsTest extends SdkTest with StringDataPointsResourceBehavior
     ).head
     try {
       val _ = testCode(timeSeries)
+    } catch {
+      case t: Throwable => throw t
     } finally {
       client.timeSeries.deleteByIds(Seq(timeSeries.id))
     }

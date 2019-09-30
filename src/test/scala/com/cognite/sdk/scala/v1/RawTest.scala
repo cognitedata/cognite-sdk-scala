@@ -30,6 +30,8 @@ class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     ).map(_.id)
     try {
       val _ = testCode(database, tables)
+    } catch {
+      case t: Throwable => throw t
     } finally {
       try {
         client.rawTables(database).deleteByIds(tables)
