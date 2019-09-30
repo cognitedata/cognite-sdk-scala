@@ -6,7 +6,7 @@ import io.circe.syntax._
 import org.scalatest.ParallelTestExecution
 
 class SequenceRowsTest extends SdkTest with ParallelTestExecution {
-  def withSequenceId(testCode: Sequence => Any): Unit = {
+  def withSequence(testCode: Sequence => Any): Unit = {
     val externalId = shortRandom()
     val sequence = client.sequences.createOneFromRead(
       Sequence(
@@ -21,6 +21,8 @@ class SequenceRowsTest extends SdkTest with ParallelTestExecution {
     )
     try {
       val _ = testCode(sequence)
+    } catch {
+      case t: Throwable => throw t
     } finally {
       client.sequences.deleteById(sequence.id)
     }
@@ -33,7 +35,7 @@ class SequenceRowsTest extends SdkTest with ParallelTestExecution {
   private val minRow = testRows.map(_.rowNumber).min
   private val maxRow = testRows.map(_.rowNumber).max
 
-  it should "be possible to insert, update, and delete sequence rows" in withSequenceId { sequence =>
+  it should "be possible to insert, update, and delete sequence rows" in withSequence { sequence =>
     client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.externalId).toList, testRows)
     Thread.sleep(5000)
     val (_, rows) = client.sequenceRows.queryById(
@@ -59,7 +61,7 @@ class SequenceRowsTest extends SdkTest with ParallelTestExecution {
     rowsAfterDeleteAll shouldBe empty
   }
 
-  it should "be possible to insert, update and delete sequence rows using externalId" in withSequenceId { sequence =>
+  it should "be possible to insert, update and delete sequence rows using externalId" in withSequence { sequence =>
     val externalId = sequence.externalId.get
     client.sequenceRows.insertByExternalId(externalId, sequence.columns.map(_.externalId).toList, testRows)
     Thread.sleep(5000)
