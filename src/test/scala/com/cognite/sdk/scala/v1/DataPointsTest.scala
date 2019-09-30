@@ -39,6 +39,7 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
       "1d",
       Seq("average", "stepInterpolation")
     )
+    extAggregates.keys should contain theSameElementsAs List("average", "stepInterpolation")
     val extAverages = extAggregates("average")
     val extStepInterpolation = extAggregates("stepInterpolation")
     extAverages.map(_.timestamp).tail should contain theSameElementsInOrderAs extStepInterpolation.map(_.timestamp)
@@ -93,6 +94,15 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
       )
     }
   }
+
+  val sumsOnly = client.dataPoints.queryAggregatesById(
+    1580330145648L,
+    0L,
+    1564272000000L,
+    "1d",
+    Seq("min")
+  )
+  sumsOnly.keys should contain theSameElementsAs List("min")
 
   it should "correctly decode an error response as json instead of protobuf" in {
     val missingId = 1345746392847240L
