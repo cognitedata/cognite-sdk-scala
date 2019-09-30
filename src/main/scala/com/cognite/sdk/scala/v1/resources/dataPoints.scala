@@ -158,7 +158,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
                   screenOutNan(a.average),
                   screenOutNan(a.max),
                   screenOutNan(a.min),
-                  screenOutNan(a.min),
+                  screenOutNan(a.count),
                   screenOutNan(a.sum),
                   screenOutNan(a.interpolation),
                   screenOutNan(a.stepInterpolation),
@@ -635,5 +635,4 @@ object DataPointsResourceV1 {
   implicit val queryAggregatesByIdResponseItemsDecoder
       : Decoder[Items[QueryAggregatesByIdResponse]] =
     deriveDecoder
-
 }
