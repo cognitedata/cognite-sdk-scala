@@ -60,8 +60,8 @@ final case class ThreeDRevisionUpdate(
 final case class ThreeDAssetMapping(
     nodeId: Long,
     assetId: Long,
-    treeIndex: Long = 0,
-    subtreeSize: Long = 0
+    treeIndex: Option[Long],
+    subtreeSize: Option[Long]
 )
 
 final case class ThreeDAssetMappingCreate(
