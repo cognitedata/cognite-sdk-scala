@@ -6,7 +6,7 @@ import cats.implicits._
 import com.cognite.sdk.scala.common.{Auth, InvalidAuthentication, Login}
 import com.cognite.sdk.scala.v1.resources.{
   Assets,
-  DataPointsResourceV1,
+  DataPointsResource,
   Events,
   Files,
   RawDatabases,
@@ -92,7 +92,7 @@ class GenericClient[F[_]: Monad, _](
   val events = new Events[F](requestSession)
   val files = new Files[F](requestSession)
   val timeSeries = new TimeSeriesResource[F](requestSession)
-  val dataPoints = new DataPointsResourceV1[F](requestSession)
+  val dataPoints = new DataPointsResource[F](requestSession)
   val sequences = new SequencesResource[F](requestSession)
   val sequenceRows = new SequenceRows[F](requestSession)
 

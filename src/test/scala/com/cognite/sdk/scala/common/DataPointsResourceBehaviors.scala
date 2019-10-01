@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.common
 import java.time.Instant
 
 import com.cognite.sdk.scala.v1.TimeSeries
+import com.cognite.sdk.scala.v1.resources.DataPointsResource
 import com.softwaremill.sttp.Id
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -25,6 +26,9 @@ trait DataPointsResourceBehaviors extends Matchers { this: FlatSpec =>
         val points = dataPoints.queryById(timeSeriesId, startTime, endTime + 1)
         points should have size testDataPoints.size.toLong
 
+        val pointsWithLimit = dataPoints.queryByIdWithLimit(timeSeriesId, startTime, endTime + 1, 3)
+        pointsWithLimit should have size 3
+
         val latest = dataPoints.getLatestDataPointById(timeSeriesId)
         latest.isDefined should be(true)
         val latestPoint = latest.get
@@ -40,6 +44,9 @@ trait DataPointsResourceBehaviors extends Matchers { this: FlatSpec =>
         Thread.sleep(15000)
         val points2 = dataPoints.queryByExternalId(timeSeriesExternalId, startTime, endTime + 1)
         points2 should have size testDataPoints.size.toLong
+
+        val points2WithLimit = dataPoints.queryByExternalId(timeSeriesExternalId, startTime, endTime + 1, Some(5))
+        points2WithLimit should have size 5
 
         val latest2 = dataPoints.getLatestDataPointByExternalId(timeSeriesExternalId)
         latest2.isDefined should be(true)

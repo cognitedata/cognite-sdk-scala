@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.common
 import java.time.Instant
 
 import com.cognite.sdk.scala.v1.TimeSeries
+import com.cognite.sdk.scala.v1.resources.DataPointsResource
 import com.softwaremill.sttp.Id
 import org.scalatest.{FlatSpec, Matchers}
 
