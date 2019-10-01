@@ -23,12 +23,11 @@ import com.cognite.v1.timeseries.proto.data_points.{
 }
 import io.circe.parser.decode
 
-class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
+class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with BaseUri
-    with DataPointsResource[F] {
+    with BaseUri {
 
-  import DataPointsResourceV1._
+  import DataPointsResource._
 
   override val baseUri = uri"${requestSession.baseUri}/timeseries/data"
 
@@ -218,54 +217,40 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
           }
       }
 
-  def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]] =
-    queryProtobuf(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString)))) {
-      dataPointListResponse =>
-        parseNumericDataPoints(dataPointListResponse)
-    }
+  def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]] = {
+    val query = QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString)
+    queryProtobuf(Items(Seq(query)))(parseNumericDataPoints)
+  }
+
+  def queryByIdWithLimit(
+      id: Long,
+      inclusiveStart: Long,
+      exclusiveEnd: Long,
+      limit: Int
+  ): F[Seq[DataPoint]] = {
+    val query =
+      QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString, limit = Some(limit))
+    queryProtobuf(Items(Seq(query)))(parseNumericDataPoints)
+  }
 
   def queryByExternalId(
       externalId: String,
       inclusiveStart: Long,
-      exclusiveEnd: Long
-  ): F[Seq[DataPoint]] =
-    queryProtobuf(
-      Items(Seq(QueryRangeByExternalId(externalId, inclusiveStart.toString, exclusiveEnd.toString)))
-    ) { dataPointListResponse =>
-      parseNumericDataPoints(dataPointListResponse)
-    }
+      exclusiveEnd: Long,
+      limit: Option[Int] = None
+  ): F[Seq[DataPoint]] = {
+    val query =
+      QueryRangeByExternalId(externalId, inclusiveStart.toString, exclusiveEnd.toString, limit)
+    queryProtobuf(Items(Seq(query)))(parseNumericDataPoints)
+  }
 
   def queryAggregatesById(
       id: Long,
       inclusiveStart: Long,
       exclusiveEnd: Long,
       granularity: String,
-      aggregates: Seq[String]
-  ): F[Map[String, Seq[DataPoint]]] =
-    queryProtobuf(
-      Items(
-        Seq(
-          QueryRangeById(
-            id,
-            inclusiveStart.toString,
-            exclusiveEnd.toString,
-            None,
-            Some(granularity),
-            Some(aggregates)
-          )
-        )
-      )
-    ) { dataPointListResponse =>
-      toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
-    }
-
-  def queryAggregatesByIdWithLimit(
-      id: Long,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
-      granularity: String,
       aggregates: Seq[String],
-      limit: Int
+      limit: Option[Int] = None
   ): F[Map[String, Seq[DataPoint]]] =
     queryProtobuf(
       Items(
@@ -274,7 +259,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
             id,
             inclusiveStart.toString,
             exclusiveEnd.toString,
-            Some(limit),
+            limit,
             Some(granularity),
             Some(aggregates)
           )
@@ -289,32 +274,8 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
       inclusiveStart: Long,
       exclusiveEnd: Long,
       granularity: String,
-      aggregates: Seq[String]
-  ): F[Map[String, Seq[DataPoint]]] =
-    queryProtobuf(
-      Items(
-        Seq(
-          QueryRangeByExternalId(
-            externalId,
-            inclusiveStart.toString,
-            exclusiveEnd.toString,
-            None,
-            Some(granularity),
-            Some(aggregates)
-          )
-        )
-      )
-    ) { dataPointListResponse =>
-      toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
-    }
-
-  def queryAggregatesByExternalIdWithLimit(
-      externalId: String,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
-      granularity: String,
       aggregates: Seq[String],
-      limit: Int
+      limit: Option[Int] = None
   ): F[Map[String, Seq[DataPoint]]] =
     queryProtobuf(
       Items(
@@ -323,7 +284,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
             externalId,
             inclusiveStart.toString,
             exclusiveEnd.toString,
-            Some(limit),
+            limit,
             Some(granularity),
             Some(aggregates)
           )
@@ -350,103 +311,25 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
         accept = "application/protobuf"
       )
 
-  private def toAggregateMap(
-      aggregateDataPoints: Seq[AggregateDataPoint]
-  ): Map[String, Seq[DataPoint]] =
-    Map(
-      "average" ->
-        aggregateDataPoints.flatMap(p => p.average.toList.map(v => DataPoint(p.timestamp, v))),
-      "max" ->
-        aggregateDataPoints.flatMap(p => p.max.toList.map(v => DataPoint(p.timestamp, v))),
-      "min" ->
-        aggregateDataPoints.flatMap(p => p.min.toList.map(v => DataPoint(p.timestamp, v))),
-      "count" ->
-        aggregateDataPoints.flatMap(p => p.count.toList.map(v => DataPoint(p.timestamp, v))),
-      "sum" ->
-        aggregateDataPoints.flatMap(p => p.sum.toList.map(v => DataPoint(p.timestamp, v))),
-      "interpolation" ->
-        aggregateDataPoints.flatMap(
-          p => p.interpolation.toList.map(v => DataPoint(p.timestamp, v))
-        ),
-      "stepInterpolation" ->
-        aggregateDataPoints.flatMap(
-          p => p.stepInterpolation.toList.map(v => DataPoint(p.timestamp, v))
-        ),
-      "continuousVariance" ->
-        aggregateDataPoints.flatMap(
-          p => p.continuousVariance.toList.map(v => DataPoint(p.timestamp, v))
-        ),
-      "discreteVariance" ->
-        aggregateDataPoints.flatMap(
-          p => p.discreteVariance.toList.map(v => DataPoint(p.timestamp, v))
-        ),
-      "totalVariation" ->
-        aggregateDataPoints.flatMap(
-          p => p.totalVariation.toList.map(v => DataPoint(p.timestamp, v))
-        )
-    ).filter(kv => kv._2.nonEmpty)
-
   def queryStringsById(
       id: Long,
       inclusiveStart: Long,
-      exclusiveEnd: Long
-  ): F[Seq[StringDataPoint]] =
-    requestSession
-      .sendCdf(
-        { request =>
-          request
-            .post(uri"$baseUri/list")
-            .body(Items(Seq(QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString))))
-            .response(asProtobufOrCdpApiError)
-            .mapResponse {
-              case Left(value) => throw value.error
-              case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-              case Right(Right(dataPointListResponse)) =>
-                parseStringDataPoints(dataPointListResponse)
-            }
-        },
-        accept = "application/protobuf"
-      )
+      exclusiveEnd: Long,
+      limit: Option[Int] = None
+  ): F[Seq[StringDataPoint]] = {
+    val query = QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString, limit)
+    queryProtobuf(Items(Seq(query)))(parseStringDataPoints)
+  }
 
   def queryStringsByExternalId(
       externalId: String,
       inclusiveStart: Long,
-      exclusiveEnd: Long
-  ): F[Seq[StringDataPoint]] = {
-    val query = QueryRangeByExternalId(externalId, inclusiveStart.toString, exclusiveEnd.toString)
-    queryProtobuf(Items(Seq(query))) { dataPointListResponse =>
-      parseStringDataPoints(dataPointListResponse)
-    }
-  }
-
-  def queryStringsByExternalIdWithLimit(
-      externalId: String,
-      inclusiveStart: Long,
       exclusiveEnd: Long,
-      limit: Int
+      limit: Option[Int] = None
   ): F[Seq[StringDataPoint]] = {
-    val query = QueryRangeByExternalId(
-      externalId,
-      inclusiveStart.toString,
-      exclusiveEnd.toString,
-      limit = Some(limit)
-    )
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/list")
-          .body(Items(Seq(query)))
-          .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
-            case Right(Right(value)) =>
-              value.items.headOption match {
-                case Some(items) => items.datapoints
-                case None => Seq.empty
-              }
-          }
-      }
+    val query =
+      QueryRangeByExternalId(externalId, inclusiveStart.toString, exclusiveEnd.toString, limit)
+    queryProtobuf(Items(Seq(query)))(parseStringDataPoints)
   }
 
   def getLatestDataPointById(id: Long): F[Option[DataPoint]] =
@@ -572,7 +455,7 @@ class DataPointsResourceV1[F[_]](val requestSession: RequestSession[F])
       }
 }
 
-object DataPointsResourceV1 {
+object DataPointsResource {
   implicit val instantEncoder: Encoder[Instant] = Encoder.encodeLong.contramap(_.toEpochMilli)
   implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
 
@@ -656,4 +539,40 @@ object DataPointsResourceV1 {
       }
     })
   }
+
+  private def toAggregateMap(
+      aggregateDataPoints: Seq[AggregateDataPoint]
+  ): Map[String, Seq[DataPoint]] =
+    Map(
+      "average" ->
+        aggregateDataPoints.flatMap(p => p.average.toList.map(v => DataPoint(p.timestamp, v))),
+      "max" ->
+        aggregateDataPoints.flatMap(p => p.max.toList.map(v => DataPoint(p.timestamp, v))),
+      "min" ->
+        aggregateDataPoints.flatMap(p => p.min.toList.map(v => DataPoint(p.timestamp, v))),
+      "count" ->
+        aggregateDataPoints.flatMap(p => p.count.toList.map(v => DataPoint(p.timestamp, v))),
+      "sum" ->
+        aggregateDataPoints.flatMap(p => p.sum.toList.map(v => DataPoint(p.timestamp, v))),
+      "interpolation" ->
+        aggregateDataPoints.flatMap(
+          p => p.interpolation.toList.map(v => DataPoint(p.timestamp, v))
+        ),
+      "stepInterpolation" ->
+        aggregateDataPoints.flatMap(
+          p => p.stepInterpolation.toList.map(v => DataPoint(p.timestamp, v))
+        ),
+      "continuousVariance" ->
+        aggregateDataPoints.flatMap(
+          p => p.continuousVariance.toList.map(v => DataPoint(p.timestamp, v))
+        ),
+      "discreteVariance" ->
+        aggregateDataPoints.flatMap(
+          p => p.discreteVariance.toList.map(v => DataPoint(p.timestamp, v))
+        ),
+      "totalVariation" ->
+        aggregateDataPoints.flatMap(
+          p => p.totalVariation.toList.map(v => DataPoint(p.timestamp, v))
+        )
+    ).filter(kv => kv._2.nonEmpty)
 }
