@@ -24,7 +24,7 @@ class Events[F[_]](val requestSession: RequestSession[F])
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[Event]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit, partition)
@@ -50,7 +50,7 @@ class Events[F[_]](val requestSession: RequestSession[F])
   private[sdk] def filterWithCursor(
       filter: EventsFilter,
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[Event]] =
     Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit, partition)

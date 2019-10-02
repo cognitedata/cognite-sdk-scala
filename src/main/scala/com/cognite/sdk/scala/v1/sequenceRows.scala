@@ -16,14 +16,14 @@ final case class SequenceRowsQueryById(
     id: Long,
     start: Long,
     end: Long,
-    limit: Int,
-    columns: Option[Seq[Long]]
+    limit: Option[Int],
+    columns: Option[Seq[String]]
 )
 final case class SequenceRowsQueryByExternalId(
     externalId: String,
     start: Long,
     end: Long,
-    limit: Int,
+    limit: Option[Int],
     columns: Option[Seq[String]]
 )
 final case class SequenceRowsResponse(

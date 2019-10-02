@@ -85,11 +85,11 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     assert(createdTimeFilterPartitionResults.length == 84)
 
     val createdTimeFilterResultsWithLimit = client.assets
-      .filterWithLimit(
+      .filter(
         AssetsFilter(
           createdTime = Some(
             TimeRange(Instant.ofEpochMilli(1560756441301L), Instant.ofEpochMilli(1560756445000L)))),
-        10
+        Some(10)
       )
       .compile
       .toList

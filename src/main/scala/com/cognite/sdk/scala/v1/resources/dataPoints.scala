@@ -217,19 +217,13 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
           }
       }
 
-  def queryById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Seq[DataPoint]] = {
-    val query = QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString)
-    queryProtobuf(Items(Seq(query)))(parseNumericDataPoints)
-  }
-
-  def queryByIdWithLimit(
+  def queryById(
       id: Long,
       inclusiveStart: Long,
       exclusiveEnd: Long,
-      limit: Int
+      limit: Option[Int] = None
   ): F[Seq[DataPoint]] = {
-    val query =
-      QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString, limit = Some(limit))
+    val query = QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString, limit)
     queryProtobuf(Items(Seq(query)))(parseNumericDataPoints)
   }
 

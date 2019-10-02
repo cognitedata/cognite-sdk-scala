@@ -79,7 +79,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[File]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
@@ -102,7 +102,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
   private[sdk] def filterWithCursor(
       filter: FilesFilter,
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[File]] =
     Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit, None)

@@ -88,41 +88,9 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
   def queryById(
       id: Long,
       inclusiveStart: Long,
-      exclusiveEnd: Long
-  ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
-    queryByIdWithLimitAndMaybeColumns(id, inclusiveStart, exclusiveEnd)
-
-  def queryByIdWithLimit(
-      id: Long,
-      inclusiveStart: Long,
       exclusiveEnd: Long,
-      limit: Int
-  ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
-    queryByIdWithLimitAndMaybeColumns(id, inclusiveStart, exclusiveEnd, limit = limit)
-
-  def queryByIdWithColumns(
-      id: Long,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
-      columns: Seq[Long]
-  ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
-    queryByIdWithLimitAndMaybeColumns(id, inclusiveStart, exclusiveEnd, columns = Some(columns))
-
-  def queryByIdWithColumnsAndLimit(
-      id: Long,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
-      columns: Seq[Long],
-      limit: Int
-  ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
-    queryByIdWithLimitAndMaybeColumns(id, inclusiveStart, exclusiveEnd, limit, Some(columns))
-
-  private def queryByIdWithLimitAndMaybeColumns(
-      id: Long,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
-      limit: Int = 100,
-      columns: Option[Seq[Long]] = None
+      limit: Option[Int] = None,
+      columns: Option[Seq[String]] = None
   ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
     requestSession
       .sendCdf { request =>
@@ -140,56 +108,8 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
   def queryByExternalId(
       externalId: String,
       inclusiveStart: Long,
-      exclusiveEnd: Long
-  ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
-    queryByExternalIdWithLimitAndMaybeColumns(externalId, inclusiveStart, exclusiveEnd)
-
-  def queryByExternalIdWithLimit(
-      externalId: String,
-      inclusiveStart: Long,
       exclusiveEnd: Long,
-      limit: Int
-  ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
-    queryByExternalIdWithLimitAndMaybeColumns(
-      externalId,
-      inclusiveStart,
-      exclusiveEnd,
-      limit = limit
-    )
-
-  def queryByExternalIdWithColumns(
-      externalId: String,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
-      columns: Seq[String]
-  ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
-    queryByExternalIdWithLimitAndMaybeColumns(
-      externalId,
-      inclusiveStart,
-      exclusiveEnd,
-      columns = Some(columns)
-    )
-
-  def queryByExternalIdWithColumnsAndLimit(
-      externalId: String,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
-      columns: Seq[String],
-      limit: Int
-  ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
-    queryByExternalIdWithLimitAndMaybeColumns(
-      externalId,
-      inclusiveStart,
-      exclusiveEnd,
-      limit,
-      Some(columns)
-    )
-
-  private def queryByExternalIdWithLimitAndMaybeColumns(
-      externalId: String,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
-      limit: Int = 100,
+      limit: Option[Int] = None,
       columns: Option[Seq[String]] = None
   ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
     requestSession

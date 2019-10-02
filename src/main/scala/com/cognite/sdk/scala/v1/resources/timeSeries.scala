@@ -25,7 +25,7 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[TimeSeries]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
@@ -51,7 +51,7 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
   override private[sdk] def filterWithCursor(
       filter: TimeSeriesFilter,
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[TimeSeries]] = {
     val uriWithAssetIds = filter.assetIds.fold(baseUri)(

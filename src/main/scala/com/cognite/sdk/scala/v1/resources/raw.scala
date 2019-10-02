@@ -41,7 +41,7 @@ class RawDatabases[F[_]](val requestSession: RequestSession[F])
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[RawDatabase]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
@@ -75,7 +75,7 @@ class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[RawTable]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
@@ -127,7 +127,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[RawRow]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
