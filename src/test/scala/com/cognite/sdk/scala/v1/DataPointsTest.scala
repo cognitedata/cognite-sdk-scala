@@ -1,6 +1,8 @@
 package com.cognite.sdk.scala.v1
 
+import java.time.Instant
 import java.util.UUID
+
 import com.cognite.sdk.scala.common.{CdpApiException, DataPointsResourceBehaviors, SdkTest}
 
 class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
@@ -25,8 +27,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
   it should "be possible to correctly query aggregate values" in {
     val aggregates = client.dataPoints.queryAggregatesById(
       1580330145648L,
-      0L,
-      1564272000000L,
+      Instant.ofEpochMilli(0L),
+      Instant.ofEpochMilli(1564272000000L),
       "1d",
       Seq("average", "stepInterpolation")
     )
@@ -38,8 +40,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     val limit = 10
     val aggregatesWithLimit = client.dataPoints.queryAggregatesById(
       1580330145648L,
-      0L,
-      1564272000000L,
+      Instant.ofEpochMilli(0L),
+      Instant.ofEpochMilli(1564272000000L),
       "1d",
       Seq("average", "stepInterpolation"),
       Some(limit)
@@ -53,8 +55,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
 
     val aggregatesWithZeroLimit = client.dataPoints.queryAggregatesById(
       1580330145648L,
-      0L,
-      1564272000000L,
+      Instant.ofEpochMilli(0L),
+      Instant.ofEpochMilli(1564272000000L),
       "1d",
       Seq("average", "stepInterpolation"),
       Some(0)
@@ -65,8 +67,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
       // negative limit parameter is not allowed by the API
       client.dataPoints.queryAggregatesById(
         1580330145648L,
-        0L,
-        1564272000000L,
+        Instant.ofEpochMilli(0L),
+        Instant.ofEpochMilli(1564272000000L),
         "1d",
         Seq("average", "stepInterpolation"),
         Some(-123)
@@ -75,8 +77,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
 
     val extAggregates = client.dataPoints.queryAggregatesByExternalId(
       "test__constant_74_with_noise",
-      0L,
-      1564272000000L,
+      Instant.ofEpochMilli(0L),
+      Instant.ofEpochMilli(1564272000000L),
       "1d",
       Seq("average", "stepInterpolation")
     )
@@ -93,8 +95,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     extStepInterpolation.last.value should equal(74.07992673539263)
     val aggregates2 = client.dataPoints.queryAggregatesById(
       1580330145648L,
-      0L,
-      1564272000000L,
+      Instant.ofEpochMilli(0L),
+      Instant.ofEpochMilli(1564272000000L),
       "1h",
       Seq("sum", "stepInterpolation")
     )
@@ -107,8 +109,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
 
     val extAggregatesWithLimit = client.dataPoints.queryAggregatesByExternalId(
       "test__constant_74_with_noise",
-      0L,
-      1564272000000L,
+      Instant.ofEpochMilli(0L),
+      Instant.ofEpochMilli(1564272000000L),
       "1d",
       Seq("average", "stepInterpolation"),
       Some(limit)
@@ -124,8 +126,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     extStepInterpolationWithLimit.last.value should equal(stepInterpolationsWithLimit.last.value)
     val extAggregatesWithZeroLimit = client.dataPoints.queryAggregatesByExternalId(
       "test__constant_74_with_noise",
-      0L,
-      1564272000000L,
+      Instant.ofEpochMilli(0L),
+      Instant.ofEpochMilli(1564272000000L),
       "1d",
       Seq("average", "stepInterpolation"),
       Some(0)
@@ -136,8 +138,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
       // negative limit parameter is not allowed by the API
       client.dataPoints.queryAggregatesByExternalId(
         "test__constant_74_with_noise",
-        0L,
-        1564272000000L,
+        Instant.ofEpochMilli(0L),
+        Instant.ofEpochMilli(1564272000000L),
         "1d",
         Seq("average", "stepInterpolation"),
         Some(-1)
@@ -147,8 +149,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     val extAggregates2 =
       client.dataPoints.queryAggregatesByExternalId(
         "test__constant_74_with_noise",
-        0L,
-        1564272000000L,
+        Instant.ofEpochMilli(0L),
+        Instant.ofEpochMilli(1564272000000L),
         "1h",
         Seq("sum", "stepInterpolation")
       )
@@ -159,8 +161,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     assertThrows[CdpApiException] {
       val _ = client.dataPoints.queryAggregatesById(
         1580330145648L,
-        0L,
-        1564272000000L,
+        Instant.ofEpochMilli(0L),
+        Instant.ofEpochMilli(1564272000000L),
         "1d",
         Seq("invalid aggregate1", "minx")
       )
@@ -168,8 +170,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     assertThrows[CdpApiException] {
       val _ = client.dataPoints.queryAggregatesById(
         1580330145648L,
-        0L,
-        1564272000000L,
+        Instant.ofEpochMilli(0L),
+        Instant.ofEpochMilli(1564272000000L),
         "1d",
         Seq.empty
       )
@@ -178,8 +180,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
 
   val sumsOnly = client.dataPoints.queryAggregatesById(
     1580330145648L,
-    0L,
-    1564272000000L,
+    Instant.ofEpochMilli(0L),
+    Instant.ofEpochMilli(1564272000000L),
     "1d",
     Seq("min")
   )
@@ -190,8 +192,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     val caught = intercept[CdpApiException] {
       client.dataPoints.queryById(
         missingId,
-        0L,
-        1564272000000L
+        Instant.ofEpochMilli(0L),
+        Instant.ofEpochMilli(1564272000000L)
       )
     }
     caught.missing.get.head.toMap("id").toString() shouldEqual missingId.toString
@@ -199,8 +201,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     val sCaught = intercept[CdpApiException] {
       client.dataPoints.queryById(
         missingId,
-        0L,
-        1564272000000L
+        Instant.ofEpochMilli(0L),
+        Instant.ofEpochMilli(1564272000000L)
       )
     }
     sCaught.missing.get.head.toMap("id").toString() shouldEqual missingId.toString
@@ -208,8 +210,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     val aggregateCaught = intercept[CdpApiException] {
       client.dataPoints.queryAggregatesById(
         missingId,
-        0L,
-        1564272000000L,
+        Instant.ofEpochMilli(0L),
+        Instant.ofEpochMilli(1564272000000L),
         "1d",
         Seq("average")
       )
