@@ -185,12 +185,14 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
           }
       }
 
-  def deleteRangeById(id: Long, inclusiveStart: Long, exclusiveEnd: Long): F[Unit] =
+  def deleteRangeById(id: Long, inclusiveStart: Instant, exclusiveEnd: Instant): F[Unit] =
     requestSession
       .sendCdf { request =>
         request
           .post(uri"$baseUri/delete")
-          .body(Items(Seq(DeleteRangeById(id, inclusiveStart, exclusiveEnd))))
+          .body(
+            Items(Seq(DeleteRangeById(id, inclusiveStart.toEpochMilli, exclusiveEnd.toEpochMilli)))
+          )
           .response(asJson[Either[CdpApiError, Unit]])
           .mapResponse {
             case Left(value) => throw value.error
@@ -201,14 +203,24 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   def deleteRangeByExternalId(
       externalId: String,
-      inclusiveStart: Long,
-      exclusiveEnd: Long
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant
   ): F[Unit] =
     requestSession
       .sendCdf { request =>
         request
           .post(uri"$baseUri/delete")
-          .body(Items(Seq(DeleteRangeByExternalId(externalId, inclusiveStart, exclusiveEnd))))
+          .body(
+            Items(
+              Seq(
+                DeleteRangeByExternalId(
+                  externalId,
+                  inclusiveStart.toEpochMilli,
+                  exclusiveEnd.toEpochMilli
+                )
+              )
+            )
+          )
           .response(asJson[Either[CdpApiError, Unit]])
           .mapResponse {
             case Left(value) => throw value.error
@@ -219,29 +231,39 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   def queryById(
       id: Long,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
       limit: Option[Int] = None
   ): F[Seq[DataPoint]] = {
-    val query = QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString, limit)
+    val query = QueryRangeById(
+      id,
+      inclusiveStart.toEpochMilli.toString,
+      exclusiveEnd.toEpochMilli.toString,
+      limit
+    )
     queryProtobuf(Items(Seq(query)))(parseNumericDataPoints)
   }
 
   def queryByExternalId(
       externalId: String,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
       limit: Option[Int] = None
   ): F[Seq[DataPoint]] = {
     val query =
-      QueryRangeByExternalId(externalId, inclusiveStart.toString, exclusiveEnd.toString, limit)
+      QueryRangeByExternalId(
+        externalId,
+        inclusiveStart.toEpochMilli.toString,
+        exclusiveEnd.toEpochMilli.toString,
+        limit
+      )
     queryProtobuf(Items(Seq(query)))(parseNumericDataPoints)
   }
 
   def queryAggregatesById(
       id: Long,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
       granularity: String,
       aggregates: Seq[String],
       limit: Option[Int] = None
@@ -251,8 +273,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         Seq(
           QueryRangeById(
             id,
-            inclusiveStart.toString,
-            exclusiveEnd.toString,
+            inclusiveStart.toEpochMilli.toString,
+            exclusiveEnd.toEpochMilli.toString,
             limit,
             Some(granularity),
             Some(aggregates)
@@ -265,8 +287,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   def queryAggregatesByExternalId(
       externalId: String,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
       granularity: String,
       aggregates: Seq[String],
       limit: Option[Int] = None
@@ -276,8 +298,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         Seq(
           QueryRangeByExternalId(
             externalId,
-            inclusiveStart.toString,
-            exclusiveEnd.toString,
+            inclusiveStart.toEpochMilli.toString,
+            exclusiveEnd.toEpochMilli.toString,
             limit,
             Some(granularity),
             Some(aggregates)
@@ -307,22 +329,32 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   def queryStringsById(
       id: Long,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
       limit: Option[Int] = None
   ): F[Seq[StringDataPoint]] = {
-    val query = QueryRangeById(id, inclusiveStart.toString, exclusiveEnd.toString, limit)
+    val query = QueryRangeById(
+      id,
+      inclusiveStart.toEpochMilli.toString,
+      exclusiveEnd.toEpochMilli.toString,
+      limit
+    )
     queryProtobuf(Items(Seq(query)))(parseStringDataPoints)
   }
 
   def queryStringsByExternalId(
       externalId: String,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
       limit: Option[Int] = None
   ): F[Seq[StringDataPoint]] = {
     val query =
-      QueryRangeByExternalId(externalId, inclusiveStart.toString, exclusiveEnd.toString, limit)
+      QueryRangeByExternalId(
+        externalId,
+        inclusiveStart.toEpochMilli.toString,
+        exclusiveEnd.toEpochMilli.toString,
+        limit
+      )
     queryProtobuf(Items(Seq(query)))(parseStringDataPoints)
   }
 
