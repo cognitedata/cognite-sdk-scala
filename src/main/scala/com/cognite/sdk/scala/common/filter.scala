@@ -29,7 +29,7 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
       limit: Option[Int]
   ): Stream[F, R] =
     Readable
-      .pullFromCursorWithLimit(cursor, limit, None, filterWithCursor(filter, _, _, _))
+      .pullFromCursor(cursor, limit, None, filterWithCursor(filter, _, _, _))
       .stream
 
   def filter(filter: Fi, limit: Option[Int] = None): Stream[F, R] =
@@ -37,14 +37,14 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
 }
 
 trait PartitionedFilter[R, Fi, F[_]] extends Filter[R, Fi, F] {
-  private def filterPartitionsMaybeWithLimit(
+  def filterPartitions(
       filter: Fi,
       numPartitions: Int,
-      limitPerPartition: Option[Int]
-  ) =
+      limitPerPartition: Option[Int] = None
+  ): Seq[Stream[F, R]] =
     1.to(numPartitions).map { i =>
       Readable
-        .pullFromCursorWithLimit(
+        .pullFromCursor(
           None,
           limitPerPartition,
           Some(Partition(i, numPartitions)),
@@ -52,13 +52,6 @@ trait PartitionedFilter[R, Fi, F[_]] extends Filter[R, Fi, F] {
         )
         .stream
     }
-
-  def filterPartitions(
-      filter: Fi,
-      numPartitions: Int,
-      limitPerPartition: Option[Int] = None
-  ): Seq[Stream[F, R]] =
-    filterPartitionsMaybeWithLimit(filter, numPartitions, limitPerPartition)
 
   def filterConcurrently(filter: Fi, numPartitions: Int, limitPerPartition: Option[Int] = None)(
       implicit c: Concurrent[F]
