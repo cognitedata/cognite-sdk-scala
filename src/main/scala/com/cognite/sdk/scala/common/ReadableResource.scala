@@ -19,16 +19,6 @@ trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[R]]
-
-  def readFromCursor(cursor: String): F[ItemsWithCursor[R]] =
-    readWithCursor(Some(cursor), None, None)
-
-  def readFromCursorWithLimit(
-      cursor: String,
-      limit: Int
-  ): F[ItemsWithCursor[R]] =
-    readWithCursor(Some(cursor), Some(limit), None)
-
   def read(limit: Option[Int] = None): F[ItemsWithCursor[R]] =
     readWithCursor(None, limit, None)
 
@@ -37,21 +27,18 @@ trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
       limit: Option[Int]
   ): Stream[F, R] =
     Readable
-      .pullFromCursorWithLimit(cursor, limit, None, readWithCursor)
+      .pullFromCursor(cursor, limit, None, readWithCursor)
       .stream
-
-  def listFromCursor(cursor: String, limit: Option[Int]): Stream[F, R] =
-    listWithNextCursor(Some(cursor), limit)
 
   def list(limit: Option[Int] = None): Stream[F, R] =
     listWithNextCursor(None, limit)
 }
 
 trait PartitionedReadable[R, F[_]] extends Readable[R, F] {
-  private def listPartitionsMaybeWithLimit(numPartitions: Int, limitPerPartition: Option[Int]) =
+  def listPartitions(numPartitions: Int, limitPerPartition: Option[Int] = None): Seq[Stream[F, R]] =
     1.to(numPartitions).map { i =>
       Readable
-        .pullFromCursorWithLimit(
+        .pullFromCursor(
           None,
           limitPerPartition,
           Some(Partition(i, numPartitions)),
@@ -59,9 +46,6 @@ trait PartitionedReadable[R, F[_]] extends Readable[R, F] {
         )
         .stream
     }
-
-  def listPartitions(numPartitions: Int, limitPerPartition: Option[Int] = None): Seq[Stream[F, R]] =
-    listPartitionsMaybeWithLimit(numPartitions, limitPerPartition)
 
   def listConcurrently(numPartitions: Int, limitPerPartition: Option[Int] = None)(
       implicit c: Concurrent[F]
@@ -71,7 +55,7 @@ trait PartitionedReadable[R, F[_]] extends Readable[R, F] {
 
 object Readable {
   @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-  private[sdk] def pullFromCursorWithLimit[F[_], R](
+  private[sdk] def pullFromCursor[F[_], R](
       cursor: Option[String],
       limit: Option[Int],
       partition: Option[Partition],
@@ -84,7 +68,7 @@ object Readable {
         Pull.output(Chunk.seq(items.items)) >>
           items.nextCursor
             .map { s =>
-              pullFromCursorWithLimit(Some(s), limit.map(_ - items.items.size), partition, get)
+              pullFromCursor(Some(s), limit.map(_ - items.items.size), partition, get)
             }
             .getOrElse(Pull.done)
       }
