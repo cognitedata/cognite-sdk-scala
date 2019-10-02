@@ -16,7 +16,7 @@ final case class Partition(index: Int = 1, numPartitions: Int = 1) {
 trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
   private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[R]]
 
@@ -25,42 +25,30 @@ trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
 
   def readFromCursorWithLimit(
       cursor: String,
-      limit: Long
+      limit: Int
   ): F[ItemsWithCursor[R]] =
     readWithCursor(Some(cursor), Some(limit), None)
 
-  def read(): F[ItemsWithCursor[R]] =
-    readWithCursor(None, None, None)
-
-  def readWithLimit(limit: Long): F[ItemsWithCursor[R]] =
-    readWithCursor(None, Some(limit), None)
+  def read(limit: Option[Int] = None): F[ItemsWithCursor[R]] =
+    readWithCursor(None, limit, None)
 
   private[sdk] def listWithNextCursor(
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Int]
   ): Stream[F, R] =
     Readable
       .pullFromCursorWithLimit(cursor, limit, None, readWithCursor)
       .stream
 
-  def listFromCursor(cursor: String): Stream[F, R] =
-    listWithNextCursor(Some(cursor), None)
+  def listFromCursor(cursor: String, limit: Option[Int]): Stream[F, R] =
+    listWithNextCursor(Some(cursor), limit)
 
-  def listWithLimit(limit: Long): Stream[F, R] =
-    listWithNextCursor(None, Some(limit))
-
-  def listFromCursorWithLimit(
-      cursor: String,
-      limit: Long
-  ): Stream[F, R] =
-    listWithNextCursor(Some(cursor), Some(limit))
-
-  def list(): Stream[F, R] =
-    listWithNextCursor(None, None)
+  def list(limit: Option[Int] = None): Stream[F, R] =
+    listWithNextCursor(None, limit)
 }
 
 trait PartitionedReadable[R, F[_]] extends Readable[R, F] {
-  private def listPartitionsMaybeWithLimit(numPartitions: Int, limitPerPartition: Option[Long]) =
+  private def listPartitionsMaybeWithLimit(numPartitions: Int, limitPerPartition: Option[Int]) =
     1.to(numPartitions).map { i =>
       Readable
         .pullFromCursorWithLimit(
@@ -72,28 +60,22 @@ trait PartitionedReadable[R, F[_]] extends Readable[R, F] {
         .stream
     }
 
-  def listPartitions(numPartitions: Int): Seq[Stream[F, R]] =
-    listPartitionsMaybeWithLimit(numPartitions, None)
+  def listPartitions(numPartitions: Int, limitPerPartition: Option[Int] = None): Seq[Stream[F, R]] =
+    listPartitionsMaybeWithLimit(numPartitions, limitPerPartition)
 
-  def listPartitionsWithLimit(numPartitions: Int, limitPerPartition: Long): Seq[Stream[F, R]] =
-    listPartitionsMaybeWithLimit(numPartitions, Some(limitPerPartition))
-
-  def listConcurrently(numPartitions: Int)(implicit c: Concurrent[F]): Stream[F, R] =
-    listPartitions(numPartitions).fold(Stream.empty)(_.merge(_))
-
-  def listConcurrentlyWithLimit(numPartitions: Int, limitPerPartition: Long)(
+  def listConcurrently(numPartitions: Int, limitPerPartition: Option[Int] = None)(
       implicit c: Concurrent[F]
   ): Stream[F, R] =
-    listPartitionsWithLimit(numPartitions, limitPerPartition).fold(Stream.empty)(_.merge(_))
+    listPartitions(numPartitions, limitPerPartition).fold(Stream.empty)(_.merge(_))
 }
 
 object Readable {
   @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private[sdk] def pullFromCursorWithLimit[F[_], R](
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition],
-      get: (Option[String], Option[Long], Option[Partition]) => F[ItemsWithCursor[R]]
+      get: (Option[String], Option[Int], Option[Partition]) => F[ItemsWithCursor[R]]
   ): Pull[F, R, Unit] =
     if (limit.exists(_ <= 0)) {
       Pull.done
@@ -108,7 +90,7 @@ object Readable {
       }
     }
 
-  private def uriWithCursorAndLimit(baseUri: Uri, cursor: Option[String], limit: Option[Long]) =
+  private def uriWithCursorAndLimit(baseUri: Uri, cursor: Option[String], limit: Option[Int]) =
     cursor
       .fold(baseUri)(baseUri.param("cursor", _))
       .param("limit", limit.getOrElse(Resource.defaultLimit).toString)
@@ -117,7 +99,7 @@ object Readable {
       requestSession: RequestSession[F],
       baseUri: Uri,
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   )(
       implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]

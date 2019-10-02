@@ -11,16 +11,16 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
     }
 
     it should "read items with limit" in {
-      (readable.readWithLimit(1).items should have).length(Math.min(listLength.toLong, 1))
-      (readable.readWithLimit(2).items should have).length(Math.min(listLength.toLong,2))
+      (readable.read(limit = Some(1)).items should have).length(Math.min(listLength.toLong, 1))
+      (readable.read(limit = Some(2)).items should have).length(Math.min(listLength.toLong,2))
     }
 
     it should "read all items" in {
       val first1Length = readable.list().take(1).compile.toList.length
       first1Length should be(Math.min(listLength, 1))
-      val first2Length = readable.listWithLimit(2).compile.toList.length
+      val first2Length = readable.list(limit = Some(2)).compile.toList.length
       first2Length should be(Math.min(listLength, 2))
-      val allLength = readable.listWithLimit(3).compile.toList.length
+      val allLength = readable.list(limit = Some(3)).compile.toList.length
       allLength should be(Math.min(listLength, 3))
     }
   }
@@ -39,7 +39,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
     }
 
     it should "read item partitions with limit" in {
-      val partitionStreams = readable.listPartitionsWithLimit(2, 2)
+      val partitionStreams = readable.listPartitions(2, limitPerPartition = Some(2))
       partitionStreams should have length 2
       val partition1Items = partitionStreams.head.compile.toList
       val partition2Items = partitionStreams(1).compile.toList
@@ -50,9 +50,9 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
     it should "read all items using partitions" in {
       val first1Length = readable.list().take(1).compile.toList.length
       first1Length should be(1)
-      val first2Length = readable.listWithLimit(2).compile.toList.length
+      val first2Length = readable.list(Some(2)).compile.toList.length
       first2Length should be(2)
-      val allLength = readable.listWithLimit(3).compile.toList.length
+      val allLength = readable.list(Some(3)).compile.toList.length
       allLength should be(3)
       val unlimitedLength = readable.list().map(_ => 1).compile.toList.length
       val partitionsLength = readable.listPartitions(40)
@@ -72,7 +72,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       supportsMissingAndThrown: Boolean
   ): Unit = {
     it should "support retrieving items by id" in {
-      val firstTwoItemIds = readable.readWithLimit(2).items.map(_.id)
+      val firstTwoItemIds = readable.read(limit = Some(2)).items.map(_.id)
       firstTwoItemIds should have size 2
       val maybeItemsRead = readable.retrieveByIds(firstTwoItemIds)
       val itemsReadIds = maybeItemsRead.map(_.id)

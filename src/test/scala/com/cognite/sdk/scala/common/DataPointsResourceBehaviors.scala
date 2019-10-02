@@ -26,7 +26,7 @@ trait DataPointsResourceBehaviors extends Matchers { this: FlatSpec =>
         val points = dataPoints.queryById(timeSeriesId, startTime, endTime + 1)
         points should have size testDataPoints.size.toLong
 
-        val pointsWithLimit = dataPoints.queryByIdWithLimit(timeSeriesId, startTime, endTime + 1, 3)
+        val pointsWithLimit = dataPoints.queryById(timeSeriesId, startTime, endTime + 1, Some(3))
         pointsWithLimit should have size 3
 
         val latest = dataPoints.getLatestDataPointById(timeSeriesId)

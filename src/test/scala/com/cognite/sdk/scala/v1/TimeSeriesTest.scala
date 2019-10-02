@@ -79,11 +79,11 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
     manyTimeSeriesForAsset.size should be (327)
 
     val manyTimeSeriesForAssetWithLimit = client.timeSeries
-      .filterWithLimit(
+      .filter(
         TimeSeriesFilter(
           assetIds = Some(Seq(95453437348104L))
         ),
-        100
+        limit = Some(100)
       )
       .compile
       .toList

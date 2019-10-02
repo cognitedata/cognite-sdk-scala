@@ -98,13 +98,13 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       .toList
     assert(createdTimeFilterPartitionsResults.length == 3)
     val createdTimeFilterResultsWithLimit = client.events
-      .filterWithLimit(
+      .filter(
         EventsFilter(
           createdTime = Some(
             TimeRange(Instant.ofEpochMilli(1500510008838L), Instant.ofEpochMilli(1550300000000L))
           )
         ),
-        1
+        limit = Some(1)
       )
       .compile
       .toList

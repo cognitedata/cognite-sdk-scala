@@ -10,7 +10,7 @@ import io.circe.syntax._
 
 final case class FilterRequest[T](
     filter: T,
-    limit: Option[Long],
+    limit: Option[Int],
     cursor: Option[String],
     partition: Option[String]
 )
@@ -19,31 +19,28 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
   private[sdk] def filterWithCursor(
       filter: Fi,
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[R]]
 
   private def filterWithNextCursor(
       filter: Fi,
       cursor: Option[String],
-      limit: Option[Long]
+      limit: Option[Int]
   ): Stream[F, R] =
     Readable
       .pullFromCursorWithLimit(cursor, limit, None, filterWithCursor(filter, _, _, _))
       .stream
 
-  def filter(filter: Fi): Stream[F, R] =
-    filterWithNextCursor(filter, None, None)
-
-  def filterWithLimit(filter: Fi, limit: Long): Stream[F, R] =
-    filterWithNextCursor(filter, None, Some(limit))
+  def filter(filter: Fi, limit: Option[Int] = None): Stream[F, R] =
+    filterWithNextCursor(filter, None, limit)
 }
 
 trait PartitionedFilter[R, Fi, F[_]] extends Filter[R, Fi, F] {
   private def filterPartitionsMaybeWithLimit(
       filter: Fi,
       numPartitions: Int,
-      limitPerPartition: Option[Long]
+      limitPerPartition: Option[Int]
   ) =
     1.to(numPartitions).map { i =>
       Readable
@@ -56,25 +53,17 @@ trait PartitionedFilter[R, Fi, F[_]] extends Filter[R, Fi, F] {
         .stream
     }
 
-  def filterPartitions(filter: Fi, numPartitions: Int): Seq[Stream[F, R]] =
-    filterPartitionsMaybeWithLimit(filter, numPartitions, None)
-
-  def filterPartitionsWithLimit(
+  def filterPartitions(
       filter: Fi,
       numPartitions: Int,
-      limitPerPartition: Long
+      limitPerPartition: Option[Int] = None
   ): Seq[Stream[F, R]] =
-    filterPartitionsMaybeWithLimit(filter, numPartitions, Some(limitPerPartition))
+    filterPartitionsMaybeWithLimit(filter, numPartitions, limitPerPartition)
 
-  def filterConcurrently(filter: Fi, numPartitions: Int)(implicit c: Concurrent[F]): Stream[F, R] =
-    filterPartitions(filter, numPartitions).fold(Stream.empty)(_.merge(_))
-
-  def filterConcurrentlyWithLimit(filter: Fi, numPartitions: Int, limitPerPartition: Long)(
+  def filterConcurrently(filter: Fi, numPartitions: Int, limitPerPartition: Option[Int] = None)(
       implicit c: Concurrent[F]
   ): Stream[F, R] =
-    filterPartitionsWithLimit(filter, numPartitions, limitPerPartition).fold(Stream.empty)(
-      _.merge(_)
-    )
+    filterPartitions(filter, numPartitions, limitPerPartition).fold(Stream.empty)(_.merge(_))
 }
 
 object Filter {
@@ -83,7 +72,7 @@ object Filter {
       baseUri: Uri,
       filter: Fi,
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   )(
       implicit readItemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],

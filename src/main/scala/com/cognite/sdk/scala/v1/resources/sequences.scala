@@ -24,7 +24,7 @@ class SequencesResource[F[_]](val requestSession: RequestSession[F])
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
-      limit: Option[Long],
+      limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[Sequence]] =
     Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
