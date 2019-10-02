@@ -77,10 +77,44 @@ print(c.timeSeries.retrieveById(timeSeriesId))
 If you have a time series ID you can retrieve its data points:
 
 ```scala
-c.dataPoints.queryById(timeSeriesId, 0, System.currentTimeMillis())
+c.dataPoints.queryById(timeSeriesId, 0, Instant.now())
 ```
 
-Note that aggregates are not yet supported.
+It is also possible to query aggregate values using a time series ID. Possible aggregate values can be found in the API [documentation](https://docs.cognite.com/api/v1/#operation/getMultiTimeSeriesDatapoints)
+You must also specify a granularity. 
+
+```scala
+val aggregates = Seq("count, average, max")
+c.dataPoints.queryAggregatesById(timeSeriesId, Instant.ofEpochMilli(0L), Instant.now(), "1d", aggregates)
+```
+
+If you need only the last data point for a time series or group of timeseries, you can retrieve these using:
+
+```scala
+val latestPoints: Map[Long: Option[DataPoint]] = c.dataPoints.getLatestDataPointsByIds(Seq(timeSeriesId))
+```
+
+This returns a map from each of the time series IDs specified in the function call to the latest data point for that
+ time series, if it exists, or None if it does not.
+
+There are analogous functions available to execute these queries using external IDs instead of IDs and returning string
+valued data points rather than numeric valued data points.
+
+### Insert and Delete Data
+
+It is possible to insert and delete numeric data points for specified time series. To insert data, you must
+specify the time series for which to insert data and the data points to insert:
+
+```scala
+val testDataPoints = (startTime to endTime by 1000).map(t => DataPoint(Instant.ofEpochMilli(t), math.random))
+c.dataPoints.insertById(timeSeriesId, testDataPoints)
+```
+
+To delete data, you must specify the time series and the range of times for which to delete data:
+
+```scala
+c.dataPoints.deleteRangeById(timeSeriesId, Instant.ofEpochMilli(0L), Instant.now())
+```
 
 ### Create an asset hierarchy
 
@@ -135,3 +169,28 @@ def eventsInSubTree(parents: Seq[Asset]): Seq[Event] = {
 
 eventsInSubTree(c.assets.retrieveByIds(Seq(rootId))).foreach(event => println(event.`type`))
 ```
+## 3D
+
+To list 3D models:
+
+```scala
+val models = c.threeDModels.list().take(10).compile.toList
+```
+
+You can create, update, delete, and retrieve models based on their ID. To access model revisions for a specific model:
+
+```scala
+val modelId = modelIds.head.id
+val revisions = c.threeDRevisions(modelId).list().take(10).compile.toList
+```
+
+You can also create, update, delete, and retrieve revisions based on their IDs. You can also list all the nodes in a
+particular revision, as well as the ancestors of a particular node (including the node itself):
+
+```scala
+val revisionId = revisionIds.head.id
+val nodes = c.threeDNodes(modelId, revisionId).list().listWithLimit(10).compile.toList
+val nodeId = nodeIds.head.id
+val ancestorNodes = c.threeDNodes(modelId, revisionId).ancestors(nodeId).compile.toList
+```
+
