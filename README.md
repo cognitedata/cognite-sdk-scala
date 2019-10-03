@@ -25,7 +25,7 @@ Create a simple client, specifying an application name:
 ```scala
 import com.cognite.sdk.scala.v1._
 
-val c = Client("scala-sdk-examples", "api.cognitedata.com")
+val c = Client("scala-sdk-examples", "https://api.cognitedata.com")
 ```
 
 Create a client using the cats-effect `IO`:
@@ -39,7 +39,7 @@ import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 implicit val cs = IO.contextShift(ExecutionContext.fromExecutor(Executors.newCachedThreadPool()))
 implicit val sttpBackend = AsyncHttpClientCatsBackend[cats.effect.IO]()
-val c = Client("scala-sdk-examples", "api.cognite.com")
+val c = new GremlinClient[IO, Nothing]("scala-sdk-examples", "https://api.cognitedata.com")
 ```
 
 The following examples will use `Client` with the identity effect.
