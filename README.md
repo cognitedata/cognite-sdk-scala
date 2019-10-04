@@ -39,7 +39,7 @@ import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 implicit val cs = IO.contextShift(ExecutionContext.fromExecutor(Executors.newCachedThreadPool()))
 implicit val sttpBackend = AsyncHttpClientCatsBackend[cats.effect.IO]()
-val c = new GremlinClient[IO, Nothing]("scala-sdk-examples", "https://api.cognitedata.com")
+val c = new GenericClient[IO, Nothing]("scala-sdk-examples", "https://api.cognitedata.com")
 ```
 
 The following examples will use `Client` with the identity effect.
