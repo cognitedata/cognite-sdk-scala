@@ -5,7 +5,7 @@ import java.time.Instant
 import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
 
 final case class TimeSeries(
-    name: String,
+    name: Option[String] = None,
     isString: Boolean = false,
     metadata: Option[Map[String, String]] = None,
     unit: Option[String] = None,
@@ -22,7 +22,7 @@ final case class TimeSeries(
 
 final case class TimeSeriesCreate(
     externalId: Option[String] = None,
-    name: String,
+    name: Option[String] = None,
     legacyName: Option[String] = None,
     isString: Boolean = false,
     metadata: Option[Map[String, String]] = None,

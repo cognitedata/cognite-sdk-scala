@@ -2,10 +2,10 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
+import com.cognite.sdk.scala.common.{DataPoint, ReadBehaviours, SdkTest, WritableBehaviors}
 
 class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
-  private val idsThatDoNotExist = Seq(999991L, 999992L)
+  private val idsThatDoNotExist = Seq(999991L, 999992L, 999993L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
   it should behave like readable(client.timeSeries)
@@ -17,12 +17,14 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
   it should behave like writable(
     client.timeSeries,
     Seq(
-      TimeSeries(name = "scala-sdk-write-example-1"),
-      TimeSeries(name = "scala-sdk-write-example-2")
+      TimeSeries(name = Some("scala-sdk-write-example-1")),
+      TimeSeries(name = Some("scala-sdk-write-example-2")),
+      TimeSeries()
     ),
     Seq(
-      TimeSeriesCreate(name = "scala-sdk-create-example-1"),
-      TimeSeriesCreate(name = "scala-sdk-create-example-2")
+      TimeSeriesCreate(name = Some("scala-sdk-create-example-1")),
+      TimeSeriesCreate(name = Some("scala-sdk-create-example-2")),
+      TimeSeriesCreate()
     ),
     idsThatDoNotExist,
     supportsMissingAndThrown = true
@@ -31,24 +33,26 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
   it should behave like writableWithExternalId(
     client.timeSeries,
     Seq(
-      TimeSeries(name = "scala-sdk-write-external-example-1", externalId = Some(shortRandom())),
-      TimeSeries(name = "scala-sdk-write-external-example-2", externalId = Some(shortRandom()))
+      TimeSeries(name = Some("scala-sdk-write-external-example-1"), externalId = Some(shortRandom())),
+      TimeSeries(name = Some("scala-sdk-write-external-example-2"), externalId = Some(shortRandom())),
+      TimeSeries(externalId = Some(shortRandom()))
     ),
     Seq(
-      TimeSeriesCreate(name = "scala-sdk-create-external-example-1", externalId = Some(shortRandom())),
-      TimeSeriesCreate(name = "scala-sdk-create-external-example-2", externalId = Some(shortRandom()))
+      TimeSeriesCreate(name = Some("scala-sdk-create-external-example-1"), externalId = Some(shortRandom())),
+      TimeSeriesCreate(name = Some("scala-sdk-create-external-example-2"), externalId = Some(shortRandom())),
+      TimeSeriesCreate(externalId = Some(shortRandom()))
     ),
     externalIdsThatDoNotExist,
     supportsMissingAndThrown = true
   )
 
   private val timeSeriesToCreate = Seq(
-    TimeSeries(name = "scala-sdk-write-example-1", description = Some("description-1")),
-    TimeSeries(name = "scala-sdk-write-example-2")
+    TimeSeries(name = Some("scala-sdk-write-example-1"), description = Some("description-1")),
+    TimeSeries(name = Some("scala-sdk-write-example-2"))
   )
   private val timeSeriesUpdates = Seq(
-    TimeSeries(name = "scala-sdk-write-example-1-1", description = Some(null)), // scalastyle:ignore null
-    TimeSeries(name = "scala-sdk-write-example-2-1", description = Some("scala-sdk-write-example-2"))
+    TimeSeries(name = Some("scala-sdk-write-example-1-1"), description = Some(null)), // scalastyle:ignore null
+    TimeSeries(name = Some("scala-sdk-write-example-2-1"), description = Some("scala-sdk-write-example-2"))
   )
   it should behave like updatable(
     client.timeSeries,
@@ -60,7 +64,7 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
       assert(readTimeSeries.size == timeSeriesUpdates.size)
       assert(readTimeSeries.size == timeSeriesToCreate.size)
       assert(updatedTimeSeries.size == timeSeriesUpdates.size)
-      assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) => updated.name == s"${read.name}-1" })
+      assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) => updated.name == Some(s"${read.name.get}-1")})
       assert(updatedTimeSeries.head.description.isEmpty)
       assert(updatedTimeSeries(1).description == timeSeriesUpdates(1).description)
       ()
@@ -202,4 +206,19 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
     )
     assert(limitDescriptionSearchResults.length == 5)
   }
+
+  it should "be possible to create and query a time series without a name" in {
+    val timeSeriesID = client.timeSeries.createFromRead(Seq(TimeSeries())).head.id
+    val startTime = System.currentTimeMillis()
+    val endTime = startTime + 20*1000
+    val dp = (startTime to endTime by 1000).map(t =>
+        DataPoint(Instant.ofEpochMilli(t), math.random))
+    client.dataPoints.insertById(timeSeriesID, dp)
+    Thread.sleep(5000)
+    val retrievedDp = client.dataPoints.queryById(
+      timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000))
+    dp should contain theSameElementsInOrderAs retrievedDp
+    client.dataPoints.deleteRangeById(timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000))
+  }
+
 }
