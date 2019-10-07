@@ -5,9 +5,9 @@ import com.cognite.sdk.scala.common.{DataPointsResourceBehaviors, SdkTest}
 
 class GreenfieldDataPointsTest extends SdkTest with DataPointsResourceBehaviors {
   override def withTimeSeries(testCode: TimeSeries => Any): Unit = {
-    val name = s"data-points-test-${UUID.randomUUID().toString}"
+    val name = Some(s"data-points-test-${UUID.randomUUID().toString}")
     val timeSeries = greenfieldClient.timeSeries.createFromRead(
-      Seq(TimeSeries(name = name, externalId = Some(name)))
+      Seq(TimeSeries(name = name, externalId = name))
     ).head
     try {
       val _ = testCode(timeSeries)
