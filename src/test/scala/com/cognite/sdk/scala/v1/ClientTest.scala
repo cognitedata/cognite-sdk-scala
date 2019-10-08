@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1
 
+import java.net.UnknownHostException
+
 import cats.{Id, Monad}
 import com.cognite.sdk.scala.common.{ApiKeyAuth, Auth, InvalidAuthentication, SdkTest}
 
@@ -48,4 +50,24 @@ class ClientTest extends SdkTest {
     )
   }
 
+  it should "give a friendly error message when using a malformed base url" in {
+    assertThrows[IllegalArgumentException] {
+      Client(
+        "relationships-unit-tests",
+        ""
+      )(auth, sttpBackend)
+    }
+    assertThrows[RuntimeException] {
+      Client(
+        "url-test-2",
+        "api.cognitedata.com"
+      )(auth, sttpBackend)
+    }
+    assertThrows[UnknownHostException] {
+      Client(
+        "url-test-3",
+        "thisShouldThrowAnUnknownHostException:)"
+      )(auth, sttpBackend)
+    }
+  }
 }

@@ -66,12 +66,19 @@ class GenericClient[F[_]: Monad, _](
     sttpBackend: SttpBackend[F, _]
 ) {
 
+  val uri: Uri = try {
+    uri"$baseUri"
+  } catch {
+    case _: Throwable =>
+      throw new IllegalArgumentException("Unable to parse URI. Please check URI syntax.")
+  }
+
   val project: String = auth.project.getOrElse {
     val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
       options = SttpBackendOptions.connectionTimeout(90.seconds)
     )
     val loginStatus = new Login(
-      RequestSession(applicationName, uri"$baseUri", sttpBackend, auth)
+      RequestSession(applicationName, uri"$uri", sttpBackend, auth)
     ).status()
 
     if (loginStatus.project.trim.isEmpty) {
@@ -84,11 +91,11 @@ class GenericClient[F[_]: Monad, _](
   val requestSession =
     RequestSession(
       applicationName,
-      uri"$baseUri/api/v1/projects/$project",
+      uri"$uri/api/v1/projects/$project",
       sttpBackend,
       auth
     )
-  val login = new Login[F](requestSession.copy(baseUri = uri"$baseUri"))
+  val login = new Login[F](requestSession.copy(baseUri = uri))
   val assets = new Assets[F](requestSession)
   val events = new Events[F](requestSession)
   val files = new Files[F](requestSession)

@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.common
 
+import java.net.{ConnectException, UnknownHostException}
+
 import com.cognite.sdk.scala.v1.RequestSession
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
@@ -12,14 +14,22 @@ class Login[F[_]](val requestSession: RequestSession[F]) {
   implicit val loginStatusDecoder = deriveDecoder[LoginStatus]
   implicit val dataLoginStatusDecoder = deriveDecoder[DataLoginStatus]
   def status(): F[LoginStatus] =
-    requestSession
-      .sendCdf { request =>
-        request
-          .get(uri"${requestSession.baseUri}/login/status")
-          .response(asJson[DataLoginStatus])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(value) => value.data
-          }
-      }
+    try {
+      requestSession
+        .sendCdf { request =>
+          request
+            .get(uri"${requestSession.baseUri}/login/status")
+            .response(asJson[DataLoginStatus])
+            .mapResponse {
+              case Left(value) => throw value.error
+              case Right(value) => value.data
+            }
+        }
+    } catch {
+      case e @ (_: UnknownHostException | _: ConnectException) => throw e
+      case _: io.circe.ParsingFailure =>
+        throw new RuntimeException(
+          s"Could not connect to Cognite Data Fusion API using baseUri ${requestSession.baseUri.toString()}"
+        )
+    }
 }
