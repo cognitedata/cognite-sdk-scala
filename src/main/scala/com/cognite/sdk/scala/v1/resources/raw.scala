@@ -47,7 +47,14 @@ class RawDatabases[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[RawDatabase]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+    Readable.readWithCursor(
+      requestSession,
+      baseUri,
+      cursor,
+      limit,
+      None,
+      Constants.defaultBatchSize
+    )
 
   override def createItems(items: Items[RawDatabase]): F[Seq[RawDatabase]] =
     Create.createItems[F, RawDatabase, RawDatabase](requestSession, baseUri, items)
@@ -81,7 +88,14 @@ class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[RawTable]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+    Readable.readWithCursor(
+      requestSession,
+      baseUri,
+      cursor,
+      limit,
+      None,
+      Constants.defaultBatchSize
+    )
 
   override def createItems(items: Items[RawTable]): F[Seq[RawTable]] =
     Create.createItems[F, RawTable, RawTable](requestSession, baseUri, items)
@@ -141,7 +155,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[RawRow]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None, Constants.rowsBatchSize)
 
   override def deleteByIds(ids: Seq[String]): F[Unit] =
     RawResource.deleteByIds(requestSession, baseUri, ids.map(RawRowKey))
@@ -157,7 +171,8 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       baseUri.params(filterToParams(filter)),
       cursor,
       limit,
-      None
+      None,
+      Constants.defaultBatchSize
     )
 
   override def filterPartitionsF(

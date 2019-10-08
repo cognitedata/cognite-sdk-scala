@@ -28,7 +28,14 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[TimeSeries]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+    Readable.readWithCursor(
+      requestSession,
+      baseUri,
+      cursor,
+      limit,
+      None,
+      Constants.defaultBatchSize
+    )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[TimeSeries]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
@@ -57,7 +64,14 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     val uriWithAssetIds = filter.assetIds.fold(baseUri)(
       assetIds => baseUri.param("assetIds", assetIds.asJson.toString())
     )
-    Readable.readWithCursor(requestSession, uriWithAssetIds, cursor, limit, None)
+    Readable.readWithCursor(
+      requestSession,
+      uriWithAssetIds,
+      cursor,
+      limit,
+      None,
+      Constants.defaultBatchSize
+    )
   }
 
   override def search(searchQuery: TimeSeriesQuery): F[Seq[TimeSeries]] =

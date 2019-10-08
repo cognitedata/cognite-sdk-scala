@@ -21,6 +21,7 @@ import com.cognite.v1.timeseries.proto.data_points.{
   StringDatapoint,
   StringDatapoints
 }
+import com.cognite.sdk.scala.common.Constants
 import io.circe.parser.decode
 
 class DataPointsResource[F[_]](val requestSession: RequestSession[F])
@@ -239,7 +240,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       id,
       inclusiveStart.toEpochMilli.toString,
       exclusiveEnd.toEpochMilli.toString,
-      limit
+      Some(limit.getOrElse(Constants.dataPointsBatchSize))
     )
     queryProtobuf(Items(Seq(query)))(parseNumericDataPoints)
   }
@@ -255,7 +256,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         externalId,
         inclusiveStart.toEpochMilli.toString,
         exclusiveEnd.toEpochMilli.toString,
-        limit
+        Some(limit.getOrElse(Constants.dataPointsBatchSize))
       )
     queryProtobuf(Items(Seq(query)))(parseNumericDataPoints)
   }
@@ -275,7 +276,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
             id,
             inclusiveStart.toEpochMilli.toString,
             exclusiveEnd.toEpochMilli.toString,
-            limit,
+            Some(limit.getOrElse(Constants.aggregatesBatchSize)),
             Some(granularity),
             Some(aggregates)
           )
@@ -300,7 +301,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
             externalId,
             inclusiveStart.toEpochMilli.toString,
             exclusiveEnd.toEpochMilli.toString,
-            limit,
+            Some(limit.getOrElse(Constants.aggregatesBatchSize)),
             Some(granularity),
             Some(aggregates)
           )
@@ -337,7 +338,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       id,
       inclusiveStart.toEpochMilli.toString,
       exclusiveEnd.toEpochMilli.toString,
-      limit
+      Some(limit.getOrElse(Constants.dataPointsBatchSize))
     )
     queryProtobuf(Items(Seq(query)))(parseStringDataPoints)
   }
@@ -353,7 +354,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         externalId,
         inclusiveStart.toEpochMilli.toString,
         exclusiveEnd.toEpochMilli.toString,
-        limit
+        Some(limit.getOrElse(Constants.dataPointsBatchSize))
       )
     queryProtobuf(Items(Seq(query)))(parseStringDataPoints)
   }

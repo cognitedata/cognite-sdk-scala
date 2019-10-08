@@ -57,40 +57,46 @@ object Readable {
   @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private[sdk] def pullFromCursor[F[_], R](
       cursor: Option[String],
-      limit: Option[Int],
+      maxItemsReturned: Option[Int],
       partition: Option[Partition],
       get: (Option[String], Option[Int], Option[Partition]) => F[ItemsWithCursor[R]]
   ): Pull[F, R, Unit] =
-    if (limit.exists(_ <= 0)) {
+    if (maxItemsReturned.exists(_ <= 0)) {
       Pull.done
     } else {
-      Pull.eval(get(cursor, limit, partition)).flatMap { items =>
+      Pull.eval(get(cursor, maxItemsReturned, partition)).flatMap { items =>
         Pull.output(Chunk.seq(items.items)) >>
           items.nextCursor
             .map { s =>
-              pullFromCursor(Some(s), limit.map(_ - items.items.size), partition, get)
+              pullFromCursor(Some(s), maxItemsReturned.map(_ - items.items.size), partition, get)
             }
             .getOrElse(Pull.done)
       }
     }
 
-  private def uriWithCursorAndLimit(baseUri: Uri, cursor: Option[String], limit: Option[Int]) =
+  private def uriWithCursorAndLimit(
+      baseUri: Uri,
+      cursor: Option[String],
+      limit: Option[Int],
+      batchSize: Int
+  ) =
     cursor
       .fold(baseUri)(baseUri.param("cursor", _))
-      .param("limit", limit.getOrElse(Resource.defaultLimit).toString)
+      .param("limit", scala.math.min(limit.getOrElse(batchSize), batchSize).toString)
 
   private[sdk] def readWithCursor[F[_], R](
       requestSession: RequestSession[F],
       baseUri: Uri,
       cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition]
+      maxItemsReturned: Option[Int],
+      partition: Option[Partition],
+      batchSize: Int
   )(
       implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]
   ): F[ItemsWithCursor[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
-    val uriWithCursor = uriWithCursorAndLimit(baseUri, cursor, limit)
+    val uriWithCursor = uriWithCursorAndLimit(baseUri, cursor, maxItemsReturned, batchSize)
     val uriWithCursorAndPartition = partition.fold(uriWithCursor) { p =>
       uriWithCursor.param("partition", p.toString)
     }

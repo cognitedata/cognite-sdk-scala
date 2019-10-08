@@ -27,7 +27,14 @@ class SequencesResource[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[Sequence]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+    Readable.readWithCursor(
+      requestSession,
+      baseUri,
+      cursor,
+      limit,
+      None,
+      Constants.defaultBatchSize
+    )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[Sequence]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
