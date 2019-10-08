@@ -43,7 +43,14 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[ThreeDModel]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+    Readable.readWithCursor(
+      requestSession,
+      baseUri,
+      cursor,
+      limit,
+      None,
+      Constants.defaultBatchSize
+    )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDModel]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
@@ -90,7 +97,14 @@ class ThreeDNodes[F[_]](val requestSession: RequestSession[F], modelId: Long, re
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[ThreeDNode]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+    Readable.readWithCursor(
+      requestSession,
+      baseUri,
+      cursor,
+      limit,
+      None,
+      Constants.defaultBatchSize
+    )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDNode]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
@@ -114,7 +128,14 @@ class ThreeDAncestorNodes[F[_]](
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[ThreeDNode]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+    Readable.readWithCursor(
+      requestSession,
+      baseUri,
+      cursor,
+      limit,
+      None,
+      Constants.defaultBatchSize
+    )
 }
 
 object ThreeDNodes {
@@ -167,7 +188,14 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[ThreeDRevision]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+    Readable.readWithCursor(
+      requestSession,
+      baseUri,
+      cursor,
+      limit,
+      None,
+      Constants.defaultBatchSize
+    )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDRevision]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
@@ -217,7 +245,14 @@ class ThreeDAssetMappings[F[_]](
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[ThreeDAssetMapping]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+    Readable.readWithCursor(
+      requestSession,
+      baseUri,
+      cursor,
+      limit,
+      None,
+      Constants.defaultBatchSize
+    )
 }
 
 object ThreeDAssetMappings {

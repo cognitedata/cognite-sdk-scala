@@ -82,7 +82,14 @@ class Files[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[File]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None)
+    Readable.readWithCursor(
+      requestSession,
+      baseUri,
+      cursor,
+      limit,
+      None,
+      Constants.defaultBatchSize
+    )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[File]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)

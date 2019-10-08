@@ -144,4 +144,9 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       )
     assert(esdvLimitResults.length == 10)
   }
+
+  it should "not be an error to request more assets than the API limit" in {
+    val _ = client.assets.list(Some(100000000)).take(10).compile.drain
+  }
+
 }

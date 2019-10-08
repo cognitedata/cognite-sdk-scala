@@ -103,9 +103,9 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
     val sums2 = aggregates2("sum")
     val stepInterpolation2 = aggregates2("stepInterpolation")
     sums2.head.value should equal(65415.958570785)
-    sums2.last.value should equal(253965.25002673318)
+    sums2.last.value should equal(252857.16150906676)
     stepInterpolation2.head.value should equal(73.92400373499633)
-    stepInterpolation2.last.value should equal(74.04062931032483)
+    stepInterpolation2.last.value should equal(74.03938853847485)
 
     val extAggregatesWithLimit = client.dataPoints.queryAggregatesByExternalId(
       "test__constant_74_with_noise",

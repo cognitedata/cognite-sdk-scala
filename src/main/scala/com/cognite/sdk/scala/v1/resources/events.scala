@@ -27,7 +27,14 @@ class Events[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[Event]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, partition)
+    Readable.readWithCursor(
+      requestSession,
+      baseUri,
+      cursor,
+      limit,
+      partition,
+      Constants.defaultBatchSize
+    )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[Event]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
