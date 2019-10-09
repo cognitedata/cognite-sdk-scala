@@ -2,12 +2,15 @@ package com.cognite.sdk.scala.v1.resources
 
 import java.time.Instant
 
+import cats.Applicative
+import cats.implicits._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
+import fs2._
 
 object RawResource {
   def deleteByIds[F[_], I](requestSession: RequestSession[F], baseUri: Uri, ids: Seq[I])(
@@ -102,10 +105,18 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
     extends WithRequestSession[F]
     with Readable[RawRow, F]
     with Create[RawRow, RawRow, F]
-    with DeleteByIds[F, String] {
+    with DeleteByIds[F, String]
+    with PartitionedFilterF[RawRow, RawRowFilter, F] {
+  implicit val stringItemsDecoder: Decoder[Items[String]] = deriveDecoder[Items[String]]
+
+  implicit val errorOrStringItemsDecoder: Decoder[Either[CdpApiError, Items[String]]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Items[String]]
+
   import RawRows._
   override val baseUri =
     uri"${requestSession.baseUri}/raw/dbs/$database/tables/$table/rows"
+
+  val cursorsUri = uri"${requestSession.baseUri}/raw/dbs/$database/tables/$table/cursors"
 
   // raw does not return the created rows in the response, so we'll always return an empty sequence.
   override def createItems(items: Items[RawRow]): F[Seq[RawRow]] = {
@@ -134,6 +145,77 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
 
   override def deleteByIds(ids: Seq[String]): F[Unit] =
     RawResource.deleteByIds(requestSession, baseUri, ids.map(RawRowKey))
+
+  override private[sdk] def filterWithCursor(
+      filter: RawRowFilter,
+      cursor: Option[String],
+      limit: Option[Int],
+      partition: Option[Partition]
+  ): F[ItemsWithCursor[RawRow]] =
+    Readable.readWithCursor(
+      requestSession,
+      baseUri.params(filterToParams(filter)),
+      cursor,
+      limit,
+      None
+    )
+
+  override def filterPartitionsF(
+      filter: RawRowFilter,
+      numPartitions: Int,
+      limitPerPartition: Option[Int]
+  )(implicit F: Applicative[F]): F[Seq[Stream[F, RawRow]]] = {
+    val cursorsUriWithParams = cursorsUri
+      .param("numberOfCursors", numPartitions.toString)
+      .params(lastUpdatedTimeFilterToParams(filter))
+
+    for {
+      cursors <- requestSession
+        .sendCdf { request =>
+          request
+            .get(cursorsUriWithParams)
+            .response(asJson[Either[CdpApiError, Items[String]]])
+            .mapResponse {
+              case Left(value) => throw value.error
+              case Right(Left(cdpApiError)) =>
+                throw cdpApiError.asException(cursorsUriWithParams)
+              case Right(Right(value)) => value
+            }
+        }
+      streams = cursors.items.map(
+        cursor =>
+          Readable
+            .pullFromCursor(
+              Some(cursor),
+              limitPerPartition,
+              None,
+              filterWithCursor(filter, _, _, _)
+            )
+            .stream
+      )
+    } yield streams
+  }
+
+  def filterToParams(filter: RawRowFilter): Map[String, String] =
+    Map(
+      "columns" -> filter.columns.map { columns =>
+        if (columns.isEmpty) {
+          ","
+        } else {
+          columns.mkString(",")
+        }
+      }
+    ).collect {
+      case (key, Some(value)) => key -> value
+    } ++ lastUpdatedTimeFilterToParams(filter)
+
+  def lastUpdatedTimeFilterToParams(filter: RawRowFilter): Map[String, String] =
+    Map(
+      "minLastUpdatedTime" -> filter.minLastUpdatedTime.map(_.toEpochMilli.toString),
+      "maxLastUpdatedTime" -> filter.maxLastUpdatedTime.map(_.toEpochMilli.toString)
+    ).collect {
+      case (key, Some(value)) => key -> value
+    }
 }
 
 object RawRows {

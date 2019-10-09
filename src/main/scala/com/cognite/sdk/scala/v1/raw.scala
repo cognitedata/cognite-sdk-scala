@@ -20,3 +20,9 @@ final case class RawRow(
 )
 
 final case class RawRowKey(key: String)
+
+final case class RawRowFilter(
+    minLastUpdatedTime: Option[Instant] = None,
+    maxLastUpdatedTime: Option[Instant] = None,
+    columns: Option[Seq[String]] = None
+)
