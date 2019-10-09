@@ -1,5 +1,6 @@
 package com.cognite.sdk.scala.common
 
+import cats.Applicative
 import cats.effect.Concurrent
 import com.cognite.sdk.scala.v1.RequestSession
 import com.softwaremill.sttp._
@@ -36,7 +37,22 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
     filterWithNextCursor(filter, None, limit)
 }
 
-trait PartitionedFilter[R, Fi, F[_]] extends Filter[R, Fi, F] {
+trait PartitionedFilterF[R, Fi, F[_]] extends Filter[R, Fi, F] {
+  def filterPartitionsF(
+      filter: Fi,
+      numPartitions: Int,
+      limitPerPartition: Option[Int] = None
+  )(implicit F: Applicative[F]): F[Seq[Stream[F, R]]]
+
+  def filterConcurrently(filter: Fi, numPartitions: Int, limitPerPartition: Option[Int] = None)(
+      implicit F: Concurrent[F]
+  ): Stream[F, R] =
+    Stream
+      .eval(filterPartitionsF(filter, numPartitions, limitPerPartition))
+      .flatMap(_.fold(Stream.empty)(_.merge(_)))
+}
+
+trait PartitionedFilter[R, Fi, F[_]] extends PartitionedFilterF[R, Fi, F] {
   def filterPartitions(
       filter: Fi,
       numPartitions: Int,
@@ -53,10 +69,12 @@ trait PartitionedFilter[R, Fi, F[_]] extends Filter[R, Fi, F] {
         .stream
     }
 
-  def filterConcurrently(filter: Fi, numPartitions: Int, limitPerPartition: Option[Int] = None)(
-      implicit c: Concurrent[F]
-  ): Stream[F, R] =
-    filterPartitions(filter, numPartitions, limitPerPartition).fold(Stream.empty)(_.merge(_))
+  override def filterPartitionsF(
+      filter: Fi,
+      numPartitions: StatusCode,
+      limitPerPartition: Option[StatusCode]
+  )(implicit F: Applicative[F]): F[Seq[Stream[F, R]]] =
+    F.pure(filterPartitions(filter, numPartitions, limitPerPartition))
 }
 
 object Filter {
