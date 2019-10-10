@@ -56,6 +56,22 @@ import $ivy.`com.cognite::cognite-sdk-scala:0.1.2`
 import com.cognite.sdk.scala.v1._
 ```
 
+#### Shell
+You can also use Ammonite as a [shell](https://ammonite.io/#Ammonite-Shell). It supports tab-completion of Scala methods.
+1. Install Ammonite shell
+```
+mkdir -p ~/.ammonite && curl -L -o ~/.ammonite/predef.sc https://git.io/vHaKQ
+sudo sh -c '(echo "#!/usr/bin/env sh" && curl -L https://github.com/lihaoyi/Ammonite/releases/download/1.7.4/2.13-1.7.4) > /usr/local/bin/amm && chmod +x /usr/local/bin/amm'
+```
+2. Then run `COGNITE_API_KEY=YourKey amm` to start the shell with an API_KEY set
+3. Run the following to list 10 events 
+```scala
+import com.cognite.sdk.scala.v1._
+
+val c = Client("scala-sdk-examples", "https://api.cognitedata.com")
+c.events.list(limit=Some(10)).compile.toList
+```
+
 ### Discover time series
 
 List and filter endpoints use Stream from [fs2](https://github.com/functional-streams-for-scala/fs2),
