@@ -4,7 +4,7 @@ import java.util.UUID
 
 import cats.{Id, Monad}
 import com.cognite.sdk.scala.v1.{GenericClient, sttpBackend}
-import com.softwaremill.sttp.{MonadError, Request, Response, SttpBackend}
+import com.softwaremill.sttp.{HttpURLConnectionBackend, MonadError, Request, Response, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
 
 class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBackend[R, S] {
@@ -29,11 +29,12 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
 }
 
 abstract class SdkTest extends FlatSpec with Matchers {
-  val client = new GenericClient("scala-sdk-test")(
+
+  val client = new GenericClient[Id, Nothing]("scala-sdk-test")(
     implicitly[Monad[Id]],
     auth,
     // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
-    sttpBackend
+    new RetryingBackend[Id, Nothing](HttpURLConnectionBackend())
   )
 
   val greenfieldClient = new GenericClient(

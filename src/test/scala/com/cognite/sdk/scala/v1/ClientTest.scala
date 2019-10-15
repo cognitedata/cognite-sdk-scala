@@ -3,7 +3,8 @@ package com.cognite.sdk.scala.v1
 import java.net.UnknownHostException
 
 import cats.{Id, Monad}
-import com.cognite.sdk.scala.common.{ApiKeyAuth, Auth, InvalidAuthentication, SdkTest}
+import com.cognite.sdk.scala.common.{ApiKeyAuth, Auth, CdpApiException, InvalidAuthentication, RetryingBackend, SdkTest}
+import com.softwaremill.sttp.testing.SttpBackendStub
 
 class ClientTest extends SdkTest {
   "Client" should "fetch the project using login/status if necessary" in {
@@ -69,5 +70,40 @@ class ClientTest extends SdkTest {
         "thisShouldThrowAnUnknownHostException:)"
       )(auth, sttpBackend)
     }
+  }
+
+  it should "retry certain failed requests" in {
+    val testingBackend = SttpBackendStub.synchronous
+      .whenAnyRequest
+      .thenRespondCyclic("{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Some error\"\n  }\n}",
+        "{\n  \"error\": {\n    \"code\": 401,\n    \"message\": \"Some error\"\n  }\n}",
+        "{\n  \"error\": {\n    \"code\": 500,\n    \"message\": \"Some error\"\n  }\n}",
+        "{\n  \"error\": {\n    \"code\": 502,\n    \"message\": \"Some error\"\n  }\n}",
+        "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"Some error\"\n  }\n}",
+        client.threeDModels.list()
+      )
+
+    assertThrows[CdpApiException] {
+      new GenericClient("scala-sdk-test")(
+        implicitly[Monad[Id]],
+        auth,
+        testingBackend
+      ).threeDModels.list()
+    }
+
+    val _ = new GenericClient("scala-sdk-test")(
+      implicitly[Monad[Id]],
+      auth,
+      new RetryingBackend[Id, Nothing](testingBackend)
+    ).threeDModels.list()
+
+    assertThrows[CdpApiException] {
+      new GenericClient("scala-sdk-test")(
+      implicitly[Monad[Id]],
+      auth,
+      new RetryingBackend[Id, Nothing](testingBackend, Some(4))
+      ).threeDModels.list()
+    }
+
   }
 }

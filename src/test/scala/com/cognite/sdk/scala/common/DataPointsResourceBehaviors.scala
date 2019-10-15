@@ -7,7 +7,7 @@ import com.cognite.sdk.scala.v1.resources.DataPointsResource
 import com.softwaremill.sttp.Id
 import org.scalatest.{FlatSpec, Matchers}
 
-trait DataPointsResourceBehaviors extends Matchers { this: FlatSpec =>
+trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: FlatSpec =>
   private val startTime = System.currentTimeMillis()
   private val start = Instant.ofEpochMilli(startTime)
   private val endTime = startTime + 20*1000
@@ -17,6 +17,7 @@ trait DataPointsResourceBehaviors extends Matchers { this: FlatSpec =>
 
   def withTimeSeries(testCode: TimeSeries => Any): Unit
 
+   // scalastyle:off
   def dataPointsResource(dataPoints: DataPointsResource[Id]): Unit =
     it should "be possible to insert and delete numerical data points" in withTimeSeries {
       timeSeries =>
@@ -24,41 +25,55 @@ trait DataPointsResourceBehaviors extends Matchers { this: FlatSpec =>
         val timeSeriesExternalId = timeSeries.externalId.get
         dataPoints.insertById(timeSeriesId, testDataPoints)
 
-        Thread.sleep(15000)
-        val points = dataPoints.queryById(timeSeriesId, start, end.plusMillis(1))
-        points should have size testDataPoints.size.toLong
+        retryWithExpectedResult[Seq[DataPoint]](
+          dataPoints.queryById(timeSeriesId, start, end.plusMillis(1)),
+          None,
+          Seq(p => p should have size testDataPoints.size.toLong)
+        )
 
-        val pointsWithLimit = dataPoints.queryById(timeSeriesId, start, end.plusMillis(1), Some(3))
-        pointsWithLimit should have size 3
+        retryWithExpectedResult[Seq[DataPoint]](
+          dataPoints.queryById(timeSeriesId, start, end.plusMillis(1), Some(3)),
+          None,
+          Seq(p => p should have size 3)
+        )
 
-        val latest = dataPoints.getLatestDataPointById(timeSeriesId)
-        latest.isDefined should be(true)
-        val latestPoint = latest.get
-        testDataPoints.toList should contain(latestPoint)
+        retryWithExpectedResult[Option[DataPoint]](
+          dataPoints.getLatestDataPointById(timeSeriesId),
+          None,
+          Seq(dp => dp.isDefined shouldBe true, dp => testDataPoints.toList should contain(dp.get))
+        )
 
         dataPoints.deleteRangeById(timeSeriesId, start, end.plusMillis(1))
-        Thread.sleep(15000)
-        val pointsAfterDelete = dataPoints.queryById(timeSeriesId, start, end.plusMillis(1))
-        pointsAfterDelete should have size 0
+        retryWithExpectedResult[Seq[DataPoint]](
+          dataPoints.queryById(timeSeriesId, start, end.plusMillis(1)),
+          None,
+          Seq(dp => dp should have size 0)
+        )
 
         dataPoints.insertByExternalId(timeSeriesExternalId, testDataPoints)
+        retryWithExpectedResult[Seq[DataPoint]](
+          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
+          None,
+          Seq(p2 => p2 should have size testDataPoints.size.toLong)
+        )
 
-        Thread.sleep(15000)
-        val points2 = dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
-        points2 should have size testDataPoints.size.toLong
+        retryWithExpectedResult[Seq[DataPoint]](
+          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1), Some(5)),
+          None,
+          Seq(p2 => p2 should have size 5)
+        )
 
-        val points2WithLimit = dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1), Some(5))
-        points2WithLimit should have size 5
-
-        val latest2 = dataPoints.getLatestDataPointByExternalId(timeSeriesExternalId)
-        latest2.isDefined should be(true)
-        val latestPoint2 = latest.get
-        testDataPoints.toList should contain(latestPoint2)
+        retryWithExpectedResult[Option[DataPoint]](
+          dataPoints.getLatestDataPointByExternalId(timeSeriesExternalId),
+          None,
+          Seq(l2 => l2.isDefined shouldBe true, l2 => testDataPoints.toList should contain(l2.get))
+        )
 
         dataPoints.deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
-        Thread.sleep(15000)
-        val pointsAfterDelete2 =
-          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
-        pointsAfterDelete2 should have size 0
+        retryWithExpectedResult[Seq[DataPoint]](
+          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
+          None,
+          Seq(pad => pad should have size 0)
+        )
     }
 }

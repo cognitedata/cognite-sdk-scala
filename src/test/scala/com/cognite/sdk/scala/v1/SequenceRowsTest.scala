@@ -1,11 +1,11 @@
 package com.cognite.sdk.scala.v1
 
 import cats.data.NonEmptyList
-import com.cognite.sdk.scala.common.SdkTest
+import com.cognite.sdk.scala.common.{RetryWhile, SdkTest}
 import io.circe.syntax._
 import org.scalatest.ParallelTestExecution
 
-class SequenceRowsTest extends SdkTest with ParallelTestExecution {
+class SequenceRowsTest extends SdkTest with ParallelTestExecution with RetryWhile {
   def withSequence(testCode: Sequence => Any): Unit = {
     val externalId = shortRandom()
     val sequence = client.sequences.createOneFromRead(
@@ -37,36 +37,48 @@ class SequenceRowsTest extends SdkTest with ParallelTestExecution {
 
   it should "be possible to insert, update, and delete sequence rows" in withSequence { sequence =>
     client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.externalId).toList, testRows)
-    Thread.sleep(5000)
-    val (_, rows) = client.sequenceRows.queryById(
-      sequence.id, minRow, maxRow + 1)
-    rows should contain theSameElementsAs testRows
+    val rows = retryWithExpectedResult[Seq[SequenceRow]](
+      client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)._2,
+      None,
+      Seq(r => r should contain theSameElementsAs testRows)
+    )
 
     val updateRows = testRows.map { row =>
       row.copy(values = row.values.updated(0, row.values.head.mapString(s => s"${s}-updated")))
     }
     client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.externalId).toList, updateRows)
-    Thread.sleep(5000)
     val (_, rowsAfterUpdate) = client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)
-    rowsAfterUpdate should contain theSameElementsAs updateRows
+    retryWithExpectedResult[Seq[SequenceRow]](
+      client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)._2,
+      Some(rowsAfterUpdate),
+      Seq(r => r should contain theSameElementsAs updateRows)
+    )
 
     client.sequenceRows.deleteById(sequence.id, rows.map(_.rowNumber).take(1))
-    Thread.sleep(5000)
     val (_, rowsAfterOneDelete) = client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)
-    rowsAfterOneDelete should have size testRows.size.toLong - 1
+    retryWithExpectedResult[Seq[SequenceRow]](
+      client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)._2,
+      Some(rowsAfterOneDelete),
+      Seq(r => r should have size testRows.size.toLong - 1 )
+    )
 
     client.sequenceRows.deleteById(sequence.id, rows.map(_.rowNumber))
-    Thread.sleep(5000)
     val (_, rowsAfterDeleteAll) = client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)
-    rowsAfterDeleteAll shouldBe empty
+    retryWithExpectedResult[Seq[SequenceRow]](
+      client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)._2,
+      Some(rowsAfterDeleteAll),
+      Seq(r => r shouldBe empty)
+    )
   }
 
   it should "be possible to insert, update and delete sequence rows using externalId" in withSequence { sequence =>
     val externalId = sequence.externalId.get
     client.sequenceRows.insertByExternalId(externalId, sequence.columns.map(_.externalId).toList, testRows)
-    Thread.sleep(5000)
-    val (_, rows) = client.sequenceRows.queryByExternalId(externalId, minRow, maxRow + 1)
-    rows should contain theSameElementsAs testRows
+    val rows = retryWithExpectedResult[Seq[SequenceRow]](
+      client.sequenceRows.queryByExternalId(externalId, minRow, maxRow + 1)._2,
+      None,
+      Seq(r => r should contain theSameElementsAs testRows)
+    )
 
     // note: intentionally using queryById here.
     val (_, rowsById) = client.sequenceRows.queryById(
@@ -74,8 +86,11 @@ class SequenceRowsTest extends SdkTest with ParallelTestExecution {
     rowsById should contain theSameElementsAs testRows
 
     client.sequenceRows.deleteByExternalId(externalId, rows.map(_.rowNumber))
-    Thread.sleep(5000)
     val (_, rowsAfterDeleteAll) = client.sequenceRows.queryByExternalId(externalId, minRow, maxRow + 1)
-    rowsAfterDeleteAll shouldBe empty
+    retryWithExpectedResult[Seq[SequenceRow]](
+      client.sequenceRows.queryByExternalId(externalId, minRow, maxRow + 1)._2,
+      Some(rowsAfterDeleteAll),
+      Seq(r => r shouldBe empty)
+    )
   }
 }
