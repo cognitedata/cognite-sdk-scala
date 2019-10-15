@@ -2,9 +2,9 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 
-import com.cognite.sdk.scala.common.{DataPoint, ReadBehaviours, SdkTest, WritableBehaviors}
+import com.cognite.sdk.scala.common.{DataPoint, ReadBehaviours, RetryWhile, SdkTest, WritableBehaviors}
 
-class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
+class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L, 999993L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
@@ -135,7 +135,7 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
           )
         )
       )
-    assert(createdTimeSearchResults.length == 22)
+    assert(createdTimeSearchResults.length == 20)
     val createdTimeSearchResults2 = client.timeSeries.search(
       TimeSeriesQuery(
         filter = Some(
@@ -147,7 +147,7 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
         )
       )
     )
-    assert(createdTimeSearchResults2.length == 37)
+    assert(createdTimeSearchResults2.length == 2)
 
     val unitSearchResults = client.timeSeries.search(
       TimeSeriesQuery(
@@ -214,10 +214,14 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
     val dp = (startTime to endTime by 1000).map(t =>
         DataPoint(Instant.ofEpochMilli(t), math.random))
     client.dataPoints.insertById(timeSeriesID, dp)
-    Thread.sleep(5000)
     val retrievedDp = client.dataPoints.queryById(
       timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000))
-    dp should contain theSameElementsInOrderAs retrievedDp
+    retryWithExpectedResult[Seq[DataPoint]](
+      client.dataPoints.queryById(
+        timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000)),
+      Some(retrievedDp),
+      Seq(dp => dp should contain theSameElementsInOrderAs retrievedDp)
+    )
     client.dataPoints.deleteRangeById(timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000))
   }
 

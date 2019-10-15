@@ -311,7 +311,9 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
     }
 
-  private def queryProtobuf[Q: Encoder, R](query: Q)(mapDataPointList: DataPointListResponse => R) =
+  private def queryProtobuf[Q: Encoder, R](
+      query: Q
+  )(mapDataPointList: DataPointListResponse => R): F[R] =
     requestSession
       .sendCdf(
         { request =>

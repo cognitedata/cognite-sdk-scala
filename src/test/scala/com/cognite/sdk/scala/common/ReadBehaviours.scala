@@ -61,7 +61,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
         .compile
         .toList
         .length
-      assert(unlimitedLength == partitionsLength)
+      assert(unlimitedLength <= partitionsLength)
     }
   }
 
