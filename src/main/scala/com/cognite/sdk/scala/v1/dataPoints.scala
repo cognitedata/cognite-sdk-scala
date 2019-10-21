@@ -2,11 +2,6 @@ package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{AggregateDataPoint, DataPoint, StringDataPoint}
 
-final case class DataPointsById(
-    id: Long,
-    datapoints: Seq[DataPoint]
-)
-
 final case class DataPointsByExternalId(
     externalId: String,
     datapoints: Seq[DataPoint]
@@ -16,6 +11,8 @@ final case class DataPointsByIdResponse(
     id: Long,
     externalId: Option[String],
     isString: Boolean,
+    isStep: Boolean,
+    unit: Option[String],
     datapoints: Seq[DataPoint]
 )
 
@@ -23,6 +20,8 @@ final case class DataPointsByExternalIdResponse(
     id: Long,
     externalId: String,
     isString: Boolean,
+    isStep: Boolean,
+    unit: Option[String],
     datapoints: Seq[DataPoint]
 )
 
@@ -30,6 +29,8 @@ final case class StringDataPointsByIdResponse(
     id: Long,
     externalId: Option[String],
     isString: Boolean,
+    isStep: Option[Boolean],
+    unit: Option[String],
     datapoints: Seq[StringDataPoint]
 )
 
@@ -37,11 +38,8 @@ final case class StringDataPointsByExternalIdResponse(
     id: Long,
     externalId: String,
     isString: Boolean,
-    datapoints: Seq[StringDataPoint]
-)
-
-final case class StringDataPointsById(
-    id: Long,
+    isStep: Option[Boolean],
+    unit: Option[String],
     datapoints: Seq[StringDataPoint]
 )
 
@@ -80,8 +78,11 @@ final case class QueryRangeByExternalId(
     aggregates: Option[Seq[String]] = None
 )
 
-final case class QueryAggregatesByIdResponse(
+final case class QueryAggregatesResponse(
     id: Long,
     externalId: Option[String],
+    isString: Boolean,
+    isStep: Boolean,
+    unit: Option[String],
     datapoints: Seq[AggregateDataPoint]
 )

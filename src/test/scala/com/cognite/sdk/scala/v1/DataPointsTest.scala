@@ -32,8 +32,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
       "1d",
       Seq("average", "stepInterpolation")
     )
-    val averages = aggregates("average")
-    val stepInterpolations = aggregates("stepInterpolation")
+    val averages = aggregates("average").head.datapoints
+    val stepInterpolations = aggregates("stepInterpolation").head.datapoints
     averages.map(_.timestamp).tail should contain theSameElementsInOrderAs stepInterpolations.map(_.timestamp)
     averages.last.value should equal(73.9999423351708)
 
@@ -46,8 +46,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
       Seq("average", "stepInterpolation"),
       Some(limit)
     )
-    val averagesWithLimit = aggregatesWithLimit("average")
-    val stepInterpolationsWithLimit = aggregatesWithLimit("stepInterpolation")
+    val averagesWithLimit = aggregatesWithLimit("average").head.datapoints
+    val stepInterpolationsWithLimit = aggregatesWithLimit("stepInterpolation").head.datapoints
     averagesWithLimit.size should be <= limit
     stepInterpolationsWithLimit.size should be <= limit
     averagesWithLimit.head.value should equal(averages.head.value)
@@ -83,8 +83,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
       Seq("average", "stepInterpolation")
     )
     extAggregates.keys should contain theSameElementsAs List("average", "stepInterpolation")
-    val extAverages = extAggregates("average")
-    val extStepInterpolation = extAggregates("stepInterpolation")
+    val extAverages = extAggregates("average").head.datapoints
+    val extStepInterpolation = extAggregates("stepInterpolation").head.datapoints
     extAverages.map(_.timestamp).tail should contain theSameElementsInOrderAs extStepInterpolation.map(_.timestamp)
     extAverages.map(_.timestamp) shouldBe sorted
     extStepInterpolation.map(_.timestamp) shouldBe sorted
@@ -100,8 +100,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
       "1h",
       Seq("sum", "stepInterpolation")
     )
-    val sums2 = aggregates2("sum")
-    val stepInterpolation2 = aggregates2("stepInterpolation")
+    val sums2 = aggregates2("sum").head.datapoints
+    val stepInterpolation2 = aggregates2("stepInterpolation").head.datapoints
     sums2.head.value should equal(65415.958570785)
     sums2.last.value should equal(252857.16150906676)
     stepInterpolation2.head.value should equal(73.92400373499633)
@@ -115,8 +115,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
       Seq("average", "stepInterpolation"),
       Some(limit)
     )
-    val extAveragesWithLimit = extAggregatesWithLimit("average")
-    val extStepInterpolationWithLimit = extAggregatesWithLimit("stepInterpolation")
+    val extAveragesWithLimit = extAggregatesWithLimit("average").head.datapoints
+    val extStepInterpolationWithLimit = extAggregatesWithLimit("stepInterpolation").head.datapoints
     extAveragesWithLimit.size should be <= limit
     extStepInterpolationWithLimit.size should be <= limit
     extAveragesWithLimit.head.value should equal(extAverages.head.value)
@@ -154,8 +154,8 @@ class DataPointsTest extends SdkTest with DataPointsResourceBehaviors {
         "1h",
         Seq("sum", "stepInterpolation")
       )
-    val extSum2 = extAggregates2("sum")
-    val extStepInterpolation2 = extAggregates2("stepInterpolation")
+    val extSum2 = extAggregates2("sum").head.datapoints
+    val extStepInterpolation2 = extAggregates2("stepInterpolation").head.datapoints
     extSum2.map(_.timestamp).tail should contain theSameElementsInOrderAs extStepInterpolation2.map(_.timestamp)
     aggregates2.keys should contain only("sum", "stepInterpolation")
     assertThrows[CdpApiException] {
