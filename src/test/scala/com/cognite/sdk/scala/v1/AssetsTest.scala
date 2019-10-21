@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
+import fs2.Stream
 
 class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
@@ -95,6 +96,16 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       .toList
     assert(createdTimeFilterResultsWithLimit.length == 10)
 
+    val filterWithRootAssetsByInternalId = client.assets
+      .filterPartitions(
+        AssetsFilter(
+          rootIds = Some(Seq(CogniteInternalId(2780934754068396L)))
+        ), 10
+      )
+      .fold(Stream.empty)(_ ++ _)
+      .compile
+      .toList
+    assert(filterWithRootAssetsByInternalId.length == 781)
   }
 
   it should "support search" in {

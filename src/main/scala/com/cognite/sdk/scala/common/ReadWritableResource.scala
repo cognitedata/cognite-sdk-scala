@@ -3,7 +3,6 @@ package com.cognite.sdk.scala.common
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
-import io.circe.derivation.deriveEncoder
 import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
@@ -15,9 +14,6 @@ trait DeleteByIds[F[_], PrimitiveId] {
 }
 
 object DeleteByIds {
-  implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
-  implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
-
   def deleteByIds[F[_]](
       requestSession: RequestSession[F],
       baseUri: Uri,
@@ -31,7 +27,7 @@ object DeleteByIds {
       .sendCdf { request =>
         request
           .post(uri"$baseUri/delete")
-          .body(Items(ids.map(CogniteId)))
+          .body(Items(ids.map(CogniteInternalId)))
           .response(asJson[Either[CdpApiError, Unit]])
           .mapResponse {
             case Left(value) => throw value.error
@@ -49,8 +45,6 @@ trait DeleteByExternalIds[F[_]] {
 }
 
 object DeleteByExternalIds {
-  implicit val cogniteExternalIdEncoder: Encoder[CogniteExternalId] = deriveEncoder
-  implicit val cogniteExternalIdItemsEncoder: Encoder[Items[CogniteExternalId]] = deriveEncoder
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
 

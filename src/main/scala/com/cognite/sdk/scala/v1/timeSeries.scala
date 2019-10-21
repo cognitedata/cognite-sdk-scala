@@ -57,7 +57,16 @@ final case class TimeSeriesSearchFilter(
 )
 
 final case class TimeSeriesFilter(
-    assetIds: Option[Seq[Long]] = None
+    name: Option[String] = None,
+    unit: Option[String] = None,
+    isString: Option[Boolean] = None,
+    isStep: Option[Boolean] = None,
+    metadata: Option[Map[String, String]] = None,
+    assetIds: Option[Seq[Long]] = None,
+    rootAssetIds: Option[Seq[CogniteId]] = None,
+    externalIdPrefix: Option[String] = None,
+    createdTime: Option[TimeRange] = None,
+    lastUpdatedTime: Option[TimeRange] = None
 )
 
 final case class TimeSeriesSearch(

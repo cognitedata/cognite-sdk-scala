@@ -1,13 +1,10 @@
 package com.cognite.sdk.scala.v1.resources
 
-import java.time.Instant
-
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
-import io.circe.syntax._
 
 class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -17,7 +14,7 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     with Create[TimeSeries, TimeSeriesCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
-    with Filter[TimeSeries, TimeSeriesFilter, F]
+    with PartitionedFilter[TimeSeries, TimeSeriesFilter, F]
     with Search[TimeSeries, TimeSeriesQuery, F]
     with Update[TimeSeries, TimeSeriesUpdate, F] {
   import TimeSeriesResource._
@@ -60,28 +57,14 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
       cursor: Option[String],
       limit: Option[Int],
       partition: Option[Partition]
-  ): F[ItemsWithCursor[TimeSeries]] = {
-    val uriWithAssetIds = filter.assetIds.fold(baseUri)(
-      assetIds => baseUri.param("assetIds", assetIds.asJson.toString())
-    )
-    Readable.readWithCursor(
-      requestSession,
-      uriWithAssetIds,
-      cursor,
-      limit,
-      None,
-      Constants.defaultBatchSize
-    )
-  }
+  ): F[ItemsWithCursor[TimeSeries]] =
+    Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit, partition)
 
   override def search(searchQuery: TimeSeriesQuery): F[Seq[TimeSeries]] =
     Search.search(requestSession, baseUri, searchQuery)
 }
 
 object TimeSeriesResource {
-  implicit val instantEncoder: Encoder[Instant] = Encoder.encodeLong.contramap(_.toEpochMilli)
-  implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
-
   implicit val timeSeriesDecoder: Decoder[TimeSeries] = deriveDecoder[TimeSeries]
   implicit val timeSeriesUpdateEncoder: Encoder[TimeSeriesUpdate] = deriveEncoder[TimeSeriesUpdate]
   implicit val timeSeriesItemsWithCursorDecoder: Decoder[ItemsWithCursor[TimeSeries]] =
@@ -97,4 +80,8 @@ object TimeSeriesResource {
     deriveEncoder[TimeSeriesSearch]
   implicit val timeSeriesQueryEncoder: Encoder[TimeSeriesQuery] =
     deriveEncoder[TimeSeriesQuery]
+  implicit val assetsFilterEncoder: Encoder[TimeSeriesFilter] =
+    deriveEncoder[TimeSeriesFilter]
+  implicit val assetsFilterRequestEncoder: Encoder[FilterRequest[TimeSeriesFilter]] =
+    deriveEncoder[FilterRequest[TimeSeriesFilter]]
 }

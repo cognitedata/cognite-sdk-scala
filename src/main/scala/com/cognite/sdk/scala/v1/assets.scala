@@ -39,6 +39,7 @@ final case class AssetUpdate(
 final case class AssetsFilter(
     name: Option[String] = None,
     parentIds: Option[Seq[Long]] = None,
+    rootIds: Option[Seq[CogniteId]] = None,
     metadata: Option[Map[String, String]] = None,
     source: Option[String] = None,
     createdTime: Option[TimeRange] = None,

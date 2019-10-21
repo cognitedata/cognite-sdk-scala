@@ -50,6 +50,7 @@ final case class EventsFilter(
     endTime: Option[TimeRange] = None,
     metadata: Option[Map[String, String]] = None,
     assetIds: Option[Seq[Long]] = None,
+    rootAssetIds: Option[Seq[CogniteId]] = None,
     source: Option[String] = None,
     `type`: Option[String] = None,
     subtype: Option[String] = None,

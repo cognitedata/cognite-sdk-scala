@@ -1,7 +1,5 @@
 package com.cognite.sdk.scala.v1.resources
 
-import java.time.Instant
-
 import cats.Applicative
 import cats.implicits._
 import com.cognite.sdk.scala.common._
@@ -234,9 +232,6 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
 }
 
 object RawRows {
-  implicit val instantEncoder: Encoder[Instant] = Encoder.encodeLong.contramap(_.toEpochMilli)
-  implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
-
   implicit val rawRowEncoder: Encoder[RawRow] = deriveEncoder[RawRow]
   implicit val rawRowDecoder: Decoder[RawRow] = deriveDecoder[RawRow]
   implicit val rawRowItemsWithCursorDecoder: Decoder[ItemsWithCursor[RawRow]] =

@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 
 import com.cognite.sdk.scala.common.{DataPoint, ReadBehaviours, RetryWhile, SdkTest, WritableBehaviors}
+import fs2.Stream
 
 class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L, 999993L)
@@ -104,24 +105,62 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
     fewTimeSeriesForOtherAsset.size should be (1)
 
     val timeSeriesForBothAssets = client.timeSeries
-      .filter(
+      .filterPartitions(
         TimeSeriesFilter(
           assetIds = Some(Seq(4480618819297421L, 95453437348104L))
-        )
+        ), 20
       )
+      .fold(Stream.empty)(_ ++ _)
       .compile
       .toList
     timeSeriesForBothAssets.size should be (manyTimeSeriesForAsset.size + fewTimeSeriesForOtherAsset.size)
 
     val timeSeriesForUnknownAsset = client.timeSeries
-      .filter(
+      .filterPartitions(
         TimeSeriesFilter(
           assetIds = Some(Seq(44444L))
-        )
+        ), 20
       )
+      .fold(Stream.empty)(_ ++ _)
       .compile
       .toList
     timeSeriesForUnknownAsset.size should be (0)
+
+    val timeSeriesForManyFilters = client.timeSeries
+      .filterPartitions(
+        TimeSeriesFilter(
+          name = Some("VAL_23_FIC_92543_06:Z.X.Value"),
+          isStep = Some(false),
+          isString = Some(false),
+          unit = None,
+          assetIds = Some(Seq(95453437348104L)),
+          externalIdPrefix = Some("VAL_23_FIC")
+        ), 20, Some(5)
+      )
+      .fold(Stream.empty)(_ ++ _)
+      .compile
+      .toList
+    timeSeriesForManyFilters.size should be (1)
+  }
+
+  it should "return the same results using filter as filterPartitions" in {
+    val timeSeriesFilter = TimeSeriesFilter(
+      isStep = Some(false),
+      isString = Some(false),
+      unit = None,
+      externalIdPrefix = Some("VAL_23_FIC")
+    )
+
+    val tsFiltered = client.timeSeries
+      .filter(timeSeriesFilter).compile.toList
+
+    val tsFilteredByPartitions = client.timeSeries
+        .filterPartitions(timeSeriesFilter, 8)
+      .fold(Stream.empty)(_ ++ _)
+      .compile.toList
+
+    tsFiltered.size should be (10)
+    assert(tsFiltered === tsFilteredByPartitions)
   }
 
   it should "support search" in {
