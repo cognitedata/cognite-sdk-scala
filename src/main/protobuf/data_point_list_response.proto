@@ -1,14 +1,17 @@
 syntax = "proto3";
 
 package com.cognite.v1.timeseries.proto;
-option java_package = "com.cognite.v1.timeseries.proto";
-option java_multiple_files = true;
 
 import "data_points.proto";
+
+option java_multiple_files = true;
 
 message DataPointListItem {
     int64 id = 1;
     string externalId = 2;
+    bool isString = 6;
+    bool isStep = 7;
+    string unit = 8;
 
     oneof datapointType {
         NumericDatapoints numericDatapoints = 3;

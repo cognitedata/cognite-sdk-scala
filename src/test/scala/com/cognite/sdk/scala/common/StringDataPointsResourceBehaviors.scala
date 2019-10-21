@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.common
 
 import java.time.Instant
 
-import com.cognite.sdk.scala.v1.TimeSeries
+import com.cognite.sdk.scala.v1.{StringDataPointsByIdResponse, TimeSeries}
 import com.cognite.sdk.scala.v1.resources.DataPointsResource
 import com.softwaremill.sttp.Id
 import org.scalatest.{FlatSpec, Matchers}
@@ -25,10 +25,10 @@ trait StringDataPointsResourceBehaviors extends Matchers with RetryWhile { this:
         val stringTimeSeriesExternalId = stringTimeSeries.externalId.get
         dataPoints.insertStringsById(stringTimeSeriesId, testStringDataPoints)
 
-        retryWithExpectedResult[Seq[StringDataPoint]](
+        retryWithExpectedResult[Seq[StringDataPointsByIdResponse]](
           dataPoints.queryStringsById(stringTimeSeriesId, start, end.plusMillis(1)),
           None,
-          Seq(p => p should have size testStringDataPoints.size.toLong)
+          Seq(p => p.head.datapoints should have size testStringDataPoints.size.toLong)
         )
 
         retryWithExpectedResult[Option[StringDataPoint]](
@@ -38,17 +38,17 @@ trait StringDataPointsResourceBehaviors extends Matchers with RetryWhile { this:
         )
 
         dataPoints.deleteRangeById(stringTimeSeriesId, start, end.plusMillis(1))
-        retryWithExpectedResult[Seq[StringDataPoint]](
+        retryWithExpectedResult[Seq[StringDataPointsByIdResponse]](
           dataPoints.queryStringsById(stringTimeSeriesId, start, end.plusMillis(1)),
           None,
-          Seq(dp => dp should have size 0)
+          Seq(dp => dp.head.datapoints should have size 0)
         )
 
         dataPoints.insertStringsByExternalId(stringTimeSeriesExternalId, testStringDataPoints)
-        retryWithExpectedResult[Seq[StringDataPoint]](
+        retryWithExpectedResult[Seq[StringDataPointsByIdResponse]](
           dataPoints.queryStringsByExternalId(stringTimeSeriesExternalId, start, end.plusMillis(1)),
           None,
-          Seq(p2 => p2 should have size testStringDataPoints.size.toLong)
+          Seq(p2 => p2.head.datapoints should have size testStringDataPoints.size.toLong)
         )
 
         val latest2 = dataPoints.getLatestStringDataPointByExternalId(stringTimeSeriesExternalId)
@@ -59,10 +59,10 @@ trait StringDataPointsResourceBehaviors extends Matchers with RetryWhile { this:
         )
 
         dataPoints.deleteRangeById(stringTimeSeriesId, start, end.plusMillis(1))
-        retryWithExpectedResult[Seq[StringDataPoint]](
+        retryWithExpectedResult[Seq[StringDataPointsByIdResponse]](
           dataPoints.queryStringsByExternalId(stringTimeSeriesExternalId, start, end.plusMillis(1)),
           None,
-          Seq(pad => pad should have size 0)
+          Seq(pad => pad.head.datapoints should have size 0)
         )
     }
 }
