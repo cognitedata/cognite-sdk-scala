@@ -38,8 +38,6 @@ final case class CdpApiException(
     missingFields: Option[Seq[String]]
 ) extends Throwable(s"Request to ${url.toString()} failed with status ${code.toString}: $message")
 
-final case class CogniteId(id: Long)
-
 final case class DataPoint(
     timestamp: Instant,
     value: Double

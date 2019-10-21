@@ -1,7 +1,5 @@
 package com.cognite.sdk.scala.v1.resources
 
-import java.time.Instant
-
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
@@ -28,7 +26,7 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
       .sendCdf { request =>
         request
           .post(uri"$baseUri/delete")
-          .body(Items(ids.map(CogniteId)))
+          .body(Items(ids.map(CogniteInternalId)))
           .response(asJson[Either[CdpApiError, Unit]])
           .mapResponse {
             case Left(value) => throw value.error
@@ -63,11 +61,6 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
 }
 
 object ThreeDModels {
-  implicit val instantEncoder: Encoder[Instant] = Encoder.encodeLong.contramap(_.toEpochMilli)
-  implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
-
-  implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
-  implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
   implicit val threeDModelDecoder: Decoder[ThreeDModel] = deriveDecoder[ThreeDModel]
   implicit val threeDModelUpdateEncoder: Encoder[ThreeDModelUpdate] =
     deriveEncoder[ThreeDModelUpdate]
@@ -173,7 +166,7 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
       .sendCdf { request =>
         request
           .post(uri"$baseUri/delete")
-          .body(Items(ids.map(CogniteId)))
+          .body(Items(ids.map(CogniteInternalId)))
           .response(asJson[Either[CdpApiError, Unit]])
           .mapResponse {
             case Left(value) => throw value.error
@@ -208,11 +201,6 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
 }
 
 object ThreeDRevisions {
-  implicit val instantEncoder: Encoder[Instant] = Encoder.encodeLong.contramap(_.toEpochMilli)
-  implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
-
-  implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
-  implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
   implicit val threeDRevisionCameraDecoder: Decoder[Camera] = deriveDecoder[Camera]
   implicit val threeDRevisionCameraEncoder: Encoder[Camera] = deriveEncoder[Camera]
   implicit val threeDRevisionDecoder: Decoder[ThreeDRevision] = deriveDecoder[ThreeDRevision]

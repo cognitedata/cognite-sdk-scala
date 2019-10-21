@@ -5,8 +5,7 @@ import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import fs2._
-import io.circe.{Decoder, Encoder}
-import io.circe.derivation.deriveEncoder
+import io.circe.Decoder
 
 // TODO: Verify that index and numPartitions are valid
 final case class Partition(index: Int = 1, numPartitions: Int = 1) {
@@ -123,9 +122,6 @@ trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUri {
 }
 
 object RetrieveByIds {
-  implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
-  implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
-
   def retrieveByIds[F[_], R](requestSession: RequestSession[F], baseUri: Uri, ids: Seq[Long])(
       implicit itemsDecoder: Decoder[Items[R]]
   ): F[Seq[R]] = {
@@ -135,7 +131,7 @@ object RetrieveByIds {
       .sendCdf { request =>
         request
           .post(uri"$baseUri/byids")
-          .body(Items(ids.map(CogniteId)))
+          .body(Items(ids.map(CogniteInternalId)))
           .response(asJson[Either[CdpApiError, Items[R]]])
           .mapResponse {
             case Left(value) => throw value.error
@@ -153,9 +149,6 @@ trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUri 
 }
 
 object RetrieveByExternalIds {
-  implicit val cogniteExternalIdEncoder: Encoder[CogniteExternalId] = deriveEncoder
-  implicit val cogniteExternalIdItemsEncoder: Encoder[Items[CogniteExternalId]] = deriveEncoder
-
   def retrieveByExternalIds[F[_], R](
       requestSession: RequestSession[F],
       baseUri: Uri,

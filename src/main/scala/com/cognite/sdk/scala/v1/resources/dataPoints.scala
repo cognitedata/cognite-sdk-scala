@@ -426,7 +426,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       .sendCdf { request =>
         request
           .post(uri"$baseUri/latest")
-          .body(Items(ids.map(CogniteId)))
+          .body(Items(ids.map(CogniteInternalId)))
           .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
           .mapResponse {
             case Left(value) => throw value.error
@@ -486,7 +486,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       .sendCdf { request =>
         request
           .post(uri"$baseUri/latest")
-          .body(Items(ids.map(CogniteId)))
+          .body(Items(ids.map(CogniteInternalId)))
           .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
           .mapResponse {
             case Left(value) => throw value.error
@@ -519,13 +519,6 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 }
 
 object DataPointsResource {
-  implicit val instantEncoder: Encoder[Instant] = Encoder.encodeLong.contramap(_.toEpochMilli)
-  implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
-
-  implicit val cogniteIdEncoder: Encoder[CogniteId] = deriveEncoder
-  implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
-  implicit val cogniteExternalIdEncoder: Encoder[CogniteExternalId] = deriveEncoder
-  implicit val cogniteExternalIdItemsEncoder: Encoder[Items[CogniteExternalId]] = deriveEncoder
   implicit val dataPointDecoder: Decoder[DataPoint] = deriveDecoder
   implicit val dataPointEncoder: Encoder[DataPoint] = deriveEncoder
   implicit val dataPointsByIdResponseDecoder: Decoder[DataPointsByIdResponse] = deriveDecoder

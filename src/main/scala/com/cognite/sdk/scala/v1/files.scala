@@ -42,10 +42,13 @@ final case class FilesFilter(
     mimeType: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
     assetIds: Option[Seq[Long]] = None,
+    rootAssetIds: Option[Seq[CogniteId]] = None,
     source: Option[String] = None,
     createdTime: Option[TimeRange] = None,
     lastUpdatedTime: Option[TimeRange] = None,
     uploadedTime: Option[TimeRange] = None,
+    sourceCreatedTime: Option[TimeRange] = None,
+    sourceModifiedTime: Option[TimeRange] = None,
     externalIdPrefix: Option[String] = None,
     uploaded: Option[Boolean] = None
 )
