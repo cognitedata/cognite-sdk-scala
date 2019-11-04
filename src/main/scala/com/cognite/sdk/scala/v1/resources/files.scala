@@ -109,7 +109,8 @@ class Files[F[_]](val requestSession: RequestSession[F])
       filter: FilesFilter,
       cursor: Option[String],
       limit: Option[Int],
-      partition: Option[Partition]
+      partition: Option[Partition],
+      aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[File]] =
     Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit, None)
 

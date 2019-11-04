@@ -162,7 +162,8 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       filter: RawRowFilter,
       cursor: Option[String],
       limit: Option[Int],
-      partition: Option[Partition]
+      partition: Option[Partition],
+      aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[RawRow]] =
     Readable.readWithCursor(
       requestSession,

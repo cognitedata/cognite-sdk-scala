@@ -6,14 +6,15 @@ import com.cognite.sdk.scala.v1.RequestSession
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import fs2._
-import io.circe.{Decoder, Encoder}
+import io.circe.{Decoder, Encoder, Printer}
 import io.circe.syntax._
 
 final case class FilterRequest[T](
     filter: T,
     limit: Option[Int],
     cursor: Option[String],
-    partition: Option[String]
+    partition: Option[String],
+    aggregatedProperties: Option[Seq[String]]
 )
 
 trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
@@ -21,30 +22,34 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
       filter: Fi,
       cursor: Option[String],
       limit: Option[Int],
-      partition: Option[Partition]
+      partition: Option[Partition],
+      aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[R]]
 
-  private def filterWithNextCursor(
+  private[sdk] def filterWithNextCursor(
       filter: Fi,
       cursor: Option[String],
-      limit: Option[Int]
+      limit: Option[Int],
+      aggregatedProperties: Option[Seq[String]]
   ): Stream[F, R] =
     Readable
-      .pullFromCursor(cursor, limit, None, filterWithCursor(filter, _, _, _))
+      .pullFromCursor(cursor, limit, None, filterWithCursor(filter, _, _, _, aggregatedProperties))
       .stream
 
   def filter(filter: Fi, limit: Option[Int] = None): Stream[F, R] =
-    filterWithNextCursor(filter, None, limit)
+    filterWithNextCursor(filter, None, limit, None)
 }
 
 trait PartitionedFilterF[R, Fi, F[_]] extends Filter[R, Fi, F] {
-  def filterPartitionsF(
+  def filterPartitionsF(filter: Fi, numPartitions: Int, limitPerPartition: Option[Int] = None)(
+      implicit F: Applicative[F]
+  ): F[Seq[Stream[F, R]]]
+
+  def filterConcurrently(
       filter: Fi,
       numPartitions: Int,
       limitPerPartition: Option[Int] = None
-  )(implicit F: Applicative[F]): F[Seq[Stream[F, R]]]
-
-  def filterConcurrently(filter: Fi, numPartitions: Int, limitPerPartition: Option[Int] = None)(
+  )(
       implicit F: Concurrent[F]
   ): Stream[F, R] =
     Stream
@@ -64,7 +69,7 @@ trait PartitionedFilter[R, Fi, F[_]] extends PartitionedFilterF[R, Fi, F] {
           None,
           limitPerPartition,
           Some(Partition(i, numPartitions)),
-          filterWithCursor(filter, _, _, _)
+          filterWithCursor(filter, _, _, _, None)
         )
         .stream
     }
@@ -78,20 +83,25 @@ trait PartitionedFilter[R, Fi, F[_]] extends PartitionedFilterF[R, Fi, F] {
 }
 
 object Filter {
+  //scalastyle:off parameter.number
   def filterWithCursor[F[_], R, Fi: Encoder](
       requestSession: RequestSession[F],
       baseUri: Uri,
       filter: Fi,
       cursor: Option[String],
       limit: Option[Int],
-      partition: Option[Partition]
+      partition: Option[Partition],
+      aggregatedProperties: Option[Seq[String]] = None
   )(
       implicit readItemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
       filterRequestEncoder: Encoder[FilterRequest[Fi]]
   ): F[ItemsWithCursor[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
-    val body = FilterRequest(filter, limit, cursor, partition.map(_.toString)).asJson
+    // avoid sending aggregatedProperties to resources that do not support it
+    implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
+    val body =
+      FilterRequest(filter, limit, cursor, partition.map(_.toString), aggregatedProperties).asJson
     requestSession
       .sendCdf { request =>
         request
@@ -108,4 +118,5 @@ object Filter {
           }
       }
   }
+  //scalastyle:off parameter.number
 }

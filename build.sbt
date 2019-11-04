@@ -75,7 +75,8 @@ lazy val commonSettings = Seq(
           Wart.Any,
           Wart.Throw,
           Wart.ImplicitParameter,
-          Wart.ToString
+          Wart.ToString,
+          Wart.Overloading
         )
     }),
   wartremoverExcluded += baseDirectory.value / "target" / "protobuf-generated"
