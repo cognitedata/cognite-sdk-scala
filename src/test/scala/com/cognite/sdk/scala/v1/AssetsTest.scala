@@ -108,6 +108,15 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     assert(filterWithRootAssetsByInternalId.length == 781)
   }
 
+  it should "support asset aggregates" in {
+    val filterWithAggregates = client.assets
+      .filter(AssetsFilter(
+        rootIds = Some(Seq(CogniteInternalId(2780934754068396L)))
+      ), Some(5), Some(Seq("childCount")))
+        .compile.toList
+    assert(filterWithAggregates.map(_.aggregates.get("childCount")).exists(_ > 0))
+  }
+
   it should "support search" in {
     val createdTimeSearchResults = client.assets
       .search(

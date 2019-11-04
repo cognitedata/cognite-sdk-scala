@@ -56,7 +56,8 @@ class Events[F[_]](val requestSession: RequestSession[F])
       filter: EventsFilter,
       cursor: Option[String],
       limit: Option[Int],
-      partition: Option[Partition]
+      partition: Option[Partition],
+      aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[Event]] =
     Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit, partition)
 

@@ -13,7 +13,9 @@ final case class Asset(
     source: Option[String] = None,
     id: Long = 0,
     createdTime: Instant = Instant.ofEpochMilli(0),
-    lastUpdatedTime: Instant = Instant.ofEpochMilli(0)
+    lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
+    rootId: Option[Long] = None,
+    aggregates: Option[Map[String, Long]] = None
 ) extends WithId[Long]
     with WithExternalId
 

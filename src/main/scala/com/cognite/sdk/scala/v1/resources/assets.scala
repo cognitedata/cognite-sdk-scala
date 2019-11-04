@@ -52,13 +52,46 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUri, externalIds)
 
+  def filter(
+      filter: AssetsFilter,
+      limit: Option[StatusCode],
+      aggregatedProperties: Option[Seq[String]]
+  ): fs2.Stream[F, Asset] =
+    filterWithNextCursor(filter, None, limit, aggregatedProperties)
+
+  def filterPartitions(
+      filter: AssetsFilter,
+      numPartitions: StatusCode,
+      limitPerPartition: Option[StatusCode],
+      aggregatedProperties: Option[Seq[String]]
+  ): Seq[fs2.Stream[F, Asset]] =
+    1.to(numPartitions).map { i =>
+      Readable
+        .pullFromCursor(
+          None,
+          limitPerPartition,
+          Some(Partition(i, numPartitions)),
+          filterWithCursor(filter, _, _, _, aggregatedProperties)
+        )
+        .stream
+    }
+
   private[sdk] def filterWithCursor(
       filter: AssetsFilter,
       cursor: Option[String],
       limit: Option[Int],
-      partition: Option[Partition]
+      partition: Option[Partition],
+      aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[Asset]] =
-    Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit, partition)
+    Filter.filterWithCursor(
+      requestSession,
+      baseUri,
+      filter,
+      cursor,
+      limit,
+      partition,
+      aggregatedProperties
+    )
 
   override def search(searchQuery: AssetsQuery): F[Seq[Asset]] =
     Search.search(requestSession, baseUri, searchQuery)

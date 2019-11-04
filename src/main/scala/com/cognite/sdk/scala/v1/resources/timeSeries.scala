@@ -56,7 +56,8 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
       filter: TimeSeriesFilter,
       cursor: Option[String],
       limit: Option[Int],
-      partition: Option[Partition]
+      partition: Option[Partition],
+      aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[TimeSeries]] =
     Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit, partition)
 
