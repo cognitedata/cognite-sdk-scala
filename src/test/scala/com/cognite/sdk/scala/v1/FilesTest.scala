@@ -181,6 +181,8 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with 
   }
   it should "support upload" in {
 
+    val cwd = new java.io.File("./")
+    println(s"current working directory is ${cwd.getAbsolutePath}")
     val inputStream = new BufferedInputStream(
       new FileInputStream(
         new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
