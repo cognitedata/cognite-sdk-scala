@@ -33,7 +33,6 @@ final case class EventCreate(
 ) extends WithExternalId
 
 final case class EventUpdate(
-    id: Long = 0,
     startTime: Option[Setter[Instant]] = None,
     endTime: Option[Setter[Instant]] = None,
     description: Option[Setter[String]] = None,
@@ -43,7 +42,7 @@ final case class EventUpdate(
     assetIds: Option[NonNullableSetter[Seq[Long]]] = None,
     source: Option[Setter[String]] = None,
     externalId: Option[Setter[String]] = None
-) extends WithId[Long]
+)
 
 final case class EventsFilter(
     startTime: Option[TimeRange] = None,

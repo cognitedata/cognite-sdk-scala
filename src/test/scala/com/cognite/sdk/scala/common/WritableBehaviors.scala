@@ -147,10 +147,10 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
     //       id in the same api call for V1
   }
 
-  def updatable[R <: WithId[Long], W, U <: WithId[Long]](
+  def updatable[R <: WithId[Long], W, U](
       updatable: Create[R, W, Id]
         with DeleteByIds[Id, Long]
-        with Update[R, U, Id]
+        with UpdateById[R, U, Id]
         with RetrieveByIds[R, Id],
       readExamples: Seq[R],
       updateExamples: Seq[R],
@@ -183,6 +183,39 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
 
       // delete it
       updatable.deleteByIds(createdItems.map(_.id))
+    }
+
+  def updatableByExternalId[R <: WithExternalId, W, U](
+    resource: Create[R, W, Id]
+      with DeleteByExternalIds[Id]
+      with UpdateByExternalId[R, U, Id]
+      with RetrieveByIds[R, Id],
+    itemsToCreate: Seq[R],
+    updatesToMake: Map[String, U],
+    expectedBehaviors: (Seq[R], Seq[R]) => Unit)
+  (implicit t: Transformer[R, W]): Unit =
+    it should "allow updating by externalId" in {
+      val createdItems = resource.createFromRead(itemsToCreate)
+      val updatedItems = resource.updateByExternalId(updatesToMake)
+      expectedBehaviors(createdItems, updatedItems)
+      resource.deleteByExternalIds(updatedItems.map(_.externalId.get))
+    }
+
+  def updatableById[R <: WithId[Long], W, U](
+    resource: Create[R, W, Id]
+      with DeleteByIds[Id, Long]
+      with UpdateById[R, U, Id]
+      with RetrieveByIds[R, Id],
+    itemsToCreate: Seq[R],
+    updatesToMake: Seq[U],
+    expectedBehaviors: (Seq[R], Seq[R]) => Unit
+  )(implicit t: Transformer[R, W]): Unit =
+    it should "allow updating by Id" in {
+      val createdItems = resource.createFromRead(itemsToCreate)
+      val updateMap = createdItems.indices.map(i => (createdItems(i).id, updatesToMake(i))).toMap
+      val updatedItems = resource.updateById(updateMap)
+      expectedBehaviors(createdItems, updatedItems)
+      resource.deleteByIds(updatedItems.map(_.id))
     }
 
   def deletableWithIgnoreUnknownIds[R <: WithId[Long], W, PrimitiveId](

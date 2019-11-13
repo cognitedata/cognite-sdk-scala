@@ -16,7 +16,8 @@ class Events[F[_]](val requestSession: RequestSession[F])
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
     with PartitionedFilter[Event, EventsFilter, F]
     with Search[Event, EventsQuery, F]
-    with Update[Event, EventUpdate, F] {
+    with UpdateById[Event, EventUpdate, F]
+    with UpdateByExternalId[Event, EventUpdate, F] {
   import Events._
   override val baseUri = uri"${requestSession.baseUri}/events"
 
@@ -43,8 +44,11 @@ class Events[F[_]](val requestSession: RequestSession[F])
   override def createItems(items: Items[EventCreate]): F[Seq[Event]] =
     Create.createItems[F, Event, EventCreate](requestSession, baseUri, items)
 
-  override def update(items: Seq[EventUpdate]): F[Seq[Event]] =
-    Update.update[F, Event, EventUpdate](requestSession, baseUri, items)
+  override def updateById(items: Map[Long, EventUpdate]): F[Seq[Event]] =
+    UpdateById.updateById[F, Event, EventUpdate](requestSession, baseUri, items)
+
+  override def updateByExternalId(items: Map[String, EventUpdate]): F[Seq[Event]] =
+    UpdateByExternalId.updateByExternalId[F, Event, EventUpdate](requestSession, baseUri, items)
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] = deleteByIds(ids, false)
 

@@ -82,7 +82,7 @@ object EitherDecoder {
 
 sealed trait Setter[+T]
 sealed trait NonNullableSetter[+T]
-final case class Set[+T](set: T) extends Setter[T] with NonNullableSetter[T]
+final case class SetValue[+T](set: T) extends Setter[T] with NonNullableSetter[T]
 final case class SetNull[+T]() extends Setter[T]
 
 object Setter {
@@ -93,7 +93,7 @@ object Setter {
         case null => Some(SetNull()) // scalastyle:ignore null
         case None => None
         case Some(null) => Some(SetNull()) // scalastyle:ignore null
-        case Some(value: T) => Some(Set(value))
+        case Some(value: T) => Some(SetValue(value))
       }
     }
 
@@ -102,14 +102,14 @@ object Setter {
     new Transformer[T, Option[Setter[T]]] {
       override def transform(src: T): Option[Setter[T]] = src match {
         case null => Some(SetNull()) // scalastyle:ignore null
-        case value => Some(Set(value))
+        case value => Some(SetValue(value))
       }
     }
 
   implicit def encodeSetter[T](implicit encodeT: Encoder[T]): Encoder[Setter[T]] =
     new Encoder[Setter[T]] {
       final def apply(a: Setter[T]): Json = a match {
-        case Set(value) => Json.obj(("set", encodeT.apply(value)))
+        case SetValue(value) => Json.obj(("set", encodeT.apply(value)))
         case SetNull() => Json.obj(("setNull", Json.True))
       }
     }
@@ -131,26 +131,26 @@ object NonNullableSetter {
         case None => None
         case Some(value: T) =>
           require(value != null, "Invalid null value for non-nullable field update") // scalastyle:ignore null
-          Some(Set(value))
+          Some(SetValue(value))
       }
     }
 
   implicit def toNonNullableSetter[T: Manifest]: Transformer[T, NonNullableSetter[T]] =
     new Transformer[T, NonNullableSetter[T]] {
-      override def transform(value: T): NonNullableSetter[T] = Set(value)
+      override def transform(value: T): NonNullableSetter[T] = SetValue(value)
     }
 
   implicit def toOptionNonNullableSetter[T: Manifest]
       : Transformer[T, Option[NonNullableSetter[T]]] =
     new Transformer[T, Option[NonNullableSetter[T]]] {
-      override def transform(value: T): Option[NonNullableSetter[T]] = Some(Set(value))
+      override def transform(value: T): Option[NonNullableSetter[T]] = Some(SetValue(value))
     }
 
   implicit def encodeNonNullableSetter[T](
       implicit encodeT: Encoder[T]
   ): Encoder[NonNullableSetter[T]] = new Encoder[NonNullableSetter[T]] {
     final def apply(a: NonNullableSetter[T]): Json = a match {
-      case Set(value) => Json.obj(("set", encodeT.apply(value)))
+      case SetValue(value) => Json.obj(("set", encodeT.apply(value)))
     }
   }
 }

@@ -6,8 +6,7 @@ import java.time.Instant
 import java.util.UUID
 
 import org.scalatest.Matchers
-
-import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, SdkTest, WritableBehaviors}
+import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, SdkTest, SetValue, WritableBehaviors}
 
 class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with Matchers {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
@@ -95,6 +94,26 @@ class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with 
 
     // delete it
     client.files.deleteByIds(Seq(createdItem.id))
+  }
+
+  it should "allow updates by Id" in {
+    val testFile = File(name = "test-file-1", externalId = Some("test-externalId-1"))
+    val createdItem = client.files.createOneFromRead(testFile)
+    val updatedFile = client.files.updateById(Map(createdItem.id -> FileUpdate(externalId = Some(SetValue("test-externalId-1-1")))))
+    assert(updatedFile.length == 1)
+    assert(createdItem.name == updatedFile.head.name)
+    assert(updatedFile.head.externalId.get == s"${testFile.externalId.get}-1")
+    client.files.deleteByExternalId("test-externalId-1-1")
+  }
+
+  it should "allow updates by externalId" in {
+    val testFile = File(name = "test-file-1", externalId = Some("test-externalId-1"), source = Some("source-1"))
+    val createdItem = client.files.createOneFromRead(testFile)
+    val updatedFile = client.files.updateByExternalId(Map(createdItem.externalId.get -> FileUpdate(source = Some(SetValue("source-1-1")))))
+    assert(updatedFile.length == 1)
+    assert(createdItem.name == updatedFile.head.name)
+    assert(updatedFile.head.source.get == s"${testFile.source.get}-1")
+    client.files.deleteByExternalId("test-externalId-1")
   }
 
   it should "support filter" in {

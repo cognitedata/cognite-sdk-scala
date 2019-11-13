@@ -30,13 +30,14 @@ final case class AssetCreate(
 ) extends WithExternalId
 
 final case class AssetUpdate(
-    id: Long,
     name: Option[NonNullableSetter[String]] = None,
     description: Option[Setter[String]] = None,
     source: Option[Setter[String]] = None,
     externalId: Option[Setter[String]] = None,
-    metadata: Option[NonNullableSetter[Map[String, String]]] = None
-) extends WithId[Long]
+    metadata: Option[NonNullableSetter[Map[String, String]]] = None,
+    parentId: Option[Setter[Long]] = None,
+    parentExternalId: Option[Setter[String]] = None
+)
 
 final case class AssetsFilter(
     name: Option[String] = None,

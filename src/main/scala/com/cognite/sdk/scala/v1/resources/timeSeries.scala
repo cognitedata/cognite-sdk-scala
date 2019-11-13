@@ -16,7 +16,8 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     with DeleteByExternalIds[F]
     with PartitionedFilter[TimeSeries, TimeSeriesFilter, F]
     with Search[TimeSeries, TimeSeriesQuery, F]
-    with Update[TimeSeries, TimeSeriesUpdate, F] {
+    with UpdateById[TimeSeries, TimeSeriesUpdate, F]
+    with UpdateByExternalId[TimeSeries, TimeSeriesUpdate, F] {
   import TimeSeriesResource._
   override val baseUri = uri"${requestSession.baseUri}/timeseries"
 
@@ -43,8 +44,15 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
   override def createItems(items: Items[TimeSeriesCreate]): F[Seq[TimeSeries]] =
     Create.createItems[F, TimeSeries, TimeSeriesCreate](requestSession, baseUri, items)
 
-  override def update(items: Seq[TimeSeriesUpdate]): F[Seq[TimeSeries]] =
-    Update.update[F, TimeSeries, TimeSeriesUpdate](requestSession, baseUri, items)
+  override def updateById(items: Map[Long, TimeSeriesUpdate]): F[Seq[TimeSeries]] =
+    UpdateById.updateById[F, TimeSeries, TimeSeriesUpdate](requestSession, baseUri, items)
+
+  override def updateByExternalId(items: Map[String, TimeSeriesUpdate]): F[Seq[TimeSeries]] =
+    UpdateByExternalId.updateByExternalId[F, TimeSeries, TimeSeriesUpdate](
+      requestSession,
+      baseUri,
+      items
+    )
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUri, ids)

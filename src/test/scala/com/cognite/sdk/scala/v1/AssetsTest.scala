@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
+import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, SetValue, WritableBehaviors}
 import fs2.Stream
 
 class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
@@ -61,7 +61,9 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     assetsToCreate,
     assetUpdates,
     (id: Long, item: Asset) => item.copy(id = id),
-    (a: Asset, b: Asset) => { a == b },
+    (a: Asset, b: Asset) => {
+      a.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) == b.copy(lastUpdatedTime = Instant.ofEpochMilli(0))
+    },
     (readAssets: Seq[Asset], updatedAssets: Seq[Asset]) => {
       assert(assetsToCreate.size == assetUpdates.size)
       assert(readAssets.size == assetsToCreate.size)
@@ -69,6 +71,36 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       assert(updatedAssets.zip(readAssets).forall { case (updated, read) =>  updated.name == s"${read.name}-1" })
       assert(updatedAssets.head.description.isEmpty)
       assert(updatedAssets(1).description == readAssets(1).description)
+      ()
+    }
+  )
+
+  it should behave like updatableById(
+    client.assets,
+    assetsToCreate,
+    Seq(AssetUpdate(name = Some(SetValue("scala-sdk-update-1-1"))), AssetUpdate(name = Some(SetValue("scala-sdk-update-2-1")))),
+    (readAssets: Seq[Asset], updatedAssets: Seq[Asset]) => {
+      assert(assetsToCreate.size == assetUpdates.size)
+      assert(readAssets.size == assetsToCreate.size)
+      assert(updatedAssets.size == assetUpdates.size)
+      assert(updatedAssets.zip(readAssets).forall { case (updated, read) =>  updated.name == s"${read.name}-1" })
+      ()
+    }
+  )
+
+  it should behave like updatableByExternalId(
+    client.assets,
+    Seq(
+      Asset(name = "update-1", externalId = Some("update-1-externalId")),
+      Asset(name = "update-2", externalId = Some("update-2-externalId"))),
+    Map("update-1-externalId" -> AssetUpdate(name = Some(SetValue("update-1-1"))),
+      "update-2-externalId" -> AssetUpdate(name = Some(SetValue("update-2-1")))),
+    (readAssets: Seq[Asset], updatedAssets: Seq[Asset]) => {
+      assert(assetsToCreate.size == assetUpdates.size)
+      assert(readAssets.size == assetsToCreate.size)
+      assert(updatedAssets.size == assetUpdates.size)
+      assert(updatedAssets.zip(readAssets).forall { case (updated, read) =>  updated.name == s"${read.name}-1" })
+      assert(updatedAssets.zip(readAssets).forall { case (updated, read) => updated.externalId == read.externalId })
       ()
     }
   )

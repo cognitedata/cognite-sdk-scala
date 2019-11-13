@@ -34,7 +34,6 @@ final case class TimeSeriesCreate(
 ) extends WithExternalId
 
 final case class TimeSeriesUpdate(
-    id: Long = 0,
     name: Option[Setter[String]] = None,
     externalId: Option[Setter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
@@ -42,7 +41,7 @@ final case class TimeSeriesUpdate(
     assetId: Option[Setter[Long]] = None,
     description: Option[Setter[String]] = None,
     securityCategories: Option[Setter[Seq[Long]]] = None
-) extends WithId[Long]
+)
 
 final case class TimeSeriesSearchFilter(
     name: Option[String] = None,

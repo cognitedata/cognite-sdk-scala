@@ -1,8 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
-import com.cognite.sdk.scala.common.{DataPoint, ReadBehaviours, RetryWhile, SdkTest, WritableBehaviors}
+import com.cognite.sdk.scala.common.{DataPoint, ReadBehaviours, RetryWhile, SdkTest, SetValue, WritableBehaviors}
 import fs2.Stream
 
 class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors with RetryWhile {
@@ -68,6 +67,31 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
       assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) => updated.name == Some(s"${read.name.get}-1")})
       assert(updatedTimeSeries.head.description.isEmpty)
       assert(updatedTimeSeries(1).description == timeSeriesUpdates(1).description)
+      ()
+    }
+  )
+
+  it should behave like updatableById(
+    client.timeSeries,
+    timeSeriesToCreate,
+    Seq(TimeSeriesUpdate(name = Some(SetValue("scala-sdk-write-example-1-1"))), TimeSeriesUpdate(name = Some(SetValue("scala-sdk-write-example-2-1")))),
+    (readTimeSeries: Seq[TimeSeries], updatedTimeSeries: Seq[TimeSeries]) => {
+      assert(readTimeSeries.size == updatedTimeSeries.size)
+      assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) =>  updated.name.get == s"${read.name.get}-1" })
+      ()
+    }
+  )
+
+  it should behave like updatableByExternalId(
+    client.timeSeries,
+    Seq(TimeSeries(name = Some("name-1"), externalId = Some("externalId-1")),
+      TimeSeries(name = Some("name-2"), externalId = Some("externalId-2"))),
+    Map("externalId-1" -> TimeSeriesUpdate(name = Some(SetValue("name-1-1"))),
+      "externalId-2" -> TimeSeriesUpdate(name = Some(SetValue("name-2-1")))),
+    (readTimeSeries: Seq[TimeSeries], updatedTimeSeries: Seq[TimeSeries]) => {
+      assert(readTimeSeries.size == updatedTimeSeries.size)
+      assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) =>
+        updated.name.getOrElse("") == s"${read.name.getOrElse("")}-1" })
       ()
     }
   )

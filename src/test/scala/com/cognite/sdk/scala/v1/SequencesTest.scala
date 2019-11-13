@@ -3,7 +3,7 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 
 import cats.data.NonEmptyList
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
+import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, SetValue, WritableBehaviors}
 
 class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
@@ -144,6 +144,34 @@ class SequencesTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       }
     )
   )
+
+  it should behave like updatableById(
+    client.sequences,
+    sequencesToCreate,
+    Seq(SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-1-1"))), SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-2-1")))),
+    (readSequences: Seq[Sequence], updatedSequences: Seq[Sequence]) => {
+      assert(readSequences.size == updatedSequences.size)
+      assert(updatedSequences.zip(readSequences).forall { case (updated, read) =>  updated.name.get == s"${read.name.get}-1" })
+      ()
+    }
+  )
+
+  it should behave like updatableByExternalId(
+    client.sequences,
+    Seq(Sequence(
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "string-column")), externalId = Some("update-1-externalId")),
+      Sequence(columns = NonEmptyList.of(
+        SequenceColumn(name = Some("string-column"), externalId = "string-column")), externalId = Some("update-2-externalId"))),
+    Map("update-1-externalId" -> SequenceUpdate(externalId = Some(SetValue("update-1-externalId-1"))),
+      "update-2-externalId" -> SequenceUpdate(externalId = Some(SetValue("update-2-externalId-1")))),
+    (readSequences: Seq[Sequence], updatedSequences: Seq[Sequence]) => {
+      assert(readSequences.size == updatedSequences.size)
+      assert(updatedSequences.zip(readSequences).forall { case (updated, read) =>
+        updated.externalId.getOrElse("") == s"${read.externalId.getOrElse("")}-1" })
+      ()
+    }
+  )
+
   it should "support search" in {
     val emptyCreatedTimeSearchResults = client.sequences
       .search(

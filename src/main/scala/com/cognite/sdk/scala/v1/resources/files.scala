@@ -20,7 +20,8 @@ class Files[F[_]](val requestSession: RequestSession[F])
     with DeleteByExternalIds[F]
     with Filter[File, FilesFilter, F]
     with Search[File, FilesQuery, F]
-    with Update[File, FileUpdate, F] {
+    with UpdateById[File, FileUpdate, F]
+    with UpdateByExternalId[File, FileUpdate, F] {
   import Files._
   override val baseUri = uri"${requestSession.baseUri}/files"
 
@@ -96,8 +97,11 @@ class Files[F[_]](val requestSession: RequestSession[F])
   override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[File]] =
     RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUri, externalIds)
 
-  override def update(items: Seq[FileUpdate]): F[Seq[File]] =
-    Update.update[F, File, FileUpdate](requestSession, baseUri, items)
+  override def updateById(items: Map[Long, FileUpdate]): F[Seq[File]] =
+    UpdateById.updateById[F, File, FileUpdate](requestSession, baseUri, items)
+
+  override def updateByExternalId(items: Map[String, FileUpdate]): F[Seq[File]] =
+    UpdateByExternalId.updateByExternalId[F, File, FileUpdate](requestSession, baseUri, items)
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUri, ids)
