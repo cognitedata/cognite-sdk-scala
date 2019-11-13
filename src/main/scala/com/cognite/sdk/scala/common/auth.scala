@@ -41,7 +41,7 @@ final case class BearerTokenAuth(bearerToken: String, override val project: Opti
     r.header("Authorization", s"Bearer $bearerToken")
 }
 
-final case class AuthTicketAuth(authTicket: String, override val project: Option[String] = None)
+final case class TicketAuth(authTicket: String, override val project: Option[String] = None)
     extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     r.header("auth-ticket", authTicket)
