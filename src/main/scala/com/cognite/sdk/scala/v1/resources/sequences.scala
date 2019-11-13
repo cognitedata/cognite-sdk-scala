@@ -14,7 +14,8 @@ class SequencesResource[F[_]](val requestSession: RequestSession[F])
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
     with Search[Sequence, SequenceQuery, F]
-    with Update[Sequence, SequenceUpdate, F] {
+    with UpdateById[Sequence, SequenceUpdate, F]
+    with UpdateByExternalId[Sequence, SequenceUpdate, F] {
   import SequencesResource._
 
   override val baseUri = uri"${requestSession.baseUri}/sequences"
@@ -42,8 +43,15 @@ class SequencesResource[F[_]](val requestSession: RequestSession[F])
   override def createItems(items: Items[SequenceCreate]): F[Seq[Sequence]] =
     Create.createItems[F, Sequence, SequenceCreate](requestSession, baseUri, items)
 
-  override def update(items: Seq[SequenceUpdate]): F[Seq[Sequence]] =
-    Update.update[F, Sequence, SequenceUpdate](requestSession, baseUri, items)
+  override def updateById(items: Map[Long, SequenceUpdate]): F[Seq[Sequence]] =
+    UpdateById.updateById[F, Sequence, SequenceUpdate](requestSession, baseUri, items)
+
+  override def updateByExternalId(items: Map[String, SequenceUpdate]): F[Seq[Sequence]] =
+    UpdateByExternalId.updateByExternalId[F, Sequence, SequenceUpdate](
+      requestSession,
+      baseUri,
+      items
+    )
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUri, ids)

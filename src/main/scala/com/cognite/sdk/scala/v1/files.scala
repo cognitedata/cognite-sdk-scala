@@ -30,12 +30,11 @@ final case class FileCreate(
 )
 
 final case class FileUpdate(
-    id: Long = 0,
     externalId: Option[Setter[String]] = None,
     source: Option[Setter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
     assetIds: Option[NonNullableSetter[Seq[Long]]] = None
-) extends WithId[Long]
+)
 
 final case class FilesFilter(
     name: Option[String] = None,

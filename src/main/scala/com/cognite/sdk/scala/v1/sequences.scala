@@ -52,13 +52,12 @@ final case class SequenceCreate(
 ) extends WithExternalId
 
 final case class SequenceUpdate(
-    id: Long = 0,
     name: Option[Setter[String]] = None,
     description: Option[Setter[String]] = None,
     assetId: Option[Setter[Long]] = None,
     externalId: Option[Setter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None
-) extends WithId[Long]
+)
 
 final case class SequenceFilter(
     name: Option[String] = None,

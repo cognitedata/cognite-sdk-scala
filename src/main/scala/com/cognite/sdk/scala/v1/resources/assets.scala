@@ -16,7 +16,8 @@ class Assets[F[_]](val requestSession: RequestSession[F])
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
     with PartitionedFilter[Asset, AssetsFilter, F]
     with Search[Asset, AssetsQuery, F]
-    with Update[Asset, AssetUpdate, F] {
+    with UpdateById[Asset, AssetUpdate, F]
+    with UpdateByExternalId[Asset, AssetUpdate, F] {
   import Assets._
   override val baseUri = uri"${requestSession.baseUri}/assets"
 
@@ -43,8 +44,15 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   override def createItems(items: Items[AssetCreate]): F[Seq[Asset]] =
     Create.createItems[F, Asset, AssetCreate](requestSession, baseUri, items)
 
-  override def update(items: Seq[AssetUpdate]): F[Seq[Asset]] =
-    Update.update[F, Asset, AssetUpdate](requestSession, baseUri, items)
+  override def updateById(items: Map[Long, AssetUpdate]): F[Seq[Asset]] =
+    UpdateById.updateById[F, Asset, AssetUpdate](requestSession, baseUri, items)
+
+  override def updateByExternalId(items: Map[String, AssetUpdate]): F[Seq[Asset]] =
+    UpdateByExternalId.updateByExternalId[F, Asset, AssetUpdate](
+      requestSession,
+      baseUri,
+      items
+    )
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] = deleteByIds(ids, false)
 
@@ -116,10 +124,7 @@ object Assets {
   implicit val createAssetEncoder: Encoder[AssetCreate] = deriveEncoder[AssetCreate]
   implicit val createAssetsItemsEncoder: Encoder[Items[AssetCreate]] =
     deriveEncoder[Items[AssetCreate]]
-  implicit val assetUpdateEncoder: Encoder[AssetUpdate] =
-    deriveEncoder[AssetUpdate]
-  implicit val updateAssetsItemsEncoder: Encoder[Items[AssetUpdate]] =
-    deriveEncoder[Items[AssetUpdate]]
+  implicit val assetUpdateEncoder: Encoder[AssetUpdate] = deriveEncoder[AssetUpdate]
   implicit val assetsFilterEncoder: Encoder[AssetsFilter] =
     deriveEncoder[AssetsFilter]
   implicit val assetsSearchEncoder: Encoder[AssetsSearch] =

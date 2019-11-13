@@ -12,7 +12,7 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
     with RetrieveByIds[ThreeDModel, F]
     with Readable[ThreeDModel, F]
     with DeleteByIds[F, Long]
-    with Update[ThreeDModel, ThreeDModelUpdate, F]
+    with UpdateById[ThreeDModel, ThreeDModelUpdate, F]
     with WithRequestSession[F] {
   import ThreeDModels._
   override val baseUri = uri"${requestSession.baseUri}/3d/models"
@@ -56,8 +56,8 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
   override def createItems(items: Items[ThreeDModelCreate]): F[Seq[ThreeDModel]] =
     Create.createItems[F, ThreeDModel, ThreeDModelCreate](requestSession, baseUri, items)
 
-  override def update(items: Seq[ThreeDModelUpdate]): F[Seq[ThreeDModel]] =
-    Update.update[F, ThreeDModel, ThreeDModelUpdate](requestSession, baseUri, items)
+  override def updateById(items: Map[Long, ThreeDModelUpdate]): F[Seq[ThreeDModel]] =
+    UpdateById.updateById[F, ThreeDModel, ThreeDModelUpdate](requestSession, baseUri, items)
 }
 
 object ThreeDModels {
@@ -151,7 +151,7 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
     with RetrieveByIds[ThreeDRevision, F]
     with Readable[ThreeDRevision, F]
     with DeleteByIds[F, Long]
-    with Update[ThreeDRevision, ThreeDRevisionUpdate, F]
+    with UpdateById[ThreeDRevision, ThreeDRevisionUpdate, F]
     with WithRequestSession[F] {
   import ThreeDRevisions._
   override val baseUri =
@@ -196,8 +196,8 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
   override def createItems(items: Items[ThreeDRevisionCreate]): F[Seq[ThreeDRevision]] =
     Create.createItems[F, ThreeDRevision, ThreeDRevisionCreate](requestSession, baseUri, items)
 
-  override def update(items: Seq[ThreeDRevisionUpdate]): F[Seq[ThreeDRevision]] =
-    Update.update[F, ThreeDRevision, ThreeDRevisionUpdate](requestSession, baseUri, items)
+  override def updateById(items: Map[Long, ThreeDRevisionUpdate]): F[Seq[ThreeDRevision]] =
+    UpdateById.updateById[F, ThreeDRevision, ThreeDRevisionUpdate](requestSession, baseUri, items)
 }
 
 object ThreeDRevisions {

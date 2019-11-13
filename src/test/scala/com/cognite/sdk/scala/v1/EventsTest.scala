@@ -1,8 +1,9 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
+
 import fs2._
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
+import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, SetValue, WritableBehaviors}
 
 class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
@@ -81,6 +82,44 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       ()
     }
   )
+
+  it should behave like updatableById(
+    client.events,
+    eventsToCreate,
+    Seq(EventUpdate(description = Some(SetValue("scala-sdk-update-1-1"))), EventUpdate(description = Some(SetValue("scala-sdk-update-2-1")))),
+    (readEvents: Seq[Event], updatedEvents: Seq[Event]) => {
+      assert(readEvents.size == updatedEvents.size)
+      assert(updatedEvents.zip(readEvents).forall { case (updated, read) =>  updated.description.get == s"${read.description.get}-1" })
+      ()
+    }
+  )
+
+  it should behave like updatableByExternalId(
+    client.events,
+    Seq(Event(description = Some("description-1"), externalId = Some("update-1-externalId")),
+      Event(description = Some("description-2"), externalId = Some("update-2-externalId"))),
+    Map("update-1-externalId" -> EventUpdate(description = Some(SetValue("description-1-1"))),
+      "update-2-externalId" -> EventUpdate(description = Some(SetValue("description-2-1")))),
+    (readEvents: Seq[Event], updatedEvents: Seq[Event]) => {
+      assert(readEvents.size == updatedEvents.size)
+      assert(updatedEvents.zip(readEvents).forall { case (updated, read) =>
+        updated.description.getOrElse("") == s"${read.description.getOrElse("")}-1" })
+      assert(updatedEvents.zip(readEvents).forall { case (updated, read) => updated.externalId == read.externalId })
+      ()
+    }
+  )
+
+  it should "support updating by id" in {
+    val createEvents = client.events.createFromRead(
+      Seq(Event(description = Some("description-1")), Event(description = Some("description-2"))))
+    import com.cognite.sdk.scala.common.SetValue
+    val updatedEvents = client.events.updateById(
+      Map(createEvents.head.id -> EventUpdate(description = Some(SetValue("description-1-1"))),
+        createEvents.tail.head.id -> EventUpdate(description = Some(SetValue("description-2-1")))))
+    assert(updatedEvents.zip(createEvents).forall {
+      case (updated, read) => updated.description.get == s"${read.description.get}-1" })
+    assert(updatedEvents.zip(createEvents).forall { case (updated, read) => updated.id == read.id })
+  }
 
   it should "support filter" in {
     val createdTimeFilterResults = client.events
