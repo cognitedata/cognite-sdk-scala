@@ -25,4 +25,7 @@ package object common {
   implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
   implicit val timeRangeEncoder: Encoder[TimeRange] = deriveEncoder
 
+  implicit val deleteRequestWithIgnoreUnknownIdsEncoder: Encoder[ItemsWithIgnoreUnknownIds] =
+    deriveEncoder
+
 }

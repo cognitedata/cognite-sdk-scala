@@ -39,6 +39,15 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     supportsMissingAndThrown = true
   )
 
+  it should behave like deletableWithIgnoreUnknownIds(
+    client.assets,
+    Seq(
+      Asset(name = "scala-sdk-read-example-1", externalId = Some(shortRandom())),
+      Asset(name = "scala-sdk-read-example-2", externalId = Some(shortRandom()))
+    ),
+    idsThatDoNotExist
+  )
+
   private val assetsToCreate = Seq(
     Asset(name = "scala-sdk-update-1", description = Some("description-1")),
     Asset(name = "scala-sdk-update-2", description = Some("description-2"))

@@ -2,6 +2,7 @@ package com.cognite.sdk.scala.common
 
 import java.time.Instant
 
+import com.cognite.sdk.scala.v1.CogniteId
 import com.softwaremill.sttp.Uri
 import io.circe.{Decoder, Encoder, Json, JsonObject}
 import io.circe.derivation.deriveDecoder
@@ -10,6 +11,7 @@ import io.scalaland.chimney.dsl._
 
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
 final case class Items[A](items: Seq[A])
+final case class ItemsWithIgnoreUnknownIds(items: Seq[CogniteId], ignoreUnknownIds: Boolean)
 final case class SdkException(message: String) extends Throwable(message)
 final case class CdpApiErrorPayload(
     code: Int,

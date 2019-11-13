@@ -185,6 +185,24 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       updatable.deleteByIds(createdItems.map(_.id))
     }
 
+  def deletableWithIgnoreUnknownIds[R <: WithId[Long], W, PrimitiveId](
+    writable: Create[R, W, Id] with DeleteByIdsWithIgnoreUnknownIds[Id, Long] with RetrieveByIds[R, Id],
+    readExamples: Seq[R],
+    idsThatDoNotExist: Seq[Long]
+  )(implicit t: Transformer[R, W]): Unit = {
+    it should "support ignoring unknown ids on delete" in {
+      val createdItems: Id[Seq[R]] = writable.createFromRead(readExamples)
+      val createdIds = createdItems.map(_.id)
+      val createdAndSomeNonExistingIds = createdIds ++ idsThatDoNotExist
+      writable.deleteByIds(createdAndSomeNonExistingIds, ignoreUnknownIds = true)
+      val retrieveDeletedException = intercept[CdpApiException](writable.retrieveByIds(createdIds))
+      assert(retrieveDeletedException.code == 400)
+      val doNotIgnoreException = intercept[CdpApiException](
+        writable.deleteByIds(idsThatDoNotExist, ignoreUnknownIds = false))
+      assert(doNotIgnoreException.code == 400)
+    }
+  }
+
 //    it should "create and delete items using the create class" in {
 //      // create a single item
 //      val createdItem = updatable.create(createExamples.take(1)).unsafeBody

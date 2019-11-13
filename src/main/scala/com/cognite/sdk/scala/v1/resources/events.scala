@@ -12,8 +12,8 @@ class Events[F[_]](val requestSession: RequestSession[F])
     with RetrieveByIds[Event, F]
     with RetrieveByExternalIds[Event, F]
     with Create[Event, EventCreate, F]
-    with DeleteByIds[F, Long]
-    with DeleteByExternalIds[F]
+    with DeleteByIdsWithIgnoreUnknownIds[F, Long]
+    with DeleteByExternalIdsWithIgnoreUnknownIds[F]
     with PartitionedFilter[Event, EventsFilter, F]
     with Search[Event, EventsQuery, F]
     with Update[Event, EventUpdate, F] {
@@ -46,11 +46,24 @@ class Events[F[_]](val requestSession: RequestSession[F])
   override def update(items: Seq[EventUpdate]): F[Seq[Event]] =
     Update.update[F, Event, EventUpdate](requestSession, baseUri, items)
 
-  override def deleteByIds(ids: Seq[Long]): F[Unit] =
-    DeleteByIds.deleteByIds(requestSession, baseUri, ids)
+  override def deleteByIds(ids: Seq[Long]): F[Unit] = deleteByIds(ids, false)
+
+  override def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean = false): F[Unit] =
+    DeleteByIds.deleteByIdsWithIgnoreUnknownIds(requestSession, baseUri, ids, ignoreUnknownIds)
 
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
-    DeleteByExternalIds.deleteByExternalIds(requestSession, baseUri, externalIds)
+    deleteByExternalIds(externalIds, false)
+
+  override def deleteByExternalIds(
+      externalIds: Seq[String],
+      ignoreUnknownIds: Boolean = false
+  ): F[Unit] =
+    DeleteByExternalIds.deleteByExternalIdsWithIgnoreUnknownIds(
+      requestSession,
+      baseUri,
+      externalIds,
+      ignoreUnknownIds
+    )
 
   private[sdk] def filterWithCursor(
       filter: EventsFilter,
