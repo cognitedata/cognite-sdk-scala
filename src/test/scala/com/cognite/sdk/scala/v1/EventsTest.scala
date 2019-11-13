@@ -38,6 +38,15 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     supportsMissingAndThrown = true
   )
 
+  it should behave like deletableWithIgnoreUnknownIds(
+    client.events,
+    Seq(
+      Event(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
+      Event(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
+    ),
+    idsThatDoNotExist
+  )
+
   private val eventsToCreate = Seq(
     Event(description = Some("scala-sdk-update-1"), `type` = Some("test"), subtype = Some("test")),
     Event(description = Some("scala-sdk-update-2"), `type` = Some("test"), subtype = Some("test"))

@@ -13,6 +13,13 @@ trait DeleteByIds[F[_], PrimitiveId] {
   def deleteById(id: PrimitiveId): F[Unit] = deleteByIds(Seq(id))
 }
 
+trait DeleteByIdsWithIgnoreUnknownIds[F[_], PrimitiveId] extends DeleteByIds[F, PrimitiveId] {
+  def deleteByIds(ids: Seq[PrimitiveId], ignoreUnknownIds: Boolean = false): F[Unit]
+
+  def deleteById(id: PrimitiveId, ignoreUnknownIds: Boolean = false): F[Unit] =
+    deleteByIds(Seq(id), ignoreUnknownIds)
+}
+
 object DeleteByIds {
   def deleteByIds[F[_]](
       requestSession: RequestSession[F],
@@ -36,6 +43,31 @@ object DeleteByIds {
           }
       }
   }
+
+  def deleteByIdsWithIgnoreUnknownIds[F[_]](
+      requestSession: RequestSession[F],
+      baseUri: Uri,
+      ids: Seq[Long],
+      ignoreUnknownIds: Boolean
+  ): F[Unit] = {
+    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Unit]
+    // TODO: group deletes by max deletion request size
+    //       or assert that length of `ids` is less than max deletion request size
+    requestSession
+      .sendCdf { request =>
+        request
+          .post(uri"$baseUri/delete")
+          .body(ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds))
+          .response(asJson[Either[CdpApiError, Unit]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
+            case Right(Right(_)) => ()
+          }
+      }
+  }
+
 }
 
 trait DeleteByExternalIds[F[_]] {
@@ -44,9 +76,39 @@ trait DeleteByExternalIds[F[_]] {
   def deleteByExternalId(externalId: String): F[Unit] = deleteByExternalIds(Seq(externalId))
 }
 
+trait DeleteByExternalIdsWithIgnoreUnknownIds[F[_]] extends DeleteByExternalIds[F] {
+  def deleteByExternalIds(externalIds: Seq[String], ignoreUnknownIds: Boolean = false): F[Unit]
+
+  def deleteByExternalId(externalId: String, ignoreUnknownIds: Boolean = false): F[Unit] =
+    deleteByExternalIds(Seq(externalId), ignoreUnknownIds)
+}
+
 object DeleteByExternalIds {
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
+
+  def deleteByExternalIdsWithIgnoreUnknownIds[F[_]](
+      requestSession: RequestSession[F],
+      baseUri: Uri,
+      externalIds: Seq[String],
+      ignoreUnknownIds: Boolean
+  ): F[Unit] =
+    // TODO: group deletes by max deletion request size
+    //       or assert that length of `ids` is less than max deletion request size
+    requestSession
+      .sendCdf { request =>
+        request
+          .post(uri"$baseUri/delete")
+          .body(
+            ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId), ignoreUnknownIds)
+          )
+          .response(asJson[Either[CdpApiError, Unit]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
+            case Right(Right(_)) => ()
+          }
+      }
 
   def deleteByExternalIds[F[_]](
       requestSession: RequestSession[F],
