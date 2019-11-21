@@ -1,11 +1,11 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
+import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, SetValue, WritableBehaviors}
 import fs2.Stream
 
-class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
+class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
@@ -106,6 +106,19 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   )
 
   it should "support filter" in {
+    retryWithExpectedResult[Seq[Asset]](
+      client.assets
+        .filter(
+          AssetsFilter(
+            createdTime = Some(
+              TimeRange(Instant.ofEpochMilli(1560756441301L), Instant.ofEpochMilli(1560756445000L))))
+        )
+        .compile
+        .toList,
+      None,
+      Seq(r => r should have size 84)
+    )
+
     val createdTimeFilterResults = client.assets
       .filter(
         AssetsFilter(
@@ -137,25 +150,34 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
       .toList
     assert(createdTimeFilterResultsWithLimit.length == 10)
 
-    val filterWithRootAssetsByInternalId = client.assets
+    retryWithExpectedResult[Seq[Asset]](
+      client.assets
       .filterPartitions(
         AssetsFilter(
-          rootIds = Some(Seq(CogniteInternalId(2780934754068396L)))
+          rootIds = Some(Seq(CogniteInternalId(7127045760755934L)))
         ), 10
       )
       .fold(Stream.empty)(_ ++ _)
       .compile
-      .toList
-    assert(filterWithRootAssetsByInternalId.length == 781)
+      .toList,
+      None,
+      Seq(a => a should have size 1106)
+    )
   }
 
   it should "support asset aggregates" in {
-    val filterWithAggregates = client.assets
-      .filter(AssetsFilter(
-        rootIds = Some(Seq(CogniteInternalId(2780934754068396L)))
-      ), Some(5), Some(Seq("childCount")))
-        .compile.toList
-    assert(filterWithAggregates.map(_.aggregates.get("childCount")).exists(_ > 0))
+    retryWithExpectedResult[Seq[Asset]](
+      client.assets
+        .filter(AssetsFilter(
+          rootIds = Some(Seq(CogniteInternalId(7127045760755934L)))
+        ), Some(5), Some(Seq("childCount")))
+        .compile.toList,
+      None,
+      Seq(a => {
+        val bool = a.map(_.aggregates.get("childCount")).exists(_ > 0)
+        bool shouldBe true
+      })
+    )
   }
 
   it should "support search" in {

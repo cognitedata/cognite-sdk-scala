@@ -76,8 +76,8 @@ trait PartitionedFilter[R, Fi, F[_]] extends PartitionedFilterF[R, Fi, F] {
 
   override def filterPartitionsF(
       filter: Fi,
-      numPartitions: StatusCode,
-      limitPerPartition: Option[StatusCode]
+      numPartitions: Int,
+      limitPerPartition: Option[Int]
   )(implicit F: Applicative[F]): F[Seq[Stream[F, R]]] =
     F.pure(filterPartitions(filter, numPartitions, limitPerPartition))
 }

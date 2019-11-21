@@ -72,15 +72,15 @@ class Assets[F[_]](val requestSession: RequestSession[F])
 
   def filter(
       filter: AssetsFilter,
-      limit: Option[StatusCode],
+      limit: Option[Int],
       aggregatedProperties: Option[Seq[String]]
   ): fs2.Stream[F, Asset] =
     filterWithNextCursor(filter, None, limit, aggregatedProperties)
 
   def filterPartitions(
       filter: AssetsFilter,
-      numPartitions: StatusCode,
-      limitPerPartition: Option[StatusCode],
+      numPartitions: Int,
+      limitPerPartition: Option[Int],
       aggregatedProperties: Option[Seq[String]]
   ): Seq[fs2.Stream[F, Asset]] =
     1.to(numPartitions).map { i =>
