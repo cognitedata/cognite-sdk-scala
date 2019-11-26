@@ -1,8 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
-import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
+import com.cognite.sdk.scala.common._
 
 final case class Asset(
     externalId: Option[String] = None,
@@ -37,7 +36,7 @@ final case class AssetUpdate(
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
     parentId: Option[Setter[Long]] = None,
     parentExternalId: Option[Setter[String]] = None
-)
+) extends WithSetExternalId
 
 final case class AssetsFilter(
     name: Option[String] = None,
