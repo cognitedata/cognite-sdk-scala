@@ -1,8 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
-import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
+import com.cognite.sdk.scala.common._
 
 final case class Event(
     id: Long = 0,
@@ -42,7 +41,7 @@ final case class EventUpdate(
     assetIds: Option[NonNullableSetter[Seq[Long]]] = None,
     source: Option[Setter[String]] = None,
     externalId: Option[Setter[String]] = None
-)
+) extends WithSetExternalId
 
 final case class EventsFilter(
     startTime: Option[TimeRange] = None,

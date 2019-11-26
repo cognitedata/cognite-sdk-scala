@@ -1,8 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
-import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
+import com.cognite.sdk.scala.common._
 
 final case class TimeSeries(
     name: Option[String] = None,
@@ -41,7 +40,7 @@ final case class TimeSeriesUpdate(
     assetId: Option[Setter[Long]] = None,
     description: Option[Setter[String]] = None,
     securityCategories: Option[Setter[Seq[Long]]] = None
-)
+) extends WithSetExternalId
 
 final case class TimeSeriesSearchFilter(
     name: Option[String] = None,
