@@ -33,8 +33,7 @@ object ServiceAccounts {
     deriveDecoder[ItemsWithCursor[ServiceAccount]]
 }
 
-class ApiKeys[F[_]](val requestSession: RequestSession[F])
-    extends Readable[ApiKey, F] {
+class ApiKeys[F[_]](val requestSession: RequestSession[F]) extends Readable[ApiKey, F] {
   import ApiKeys._
   override val baseUri = uri"${requestSession.baseUri}/apikeys"
 
@@ -59,8 +58,7 @@ object ApiKeys {
     deriveDecoder[ItemsWithCursor[ApiKey]]
 }
 
-class Groups[F[_]](val requestSession: RequestSession[F])
-    extends Readable[Group, F] {
+class Groups[F[_]](val requestSession: RequestSession[F]) extends Readable[Group, F] {
   import Groups._
   override val baseUri = uri"${requestSession.baseUri}/groups"
 
