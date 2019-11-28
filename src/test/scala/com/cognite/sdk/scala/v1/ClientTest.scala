@@ -18,7 +18,7 @@ class ClientTest extends SdkTest {
       implicitly[Monad[Id]],
       auth,
       sttpBackend
-    ).project should not be empty
+    ).projectName should not be empty
   }
   it should "throw an exception if the authentication is invalid and project is not specified" in {
     implicit val auth: Auth = ApiKeyAuth("invalid-key")
