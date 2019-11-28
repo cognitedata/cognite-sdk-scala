@@ -9,9 +9,11 @@ class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
-  it should behave like readable(client.events)
+  // Use greenfieldClient for readable tests since publicdata has a lot of events,
+  // so it's painfully slow to read them all sequentially.
+  it should behave like readable(greenfieldClient.events)
 
-  it should behave like partitionedReadable(client.events)
+  it should behave like partitionedReadable(greenfieldClient.events)
 
   it should behave like readableWithRetrieve(client.events, idsThatDoNotExist, supportsMissingAndThrown = true)
 
