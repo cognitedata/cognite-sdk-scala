@@ -12,7 +12,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
 
     it should "read items with limit" in {
       (readable.read(limit = Some(1)).items should have).length(Math.min(listLength.toLong, 1))
-      (readable.read(limit = Some(2)).items should have).length(Math.min(listLength.toLong,2))
+      (readable.read(limit = Some(2)).items should have).length(Math.min(listLength.toLong, 2))
     }
 
     it should "read all items" in {
