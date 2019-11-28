@@ -4,33 +4,42 @@ import com.softwaremill.sttp.Id
 import org.scalatest.{FlatSpec, Matchers}
 
 trait ReadBehaviours extends Matchers { this: FlatSpec =>
-  def readable[R, InternalId, PrimitiveId](readable: Readable[R, Id]): Unit = {
+  def readable[R, InternalId, PrimitiveId](
+      readable: Readable[R, Id],
+      supportsLimit: Boolean = true
+  ): Unit = {
     val listLength = readable.list().compile.toList.length
     it should "read items" in {
       readable.read().items should not be empty
     }
 
-    it should "read items with limit" in {
-      (readable.read(limit = Some(1)).items should have).length(Math.min(listLength.toLong, 1))
-      (readable.read(limit = Some(2)).items should have).length(Math.min(listLength.toLong, 2))
+    if (supportsLimit) {
+      it should "read items with limit" in {
+        (readable.read(limit = Some(1)).items should have).length(Math.min(listLength.toLong, 1))
+        (readable.read(limit = Some(2)).items should have).length(Math.min(listLength.toLong, 2))
+      }
     }
 
     it should "read all items" in {
       val first1Length = readable.list().take(1).compile.toList.length
       first1Length should be(Math.min(listLength, 1))
-      val first2Length = readable.list(limit = Some(2)).compile.toList.length
-      first2Length should be(Math.min(listLength, 2))
-      val allLength = readable.list(limit = Some(3)).compile.toList.length
-      allLength should be(Math.min(listLength, 3))
+      if (supportsLimit) {
+        val first2Length = readable.list(limit = Some(2)).compile.toList.length
+        first2Length should be(Math.min(listLength, 2))
+        val allLength = readable.list(limit = Some(3)).compile.toList.length
+        allLength should be(Math.min(listLength, 3))
+      }
     }
   }
 
-  def partitionedReadable[R, InternalId, PrimitiveId](readable: PartitionedReadable[R, Id]): Unit = {
+  def partitionedReadable[R, InternalId, PrimitiveId](
+      readable: PartitionedReadable[R, Id]
+  ): Unit = {
     it should "read items with partitions" in {
       val partitionStreams = readable.listPartitions(2)
       val partitionStreams10 = readable.listPartitions(10)
-      partitionStreams should have length 2
-      partitionStreams10 should have length 10
+      (partitionStreams should have).length(2)
+      (partitionStreams10 should have).length(10)
       val partition1Items = partitionStreams.head.take(2).compile.toList
       val partition2Items = partitionStreams(1).take(2).compile.toList
       partition1Items.size should be <= 2
@@ -40,7 +49,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
 
     it should "read item partitions with limit" in {
       val partitionStreams = readable.listPartitions(2, limitPerPartition = Some(2))
-      partitionStreams should have length 2
+      (partitionStreams should have).length(2)
       val partition1Items = partitionStreams.head.compile.toList
       val partition2Items = partitionStreams(1).compile.toList
       partition1Items.size should be <= 2
@@ -55,7 +64,8 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       val allLength = readable.list(Some(3)).compile.toList.length
       allLength should be(3)
       val unlimitedLength = readable.list().map(_ => 1).compile.toList.length
-      val partitionsLength = readable.listPartitions(40)
+      val partitionsLength = readable
+        .listPartitions(40)
         .reduce(_ ++ _)
         .map(_ => 1)
         .compile
@@ -121,7 +131,8 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       supportsMissingAndThrown: Boolean
   ): Unit = {
     it should "support retrieving items by external id" in {
-      val firstTwoItemIds = readable.list().filter(_.externalId.isDefined).take(2).map(_.externalId.get).compile.toList
+      val firstTwoItemIds =
+        readable.list().filter(_.externalId.isDefined).take(2).map(_.externalId.get).compile.toList
       firstTwoItemIds should have size 2
       val maybeItemsRead = readable.retrieveByExternalIds(firstTwoItemIds)
       val itemsReadIds = maybeItemsRead.map(_.externalId.get)
