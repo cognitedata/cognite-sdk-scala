@@ -78,10 +78,13 @@ object Readable {
       cursor: Option[String],
       limit: Option[Int],
       batchSize: Int
-  ) =
-    cursor
-      .fold(baseUri)(baseUri.param("cursor", _))
-      .param("limit", scala.math.min(limit.getOrElse(batchSize), batchSize).toString)
+  ) = {
+    val uriWithCursor = cursor.fold(baseUri)(baseUri.param("cursor", _))
+    limit.fold(uriWithCursor) { l =>
+      val limitValue = scala.math.min(l, batchSize).toString
+      uriWithCursor.param("limit", limitValue)
+    }
+  }
 
   private[sdk] def readWithCursor[F[_], R](
       requestSession: RequestSession[F],

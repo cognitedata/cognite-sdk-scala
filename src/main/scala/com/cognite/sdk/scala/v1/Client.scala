@@ -3,24 +3,12 @@ package com.cognite.sdk.scala.v1
 import BuildInfo.BuildInfo
 import cats.Monad
 import cats.implicits._
-import com.cognite.sdk.scala.common.{Auth, InvalidAuthentication, Login}
-import com.cognite.sdk.scala.v1.resources.{
-  Assets,
-  DataPointsResource,
-  Events,
-  Files,
-  RawDatabases,
-  RawRows,
-  RawTables,
-  SequenceRows,
-  SequencesResource,
-  ThreeDAssetMappings,
-  ThreeDModels,
-  ThreeDNodes,
-  ThreeDRevisions,
-  TimeSeriesResource
-}
+import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.v1.resources._
 import com.softwaremill.sttp._
+import com.softwaremill.sttp.circe.asJson
+import io.circe.Decoder
+import io.circe.derivation.deriveDecoder
 
 import scala.concurrent.duration._
 
@@ -65,7 +53,7 @@ class GenericClient[F[_]: Monad, _](
     implicit auth: Auth,
     sttpBackend: SttpBackend[F, _]
 ) {
-
+  import GenericClient._
   val uri: Uri = try {
     uri"$baseUri"
   } catch {
@@ -73,7 +61,7 @@ class GenericClient[F[_]: Monad, _](
       throw new IllegalArgumentException("Unable to parse URI. Please check URI syntax.")
   }
 
-  val project: String = auth.project.getOrElse {
+  val projectName: String = auth.project.getOrElse {
     val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
       options = SttpBackendOptions.connectionTimeout(90.seconds)
     )
@@ -91,7 +79,7 @@ class GenericClient[F[_]: Monad, _](
   val requestSession =
     RequestSession(
       applicationName,
-      uri"$uri/api/v1/projects/$project",
+      uri"$uri/api/v1/projects/$projectName",
       sttpBackend,
       auth
     )
@@ -116,6 +104,35 @@ class GenericClient[F[_]: Monad, _](
     new ThreeDAssetMappings(requestSession, modelId, revisionId)
   def threeDNodes(modelId: Long, revisionId: Long): ThreeDNodes[F] =
     new ThreeDNodes(requestSession, modelId, revisionId)
+
+  def project(): F[Project] = {
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Project]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Project]
+
+    requestSession
+      .sendCdf { request =>
+        request
+          .get(requestSession.baseUri)
+          .response(asJson[Either[CdpApiError, Project]])
+          .mapResponse {
+            case Left(value) => throw value.error
+            case Right(Left(cdpApiError)) =>
+              throw cdpApiError.asException(requestSession.baseUri)
+            case Right(Right(value)) => value
+          }
+      }
+  }
+  val serviceAccounts = new ServiceAccounts[F](requestSession)
+  val apiKeys = new ApiKeys[F](requestSession)
+  val groups = new Groups[F](requestSession)
+  val securityCategories = new SecurityCategories[F](requestSession)
+}
+
+object GenericClient {
+  implicit val projectAuthenticationDecoder: Decoder[ProjectAuthentication] =
+    deriveDecoder[ProjectAuthentication]
+  @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
+  implicit val projectDecoder: Decoder[Project] = deriveDecoder[Project]
 }
 
 final case class Client(
