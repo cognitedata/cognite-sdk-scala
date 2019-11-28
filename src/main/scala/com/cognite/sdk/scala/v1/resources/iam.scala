@@ -36,7 +36,7 @@ object ServiceAccounts {
 class ApiKeys[F[_]](val requestSession: RequestSession[F])
     extends Readable[ApiKey, F] {
   import ApiKeys._
-  override val baseUri = uri"${requestSession.baseUri}/apiKeys"
+  override val baseUri = uri"${requestSession.baseUri}/apikeys"
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],

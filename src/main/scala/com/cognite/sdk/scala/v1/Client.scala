@@ -105,7 +105,7 @@ class GenericClient[F[_]: Monad, _](
   def threeDNodes(modelId: Long, revisionId: Long): ThreeDNodes[F] =
     new ThreeDNodes(requestSession, modelId, revisionId)
 
-  def project(): F[Project] = {
+  def project: F[Project] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Project]] =
       EitherDecoder.eitherDecoder[CdpApiError, Project]
 
