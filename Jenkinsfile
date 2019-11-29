@@ -2,7 +2,7 @@ def label = "cognite-sdk-scala-${UUID.randomUUID().toString().substring(0, 5)}"
 
 podTemplate(label: label,
             containers: [containerTemplate(name: 'sbt',
-                                           image: 'eu.gcr.io/cognitedata/openjdk8-sbt:2018-09-18-d077396',
+                                           image: 'eu.gcr.io/cognitedata/openjdk8-sbt:2019-11-29-2c0adaf',
                                            resourceRequestCpu: '1000m',
                                            resourceLimitCpu: '3800m',
                                            resourceLimitMemory: '3500Mi',
