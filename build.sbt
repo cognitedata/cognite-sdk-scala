@@ -2,7 +2,7 @@ import wartremover.Wart
 import sbt.project
 
 val scala213 = "2.13.1"
-val scala212 = "2.12.9"
+val scala212 = "2.12.10"
 val scala211 = "2.11.12"
 val supportedScalaVersions = List(scala212, scala213, scala211)
 
