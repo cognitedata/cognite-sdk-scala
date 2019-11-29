@@ -41,6 +41,10 @@ podTemplate(label: label,
                     sh('cp /sbt-credentials/repositories /root/.sbt/')
                     sh('mkdir -p /root/.sbt/gpg && cp /sbt-credentials/pubring.asc /sbt-credentials/secring.asc /root/.sbt/gpg/')
                 }
+                stage('Copy SBT cache') {
+                    sh('cp -r /root/.sbt /home/jenkins')
+                    sh('cp -r /root/.ivy2 /home/jenkins')
+                }
                 stage('Run tests') {
                     sh('cat /dev/null | sbt -Dsbt.log.noformat=true scalastyle test:scalastyle scalafmtCheck coverage +test coverageReport')
                 }
