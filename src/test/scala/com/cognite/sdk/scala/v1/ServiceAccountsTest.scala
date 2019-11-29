@@ -1,10 +1,11 @@
 package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest}
-import org.scalatest.Ignore
-
-// TODO: We don't have permissions to list service accounts
-@Ignore
+// FIXME: Not sure why @Ignore isn't working. "behave like" doesn't seem to support ignore.
+//import org.scalatest.Ignore
+//
+//@Ignore
 class ServiceAccountsTest extends SdkTest with ReadBehaviours {
-  "ServiceAccounts" should behave like readable(client.serviceAccounts)
+  // TODO: We don't have permissions to list service accounts
+//  "ServiceAccounts" should behave like readable(client.serviceAccounts)
 }
