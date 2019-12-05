@@ -25,16 +25,16 @@ trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: FlatS
         val timeSeriesExternalId = timeSeries.externalId.get
         dataPoints.insertById(timeSeriesId, testDataPoints)
 
-        retryWithExpectedResult[Seq[DataPointsByIdResponse]](
+        retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryById(timeSeriesId, start, end.plusMillis(1)),
           None,
-          Seq(p => p.head.datapoints should have size testDataPoints.size.toLong)
+          Seq(p => p.datapoints should have size testDataPoints.size.toLong)
         )
 
-        retryWithExpectedResult[Seq[DataPointsByIdResponse]](
+        retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryById(timeSeriesId, start, end.plusMillis(1), Some(3)),
           None,
-          Seq(p => p.head.datapoints should have size 3)
+          Seq(p => p.datapoints should have size 3)
         )
 
         retryWithExpectedResult[Option[DataPoint]](
@@ -44,23 +44,23 @@ trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: FlatS
         )
 
         dataPoints.deleteRangeById(timeSeriesId, start, end.plusMillis(1))
-        retryWithExpectedResult[Seq[DataPointsByIdResponse]](
+        retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryById(timeSeriesId, start, end.plusMillis(1)),
           None,
-          Seq(dp => dp.head.datapoints should have size 0)
+          Seq(dp => dp.datapoints should have size 0)
         )
 
         dataPoints.insertByExternalId(timeSeriesExternalId, testDataPoints)
-        retryWithExpectedResult[Seq[DataPointsByIdResponse]](
+        retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
           None,
-          Seq(p2 => p2.head.datapoints should have size testDataPoints.size.toLong)
+          Seq(p2 => p2.datapoints should have size testDataPoints.size.toLong)
         )
 
-        retryWithExpectedResult[Seq[DataPointsByIdResponse]](
+        retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1), Some(5)),
           None,
-          Seq(p2 => p2.head.datapoints should have size 5)
+          Seq(p2 => p2.datapoints should have size 5)
         )
 
         retryWithExpectedResult[Option[DataPoint]](
@@ -70,10 +70,10 @@ trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: FlatS
         )
 
         dataPoints.deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
-        retryWithExpectedResult[Seq[DataPointsByIdResponse]](
+        retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
           None,
-          Seq(pad => pad.head.datapoints should have size 0)
+          Seq(pad => pad.datapoints should have size 0)
         )
     }
 }
