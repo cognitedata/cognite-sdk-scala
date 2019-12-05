@@ -279,11 +279,11 @@ class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors 
     client.dataPoints.insertById(timeSeriesID, dp)
     val retrievedDp = client.dataPoints.queryById(
       timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000))
-    retryWithExpectedResult[Seq[DataPointsByIdResponse]](
+    retryWithExpectedResult[DataPointsByIdResponse](
       client.dataPoints.queryById(
         timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000)),
       Some(retrievedDp),
-      Seq(dp => dp should contain theSameElementsInOrderAs retrievedDp)
+      Seq(dp => dp shouldBe retrievedDp)
     )
     client.dataPoints.deleteRangeById(timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000))
   }

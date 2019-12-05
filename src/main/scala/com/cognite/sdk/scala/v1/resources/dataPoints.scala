@@ -237,13 +237,19 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         _ => ()
       )
 
+  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   def queryById(
       id: Long,
       inclusiveStart: Instant,
       exclusiveEnd: Instant,
       limit: Option[Int] = None
-  ): F[Seq[DataPointsByIdResponse]] =
-    queryByIds(Seq(id), inclusiveStart, exclusiveEnd, limit)
+  ): F[DataPointsByIdResponse] =
+    // The API returns an error causing an exception to be thrown if the item isn't found,
+    // so .head is safe here.
+    requestSession.map(
+      queryByIds(Seq(id), inclusiveStart, exclusiveEnd, limit),
+      (r1: Seq[DataPointsByIdResponse]) => r1.head
+    )
 
   def queryByIds(
       ids: Seq[Long],
@@ -264,13 +270,19 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
     queryProtobuf(Items(queries))(parseNumericDataPoints)
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   def queryByExternalId(
       externalId: String,
       inclusiveStart: Instant,
       exclusiveEnd: Instant,
       limit: Option[Int] = None
-  ): F[Seq[DataPointsByIdResponse]] =
-    queryByExternalIds(Seq(externalId), inclusiveStart, exclusiveEnd, limit)
+  ): F[DataPointsByIdResponse] =
+    // The API returns an error causing an exception to be thrown if the item isn't found,
+    // so .head is safe here.
+    requestSession.map(
+      queryByExternalIds(Seq(externalId), inclusiveStart, exclusiveEnd, limit),
+      (r1: Seq[DataPointsByIdResponse]) => r1.head
+    )
 
   def queryByExternalIds(
       externalIds: Seq[String],
