@@ -30,18 +30,11 @@ object DeleteByIds {
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/delete")
-          .body(Items(ids.map(CogniteInternalId)))
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-            case Right(Right(_)) => ()
-          }
-      }
+    requestSession.post[Unit, Unit, Items[CogniteInternalId]](
+      Items(ids.map(CogniteInternalId)),
+      uri"$baseUri/delete",
+      _ => ()
+    )
   }
 
   def deleteByIdsWithIgnoreUnknownIds[F[_]](
@@ -54,18 +47,11 @@ object DeleteByIds {
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/delete")
-          .body(ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds))
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-            case Right(Right(_)) => ()
-          }
-      }
+    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds](
+      ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
+      uri"$baseUri/delete",
+      _ => ()
+    )
   }
 
 }
@@ -95,20 +81,11 @@ object DeleteByExternalIds {
   ): F[Unit] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/delete")
-          .body(
-            ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId), ignoreUnknownIds)
-          )
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-            case Right(Right(_)) => ()
-          }
-      }
+    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds](
+      ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId), ignoreUnknownIds),
+      uri"$baseUri/delete",
+      _ => ()
+    )
 
   def deleteByExternalIds[F[_]](
       requestSession: RequestSession[F],
@@ -117,18 +94,11 @@ object DeleteByExternalIds {
   ): F[Unit] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/delete")
-          .body(Items(externalIds.map(CogniteExternalId)))
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-            case Right(Right(_)) => ()
-          }
-      }
+    requestSession.post[Unit, Unit, Items[CogniteExternalId]](
+      Items(externalIds.map(CogniteExternalId)),
+      uri"$baseUri/delete",
+      _ => ()
+    )
 }
 
 trait Create[R, W, F[_]] extends WithRequestSession[F] with CreateOne[R, W, F] with BaseUri {
@@ -160,19 +130,11 @@ object Create {
   ): F[Seq[R]] = {
     implicit val errorOrItemsWithCursorDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(baseUri)
-          .body(items)
-          .response(asJson[Either[CdpApiError, ItemsWithCursor[R]]])
-          .mapResponse {
-            case Left(value) =>
-              throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-            case Right(Right(value)) => value.items
-          }
-      }
+    requestSession.post[Seq[R], ItemsWithCursor[R], Items[W]](
+      items,
+      baseUri,
+      value => value.items
+    )
   }
 }
 
@@ -192,18 +154,10 @@ object CreateOne {
   ): F[R] = {
     implicit val errorOrItemsWithCursorDecoder: Decoder[Either[CdpApiError, R]] =
       EitherDecoder.eitherDecoder[CdpApiError, R]
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(baseUri)
-          .body(item)
-          .response(asJson[Either[CdpApiError, R]])
-          .mapResponse {
-            case Left(value) =>
-              throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-            case Right(Right(value)) => value
-          }
-      }
+    requestSession.post[R, R, W](
+      item,
+      baseUri,
+      value => value
+    )
   }
 }

@@ -103,18 +103,10 @@ object Readable {
       uriWithCursor.param("partition", p.toString)
     }
 
-    requestSession
-      .sendCdf { request =>
-        request
-          .get(uriWithCursorAndPartition)
-          .response(asJson[Either[CdpApiError, ItemsWithCursor[R]]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) =>
-              throw cdpApiError.asException(uriWithCursorAndPartition)
-            case Right(Right(value)) => value
-          }
-      }
+    requestSession.get[ItemsWithCursor[R], ItemsWithCursor[R]](
+      uriWithCursorAndPartition,
+      value => value
+    )
   }
 }
 
@@ -130,18 +122,11 @@ object RetrieveByIds {
   ): F[Seq[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/byids")
-          .body(Items(ids.map(CogniteInternalId)))
-          .response(asJson[Either[CdpApiError, Items[R]]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
-            case Right(Right(value)) => value.items
-          }
-      }
+    requestSession.post[Seq[R], Items[R], Items[CogniteInternalId]](
+      Items(ids.map(CogniteInternalId)),
+      uri"$baseUri/byids",
+      value => value.items
+    )
   }
 }
 
@@ -161,17 +146,10 @@ object RetrieveByExternalIds {
   ): F[Seq[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/byids")
-          .body(Items(externalIds.map(CogniteExternalId)))
-          .response(asJson[Either[CdpApiError, Items[R]]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
-            case Right(Right(value)) => value.items
-          }
-      }
+    requestSession.post[Seq[R], Items[R], Items[CogniteExternalId]](
+      Items(externalIds.map(CogniteExternalId)),
+      uri"$baseUri/byids",
+      value => value.items
+    )
   }
 }

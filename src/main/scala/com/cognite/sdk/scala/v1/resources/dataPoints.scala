@@ -3,7 +3,8 @@ package com.cognite.sdk.scala.v1.resources
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 
-import cats.Show
+import BuildInfo.BuildInfo
+import cats.{Monad, Show}
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
@@ -23,8 +24,9 @@ import com.cognite.v1.timeseries.proto.data_points.{
 }
 import com.cognite.sdk.scala.common.Constants
 import io.circe.parser.decode
+import scala.concurrent.duration._
 
-class DataPointsResource[F[_]](val requestSession: RequestSession[F])
+class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUri {
 
@@ -47,77 +49,94 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
 
+  // FIXME: Using requestSession.post() resulted in 500 errors when the request involves protobuf because of some
+  //  serialization error. Should investigate the error and use requestSession.post rather than having its own
+  //  identical handling for this method and insertStringsById()
   def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Unit] =
-    requestSession
-      .sendCdf(
-        { request =>
-          request
-            .post(baseUri)
-            .body(
-              DataPointInsertionRequest(
-                Seq(
-                  DataPointInsertionItem(
-                    DataPointInsertionItem.IdOrExternalId.Id(id),
-                    DataPointInsertionItem.DatapointType
-                      .NumericDatapoints(NumericDatapoints(dataPoints.map { dp =>
-                        NumericDatapoint(dp.timestamp.toEpochMilli, dp.value)
-                      }))
-                  )
-                )
-              ).toByteArray
+    requestSession.map(
+      sttp
+        .followRedirects(false)
+        .auth(requestSession.auth)
+        .contentType("application/protobuf")
+        .header("accept", "application/json")
+        .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
+        .header("x-cdp-app", requestSession.applicationName)
+        .readTimeout(90.seconds)
+        .parseResponseIf(_ => true)
+        .post(baseUri)
+        .body(
+          DataPointInsertionRequest(
+            Seq(
+              DataPointInsertionItem(
+                DataPointInsertionItem.IdOrExternalId.Id(id),
+                DataPointInsertionItem.DatapointType
+                  .NumericDatapoints(NumericDatapoints(dataPoints.map { dp =>
+                    NumericDatapoint(dp.timestamp.toEpochMilli, dp.value)
+                  }))
+              )
             )
-            .response(asJson[Either[CdpApiError, Unit]])
-            .mapResponse {
-              case Left(value) => throw value.error
-              case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-              case Right(Right(_)) => ()
-            }
-        },
-        contentType = "application/protobuf"
-      )
+          ).toByteArray
+        )
+        .response(
+          asJson[Either[CdpApiError, Unit]].mapWithMetadata(
+            (response, metadata) =>
+              response match {
+                case Left(value) => throw value.error
+                case Right(Left(cdpApiError)) =>
+                  throw cdpApiError.asException(uri"$baseUri", metadata.header("x-request-id"))
+                case Right(Right(_)) => ()
+              }
+          )
+        )
+        .send()(requestSession.sttpBackend, implicitly),
+      (r: Response[Unit]) => r.unsafeBody
+    )
 
   def insertByExternalId(externalId: String, dataPoints: Seq[DataPoint]): F[Unit] =
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(baseUri)
-          .body(Items(Seq(DataPointsByExternalId(externalId, dataPoints))))
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-            case Right(Right(_)) => ()
-          }
-      }
+    requestSession.post[Unit, Unit, Items[DataPointsByExternalId]](
+      Items(Seq(DataPointsByExternalId(externalId, dataPoints))),
+      baseUri,
+      _ => ()
+    )
 
   def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Unit] =
-    requestSession
-      .sendCdf(
-        { request =>
-          request
-            .post(baseUri)
-            .body(
-              DataPointInsertionRequest(
-                Seq(
-                  DataPointInsertionItem(
-                    DataPointInsertionItem.IdOrExternalId.Id(id),
-                    DataPointInsertionItem.DatapointType
-                      .StringDatapoints(StringDatapoints(dataPoints.map { dp =>
-                        StringDatapoint(dp.timestamp.toEpochMilli, dp.value)
-                      }))
-                  )
-                )
-              ).toByteArray
+    requestSession.map(
+      sttp
+        .followRedirects(false)
+        .auth(requestSession.auth)
+        .contentType("application/protobuf")
+        .header("accept", "application/json")
+        .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
+        .header("x-cdp-app", "sdgsfgf")
+        .parseResponseIf(_ => true)
+        .post(baseUri)
+        .body(
+          DataPointInsertionRequest(
+            Seq(
+              DataPointInsertionItem(
+                DataPointInsertionItem.IdOrExternalId.Id(id),
+                DataPointInsertionItem.DatapointType
+                  .StringDatapoints(StringDatapoints(dataPoints.map { dp =>
+                    StringDatapoint(dp.timestamp.toEpochMilli, dp.value)
+                  }))
+              )
             )
-            .response(asJson[Either[CdpApiError, Unit]])
-            .mapResponse {
-              case Left(value) => throw value.error
-              case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-              case Right(Right(_)) => ()
-            }
-        },
-        contentType = "application/protobuf"
-      )
+          ).toByteArray
+        )
+        .response(
+          asJson[Either[CdpApiError, Unit]].mapWithMetadata(
+            (response, metadata) =>
+              response match {
+                case Left(value) => throw value.error
+                case Right(Left(cdpApiError)) =>
+                  throw cdpApiError.asException(uri"$baseUri", metadata.header("x-request-id"))
+                case Right(Right(_)) => ()
+              }
+          )
+        )
+        .send()(requestSession.sttpBackend, implicitly),
+      (r: Response[Unit]) => r.unsafeBody
+    )
 
   def parseStringDataPoints(response: DataPointListResponse): Seq[StringDataPointsByIdResponse] =
     response.items
@@ -185,34 +204,18 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       )
 
   def insertStringsByExternalId(externalId: String, dataPoints: Seq[StringDataPoint]): F[Unit] =
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(baseUri)
-          .body(Items(Seq(StringDataPointsByExternalId(externalId, dataPoints))))
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-            case Right(Right(_)) => ()
-          }
-      }
+    requestSession.post[Unit, Unit, Items[StringDataPointsByExternalId]](
+      Items(Seq(StringDataPointsByExternalId(externalId, dataPoints))),
+      baseUri,
+      _ => ()
+    )
 
   def deleteRangeById(id: Long, inclusiveStart: Instant, exclusiveEnd: Instant): F[Unit] =
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/delete")
-          .body(
-            Items(Seq(DeleteRangeById(id, inclusiveStart.toEpochMilli, exclusiveEnd.toEpochMilli)))
-          )
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-            case Right(Right(_)) => ()
-          }
-      }
+    requestSession.post[Unit, Unit, Items[DeleteRangeById]](
+      Items(Seq(DeleteRangeById(id, inclusiveStart.toEpochMilli, exclusiveEnd.toEpochMilli))),
+      uri"$baseUri/delete",
+      _ => ()
+    )
 
   def deleteRangeByExternalId(
       externalId: String,
@@ -220,27 +223,19 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       exclusiveEnd: Instant
   ): F[Unit] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/delete")
-          .body(
-            Items(
-              Seq(
-                DeleteRangeByExternalId(
-                  externalId,
-                  inclusiveStart.toEpochMilli,
-                  exclusiveEnd.toEpochMilli
-                )
-              )
+      .post[Unit, Unit, Items[DeleteRangeByExternalId]](
+        Items(
+          Seq(
+            DeleteRangeByExternalId(
+              externalId,
+              inclusiveStart.toEpochMilli,
+              exclusiveEnd.toEpochMilli
             )
           )
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-            case Right(Right(_)) => ()
-          }
-      }
+        ),
+        uri"$baseUri/delete",
+        _ => ()
+      )
 
   def queryById(
       id: Long,
@@ -354,12 +349,19 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
           request
             .post(uri"$baseUri/list")
             .body(query)
-            .response(asProtobufOrCdpApiError)
-            .mapResponse {
-              case Left(value) => throw value.error
-              case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
-              case Right(Right(dataPointListResponse)) => mapDataPointList(dataPointListResponse)
-            }
+            .response(
+              asProtobufOrCdpApiError.mapWithMetadata(
+                (response, metadata) =>
+                  response match {
+                    case Left(value) => throw value.error
+                    case Right(Left(cdpApiError)) =>
+                      throw cdpApiError
+                        .asException(uri"$baseUri/list", metadata.header("x-request-id"))
+                    case Right(Right(dataPointListResponse)) =>
+                      mapDataPointList(dataPointListResponse)
+                  }
+              )
+            )
         },
         accept = "application/protobuf"
       )
@@ -423,37 +425,27 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   def getLatestDataPointsByIds(ids: Seq[Long]): F[Map[Long, Option[DataPoint]]] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/latest")
-          .body(Items(ids.map(CogniteInternalId)))
-          .response(asJson[Either[CdpApiError, Items[DataPointsByIdResponse]]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/latest")
-            case Right(Right(value)) =>
-              value.items.map { item =>
-                item.id -> item.datapoints.headOption
-              }.toMap
-          }
-      }
+      .post[Map[Long, Option[DataPoint]], Items[DataPointsByIdResponse], Items[CogniteInternalId]](
+        Items(ids.map(CogniteInternalId)),
+        uri"$baseUri/latest",
+        value =>
+          value.items.map { item =>
+            item.id -> item.datapoints.headOption
+          }.toMap
+      )
 
   def getLatestDataPointsByExternalIds(ids: Seq[String]): F[Map[String, Option[DataPoint]]] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/latest")
-          .body(Items(ids.map(CogniteExternalId)))
-          .response(asJson[Either[CdpApiError, Items[DataPointsByExternalIdResponse]]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/latest")
-            case Right(Right(value)) =>
-              value.items.map { item =>
-                item.externalId -> item.datapoints.headOption
-              }.toMap
-          }
-      }
+      .post[Map[String, Option[DataPoint]], Items[DataPointsByExternalIdResponse], Items[
+        CogniteExternalId
+      ]](
+        Items(ids.map(CogniteExternalId)),
+        uri"$baseUri/latest",
+        value =>
+          value.items.map { item =>
+            item.externalId -> item.datapoints.headOption
+          }.toMap
+      )
 
   def getLatestStringDataPointById(id: Long): F[Option[StringDataPoint]] =
     requestSession.map(
@@ -483,39 +475,31 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   def getLatestStringDataPointByIds(ids: Seq[Long]): F[Map[Long, Option[StringDataPoint]]] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/latest")
-          .body(Items(ids.map(CogniteInternalId)))
-          .response(asJson[Either[CdpApiError, Items[StringDataPointsByIdResponse]]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/latest")
-            case Right(Right(value)) =>
-              value.items.map { item =>
-                item.id -> item.datapoints.headOption
-              }.toMap
-          }
-      }
+      .post[Map[Long, Option[StringDataPoint]], Items[StringDataPointsByIdResponse], Items[
+        CogniteInternalId
+      ]](
+        Items(ids.map(CogniteInternalId)),
+        uri"$baseUri/latest",
+        value =>
+          value.items.map { item =>
+            item.id -> item.datapoints.headOption
+          }.toMap
+      )
 
   def getLatestStringDataPointByExternalIds(
       ids: Seq[String]
   ): F[Map[String, Option[StringDataPoint]]] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/latest")
-          .body(Items(ids.map(CogniteExternalId)))
-          .response(asJson[Either[CdpApiError, Items[StringDataPointsByExternalIdResponse]]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/latest")
-            case Right(Right(value)) =>
-              value.items.map { item =>
-                item.externalId -> item.datapoints.headOption
-              }.toMap
-          }
-      }
+      .post[Map[String, Option[StringDataPoint]], Items[StringDataPointsByExternalIdResponse], Items[
+        CogniteExternalId
+      ]](
+        Items(ids.map(CogniteExternalId)),
+        uri"$baseUri/latest",
+        value =>
+          value.items.map { item =>
+            item.externalId -> item.datapoints.headOption
+          }.toMap
+      )
 }
 
 object DataPointsResource {

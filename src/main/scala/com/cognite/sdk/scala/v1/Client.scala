@@ -24,6 +24,68 @@ final case class RequestSession[F[_]: Monad](
         .readTimeout(90.seconds)
     ).send()(sttpBackend, implicitly)
 
+  def get[R, T](
+      uri: Uri,
+      mapResult: T => R,
+      contentType: String = "application/json",
+      accept: String = "application/json"
+  )(implicit decoder: Decoder[Either[CdpApiError, T]]): F[R] =
+    sttp
+      .followRedirects(false)
+      .auth(auth)
+      .contentType(contentType)
+      .header("accept", accept)
+      .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
+      .header("x-cdp-app", applicationName)
+      .readTimeout(90.seconds)
+      .parseResponseIf(_ => true)
+      .get(uri)
+      .response(
+        asJson[Either[CdpApiError, T]].mapWithMetadata(
+          (response, metadata) =>
+            response match {
+              case Left(value) => throw value.error
+              case Right(Left(cdpApiError)) =>
+                throw cdpApiError.asException(uri"$baseUri", metadata.header("x-request-id"))
+              case Right(Right(value)) => mapResult(value)
+            }
+        )
+      )
+      .send()(sttpBackend, implicitly)
+      .map(_.unsafeBody)
+
+  def post[R, T, I](
+      body: I,
+      uri: Uri,
+      mapResult: T => R,
+      contentType: String = "application/json",
+      accept: String = "application/json"
+  )(implicit serializer: BodySerializer[I], decoder: Decoder[Either[CdpApiError, T]]): F[R] =
+    sttp
+      .followRedirects(false)
+      .auth(auth)
+      .contentType(contentType)
+      .header("accept", accept)
+      .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
+      .header("x-cdp-app", applicationName)
+      .readTimeout(90.seconds)
+      .parseResponseIf(_ => true)
+      .post(uri)
+      .body(body)
+      .response(
+        asJson[Either[CdpApiError, T]].mapWithMetadata(
+          (response, metadata) =>
+            response match {
+              case Left(value) => throw value.error
+              case Right(Left(cdpApiError)) =>
+                throw cdpApiError.asException(uri"$baseUri", metadata.header("x-request-id"))
+              case Right(Right(value)) => mapResult(value)
+            }
+        )
+      )
+      .send()(sttpBackend, implicitly)
+      .map(_.unsafeBody)
+
   def sendCdf[R](
       r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing],
       contentType: String = "application/json",
@@ -39,7 +101,7 @@ final case class RequestSession[F[_]: Monad](
         .header("x-cdp-app", applicationName)
         .readTimeout(90.seconds)
         .parseResponseIf(_ => true)
-    ).send()(sttpBackend, implicitly).map(_.unsafeBody)
+    ).send()(sttpBackend, implicitly).map(r => r.unsafeBody)
 
   def map[R, R1](r: F[R], f: R => R1): F[R1] = r.map(f)
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
@@ -108,19 +170,10 @@ class GenericClient[F[_]: Monad, _](
   def project: F[Project] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Project]] =
       EitherDecoder.eitherDecoder[CdpApiError, Project]
-
-    requestSession
-      .sendCdf { request =>
-        request
-          .get(requestSession.baseUri)
-          .response(asJson[Either[CdpApiError, Project]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) =>
-              throw cdpApiError.asException(requestSession.baseUri)
-            case Right(Right(value)) => value
-          }
-      }
+    requestSession.get[Project, Project](
+      requestSession.baseUri,
+      value => value
+    )
   }
   val serviceAccounts = new ServiceAccounts[F](requestSession)
   val apiKeys = new ApiKeys[F](requestSession)

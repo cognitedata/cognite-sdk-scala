@@ -43,6 +43,13 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       }
     }
 
+    it should "include the request id in all cdp api exceptions" in {
+      val caught = intercept[CdpApiException](
+        writable.deleteByIds(idsThatDoNotExist)
+      )
+      assert(caught.requestId.isDefined)
+    }
+
     it should "create and delete items using the read class" in {
       // create a single item
       val createdItem = writable.createFromRead(readExamples.take(1))

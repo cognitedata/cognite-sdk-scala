@@ -21,10 +21,11 @@ final case class CdpApiErrorPayload(
     missingFields: Option[Seq[String]]
 )
 final case class CdpApiError(error: CdpApiErrorPayload) {
-  def asException(url: Uri): CdpApiException =
+  def asException(url: Uri, requestId: Option[String]): CdpApiException =
     this.error
       .into[CdpApiException]
       .withFieldConst(_.url, url)
+      .withFieldConst(_.requestId, requestId)
       .transform
 }
 object CdpApiError {
@@ -37,8 +38,12 @@ final case class CdpApiException(
     message: String,
     missing: Option[Seq[JsonObject]],
     duplicated: Option[Seq[JsonObject]],
-    missingFields: Option[Seq[String]]
-) extends Throwable(s"Request to ${url.toString()} failed with status ${code.toString}: $message")
+    missingFields: Option[Seq[String]],
+    requestId: Option[String]
+) extends Throwable(
+      s"Request ${requestId.map(id => s"with id $id").getOrElse("")} to ${url
+        .toString()} failed with status ${code.toString}: $message"
+    )
 
 final case class DataPoint(
     timestamp: Instant,

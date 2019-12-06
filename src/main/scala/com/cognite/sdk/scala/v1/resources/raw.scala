@@ -16,19 +16,11 @@ object RawResource {
   ): F[Unit] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/delete")
-          .body(Items(ids))
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) =>
-              throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-            case Right(Right(_)) => ()
-          }
-      }
+    requestSession.post[Unit, Unit, Items[I]](
+      Items(ids),
+      uri"$baseUri/delete",
+      _ => ()
+    )
   }
 }
 
@@ -134,18 +126,11 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
   override def createItems(items: Items[RawRow]): F[Seq[RawRow]] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(baseUri)
-          .body(items)
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/byids")
-            case Right(Right(_)) => Seq.empty[RawRow]
-          }
-      }
+    requestSession.post[Seq[RawRow], Unit, Items[RawRow]](
+      items,
+      baseUri,
+      _ => Seq.empty[RawRow]
+    )
   }
 
   override private[sdk] def readWithCursor(
@@ -185,17 +170,10 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
 
     for {
       cursors <- requestSession
-        .sendCdf { request =>
-          request
-            .get(cursorsUriWithParams)
-            .response(asJson[Either[CdpApiError, Items[String]]])
-            .mapResponse {
-              case Left(value) => throw value.error
-              case Right(Left(cdpApiError)) =>
-                throw cdpApiError.asException(cursorsUriWithParams)
-              case Right(Right(value)) => value
-            }
-        }
+        .get[Items[String], Items[String]](
+          cursorsUriWithParams,
+          value => value
+        )
       streams = cursors.items.map(
         cursor =>
           Readable
