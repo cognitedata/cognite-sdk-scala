@@ -21,17 +21,11 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
 
   def insertById(id: Long, columns: Seq[String], rows: Seq[SequenceRow]): F[Unit] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(baseUri)
-          .body(Items(Seq(SequenceRowsInsertById(id, columns, rows))))
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-            case Right(Right(_)) => ()
-          }
-      }
+      .post[Unit, Unit, Items[SequenceRowsInsertById]](
+        Items(Seq(SequenceRowsInsertById(id, columns, rows))),
+        baseUri,
+        _ => ()
+      )
 
   def insertByExternalId(
       externalId: String,
@@ -39,49 +33,27 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
       rows: Seq[SequenceRow]
   ): F[Unit] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(baseUri)
-          .body(
-            Items(
-              Seq(SequenceRowsInsertByExternalId(externalId, columns, rows))
-            )
-          )
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(baseUri)
-            case Right(Right(_)) => ()
-          }
-      }
+      .post[Unit, Unit, Items[SequenceRowsInsertByExternalId]](
+        Items(Seq(SequenceRowsInsertByExternalId(externalId, columns, rows))),
+        baseUri,
+        _ => ()
+      )
 
   def deleteById(id: Long, rows: Seq[Long]): F[Unit] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/delete")
-          .body(Items(Seq(SequenceRowsDeleteById(id, rows))))
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-            case Right(Right(_)) => ()
-          }
-      }
+      .post[Unit, Unit, Items[SequenceRowsDeleteById]](
+        Items(Seq(SequenceRowsDeleteById(id, rows))),
+        uri"$baseUri/delete",
+        _ => ()
+      )
 
   def deleteByExternalId(externalId: String, rows: Seq[Long]): F[Unit] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/delete")
-          .body(Items(Seq(SequenceRowsDeleteByExternalId(externalId, rows))))
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-            case Right(Right(_)) => ()
-          }
-      }
+      .post[Unit, Unit, Items[SequenceRowsDeleteByExternalId]](
+        Items(Seq(SequenceRowsDeleteByExternalId(externalId, rows))),
+        uri"$baseUri/delete",
+        _ => ()
+      )
 
   def queryById(
       id: Long,
@@ -91,17 +63,11 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
       columns: Option[Seq[String]] = None
   ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/list")
-          .body(SequenceRowsQueryById(id, inclusiveStart, exclusiveEnd, limit, columns))
-          .response(asJson[Either[CdpApiError, SequenceRowsResponse]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
-            case Right(Right(value)) => (value.columns.toList, value.rows)
-          }
-      }
+      .post[(Seq[SequenceColumnId], Seq[SequenceRow]), SequenceRowsResponse, SequenceRowsQueryById](
+        SequenceRowsQueryById(id, inclusiveStart, exclusiveEnd, limit, columns),
+        uri"$baseUri/list",
+        value => (value.columns.toList, value.rows)
+      )
 
   def queryByExternalId(
       externalId: String,
@@ -111,25 +77,22 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
       columns: Option[Seq[String]] = None
   ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/list")
-          .body(
-            SequenceRowsQueryByExternalId(
-              externalId,
-              inclusiveStart,
-              exclusiveEnd,
-              limit,
-              columns
-            )
-          )
-          .response(asJson[Either[CdpApiError, SequenceRowsResponse]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
-            case Right(Right(value)) => (value.columns.toList, value.rows)
-          }
-      }
+      .post[
+        (Seq[SequenceColumnId], Seq[SequenceRow]),
+        SequenceRowsResponse,
+        SequenceRowsQueryByExternalId
+      ](
+        SequenceRowsQueryByExternalId(
+          externalId,
+          inclusiveStart,
+          exclusiveEnd,
+          limit,
+          columns
+        ),
+        uri"$baseUri/list",
+        value => (value.columns.toList, value.rows)
+      )
+
 }
 
 object SequenceRows {

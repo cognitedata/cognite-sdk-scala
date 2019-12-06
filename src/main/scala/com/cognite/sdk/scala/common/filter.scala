@@ -6,7 +6,7 @@ import com.cognite.sdk.scala.v1.RequestSession
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import fs2._
-import io.circe.{Decoder, Encoder, Printer}
+import io.circe.{Decoder, Encoder, Json, Printer}
 import io.circe.syntax._
 
 final case class FilterRequest[T](
@@ -102,21 +102,11 @@ object Filter {
     implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
     val body =
       FilterRequest(filter, limit, cursor, partition.map(_.toString), aggregatedProperties).asJson
-    requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/list")
-          .body(
-            // this is an ugly hack necessary because Files does not allow "partition": null
-            partition.map(_ => body).getOrElse(body.mapObject(o => o.remove("partition")))
-          )
-          .response(asJson[Either[CdpApiError, ItemsWithCursor[R]]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/list")
-            case Right(Right(value)) => value
-          }
-      }
+    requestSession.post[ItemsWithCursor[R], ItemsWithCursor[R], Json](
+      partition.map(_ => body).getOrElse(body.mapObject(o => o.remove("partition"))),
+      uri"$baseUri/list",
+      value => value
+    )
   }
   //scalastyle:off parameter.number
 }

@@ -30,18 +30,11 @@ class Files[F[_]](val requestSession: RequestSession[F])
 
   override def createOne(item: FileCreate): F[File] =
     requestSession
-      .sendCdf { request =>
-        request
-          .post(baseUri)
-          .body(item)
-          .response(asJson[Either[CdpApiError, File]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) =>
-              throw cdpApiError.asException(uri"$baseUri/byids")
-            case Right(Right(value)) => value
-          }
-      }
+      .post[File, File, FileCreate](
+        item,
+        baseUri,
+        value => value
+      )
 
   def uploadWithName(input: java.io.InputStream, name: String): F[File] = {
     val item = FileCreate(name = name)
@@ -124,19 +117,11 @@ class Files[F[_]](val requestSession: RequestSession[F])
   def download(item: FileDownload, out: java.io.OutputStream): F[Unit] = {
     val request =
       requestSession
-        .sendCdf { request =>
-          request
-            .post(uri"${baseUri.toString()}/downloadlink")
-            .body(Items(Seq(item)))
-            .response(asJson[Either[CdpApiError, Items[FileDownloadLink]]])
-            .mapResponse {
-              case Left(value) => throw value.error
-              case Right(Left(cdpApiError)) =>
-                throw cdpApiError.asException(uri"${baseUri.toString()}/downloadlink")
-              case Right(Right(values)) => values
-
-            }
-        }
+        .post[Items[FileDownloadLink], Items[FileDownloadLink], Items[FileDownload]](
+          Items(Seq(item)),
+          uri"${baseUri.toString()}/downloadlink",
+          values => values
+        )
 
     requestSession.flatMap(
       request,

@@ -23,17 +23,11 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/delete")
-          .body(Items(ids.map(CogniteInternalId)))
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-            case Right(Right(_)) => ()
-          }
-      }
+      .post[Unit, Unit, Items[CogniteInternalId]](
+        Items(ids.map(CogniteInternalId)),
+        uri"$baseUri/delete",
+        _ => ()
+      )
   }
 
   override private[sdk] def readWithCursor(
@@ -163,17 +157,11 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/delete")
-          .body(Items(ids.map(CogniteInternalId)))
-          .response(asJson[Either[CdpApiError, Unit]])
-          .mapResponse {
-            case Left(value) => throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/delete")
-            case Right(Right(_)) => ()
-          }
-      }
+      .post[Unit, Unit, Items[CogniteInternalId]](
+        Items(ids.map(CogniteInternalId)),
+        uri"$baseUri/delete",
+        _ => ()
+      )
   }
 
   override private[sdk] def readWithCursor(

@@ -4,6 +4,7 @@ import java.net.UnknownHostException
 
 import cats.{Id, Monad}
 import com.cognite.sdk.scala.common.{ApiKeyAuth, Auth, CdpApiException, InvalidAuthentication, RetryingBackend, SdkTest}
+import com.softwaremill.sttp.Response
 import com.softwaremill.sttp.testing.SttpBackendStub
 
 class ClientTest extends SdkTest {
@@ -73,14 +74,16 @@ class ClientTest extends SdkTest {
   }
 
   it should "retry certain failed requests" in {
+    val errorResponse = new Response(Right("{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Some error\"\n  }\n}"),
+      429, "", scala.collection.immutable.Seq[(String, String)](("x-request-id", "test-request-header")), Nil)
+    val successResponse = new Response(Right(
+      "{\n  \"items\": [\n{\n  \"id\": 5238663994907390,\n  \"createdTime\":" +
+        " 1550760030463,\n  \"name\": \"model_793601675501121482\"\n}\n  ]\n}"),
+      200, "", scala.collection.immutable.Seq[(String, String)](("x-request-id", "test-request-header")), Nil)
+
     val testingBackend = SttpBackendStub.synchronous
       .whenAnyRequest
-      .thenRespondCyclic("{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Some error\"\n  }\n}",
-        "{\n  \"error\": {\n    \"code\": 401,\n    \"message\": \"Some error\"\n  }\n}",
-        "{\n  \"error\": {\n    \"code\": 500,\n    \"message\": \"Some error\"\n  }\n}",
-        "{\n  \"error\": {\n    \"code\": 502,\n    \"message\": \"Some error\"\n  }\n}",
-        "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"Some error\"\n  }\n}",
-        client.threeDModels.list()
+      .thenRespondCyclicResponses(errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse
       )
 
     assertThrows[CdpApiException] {
@@ -104,6 +107,5 @@ class ClientTest extends SdkTest {
       new RetryingBackend[Id, Nothing](testingBackend, Some(4))
       ).threeDModels.list()
     }
-
   }
 }

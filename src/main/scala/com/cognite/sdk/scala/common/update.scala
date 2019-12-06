@@ -58,21 +58,14 @@ object UpdateById {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/update")
-          .body(Items(updates.map {
-            case (id, update) =>
-              UpdateRequest(update.asJson, id)
-          }.toSeq))
-          .response(asJson[Either[CdpApiError, Items[R]]])
-          .mapResponse {
-            case Left(value) =>
-              throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/update")
-            case Right(Right(value)) => value.items
-          }
-      }
+      .post[Seq[R], Items[R], Items[UpdateRequest]](
+        Items(updates.map {
+          case (id, update) =>
+            UpdateRequest(update.asJson, id)
+        }.toSeq),
+        uri"$baseUri/update",
+        value => value.items
+      )
   }
 }
 
@@ -108,20 +101,13 @@ object UpdateByExternalId {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
-      .sendCdf { request =>
-        request
-          .post(uri"$baseUri/update")
-          .body(Items(updates.map {
-            case (id, update) =>
-              UpdateRequestExternalId(update.asJson, id)
-          }.toSeq))
-          .response(asJson[Either[CdpApiError, Items[R]]])
-          .mapResponse {
-            case Left(value) =>
-              throw value.error
-            case Right(Left(cdpApiError)) => throw cdpApiError.asException(uri"$baseUri/update")
-            case Right(Right(value)) => value.items
-          }
-      }
+      .post[Seq[R], Items[R], Items[UpdateRequestExternalId]](
+        Items(updates.map {
+          case (id, update) =>
+            UpdateRequestExternalId(update.asJson, id)
+        }.toSeq),
+        uri"$baseUri/update",
+        value => value.items
+      )
   }
 }
