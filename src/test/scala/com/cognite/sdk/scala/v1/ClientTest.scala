@@ -4,7 +4,7 @@ import java.net.UnknownHostException
 
 import cats.{Comonad, Id, Monad}
 import cats.effect._
-import com.cognite.sdk.scala.common.{ApiKeyAuth, Auth, CdpApiException, InvalidAuthentication, RetryingBackend, SdkTest}
+import com.cognite.sdk.scala.common.{ApiKeyAuth, Auth, CdpApiException, InvalidAuthentication, RetryingBackend, SdkException, SdkTest}
 import com.softwaremill.sttp.Response
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -45,7 +45,7 @@ class ClientTest extends SdkTest {
       implicitly[Comonad[Id]],
       auth,
       sttpBackend
-    )
+    ).assets.list(Some(1)).compile.toList
   }
   it should "not throw an exception if the authentication is invalid and project is specified" in {
     implicit val auth: Auth = ApiKeyAuth("invalid-key", project = Some("random-project"))
@@ -78,17 +78,17 @@ class ClientTest extends SdkTest {
         ""
       )(auth, sttpBackend)
     }
-    assertThrows[RuntimeException] {
+    assertThrows[SdkException] {
       Client(
         "url-test-2",
         "api.cognitedata.com"
-      )(auth, sttpBackend)
+      )(auth, sttpBackend).projectName
     }
     assertThrows[UnknownHostException] {
       Client(
         "url-test-3",
         "thisShouldThrowAnUnknownHostException:)"
-      )(auth, sttpBackend)
+      )(auth, sttpBackend).projectName
     }
   }
 
