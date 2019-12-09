@@ -2,8 +2,8 @@ package com.cognite.sdk.scala.common
 
 import java.util.UUID
 
-import cats.{Id, Monad}
-import com.cognite.sdk.scala.v1.{GenericClient, sttpBackend}
+import cats.{Comonad, Id, Monad}
+import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp.{HttpURLConnectionBackend, MonadError, Request, Response, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -32,6 +32,7 @@ abstract class SdkTest extends FlatSpec with Matchers {
 
   val client = new GenericClient[Id, Nothing]("scala-sdk-test")(
     implicitly[Monad[Id]],
+    implicitly[Comonad[Id]],
     auth,
     // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
     new RetryingBackend[Id, Nothing](HttpURLConnectionBackend())
@@ -40,6 +41,7 @@ abstract class SdkTest extends FlatSpec with Matchers {
   val greenfieldClient = new GenericClient(
     "cdp-spark-datasource-test", "https://greenfield.cognitedata.com")(
     implicitly[Monad[Id]],
+    implicitly[Comonad[Id]],
     greenfieldAuth,
     sttpBackend
   )

@@ -108,7 +108,8 @@ val scalaTestDeps = Seq(
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp" %% "core" % sttpVersion,
-  "com.softwaremill.sttp" %% "circe" % sttpVersion
+  "com.softwaremill.sttp" %% "circe" % sttpVersion,
+  "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion % Test
 )
 
 def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
