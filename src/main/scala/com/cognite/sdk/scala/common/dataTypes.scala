@@ -12,7 +12,23 @@ import io.scalaland.chimney.dsl._
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
 final case class Items[A](items: Seq[A])
 final case class ItemsWithIgnoreUnknownIds(items: Seq[CogniteId], ignoreUnknownIds: Boolean)
-final case class SdkException(message: String) extends Throwable(message)
+final case class SdkException(
+    message: String,
+    uri: Option[Uri] = None,
+    requestId: Option[String] = None
+) extends Throwable(message) {
+  override def toString: String = {
+    val uriMessage = uri.map(u => s", in response to request sent to ${u.toString()}").getOrElse("")
+    val requestIdMessage = requestId.map(id => s", with request id ${id}").getOrElse("")
+    val superString: String = super.toString
+    val superMessage = if (superString.length > 0) {
+      superString
+    } else {
+      "Missing error message"
+    }
+    s"$superMessage$uriMessage$requestIdMessage"
+  }
+}
 final case class CdpApiErrorPayload(
     code: Int,
     message: String,
@@ -41,7 +57,7 @@ final case class CdpApiException(
     missingFields: Option[Seq[String]],
     requestId: Option[String]
 ) extends Throwable(
-      s"Request ${requestId.map(id => s"with id $id").getOrElse("")} to ${url
+      s"Request ${requestId.map(id => s"with id $id ").getOrElse("")}to ${url
         .toString()} failed with status ${code.toString}: $message"
     )
 

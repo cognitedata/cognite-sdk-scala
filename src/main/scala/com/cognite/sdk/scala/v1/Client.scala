@@ -12,6 +12,7 @@ import io.circe.Decoder
 import io.circe.derivation.deriveDecoder
 
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
 
 final case class RequestSession[F[_]: Monad](
     applicationName: String,
@@ -25,35 +26,61 @@ final case class RequestSession[F[_]: Monad](
         .readTimeout(90.seconds)
     ).send()(sttpBackend, implicitly)
 
+  private val sttpRequest = sttp
+    .followRedirects(false)
+    .auth(auth)
+    .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
+    .header("x-cdp-app", applicationName)
+    .readTimeout(90.seconds)
+    .parseResponseIfMetadata(_.contentLength.forall(_ > 0))
+
+  private def parseResponse[T, R](uri: Uri, mapResult: T => R)(
+      implicit decoder: Decoder[Either[CdpApiError, T]]
+  ) =
+    asJson[Either[CdpApiError, T]].mapWithMetadata(
+      (response, metadata) =>
+        response match {
+          case Left(value) => throw value.error
+          case Right(Left(cdpApiError)) =>
+            throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
+          case Right(Right(value)) => mapResult(value)
+        }
+    )
+
+  private def unsafeBody[R](uri: Uri, response: Response[R]): R =
+    try {
+      response.unsafeBody
+    } catch {
+      // sttp's .unsafeBody returns a NoSuchElementException if the status wasn't
+      // a 200 and there is no body to return.
+      case _: NoSuchElementException =>
+        val code = response.code.toInt
+        throw SdkException(
+          s"Unexpected status code $code",
+          Some(uri),
+          response.header("x-request-id")
+        )
+      case NonFatal(_) =>
+        throw SdkException(
+          s"Unexpected exception while reading response body",
+          Some(uri),
+          response.header("x-request-id")
+        )
+    }
+
   def get[R, T](
       uri: Uri,
       mapResult: T => R,
       contentType: String = "application/json",
       accept: String = "application/json"
   )(implicit decoder: Decoder[Either[CdpApiError, T]]): F[R] =
-    sttp
-      .followRedirects(false)
-      .auth(auth)
+    sttpRequest
       .contentType(contentType)
       .header("accept", accept)
-      .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
-      .header("x-cdp-app", applicationName)
-      .readTimeout(90.seconds)
-      .parseResponseIf(_ => true)
       .get(uri)
-      .response(
-        asJson[Either[CdpApiError, T]].mapWithMetadata(
-          (response, metadata) =>
-            response match {
-              case Left(value) => throw value.error
-              case Right(Left(cdpApiError)) =>
-                throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
-              case Right(Right(value)) => mapResult(value)
-            }
-        )
-      )
+      .response(parseResponse(uri, mapResult))
       .send()(sttpBackend, implicitly)
-      .map(_.unsafeBody)
+      .map(unsafeBody(uri, _))
 
   def post[R, T, I](
       body: I,
@@ -62,47 +89,27 @@ final case class RequestSession[F[_]: Monad](
       contentType: String = "application/json",
       accept: String = "application/json"
   )(implicit serializer: BodySerializer[I], decoder: Decoder[Either[CdpApiError, T]]): F[R] =
-    sttp
-      .followRedirects(false)
-      .auth(auth)
+    sttpRequest
       .contentType(contentType)
       .header("accept", accept)
-      .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
-      .header("x-cdp-app", applicationName)
-      .readTimeout(90.seconds)
-      .parseResponseIf(_ => true)
       .post(uri)
       .body(body)
-      .response(
-        asJson[Either[CdpApiError, T]].mapWithMetadata(
-          (response, metadata) =>
-            response match {
-              case Left(value) => throw value.error
-              case Right(Left(cdpApiError)) =>
-                throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
-              case Right(Right(value)) => mapResult(value)
-            }
-        )
-      )
+      .response(parseResponse(uri, mapResult))
       .send()(sttpBackend, implicitly)
-      .map(_.unsafeBody)
+      .map(unsafeBody(uri, _))
 
   def sendCdf[R](
       r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing],
       contentType: String = "application/json",
       accept: String = "application/json"
-  ): F[R] =
-    r(
-      sttp
-        .followRedirects(false)
-        .auth(auth)
+  ): F[R] = {
+    val request = r(
+      sttpRequest
         .contentType(contentType)
         .header("accept", accept)
-        .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
-        .header("x-cdp-app", applicationName)
-        .readTimeout(90.seconds)
-        .parseResponseIf(_ => true)
-    ).send()(sttpBackend, implicitly).map(r => r.unsafeBody)
+    )
+    request.send()(sttpBackend, implicitly).map(unsafeBody(request.uri, _))
+  }
 
   def map[R, R1](r: F[R], f: R => R1): F[R1] = r.map(f)
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
@@ -124,9 +131,9 @@ class GenericClient[F[_]: Monad: Comonad, _](
       throw new IllegalArgumentException("Unable to parse URI. Please check URI syntax.")
   }
 
-  val projectName: String = auth.project.getOrElse {
+  lazy val projectName: String = auth.project.getOrElse {
     val loginStatus = new Login(
-      RequestSession(applicationName, uri"$uri", sttpBackend, auth)
+      RequestSession(applicationName, uri, sttpBackend, auth)
     ).status().extract
     if (loginStatus.project.trim.isEmpty) {
       throw InvalidAuthentication()
@@ -135,28 +142,28 @@ class GenericClient[F[_]: Monad: Comonad, _](
     }
   }
 
-  val requestSession =
+  lazy val requestSession =
     RequestSession(
       applicationName,
       uri"$uri/api/v1/projects/$projectName",
       sttpBackend,
       auth
     )
-  val login = new Login[F](requestSession.copy(baseUri = uri))
-  val assets = new Assets[F](requestSession)
-  val events = new Events[F](requestSession)
-  val files = new Files[F](requestSession)
-  val timeSeries = new TimeSeriesResource[F](requestSession)
-  val dataPoints = new DataPointsResource[F](requestSession)
-  val sequences = new SequencesResource[F](requestSession)
-  val sequenceRows = new SequenceRows[F](requestSession)
+  lazy val login = new Login[F](RequestSession(applicationName, uri, sttpBackend, auth))
+  lazy val assets = new Assets[F](requestSession)
+  lazy val events = new Events[F](requestSession)
+  lazy val files = new Files[F](requestSession)
+  lazy val timeSeries = new TimeSeriesResource[F](requestSession)
+  lazy val dataPoints = new DataPointsResource[F](requestSession)
+  lazy val sequences = new SequencesResource[F](requestSession)
+  lazy val sequenceRows = new SequenceRows[F](requestSession)
 
-  val rawDatabases = new RawDatabases[F](requestSession)
+  lazy val rawDatabases = new RawDatabases[F](requestSession)
   def rawTables(database: String): RawTables[F] = new RawTables(requestSession, database)
   def rawRows(database: String, table: String): RawRows[F] =
     new RawRows(requestSession, database, table)
 
-  val threeDModels = new ThreeDModels[F](requestSession)
+  lazy val threeDModels = new ThreeDModels[F](requestSession)
   def threeDRevisions(modelId: Long): ThreeDRevisions[F] =
     new ThreeDRevisions(requestSession, modelId)
   def threeDAssetMappings(modelId: Long, revisionId: Long): ThreeDAssetMappings[F] =
@@ -172,10 +179,10 @@ class GenericClient[F[_]: Monad: Comonad, _](
       value => value
     )
   }
-  val serviceAccounts = new ServiceAccounts[F](requestSession)
-  val apiKeys = new ApiKeys[F](requestSession)
-  val groups = new Groups[F](requestSession)
-  val securityCategories = new SecurityCategories[F](requestSession)
+  lazy val serviceAccounts = new ServiceAccounts[F](requestSession)
+  lazy val apiKeys = new ApiKeys[F](requestSession)
+  lazy val groups = new Groups[F](requestSession)
+  lazy val securityCategories = new SecurityCategories[F](requestSession)
 }
 
 object GenericClient {

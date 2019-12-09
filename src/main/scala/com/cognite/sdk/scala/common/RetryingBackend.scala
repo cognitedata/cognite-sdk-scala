@@ -1,4 +1,5 @@
 package com.cognite.sdk.scala.common
+
 import cats.effect.Timer
 import com.softwaremill.sttp.{Id, MonadError, Request, Response, SttpBackend}
 
@@ -51,12 +52,7 @@ class RetryingBackend[R[_], S](delegate: SttpBackend[R, S], maxRetries: Option[I
       case cdpError: CdpApiException =>
         if (shouldRetry(cdpError.code) && retries > 0) {
           responseMonad.flatMap(sleepImpl.sleep(initialDelay))(
-            _ =>
-              sendWithRetryCounter(
-                request,
-                retries - 1,
-                nextDelay
-              )
+            _ => sendWithRetryCounter(request, retries - 1, nextDelay)
           )
         } else {
           responseMonad.error(cdpError)
@@ -64,12 +60,7 @@ class RetryingBackend[R[_], S](delegate: SttpBackend[R, S], maxRetries: Option[I
       case e: TimeoutException =>
         if (retries > 0) {
           responseMonad.flatMap(sleepImpl.sleep(initialDelay))(
-            _ =>
-              sendWithRetryCounter(
-                request,
-                retries - 1,
-                nextDelay
-              )
+            _ => sendWithRetryCounter(request, retries - 1, nextDelay)
           )
         } else {
           responseMonad.error(e)
@@ -77,7 +68,15 @@ class RetryingBackend[R[_], S](delegate: SttpBackend[R, S], maxRetries: Option[I
       case error => responseMonad.error(error)
     }
     responseMonad.flatMap(r) { resp =>
-      responseMonad.unit(resp)
+      // This can happen when we get empty responses, as we sometimes do for
+      // Service Unavailable or Bad Gateway.
+      if (shouldRetry(resp.code.toInt)) {
+        responseMonad.flatMap(sleepImpl.sleep(initialDelay))(
+          _ => sendWithRetryCounter(request, retries - 1, nextDelay)
+        )
+      } else {
+        responseMonad.unit(resp)
+      }
     }
   }
 
