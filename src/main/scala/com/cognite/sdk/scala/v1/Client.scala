@@ -1,11 +1,12 @@
 package com.cognite.sdk.scala.v1
 
 import BuildInfo.BuildInfo
-import cats.Monad
+import cats.{Comonad, Id, Monad}
 import cats.implicits._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.resources._
-import com.softwaremill.sttp._
+import com.softwaremill.sttp.SttpBackend
+import com.softwaremill.sttp.{Id => _, _}
 import com.softwaremill.sttp.circe.asJson
 import io.circe.Decoder
 import io.circe.derivation.deriveDecoder
@@ -107,7 +108,7 @@ final case class RequestSession[F[_]: Monad](
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
-class GenericClient[F[_]: Monad, _](
+class GenericClient[F[_]: Monad: Comonad, _](
     applicationName: String,
     baseUri: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com")
@@ -124,13 +125,9 @@ class GenericClient[F[_]: Monad, _](
   }
 
   val projectName: String = auth.project.getOrElse {
-    val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
-      options = SttpBackendOptions.connectionTimeout(90.seconds)
-    )
     val loginStatus = new Login(
       RequestSession(applicationName, uri"$uri", sttpBackend, auth)
-    ).status()
-
+    ).status().extract
     if (loginStatus.project.trim.isEmpty) {
       throw InvalidAuthentication()
     } else {
