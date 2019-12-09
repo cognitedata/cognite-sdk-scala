@@ -47,7 +47,7 @@ final case class RequestSession[F[_]: Monad](
             response match {
               case Left(value) => throw value.error
               case Right(Left(cdpApiError)) =>
-                throw cdpApiError.asException(uri"$baseUri", metadata.header("x-request-id"))
+                throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
               case Right(Right(value)) => mapResult(value)
             }
         )
@@ -79,7 +79,7 @@ final case class RequestSession[F[_]: Monad](
             response match {
               case Left(value) => throw value.error
               case Right(Left(cdpApiError)) =>
-                throw cdpApiError.asException(uri"$baseUri", metadata.header("x-request-id"))
+                throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
               case Right(Right(value)) => mapResult(value)
             }
         )
