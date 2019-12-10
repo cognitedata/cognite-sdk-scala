@@ -60,9 +60,9 @@ final case class RequestSession[F[_]: Monad](
           Some(uri),
           response.header("x-request-id")
         )
-      case NonFatal(_) =>
+      case NonFatal(e) =>
         throw SdkException(
-          s"Unexpected exception while reading response body",
+          s"Unexpected exception ${e.toString} while reading response body",
           Some(uri),
           response.header("x-request-id")
         )
