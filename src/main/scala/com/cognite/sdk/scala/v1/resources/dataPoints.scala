@@ -107,7 +107,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         .contentType("application/protobuf")
         .header("accept", "application/json")
         .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
-        .header("x-cdp-app", "sdgsfgf")
+        .header("x-cdp-app", requestSession.applicationName)
         .parseResponseIf(_ => true)
         .post(baseUri)
         .body(
