@@ -54,7 +54,7 @@ final case class RequestSession[F[_]: Monad](
       // sttp's .unsafeBody returns a NoSuchElementException if the status wasn't
       // a 200 and there is no body to return.
       case _: NoSuchElementException =>
-        val code = response.code.toInt
+        val code = response.code.toString
         throw SdkException(
           s"Unexpected status code $code",
           Some(uri),
