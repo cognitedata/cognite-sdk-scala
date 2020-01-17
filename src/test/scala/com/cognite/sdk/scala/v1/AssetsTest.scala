@@ -163,6 +163,15 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors with
       None,
       Seq(a => a should have size 1106)
     )
+
+    val assetSubtreeIdsFilterResult = client.assets
+      .filter(
+        AssetsFilter(
+          assetSubtreeIds = Some(Seq(CogniteInternalId(3028597755787717L))))
+      )
+      .compile
+      .toList
+    assert(assetSubtreeIdsFilterResult.length == 5)
   }
 
   it should "support asset aggregates" in {
@@ -217,7 +226,7 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors with
           search = Some(AssetsSearch(name = Some("ESDV")))
         )
       )
-    assert(esdvResults.length == 15)
+    assert(esdvResults.length == 20)
     val esdvLimitResults = client.assets
       .search(
         AssetsQuery(
