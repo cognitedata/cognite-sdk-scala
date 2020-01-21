@@ -122,7 +122,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
 
   val cursorsUri = uri"${requestSession.baseUri}/raw/dbs/$database/tables/$table/cursors"
 
-  // raw does not return the created rows in the response, so we'll always return an empty sequence.
+  // RAW does not return the created rows in the response, so we'll always return an empty sequence.
   override def createItems(items: Items[RawRow]): F[Seq[RawRow]] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
@@ -132,6 +132,13 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       _ => Seq.empty[RawRow]
     )
   }
+
+  // ... and since RAW doesn't return the created rows, we just return the one we sent here.
+  override def createOne(item: RawRow): F[RawRow] =
+    requestSession.map(
+      create(Seq(item)),
+      (_: Seq[RawRow]) => item
+    )
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],

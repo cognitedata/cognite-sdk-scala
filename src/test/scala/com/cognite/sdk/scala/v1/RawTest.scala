@@ -99,6 +99,10 @@ class RawTest extends SdkTest with ReadBehaviours with WritableBehaviors {
     rows.deleteByIds(Seq("123"))
     val rowsResponseAfterOneDelete = rows.list().compile.toList
     assert(rowsResponseAfterOneDelete.size === 1)
+
+    rows.createOne(RawRow("1b3", Map("abc" -> "cdf".asJson)))
+    val rowsResponseAfterCreateOne = rows.list().compile.toList
+    assert(rowsResponseAfterCreateOne.size === 2)
   }
 
   it should "allow partition read and filtering of rows" in withDatabaseTables {
