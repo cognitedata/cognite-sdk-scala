@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.common
 
+import java.net.ConnectException
+
 import cats.effect.Timer
 import com.softwaremill.sttp.{Id, MonadError, Request, Response, SttpBackend}
 
@@ -57,7 +59,7 @@ class RetryingBackend[R[_], S](delegate: SttpBackend[R, S], maxRetries: Option[I
         } else {
           responseMonad.error(cdpError)
         }
-      case e: TimeoutException =>
+      case e @ (_: TimeoutException | _: ConnectException) =>
         if (retries > 0) {
           responseMonad.flatMap(sleepImpl.sleep(initialDelay))(
             _ => sendWithRetryCounter(request, retries - 1, nextDelay)
