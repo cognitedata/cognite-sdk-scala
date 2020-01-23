@@ -48,6 +48,29 @@ class AssetsTest extends SdkTest with ReadBehaviours with WritableBehaviors with
     idsThatDoNotExist
   )
 
+  it should "support deleting entire asset subtrees recursively" in {
+    val assetTree = Seq(
+        AssetCreate(name = "root", externalId = Some("recursive-root")),
+        AssetCreate(name = "child", externalId = Some("recursive-child"), parentExternalId = Some("recursive-root")),
+        AssetCreate(name = "grandchild", externalId = Some("recursive-grandchild"), parentExternalId = Some("recursive-child"))
+    )
+    client.assets.create(assetTree)
+
+    retryWithExpectedResult[Seq[Asset]](
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some("recursive"))).compile.toList,
+      None,
+      Seq(r => r should have size 3)
+    )
+
+    client.assets.deleteByExternalIds(Seq("recursive-root"), true, true)
+
+    retryWithExpectedResult[Seq[Asset]](
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some("recursive"))).compile.toList,
+      None,
+      Seq(r => r should have size 0)
+    )
+  }
+
   private val assetsToCreate = Seq(
     Asset(name = "scala-sdk-update-1", description = Some("description-1")),
     Asset(name = "scala-sdk-update-2", description = Some("description-2"))

@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.v1.resources
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
+import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 
@@ -70,6 +71,21 @@ class Assets[F[_]](val requestSession: RequestSession[F])
       ignoreUnknownIds
     )
 
+  def deleteByExternalIds(
+      externalIds: Seq[String],
+      recursive: Boolean,
+      ignoreUnknownIds: Boolean
+  ): F[Unit] =
+    requestSession.post[Unit, Unit, ItemsWithRecursiveAndIgnoreUnknownIds](
+      ItemsWithRecursiveAndIgnoreUnknownIds(
+        externalIds.map(CogniteExternalId),
+        recursive,
+        ignoreUnknownIds
+      ),
+      uri"$baseUri/delete",
+      _ => ()
+    )
+
   def filter(
       filter: AssetsFilter,
       limit: Option[Int],
@@ -133,4 +149,10 @@ object Assets {
     deriveEncoder[AssetsQuery]
   implicit val assetsFilterRequestEncoder: Encoder[FilterRequest[AssetsFilter]] =
     deriveEncoder[FilterRequest[AssetsFilter]]
+
+  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Unit]
+  implicit val deleteRequestWithRecursiveAndIgnoreUnknownIdsEncoder
+      : Encoder[ItemsWithRecursiveAndIgnoreUnknownIds] =
+    deriveEncoder[ItemsWithRecursiveAndIgnoreUnknownIds]
 }
