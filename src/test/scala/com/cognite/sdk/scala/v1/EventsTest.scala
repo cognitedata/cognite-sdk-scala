@@ -3,9 +3,9 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 
 import fs2._
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTestSpec, SetValue, WritableBehaviors}
 
-class EventsTest extends SdkTest with ReadBehaviours with WritableBehaviors {
+class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 

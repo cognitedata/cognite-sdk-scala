@@ -5,7 +5,7 @@ import com.softwaremill.sttp._
 
 import scala.concurrent.duration._
 
-class LoginTest extends SdkTest {
+class LoginTest extends SdkTestSpec {
   implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
     options = SttpBackendOptions.connectionTimeout(90.seconds)
   )

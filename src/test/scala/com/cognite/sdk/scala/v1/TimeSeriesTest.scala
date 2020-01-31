@@ -1,10 +1,10 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-import com.cognite.sdk.scala.common.{DataPoint, ReadBehaviours, RetryWhile, SdkTest, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common.{DataPoint, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
 import fs2.Stream
 
-class TimeSeriesTest extends SdkTest with ReadBehaviours with WritableBehaviors with RetryWhile {
+class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L, 999993L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 

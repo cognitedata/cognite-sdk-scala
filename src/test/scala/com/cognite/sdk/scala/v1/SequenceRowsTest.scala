@@ -1,11 +1,11 @@
 package com.cognite.sdk.scala.v1
 
 import cats.data.NonEmptyList
-import com.cognite.sdk.scala.common.{RetryWhile, SdkTest}
+import com.cognite.sdk.scala.common.{RetryWhile, SdkTestSpec}
 import io.circe.syntax._
 import org.scalatest.ParallelTestExecution
 
-class SequenceRowsTest extends SdkTest with ParallelTestExecution with RetryWhile {
+class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with RetryWhile {
   def withSequence(testCode: Sequence => Any): Unit = {
     val externalId = shortRandom()
     val sequence = client.sequences.createOneFromRead(

@@ -1,9 +1,9 @@
 package com.cognite.sdk.scala.v1
 
 import java.util.UUID
-import com.cognite.sdk.scala.common.{DataPointsResourceBehaviors, SdkTest}
+import com.cognite.sdk.scala.common.{DataPointsResourceBehaviors, SdkTestSpec}
 
-class GreenfieldDataPointsTest extends SdkTest with DataPointsResourceBehaviors {
+class GreenfieldDataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
   override def withTimeSeries(testCode: TimeSeries => Any): Unit = {
     val name = Some(s"data-points-test-${UUID.randomUUID().toString}")
     val timeSeries = greenfieldClient.timeSeries.createFromRead(
