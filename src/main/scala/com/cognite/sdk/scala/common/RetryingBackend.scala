@@ -30,7 +30,12 @@ object Sleep {
   }
 }
 
-class RetryingBackend[R[_], S](delegate: SttpBackend[R, S], maxRetries: Option[Int] = None)(
+class RetryingBackend[R[_], S](
+    delegate: SttpBackend[R, S],
+    maxRetries: Option[Int] = None,
+    initialRetryDelay: FiniteDuration = Constants.DefaultInitialRetryDelay,
+    maxRetryDelay: FiniteDuration = Constants.DefaultMaxBackoffDelay
+)(
     implicit sleepImpl: Sleep[R]
 ) extends SttpBackend[R, S] {
   override def send[T](
@@ -44,37 +49,35 @@ class RetryingBackend[R[_], S](delegate: SttpBackend[R, S], maxRetries: Option[I
   @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   def sendWithRetryCounter[T](
       request: Request[T, S],
-      retries: Int,
-      initialDelay: FiniteDuration = Constants.DefaultInitialRetryDelay
+      retriesRemaining: Int,
+      initialDelay: FiniteDuration = initialRetryDelay
   ): R[Response[T]] = {
-    val exponentialDelay = (Constants.DefaultMaxBackoffDelay / 2).min(initialDelay * 2)
-    val randomDelayScale = (Constants.DefaultMaxBackoffDelay / 2).min(initialDelay * 2).toMillis
+    val exponentialDelay = (maxRetryDelay / 2).min(initialDelay * 2)
+    val randomDelayScale = (maxRetryDelay / 2).min(initialDelay * 2).toMillis
     val nextDelay = Random.nextInt(randomDelayScale.toInt).millis + exponentialDelay
+
+    val maybeRetry: (Option[Int], Throwable) => R[Response[T]] =
+      (code: Option[Int], exception: Throwable) =>
+        if (retriesRemaining > 0 && code.forall(shouldRetry)) {
+          responseMonad.flatMap(sleepImpl.sleep(initialDelay))(
+            _ => sendWithRetryCounter(request, retriesRemaining - 1, nextDelay)
+          )
+        } else {
+          responseMonad.error(exception)
+        }
+
     val r = responseMonad.handleError(delegate.send(request)) {
-      case cdpError: CdpApiException =>
-        if (shouldRetry(cdpError.code) && retries > 0) {
-          responseMonad.flatMap(sleepImpl.sleep(initialDelay))(
-            _ => sendWithRetryCounter(request, retries - 1, nextDelay)
-          )
-        } else {
-          responseMonad.error(cdpError)
-        }
-      case e @ (_: TimeoutException | _: ConnectException) =>
-        if (retries > 0) {
-          responseMonad.flatMap(sleepImpl.sleep(initialDelay))(
-            _ => sendWithRetryCounter(request, retries - 1, nextDelay)
-          )
-        } else {
-          responseMonad.error(e)
-        }
-      case error => responseMonad.error(error)
+      case cdpError: CdpApiException => maybeRetry(Some(cdpError.code), cdpError)
+      case sdkException @ SdkException(_, _, _, code @ Some(_)) => maybeRetry(code, sdkException)
+      case e @ (_: TimeoutException | _: ConnectException) => maybeRetry(None, e)
+      //case error => responseMonad.error(error)
     }
     responseMonad.flatMap(r) { resp =>
       // This can happen when we get empty responses, as we sometimes do for
       // Service Unavailable or Bad Gateway.
-      if (shouldRetry(resp.code.toInt)) {
+      if (retriesRemaining > 0 && shouldRetry(resp.code.toInt)) {
         responseMonad.flatMap(sleepImpl.sleep(initialDelay))(
-          _ => sendWithRetryCounter(request, retries - 1, nextDelay)
+          _ => sendWithRetryCounter(request, retriesRemaining - 1, nextDelay)
         )
       } else {
         responseMonad.unit(resp)

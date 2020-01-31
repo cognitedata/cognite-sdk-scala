@@ -2,6 +2,8 @@ package com.cognite.sdk.scala
 
 import java.util.concurrent.Executors
 
+import scala.concurrent.duration._
+
 import cats.{Comonad, Id}
 import cats.effect.IO
 import com.softwaremill.sttp.{HttpURLConnectionBackend, SttpBackend}
@@ -13,7 +15,11 @@ package object v1 {
   implicit val executionContext: ExecutionContext =
     ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   implicit val sttpBackend: SttpBackend[Id, Nothing] =
-    new RetryingBackend[Id, Nothing](HttpURLConnectionBackend())
+    new RetryingBackend[Id, Nothing](
+      HttpURLConnectionBackend(),
+      initialRetryDelay = 100.millis,
+      maxRetryDelay = 200.millis
+    )
 
   // This is ugly and not great, but we need to do something hacky one
   // way or another to be able to support both IO and Id types.

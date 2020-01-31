@@ -24,7 +24,9 @@ import com.cognite.v1.timeseries.proto.data_points.{
 }
 import com.cognite.sdk.scala.common.Constants
 import io.circe.parser.decode
+
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
 
 class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -362,17 +364,19 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
             .post(uri"$baseUri/list")
             .body(query)
             .response(
-              asProtobufOrCdpApiError.mapWithMetadata(
-                (response, metadata) =>
-                  response match {
-                    case Left(value) => throw value.error
-                    case Right(Left(cdpApiError)) =>
-                      throw cdpApiError
-                        .asException(uri"$baseUri/list", metadata.header("x-request-id"))
-                    case Right(Right(dataPointListResponse)) =>
-                      mapDataPointList(dataPointListResponse)
-                  }
-              )
+              asProtobufOrError(uri"$baseUri/list")
+                .mapWithMetadata(
+                  (response, metadata) =>
+                    response match {
+                      case Left(value) =>
+                        throw value.error
+                      case Right(Left(cdpApiError)) =>
+                        throw cdpApiError
+                          .asException(uri"$baseUri/list", metadata.header("x-request-id"))
+                      case Right(Right(dataPointListResponse)) =>
+                        mapDataPointList(dataPointListResponse)
+                    }
+                )
             )
         },
         accept = "application/protobuf"
@@ -562,25 +566,37 @@ object DataPointsResource {
   implicit val aggregateDataPointDecoder: Decoder[AggregateDataPoint] = deriveDecoder
   implicit val aggregateDataPointEncoder: Encoder[AggregateDataPoint] = deriveEncoder
 
-  val asProtobufOrCdpApiError: ResponseAs[
-    Either[DeserializationError[io.circe.Error], Either[CdpApiError, DataPointListResponse]],
-    Nothing
-  ] = {
-    asByteArray.map(response => {
+  private def asProtobufOrError(uri: Uri) =
+    asByteArray.mapWithMetadata((response, metadata) => {
       // TODO: Can use the HTTP headers in .mapWithMetaData to choose to parse as json or protbuf
       try {
         Right(Right(DataPointListResponse.parseFrom(response)))
       } catch {
-        case _: Throwable =>
+        case NonFatal(_) =>
           val s = new String(response, StandardCharsets.UTF_8)
-          decode[CdpApiError](s) match {
-            case Left(error) =>
-              Left(DeserializationError(s, error, Show[io.circe.Error].show(error)))
-            case Right(cdpApiError) => Right(Left(cdpApiError))
+          val shouldParse = metadata.contentLength.exists(_ > 0) &&
+            metadata.contentType.exists(_.startsWith(MediaTypes.Json))
+          if (shouldParse) {
+            decode[CdpApiError](s) match {
+              case Left(error) =>
+                Left(DeserializationError(s, error, Show[io.circe.Error].show(error)))
+              case Right(cdpApiError) => Right(Left(cdpApiError))
+            }
+          } else {
+            val message = if (metadata.statusText.isEmpty) {
+              "Unknown error (no status text)"
+            } else {
+              metadata.statusText
+            }
+            throw SdkException(
+              message,
+              Some(uri),
+              metadata.header("x-request-id"),
+              Some(metadata.code)
+            )
           }
       }
     })
-  }
 
   private def toAggregateMap(
       aggregateDataPoints: Seq[QueryAggregatesResponse]

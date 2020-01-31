@@ -2,9 +2,9 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest, WritableBehaviors}
+import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTestSpec, WritableBehaviors}
 
-class ThreeDTest extends SdkTest with ReadBehaviours with WritableBehaviors {
+class ThreeDTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
   private val idsThatDoNotExist = Seq(9999991L, 9999992L)
 
   ("ThreeDModels" should behave).like(readable(client.threeDModels))

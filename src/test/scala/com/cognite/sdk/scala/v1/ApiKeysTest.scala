@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTest}
+import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTestSpec}
 
-class ApiKeysTest extends SdkTest with ReadBehaviours {
+class ApiKeysTest extends SdkTestSpec with ReadBehaviours {
   "ApiKeys" should behave like readable(client.apiKeys, supportsLimit = false)
 }

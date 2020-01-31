@@ -21,18 +21,24 @@ final case class ItemsWithRecursiveAndIgnoreUnknownIds(
 final case class SdkException(
     message: String,
     uri: Option[Uri] = None,
-    requestId: Option[String] = None
+    requestId: Option[String] = None,
+    responseCode: Option[Int] = None
 ) extends Throwable(message) {
   override def toString: String = {
-    val uriMessage = uri.map(u => s", in response to request sent to ${u.toString()}").getOrElse("")
-    val requestIdMessage = requestId.map(id => s", with request id ${id}").getOrElse("")
-    val superString: String = super.toString
+    val responseCodeMessage = responseCode
+      .map(c => s" (with response code ${c.toString})")
+      .getOrElse("")
+    val uriMessage = uri
+      .map(u => s", in response$responseCodeMessage to request sent to ${u.toString()}")
+      .getOrElse("")
+    val requestIdMessage = requestId.map(id => s", with request id $id").getOrElse("")
+    val superString = super.toString
     val superMessage = if (superString.length > 0) {
       superString
     } else {
       "Missing error message"
     }
-    s"$superMessage$uriMessage$requestIdMessage"
+    s"$superMessage$uriMessage$responseCodeMessage$requestIdMessage"
   }
 }
 final case class CdpApiErrorPayload(

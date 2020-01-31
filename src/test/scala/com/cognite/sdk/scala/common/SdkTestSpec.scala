@@ -4,11 +4,10 @@ import java.util.UUID
 
 import cats.{Comonad, Id, Monad}
 import com.cognite.sdk.scala.v1._
-import com.softwaremill.sttp.{HttpURLConnectionBackend, MonadError, Request, Response, SttpBackend}
+import com.softwaremill.sttp.{MonadError, Request, Response, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
 
 class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBackend[R, S] {
-
   override def send[T](request: Request[T, S]): R[Response[T]] =
     responseMonad.map(responseMonad.handleError(delegate.send(request)) {
       case e: Exception =>
@@ -28,17 +27,17 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
   override def responseMonad: MonadError[R] = delegate.responseMonad
 }
 
-abstract class SdkTest extends FlatSpec with Matchers {
+abstract class SdkTestSpec extends FlatSpec with Matchers {
 
   val client = new GenericClient[Id, Nothing]("scala-sdk-test")(
     implicitly[Monad[Id]],
     implicitly[Comonad[Id]],
     auth,
     // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
-    new RetryingBackend[Id, Nothing](HttpURLConnectionBackend())
+    sttpBackend
   )
 
-  val greenfieldClient = new GenericClient(
+  val greenfieldClient = new GenericClient[Id, Nothing](
     "cdp-spark-datasource-test", "https://greenfield.cognitedata.com")(
     implicitly[Monad[Id]],
     implicitly[Comonad[Id]],

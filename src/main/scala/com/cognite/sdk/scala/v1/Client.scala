@@ -32,7 +32,13 @@ final case class RequestSession[F[_]: Monad](
     .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
     .header("x-cdp-app", applicationName)
     .readTimeout(90.seconds)
-    .parseResponseIfMetadata(_.contentLength.forall(_ > 0))
+    .parseResponseIfMetadata { md =>
+      md.contentLength.forall(_ > 0) && md.contentType.exists(
+        // This is a bit ugly, but we're highly unlikely to use any other ContentType
+        // any time soon.
+        ct => ct.startsWith(MediaTypes.Json) || ct.startsWith("application/protobuf")
+      )
+    }
 
   private def parseResponse[T, R](uri: Uri, mapResult: T => R)(
       implicit decoder: Decoder[Either[CdpApiError, T]]
@@ -40,7 +46,24 @@ final case class RequestSession[F[_]: Monad](
     asJson[Either[CdpApiError, T]].mapWithMetadata(
       (response, metadata) =>
         response match {
-          case Left(value) => throw value.error
+          case Left(value) =>
+            val shouldHaveParsed = metadata.contentLength.exists(_ > 0) &&
+              metadata.contentType.exists(_.startsWith(MediaTypes.Json))
+            if (shouldHaveParsed) {
+              throw value.error
+            } else {
+              val message = if (metadata.statusText.isEmpty) {
+                "Unknown error (no status text)"
+              } else {
+                metadata.statusText
+              }
+              throw SdkException(
+                message,
+                Some(uri),
+                metadata.header("x-request-id"),
+                Some(metadata.code)
+              )
+            }
           case Right(Left(cdpApiError)) =>
             throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
           case Right(Right(value)) => mapResult(value)
@@ -58,7 +81,8 @@ final case class RequestSession[F[_]: Monad](
         throw SdkException(
           s"Unexpected status code $code",
           Some(uri),
-          response.header("x-request-id")
+          response.header("x-request-id"),
+          Some(response.code)
         )
       case NonFatal(e) =>
         throw SdkException(
@@ -115,20 +139,22 @@ final case class RequestSession[F[_]: Monad](
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
-class GenericClient[F[_]: Monad: Comonad, _](
+class GenericClient[F[_]: Monad: Comonad, S](
     applicationName: String,
     baseUri: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com")
 )(
     implicit auth: Auth,
-    sttpBackend: SttpBackend[F, _]
+    sttpBackend: SttpBackend[F, S]
 ) {
   import GenericClient._
   val uri: Uri = try {
     uri"$baseUri"
   } catch {
-    case _: Throwable =>
-      throw new IllegalArgumentException("Unable to parse URI. Please check URI syntax.")
+    case NonFatal(_) =>
+      throw new IllegalArgumentException(
+        s"Unable to parse baseUri = ${baseUri} as a valid URI."
+      )
   }
 
   lazy val projectName: String = auth.project.getOrElse {

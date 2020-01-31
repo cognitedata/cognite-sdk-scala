@@ -6,9 +6,9 @@ import java.time.Instant
 import java.util.UUID
 
 import org.scalatest.Matchers
-import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, SdkTest, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, SdkTestSpec, SetValue, WritableBehaviors}
 
-class FilesTest extends SdkTest with ReadBehaviours with WritableBehaviors with Matchers {
+class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with Matchers {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
