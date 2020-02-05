@@ -1,13 +1,13 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTestSpec, WritableBehaviors}
 
 class ThreeDTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
   private val idsThatDoNotExist = Seq(9999991L, 9999992L)
 
   ("ThreeDModels" should behave).like(readable(client.threeDModels))
+
   (it should behave).like(
     writable(
       client.threeDModels,
@@ -23,9 +23,11 @@ class ThreeDTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       supportsMissingAndThrown = false
     )
   )
+
   ("ThreeDRevisions" should behave).like(
     readable(client.threeDRevisions(4222532244684431L))
   )
+
   (it should behave).like(
     writable(
       client.threeDRevisions(4222532244684431L),
@@ -55,6 +57,15 @@ class ThreeDTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       false
     )
   )
+
+  (it should behave).like(
+    readableWithRetrieve(
+      client.threeDRevisions(4222532244684431L),
+      idsThatDoNotExist,
+      supportsMissingAndThrown = false
+    )
+  )
+
   ("ThreeDAssetMapping" should behave).like(
     readable(client.threeDAssetMappings(1367881358941595L, 7901013305364074L))
   )
