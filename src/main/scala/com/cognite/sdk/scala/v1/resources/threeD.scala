@@ -1,9 +1,11 @@
 package com.cognite.sdk.scala.v1.resources
 
+import cats.Applicative
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
+import cats.implicits._
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
@@ -140,7 +142,7 @@ object ThreeDNodes {
   implicit val threeDNodeItemsDecoder: Decoder[Items[ThreeDNode]] = deriveDecoder[Items[ThreeDNode]]
 }
 
-class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long)
+class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], modelId: Long)
     extends Create[ThreeDRevision, ThreeDRevisionCreate, F]
     with RetrieveByIds[ThreeDRevision, F]
     with Readable[ThreeDRevision, F]
@@ -178,8 +180,14 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
       Constants.defaultBatchSize
     )
 
+  override def retrieveById(id: Long): F[ThreeDRevision] = {
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ThreeDRevision]] =
+      EitherDecoder.eitherDecoder[CdpApiError, ThreeDRevision]
+    requestSession.get[ThreeDRevision, ThreeDRevision](uri"$baseUri/$id", value => value)
+  }
+
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDRevision]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+    ids.toList.traverse(retrieveById).map(_.toSeq)
 
   override def createItems(items: Items[ThreeDRevisionCreate]): F[Seq[ThreeDRevision]] =
     Create.createItems[F, ThreeDRevision, ThreeDRevisionCreate](requestSession, baseUri, items)
