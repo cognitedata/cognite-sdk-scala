@@ -9,7 +9,7 @@ import com.softwaremill.sttp._
 class ServiceAccounts[F[_]](val requestSession: RequestSession[F])
     extends Readable[ServiceAccount, F] {
   import ServiceAccounts._
-  override val baseUri = uri"${requestSession.baseUri}/serviceaccounts"
+  override val baseUrl = uri"${requestSession.baseUrl}/serviceaccounts"
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -18,7 +18,7 @@ class ServiceAccounts[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[ServiceAccount]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       None,
       None,
       None,
@@ -35,7 +35,7 @@ object ServiceAccounts {
 
 class ApiKeys[F[_]](val requestSession: RequestSession[F]) extends Readable[ApiKey, F] {
   import ApiKeys._
-  override val baseUri = uri"${requestSession.baseUri}/apikeys"
+  override val baseUrl = uri"${requestSession.baseUrl}/apikeys"
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -44,7 +44,7 @@ class ApiKeys[F[_]](val requestSession: RequestSession[F]) extends Readable[ApiK
   ): F[ItemsWithCursor[ApiKey]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       None,
       None,
       None,
@@ -60,7 +60,7 @@ object ApiKeys {
 
 class Groups[F[_]](val requestSession: RequestSession[F]) extends Readable[Group, F] {
   import Groups._
-  override val baseUri = uri"${requestSession.baseUri}/groups"
+  override val baseUrl = uri"${requestSession.baseUrl}/groups"
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -69,7 +69,7 @@ class Groups[F[_]](val requestSession: RequestSession[F]) extends Readable[Group
   ): F[ItemsWithCursor[Group]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       None,
       None,
       None,
@@ -88,7 +88,7 @@ object Groups {
 class SecurityCategories[F[_]](val requestSession: RequestSession[F])
     extends Readable[SecurityCategory, F] {
   import SecurityCategories._
-  override val baseUri = uri"${requestSession.baseUri}/securitycategories"
+  override val baseUrl = uri"${requestSession.baseUrl}/securitycategories"
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -97,7 +97,7 @@ class SecurityCategories[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[SecurityCategory]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       None,
       None,
       None,

@@ -12,7 +12,7 @@ final case class Partition(index: Int = 1, numPartitions: Int = 1) {
   override def toString: String = s"${index.toString}/${numPartitions.toString}"
 }
 
-trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUri {
+trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   private[sdk] def readWithCursor(
       cursor: Option[String],
       limit: Option[Int],
@@ -74,12 +74,12 @@ object Readable {
     }
 
   private def uriWithCursorAndLimit(
-      baseUri: Uri,
+      baseUrl: Uri,
       cursor: Option[String],
       limit: Option[Int],
       batchSize: Int
   ) = {
-    val uriWithCursor = cursor.fold(baseUri)(baseUri.param("cursor", _))
+    val uriWithCursor = cursor.fold(baseUrl)(baseUrl.param("cursor", _))
     limit.fold(uriWithCursor) { l =>
       val limitValue = scala.math.min(l, batchSize).toString
       uriWithCursor.param("limit", limitValue)
@@ -88,7 +88,7 @@ object Readable {
 
   private[sdk] def readWithCursor[F[_], R](
       requestSession: RequestSession[F],
-      baseUri: Uri,
+      baseUrl: Uri,
       cursor: Option[String],
       maxItemsReturned: Option[Int],
       partition: Option[Partition],
@@ -98,7 +98,7 @@ object Readable {
   ): F[ItemsWithCursor[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
-    val uriWithCursor = uriWithCursorAndLimit(baseUri, cursor, maxItemsReturned, batchSize)
+    val uriWithCursor = uriWithCursorAndLimit(baseUrl, cursor, maxItemsReturned, batchSize)
     val uriWithCursorAndPartition = partition.fold(uriWithCursor) { p =>
       uriWithCursor.param("partition", p.toString)
     }
@@ -110,7 +110,7 @@ object Readable {
   }
 }
 
-trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUri {
+trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByIds(ids: Seq[Long]): F[Seq[R]]
   @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   def retrieveById(id: Long): F[R] =
@@ -120,20 +120,20 @@ trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUri {
 }
 
 object RetrieveByIds {
-  def retrieveByIds[F[_], R](requestSession: RequestSession[F], baseUri: Uri, ids: Seq[Long])(
+  def retrieveByIds[F[_], R](requestSession: RequestSession[F], baseUrl: Uri, ids: Seq[Long])(
       implicit itemsDecoder: Decoder[Items[R]]
   ): F[Seq[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession.post[Seq[R], Items[R], Items[CogniteInternalId]](
       Items(ids.map(CogniteInternalId)),
-      uri"$baseUri/byids",
+      uri"$baseUrl/byids",
       value => value.items
     )
   }
 }
 
-trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUri {
+trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[R]]
   @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   def retrieveByExternalId(externalIds: String): F[R] =
@@ -145,7 +145,7 @@ trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUri 
 object RetrieveByExternalIds {
   def retrieveByExternalIds[F[_], R](
       requestSession: RequestSession[F],
-      baseUri: Uri,
+      baseUrl: Uri,
       externalIds: Seq[String]
   )(
       implicit itemsDecoder: Decoder[Items[R]]
@@ -154,7 +154,7 @@ object RetrieveByExternalIds {
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession.post[Seq[R], Items[R], Items[CogniteExternalId]](
       Items(externalIds.map(CogniteExternalId)),
-      uri"$baseUri/byids",
+      uri"$baseUrl/byids",
       value => value.items
     )
   }

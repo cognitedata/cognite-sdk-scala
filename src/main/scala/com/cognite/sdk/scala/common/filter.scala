@@ -17,7 +17,7 @@ final case class FilterRequest[T](
     aggregatedProperties: Option[Seq[String]]
 )
 
-trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUri {
+trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUrl {
   private[sdk] def filterWithCursor(
       filter: Fi,
       cursor: Option[String],
@@ -86,7 +86,7 @@ object Filter {
   //scalastyle:off parameter.number
   def filterWithCursor[F[_], R, Fi: Encoder](
       requestSession: RequestSession[F],
-      baseUri: Uri,
+      baseUrl: Uri,
       filter: Fi,
       cursor: Option[String],
       limit: Option[Int],
@@ -104,7 +104,7 @@ object Filter {
       FilterRequest(filter, limit, cursor, partition.map(_.toString), aggregatedProperties).asJson
     requestSession.post[ItemsWithCursor[R], ItemsWithCursor[R], Json](
       partition.map(_ => body).getOrElse(body.mapObject(o => o.remove("partition"))),
-      uri"$baseUri/list",
+      uri"$baseUrl/list",
       value => value
     )
   }

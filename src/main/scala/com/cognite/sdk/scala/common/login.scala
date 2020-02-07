@@ -17,7 +17,7 @@ class Login[F[_]](val requestSession: RequestSession[F]) {
   def status(): F[LoginStatus] =
     requestSession
       .get[LoginStatus, DataLoginStatus](
-        uri"${requestSession.baseUri}/login/status",
+        uri"${requestSession.baseUrl}/login/status",
         value => value.data
       )
 }

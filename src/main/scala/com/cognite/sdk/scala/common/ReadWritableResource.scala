@@ -23,7 +23,7 @@ trait DeleteByIdsWithIgnoreUnknownIds[F[_], PrimitiveId] extends DeleteByIds[F, 
 object DeleteByIds {
   def deleteByIds[F[_]](
       requestSession: RequestSession[F],
-      baseUri: Uri,
+      baseUrl: Uri,
       ids: Seq[Long]
   ): F[Unit] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
@@ -32,14 +32,14 @@ object DeleteByIds {
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.post[Unit, Unit, Items[CogniteInternalId]](
       Items(ids.map(CogniteInternalId)),
-      uri"$baseUri/delete",
+      uri"$baseUrl/delete",
       _ => ()
     )
   }
 
   def deleteByIdsWithIgnoreUnknownIds[F[_]](
       requestSession: RequestSession[F],
-      baseUri: Uri,
+      baseUrl: Uri,
       ids: Seq[Long],
       ignoreUnknownIds: Boolean
   ): F[Unit] = {
@@ -49,7 +49,7 @@ object DeleteByIds {
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds](
       ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
-      uri"$baseUri/delete",
+      uri"$baseUrl/delete",
       _ => ()
     )
   }
@@ -75,7 +75,7 @@ object DeleteByExternalIds {
 
   def deleteByExternalIdsWithIgnoreUnknownIds[F[_]](
       requestSession: RequestSession[F],
-      baseUri: Uri,
+      baseUrl: Uri,
       externalIds: Seq[String],
       ignoreUnknownIds: Boolean
   ): F[Unit] =
@@ -83,25 +83,25 @@ object DeleteByExternalIds {
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds](
       ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId), ignoreUnknownIds),
-      uri"$baseUri/delete",
+      uri"$baseUrl/delete",
       _ => ()
     )
 
   def deleteByExternalIds[F[_]](
       requestSession: RequestSession[F],
-      baseUri: Uri,
+      baseUrl: Uri,
       externalIds: Seq[String]
   ): F[Unit] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.post[Unit, Unit, Items[CogniteExternalId]](
       Items(externalIds.map(CogniteExternalId)),
-      uri"$baseUri/delete",
+      uri"$baseUrl/delete",
       _ => ()
     )
 }
 
-trait Create[R, W, F[_]] extends WithRequestSession[F] with CreateOne[R, W, F] with BaseUri {
+trait Create[R, W, F[_]] extends WithRequestSession[F] with CreateOne[R, W, F] with BaseUrl {
   def createItems(items: Items[W]): F[Seq[R]]
 
   def create(items: Seq[W]): F[Seq[R]] =
@@ -124,7 +124,7 @@ trait Create[R, W, F[_]] extends WithRequestSession[F] with CreateOne[R, W, F] w
 }
 
 object Create {
-  def createItems[F[_], R, W](requestSession: RequestSession[F], baseUri: Uri, items: Items[W])(
+  def createItems[F[_], R, W](requestSession: RequestSession[F], baseUrl: Uri, items: Items[W])(
       implicit readDecoder: Decoder[ItemsWithCursor[R]],
       itemsEncoder: Encoder[Items[W]]
   ): F[Seq[R]] = {
@@ -132,13 +132,13 @@ object Create {
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     requestSession.post[Seq[R], ItemsWithCursor[R], Items[W]](
       items,
-      baseUri,
+      baseUrl,
       value => value.items
     )
   }
 }
 
-trait CreateOne[R, W, F[_]] extends WithRequestSession[F] with BaseUri {
+trait CreateOne[R, W, F[_]] extends WithRequestSession[F] with BaseUrl {
   def createOne(item: W): F[R]
 
   def createOneFromRead(item: R)(
@@ -148,7 +148,7 @@ trait CreateOne[R, W, F[_]] extends WithRequestSession[F] with BaseUri {
 }
 
 object CreateOne {
-  def createOne[F[_], R, W](requestSession: RequestSession[F], baseUri: Uri, item: W)(
+  def createOne[F[_], R, W](requestSession: RequestSession[F], baseUrl: Uri, item: W)(
       implicit readDecoder: Decoder[R],
       itemsEncoder: Encoder[W]
   ): F[R] = {
@@ -156,7 +156,7 @@ object CreateOne {
       EitherDecoder.eitherDecoder[CdpApiError, R]
     requestSession.post[R, R, W](
       item,
-      baseUri,
+      baseUrl,
       value => value
     )
   }

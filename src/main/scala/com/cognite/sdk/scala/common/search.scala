@@ -11,12 +11,12 @@ trait SearchQuery[F, S] {
   val limit: Int
 }
 
-trait Search[R, Q, F[_]] extends WithRequestSession[F] with BaseUri {
+trait Search[R, Q, F[_]] extends WithRequestSession[F] with BaseUrl {
   def search(searchQuery: Q): F[Seq[R]]
 }
 
 object Search {
-  def search[F[_], R, Q](requestSession: RequestSession[F], baseUri: Uri, searchQuery: Q)(
+  def search[F[_], R, Q](requestSession: RequestSession[F], baseUrl: Uri, searchQuery: Q)(
       implicit itemsDecoder: Decoder[Items[R]],
       searchQueryEncoder: Encoder[Q]
   ): F[Seq[R]] = {
@@ -25,7 +25,7 @@ object Search {
     requestSession
       .post[Seq[R], Items[R], Q](
         searchQuery,
-        uri"$baseUri/search",
+        uri"$baseUrl/search",
         value => value.items
       )
   }

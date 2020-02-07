@@ -11,14 +11,14 @@ import io.circe.{Decoder, Encoder}
 import fs2._
 
 object RawResource {
-  def deleteByIds[F[_], I](requestSession: RequestSession[F], baseUri: Uri, ids: Seq[I])(
+  def deleteByIds[F[_], I](requestSession: RequestSession[F], baseUrl: Uri, ids: Seq[I])(
       implicit idsItemsEncoder: Encoder[Items[I]]
   ): F[Unit] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     requestSession.post[Unit, Unit, Items[I]](
       Items(ids),
-      uri"$baseUri/delete",
+      uri"$baseUrl/delete",
       _ => ()
     )
   }
@@ -30,7 +30,7 @@ class RawDatabases[F[_]](val requestSession: RequestSession[F])
     with Create[RawDatabase, RawDatabase, F]
     with DeleteByIds[F, String] {
   import RawDatabases._
-  override val baseUri = uri"${requestSession.baseUri}/raw/dbs"
+  override val baseUrl = uri"${requestSession.baseUrl}/raw/dbs"
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -39,7 +39,7 @@ class RawDatabases[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[RawDatabase]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       cursor,
       limit,
       None,
@@ -47,10 +47,10 @@ class RawDatabases[F[_]](val requestSession: RequestSession[F])
     )
 
   override def createItems(items: Items[RawDatabase]): F[Seq[RawDatabase]] =
-    Create.createItems[F, RawDatabase, RawDatabase](requestSession, baseUri, items)
+    Create.createItems[F, RawDatabase, RawDatabase](requestSession, baseUrl, items)
 
   override def deleteByIds(ids: Seq[String]): F[Unit] =
-    RawResource.deleteByIds(requestSession, baseUri, ids.map(RawDatabase))
+    RawResource.deleteByIds(requestSession, baseUrl, ids.map(RawDatabase))
 }
 
 object RawDatabases {
@@ -70,8 +70,8 @@ class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
     with Create[RawTable, RawTable, F]
     with DeleteByIds[F, String] {
   import RawTables._
-  override val baseUri =
-    uri"${requestSession.baseUri}/raw/dbs/$database/tables"
+  override val baseUrl =
+    uri"${requestSession.baseUrl}/raw/dbs/$database/tables"
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -80,7 +80,7 @@ class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
   ): F[ItemsWithCursor[RawTable]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       cursor,
       limit,
       None,
@@ -88,10 +88,10 @@ class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
     )
 
   override def createItems(items: Items[RawTable]): F[Seq[RawTable]] =
-    Create.createItems[F, RawTable, RawTable](requestSession, baseUri, items)
+    Create.createItems[F, RawTable, RawTable](requestSession, baseUrl, items)
 
   override def deleteByIds(ids: Seq[String]): F[Unit] =
-    RawResource.deleteByIds(requestSession, baseUri, ids.map(RawTable))
+    RawResource.deleteByIds(requestSession, baseUrl, ids.map(RawTable))
 }
 
 object RawTables {
@@ -117,10 +117,10 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
     EitherDecoder.eitherDecoder[CdpApiError, Items[String]]
 
   import RawRows._
-  override val baseUri =
-    uri"${requestSession.baseUri}/raw/dbs/$database/tables/$table/rows"
+  override val baseUrl =
+    uri"${requestSession.baseUrl}/raw/dbs/$database/tables/$table/rows"
 
-  val cursorsUri = uri"${requestSession.baseUri}/raw/dbs/$database/tables/$table/cursors"
+  val cursorsUri = uri"${requestSession.baseUrl}/raw/dbs/$database/tables/$table/cursors"
 
   // RAW does not return the created rows in the response, so we'll always return an empty sequence.
   override def createItems(items: Items[RawRow]): F[Seq[RawRow]] = {
@@ -128,7 +128,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     requestSession.post[Seq[RawRow], Unit, Items[RawRow]](
       items,
-      baseUri,
+      baseUrl,
       _ => Seq.empty[RawRow]
     )
   }
@@ -145,10 +145,10 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[RawRow]] =
-    Readable.readWithCursor(requestSession, baseUri, cursor, limit, None, Constants.rowsBatchSize)
+    Readable.readWithCursor(requestSession, baseUrl, cursor, limit, None, Constants.rowsBatchSize)
 
   override def deleteByIds(ids: Seq[String]): F[Unit] =
-    RawResource.deleteByIds(requestSession, baseUri, ids.map(RawRowKey))
+    RawResource.deleteByIds(requestSession, baseUrl, ids.map(RawRowKey))
 
   override private[sdk] def filterWithCursor(
       filter: RawRowFilter,
@@ -159,7 +159,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
   ): F[ItemsWithCursor[RawRow]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri.params(filterToParams(filter)),
+      baseUrl.params(filterToParams(filter)),
       cursor,
       limit,
       None,

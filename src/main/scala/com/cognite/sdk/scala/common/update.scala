@@ -13,7 +13,7 @@ import io.scalaland.chimney.dsl._
 final case class UpdateRequest(update: Json, id: Long)
 final case class UpdateRequestExternalId(update: Json, externalId: String)
 
-trait UpdateById[R <: WithId[Long], U, F[_]] extends WithRequestSession[F] with BaseUri {
+trait UpdateById[R <: WithId[Long], U, F[_]] extends WithRequestSession[F] with BaseUrl {
   def updateById(items: Map[Long, U]): F[Seq[R]]
 
   def updateFromRead(items: Seq[R])(
@@ -50,7 +50,7 @@ object UpdateById {
   implicit val updateRequestItemsEncoder: Encoder[Items[UpdateRequest]] = deriveEncoder
   def updateById[F[_], R, U: Encoder](
       requestSession: RequestSession[F],
-      baseUri: Uri,
+      baseUrl: Uri,
       updates: Map[Long, U]
   )(implicit decodeReadItems: Decoder[Items[R]]): F[Seq[R]] = {
     require(updates.keys.forall(id => id > 0), "Updating by id requires an id to be set")
@@ -63,13 +63,13 @@ object UpdateById {
           case (id, update) =>
             UpdateRequest(update.asJson, id)
         }.toSeq),
-        uri"$baseUri/update",
+        uri"$baseUrl/update",
         value => value.items
       )
   }
 }
 
-trait UpdateByExternalId[R, U, F[_]] extends WithRequestSession[F] with BaseUri {
+trait UpdateByExternalId[R, U, F[_]] extends WithRequestSession[F] with BaseUrl {
   def updateByExternalId(items: Map[String, U]): F[Seq[R]]
 
   def updateOneByExternalId(id: String, item: U): F[R] =
@@ -90,7 +90,7 @@ object UpdateByExternalId {
     deriveEncoder
   def updateByExternalId[F[_], R, U: Encoder](
       requestSession: RequestSession[F],
-      baseUri: Uri,
+      baseUrl: Uri,
       updates: Map[String, U]
   )(implicit decodeReadItems: Decoder[Items[R]]): F[Seq[R]] = {
     require(
@@ -106,7 +106,7 @@ object UpdateByExternalId {
           case (id, update) =>
             UpdateRequestExternalId(update.asJson, id)
         }.toSeq),
-        uri"$baseUri/update",
+        uri"$baseUrl/update",
         value => value.items
       )
   }

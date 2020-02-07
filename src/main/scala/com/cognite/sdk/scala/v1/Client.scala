@@ -16,7 +16,7 @@ import scala.util.control.NonFatal
 
 final case class RequestSession[F[_]: Monad](
     applicationName: String,
-    baseUri: Uri,
+    baseUrl: Uri,
     sttpBackend: SttpBackend[F, _],
     auth: Auth
 ) {
@@ -148,25 +148,7 @@ class GenericClient[F[_]: Monad: Comonad, S](
     sttpBackend: SttpBackend[F, S]
 ) {
   import GenericClient._
-  val uri: Uri = try {
-    uri"$baseUri"
-  } catch {
-    case NonFatal(_) =>
-      throw new IllegalArgumentException(
-        s"Unable to parse baseUri = ${baseUri} as a valid URI."
-      )
-  }
-
-  lazy val projectName: String = auth.project.getOrElse {
-    val loginStatus = new Login(
-      RequestSession(applicationName, uri, sttpBackend, auth)
-    ).status().extract
-    if (loginStatus.project.trim.isEmpty) {
-      throw InvalidAuthentication()
-    } else {
-      loginStatus.project
-    }
-  }
+  val uri: Uri = parseBaseUrlOrThrow(baseUrl)
 
   lazy val requestSession =
     RequestSession(
@@ -201,7 +183,7 @@ class GenericClient[F[_]: Monad: Comonad, S](
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Project]] =
       EitherDecoder.eitherDecoder[CdpApiError, Project]
     requestSession.get[Project, Project](
-      requestSession.baseUri,
+      requestSession.baseUrl,
       value => value
     )
   }
@@ -216,6 +198,20 @@ object GenericClient {
     deriveDecoder[ProjectAuthentication]
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val projectDecoder: Decoder[Project] = deriveDecoder[Project]
+
+  val defaultBaseUrl = Option(System.getenv("COGNITE_BASE_URL"))
+    .getOrElse("https://api.cognitedata.com")
+
+  def parseBaseUrlOrThrow(baseUrl: String): Uri =
+    try {
+      uri"$baseUrl"
+    } catch {
+      case NonFatal(_) =>
+        throw new IllegalArgumentException(
+          s"Unable to parse baseUrl = ${baseUrl} as a valid URI."
+        )
+    }
+
 }
 
 final case class Client(
