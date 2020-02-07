@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import BuildInfo.BuildInfo
-import cats.{Comonad, Id, Monad}
+import cats.{Id, Monad}
 import cats.implicits._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.resources._
@@ -139,13 +139,14 @@ final case class RequestSession[F[_]: Monad](
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
-class GenericClient[F[_]: Monad: Comonad, S](
+class GenericClient[F[_]: Monad, S](
     applicationName: String,
-    baseUri: String =
+    val projectName: String,
+    auth: Auth,
+    baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com")
 )(
-    implicit auth: Auth,
-    sttpBackend: SttpBackend[F, S]
+    implicit sttpBackend: SttpBackend[F, S]
 ) {
   import GenericClient._
   val uri: Uri = parseBaseUrlOrThrow(baseUrl)
@@ -212,13 +213,35 @@ object GenericClient {
         )
     }
 
+  def forAuth[F[_]: Monad, S](
+      applicationName: String,
+      auth: Auth,
+      baseUrl: String = defaultBaseUrl
+  )(implicit sttpBackend: SttpBackend[F, S]): F[GenericClient[F, S]] = {
+    val login = new Login[F](
+      RequestSession(applicationName, parseBaseUrlOrThrow(baseUrl), sttpBackend, auth)
+    )
+    for {
+      status <- login.status()
+      projectName = status.project
+    } yield
+      if (projectName.trim.isEmpty) {
+        throw InvalidAuthentication()
+      } else {
+        new GenericClient[F, S](applicationName, projectName, auth, baseUrl)(
+          implicitly,
+          sttpBackend
+        )
+      }
+  }
 }
 
 final case class Client(
     applicationName: String,
-    baseUri: String =
+    override val projectName: String,
+    auth: Auth = Auth.defaultAuth,
+    baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com")
 )(
-    implicit auth: Auth,
-    sttpBackend: SttpBackend[Id, Nothing]
-) extends GenericClient[Id, Nothing](applicationName, baseUri)
+    implicit sttpBackend: SttpBackend[Id, Nothing]
+) extends GenericClient[Id, Nothing](applicationName, projectName, auth, baseUrl)

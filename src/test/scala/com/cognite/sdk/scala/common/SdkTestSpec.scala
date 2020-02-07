@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.common
 
 import java.util.UUID
 
-import cats.{Comonad, Id, Monad}
+import cats.Id
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp.{MonadError, Request, Response, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
@@ -29,21 +29,13 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
 
 abstract class SdkTestSpec extends FlatSpec with Matchers {
 
-  val client = new GenericClient[Id, Nothing]("scala-sdk-test")(
-    implicitly[Monad[Id]],
-    implicitly[Comonad[Id]],
-    auth,
-    // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
-    sttpBackend
-  )
+  val client: GenericClient[Id, Nothing] = GenericClient.forAuth[Id, Nothing](
+    "scala-sdk-test", auth)(implicitly, sttpBackend)
 
-  val greenfieldClient = new GenericClient[Id, Nothing](
-    "cdp-spark-datasource-test", "https://greenfield.cognitedata.com")(
-    implicitly[Monad[Id]],
-    implicitly[Comonad[Id]],
-    greenfieldAuth,
-    sttpBackend
-  )
+  val greenfieldClient: GenericClient[Id, Nothing] = GenericClient.forAuth[Id, Nothing](
+    "scala-sdk-test", greenfieldAuth, "https://greenfield.cognitedata.com")(implicitly, sttpBackend)
+
+  val projectName: String = client.login.status().project
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
 

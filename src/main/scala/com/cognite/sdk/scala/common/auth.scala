@@ -11,7 +11,7 @@ sealed trait Auth {
 
 object Auth {
   val apiKeyEnvironmentVariable = "COGNITE_API_KEY"
-  implicit val auth: Auth =
+  val defaultAuth: Auth =
     Option(System.getenv(apiKeyEnvironmentVariable))
       .map(ApiKeyAuth(_, None))
       .getOrElse[Auth](NoAuthentication())
