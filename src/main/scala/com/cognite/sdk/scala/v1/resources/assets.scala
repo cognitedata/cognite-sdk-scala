@@ -20,7 +20,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
     with UpdateById[Asset, AssetUpdate, F]
     with UpdateByExternalId[Asset, AssetUpdate, F] {
   import Assets._
-  override val baseUri = uri"${requestSession.baseUri}/assets"
+  override val baseUrl = uri"${requestSession.baseUrl}/assets"
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -29,7 +29,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[Asset]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       cursor,
       limit,
       partition,
@@ -37,28 +37,28 @@ class Assets[F[_]](val requestSession: RequestSession[F])
     )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[Asset]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+    RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
 
   override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[Asset]] =
-    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUri, externalIds)
+    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUrl, externalIds)
 
   override def createItems(items: Items[AssetCreate]): F[Seq[Asset]] =
-    Create.createItems[F, Asset, AssetCreate](requestSession, baseUri, items)
+    Create.createItems[F, Asset, AssetCreate](requestSession, baseUrl, items)
 
   override def updateById(items: Map[Long, AssetUpdate]): F[Seq[Asset]] =
-    UpdateById.updateById[F, Asset, AssetUpdate](requestSession, baseUri, items)
+    UpdateById.updateById[F, Asset, AssetUpdate](requestSession, baseUrl, items)
 
   override def updateByExternalId(items: Map[String, AssetUpdate]): F[Seq[Asset]] =
     UpdateByExternalId.updateByExternalId[F, Asset, AssetUpdate](
       requestSession,
-      baseUri,
+      baseUrl,
       items
     )
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] = deleteByIds(ids, false)
 
   override def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean): F[Unit] =
-    DeleteByIds.deleteByIdsWithIgnoreUnknownIds(requestSession, baseUri, ids, ignoreUnknownIds)
+    DeleteByIds.deleteByIdsWithIgnoreUnknownIds(requestSession, baseUrl, ids, ignoreUnknownIds)
 
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     deleteByExternalIds(externalIds, false)
@@ -66,7 +66,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   override def deleteByExternalIds(externalIds: Seq[String], ignoreUnknownIds: Boolean): F[Unit] =
     DeleteByExternalIds.deleteByExternalIdsWithIgnoreUnknownIds(
       requestSession,
-      baseUri,
+      baseUrl,
       externalIds,
       ignoreUnknownIds
     )
@@ -82,7 +82,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
         recursive,
         ignoreUnknownIds
       ),
-      uri"$baseUri/delete",
+      uri"$baseUrl/delete",
       _ => ()
     )
 
@@ -119,7 +119,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[Asset]] =
     Filter.filterWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       filter,
       cursor,
       limit,
@@ -128,7 +128,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
     )
 
   override def search(searchQuery: AssetsQuery): F[Seq[Asset]] =
-    Search.search(requestSession, baseUri, searchQuery)
+    Search.search(requestSession, baseUrl, searchQuery)
 }
 
 object Assets {

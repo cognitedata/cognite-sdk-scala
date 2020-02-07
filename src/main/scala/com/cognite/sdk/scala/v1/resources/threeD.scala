@@ -17,7 +17,7 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
     with UpdateById[ThreeDModel, ThreeDModelUpdate, F]
     with WithRequestSession[F] {
   import ThreeDModels._
-  override val baseUri = uri"${requestSession.baseUri}/3d/models"
+  override val baseUrl = uri"${requestSession.baseUrl}/3d/models"
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
@@ -27,7 +27,7 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
     requestSession
       .post[Unit, Unit, Items[CogniteInternalId]](
         Items(ids.map(CogniteInternalId)),
-        uri"$baseUri/delete",
+        uri"$baseUrl/delete",
         _ => ()
       )
   }
@@ -39,7 +39,7 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[ThreeDModel]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       cursor,
       limit,
       None,
@@ -47,13 +47,13 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
     )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDModel]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+    RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
 
   override def createItems(items: Items[ThreeDModelCreate]): F[Seq[ThreeDModel]] =
-    Create.createItems[F, ThreeDModel, ThreeDModelCreate](requestSession, baseUri, items)
+    Create.createItems[F, ThreeDModel, ThreeDModelCreate](requestSession, baseUrl, items)
 
   override def updateById(items: Map[Long, ThreeDModelUpdate]): F[Seq[ThreeDModel]] =
-    UpdateById.updateById[F, ThreeDModel, ThreeDModelUpdate](requestSession, baseUri, items)
+    UpdateById.updateById[F, ThreeDModel, ThreeDModelUpdate](requestSession, baseUrl, items)
 }
 
 object ThreeDModels {
@@ -79,8 +79,8 @@ class ThreeDNodes[F[_]](val requestSession: RequestSession[F], modelId: Long, re
     with RetrieveByIds[ThreeDNode, F]
     with WithRequestSession[F] {
   import ThreeDNodes._
-  override val baseUri =
-    uri"${requestSession.baseUri}/3d/models/$modelId/revisions/$revisionId/nodes"
+  override val baseUrl =
+    uri"${requestSession.baseUrl}/3d/models/$modelId/revisions/$revisionId/nodes"
   override private[sdk] def readWithCursor(
       cursor: Option[String],
       limit: Option[Int],
@@ -88,7 +88,7 @@ class ThreeDNodes[F[_]](val requestSession: RequestSession[F], modelId: Long, re
   ): F[ItemsWithCursor[ThreeDNode]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       cursor,
       limit,
       None,
@@ -96,7 +96,7 @@ class ThreeDNodes[F[_]](val requestSession: RequestSession[F], modelId: Long, re
     )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDNode]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+    RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
 
   def ancestors(nodeId: Long): ThreeDAncestorNodes[F] =
     new ThreeDAncestorNodes(requestSession, modelId, revisionId, nodeId)
@@ -110,8 +110,8 @@ class ThreeDAncestorNodes[F[_]](
 ) extends Readable[ThreeDNode, F]
     with WithRequestSession[F] {
   import ThreeDNodes._
-  override val baseUri =
-    uri"${requestSession.baseUri}/3d/models/$modelId/revisions/$revisionId/nodes/$nodeId/ancestors"
+  override val baseUrl =
+    uri"${requestSession.baseUrl}/3d/models/$modelId/revisions/$revisionId/nodes/$nodeId/ancestors"
   override private[sdk] def readWithCursor(
       cursor: Option[String],
       limit: Option[Int],
@@ -119,7 +119,7 @@ class ThreeDAncestorNodes[F[_]](
   ): F[ItemsWithCursor[ThreeDNode]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       cursor,
       limit,
       None,
@@ -150,8 +150,8 @@ class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], 
     with UpdateById[ThreeDRevision, ThreeDRevisionUpdate, F]
     with WithRequestSession[F] {
   import ThreeDRevisions._
-  override val baseUri =
-    uri"${requestSession.baseUri}/3d/models/$modelId/revisions"
+  override val baseUrl =
+    uri"${requestSession.baseUrl}/3d/models/$modelId/revisions"
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
@@ -161,7 +161,7 @@ class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], 
     requestSession
       .post[Unit, Unit, Items[CogniteInternalId]](
         Items(ids.map(CogniteInternalId)),
-        uri"$baseUri/delete",
+        uri"$baseUrl/delete",
         _ => ()
       )
   }
@@ -173,7 +173,7 @@ class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], 
   ): F[ItemsWithCursor[ThreeDRevision]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       cursor,
       limit,
       None,
@@ -183,17 +183,17 @@ class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], 
   override def retrieveById(id: Long): F[ThreeDRevision] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ThreeDRevision]] =
       EitherDecoder.eitherDecoder[CdpApiError, ThreeDRevision]
-    requestSession.get[ThreeDRevision, ThreeDRevision](uri"$baseUri/$id", value => value)
+    requestSession.get[ThreeDRevision, ThreeDRevision](uri"$baseUrl/$id", value => value)
   }
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDRevision]] =
     ids.toList.traverse(retrieveById).map(_.toSeq)
 
   override def createItems(items: Items[ThreeDRevisionCreate]): F[Seq[ThreeDRevision]] =
-    Create.createItems[F, ThreeDRevision, ThreeDRevisionCreate](requestSession, baseUri, items)
+    Create.createItems[F, ThreeDRevision, ThreeDRevisionCreate](requestSession, baseUrl, items)
 
   override def updateById(items: Map[Long, ThreeDRevisionUpdate]): F[Seq[ThreeDRevision]] =
-    UpdateById.updateById[F, ThreeDRevision, ThreeDRevisionUpdate](requestSession, baseUri, items)
+    UpdateById.updateById[F, ThreeDRevision, ThreeDRevisionUpdate](requestSession, baseUrl, items)
 }
 
 object ThreeDRevisions {
@@ -221,8 +221,8 @@ class ThreeDAssetMappings[F[_]](
 ) extends WithRequestSession[F]
     with Readable[ThreeDAssetMapping, F] {
   import ThreeDAssetMappings._
-  override val baseUri =
-    uri"${requestSession.baseUri}/3d/models/$modelId/revisions/$revisionId/mappings"
+  override val baseUrl =
+    uri"${requestSession.baseUrl}/3d/models/$modelId/revisions/$revisionId/mappings"
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -231,7 +231,7 @@ class ThreeDAssetMappings[F[_]](
   ): F[ItemsWithCursor[ThreeDAssetMapping]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       cursor,
       limit,
       None,

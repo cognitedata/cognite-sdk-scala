@@ -9,9 +9,9 @@ import io.circe.{Decoder, Encoder}
 
 class SequenceRows[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with BaseUri {
+    with BaseUrl {
   import SequenceRows._
-  override val baseUri = uri"${requestSession.baseUri}/sequences/data"
+  override val baseUrl = uri"${requestSession.baseUrl}/sequences/data"
 
   implicit val errorOrItemsSequenceRowsResponseDecoder
       : Decoder[Either[CdpApiError, SequenceRowsResponse]] =
@@ -23,7 +23,7 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
     requestSession
       .post[Unit, Unit, Items[SequenceRowsInsertById]](
         Items(Seq(SequenceRowsInsertById(id, columns, rows))),
-        baseUri,
+        baseUrl,
         _ => ()
       )
 
@@ -35,7 +35,7 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
     requestSession
       .post[Unit, Unit, Items[SequenceRowsInsertByExternalId]](
         Items(Seq(SequenceRowsInsertByExternalId(externalId, columns, rows))),
-        baseUri,
+        baseUrl,
         _ => ()
       )
 
@@ -43,7 +43,7 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
     requestSession
       .post[Unit, Unit, Items[SequenceRowsDeleteById]](
         Items(Seq(SequenceRowsDeleteById(id, rows))),
-        uri"$baseUri/delete",
+        uri"$baseUrl/delete",
         _ => ()
       )
 
@@ -51,7 +51,7 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
     requestSession
       .post[Unit, Unit, Items[SequenceRowsDeleteByExternalId]](
         Items(Seq(SequenceRowsDeleteByExternalId(externalId, rows))),
-        uri"$baseUri/delete",
+        uri"$baseUrl/delete",
         _ => ()
       )
 
@@ -65,7 +65,7 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
     requestSession
       .post[(Seq[SequenceColumnId], Seq[SequenceRow]), SequenceRowsResponse, SequenceRowsQueryById](
         SequenceRowsQueryById(id, inclusiveStart, exclusiveEnd, limit, columns),
-        uri"$baseUri/list",
+        uri"$baseUrl/list",
         value => (value.columns.toList, value.rows)
       )
 
@@ -89,7 +89,7 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
           limit,
           columns
         ),
-        uri"$baseUri/list",
+        uri"$baseUrl/list",
         value => (value.columns.toList, value.rows)
       )
 

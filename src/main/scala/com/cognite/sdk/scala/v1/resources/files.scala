@@ -23,7 +23,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
     with UpdateById[File, FileUpdate, F]
     with UpdateByExternalId[File, FileUpdate, F] {
   import Files._
-  override val baseUri = uri"${requestSession.baseUri}/files"
+  override val baseUrl = uri"${requestSession.baseUrl}/files"
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
     EitherDecoder.eitherDecoder[CdpApiError, File]
@@ -32,7 +32,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
     requestSession
       .post[File, File, FileCreate](
         item,
-        baseUri,
+        baseUrl,
         value => value
       )
 
@@ -77,7 +77,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[File]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       cursor,
       limit,
       None,
@@ -85,22 +85,22 @@ class Files[F[_]](val requestSession: RequestSession[F])
     )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[File]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+    RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
 
   override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[File]] =
-    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUri, externalIds)
+    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUrl, externalIds)
 
   override def updateById(items: Map[Long, FileUpdate]): F[Seq[File]] =
-    UpdateById.updateById[F, File, FileUpdate](requestSession, baseUri, items)
+    UpdateById.updateById[F, File, FileUpdate](requestSession, baseUrl, items)
 
   override def updateByExternalId(items: Map[String, FileUpdate]): F[Seq[File]] =
-    UpdateByExternalId.updateByExternalId[F, File, FileUpdate](requestSession, baseUri, items)
+    UpdateByExternalId.updateByExternalId[F, File, FileUpdate](requestSession, baseUrl, items)
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] =
-    DeleteByIds.deleteByIds(requestSession, baseUri, ids)
+    DeleteByIds.deleteByIds(requestSession, baseUrl, ids)
 
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
-    DeleteByExternalIds.deleteByExternalIds(requestSession, baseUri, externalIds)
+    DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
 
   private[sdk] def filterWithCursor(
       filter: FilesFilter,
@@ -109,17 +109,17 @@ class Files[F[_]](val requestSession: RequestSession[F])
       partition: Option[Partition],
       aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[File]] =
-    Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit, None)
+    Filter.filterWithCursor(requestSession, baseUrl, filter, cursor, limit, None)
 
   override def search(searchQuery: FilesQuery): F[Seq[File]] =
-    Search.search(requestSession, baseUri, searchQuery)
+    Search.search(requestSession, baseUrl, searchQuery)
 
   def download(item: FileDownload, out: java.io.OutputStream): F[Unit] = {
     val request =
       requestSession
         .post[Items[FileDownloadLink], Items[FileDownloadLink], Items[FileDownload]](
           Items(Seq(item)),
-          uri"${baseUri.toString()}/downloadlink",
+          uri"${baseUrl.toString()}/downloadlink",
           values => values
         )
 

@@ -30,11 +30,11 @@ import scala.util.control.NonFatal
 
 class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with BaseUri {
+    with BaseUrl {
 
   import DataPointsResource._
 
-  override val baseUri = uri"${requestSession.baseUri}/timeseries/data"
+  override val baseUrl = uri"${requestSession.baseUrl}/timeseries/data"
 
   implicit val errorOrDataPointsByIdResponseDecoder
       : Decoder[Either[CdpApiError, Items[DataPointsByIdResponse]]] =
@@ -65,7 +65,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         .header("x-cdp-app", requestSession.applicationName)
         .readTimeout(90.seconds)
         .parseResponseIf(_ => true)
-        .post(baseUri)
+        .post(baseUrl)
         .body(
           DataPointInsertionRequest(
             Seq(
@@ -85,7 +85,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
               response match {
                 case Left(value) => throw value.error
                 case Right(Left(cdpApiError)) =>
-                  throw cdpApiError.asException(uri"$baseUri", metadata.header("x-request-id"))
+                  throw cdpApiError.asException(uri"$baseUrl", metadata.header("x-request-id"))
                 case Right(Right(_)) => ()
               }
           )
@@ -97,7 +97,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
   def insertByExternalId(externalId: String, dataPoints: Seq[DataPoint]): F[Unit] =
     requestSession.post[Unit, Unit, Items[DataPointsByExternalId]](
       Items(Seq(DataPointsByExternalId(externalId, dataPoints))),
-      baseUri,
+      baseUrl,
       _ => ()
     )
 
@@ -111,7 +111,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
         .header("x-cdp-app", requestSession.applicationName)
         .parseResponseIf(_ => true)
-        .post(baseUri)
+        .post(baseUrl)
         .body(
           DataPointInsertionRequest(
             Seq(
@@ -131,7 +131,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
               response match {
                 case Left(value) => throw value.error
                 case Right(Left(cdpApiError)) =>
-                  throw cdpApiError.asException(uri"$baseUri", metadata.header("x-request-id"))
+                  throw cdpApiError.asException(uri"$baseUrl", metadata.header("x-request-id"))
                 case Right(Right(_)) => ()
               }
           )
@@ -208,14 +208,14 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
   def insertStringsByExternalId(externalId: String, dataPoints: Seq[StringDataPoint]): F[Unit] =
     requestSession.post[Unit, Unit, Items[StringDataPointsByExternalId]](
       Items(Seq(StringDataPointsByExternalId(externalId, dataPoints))),
-      baseUri,
+      baseUrl,
       _ => ()
     )
 
   def deleteRangeById(id: Long, inclusiveStart: Instant, exclusiveEnd: Instant): F[Unit] =
     requestSession.post[Unit, Unit, Items[DeleteRangeById]](
       Items(Seq(DeleteRangeById(id, inclusiveStart.toEpochMilli, exclusiveEnd.toEpochMilli))),
-      uri"$baseUri/delete",
+      uri"$baseUrl/delete",
       _ => ()
     )
 
@@ -235,7 +235,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
             )
           )
         ),
-        uri"$baseUri/delete",
+        uri"$baseUrl/delete",
         _ => ()
       )
 
@@ -361,10 +361,10 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
       .sendCdf(
         { request =>
           request
-            .post(uri"$baseUri/list")
+            .post(uri"$baseUrl/list")
             .body(query)
             .response(
-              asProtobufOrError(uri"$baseUri/list")
+              asProtobufOrError(uri"$baseUrl/list")
                 .mapWithMetadata(
                   (response, metadata) =>
                     response match {
@@ -372,7 +372,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
                         throw value.error
                       case Right(Left(cdpApiError)) =>
                         throw cdpApiError
-                          .asException(uri"$baseUri/list", metadata.header("x-request-id"))
+                          .asException(uri"$baseUrl/list", metadata.header("x-request-id"))
                       case Right(Right(dataPointListResponse)) =>
                         mapDataPointList(dataPointListResponse)
                     }
@@ -443,7 +443,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
     requestSession
       .post[Map[Long, Option[DataPoint]], Items[DataPointsByIdResponse], Items[CogniteInternalId]](
         Items(ids.map(CogniteInternalId)),
-        uri"$baseUri/latest",
+        uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
             item.id -> item.datapoints.headOption
@@ -456,7 +456,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         CogniteExternalId
       ]](
         Items(ids.map(CogniteExternalId)),
-        uri"$baseUri/latest",
+        uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
             item.externalId -> item.datapoints.headOption
@@ -495,7 +495,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         CogniteInternalId
       ]](
         Items(ids.map(CogniteInternalId)),
-        uri"$baseUri/latest",
+        uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
             item.id -> item.datapoints.headOption
@@ -510,7 +510,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         CogniteExternalId
       ]](
         Items(ids.map(CogniteExternalId)),
-        uri"$baseUri/latest",
+        uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
             item.externalId -> item.datapoints.headOption

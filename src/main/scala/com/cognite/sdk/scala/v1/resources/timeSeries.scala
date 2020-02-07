@@ -19,7 +19,7 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     with UpdateById[TimeSeries, TimeSeriesUpdate, F]
     with UpdateByExternalId[TimeSeries, TimeSeriesUpdate, F] {
   import TimeSeriesResource._
-  override val baseUri = uri"${requestSession.baseUri}/timeseries"
+  override val baseUrl = uri"${requestSession.baseUrl}/timeseries"
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -28,7 +28,7 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[TimeSeries]] =
     Readable.readWithCursor(
       requestSession,
-      baseUri,
+      baseUrl,
       cursor,
       limit,
       None,
@@ -36,29 +36,29 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     )
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[TimeSeries]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUri, ids)
+    RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
 
   override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[TimeSeries]] =
-    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUri, externalIds)
+    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUrl, externalIds)
 
   override def createItems(items: Items[TimeSeriesCreate]): F[Seq[TimeSeries]] =
-    Create.createItems[F, TimeSeries, TimeSeriesCreate](requestSession, baseUri, items)
+    Create.createItems[F, TimeSeries, TimeSeriesCreate](requestSession, baseUrl, items)
 
   override def updateById(items: Map[Long, TimeSeriesUpdate]): F[Seq[TimeSeries]] =
-    UpdateById.updateById[F, TimeSeries, TimeSeriesUpdate](requestSession, baseUri, items)
+    UpdateById.updateById[F, TimeSeries, TimeSeriesUpdate](requestSession, baseUrl, items)
 
   override def updateByExternalId(items: Map[String, TimeSeriesUpdate]): F[Seq[TimeSeries]] =
     UpdateByExternalId.updateByExternalId[F, TimeSeries, TimeSeriesUpdate](
       requestSession,
-      baseUri,
+      baseUrl,
       items
     )
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] =
-    DeleteByIds.deleteByIds(requestSession, baseUri, ids)
+    DeleteByIds.deleteByIds(requestSession, baseUrl, ids)
 
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
-    DeleteByExternalIds.deleteByExternalIds(requestSession, baseUri, externalIds)
+    DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
 
   override private[sdk] def filterWithCursor(
       filter: TimeSeriesFilter,
@@ -67,10 +67,10 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
       partition: Option[Partition],
       aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[TimeSeries]] =
-    Filter.filterWithCursor(requestSession, baseUri, filter, cursor, limit, partition)
+    Filter.filterWithCursor(requestSession, baseUrl, filter, cursor, limit, partition)
 
   override def search(searchQuery: TimeSeriesQuery): F[Seq[TimeSeries]] =
-    Search.search(requestSession, baseUri, searchQuery)
+    Search.search(requestSession, baseUrl, searchQuery)
 }
 
 object TimeSeriesResource {

@@ -7,8 +7,8 @@ object Resource {
   val defaultLimit: Int = 1000
 }
 
-trait BaseUri {
-  val baseUri: Uri
+trait BaseUrl {
+  val baseUrl: Uri
 }
 
 trait WithRequestSession[F[_]] {
