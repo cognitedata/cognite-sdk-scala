@@ -32,6 +32,7 @@ Create a client using the cats-effect `IO`:
 
 ```scala
 import com.cognite.sdk.scala.v1._
+import com.cognite.sdk.scala.common._
 import java.util.concurrent.Executors
 import scala.concurrent._
 import cats.effect.IO
@@ -39,7 +40,8 @@ import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 implicit val cs = IO.contextShift(ExecutionContext.fromExecutor(Executors.newCachedThreadPool()))
 implicit val sttpBackend = AsyncHttpClientCatsBackend[cats.effect.IO]()
-val c = new GenericClient[IO, Nothing]("scala-sdk-examples", "https://api.cognitedata.com")
+val auth = ApiKeyAuth(your API key comes here) // you can get the key at https://openindustrialdata.com/
+val c = new GenericClient[IO, Nothing]("scala-sdk-examples", projectName="publicdata", auth)
 ```
 
 The following examples will use `Client` with the identity effect.
@@ -77,21 +79,24 @@ print(c.timeSeries.retrieveById(timeSeriesId))
 If you have a time series ID you can retrieve its data points:
 
 ```scala
-c.dataPoints.queryById(timeSeriesId, 0, Instant.now())
+val dataPoints = c.dataPoints.queryById(
+      timeSeriesId,
+      inclusiveStart=Instant.ofEpochMilli(0),
+      exclusiveEnd=Instant.now())
 ```
 
 It is also possible to query aggregate values using a time series ID. Possible aggregate values can be found in the API [documentation](https://docs.cognite.com/api/v1/#operation/getMultiTimeSeriesDatapoints)
 You must also specify a granularity. 
 
 ```scala
-val aggregates = Seq("count, average, max")
-c.dataPoints.queryAggregatesById(timeSeriesId, Instant.ofEpochMilli(0L), Instant.now(), "1d", aggregates)
+val aggregates = Seq("count", "average", "max")
+c.dataPoints.queryAggregatesById(timeSeriesId, Instant.ofEpochMilli(0L), Instant.now(), granularity="1d", aggregates)
 ```
 
 If you need only the last data point for a time series or group of timeseries, you can retrieve these using:
 
 ```scala
-val latestPoints: Map[Long: Option[DataPoint]] = c.dataPoints.getLatestDataPointsByIds(Seq(timeSeriesId))
+val latestPoints: Map[Long, Option[DataPoint]] = c.dataPoints.getLatestDataPointsByIds(Seq(timeSeriesId))
 ```
 
 This returns a map from each of the time series IDs specified in the function call to the latest data point for that
