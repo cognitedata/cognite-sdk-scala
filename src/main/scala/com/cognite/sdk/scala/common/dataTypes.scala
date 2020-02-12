@@ -23,8 +23,14 @@ final case class SdkException(
     uri: Option[Uri] = None,
     requestId: Option[String] = None,
     responseCode: Option[Int] = None
-) extends Throwable(message) {
-  override def toString: String = {
+) extends Throwable(SdkException.formatMessage(message, uri, requestId, responseCode))
+object SdkException {
+  def formatMessage(
+      message: String,
+      uri: Option[Uri],
+      requestId: Option[String],
+      responseCode: Option[Int]
+  ): String = {
     val responseCodeMessage = responseCode
       .map(c => s" (with response code ${c.toString})")
       .getOrElse("")
@@ -32,15 +38,15 @@ final case class SdkException(
       .map(u => s", in response$responseCodeMessage to request sent to ${u.toString()}")
       .getOrElse(responseCodeMessage)
     val requestIdMessage = requestId.map(id => s", with request id $id").getOrElse("")
-    val superString = super.toString
-    val superMessage = if (superString.length > 0) {
-      superString
+    val exceptionMessage = if (message.length > 0) {
+      message
     } else {
       "Missing error message"
     }
-    s"$superMessage$uriMessage$requestIdMessage"
+    s"$exceptionMessage$uriMessage$requestIdMessage"
   }
 }
+
 final case class CdpApiErrorPayload(
     code: Int,
     message: String,
@@ -48,6 +54,7 @@ final case class CdpApiErrorPayload(
     duplicated: Option[Seq[JsonObject]],
     missingFields: Option[Seq[String]]
 )
+
 final case class CdpApiError(error: CdpApiErrorPayload) {
   def asException(url: Uri, requestId: Option[String]): CdpApiException =
     this.error
@@ -56,10 +63,12 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
       .withFieldConst(_.requestId, requestId)
       .transform
 }
+
 object CdpApiError {
   implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
   implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
 }
+
 final case class CdpApiException(
     url: Uri,
     code: Int,
