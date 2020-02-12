@@ -15,7 +15,8 @@ final case class Event(
     source: Option[String] = None,
     externalId: Option[String] = None,
     createdTime: Instant = Instant.ofEpochMilli(0),
-    lastUpdatedTime: Instant = Instant.ofEpochMilli(0)
+    lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
+    dataSetId: Option[Long] = None
 ) extends WithId[Long]
     with WithExternalId
 
@@ -28,7 +29,8 @@ final case class EventCreate(
     metadata: Option[Map[String, String]] = None,
     assetIds: Option[Seq[Long]] = None,
     source: Option[String] = None,
-    externalId: Option[String] = None
+    externalId: Option[String] = None,
+    dataSetId: Option[Long] = None
 ) extends WithExternalId
 
 final case class EventUpdate(
@@ -40,7 +42,8 @@ final case class EventUpdate(
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
     assetIds: Option[NonNullableSetter[Seq[Long]]] = None,
     source: Option[Setter[String]] = None,
-    externalId: Option[Setter[String]] = None
+    externalId: Option[Setter[String]] = None,
+    dataSetId: Option[Setter[Long]] = None
 ) extends WithSetExternalId
 
 final case class EventsFilter(
@@ -54,7 +57,8 @@ final case class EventsFilter(
     subtype: Option[String] = None,
     createdTime: Option[TimeRange] = None,
     lastUpdatedTime: Option[TimeRange] = None,
-    externalIdPrefix: Option[String] = None
+    externalIdPrefix: Option[String] = None,
+    dataSetIds: Option[Seq[CogniteId]] = None
 )
 
 final case class EventsSearch(

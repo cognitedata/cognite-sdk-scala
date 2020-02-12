@@ -6,9 +6,9 @@ import java.time.Instant
 import java.util.UUID
 
 import org.scalatest.Matchers
-import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, SdkTestSpec, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
 
-class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with Matchers {
+class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with Matchers with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
@@ -25,6 +25,45 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
   it should behave like readableWithRetrieveByExternalId(client.files, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
   private val externalId = UUID.randomUUID().toString.substring(0, 8)
+
+  private val filesToCreate = Seq(
+    File(name = "scala-sdk-update-1", dataSetId = Some(testDataSet.id)),
+    File(name = "scala-sdk-update-2", externalId = Some(s"${externalId}-2"))
+  )
+  private val filesUpdates = Seq(
+    //   name can not be changed, but is required here
+    File(name = "scala-sdk-update-1", externalId = Some(s"${externalId}-1"), dataSetId = Some(testDataSet.id)),
+    File(name = "scala-sdk-update-2", metadata = Some(Map("a" -> "b")), dataSetId = Some(testDataSet.id))
+  )
+
+  private def normalizeFile(f: File): File = {
+    f.copy(
+      metadata = if (f.metadata == Some(Map())) None else f.metadata, // WORKAROUND: the API returns empty set and nothing kinda interchangeably
+      lastUpdatedTime = Instant.ofEpochMilli(0)
+    )
+  }
+
+  it should behave like updatable(
+    client.files,
+    filesToCreate,
+    filesUpdates,
+    (id: Long, item: File) => item.copy(id = id),
+    (a: File, b: File) => { normalizeFile(a) == normalizeFile(b) },
+    (readFiles: Seq[File], updatedEvents: Seq[File]) => {
+      assert(filesToCreate.size == filesUpdates.size)
+      assert(readFiles.size == filesToCreate.size)
+      assert(readFiles.size == updatedEvents.size)
+      assert(updatedEvents.zip(readFiles).forall { case (updated, read) =>
+          updated.name == read.name
+      })
+      assert(Some(s"${externalId}-1") === updatedEvents(0).externalId)
+      assert("b" === updatedEvents(1).metadata.get("a"))
+      val dataSets = updatedEvents.map(_.dataSetId)
+      assert(List(Some(testDataSet.id), Some(testDataSet.id)) === dataSets)
+      ()
+    }
+  )
+
 
   it should "be an error to delete using ids that does not exist" in {
     val thrown = the[CdpApiException] thrownBy client.files
@@ -68,32 +107,6 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     createdItem.name shouldBe testFile.name
     client.files.deleteByIds(Seq(createdItem.id))
     an[CdpApiException] should be thrownBy client.files.retrieveByIds(Seq(createdItem.id))
-  }
-
-  it should "allow updates using the read class" in {
-    // create items
-    val testFile = File(name = "scala-sdk-read-example-1")
-    val createdItem = client.files.createOneFromRead(testFile)
-    assert(createdItem.name == testFile.name)
-    createdItem.id should not be 0
-
-    val readItems = client.files.retrieveByIds(Seq(createdItem.id))
-
-    // update the item with new values
-    val updateFile =
-      File(
-        name = "scala-sdk-update-1-1",
-        id = createdItem.id,
-        externalId = Some(s"${externalId}-1")
-      )
-    val updatedItems = client.files.updateFromRead(Seq(updateFile))
-    assert(updatedItems.size == readItems.size)
-    assert(updatedItems.forall {
-      case (updated) => updated.externalId == updateFile.externalId
-    })
-
-    // delete it
-    client.files.deleteByIds(Seq(createdItem.id))
   }
 
   it should "allow updates by Id" in {
@@ -242,5 +255,31 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
 
     assert(out.toByteArray().sameElements(expected))
     client.files.deleteById(file.id)
+  }
+
+  it should "support search with dataSetIds" in {
+    val created = filesToCreate.map(f => client.files.createOneFromRead(f))
+    try {
+      val fromTime = created.map(_.createdTime).min
+      val toTime = created.map(_.createdTime).max
+      val foundItems = retryWhileEmpty {
+        client.files.search(FilesQuery(Some(FilesFilter(
+          dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
+          createdTime = Some(TimeRange(
+            min=fromTime,
+            max=toTime
+          ))
+        ))))
+      }
+      assert(!foundItems.isEmpty)
+      foundItems.foreach({ i =>
+        assert(i.dataSetId == Some(testDataSet.id))
+      })
+      created.filter(_.dataSetId.isDefined).foreach { c =>
+        assert(foundItems.map(_.id).contains(c.id))
+      }
+    } finally {
+      client.files.deleteByIds(created.map(_.id))
+    }
   }
 }

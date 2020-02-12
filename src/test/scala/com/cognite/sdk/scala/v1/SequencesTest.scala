@@ -3,9 +3,9 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 
 import cats.data.NonEmptyList
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTestSpec, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common.{ReadBehaviours, RetryWhile, SdkTestSpec, SetNull, SetValue, WritableBehaviors}
 
-class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
+class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("sequence-5PNii0w", "sequence-6VhKQqt")
 
@@ -106,6 +106,11 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
     Sequence(
       name = Some("scala-sdk-write-example-2"),
       columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "string-column"))
+    ),
+    Sequence(
+      name = Some("scala-sdk-write-example-3"),
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "string-column")),
+      dataSetId = Some(testDataSet.id)
     )
   )
   private val sequencesUpdates = Seq(
@@ -117,7 +122,13 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
     Sequence(
       name = Some("scala-sdk-write-example-2-1"),
       description = Some("scala-sdk-write-example-2"),
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "string-column"))
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "string-column")),
+      dataSetId = Some(testDataSet.id)
+    ),
+    Sequence(
+      name = Some("scala-sdk-write-example-3-1"),
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = "string-column")),
+      dataSetId = Some(testDataSet.id)
     )
   )
   (it should behave).like(
@@ -140,6 +151,8 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
         })
         assert(updatedSequence.head.description.isEmpty)
         assert(updatedSequence(1).description == sequencesUpdates(1).description)
+        val dataSets = updatedSequence.map(_.dataSetId)
+        assert(List(None, Some(testDataSet.id), Some(testDataSet.id)) === dataSets)
         ()
       }
     )
@@ -148,10 +161,16 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
   it should behave like updatableById(
     client.sequences,
     sequencesToCreate,
-    Seq(SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-1-1"))), SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-2-1")))),
+    Seq(
+      SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-1-1"))),
+      SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-2-1")), dataSetId = Some(SetValue(testDataSet.id))),
+      SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-3-1")), dataSetId = Some(SetNull()))
+    ),
     (readSequences: Seq[Sequence], updatedSequences: Seq[Sequence]) => {
       assert(readSequences.size == updatedSequences.size)
       assert(updatedSequences.zip(readSequences).forall { case (updated, read) =>  updated.name.get == s"${read.name.get}-1" })
+      val dataSets = updatedSequences.map(_.dataSetId)
+      assert(List(None, Some(testDataSet.id), None) === dataSets)
       ()
     }
   )
@@ -263,5 +282,31 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
       )
     )
     assert(limitDescriptionSearchResults.length == 1)
+  }
+
+  it should "support search with dataSetIds" in {
+    val created = client.sequences.createFromRead(sequencesToCreate)
+    try {
+      val fromTime = created.map(_.createdTime).min
+      val toTime = created.map(_.createdTime).max
+      val foundItems = retryWhileEmpty {
+        client.sequences.search(SequenceQuery(Some(SequenceFilter(
+          dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
+          createdTime = Some(TimeRange(
+            min=fromTime,
+            max=toTime
+          ))
+        ))))
+      }
+      assert(!foundItems.isEmpty)
+      foundItems.foreach({ i =>
+        assert(i.dataSetId == Some(testDataSet.id))
+      })
+      created.filter(_.dataSetId.isDefined).foreach { c =>
+        assert(foundItems.map(_.id).contains(c.id))
+      }
+    } finally {
+      client.sequences.deleteByIds(created.map(_.id))
+    }
   }
 }

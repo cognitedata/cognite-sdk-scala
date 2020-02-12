@@ -15,7 +15,8 @@ final case class TimeSeries(
     id: Long = 0,
     externalId: Option[String] = None,
     createdTime: Instant = Instant.ofEpochMilli(0),
-    lastUpdatedTime: Instant = Instant.ofEpochMilli(0)
+    lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
+    dataSetId: Option[Long] = None
 ) extends WithId[Long]
     with WithExternalId
 
@@ -29,7 +30,8 @@ final case class TimeSeriesCreate(
     assetId: Option[Long] = None,
     isStep: Boolean = false,
     description: Option[String] = None,
-    securityCategories: Option[Seq[Long]] = None
+    securityCategories: Option[Seq[Long]] = None,
+    dataSetId: Option[Long] = None
 ) extends WithExternalId
 
 final case class TimeSeriesUpdate(
@@ -39,7 +41,8 @@ final case class TimeSeriesUpdate(
     unit: Option[Setter[String]] = None,
     assetId: Option[Setter[Long]] = None,
     description: Option[Setter[String]] = None,
-    securityCategories: Option[Setter[Seq[Long]]] = None
+    securityCategories: Option[Setter[Seq[Long]]] = None,
+    dataSetId: Option[Setter[Long]] = None
 ) extends WithSetExternalId
 
 final case class TimeSeriesSearchFilter(
@@ -51,7 +54,8 @@ final case class TimeSeriesSearchFilter(
     assetIds: Option[Seq[Long]] = None,
     externalIdPrefix: Option[String] = None,
     createdTime: Option[TimeRange] = None,
-    lastUpdatedTime: Option[TimeRange] = None
+    lastUpdatedTime: Option[TimeRange] = None,
+    dataSetIds: Option[Seq[CogniteId]] = None
 )
 
 final case class TimeSeriesFilter(
@@ -64,7 +68,8 @@ final case class TimeSeriesFilter(
     rootAssetIds: Option[Seq[CogniteId]] = None,
     externalIdPrefix: Option[String] = None,
     createdTime: Option[TimeRange] = None,
-    lastUpdatedTime: Option[TimeRange] = None
+    lastUpdatedTime: Option[TimeRange] = None,
+    dataSetIds: Option[Seq[CogniteId]] = None
 )
 
 final case class TimeSeriesSearch(

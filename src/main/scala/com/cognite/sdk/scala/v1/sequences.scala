@@ -38,7 +38,8 @@ final case class Sequence(
     metadata: Option[Map[String, String]] = None,
     columns: NonEmptyList[SequenceColumn],
     createdTime: Instant = Instant.ofEpochMilli(0),
-    lastUpdatedTime: Instant = Instant.ofEpochMilli(0)
+    lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
+    dataSetId: Option[Long] = None
 ) extends WithId[Long]
     with WithExternalId
 
@@ -48,7 +49,8 @@ final case class SequenceCreate(
     assetId: Option[Long] = None,
     externalId: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
-    columns: NonEmptyList[SequenceColumnCreate]
+    columns: NonEmptyList[SequenceColumnCreate],
+    dataSetId: Option[Long] = None
 ) extends WithExternalId
 
 final case class SequenceUpdate(
@@ -56,7 +58,8 @@ final case class SequenceUpdate(
     description: Option[Setter[String]] = None,
     assetId: Option[Setter[Long]] = None,
     externalId: Option[Setter[String]] = None,
-    metadata: Option[NonNullableSetter[Map[String, String]]] = None
+    metadata: Option[NonNullableSetter[Map[String, String]]] = None,
+    dataSetId: Option[Setter[Long]] = None
 )
 
 final case class SequenceFilter(
@@ -66,7 +69,8 @@ final case class SequenceFilter(
     assetIds: Option[Seq[Long]] = None,
     rootAssetIds: Option[Seq[Long]] = None,
     createdTime: Option[TimeRange] = None,
-    lastUpdatedTime: Option[TimeRange] = None
+    lastUpdatedTime: Option[TimeRange] = None,
+    dataSetIds: Option[Seq[CogniteId]] = None
 )
 
 final case class SequenceSearch(

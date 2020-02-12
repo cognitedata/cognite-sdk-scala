@@ -16,7 +16,8 @@ final case class File(
     uploadedTime: Option[Instant] = None,
     createdTime: Instant = Instant.ofEpochMilli(0),
     lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
-    uploadUrl: Option[String] = None
+    uploadUrl: Option[String] = None,
+    dataSetId: Option[Long] = None
 ) extends WithId[Long]
     with WithExternalId
 
@@ -26,14 +27,16 @@ final case class FileCreate(
     externalId: Option[String] = None,
     mimeType: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
-    assetIds: Option[Seq[Long]] = None
+    assetIds: Option[Seq[Long]] = None,
+    dataSetId: Option[Long] = None
 )
 
 final case class FileUpdate(
     externalId: Option[Setter[String]] = None,
     source: Option[Setter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
-    assetIds: Option[NonNullableSetter[Seq[Long]]] = None
+    assetIds: Option[NonNullableSetter[Seq[Long]]] = None,
+    dataSetId: Option[Setter[Long]] = None
 )
 
 final case class FilesFilter(
@@ -49,7 +52,8 @@ final case class FilesFilter(
     sourceCreatedTime: Option[TimeRange] = None,
     sourceModifiedTime: Option[TimeRange] = None,
     externalIdPrefix: Option[String] = None,
-    uploaded: Option[Boolean] = None
+    uploaded: Option[Boolean] = None,
+    dataSetIds: Option[Seq[CogniteId]] = None
 )
 
 final case class FilesSearch(

@@ -29,13 +29,13 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
 
 abstract class SdkTestSpec extends FlatSpec with Matchers {
 
-  val client: GenericClient[Id, Nothing] = GenericClient.forAuth[Id, Nothing](
+  lazy val client: GenericClient[Id, Nothing] = GenericClient.forAuth[Id, Nothing](
     "scala-sdk-test", auth)(implicitly, sttpBackend)
 
-  val greenfieldClient: GenericClient[Id, Nothing] = GenericClient.forAuth[Id, Nothing](
+  lazy val greenfieldClient: GenericClient[Id, Nothing] = GenericClient.forAuth[Id, Nothing](
     "scala-sdk-test", greenfieldAuth, "https://greenfield.cognitedata.com")(implicitly, sttpBackend)
 
-  val projectName: String = client.login.status().project
+  lazy val projectName: String = client.login.status().project
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
 
@@ -45,4 +45,11 @@ abstract class SdkTestSpec extends FlatSpec with Matchers {
   private lazy val greenfieldApiKey = Option(System.getenv("TEST_API_KEY_GREENFIELD"))
     .getOrElse(throw new RuntimeException("TEST_API_KEY_GREENFIELD not set"))
   implicit lazy val greenfieldAuth: Auth = ApiKeyAuth(greenfieldApiKey)
+
+  lazy val testDataSet = {
+    val list : Seq[DataSet] = DataSetTemporaryClient.listDataSets(client, new DataSetFilter(writeProtected = Some(false)))
+    list.headOption.getOrElse({
+      DataSetTemporaryClient.createDataSet(client, new DataSetCreate(Some("testDataSet"), Some("data set for Scala SDK tests")))
+    })
+  }
 }
