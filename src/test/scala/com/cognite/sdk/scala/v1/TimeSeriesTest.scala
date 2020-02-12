@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-import com.cognite.sdk.scala.common.{DataPoint, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common._
 import fs2.Stream
 
 class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
@@ -47,12 +47,12 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
   )
 
   private val timeSeriesToCreate = Seq(
-    TimeSeries(name = Some("scala-sdk-write-example-1"), description = Some("description-1")),
+    TimeSeries(name = Some("scala-sdk-write-example-1"), description = Some("description-1"), dataSetId = Some(testDataSet.id)),
     TimeSeries(name = Some("scala-sdk-write-example-2"))
   )
   private val timeSeriesUpdates = Seq(
     TimeSeries(name = Some("scala-sdk-write-example-1-1"), description = Some(null)), // scalastyle:ignore null
-    TimeSeries(name = Some("scala-sdk-write-example-2-1"), description = Some("scala-sdk-write-example-2"))
+    TimeSeries(name = Some("scala-sdk-write-example-2-1"), description = Some("scala-sdk-write-example-2"), dataSetId = Some(testDataSet.id))
   )
   it should behave like updatable(
     client.timeSeries,
@@ -67,6 +67,8 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) => updated.name == Some(s"${read.name.get}-1")})
       assert(updatedTimeSeries.head.description.isEmpty)
       assert(updatedTimeSeries(1).description == timeSeriesUpdates(1).description)
+      val dataSets = updatedTimeSeries.map(_.dataSetId)
+      assert(List(Some(testDataSet.id), Some(testDataSet.id)) === dataSets)
       ()
     }
   )
@@ -74,10 +76,15 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
   it should behave like updatableById(
     client.timeSeries,
     timeSeriesToCreate,
-    Seq(TimeSeriesUpdate(name = Some(SetValue("scala-sdk-write-example-1-1"))), TimeSeriesUpdate(name = Some(SetValue("scala-sdk-write-example-2-1")))),
+    Seq(
+      TimeSeriesUpdate(name = Some(SetValue("scala-sdk-write-example-1-1")), dataSetId = Some(SetNull())),
+      TimeSeriesUpdate(name = Some(SetValue("scala-sdk-write-example-2-1")))
+    ),
     (readTimeSeries: Seq[TimeSeries], updatedTimeSeries: Seq[TimeSeries]) => {
       assert(readTimeSeries.size == updatedTimeSeries.size)
       assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) =>  updated.name.get == s"${read.name.get}-1" })
+      val dataSets = updatedTimeSeries.map(_.dataSetId)
+      assert(List(None, None) === dataSets)
       ()
     }
   )
@@ -286,6 +293,32 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       Seq(dp => dp shouldBe retrievedDp)
     )
     client.dataPoints.deleteRangeById(timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000))
+  }
+
+  it should "support search with dataSetIds" in {
+    val created = client.timeSeries.createFromRead(timeSeriesToCreate)
+    try {
+      val fromTime = created.map(_.createdTime).min
+      val toTime = created.map(_.createdTime).max
+      val foundItems = retryWhileEmpty {
+        client.timeSeries.search(TimeSeriesQuery(Some(TimeSeriesSearchFilter(
+          dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
+          createdTime = Some(TimeRange(
+            min=fromTime,
+            max=toTime
+          ))
+        ))))
+      }
+      assert(!foundItems.isEmpty)
+      foundItems.foreach({ i =>
+        assert(i.dataSetId == Some(testDataSet.id))
+      })
+      created.filter(_.dataSetId.isDefined).foreach { c =>
+        assert(foundItems.map(_.id).contains(c.id))
+      }
+    } finally {
+      client.timeSeries.deleteByIds(created.map(_.id))
+    }
   }
 
 }

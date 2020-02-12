@@ -14,7 +14,8 @@ final case class Asset(
     createdTime: Instant = Instant.ofEpochMilli(0),
     lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
     rootId: Option[Long] = None,
-    aggregates: Option[Map[String, Long]] = None
+    aggregates: Option[Map[String, Long]] = None,
+    dataSetId: Option[Long] = None
 ) extends WithId[Long]
     with WithExternalId
 
@@ -25,7 +26,8 @@ final case class AssetCreate(
     source: Option[String] = None,
     externalId: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
-    parentExternalId: Option[String] = None
+    parentExternalId: Option[String] = None,
+    dataSetId: Option[Long] = None
 ) extends WithExternalId
 
 final case class AssetUpdate(
@@ -35,7 +37,8 @@ final case class AssetUpdate(
     externalId: Option[Setter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
     parentId: Option[Setter[Long]] = None,
-    parentExternalId: Option[Setter[String]] = None
+    parentExternalId: Option[Setter[String]] = None,
+    dataSetId: Option[Setter[Long]] = None
 ) extends WithSetExternalId
 
 final case class AssetsFilter(
@@ -48,7 +51,8 @@ final case class AssetsFilter(
     createdTime: Option[TimeRange] = None,
     lastUpdatedTime: Option[TimeRange] = None,
     root: Option[Boolean] = None,
-    externalIdPrefix: Option[String] = None
+    externalIdPrefix: Option[String] = None,
+    dataSetIds: Option[Seq[CogniteId]] = None
 )
 
 final case class AssetsSearch(

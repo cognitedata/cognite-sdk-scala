@@ -3,9 +3,9 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 
 import fs2._
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTestSpec, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common.{ReadBehaviours, RetryWhile, SdkTestSpec, SetNull, SetValue, WritableBehaviors}
 
-class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
+class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
@@ -52,15 +52,18 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   private val eventsToCreate = Seq(
     Event(description = Some("scala-sdk-update-1"), `type` = Some("test"), subtype = Some("test")),
-    Event(description = Some("scala-sdk-update-2"), `type` = Some("test"), subtype = Some("test"))
+    Event(description = Some("scala-sdk-update-2"), `type` = Some("test"), subtype = Some("test")),
+    Event(description = Some("scala-sdk-update-3"), `type` = Some("test"), dataSetId = Some(testDataSet.id))
   )
   private val eventUpdates = Seq(
     Event(description = Some("scala-sdk-update-1-1"), `type` = Some("testA"), subtype = Some(null)), // scalastyle:ignore null
     Event(
       description = Some("scala-sdk-update-2-1"),
       `type` = Some("testA"),
-      subtype = Some("test-1")
-    )
+      subtype = Some("test-1"),
+      dataSetId = Some(testDataSet.id)
+    ),
+    Event(description = Some("scala-sdk-update-3-1"))
   )
 
   it should behave like updatable(
@@ -81,6 +84,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       assert(readEvents.head.subtype.isDefined)
       assert(updatedEvents.head.subtype.isEmpty)
       assert(updatedEvents(1).subtype == eventUpdates(1).subtype)
+      val dataSets = updatedEvents.map(_.dataSetId)
+      assert(List(None, Some(testDataSet.id), Some(testDataSet.id)) === dataSets)
       ()
     }
   )
@@ -88,10 +93,16 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   it should behave like updatableById(
     client.events,
     eventsToCreate,
-    Seq(EventUpdate(description = Some(SetValue("scala-sdk-update-1-1"))), EventUpdate(description = Some(SetValue("scala-sdk-update-2-1")))),
+    Seq(
+      EventUpdate(description = Some(SetValue("scala-sdk-update-1-1"))),
+      EventUpdate(description = Some(SetValue("scala-sdk-update-2-1"))),
+      EventUpdate(description = Some(SetValue("scala-sdk-update-3-1")), dataSetId = Some(SetNull()))
+    ),
     (readEvents: Seq[Event], updatedEvents: Seq[Event]) => {
       assert(readEvents.size == updatedEvents.size)
       assert(updatedEvents.zip(readEvents).forall { case (updated, read) =>  updated.description.get == s"${read.description.get}-1" })
+      val dataSets = updatedEvents.map(_.dataSetId)
+      assert(List(None, None, None) === dataSets)
       ()
     }
   )
@@ -248,5 +259,32 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         )
       )
     assert(limitSearchResults.length == 1)
+  }
+
+
+  it should "support search with dataSetIds" in {
+    val created = client.events.createFromRead(eventsToCreate)
+    try {
+      val fromTime = created.map(_.createdTime).min
+      val toTime = created.map(_.createdTime).max
+      val foundItems = retryWhileEmpty {
+        client.events.search(EventsQuery(Some(EventsFilter(
+          dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
+          createdTime = Some(TimeRange(
+            min=fromTime,
+            max=toTime
+          ))
+        ))))
+      }
+      assert(!foundItems.isEmpty)
+      foundItems.foreach({ i =>
+        assert(i.dataSetId == Some(testDataSet.id))
+      })
+      created.filter(_.dataSetId.isDefined).foreach { c =>
+        assert(foundItems.map(_.id).contains(c.id))
+      }
+    } finally {
+      client.events.deleteByIds(created.map(_.id))
+    }
   }
 }

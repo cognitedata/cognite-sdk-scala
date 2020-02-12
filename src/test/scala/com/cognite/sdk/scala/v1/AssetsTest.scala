@@ -1,8 +1,7 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-import com.cognite.sdk.scala.common.RetryWhile
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTestSpec, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common._
 import fs2.Stream
 
 class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
@@ -73,10 +72,10 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   private val assetsToCreate = Seq(
     Asset(name = "scala-sdk-update-1", description = Some("description-1")),
-    Asset(name = "scala-sdk-update-2", description = Some("description-2"))
+    Asset(name = "scala-sdk-update-2", description = Some("description-2"), dataSetId = Some(testDataSet.id))
   )
   private val assetUpdates = Seq(
-    Asset(name = "scala-sdk-update-1-1", description = null), // scalastyle:ignore null
+    Asset(name = "scala-sdk-update-1-1", description = null, dataSetId = Some(testDataSet.id)), // scalastyle:ignore null
     Asset(name = "scala-sdk-update-2-1")
   )
   it should behave like updatable(
@@ -94,6 +93,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       assert(updatedAssets.zip(readAssets).forall { case (updated, read) =>  updated.name == s"${read.name}-1" })
       assert(updatedAssets.head.description.isEmpty)
       assert(updatedAssets(1).description == readAssets(1).description)
+      val dataSets = updatedAssets.map(_.dataSetId)
+      assert(List(Some(testDataSet.id), Some(testDataSet.id)) === dataSets)
       ()
     }
   )
@@ -101,12 +102,17 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   it should behave like updatableById(
     client.assets,
     assetsToCreate,
-    Seq(AssetUpdate(name = Some(SetValue("scala-sdk-update-1-1"))), AssetUpdate(name = Some(SetValue("scala-sdk-update-2-1")))),
+    Seq(
+      AssetUpdate(name = Some(SetValue("scala-sdk-update-1-1"))),
+      AssetUpdate(name = Some(SetValue("scala-sdk-update-2-1")), dataSetId = Some(SetNull()))
+    ),
     (readAssets: Seq[Asset], updatedAssets: Seq[Asset]) => {
       assert(assetsToCreate.size == assetUpdates.size)
       assert(readAssets.size == assetsToCreate.size)
       assert(updatedAssets.size == assetUpdates.size)
-      assert(updatedAssets.zip(readAssets).forall { case (updated, read) =>  updated.name == s"${read.name}-1" })
+      assert(updatedAssets.zip(readAssets).forall { case (updated, read) => updated.name == s"${read.name}-1" })
+      val dataSets = updatedAssets.map(_.dataSetId)
+      assert(List(None, None) === dataSets)
       ()
     }
   )
@@ -262,6 +268,33 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should "not be an error to request more assets than the API limit" in {
     val _ = client.assets.list(Some(100000000)).take(10).compile.drain
+  }
+
+  it should "support search with dataSetIds" in {
+    val created = client.assets.createFromRead(assetsToCreate)
+    try {
+      val fromTime = created.map(_.createdTime).min
+      val toTime = created.map(_.createdTime).max
+      Thread.sleep(10000)
+      val foundItems = retryWhileEmpty {
+        client.assets.search(AssetsQuery(Some(AssetsFilter(
+          dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
+          createdTime = Some(TimeRange(
+            min=fromTime,
+            max=toTime
+          ))
+        ))))
+      }
+      assert(!foundItems.isEmpty)
+      foundItems.foreach({ i =>
+        assert(i.dataSetId == Some(testDataSet.id))
+      })
+      created.filter(_.dataSetId.isDefined).foreach { c =>
+        assert(foundItems.map(_.id).contains(c.id))
+      }
+    } finally {
+      client.assets.deleteByIds(created.map(_.id))
+    }
   }
 
 }
