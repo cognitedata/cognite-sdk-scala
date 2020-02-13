@@ -288,22 +288,20 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
     val created = client.sequences.createFromRead(sequencesToCreate)
     try {
       val createdTimes = created.map(_.createdTime)
-      val foundItems = retryWhileEmpty {
+      val foundItems = retryWithExpectedResult(
         client.sequences.search(SequenceQuery(Some(SequenceFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min=createdTimes.min,
-            max=createdTimes.max
+            min = createdTimes.min,
+            max = createdTimes.max
           ))
-        ))))
-      }
+        )))),
+        None,
+        Seq((a: Seq[_]) => a should not be empty)
+      )
       assert(!foundItems.isEmpty)
-      foundItems.foreach({ i =>
-        assert(i.dataSetId == Some(testDataSet.id))
-      })
-      created.filter(_.dataSetId.isDefined).foreach { c =>
-        assert(foundItems.map(_.id).contains(c.id))
-      }
+      foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
+      created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)
     } finally {
       client.sequences.deleteByIds(created.map(_.id))
     }

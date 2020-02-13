@@ -261,20 +261,21 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     val created = filesToCreate.map(f => client.files.createOneFromRead(f))
     try {
       val createdTimes = created.map(_.createdTime)
-      val foundItems = retryWhileEmpty {
+      val foundItems = retryWithExpectedResult(
         client.files.search(FilesQuery(Some(FilesFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min=createdTimes.min,
-            max=createdTimes.max
+            min = createdTimes.min,
+            max = createdTimes.max
           ))
-        ))))
-      }
+        )))),
+        None,
+        Seq((a: Seq[_]) => a should not be empty)
+      )
+
       assert(!foundItems.isEmpty)
-      foundItems.map(_.dataSetId) should contain only (Some(testDataSet.id))
-      created.filter(_.dataSetId.isDefined).foreach { c =>
-        assert(foundItems.map(_.id).contains(c.id))
-      }
+      foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
+      created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)
     } finally {
       client.files.deleteByIds(created.map(_.id))
     }
