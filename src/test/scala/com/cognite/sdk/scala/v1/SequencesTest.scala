@@ -287,14 +287,13 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
   it should "support search with dataSetIds" in {
     val created = client.sequences.createFromRead(sequencesToCreate)
     try {
-      val fromTime = created.map(_.createdTime).min
-      val toTime = created.map(_.createdTime).max
+      val createdTimes = created.map(_.createdTime)
       val foundItems = retryWhileEmpty {
         client.sequences.search(SequenceQuery(Some(SequenceFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min=fromTime,
-            max=toTime
+            min=createdTimes.min,
+            max=createdTimes.max
           ))
         ))))
       }
