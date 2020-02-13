@@ -274,22 +274,19 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     val created = client.assets.createFromRead(assetsToCreate)
     try {
       val createdTimes = created.map(_.createdTime)
-      val foundItems = retryWhileEmpty {
+      val foundItems = retryWithExpectedResult(
         client.assets.search(AssetsQuery(Some(AssetsFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min=createdTimes.min,
-            max=createdTimes.max
+            min = createdTimes.min,
+            max = createdTimes.max
           ))
-        ))))
-      }
-      assert(!foundItems.isEmpty)
-      foundItems.foreach({ i =>
-        assert(i.dataSetId == Some(testDataSet.id))
-      })
-      created.filter(_.dataSetId.isDefined).foreach { c =>
-        assert(foundItems.map(_.id).contains(c.id))
-      }
+        )))),
+        None,
+        Seq((a: Seq[_]) => a should not be empty)
+      )
+      foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
+      created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)
     } finally {
       client.assets.deleteByIds(created.map(_.id))
     }

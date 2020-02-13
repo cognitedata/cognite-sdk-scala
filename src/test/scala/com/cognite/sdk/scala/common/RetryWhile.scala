@@ -33,23 +33,4 @@ trait RetryWhile {
       })
     result.getOrElse(action)
   }
-
-  def retryWhileEmpty[A](
-    action: => Seq[A],
-    retriesRemaining: Int = Constants.DefaultMaxRetries,
-    initialDelay: FiniteDuration = Constants.DefaultInitialRetryDelay
-  ): Seq[A] = {
-    val exponentialDelay = (Constants.DefaultMaxBackoffDelay / 2).min(initialDelay * 2)
-    val randomDelayScale = (Constants.DefaultMaxBackoffDelay / 2).min(Constants.DefaultInitialRetryDelay * 2).toMillis
-    val nextDelay = Random.nextInt(randomDelayScale.toInt).millis + exponentialDelay
-    val result : Seq[A] = action
-    if (!result.isEmpty) {
-      result
-    } else if (retriesRemaining > 0) {
-      Thread.sleep(initialDelay.toMillis)
-      retryWhileEmpty[A](action, retriesRemaining - 1, nextDelay)
-    } else {
-      throw new AssertionError(s"Retry count exceeded, result is still empty.")
-    }
-  }
 }

@@ -299,22 +299,20 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     val created = client.timeSeries.createFromRead(timeSeriesToCreate)
     try {
       val createdTimes = created.map(_.createdTime)
-      val foundItems = retryWhileEmpty {
+      val foundItems = retryWithExpectedResult(
         client.timeSeries.search(TimeSeriesQuery(Some(TimeSeriesSearchFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min=createdTimes.min,
-            max=createdTimes.max
+            min = createdTimes.min,
+            max = createdTimes.max
           ))
-        ))))
-      }
+        )))),
+        None,
+        Seq((a: Seq[_]) => a should not be empty)
+      )
       assert(!foundItems.isEmpty)
-      foundItems.foreach({ i =>
-        assert(i.dataSetId == Some(testDataSet.id))
-      })
-      created.filter(_.dataSetId.isDefined).foreach { c =>
-        assert(foundItems.map(_.id).contains(c.id))
-      }
+      foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
+      created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)
     } finally {
       client.timeSeries.deleteByIds(created.map(_.id))
     }
