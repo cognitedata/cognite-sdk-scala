@@ -47,9 +47,9 @@ abstract class SdkTestSpec extends FlatSpec with Matchers {
   implicit lazy val greenfieldAuth: Auth = ApiKeyAuth(greenfieldApiKey)
 
   lazy val testDataSet = {
-    val list : Seq[DataSet] = DataSetTemporaryClient.listDataSets(client, new DataSetFilter(writeProtected = Some(false)))
+    val list = DataSetTemporaryClient.listDataSets(client, DataSetFilter(writeProtected = Some(false)))
     list.headOption.getOrElse({
-      DataSetTemporaryClient.createDataSet(client, new DataSetCreate(Some("testDataSet"), Some("data set for Scala SDK tests")))
+      DataSetTemporaryClient.createDataSet(client, DataSetCreate(Some("testDataSet"), Some("data set for Scala SDK tests")))
     })
   }
 }

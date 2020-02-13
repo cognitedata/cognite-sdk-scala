@@ -260,21 +260,18 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
   it should "support search with dataSetIds" in {
     val created = filesToCreate.map(f => client.files.createOneFromRead(f))
     try {
-      val fromTime = created.map(_.createdTime).min
-      val toTime = created.map(_.createdTime).max
+      val createdTimes = created.map(_.createdTime)
       val foundItems = retryWhileEmpty {
         client.files.search(FilesQuery(Some(FilesFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min=fromTime,
-            max=toTime
+            min=createdTimes.min,
+            max=createdTimes.max
           ))
         ))))
       }
       assert(!foundItems.isEmpty)
-      foundItems.foreach({ i =>
-        assert(i.dataSetId == Some(testDataSet.id))
-      })
+      foundItems.map(_.dataSetId) should contain only (Some(testDataSet.id))
       created.filter(_.dataSetId.isDefined).foreach { c =>
         assert(foundItems.map(_.id).contains(c.id))
       }

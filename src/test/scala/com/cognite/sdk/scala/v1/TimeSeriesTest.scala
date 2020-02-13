@@ -298,14 +298,13 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
   it should "support search with dataSetIds" in {
     val created = client.timeSeries.createFromRead(timeSeriesToCreate)
     try {
-      val fromTime = created.map(_.createdTime).min
-      val toTime = created.map(_.createdTime).max
+      val createdTimes = created.map(_.createdTime)
       val foundItems = retryWhileEmpty {
         client.timeSeries.search(TimeSeriesQuery(Some(TimeSeriesSearchFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min=fromTime,
-            max=toTime
+            min=createdTimes.min,
+            max=createdTimes.max
           ))
         ))))
       }
