@@ -131,6 +131,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       supportsMissingAndThrown: Boolean
   ): Unit = {
     it should "support retrieving items by external id" in {
+      // TODO: this test is not very stable as the fetched item may be deleted before it is fetched again by the external id
       val firstTwoItemIds =
         readable.list().filter(_.externalId.isDefined).take(2).map(_.externalId.get).compile.toList
       firstTwoItemIds should have size 2
