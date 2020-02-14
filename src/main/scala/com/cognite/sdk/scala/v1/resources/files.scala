@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.v1.resources
 import java.io.{BufferedInputStream, FileInputStream}
 
 import cats.syntax.functor._
+import cats.Applicative
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
@@ -10,12 +11,12 @@ import com.softwaremill.sttp.circe._
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 
-class Files[F[_]](val requestSession: RequestSession[F])
+class Files[F[_]](val requestSession: RequestSession[F])(implicit applicative: Applicative[F])
     extends WithRequestSession[F]
     with Readable[File, F]
     with RetrieveByIds[File, F]
     with RetrieveByExternalIds[File, F]
-    with CreateOne[File, FileCreate, F]
+    with Create[File, FileCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
     with Filter[File, FilesFilter, F]
@@ -35,6 +36,11 @@ class Files[F[_]](val requestSession: RequestSession[F])
         baseUrl,
         value => value
       )
+
+  override def createItems(items: Items[FileCreate]): F[Seq[File]] = {
+    import cats.implicits._
+    applicative.map(items.items.toList.traverse(createOne))(_.toSeq)
+  }
 
   def uploadWithName(input: java.io.InputStream, name: String): F[File] = {
     val item = FileCreate(name = name)

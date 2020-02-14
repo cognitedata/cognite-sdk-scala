@@ -155,7 +155,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
   }
 
   def updatable[R <: WithId[Long], W, U](
-      updatable: CreateOne[R, W, Id]
+      updatable: Create[R, W, Id]
         with DeleteByIds[Id, Long]
         with UpdateById[R, U, Id]
         with RetrieveByIds[R, Id],
@@ -167,7 +167,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
   )(implicit t: Transformer[R, W], t2: Transformer[R, U]): Unit =
     it should "allow updates using the read class" in {
       // create items
-      val createdIds = readExamples.map(e => updatable.createOneFromRead(e).id)
+      val createdIds = updatable.createFromRead(readExamples).map(_.id)
       assert(createdIds.size == readExamples.size)
       createdIds should not contain 0
 
