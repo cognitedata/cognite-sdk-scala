@@ -4,6 +4,7 @@ import java.util.UUID
 
 import cats.Id
 import com.cognite.sdk.scala.v1._
+import com.cognite.sdk.scala.v1.resources.DataSets
 import com.softwaremill.sttp.{MonadError, Request, Response, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -46,10 +47,12 @@ abstract class SdkTestSpec extends FlatSpec with Matchers {
     .getOrElse(throw new RuntimeException("TEST_API_KEY_GREENFIELD not set"))
   implicit lazy val greenfieldAuth: Auth = ApiKeyAuth(greenfieldApiKey)
 
+  lazy val dataSetResource = new DataSets(client.requestSession)
+
   lazy val testDataSet = {
-    val list = DataSetTemporaryClient.listDataSets(client, DataSetFilter(writeProtected = Some(false)))
+    val list = dataSetResource.filter(DataSetFilter(writeProtected = Some(false))).take(1).compile.toList
     list.headOption.getOrElse({
-      DataSetTemporaryClient.createDataSet(client, DataSetCreate(Some("testDataSet"), Some("data set for Scala SDK tests")))
+      dataSetResource.createOne(DataSetCreate(Some("testDataSet"), Some("data set for Scala SDK tests")))
     })
   }
 }
