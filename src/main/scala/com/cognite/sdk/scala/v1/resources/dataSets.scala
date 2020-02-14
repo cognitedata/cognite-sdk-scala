@@ -6,9 +6,8 @@ import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 
-
 private[sdk] class DataSets[F[_]](val requestSession: RequestSession[F])
-  extends WithRequestSession[F]
+    extends WithRequestSession[F]
     with PartitionedReadable[DataSet, F]
     with Create[DataSet, DataSetCreate, F]
     with RetrieveByIds[DataSet, F]
@@ -21,9 +20,9 @@ private[sdk] class DataSets[F[_]](val requestSession: RequestSession[F])
   override val baseUrl = uri"${requestSession.baseUrl}/datasets"
 
   override private[sdk] def readWithCursor(
-    cursor: Option[String],
-    limit: Option[Int],
-    partition: Option[Partition]
+      cursor: Option[String],
+      limit: Option[Int],
+      partition: Option[Partition]
   ): F[ItemsWithCursor[DataSet]] =
     Readable.readWithCursor(
       requestSession,
@@ -54,11 +53,11 @@ private[sdk] class DataSets[F[_]](val requestSession: RequestSession[F])
     )
 
   private[sdk] def filterWithCursor(
-    filter: DataSetFilter,
-    cursor: Option[String],
-    limit: Option[Int],
-    partition: Option[Partition],
-    aggregatedProperties: Option[Seq[String]] = None
+      filter: DataSetFilter,
+      cursor: Option[String],
+      limit: Option[Int],
+      partition: Option[Partition],
+      aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[DataSet]] =
     Filter.filterWithCursor(requestSession, baseUrl, filter, cursor, limit, None)
 
