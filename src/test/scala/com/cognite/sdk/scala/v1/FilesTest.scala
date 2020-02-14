@@ -31,14 +31,15 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     File(name = "scala-sdk-update-2", externalId = Some(s"${externalId}-2"))
   )
   private val filesUpdates = Seq(
-    //   name can not be changed, but is required here
+    // `name` can not be changed, but is required here
     File(name = "scala-sdk-update-1", externalId = Some(s"${externalId}-1"), dataSetId = Some(testDataSet.id)),
     File(name = "scala-sdk-update-2", metadata = Some(Map("a" -> "b")), dataSetId = Some(testDataSet.id))
   )
 
   private def normalizeFile(f: File): File = {
     f.copy(
-      metadata = if (f.metadata == Some(Map())) None else f.metadata, // WORKAROUND: the API returns empty set and nothing kinda interchangeably
+      // WORKAROUND: the API returns empty set and nothing kinda interchangeably
+      metadata = Some(f.metadata.getOrElse(Map.empty)),
       lastUpdatedTime = Instant.ofEpochMilli(0)
     )
   }
