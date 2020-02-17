@@ -47,10 +47,20 @@ final case class RequestSession[F[_]: Monad](
       (response, metadata) =>
         response match {
           case Left(value) =>
-            val shouldHaveParsed = metadata.contentLength.exists(_ > 0) &&
-              metadata.contentType.exists(_.startsWith(MediaTypes.Json))
+            // As of 2020-02-17, content length is not reliably set.
+            // Checking the content type explicitly for JSON and protobuf isn't
+            // ideal either, but we're not likely to add other content types
+            // any time soon.
+            val shouldHaveParsed = // metadata.contentLength.exists(_ > 0) &&
+              metadata.contentType.exists(_.startsWith(MediaTypes.Json)) ||
+                metadata.contentType.exists(_.startsWith("application/protobuf"))
             if (shouldHaveParsed) {
-              throw value.error
+              throw SdkException(
+                s"Failed to parse response, reason: ${value.error.getMessage}",
+                Some(uri),
+                metadata.header("x-request-id"),
+                Some(metadata.code)
+              )
             } else {
               val message = if (metadata.statusText.isEmpty) {
                 "Unknown error (no status text)"
