@@ -33,11 +33,7 @@ final case class BoundingBox(
 )
 
 final case class Properties(
-    properties: Map[String, PropertyCategory]
-)
-
-final case class PropertyCategory(
-    pairs: Map[String, String]
+    properties: Map[String, Map[String, String]]
 )
 
 final case class ThreeDRevision(
@@ -89,8 +85,8 @@ final case class ThreeDNode(
     depth: Long,
     name: String,
     subtreeSize: Long,
-    properties: Option[Properties],
-    boundingBox: BoundingBox
+    properties: Option[Map[String, Map[String, String]]],
+    boundingBox: Option[BoundingBox]
 )
 
 final case class ThreeDNodeFilter(

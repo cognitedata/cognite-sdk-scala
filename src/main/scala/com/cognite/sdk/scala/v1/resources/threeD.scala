@@ -128,8 +128,6 @@ class ThreeDAncestorNodes[F[_]](
 }
 
 object ThreeDNodes {
-  implicit val propertyCategoryEncoder: Encoder[PropertyCategory] = deriveEncoder[PropertyCategory]
-  implicit val propertyCategoryDecoder: Decoder[PropertyCategory] = deriveDecoder[PropertyCategory]
   implicit val propertiesEncoder: Encoder[Properties] = deriveEncoder[Properties]
   implicit val boundingBoxEncoder: Encoder[BoundingBox] = deriveEncoder[BoundingBox]
   implicit val propertiesDecoder: Decoder[Properties] = deriveDecoder[Properties]
