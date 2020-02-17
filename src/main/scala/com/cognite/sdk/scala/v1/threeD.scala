@@ -23,13 +23,13 @@ final case class ThreeDModelUpdate(
 ) extends WithId[Long]
 
 final case class Camera(
-    target: Option[Array[Double]],
-    position: Option[Array[Double]]
+    target: Option[Seq[Double]],
+    position: Option[Seq[Double]]
 )
 
 final case class BoundingBox(
-    max: Option[Array[Double]],
-    min: Option[Array[Double]]
+    max: Option[Seq[Double]],
+    min: Option[Seq[Double]]
 )
 
 final case class Properties(
@@ -44,7 +44,7 @@ final case class ThreeDRevision(
     id: Long = 0,
     fileId: Long,
     published: Boolean = false,
-    rotation: Option[Array[Double]] = None,
+    rotation: Option[Seq[Double]] = None,
     camera: Option[Camera] = None,
     status: String = "",
     metadata: Option[Map[String, String]] = None,
@@ -56,7 +56,7 @@ final case class ThreeDRevision(
 
 final case class ThreeDRevisionCreate(
     published: Boolean,
-    rotation: Option[Array[Double]] = None,
+    rotation: Option[Seq[Double]] = None,
     metadata: Option[Map[String, String]] = None,
     camera: Option[Camera] = None,
     fileId: Long
@@ -65,7 +65,7 @@ final case class ThreeDRevisionCreate(
 final case class ThreeDRevisionUpdate(
     id: Long = 0,
     published: Option[NonNullableSetter[Boolean]],
-    rotation: Option[NonNullableSetter[Array[Double]]] = None,
+    rotation: Option[NonNullableSetter[Seq[Double]]] = None,
     camera: Option[NonNullableSetter[Camera]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None
 ) extends WithId[Long]
