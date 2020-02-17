@@ -274,7 +274,6 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
         Seq((a: Seq[_]) => a should not be empty)
       )
 
-      assert(!foundItems.isEmpty)
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
       created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)
     } finally {
