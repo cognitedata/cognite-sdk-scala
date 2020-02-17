@@ -30,7 +30,7 @@ final case class SdkException(
       .getOrElse("")
     val uriMessage = uri
       .map(u => s", in response$responseCodeMessage to request sent to ${u.toString()}")
-      .getOrElse("")
+      .getOrElse(responseCodeMessage)
     val requestIdMessage = requestId.map(id => s", with request id $id").getOrElse("")
     val superString = super.toString
     val superMessage = if (superString.length > 0) {
@@ -38,7 +38,7 @@ final case class SdkException(
     } else {
       "Missing error message"
     }
-    s"$superMessage$uriMessage$responseCodeMessage$requestIdMessage"
+    s"$superMessage$uriMessage$requestIdMessage"
   }
 }
 final case class CdpApiErrorPayload(
