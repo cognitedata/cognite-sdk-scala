@@ -28,8 +28,8 @@ final case class Camera(
 )
 
 final case class BoundingBox(
-    max: Option[Seq[Double]],
-    min: Option[Seq[Double]]
+    max: Seq[Double],
+    min: Seq[Double]
 )
 
 final case class Properties(
