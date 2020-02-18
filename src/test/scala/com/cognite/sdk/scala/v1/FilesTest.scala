@@ -262,7 +262,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     val created = filesToCreate.map(f => client.files.createOneFromRead(f))
     try {
       val createdTimes = created.map(_.createdTime)
-      val foundItems = retryWithExpectedResult(
+      val foundItems = retryWithExpectedResult[Seq[File]](
         client.files.search(FilesQuery(Some(FilesFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
@@ -270,8 +270,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
             max = createdTimes.max
           ))
         )))),
-        None,
-        Seq((a: Seq[_]) => a should not be empty)
+        a => a should not be empty
       )
 
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)

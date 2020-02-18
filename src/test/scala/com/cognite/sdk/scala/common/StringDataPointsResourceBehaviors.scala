@@ -27,42 +27,41 @@ trait StringDataPointsResourceBehaviors extends Matchers with RetryWhile { this:
 
         retryWithExpectedResult[Seq[StringDataPointsByIdResponse]](
           dataPoints.queryStringsById(stringTimeSeriesId, start, end.plusMillis(1)),
-          None,
-          Seq(p => p.head.datapoints should have size testStringDataPoints.size.toLong)
+          p => p.head.datapoints should have size testStringDataPoints.size.toLong
         )
 
         retryWithExpectedResult[Option[StringDataPoint]](
           dataPoints.getLatestStringDataPointById(stringTimeSeriesId),
-          None,
-          Seq(dp => dp.isDefined shouldBe true, dp => testStringDataPoints.toList should contain(dp.get))
+          dp => {
+            dp.isDefined shouldBe true
+            testStringDataPoints.toList should contain(dp.get)
+          }
         )
 
         dataPoints.deleteRangeById(stringTimeSeriesId, start, end.plusMillis(1))
         retryWithExpectedResult[Seq[StringDataPointsByIdResponse]](
           dataPoints.queryStringsById(stringTimeSeriesId, start, end.plusMillis(1)),
-          None,
-          Seq(dp => dp.head.datapoints should have size 0)
+          dp => dp.head.datapoints should have size 0
         )
 
         dataPoints.insertStringsByExternalId(stringTimeSeriesExternalId, testStringDataPoints)
         retryWithExpectedResult[Seq[StringDataPointsByIdResponse]](
           dataPoints.queryStringsByExternalId(stringTimeSeriesExternalId, start, end.plusMillis(1)),
-          None,
-          Seq(p2 => p2.head.datapoints should have size testStringDataPoints.size.toLong)
+          p2 => p2.head.datapoints should have size testStringDataPoints.size.toLong
         )
 
-        val latest2 = dataPoints.getLatestStringDataPointByExternalId(stringTimeSeriesExternalId)
         retryWithExpectedResult[Option[StringDataPoint]](
           dataPoints.getLatestStringDataPointByExternalId(stringTimeSeriesExternalId),
-          Some(latest2),
-          Seq(l2 => l2.isDefined shouldBe true, l2 => testStringDataPoints.toList should contain(l2.get))
+          l2 => {
+            l2.isDefined shouldBe true
+            testStringDataPoints.toList should contain(l2.get)
+          }
         )
 
         dataPoints.deleteRangeById(stringTimeSeriesId, start, end.plusMillis(1))
         retryWithExpectedResult[Seq[StringDataPointsByIdResponse]](
           dataPoints.queryStringsByExternalId(stringTimeSeriesExternalId, start, end.plusMillis(1)),
-          None,
-          Seq(pad => pad.head.datapoints should have size 0)
+          pad => pad.head.datapoints should have size 0
         )
     }
 }

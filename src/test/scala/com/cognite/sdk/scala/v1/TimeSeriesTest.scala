@@ -286,12 +286,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     client.dataPoints.insertById(timeSeriesID, dp)
     val retrievedDp = client.dataPoints.queryById(
       timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000))
-    retryWithExpectedResult[DataPointsByIdResponse](
-      client.dataPoints.queryById(
-        timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000)),
-      Some(retrievedDp),
-      Seq(dp => dp shouldBe retrievedDp)
-    )
+    retrievedDp shouldBe dp
     client.dataPoints.deleteRangeById(timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000))
   }
 
@@ -307,8 +302,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
             max = createdTimes.max
           ))
         )))),
-        None,
-        Seq((a: Seq[_]) => a should not be empty)
+        (a: Seq[_]) => a should not be empty
       )
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
       created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)

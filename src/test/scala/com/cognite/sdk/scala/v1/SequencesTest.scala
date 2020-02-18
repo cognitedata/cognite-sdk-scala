@@ -298,8 +298,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
             max = createdTimes.max
           ))
         )))),
-        None,
-        Seq((a: Seq[_]) => a should not be empty)
+        (a: Seq[_]) => a should not be empty
       )
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
       created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)

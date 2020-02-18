@@ -57,16 +57,14 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     retryWithExpectedResult[Seq[Asset]](
       client.assets.filter(AssetsFilter(externalIdPrefix = Some("recursive"))).compile.toList,
-      None,
-      Seq(r => r should have size 3)
+      r => r should have size 3
     )
 
     client.assets.deleteByExternalIds(Seq("recursive-root"), true, true)
 
     retryWithExpectedResult[Seq[Asset]](
       client.assets.filter(AssetsFilter(externalIdPrefix = Some("recursive"))).compile.toList,
-      None,
-      Seq(r => r should have size 0)
+      r => r should have size 0
     )
   }
 
@@ -144,8 +142,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         )
         .compile
         .toList,
-      None,
-      Seq(r => r should have size 84)
+      r => r should have size 84
     )
 
     val createdTimeFilterResults = client.assets
@@ -189,8 +186,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       .fold(Stream.empty)(_ ++ _)
       .compile
       .toList,
-      None,
-      Seq(a => a should have size 1106)
+      a => a should have size 1106
     )
 
     val assetSubtreeIdsFilterResult = client.assets
@@ -210,11 +206,10 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
           rootIds = Some(Seq(CogniteInternalId(7127045760755934L)))
         ), Some(5), Some(Seq("childCount")))
         .compile.toList,
-      None,
-      Seq(a => {
+      a => {
         val bool = a.map(_.aggregates.get("childCount")).exists(_ > 0)
         bool shouldBe true
-      })
+      }
     )
   }
 
@@ -274,7 +269,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     val created = client.assets.createFromRead(assetsToCreate)
     try {
       val createdTimes = created.map(_.createdTime)
-      val foundItems = retryWithExpectedResult(
+      val foundItems = retryWithExpectedResult[Seq[Asset]](
         client.assets.search(AssetsQuery(Some(AssetsFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
@@ -282,8 +277,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
             max = createdTimes.max
           ))
         )))),
-        None,
-        Seq((a: Seq[_]) => a should not be empty)
+        a => a should not be empty
       )
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
       created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)

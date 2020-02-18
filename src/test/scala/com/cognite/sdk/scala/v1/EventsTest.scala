@@ -266,7 +266,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     val created = client.events.createFromRead(eventsToCreate)
     try {
       val createdTimes = created.map(_.createdTime)
-      val foundItems = retryWithExpectedResult(
+      val foundItems = retryWithExpectedResult[Seq[Event]](
         client.events.search(EventsQuery(Some(EventsFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
@@ -274,8 +274,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
             max = createdTimes.max
           ))
         )))),
-        None,
-        Seq((a: Seq[_]) => a should not be empty)
+        a => a should not be empty
       )
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
       created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)

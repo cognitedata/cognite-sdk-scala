@@ -27,53 +27,51 @@ trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: FlatS
 
         retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryById(timeSeriesId, start, end.plusMillis(1)),
-          None,
-          Seq(p => p.datapoints should have size testDataPoints.size.toLong)
+          p => p.datapoints should have size testDataPoints.size.toLong
         )
 
         retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryById(timeSeriesId, start, end.plusMillis(1), Some(3)),
-          None,
-          Seq(p => p.datapoints should have size 3)
+          p => p.datapoints should have size 3
         )
 
         retryWithExpectedResult[Option[DataPoint]](
           dataPoints.getLatestDataPointById(timeSeriesId),
-          None,
-          Seq(dp => dp.isDefined shouldBe true, dp => testDataPoints.toList should contain(dp.get))
+          dp => {
+            dp.isDefined shouldBe true
+            testDataPoints.toList should contain(dp.get)
+          }
         )
 
         dataPoints.deleteRangeById(timeSeriesId, start, end.plusMillis(1))
         retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryById(timeSeriesId, start, end.plusMillis(1)),
-          None,
-          Seq(dp => dp.datapoints should have size 0)
+          dp => dp.datapoints should have size 0
         )
 
         dataPoints.insertByExternalId(timeSeriesExternalId, testDataPoints)
         retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
-          None,
-          Seq(p2 => p2.datapoints should have size testDataPoints.size.toLong)
+          p2 => p2.datapoints should have size testDataPoints.size.toLong
         )
 
         retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1), Some(5)),
-          None,
-          Seq(p2 => p2.datapoints should have size 5)
+          p2 => p2.datapoints should have size 5
         )
 
         retryWithExpectedResult[Option[DataPoint]](
           dataPoints.getLatestDataPointByExternalId(timeSeriesExternalId),
-          None,
-          Seq(l2 => l2.isDefined shouldBe true, l2 => testDataPoints.toList should contain(l2.get))
+          { l2 =>
+            l2.isDefined shouldBe true
+            testDataPoints.toList should contain(l2.get)
+          }
         )
 
         dataPoints.deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
         retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
-          None,
-          Seq(pad => pad.datapoints should have size 0)
+          pad => pad.datapoints should have size 0
         )
     }
 }
