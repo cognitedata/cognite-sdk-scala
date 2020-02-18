@@ -39,35 +39,28 @@ class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with Retry
     client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.externalId).toList, testRows)
     val rows = retryWithExpectedResult[Seq[SequenceRow]](
       client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)._2,
-      None,
-      Seq(r => r should contain theSameElementsAs testRows)
+      r => r should contain theSameElementsAs testRows
     )
 
     val updateRows = testRows.map { row =>
       row.copy(values = row.values.updated(0, row.values.head.mapString(s => s"${s}-updated")))
     }
     client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.externalId).toList, updateRows)
-    val (_, rowsAfterUpdate) = client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)
     retryWithExpectedResult[Seq[SequenceRow]](
       client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)._2,
-      Some(rowsAfterUpdate),
-      Seq(r => r should contain theSameElementsAs updateRows)
+      r => r should contain theSameElementsAs updateRows
     )
 
     client.sequenceRows.deleteById(sequence.id, rows.map(_.rowNumber).take(1))
-    val (_, rowsAfterOneDelete) = client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)
     retryWithExpectedResult[Seq[SequenceRow]](
       client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)._2,
-      Some(rowsAfterOneDelete),
-      Seq(r => r should have size testRows.size.toLong - 1 )
+      r => r should have size testRows.size.toLong - 1
     )
 
     client.sequenceRows.deleteById(sequence.id, rows.map(_.rowNumber))
-    val (_, rowsAfterDeleteAll) = client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)
     retryWithExpectedResult[Seq[SequenceRow]](
       client.sequenceRows.queryById(sequence.id, minRow, maxRow + 1)._2,
-      Some(rowsAfterDeleteAll),
-      Seq(r => r shouldBe empty)
+      r => r shouldBe empty
     )
   }
 
@@ -76,8 +69,7 @@ class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with Retry
     client.sequenceRows.insertByExternalId(externalId, sequence.columns.map(_.externalId).toList, testRows)
     val rows = retryWithExpectedResult[Seq[SequenceRow]](
       client.sequenceRows.queryByExternalId(externalId, minRow, maxRow + 1)._2,
-      None,
-      Seq(r => r should contain theSameElementsAs testRows)
+      r => r should contain theSameElementsAs testRows
     )
 
     // note: intentionally using queryById here.
@@ -86,11 +78,9 @@ class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with Retry
     rowsById should contain theSameElementsAs testRows
 
     client.sequenceRows.deleteByExternalId(externalId, rows.map(_.rowNumber))
-    val (_, rowsAfterDeleteAll) = client.sequenceRows.queryByExternalId(externalId, minRow, maxRow + 1)
     retryWithExpectedResult[Seq[SequenceRow]](
       client.sequenceRows.queryByExternalId(externalId, minRow, maxRow + 1)._2,
-      Some(rowsAfterDeleteAll),
-      Seq(r => r shouldBe empty)
+      r => r shouldBe empty
     )
   }
 }
