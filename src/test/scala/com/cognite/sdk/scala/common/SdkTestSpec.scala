@@ -40,8 +40,8 @@ abstract class SdkTestSpec extends FlatSpec with Matchers {
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
 
-  private lazy val apiKey = Option(System.getenv("TEST_API_KEY_READ"))
-    .getOrElse(throw new RuntimeException("TEST_API_KEY_READ not set"))
+  private lazy val apiKey = Option(System.getenv("TEST_API_KEY"))
+    .getOrElse(throw new RuntimeException("TEST_API_KEY not set"))
   implicit lazy val auth: Auth = ApiKeyAuth(apiKey)
   private lazy val greenfieldApiKey = Option(System.getenv("TEST_API_KEY_GREENFIELD"))
     .getOrElse(throw new RuntimeException("TEST_API_KEY_GREENFIELD not set"))
