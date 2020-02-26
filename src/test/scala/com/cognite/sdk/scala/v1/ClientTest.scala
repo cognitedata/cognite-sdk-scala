@@ -105,7 +105,7 @@ class ClientTest extends SdkTestSpec {
        |    "loggedIn": true,
        |    "project": "${loginStatus.project}",
        |    "projectId": "${loginStatus.projectId}",
-       |     "projectId": ${loginStatus.projectId}
+       |     "projectId": ${loginStatus.apiKeyId}
        |  }
        |}
        |""".stripMargin), 200, "",
