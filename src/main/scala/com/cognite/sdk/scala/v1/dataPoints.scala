@@ -48,17 +48,19 @@ final case class StringDataPointsByExternalId(
     datapoints: Seq[StringDataPoint]
 )
 
+sealed trait DeleteDataPointsRange
+
 final case class DeleteRangeById(
     id: Long,
     inclusiveBegin: Long,
     exclusiveEnd: Long
-)
+) extends DeleteDataPointsRange
 
 final case class DeleteRangeByExternalId(
     externalId: String,
     inclusiveBegin: Long,
     exclusiveEnd: Long
-)
+) extends DeleteDataPointsRange
 
 final case class QueryRangeById(
     id: Long,
