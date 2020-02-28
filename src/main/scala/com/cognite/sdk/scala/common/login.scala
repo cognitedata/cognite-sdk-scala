@@ -5,7 +5,13 @@ import com.softwaremill.sttp._
 import io.circe.Decoder
 import io.circe.derivation.deriveDecoder
 
-final case class LoginStatus(user: String, loggedIn: Boolean, project: String, projectId: Long, apiKeyId: Option[Long])
+final case class LoginStatus(
+    user: String,
+    loggedIn: Boolean,
+    project: String,
+    projectId: Long,
+    apiKeyId: Option[Long]
+)
 final case class DataLoginStatus(data: LoginStatus)
 
 class Login[F[_]](val requestSession: RequestSession[F]) {
