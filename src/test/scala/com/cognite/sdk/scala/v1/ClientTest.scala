@@ -29,6 +29,56 @@ class ClientTest extends SdkTestSpec {
     ).projectName should not be empty
   }
 
+  it should "not require apiKeyId to be present" in {
+    val loginStatusResponseWithoutApiKeyId = new Response(Right(
+      s"""
+         |{
+         |  "data": {
+         |    "user": "",
+         |    "loggedIn": false,
+         |    "project": "",
+         |    "projectId": -1
+         |  }
+         |}
+         |""".stripMargin), 200, "",
+      Seq(("x-request-id", "test-request-header"), ("content-type", "application/json; charset=utf-8")),
+      Nil)
+
+    val respondWithoutApiKeyId = SttpBackendStub.synchronous
+      .whenAnyRequest
+      .thenRespond(loginStatusResponseWithoutApiKeyId)
+    new GenericClient[Id, Nothing](
+      "scala-sdk-test", projectName, auth)(
+      implicitly,
+      respondWithoutApiKeyId
+    ).login.status().apiKeyId shouldBe empty
+  }
+
+  it should "handle an apiKeyId which is larger than an int" in {
+    val loginStatusResponseWithApiKeyId = new Response(Right(
+      s"""
+         |{
+         |  "data": {
+         |    "user": "tom@example.com",
+         |    "loggedIn": true,
+         |    "project": "${loginStatus.project}",
+         |    "projectId": ${loginStatus.projectId},
+         |    "apiKeyId": 12147483647
+         |  }
+         |}
+         |""".stripMargin), 200, "",
+      Seq(("x-request-id", "test-request-header"), ("content-type", "application/json; charset=utf-8")),
+      Nil)
+    val respondWithApiKeyId = SttpBackendStub.synchronous
+      .whenAnyRequest
+      .thenRespond(loginStatusResponseWithApiKeyId)
+    new GenericClient[Id, Nothing](
+      "scala-sdk-test", projectName, auth)(
+      implicitly,
+      respondWithApiKeyId
+    ).login.status().apiKeyId shouldBe Some(12147483647L)
+  }
+
   it should "support async IO clients" in {
     implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
     implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
