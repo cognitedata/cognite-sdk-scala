@@ -11,6 +11,7 @@ import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
+import io.circe.syntax._
 import com.cognite.v1.timeseries.proto.data_point_insertion_request.{
   DataPointInsertionItem,
   DataPointInsertionRequest
@@ -212,32 +213,30 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
       _ => ()
     )
 
-  def deleteRangeById(id: Long, inclusiveStart: Instant, exclusiveEnd: Instant): F[Unit] =
-    requestSession.post[Unit, Unit, Items[DeleteRangeById]](
-      Items(Seq(DeleteRangeById(id, inclusiveStart.toEpochMilli, exclusiveEnd.toEpochMilli))),
+  def deleteRanges(ranges: Seq[DeleteDataPointsRange]): F[Unit] =
+    requestSession.post[Unit, Unit, Items[DeleteDataPointsRange]](
+      Items(ranges),
       uri"$baseUrl/delete",
       _ => ()
     )
+
+  def deleteRangeById(id: Long, inclusiveStart: Instant, exclusiveEnd: Instant): F[Unit] =
+    deleteRanges(Seq(DeleteRangeById(id, inclusiveStart.toEpochMilli, exclusiveEnd.toEpochMilli)))
 
   def deleteRangeByExternalId(
       externalId: String,
       inclusiveStart: Instant,
       exclusiveEnd: Instant
   ): F[Unit] =
-    requestSession
-      .post[Unit, Unit, Items[DeleteRangeByExternalId]](
-        Items(
-          Seq(
-            DeleteRangeByExternalId(
-              externalId,
-              inclusiveStart.toEpochMilli,
-              exclusiveEnd.toEpochMilli
-            )
-          )
-        ),
-        uri"$baseUrl/delete",
-        _ => ()
+    deleteRanges(
+      Seq(
+        DeleteRangeByExternalId(
+          externalId,
+          inclusiveStart.toEpochMilli,
+          exclusiveEnd.toEpochMilli
+        )
       )
+    )
 
   @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   def queryById(
@@ -554,6 +553,11 @@ object DataPointsResource {
       : Encoder[Items[StringDataPointsByExternalId]] = deriveEncoder
   implicit val deleteRangeByIdEncoder: Encoder[DeleteRangeById] = deriveEncoder
   implicit val deleteRangeByIdItemsEncoder: Encoder[Items[DeleteRangeById]] = deriveEncoder
+  implicit val deleteRangeEncoder: Encoder[DeleteDataPointsRange] = Encoder.instance {
+    case byId @ DeleteRangeById(_, _, _) => byId.asJson
+    case byExternalId @ DeleteRangeByExternalId(_, _, _) => byExternalId.asJson
+  }
+  implicit val deleteRangeItemsEncoder: Encoder[Items[DeleteDataPointsRange]] = deriveEncoder
   implicit val deleteRangeByExternalIdEncoder: Encoder[DeleteRangeByExternalId] = deriveEncoder
   implicit val deleteRangeByExternalIdItemsEncoder: Encoder[Items[DeleteRangeByExternalId]] =
     deriveEncoder
