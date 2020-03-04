@@ -16,13 +16,9 @@ class ServiceAccounts[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[ServiceAccount]] =
-    Readable.readWithCursor(
+    Readable.readSimple(
       requestSession,
-      baseUrl,
-      None,
-      None,
-      None,
-      Constants.defaultBatchSize
+      baseUrl
     )
 }
 
@@ -42,13 +38,9 @@ class ApiKeys[F[_]](val requestSession: RequestSession[F]) extends Readable[ApiK
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[ApiKey]] =
-    Readable.readWithCursor(
+    Readable.readSimple(
       requestSession,
-      baseUrl,
-      None,
-      None,
-      None,
-      Constants.defaultBatchSize
+      baseUrl
     )
 }
 
@@ -67,13 +59,9 @@ class Groups[F[_]](val requestSession: RequestSession[F]) extends Readable[Group
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[Group]] =
-    Readable.readWithCursor(
+    Readable.readSimple(
       requestSession,
-      baseUrl,
-      None,
-      None,
-      None,
-      Constants.defaultBatchSize
+      baseUrl
     )
 }
 

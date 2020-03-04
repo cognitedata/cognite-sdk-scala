@@ -80,10 +80,8 @@ object Readable {
       batchSize: Int
   ) = {
     val uriWithCursor = cursor.fold(baseUrl)(baseUrl.param("cursor", _))
-    limit.fold(uriWithCursor) { l =>
-      val limitValue = scala.math.min(l, batchSize).toString
-      uriWithCursor.param("limit", limitValue)
-    }
+    val l = limit.getOrElse(batchSize)
+    uriWithCursor.param("limit", math.min(l, batchSize).toString)
   }
 
   private[sdk] def readWithCursor[F[_], R](
@@ -96,15 +94,25 @@ object Readable {
   )(
       implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]
   ): F[ItemsWithCursor[R]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     val uriWithCursor = uriWithCursorAndLimit(baseUrl, cursor, maxItemsReturned, batchSize)
     val uriWithCursorAndPartition = partition.fold(uriWithCursor) { p =>
       uriWithCursor.param("partition", p.toString)
     }
 
+    readSimple(requestSession, uriWithCursorAndPartition)
+  }
+
+  private[sdk] def readSimple[F[_], R](
+      requestSession: RequestSession[F],
+      uri: Uri
+  )(
+      implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]
+  ): F[ItemsWithCursor[R]] = {
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
+
     requestSession.get[ItemsWithCursor[R], ItemsWithCursor[R]](
-      uriWithCursorAndPartition,
+      uri,
       value => value
     )
   }
