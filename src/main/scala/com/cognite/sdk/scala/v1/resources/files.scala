@@ -113,7 +113,15 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
       partition: Option[Partition],
       aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[File]] =
-    Filter.filterWithCursor(requestSession, baseUrl, filter, cursor, limit, None)
+    Filter.filterWithCursor(
+      requestSession,
+      baseUrl,
+      filter,
+      cursor,
+      limit,
+      partition = None,
+      Constants.defaultBatchSize
+    )
 
   override def search(searchQuery: FilesQuery): F[Seq[File]] =
     Search.search(requestSession, baseUrl, searchQuery)

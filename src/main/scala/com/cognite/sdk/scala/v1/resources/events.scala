@@ -76,7 +76,15 @@ class Events[F[_]](val requestSession: RequestSession[F])
       partition: Option[Partition],
       aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[Event]] =
-    Filter.filterWithCursor(requestSession, baseUrl, filter, cursor, limit, partition)
+    Filter.filterWithCursor(
+      requestSession,
+      baseUrl,
+      filter,
+      cursor,
+      limit,
+      partition,
+      Constants.defaultBatchSize
+    )
 
   override def search(searchQuery: EventsQuery): F[Seq[Event]] =
     Search.search(requestSession, baseUrl, searchQuery)

@@ -59,7 +59,15 @@ private[sdk] class DataSets[F[_]](val requestSession: RequestSession[F])
       partition: Option[Partition],
       aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[DataSet]] =
-    Filter.filterWithCursor(requestSession, baseUrl, filter, cursor, limit, None)
+    Filter.filterWithCursor(
+      requestSession,
+      baseUrl,
+      filter,
+      cursor,
+      limit,
+      partition = None,
+      Constants.defaultBatchSize
+    )
 
   override def search(searchQuery: DataSetQuery): F[Seq[DataSet]] =
     Search.search(requestSession, baseUrl, searchQuery)
