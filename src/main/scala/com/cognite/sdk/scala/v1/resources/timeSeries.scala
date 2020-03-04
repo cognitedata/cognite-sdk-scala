@@ -80,7 +80,15 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
       partition: Option[Partition],
       aggregatedProperties: Option[Seq[String]] = None
   ): F[ItemsWithCursor[TimeSeries]] =
-    Filter.filterWithCursor(requestSession, baseUrl, filter, cursor, limit, partition)
+    Filter.filterWithCursor(
+      requestSession,
+      baseUrl,
+      filter,
+      cursor,
+      limit,
+      partition,
+      Constants.defaultBatchSize
+    )
 
   override def search(searchQuery: TimeSeriesQuery): F[Seq[TimeSeries]] =
     Search.search(requestSession, baseUrl, searchQuery)

@@ -124,6 +124,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
       cursor,
       limit,
       partition,
+      Constants.defaultBatchSize,
       aggregatedProperties
     )
 

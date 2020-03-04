@@ -8,6 +8,7 @@ import com.softwaremill.sttp.circe._
 import fs2._
 import io.circe.{Decoder, Encoder, Json, Printer}
 import io.circe.syntax._
+import scala.math
 
 final case class FilterRequest[T](
     filter: T,
@@ -91,6 +92,7 @@ object Filter {
       cursor: Option[String],
       limit: Option[Int],
       partition: Option[Partition],
+      batchSize: Int,
       aggregatedProperties: Option[Seq[String]] = None
   )(
       implicit readItemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
@@ -101,7 +103,13 @@ object Filter {
     // avoid sending aggregatedProperties to resources that do not support it
     implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
     val body =
-      FilterRequest(filter, limit, cursor, partition.map(_.toString), aggregatedProperties).asJson
+      FilterRequest(
+        filter,
+        limit.map(l => math.min(l, batchSize)).orElse(Some(batchSize)),
+        cursor,
+        partition.map(_.toString),
+        aggregatedProperties
+      ).asJson
     requestSession.post[ItemsWithCursor[R], ItemsWithCursor[R], Json](
       partition.map(_ => body).getOrElse(body.mapObject(o => o.remove("partition"))),
       uri"$baseUrl/list",
