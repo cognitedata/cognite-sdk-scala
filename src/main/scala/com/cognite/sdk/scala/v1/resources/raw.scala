@@ -163,7 +163,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       cursor,
       limit,
       None,
-      Constants.defaultBatchSize
+      Constants.rowsBatchSize
     )
 
   override def filterPartitionsF(
