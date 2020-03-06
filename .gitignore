@@ -6,3 +6,4 @@ target/
 .attach*
 .bloop/
 .metals/
+.env

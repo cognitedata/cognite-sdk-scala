@@ -40,7 +40,7 @@ class ReadTest extends SdkTestSpec {
       None,
       limit,
       None,
-      batchSize,
+      batchSize
     )
     test(totalLimit)
   }
