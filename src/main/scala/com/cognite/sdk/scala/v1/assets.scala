@@ -15,7 +15,8 @@ final case class Asset(
     lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
     rootId: Option[Long] = None,
     aggregates: Option[Map[String, Long]] = None,
-    dataSetId: Option[Long] = None
+    dataSetId: Option[Long] = None,
+    parentExternalId: Option[String] = None
 ) extends WithId[Long]
     with WithExternalId
 
@@ -52,7 +53,8 @@ final case class AssetsFilter(
     lastUpdatedTime: Option[TimeRange] = None,
     root: Option[Boolean] = None,
     externalIdPrefix: Option[String] = None,
-    dataSetIds: Option[Seq[CogniteId]] = None
+    dataSetIds: Option[Seq[CogniteId]] = None,
+    parentExternalIds: Option[Seq[String]] = None
 )
 
 final case class AssetsSearch(

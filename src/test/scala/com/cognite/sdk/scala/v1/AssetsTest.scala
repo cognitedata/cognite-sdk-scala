@@ -259,6 +259,14 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         )
       )
     assert(esdvLimitResults.length == 10)
+    val testAssets = client.assets
+      .search(
+        AssetsQuery(
+          limit = 10,
+          filter = Some(AssetsFilter(parentExternalIds = Some(Seq("test-root"))))
+        )
+      )
+    assert(testAssets.map(_.parentExternalId) == Seq(Some("test-root"), Some("test-root")))
   }
 
   it should "not be an error to request more assets than the API limit" in {
