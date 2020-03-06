@@ -139,7 +139,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       .filter(
         EventsFilter(
           createdTime = Some(
-            TimeRange(Instant.ofEpochMilli(1500510008838L), Instant.ofEpochMilli(1550300000000L))
+            TimeRange(Instant.ofEpochMilli(1581098334114L), Instant.ofEpochMilli(1581098400000L))
           )
         )
       )
@@ -150,7 +150,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       .filterPartitions(
         EventsFilter(
           createdTime = Some(
-            TimeRange(Instant.ofEpochMilli(1500510008838L), Instant.ofEpochMilli(1550300000000L))
+            TimeRange(Instant.ofEpochMilli(1581098334114L), Instant.ofEpochMilli(1581098400000L))
           )
         ), 20
       )
@@ -162,7 +162,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       .filter(
         EventsFilter(
           createdTime = Some(
-            TimeRange(Instant.ofEpochMilli(1500510008838L), Instant.ofEpochMilli(1550300000000L))
+            TimeRange(Instant.ofEpochMilli(1581098334114L), Instant.ofEpochMilli(1581098400000L))
           )
         ),
         limit = Some(1)
@@ -180,8 +180,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
             EventsFilter(
               createdTime = Some(
                 TimeRange(
-                  Instant.ofEpochMilli(1500510008838L),
-                  Instant.ofEpochMilli(1550300000000L)
+                  Instant.ofEpochMilli(1581098334114L),
+                  Instant.ofEpochMilli(1581098400000L)
                 )
               )
             )
@@ -196,11 +196,11 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
             EventsFilter(
               createdTime = Some(
                 TimeRange(
-                  Instant.ofEpochMilli(1500510008838L),
-                  Instant.ofEpochMilli(1550300000000L)
+                  Instant.ofEpochMilli(1581098334114L),
+                  Instant.ofEpochMilli(1581102000000L)
                 )
               ),
-              `type` = Some("test"),
+              `type` = Some("test-data-populator"),
               subtype = Some("test1")
             )
           )
@@ -213,7 +213,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1549011100999L)))
+                Some(TimeRange(Instant.ofEpochMilli(1581098334114L), Instant.ofEpochMilli(1581102000000L)))
             )
           ),
           search = Some(
@@ -223,19 +223,19 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
           )
         )
       )
-    assert(searchResults.length == 1)
+    assert(searchResults.length == 2)
     val searchResults2 = client.events
       .search(
         EventsQuery(
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1552395929199L)))
+                Some(TimeRange(Instant.ofEpochMilli(1581098334114L), Instant.ofEpochMilli(1581102000000L)))
             )
           ),
           search = Some(
             EventsSearch(
-              description = Some("test event wjoel")
+              description = Some("test joel")
             )
           )
         )
@@ -248,12 +248,12 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1552395929199L)))
+                Some(TimeRange(Instant.ofEpochMilli(1581098334114L), Instant.ofEpochMilli(1581102000000L)))
             )
           ),
           search = Some(
             EventsSearch(
-              description = Some("description")
+              description = Some("wjoel")
             )
           )
         )
