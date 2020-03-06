@@ -136,10 +136,10 @@ object RetrieveByIds {
 trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[R]]
   @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
-  def retrieveByExternalId(externalIds: String): F[R] =
+  def retrieveByExternalId(externalId: String): F[R] =
     // The API returns an error causing an exception to be thrown if the item isn't found,
     // so .head is safe here.
-    requestSession.map(retrieveByExternalIds(Seq(externalIds)), (r1: Seq[R]) => r1.head)
+    requestSession.map(retrieveByExternalIds(Seq(externalId)), (r1: Seq[R]) => r1.head)
 }
 
 object RetrieveByExternalIds {
