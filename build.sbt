@@ -9,22 +9,22 @@ val supportedScalaVersions = List(scala212, scala213, scala211)
 // This is used only for tests.
 val jettyTestVersion = "9.4.27.v20200227"
 
-val sttpVersion = "1.6.3"
+val sttpVersion = "1.7.2"
 val circeVersion: Option[(Long, Long)] => String = {
-  case Some((2, 13)) => "0.12.0-M4"
-  case _ => "0.11.1"
+  case Some((2, 11)) => "0.12.0-M3"
+  case _ => "0.13.0"
 }
 val circeDerivationVersion: Option[(Long, Long)] => String = {
-  case Some((2, 13)) => "0.12.0-M4"
-  case _ => "0.11.0-M1"
+  case Some((2, 11)) => "0.12.0-M3"
+  case _ => "0.13.0-M4"
 }
 val catsEffectVersion: Option[(Long, Long)] => String = {
-  case Some((2, 13)) => "2.0.0-M4"
-  case _ => "1.3.1"
+  case Some((2, 11)) => "2.0.0"
+  case _ => "2.1.3"
 }
 val fs2Version: Option[(Long, Long)] => String = {
-  case Some((2, 13)) => "1.1.0-M1"
-  case _ => "1.0.5"
+  case Some((2, 11)) => "2.1.0"
+  case _ => "2.3.0"
 }
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
@@ -94,11 +94,12 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "io.scalaland" %% "chimney" % "0.3.5",
+      "io.scalaland" %% "chimney" % "0.5.2",
       "commons-io" % "commons-io" % "2.6",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
+      "org.typelevel" %% "cats-effect" % catsEffectVersion(CrossVersion.partialVersion(scalaVersion.value)),
       "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value))
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value))
   )
