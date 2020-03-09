@@ -174,6 +174,15 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     timeSeriesForManyFilters.size should be (1)
   }
 
+  it should behave like deletableWithIgnoreUnknownIds(
+    client.timeSeries,
+    Seq(
+      TimeSeries(name = Some("scala-sdk-delete-example-1"), externalId = Some(shortRandom())),
+      TimeSeries(description = Some("scala-sdk-delete-example-2"), externalId = Some(shortRandom()))
+    ),
+    idsThatDoNotExist
+  )
+
   it should "return the same results using filter as filterPartitions" in {
     val timeSeriesFilter = TimeSeriesFilter(
       isStep = Some(false),

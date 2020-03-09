@@ -26,22 +26,22 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
 
   it should "be possible to correctly query aggregate values" in {
     val aggregates = client.dataPoints.queryAggregatesById(
-      1580330145648L,
+      54577852743225L,
       Instant.ofEpochMilli(0L),
-      Instant.ofEpochMilli(1564272000000L),
+      Instant.ofEpochMilli(1553795183461L),
       "1d",
       Seq("average", "stepInterpolation")
     )
     val averages = aggregates("average").head.datapoints
     val stepInterpolations = aggregates("stepInterpolation").head.datapoints
     averages.map(_.timestamp).tail should contain theSameElementsInOrderAs stepInterpolations.map(_.timestamp)
-    averages.last.value should equal(73.9999423351708)
+    averages.last.value should equal(2.7051279586700723)
 
     val limit = 10
     val aggregatesWithLimit = client.dataPoints.queryAggregatesById(
-      1580330145648L,
+      54577852743225L,
       Instant.ofEpochMilli(0L),
-      Instant.ofEpochMilli(1564272000000L),
+      Instant.ofEpochMilli(1553795183461L),
       "1d",
       Seq("average", "stepInterpolation"),
       Some(limit)
@@ -54,9 +54,9 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     stepInterpolationsWithLimit.head.value should equal(stepInterpolations.head.value)
 
     val aggregatesWithZeroLimit = client.dataPoints.queryAggregatesById(
-      1580330145648L,
+      54577852743225L,
       Instant.ofEpochMilli(0L),
-      Instant.ofEpochMilli(1564272000000L),
+      Instant.ofEpochMilli(1553795183461L),
       "1d",
       Seq("average", "stepInterpolation"),
       Some(0)
@@ -66,9 +66,9 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     assertThrows[CdpApiException] {
       // negative limit parameter is not allowed by the API
       client.dataPoints.queryAggregatesById(
-        1580330145648L,
+        54577852743225L,
         Instant.ofEpochMilli(0L),
-        Instant.ofEpochMilli(1564272000000L),
+        Instant.ofEpochMilli(1553795183461L),
         "1d",
         Seq("average", "stepInterpolation"),
         Some(-123)
@@ -76,9 +76,9 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     }
 
     val extAggregates = client.dataPoints.queryAggregatesByExternalId(
-      "test__constant_74_with_noise",
+      "VAL_23_FIC_92543_06:Z.X.Value",
       Instant.ofEpochMilli(0L),
-      Instant.ofEpochMilli(1564272000000L),
+      Instant.ofEpochMilli(1553795183461L),
       "1d",
       Seq("average", "stepInterpolation")
     )
@@ -89,28 +89,27 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     extAverages.map(_.timestamp) shouldBe sorted
     extStepInterpolation.map(_.timestamp) shouldBe sorted
     aggregates.keys should contain only("average", "stepInterpolation")
-    extAverages.head.value should equal(74.00018450606277)
-    extAverages.last.value should equal(73.9999423351708)
-    extAverages.head.value should equal(74.00018450606277)
-    extStepInterpolation.last.value should equal(74.07992673539263)
+    extAverages.head.value should equal(2.7346077636587798)
+    extAverages.last.value should equal(2.7051279586700723)
+    extStepInterpolation.last.value should equal(2.8424909114837646)
     val aggregates2 = client.dataPoints.queryAggregatesById(
-      1580330145648L,
+      54577852743225L,
       Instant.ofEpochMilli(0L),
-      Instant.ofEpochMilli(1564272000000L),
+      Instant.ofEpochMilli(1553795183461L),
       "1h",
       Seq("sum", "stepInterpolation")
     )
     val sums2 = aggregates2("sum").head.datapoints
     val stepInterpolation2 = aggregates2("stepInterpolation").head.datapoints
-    sums2.head.value should equal(65415.958570785)
-    sums2.last.value should equal(252857.16150906676)
-    stepInterpolation2.head.value should equal(73.92400373499633)
-    stepInterpolation2.last.value should equal(74.03938853847485)
+    sums2.head.value should equal(1883.142868757248)
+    sums2.last.value should equal(1845.0451910495758)
+    stepInterpolation2.head.value should equal(2.739926815032959)
+    stepInterpolation2.last.value should equal(2.8009767532348633)
 
     val extAggregatesWithLimit = client.dataPoints.queryAggregatesByExternalId(
-      "test__constant_74_with_noise",
+      "VAL_23_FIC_92543_06:Z.X.Value",
       Instant.ofEpochMilli(0L),
-      Instant.ofEpochMilli(1564272000000L),
+      Instant.ofEpochMilli(1553795183461L),
       "1d",
       Seq("average", "stepInterpolation"),
       Some(limit)
@@ -125,9 +124,9 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     extStepInterpolationWithLimit.head.value should equal(extStepInterpolation.head.value)
     extStepInterpolationWithLimit.last.value should equal(stepInterpolationsWithLimit.last.value)
     val extAggregatesWithZeroLimit = client.dataPoints.queryAggregatesByExternalId(
-      "test__constant_74_with_noise",
+      "VAL_23_FIC_92543_06:Z.X.Value",
       Instant.ofEpochMilli(0L),
-      Instant.ofEpochMilli(1564272000000L),
+      Instant.ofEpochMilli(1553795183461L),
       "1d",
       Seq("average", "stepInterpolation"),
       Some(0)
@@ -139,7 +138,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       client.dataPoints.queryAggregatesByExternalId(
         "test__constant_74_with_noise",
         Instant.ofEpochMilli(0L),
-        Instant.ofEpochMilli(1564272000000L),
+        Instant.ofEpochMilli(1553795183461L),
         "1d",
         Seq("average", "stepInterpolation"),
         Some(-1)
@@ -148,9 +147,9 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
 
     val extAggregates2 =
       client.dataPoints.queryAggregatesByExternalId(
-        "test__constant_74_with_noise",
+        "VAL_23_FIC_92543_06:Z.X.Value",
         Instant.ofEpochMilli(0L),
-        Instant.ofEpochMilli(1564272000000L),
+        Instant.ofEpochMilli(1553795183461L),
         "1h",
         Seq("sum", "stepInterpolation")
       )
@@ -160,18 +159,18 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     aggregates2.keys should contain only("sum", "stepInterpolation")
     assertThrows[CdpApiException] {
       val _ = client.dataPoints.queryAggregatesById(
-        1580330145648L,
+        54577852743225L,
         Instant.ofEpochMilli(0L),
-        Instant.ofEpochMilli(1564272000000L),
+        Instant.ofEpochMilli(1553795183461L),
         "1d",
         Seq("invalid aggregate1", "minx")
       )
     }
     assertThrows[CdpApiException] {
       val _ = client.dataPoints.queryAggregatesById(
-        1580330145648L,
+        54577852743225L,
         Instant.ofEpochMilli(0L),
-        Instant.ofEpochMilli(1564272000000L),
+        Instant.ofEpochMilli(1553795183461L),
         "1d",
         Seq.empty
       )
@@ -179,9 +178,9 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
   }
 
   val sumsOnly = client.dataPoints.queryAggregatesById(
-    1580330145648L,
+    54577852743225L,
     Instant.ofEpochMilli(0L),
-    Instant.ofEpochMilli(1564272000000L),
+    Instant.ofEpochMilli(1553795183461L),
     "1d",
     Seq("min")
   )
@@ -193,7 +192,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       client.dataPoints.queryById(
         missingId,
         Instant.ofEpochMilli(0L),
-        Instant.ofEpochMilli(1564272000000L)
+        Instant.ofEpochMilli(1553795183461L)
       )
     }
     caught.missing.get.head.toMap("id").toString() shouldEqual missingId.toString
@@ -202,7 +201,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       client.dataPoints.queryById(
         missingId,
         Instant.ofEpochMilli(0L),
-        Instant.ofEpochMilli(1564272000000L)
+        Instant.ofEpochMilli(1553795183461L)
       )
     }
     sCaught.missing.get.head.toMap("id").toString() shouldEqual missingId.toString
@@ -211,7 +210,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       client.dataPoints.queryAggregatesById(
         missingId,
         Instant.ofEpochMilli(0L),
-        Instant.ofEpochMilli(1564272000000L),
+        Instant.ofEpochMilli(1553795183461L),
         "1d",
         Seq("average")
       )
