@@ -30,7 +30,10 @@ class FilterTest extends SdkTestSpec {
   def filterWithCursor(batchSize: Int, limit: Option[Int])(test: Int => Any): Any = {
     var hijackedRequest: FilterRequest[DummyFilter] = null // scalastyle:ignore
     val requestHijacker = SttpBackendStub.synchronous.whenAnyRequest.thenRespondWrapped(req => {
-      hijackedRequest = decode[FilterRequest[DummyFilter]](req.body.asInstanceOf[StringBody].s).right.get
+      hijackedRequest = decode[FilterRequest[DummyFilter]](req.body.asInstanceOf[StringBody].s) match {
+        case Right(x) => x
+        case Left(e) => throw e
+      }
       Response(Right(ItemsWithCursor(Seq(0, 1, 2), None)), 200, "OK")
     })
     lazy val dummyClient = Client("foo",
