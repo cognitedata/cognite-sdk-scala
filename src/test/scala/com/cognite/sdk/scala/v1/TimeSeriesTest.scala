@@ -254,7 +254,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
           search = Some(TimeSeriesSearch(name = Some("W0405")))
         )
       )
-    assert(nameSearchResults.length == 12)
+    assert(nameSearchResults.length == 19)
 
     val descriptionSearchResults = client.timeSeries.search(
       TimeSeriesQuery(
