@@ -4,7 +4,7 @@ import java.time.Instant
 
 import com.cognite.sdk.scala.common._
 
-private[sdk] final case class DataSetCreate(
+final case class DataSetCreate(
     name: Option[String],
     description: Option[String] = None,
     externalId: Option[String] = None,
@@ -12,7 +12,7 @@ private[sdk] final case class DataSetCreate(
     writeProtected: Boolean = false
 ) extends WithExternalId
 
-private[sdk] final case class DataSetFilter(
+final case class DataSetFilter(
     externalIdPrefix: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
     writeProtected: Option[Boolean] = None,
@@ -20,7 +20,7 @@ private[sdk] final case class DataSetFilter(
     lastUpdatedTime: Option[TimeRange] = None
 )
 
-private[sdk] final case class DataSetUpdate(
+final case class DataSetUpdate(
     externalId: Option[Setter[String]] = None,
     name: Option[Setter[String]] = None,
     description: Option[Setter[String]] = None,
@@ -28,7 +28,7 @@ private[sdk] final case class DataSetUpdate(
     writeProtected: Option[NonNullableSetter[Boolean]] = None
 ) extends WithSetExternalId
 
-private[sdk] final case class DataSet(
+final case class DataSet(
     name: Option[String],
     writeProtected: Boolean,
     externalId: Option[String],
@@ -40,7 +40,7 @@ private[sdk] final case class DataSet(
 ) extends WithId[Long]
     with WithExternalId
 
-private[sdk] final case class DataSetQuery(
+final case class DataSetQuery(
     filter: Option[DataSetFilter],
     limit: Int
 )

@@ -6,7 +6,7 @@ import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 
-private[sdk] class DataSets[F[_]](val requestSession: RequestSession[F])
+class DataSets[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[DataSet, F]
     with Create[DataSet, DataSetCreate, F]
@@ -74,13 +74,13 @@ private[sdk] class DataSets[F[_]](val requestSession: RequestSession[F])
 }
 
 object DataSets {
-  implicit val dataSetUpdateEncoder: Encoder[DataSetUpdate] = deriveEncoder
-  implicit val dataSetFilterEncoder: Encoder[DataSetFilter] = deriveEncoder
-  implicit val dataSetFilterRequestEncoder: Encoder[FilterRequest[DataSetFilter]] = deriveEncoder
-  implicit val dataSetDecoder: Decoder[DataSet] = deriveDecoder
-  implicit val dataSetItemsDecoder: Decoder[Items[DataSet]] = deriveDecoder
-  implicit val dataSetItemsWithCursorDecoder: Decoder[ItemsWithCursor[DataSet]] = deriveDecoder
-  implicit val dataSetCreateEncoder: Encoder[DataSetCreate] = deriveEncoder
-  implicit val dataSetCreateItemsEncoder: Encoder[Items[DataSetCreate]] = deriveEncoder
-  implicit val dataSetListQueryEncoder: Encoder[DataSetQuery] = deriveEncoder
+  implicit val dataSetUpdateEncoder: Encoder[DataSetUpdate] = deriveEncoder[DataSetUpdate]
+  implicit val dataSetFilterEncoder: Encoder[DataSetFilter] = deriveEncoder[DataSetFilter]
+  implicit val dataSetFilterRequestEncoder: Encoder[FilterRequest[DataSetFilter]] = deriveEncoder[FilterRequest[DataSetFilter]]
+  implicit val dataSetDecoder: Decoder[DataSet] = deriveDecoder[DataSet]
+  implicit val dataSetItemsDecoder: Decoder[Items[DataSet]] = deriveDecoder[Items[DataSet]]
+  implicit val dataSetItemsWithCursorDecoder: Decoder[ItemsWithCursor[DataSet]] = deriveDecoder[ItemsWithCursor[DataSet]]
+  implicit val dataSetCreateEncoder: Encoder[DataSetCreate] = deriveEncoder[DataSetCreate]
+  implicit val dataSetCreateItemsEncoder: Encoder[Items[DataSetCreate]] = deriveEncoder[Items[DataSetCreate]]
+  implicit val dataSetListQueryEncoder: Encoder[DataSetQuery] = deriveEncoder[DataSetQuery]
 }
