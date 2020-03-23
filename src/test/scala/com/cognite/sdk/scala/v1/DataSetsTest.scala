@@ -43,10 +43,10 @@ class DataSetsTest extends SdkTestSpec {
   }
 
   it should "support retrieving by ids and throw error for missing id" in {
-    val firstTwoItemIds = client.dataSets.filter(DataSetFilter()).take(2).map(_.id).compile.to.seq
+    val firstTwoItemIds = client.dataSets.filter(DataSetFilter()).take(2).map(_.id).compile.toList
     assert(firstTwoItemIds.length == 2)
 
-    val maybeItemsRead = client.dataSets.retrieveByIds(firstTwoItemIds)
+    val maybeItemsRead = client.dataSets.retrieveByIds(Seq(firstTwoItemIds(0),firstTwoItemIds(1)))
     val itemsReadIds = maybeItemsRead.map(_.id)
 
     assert(itemsReadIds.length == firstTwoItemIds.length)
