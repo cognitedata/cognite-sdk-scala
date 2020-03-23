@@ -176,6 +176,7 @@ class GenericClient[F[_]: Monad, S](
   lazy val dataPoints = new DataPointsResource[F](requestSession)
   lazy val sequences = new SequencesResource[F](requestSession)
   lazy val sequenceRows = new SequenceRows[F](requestSession)
+  lazy val dataSets = new DataSets[F](requestSession)
 
   lazy val rawDatabases = new RawDatabases[F](requestSession)
   def rawTables(database: String): RawTables[F] = new RawTables(requestSession, database)
