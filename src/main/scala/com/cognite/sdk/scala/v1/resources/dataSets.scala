@@ -28,17 +28,16 @@ class DataSets[F[_]](val requestSession: RequestSession[F])
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] = ???
 
   override def deleteByExternalIds(
-                                    externalIds: Seq[String],
-                                    ignoreUnknownIds: Boolean = false
-                                  ): F[Unit] = ???
+      externalIds: Seq[String],
+      ignoreUnknownIds: Boolean = false
+  ): F[Unit] = ???
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[DataSet]] =
-    filterWithCursor(DataSetFilter(), None,limit, None, None)
-
+    filterWithCursor(DataSetFilter(), None, limit, None, None)
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[DataSet]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
