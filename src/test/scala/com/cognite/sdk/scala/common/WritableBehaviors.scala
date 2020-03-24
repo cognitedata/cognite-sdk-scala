@@ -11,16 +11,10 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       readExamples: Seq[R],
       createExamples: Seq[W],
       idsThatDoNotExist: Seq[PrimitiveId],
-      supportsMissingAndThrown: Boolean
+      supportsMissingAndThrown: Boolean,
+      supportsDeletes: Boolean = true
   )(implicit t: Transformer[R, W]): Unit = {
-    val datasetBaseUrl = "https://api.cognitedata.com/api/v1/projects/playground/datasets"
-    val deleteFlag =
-      if (!writable.baseUrl.toString().equals(datasetBaseUrl))
-        true
-      else
-        false
-    
-    if (deleteFlag) {
+    if (supportsDeletes) {
       it should "be an error to delete using ids that does not exist" in {
         val thrown = the[CdpApiException] thrownBy writable
           .deleteByIds(idsThatDoNotExist)
@@ -28,8 +22,8 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
           val missingIds = thrown.missing
             .getOrElse(Seq.empty)
             .flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
-          (missingIds should have).size(idsThatDoNotExist.size.toLong)
-          (missingIds should contain).theSameElementsAs(idsThatDoNotExist)
+          missingIds should have size idsThatDoNotExist.size.toLong
+          missingIds should contain theSameElementsAs idsThatDoNotExist
         }
 
         val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
@@ -46,8 +40,8 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
                 .getOrElse(Seq.empty)
                 .flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
           }
-          (sameMissingIds should have).size(sameIdsThatDoNotExist.toSet.size.toLong)
-          (sameMissingIds should contain).theSameElementsAs(sameIdsThatDoNotExist.toSet)
+          sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+          sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
         }
       }
 
@@ -62,38 +56,42 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
     it should "create and delete items using the read class" in {
       // create a single item
       val createdItem = writable.createFromRead(readExamples.take(1))
-      (createdItem should have).size(1)
+      createdItem should have size 1
       createdItem.head.id should not be 0
 
-      if (deleteFlag)
+      if (supportsDeletes) {
         writable.deleteByIds(createdItem.map(_.id))
+      }
 
       // create multiple items
       val createdItems = writable.createFromRead(readExamples)
-      (createdItems should have).size(readExamples.size.toLong)
+      createdItems should have size readExamples.size.toLong
       val createdIds = createdItems.map(_.id)
-      (createdIds should have).size(readExamples.size.toLong)
+      createdIds should have size readExamples.size.toLong
 
-      if (deleteFlag)
+      if (supportsDeletes) {
         writable.deleteByIds(createdIds)
+      }
     }
 
     it should "create and delete items using the create class" in {
       // create a single item
       val createdItem = writable.create(createExamples.take(1))
-      (createdItem should have).size(1)
+      createdItem should have size 1
       createdItem.head.id should not be 0
 
-      if (deleteFlag)
+      if (supportsDeletes) {
         writable.deleteByIds(createdItem.map(_.id))
+      }
 
       // create multiple items
       val createdItems = writable.create(createExamples)
-      (createdItems should have).size(createExamples.size.toLong)
+      createdItems should have size createExamples.size.toLong
       val createdIds = createdItems.map(_.id)
-      (createdIds should have).size(createExamples.size.toLong)
-      if (deleteFlag)
+      createdIds should have size createExamples.size.toLong
+      if (supportsDeletes) {
         writable.deleteByIds(createdIds)
+      }
     }
     // TODO: test creating multiple items with the same external
     //       id in the same api call for V1
@@ -104,16 +102,10 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       readExamples: Seq[R],
       createExamples: Seq[W],
       externalIdsThatDoNotExist: Seq[String],
-      supportsMissingAndThrown: Boolean
+      supportsMissingAndThrown: Boolean,
+      supportsDeletes: Boolean = true
   )(implicit t: Transformer[R, W]): Unit = {
-    val datasetBaseUrl = "https://api.cognitedata.com/api/v1/projects/playground/datasets"
-    val deleteFlag =
-      if (!writable.baseUrl.toString().equals(datasetBaseUrl))
-        true
-      else
-        false
-
-    if (deleteFlag) {
+    if (supportsDeletes) {
       it should "be an error to delete using external ids that does not exist" in {
         val thrown = the[CdpApiException] thrownBy writable
           .deleteByExternalIds(externalIdsThatDoNotExist)
@@ -121,8 +113,8 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
           val missingIds = thrown.missing
             .getOrElse(Seq.empty)
             .flatMap(jsonObj => jsonObj("externalId").get.asString)
-          (missingIds should have).size(externalIdsThatDoNotExist.size.toLong)
-          (missingIds should contain).theSameElementsAs(externalIdsThatDoNotExist)
+          missingIds should have size externalIdsThatDoNotExist.size.toLong
+          missingIds should contain theSameElementsAs externalIdsThatDoNotExist
         }
 
         val sameIdsThatDoNotExist =
@@ -140,8 +132,8 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
                 .getOrElse(Seq.empty)
                 .flatMap(jsonObj => jsonObj("externalId").get.asString)
           }
-          (sameMissingIds should have).size(sameIdsThatDoNotExist.toSet.size.toLong)
-          (sameMissingIds should contain).theSameElementsAs(sameIdsThatDoNotExist.toSet)
+          sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+          sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
         }
       }
     }
@@ -149,25 +141,24 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
     it should "create and delete items using the read class and external ids" in {
       // create a single item
       val createdItem = writable.createFromRead(readExamples.take(1))
-      (createdItem should have).size(1)
+      createdItem should have size 1
       createdItem.head.externalId should not be empty
 
-      if (deleteFlag)
+      if (supportsDeletes)
         writable.deleteByExternalIds(createdItem.map(_.externalId.get))
 
       // create multiple items
-      if (deleteFlag) {
+      if (supportsDeletes) {
         val createdItems = writable.createFromRead(readExamples)
-        (createdItems should have).size(readExamples.size.toLong)
+        createdItems should have size readExamples.size.toLong
         val createdExternalIds = createdItems.map(_.externalId.get)
-        (createdExternalIds should have).size(readExamples.size.toLong)
+        createdExternalIds should have size readExamples.size.toLong
         writable.deleteByExternalIds(createdExternalIds)
-      }
-      else {
+      } else {
         val createdItems = writable.createFromRead(Seq(readExamples(1),readExamples(2)))
-        (createdItems should have).size(2)
+        createdItems should have size 2
         val createdExternalIds = createdItems.map(_.externalId.get)
-        (createdExternalIds should have).size(2)
+        createdExternalIds should have size 2
       }
     }
 
@@ -175,25 +166,24 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
     it should "create and delete items using the create class and external ids" in {
       // create a single item
       val createdItem = writable.create(createExamples.take(1))
-      (createdItem should have).size(1)
+      createdItem should have size 1
       createdItem.head.externalId should not be empty
 
-      if (deleteFlag)
+      if (supportsDeletes)
         writable.deleteByExternalIds(createdItem.map(_.externalId.get))
 
       // create multiple items
-      if (deleteFlag) {
+      if (supportsDeletes) {
         val createdItems = writable.create(createExamples)
-        (createdItems should have).size(createExamples.size.toLong)
+        createdItems should have size createExamples.size.toLong
         val createdIds = createdItems.map(_.externalId.get)
-        (createdIds should have).size(createExamples.size.toLong)
+        createdIds should have size createExamples.size.toLong
         writable.deleteByExternalIds(createdIds)
-      }
-      else {
+      } else {
         val createdItems = writable.create(Seq(createExamples(1),createExamples(2)))
-        (createdItems should have).size(2)
+        createdItems should have size 2
         val createdIds = createdItems.map(_.externalId.get)
-        (createdIds should have).size(2)
+        createdIds should have size 2
       }
     }
     // TODO: test creating multiple items with the same external
@@ -209,16 +199,10 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       updateExamples: Seq[R],
       updateId: (Long, R) => R,
       compareItems: (R, R) => Boolean,
-      compareUpdated: (Seq[R], Seq[R]) => Unit
+      compareUpdated: (Seq[R], Seq[R]) => Unit,
+      supportsDeletes: Boolean = true
   )(implicit t: Transformer[R, W], t2: Transformer[R, U]): Unit =
     it should "allow updates using the read class" in {
-      val datasetBaseUrl = "https://api.cognitedata.com/api/v1/projects/playground/datasets"
-      val deleteFlag =
-        if (!updatable.baseUrl.toString().equals(datasetBaseUrl))
-          true
-        else
-          false
-
       // create items
       val createdIds = updatable.createFromRead(readExamples).map(_.id)
       assert(createdIds.size == readExamples.size)
@@ -242,8 +226,9 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       compareUpdated(readItems, updatedItems)
 
       // delete it
-      if (deleteFlag)
+      if (supportsDeletes) {
         updatable.deleteByIds(createdIds)
+      }
     }
 
   def updatableByExternalId[R <: WithExternalId, W, U](
@@ -253,22 +238,17 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       with RetrieveByIds[R, Id],
     itemsToCreate: Seq[R],
     updatesToMake: Map[String, U],
-    expectedBehaviors: (Seq[R], Seq[R]) => Unit)
-  (implicit t: Transformer[R, W]): Unit =
+    expectedBehaviors: (Seq[R], Seq[R]) => Unit,
+    supportsDeletes: Boolean = true
+  )(implicit t: Transformer[R, W]): Unit =
     it should "allow updating by externalId" in {
-      val datasetBaseUrl = "https://api.cognitedata.com/api/v1/projects/playground/datasets"
-      val deleteFlag =
-        if (!resource.baseUrl.toString().equals(datasetBaseUrl))
-          true
-        else
-          false
-
       val createdItems = resource.createFromRead(itemsToCreate)
       val updatedItems = resource.updateByExternalId(updatesToMake)
       expectedBehaviors(createdItems, updatedItems)
 
-      if (deleteFlag)
+      if (supportsDeletes) {
         resource.deleteByExternalIds(updatedItems.map(_.externalId.get))
+      }
     }
 
   def updatableById[R <: WithId[Long], W, U](
@@ -278,23 +258,18 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       with RetrieveByIds[R, Id],
     itemsToCreate: Seq[R],
     updatesToMake: Seq[U],
-    expectedBehaviors: (Seq[R], Seq[R]) => Unit
+    expectedBehaviors: (Seq[R], Seq[R]) => Unit,
+    supportsDeletes: Boolean = true
   )(implicit t: Transformer[R, W]): Unit =
     it should "allow updating by Id" in {
-      val datasetBaseUrl = "https://api.cognitedata.com/api/v1/projects/playground/datasets"
-      val deleteFlag =
-        if (!resource.baseUrl.toString().equals(datasetBaseUrl))
-          true
-        else
-          false
-
       val createdItems = resource.createFromRead(itemsToCreate)
       val updateMap = createdItems.indices.map(i => (createdItems(i).id, updatesToMake(i))).toMap
       val updatedItems = resource.updateById(updateMap)
       expectedBehaviors(createdItems, updatedItems)
 
-      if (deleteFlag)
+      if (supportsDeletes) {
         resource.deleteByIds(updatedItems.map(_.id))
+      }
     }
 
   def deletableWithIgnoreUnknownIds[R <: WithId[Long], W, PrimitiveId](
