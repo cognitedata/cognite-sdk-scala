@@ -6,32 +6,39 @@ import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 
-private[sdk] class DataSets[F[_]](val requestSession: RequestSession[F])
+class DataSets[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with PartitionedReadable[DataSet, F]
+    with Readable[DataSet, F]
     with Create[DataSet, DataSetCreate, F]
     with RetrieveByIds[DataSet, F]
     with RetrieveByExternalIds[DataSet, F]
-    with PartitionedFilter[DataSet, DataSetFilter, F]
+    with Filter[DataSet, DataSetFilter, F]
     with Search[DataSet, DataSetQuery, F]
     with UpdateById[DataSet, DataSetUpdate, F]
+    with DeleteByIdsWithIgnoreUnknownIds[F, Long]
+    with DeleteByExternalIdsWithIgnoreUnknownIds[F]
     with UpdateByExternalId[DataSet, DataSetUpdate, F] {
   import DataSets._
   override val baseUrl = uri"${requestSession.baseUrl}/datasets"
+
+  override def deleteByIds(ids: Seq[Long]): F[Unit] = ???
+
+  override def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean = false): F[Unit] = ???
+
+  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] = ???
+
+  override def deleteByExternalIds(
+                                    externalIds: Seq[String],
+                                    ignoreUnknownIds: Boolean = false
+                                  ): F[Unit] = ???
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[DataSet]] =
-    Readable.readWithCursor(
-      requestSession,
-      baseUrl,
-      cursor,
-      limit,
-      partition,
-      Constants.defaultBatchSize
-    )
+    filterWithCursor(DataSetFilter(), None,limit, None, None)
+
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[DataSet]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)

@@ -4,114 +4,134 @@ import java.time.Instant
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.common.SetValue
 
-class DataSetsTest extends SdkTestSpec {
+class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
+  private val idsThatDoNotExist = Seq(999991L, 999992L)
+  private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
+  it should behave like readable(client.dataSets)
 
-  it should "able to read datasets" in {
-    val listLength = client.dataSets.filter(DataSetFilter()).compile.toList.length
+  it should behave like readableWithRetrieve(client.dataSets, idsThatDoNotExist, supportsMissingAndThrown = true)
 
-    val first1Length =
-      client.dataSets.filter(DataSetFilter(), limit = Some(1)).compile.toList.length
-    first1Length should be (Math.min(listLength, 1))
-    val first2Length =
-      client.dataSets.filter(DataSetFilter(), limit = Some(2)).compile.toList.length
-    first2Length should be (Math.min(listLength, 2))
-    val allLength = client.dataSets.filter(DataSetFilter(), limit = Some(3)).compile.toList.length
-    allLength should be (Math.min(listLength, 3))
-  }
+  it should behave like readableWithRetrieveByExternalId(client.dataSets, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
-  it should "able to create datasets" in {
-    val random = shortRandom()
-    //create single item
-    val createdItem = client.dataSets.createOne(
-      DataSetCreate(
-        name = Some(s"testDataSet-name-${random}"),
-        externalId = Some(s"testDataset1-externalId-${random}")))
-    createdItem.id should not be 0
-    assert(createdItem.externalId.contains(s"testDataset1-externalId-${random}"))
+  it should behave like writable(
+    client.dataSets,
+    Seq(DataSet(name = Some("scala-sdk-read-example-1")), DataSet(name = Some("scala-sdk-read-example-2"))),
+    Seq(DataSetCreate(name = Some("scala-sdk-create-example-1")), DataSetCreate(name = Some("scala-sdk-create-example-2"))),
+    idsThatDoNotExist,
+    supportsMissingAndThrown = true)
 
-    //create multiple items
-    val createdItems = client.dataSets.create(
-      Seq(
-        DataSetCreate(
-          name = Some(s"testDataSet-name-1-${random}"),
-          externalId = Some(s"testDataset1-externalId-1-${random}")),
-        DataSetCreate(
-          name = Some(s"testDataSet-name-2-${random}"),
-          externalId = Some(s"testDataset1-externalId-2-${random}"))
-      ))
-    assert(createdItems.length == 2)
-  }
+  it should behave like writableWithExternalId(
+    client.dataSets,
+    Seq(
+      DataSet(name = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
+      DataSet(name = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom())),
+      DataSet(name = Some("scala-sdk-read-example-3"), externalId = Some(shortRandom()))
+    ),
+    Seq(
+      DataSetCreate(name = Some("scala-sdk-create-example-1"), externalId = Some(shortRandom())),
+      DataSetCreate(name = Some("scala-sdk-create-example-2"), externalId = Some(shortRandom())),
+      DataSetCreate(name = Some("scala-sdk-create-example-3"), externalId = Some(shortRandom())),
+    ),
+    externalIdsThatDoNotExist,
+    supportsMissingAndThrown = true
+  )
 
-  it should "support retrieving by ids and throw error for missing id" in {
-    val firstTwoItemIds = client.dataSets.filter(DataSetFilter()).take(2).map(_.id).compile.toList
-    assert(firstTwoItemIds.length == 2)
+  private val datasetsToCreate = Seq(
+    DataSet(description = Some("desc-1"), name = Some("scala-sdk-update-1")),
+    DataSet(description = Some("desc-2")),
+    DataSet(description = Some("desc-3"))
+  )
+  private val datasetUpdates = Seq(
+    DataSet(description = Some("desc-1-1"),  name = null),// scalastyle:ignore null
+    DataSet(
+      description = Some("desc-2-1"),
+      metadata = Map("a" -> "b")
+    ),
+    DataSet(description = Some("desc-3-1"))
+  )
 
-    val maybeItemsRead = client.dataSets.retrieveByIds(Seq(firstTwoItemIds(0),firstTwoItemIds(1)))
-    val itemsReadIds = maybeItemsRead.map(_.id)
-
-    assert(itemsReadIds.length == firstTwoItemIds.length)
-    assert(itemsReadIds == firstTwoItemIds)
-
-    assertThrows[CdpApiException] {
-      client.dataSets.retrieveById(1234567890123L)
+  it should behave like updatable(
+    client.dataSets,
+    datasetsToCreate,
+    datasetUpdates,
+    (id: Long, item: DataSet) => item.copy(id = id),
+    (a: DataSet, b: DataSet) => { a == b },
+    (readDatasets: Seq[DataSet], updatedDatasets: Seq[DataSet]) => {
+      assert(datasetsToCreate.size == datasetUpdates.size)
+      assert(readDatasets.size == datasetsToCreate.size)
+      assert(readDatasets.size == updatedDatasets.size)
+      assert(updatedDatasets.zip(readDatasets).forall { case (updated, read) =>
+        updated.description.nonEmpty &&
+          read.description.nonEmpty &&
+          updated.description.forall { description => description == s"${read.description.get}-1"}
+      })
+      assert(readDatasets.head.name.isDefined)
+      assert(updatedDatasets.head.name.isEmpty)
+      assert(updatedDatasets(1).name == datasetUpdates(1).name)
+      ()
     }
-  }
+  )
 
-  it should "support retrieving by externalIds and throw error for missing ones" in {
-    val maybeItemsRead = client.dataSets.retrieveByExternalId("testDataset1-externalId")
-
-    assert(maybeItemsRead.externalId.contains("testDataset1-externalId"))
-
-    assertThrows[CdpApiException] {
-      client.dataSets.retrieveByExternalId("missing-id")
+  it should behave like updatableById(
+    client.dataSets,
+    datasetsToCreate,
+    Seq(
+      DataSetUpdate(description = Some(SetValue("desc-1-1")), name = Some(SetNull())),
+      DataSetUpdate(description = Some(SetValue("desc-2-1"))),
+      DataSetUpdate(description = Some(SetValue("desc-3-1")))
+    ),
+    (readDatasets: Seq[DataSet], updatedDatasets: Seq[DataSet]) => {
+      assert(readDatasets.size == updatedDatasets.size)
+      assert(updatedDatasets.zip(readDatasets).forall { case (updated, read) =>  updated.description.get == s"${read.description.get}-1" })
+      val names = updatedDatasets.map(_.name)
+      assert(List(None, None, None) === names)
+      ()
     }
-  }
+  )
 
-  it should "support update by id and externalId" in {
-    val results =
-      client.dataSets.filter(DataSetFilter(externalIdPrefix = Some("testDataset1-externalId"))).compile.toList
+  val externalId = shortRandom()
 
-    val random = shortRandom()
-
-    val updatedDatasetById = client.dataSets.updateById(
-      Map(results.head.id -> DataSetUpdate(
-        description = Some(SetValue(s"testDataset1-description-${random}")))))
-
-    assert(updatedDatasetById.head.description.contains(s"testDataset1-description-${random}"))
-
-    val updatedDatasetByExternalId = client.dataSets.updateByExternalId(
-      Map("testDataset1-externalId" -> DataSetUpdate(
-        metadata = Some(SetValue(Map("a" -> s"b-${random}"))))))
-
-    assert(updatedDatasetByExternalId.head.metadata.get("a").equals(Some(s"b-${random}")))
-  }
-
-  it should "support filter" in {
-    val createdTimeFilterResults = client.dataSets
-      .filter(
-        DataSetFilter(
-          createdTime = Some(
-            TimeRange(Instant.ofEpochMilli(1584403200000L), Instant.ofEpochMilli(1584525600000L))
+  it should behave like updatableByExternalId(
+    client.dataSets,
+    Seq(DataSet(description = Some("description-1"), externalId = Some(s"update-1-externalId-${externalId}")),
+      DataSet(description = Some("description-2"), externalId = Some(s"update-2-externalId-${externalId}"))),
+    Map(s"update-1-externalId-${externalId}" -> DataSetUpdate(description = Some(SetValue("description-1-1"))),
+      s"update-2-externalId-${externalId}" -> DataSetUpdate(description = Some(SetValue("description-2-1")))),
+    (readDatasets: Seq[DataSet], updatedDatasets: Seq[DataSet]) => {
+      assert(readDatasets.size == updatedDatasets.size)
+      assert(updatedDatasets.zip(readDatasets).forall { case (updated, read) =>
+        updated.description.getOrElse("") == s"${read.description.getOrElse("")}-1" })
+      assert(updatedDatasets.zip(readDatasets).forall { case (updated, read) => updated.externalId == read.externalId })
+      ()
+    }
+  )
+  
+    it should "support filter" in {
+      val createdTimeFilterResults = client.dataSets
+        .filter(
+          DataSetFilter(
+            createdTime = Some(
+              TimeRange(Instant.ofEpochMilli(1584403200000L), Instant.ofEpochMilli(1584525600000L))
+            )
           )
         )
-      )
-      .compile
-      .toList
-    assert(createdTimeFilterResults.length == 4)
+        .compile
+        .toList
+      assert(createdTimeFilterResults.length == 4)
 
-    val createdTimeFilterResultsWithLimit = client.dataSets
-      .filter(
-        DataSetFilter(
-          createdTime = Some(
-            TimeRange(Instant.ofEpochMilli(1584403200000L), Instant.ofEpochMilli(1584525600000L))
+      val createdTimeFilterResultsWithLimit = client.dataSets
+        .filter(
+          DataSetFilter(
+            createdTime = Some(
+              TimeRange(Instant.ofEpochMilli(1584403200000L), Instant.ofEpochMilli(1584525600000L))
+            ),
+            externalIdPrefix = Some("test")
           ),
-          externalIdPrefix = Some("test")
-        ),
-        limit = Some(1)
-      )
-      .compile
-      .toList
+          limit = Some(1)
+        )
+        .compile
+        .toList
 
-    assert(createdTimeFilterResultsWithLimit.length == 1)
-  }
+      assert(createdTimeFilterResultsWithLimit.length == 1)
+    }
 }
