@@ -6,7 +6,7 @@ import scala.concurrent.duration._
 
 import cats.Id
 import com.softwaremill.sttp.{HttpURLConnectionBackend, SttpBackend}
-import com.cognite.sdk.scala.common.RetryingBackend
+import com.cognite.sdk.scala.common.{GzipSttpBackend, RetryingBackend}
 
 import scala.concurrent.ExecutionContext
 
@@ -15,7 +15,9 @@ package object v1 {
     ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   implicit val sttpBackend: SttpBackend[Id, Nothing] =
     new RetryingBackend[Id, Nothing](
-      HttpURLConnectionBackend(),
+      new GzipSttpBackend[Id, Nothing](
+        HttpURLConnectionBackend()
+      ),
       initialRetryDelay = 100.millis,
       maxRetryDelay = 200.millis
     )
