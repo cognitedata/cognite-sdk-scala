@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.common
 
 import java.io.{ByteArrayInputStream, File}
 import java.nio.ByteBuffer
-import java.nio.file.{Files, Paths}
+import java.nio.file.Paths
 
 import cats.effect.{ContextShift, IO, Timer}
 import com.softwaremill.sttp._
@@ -15,6 +15,7 @@ import org.scalatest.{BeforeAndAfter, FlatSpec, OptionValues}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.io.Source
 
 class EchoServlet extends HttpServlet {
   override def doPost(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
@@ -52,7 +53,7 @@ class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter
     server.stop()
   }
 
-  private val longTestString = "aaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbb".repeat(50)
+  private val longTestString = "aaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbb" * 50
 
   implicit val sttpBackend: SttpBackend[IO, Nothing] =
     new GzipSttpBackend[IO, Nothing](
@@ -134,11 +135,15 @@ class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter
     val request = sttp
       .body(new File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt"))
       .post(uri"http://localhost:$port/file")
-    val hm = request.send().unsafeRunSync()
-    assert(
-      hm.unsafeBody == Files
-        .readString(Paths.get("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt"))
+    val r = request.send().unsafeRunSync()
+    val source = Source.fromFile(
+      Paths.get("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt").toFile
     )
+    try {
+      assert(r.unsafeBody == source.mkString)
+    } finally {
+      source.close()
+    }
   }
 
   it should "not compress an already compressed request" in {
