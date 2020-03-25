@@ -6,7 +6,7 @@ val scala212 = "2.12.10"
 val scala211 = "2.11.12"
 val supportedScalaVersions = List(scala212, scala213, scala211)
 
-val sttpVersion = "1.6.3"
+val sttpVersion = "1.6.8"
 val circeVersion: Option[(Long, Long)] => String = {
   case Some((2, 13)) => "0.12.0-M4"
   case _ => "0.11.1"
