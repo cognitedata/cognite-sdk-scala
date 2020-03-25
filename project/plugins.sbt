@@ -8,4 +8,4 @@ addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.1")
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.8")
 addSbtPlugin("com.thesamet" % "sbt-protoc" % "0.99.31")
 libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.9.0"
-addSbtPlugin("au.com.onegeek" %% "sbt-dotenv" % "2.1.146")
+addSbtPlugin("au.com.onegeek" %% "sbt-dotenv" % "2.1.169")
