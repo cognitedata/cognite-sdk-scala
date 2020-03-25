@@ -6,7 +6,8 @@ import cats.Id
 import com.cognite.sdk.scala.v1._
 import com.cognite.sdk.scala.v1.resources.DataSets
 import com.softwaremill.sttp.{MonadError, Request, Response, SttpBackend}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBackend[R, S] {
   override def send[T](request: Request[T, S]): R[Response[T]] =
@@ -28,7 +29,7 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
   override def responseMonad: MonadError[R] = delegate.responseMonad
 }
 
-abstract class SdkTestSpec extends FlatSpec with Matchers {
+abstract class SdkTestSpec extends AnyFlatSpec with Matchers {
 
   lazy val client: GenericClient[Id, Nothing] = GenericClient.forAuth[Id, Nothing](
     "scala-sdk-test", auth)(implicitly, sttpBackend)
