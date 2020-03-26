@@ -57,12 +57,13 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minimumSize: Int
 }
 
 object GzipSttpBackend {
-  val minimumBufferSize = 10000
+  val maximumBufferSize = 65536
 
   private[sdk] def compress(bytes: Array[Byte]): Array[Byte] = {
-    val bos = new ByteArrayOutputStream(math.min(bytes.length, minimumBufferSize))
+    val bufferSize = math.min(bytes.length, maximumBufferSize)
+    val bos = new ByteArrayOutputStream(bufferSize)
     try {
-      val gzip = new GZIPOutputStream(bos)
+      val gzip = new GZIPOutputStream(bos, bufferSize)
       try {
         gzip.write(bytes)
       } finally {
