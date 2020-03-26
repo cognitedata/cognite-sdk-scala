@@ -8,12 +8,20 @@ import com.cognite.sdk.scala.v1.resources.DataSets
 import com.softwaremill.sttp.{MonadError, Request, Response, SttpBackend}
 import org.scalatest.{FlatSpec, Matchers}
 
+import scala.util.control.NonFatal
+
 class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBackend[R, S] {
   override def send[T](request: Request[T, S]): R[Response[T]] =
-    responseMonad.map(responseMonad.handleError(delegate.send(request)) {
-      case e: Exception =>
+    responseMonad.map(try {
+      responseMonad.handleError(delegate.send(request)) {
+        case e: Exception =>
+          println(s"Exception when sending request: $request, ${e.toString}") // scalastyle:ignore
+          responseMonad.error(e)
+      }
+    } catch {
+      case NonFatal(e) =>
         println(s"Exception when sending request: $request, ${e.toString}") // scalastyle:ignore
-        responseMonad.error(e)
+        throw e
     }) { response =>
       println(s"request ${request.body.toString}") // scalastyle:ignore
       println(s"response ${response.toString()}") // scalastyle:ignore
@@ -29,7 +37,7 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
 }
 
 abstract class SdkTestSpec extends FlatSpec with Matchers {
-
+  // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
   lazy val client: GenericClient[Id, Nothing] = GenericClient.forAuth[Id, Nothing](
     "scala-sdk-test", auth)(implicitly, sttpBackend)
 
