@@ -7,7 +7,7 @@ import java.util.zip.GZIPOutputStream
 import com.softwaremill.sttp._
 import org.apache.commons.io.IOUtils
 
-class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minSize: Int = 1000)
+class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minimumSize: Int = 1000)
     extends SttpBackend[R, S] {
   import GzipSttpBackend._
 
@@ -29,7 +29,7 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minSize: Int = 1
       case body: BasicRequestBody
           if !request.headers.exists(isGzipped)
             && !request.headers.exists(isGzippedContent) =>
-        compressBody(body, minSize)
+        compressBody(body, minimumSize)
       // TODO: Add support for streaming bodies.
       //       Will likely require us to be more strict about S, for example
       //       restricting it to fs2.Stream and using fs2.compress or fs2.compression.
@@ -68,7 +68,6 @@ object GzipSttpBackend {
   private[sdk] def compress(bytes: Array[Byte]): Array[Byte] = {
     val bos = new ByteArrayOutputStream(math.min(bytes.length, minimumBufferSize))
     try {
-      //val gzip = new DeflaterOutputStream(bos)
       val gzip = new GZIPOutputStream(bos)
       try {
         gzip.write(bytes)
@@ -78,10 +77,7 @@ object GzipSttpBackend {
     } finally {
       bos.close()
     }
-    val gzippedBytes = bos.toByteArray
-    // Skip gzip header, add final null byte
-    //gzippedBytes.slice(10, gzippedBytes.size) ++ Array[Byte](0)
-    gzippedBytes // ++ Array[Byte](0)
+    bos.toByteArray
   }
 
   private[sdk] def compressBody(
