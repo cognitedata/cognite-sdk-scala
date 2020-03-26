@@ -11,6 +11,7 @@ class ThreeDTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   (it should behave).like(
     writable(
       client.threeDModels,
+      Some(client.threeDModels),
       Seq(
         ThreeDModel(name = "scala-sdk-threeD-read-example-1"),
         ThreeDModel(name = "scala-sdk-threeD-read-example-2")
@@ -31,6 +32,7 @@ class ThreeDTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   (it should behave).like(
     writable(
       client.threeDRevisions(4222532244684431L),
+      Some(client.threeDRevisions(4222532244684431L)),
       Seq(
         ThreeDRevision(
           fileId = 6528506295318577L,
