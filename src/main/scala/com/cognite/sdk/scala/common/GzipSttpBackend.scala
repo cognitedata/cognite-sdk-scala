@@ -13,7 +13,7 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minimumSize: Int
 
   @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   implicit final class AnyOps[A](self: A) {
-    def ===(other: A): Boolean = self == other
+    def strictEq(other: A): Boolean = self == other
   }
 
   private def isGzipped(keyAndValue: Tuple2[String, String]) =
@@ -38,7 +38,7 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minimumSize: Int
       //       since the multipart encoding happens after send(?).
       case _ => (request.body, None)
     }
-    val newRequest = if (newBody === request.body) {
+    val newRequest = if (newBody.strictEq(request.body)) {
       request
     } else {
       request
