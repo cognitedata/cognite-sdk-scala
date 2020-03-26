@@ -2,18 +2,20 @@ package com.cognite.sdk.scala.common
 
 import java.io.{ByteArrayInputStream, File}
 import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
+import java.util.zip.GZIPInputStream
 
 import cats.effect.{ContextShift, IO, Timer}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.scalatest.{BeforeAndAfter, FlatSpec, OptionValues}
 
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 
@@ -23,8 +25,8 @@ class EchoServlet extends HttpServlet {
     Option(req.getHeader("X-Content-Length"))
       .orElse(Option(req.getHeader("Content-Length")))
       .foreach(resp.addHeader(GzipSttpBackendTest.originalLength, _))
-    val receivedContent = req.getReader.lines().iterator().asScala.mkString("")
-    resp.getWriter.print(receivedContent)
+    IOUtils.copy(req.getInputStream, resp.getOutputStream)
+    ()
   }
 }
 
@@ -147,7 +149,7 @@ class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter
   }
 
   it should "not compress an already compressed request" in {
-    val compressedBody = GzipSttpBackend.compress(longTestString.getBytes)
+    val compressedBody = GzipSttpBackend.compress(longTestString.getBytes("utf-8"))
     val request = sttp
       .body(compressedBody)
       .header("Content-encoding", "gzip")
@@ -155,6 +157,22 @@ class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter
     val r = request.send().unsafeRunSync()
     assert(r.header(GzipSttpBackendTest.originalLength).value.toInt == compressedBody.length)
     assert(r.unsafeBody == longTestString)
+
+    val request2 = sttp
+      .body(compressedBody)
+      .response(asByteArray)
+      .header("Content-type", "text/gzip")
+      .post(uri"http://localhost:$port/donotcompress")
+    val r2 = request2.send().unsafeRunSync()
+
+    val gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(r2.unsafeBody))
+    try {
+      val uncompressedBody = new String(gzipInputStream.readAllBytes(), StandardCharsets.UTF_8)
+      assert(r2.header(GzipSttpBackendTest.originalLength).value.toInt == compressedBody.length)
+      assert(uncompressedBody == longTestString)
+    } finally {
+      gzipInputStream.close()
+    }
   }
 }
 
