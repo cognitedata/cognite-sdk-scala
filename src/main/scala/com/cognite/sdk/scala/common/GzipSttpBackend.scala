@@ -11,13 +11,24 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minSize: Int = 1
     extends SttpBackend[R, S] {
   import GzipSttpBackend._
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
+  implicit final class AnyOps[A](self: A) {
+    def ===(other: A): Boolean = self == other
+  }
+
   private def isGzipped(keyAndValue: Tuple2[String, String]) =
     keyAndValue._1.equalsIgnoreCase(HeaderNames.ContentEncoding) &&
       keyAndValue._2.equalsIgnoreCase("gzip")
 
+  private def isGzippedContent(keyAndValue: Tuple2[String, String]) =
+    keyAndValue._1.equalsIgnoreCase(HeaderNames.ContentType) &&
+      keyAndValue._2.toLowerCase.contains("/gzip")
+
   override def send[T](request: Request[T, S]): R[Response[T]] = {
     val (newBody, newContentLength) = request.body match {
-      case body: BasicRequestBody if !request.headers.exists(isGzipped) =>
+      case body: BasicRequestBody
+          if !request.headers.exists(isGzipped)
+            && !request.headers.exists(isGzippedContent) =>
         compressBody(body, minSize)
       // TODO: Add support for streaming bodies.
       //       Will likely require us to be more strict about S, for example
@@ -25,13 +36,14 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minSize: Int = 1
       //  case StreamBody(s) =>
       // TODO: Add support for multipart bodies, though that seems difficult with sttp,
       //       since the multipart encoding happens after send(?).
-      case _ =>
-        (request.body, None)
+      case _ => (request.body, None)
     }
-    val newRequest = if (newBody != request.body) {
-      request.copy(body = newBody).header(HeaderNames.ContentEncoding, "gzip")
+    val newRequest = if (newBody === request.body) {
+      request
     } else {
       request
+        .copy(body = newBody)
+        .header(HeaderNames.ContentEncoding, "gzip")
     }
     val newRequestWithContentLength = newContentLength match {
       case Some(contentLength) =>
@@ -51,9 +63,12 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minSize: Int = 1
 }
 
 object GzipSttpBackend {
+  val minimumBufferSize = 10000
+
   private[sdk] def compress(bytes: Array[Byte]): Array[Byte] = {
-    val bos = new ByteArrayOutputStream(bytes.length)
+    val bos = new ByteArrayOutputStream(math.min(bytes.length, minimumBufferSize))
     try {
+      //val gzip = new DeflaterOutputStream(bos)
       val gzip = new GZIPOutputStream(bos)
       try {
         gzip.write(bytes)
@@ -63,7 +78,10 @@ object GzipSttpBackend {
     } finally {
       bos.close()
     }
-    bos.toByteArray ++ Array[Byte](0)
+    val gzippedBytes = bos.toByteArray
+    // Skip gzip header, add final null byte
+    //gzippedBytes.slice(10, gzippedBytes.size) ++ Array[Byte](0)
+    gzippedBytes // ++ Array[Byte](0)
   }
 
   private[sdk] def compressBody(
@@ -83,6 +101,8 @@ object GzipSttpBackend {
         val compressed = compress(byteBuffer.array())
         (ByteArrayBody(compressed, defaultContentType), Some(compressed.length))
       case InputStreamBody(inputStream, defaultContentType) =>
+        // TODO: Optimize this using IOUtils.copy(input: InputStream, output: OutputStream)
+        //       or something similar.
         val compressed = compress(IOUtils.toByteArray(inputStream))
         (ByteArrayBody(compressed, defaultContentType), Some(compressed.length))
       // TODO: Add support for FileBody.
