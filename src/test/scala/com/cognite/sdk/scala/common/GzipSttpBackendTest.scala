@@ -63,16 +63,16 @@ class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter
     )
 
   "GzipSttpBackend" should "not compress small string bodies" in {
-    val testString1 = "abcd"
+    val smallTestString = "abcd"
     val request = sttp
-      .body(testString1)
+      .body(smallTestString)
       .post(uri"http://localhost:$port/string")
     val r = request.send().unsafeRunSync()
     // Very small strings will be larger when compressed.
     assert(
-      r.header(GzipSttpBackendTest.originalLength).value.toInt == testString1.getBytes().length
+      r.header(GzipSttpBackendTest.originalLength).value.toInt == smallTestString.getBytes().length
     )
-    assert(r.unsafeBody == testString1)
+    assert(r.unsafeBody == smallTestString)
   }
 
   it should "compress larger string bodies" in {
@@ -80,7 +80,6 @@ class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter
       .body(longTestString)
       .post(uri"http://localhost:$port/string")
     val r = request.send().unsafeRunSync()
-    // Very small strings will be larger when compressed.
     assert(
       r.header(GzipSttpBackendTest.originalLength).value.toInt < longTestString.getBytes().length
     )
