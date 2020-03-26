@@ -166,7 +166,7 @@ class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter
 
     val gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(r2.unsafeBody))
     try {
-      val uncompressedBody = new String(gzipInputStream.readAllBytes(), StandardCharsets.UTF_8)
+      val uncompressedBody = new String(IOUtils.toByteArray(gzipInputStream), StandardCharsets.UTF_8)
       assert(r2.header(GzipSttpBackendTest.originalLength).value.toInt == compressedBody.length)
       assert(uncompressedBody == longTestString)
     } finally {
