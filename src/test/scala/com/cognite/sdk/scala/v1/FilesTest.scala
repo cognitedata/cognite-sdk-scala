@@ -46,6 +46,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
 
   it should behave like updatable(
     client.files,
+    Some(client.files),
     filesToCreate,
     filesUpdates,
     (id: Long, item: File) => item.copy(id = id),

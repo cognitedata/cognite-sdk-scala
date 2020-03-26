@@ -21,6 +21,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like writable(
     client.events,
+    None,
     Seq(Event(description = Some("scala-sdk-read-example-1")), Event(description = Some("scala-sdk-read-example-2"))),
     Seq(EventCreate(description = Some("scala-sdk-create-example-1")), EventCreate(description = Some("scala-sdk-create-example-2"))),
     idsThatDoNotExist,
@@ -29,6 +30,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like writableWithExternalId(
     client.events,
+    None,
     Seq(
       Event(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
       Event(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
@@ -68,6 +70,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like updatable(
     client.events,
+    None,
     eventsToCreate,
     eventUpdates,
     (id: Long, item: Event) => item.copy(id = id),
@@ -92,6 +95,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like updatableById(
     client.events,
+    None,
     eventsToCreate,
     Seq(
       EventUpdate(description = Some(SetValue("scala-sdk-update-1-1"))),
@@ -109,6 +113,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like updatableByExternalId(
     client.events,
+    Some(client.events),
     Seq(Event(description = Some("description-1"), externalId = Some("update-1-externalId")),
       Event(description = Some("description-2"), externalId = Some("update-2-externalId"))),
     Map("update-1-externalId" -> EventUpdate(description = Some(SetValue("description-1-1"))),

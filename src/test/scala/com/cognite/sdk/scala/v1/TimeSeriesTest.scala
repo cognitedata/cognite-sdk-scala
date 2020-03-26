@@ -16,6 +16,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
   it should behave like writable(
     client.timeSeries,
+    Some(client.timeSeries),
     Seq(
       TimeSeries(name = Some("scala-sdk-write-example-1")),
       TimeSeries(name = Some("scala-sdk-write-example-2")),
@@ -32,6 +33,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
   it should behave like writableWithExternalId(
     client.timeSeries,
+    Some(client.timeSeries),
     Seq(
       TimeSeries(name = Some("scala-sdk-write-external-example-1"), externalId = Some(shortRandom())),
       TimeSeries(name = Some("scala-sdk-write-external-example-2"), externalId = Some(shortRandom())),
@@ -56,6 +58,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
   )
   it should behave like updatable(
     client.timeSeries,
+    Some(client.timeSeries),
     timeSeriesToCreate,
     timeSeriesUpdates,
     (id: Long, item: TimeSeries) => item.copy(id = id),
@@ -75,6 +78,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
   it should behave like updatableById(
     client.timeSeries,
+    Some(client.timeSeries),
     timeSeriesToCreate,
     Seq(
       TimeSeriesUpdate(name = Some(SetValue("scala-sdk-write-example-1-1")), dataSetId = Some(SetNull())),
@@ -91,6 +95,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
   it should behave like updatableByExternalId(
     client.timeSeries,
+    Some(client.timeSeries),
     Seq(TimeSeries(name = Some("name-1"), externalId = Some("externalId-1")),
       TimeSeries(name = Some("name-2"), externalId = Some("externalId-2"))),
     Map("externalId-1" -> TimeSeriesUpdate(name = Some(SetValue("name-1-1"))),

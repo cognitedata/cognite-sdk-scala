@@ -18,6 +18,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like writable(
     client.assets,
+    Some(client.assets),
     Seq(Asset(name = "scala-sdk-read-example-1"), Asset(name = "scala-sdk-read-example-2")),
     Seq(AssetCreate(name = "scala-sdk-create-example-1"), AssetCreate(name = "scala-sdk-create-example-2")),
     idsThatDoNotExist,
@@ -26,6 +27,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like writableWithExternalId(
     client.assets,
+    Some(client.assets),
     Seq(
       Asset(name = "scala-sdk-read-example-1", externalId = Some(shortRandom())),
       Asset(name = "scala-sdk-read-example-2", externalId = Some(shortRandom()))
@@ -78,6 +80,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   )
   it should behave like updatable(
     client.assets,
+    Some(client.assets),
     assetsToCreate,
     assetUpdates,
     (id: Long, item: Asset) => item.copy(id = id),
@@ -99,6 +102,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like updatableById(
     client.assets,
+    Some(client.assets),
     assetsToCreate,
     Seq(
       AssetUpdate(name = Some(SetValue("scala-sdk-update-1-1"))),
@@ -117,6 +121,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like updatableByExternalId(
     client.assets,
+    Some(client.assets),
     Seq(
       Asset(name = "update-1", externalId = Some("update-1-externalId")),
       Asset(name = "update-2", externalId = Some("update-2-externalId"))),

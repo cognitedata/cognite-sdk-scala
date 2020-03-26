@@ -11,6 +11,7 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
   it should behave like readable(client.rawDatabases)
   it should behave like writable(
     client.rawDatabases,
+    Some(client.rawDatabases),
     Seq(
       RawDatabase(name = s"scala-sdk-${shortRandom()}"),
       RawDatabase(name = s"scala-sdk-${shortRandom()}")

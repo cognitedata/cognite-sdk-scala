@@ -27,6 +27,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
   (it should behave).like(
     writable(
       client.sequences,
+      Some(client.sequences),
       Seq(
         Sequence(
           name = Some("scala-sdk-write-example-1"),
@@ -67,6 +68,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
   (it should behave).like(
     writableWithExternalId(
       client.sequences,
+      Some(client.sequences),
       Seq(
         Sequence(
           name = Some("scala-sdk-write-external-example-1"),
@@ -135,6 +137,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
   (it should behave).like(
     updatable(
       client.sequences,
+      Some(client.sequences),
       sequencesToCreate,
       sequencesUpdates,
       (id: Long, item: Sequence) => item.copy(id = id),
@@ -161,6 +164,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
 
   it should behave like updatableById(
     client.sequences,
+    Some(client.sequences),
     sequencesToCreate,
     Seq(
       SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-1-1"))),
@@ -178,6 +182,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
 
   it should behave like updatableByExternalId(
     client.sequences,
+    Some(client.sequences),
     Seq(Sequence(
       columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = s"string-column-$eid")),
       externalId = Some(s"update-1-externalId-$eid")),
