@@ -15,14 +15,15 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
 
   it should behave like writable(
     client.dataSets,
+    None,
     Seq(DataSet(name = Some("scala-sdk-read-example-1")), DataSet(name = Some("scala-sdk-read-example-2"))),
     Seq(DataSetCreate(name = Some("scala-sdk-create-example-1")), DataSetCreate(name = Some("scala-sdk-create-example-2"))),
     idsThatDoNotExist,
-    supportsMissingAndThrown = true,
-    supportsDeletes = false)
+    supportsMissingAndThrown = true)
 
   it should behave like writableWithExternalId(
     client.dataSets,
+    None,
     Seq(
       DataSet(name = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
       DataSet(name = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom())),
@@ -34,8 +35,7 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
       DataSetCreate(name = Some("scala-sdk-create-example-3"), externalId = Some(shortRandom()))
     ),
     externalIdsThatDoNotExist,
-    supportsMissingAndThrown = true,
-    supportsDeletes = false
+    supportsMissingAndThrown = true
   )
 
   private val datasetsToCreate = Seq(
@@ -43,24 +43,25 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
     DataSet(description = Some("desc-2")),
     DataSet(description = Some("desc-3"))
   )
-  /*
+
   private val datasetUpdates = Seq(
-    DataSet(description = Some("desc-1-1"),  name = null),// scalastyle:ignore null
+    DataSet(description = Some("desc-1-1"), name = null), // scalastyle:ignore null
     DataSet(
       description = Some("desc-2-1"),
-      metadata = Map("a" -> "b")
+      metadata = Some(Map("a" -> "b"))
     ),
     DataSet(description = Some("desc-3-1"))
   )
 
-  //Only this test is not passing
-
   it should behave like updatable(
     client.dataSets,
+    None,
     datasetsToCreate,
     datasetUpdates,
     (id: Long, item: DataSet) => item.copy(id = id),
-    (a: DataSet, b: DataSet) => { a == b },
+    (a: DataSet, b: DataSet) => {
+      a.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) == b.copy(lastUpdatedTime = Instant.ofEpochMilli(0))
+    },
     (readDatasets: Seq[DataSet], updatedDatasets: Seq[DataSet]) => {
       assert(datasetsToCreate.size == datasetUpdates.size)
       assert(readDatasets.size == datasetsToCreate.size)
@@ -74,13 +75,12 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
       assert(updatedDatasets.head.name.isEmpty)
       assert(updatedDatasets(1).name == datasetUpdates(1).name)
       ()
-    },
-    supportsDeletes = false
+    }
   )
-*/
 
   it should behave like updatableById(
     client.dataSets,
+    None,
     datasetsToCreate,
     Seq(
       DataSetUpdate(description = Some(SetValue("desc-1-1")), name = Some(SetNull())),
@@ -93,14 +93,14 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
       val names = updatedDatasets.map(_.name)
       assert(List(None, None, None) === names)
       ()
-    },
-    supportsDeletes = false
+    }
   )
 
-  val externalId = shortRandom()
+  private val externalId = shortRandom()
 
   it should behave like updatableByExternalId(
     client.dataSets,
+    None,
     Seq(DataSet(description = Some("description-1"), externalId = Some(s"update-1-externalId-${externalId}")),
       DataSet(description = Some("description-2"), externalId = Some(s"update-2-externalId-${externalId}"))),
     Map(s"update-1-externalId-${externalId}" -> DataSetUpdate(description = Some(SetValue("description-1-1"))),
@@ -111,8 +111,7 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
         updated.description.getOrElse("") == s"${read.description.getOrElse("")}-1" })
       assert(updatedDatasets.zip(readDatasets).forall { case (updated, read) => updated.externalId == read.externalId })
       ()
-    },
-    supportsDeletes = false
+    }
   )
 
     it should "support filter" in {
