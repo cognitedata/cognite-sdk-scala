@@ -6,7 +6,10 @@ val scala212 = "2.12.10"
 val scala211 = "2.11.12"
 val supportedScalaVersions = List(scala212, scala213, scala211)
 
-val sttpVersion = "1.6.8"
+// This is used only for tests.
+val jettyTestVersion = "9.4.27.v20200227"
+
+val sttpVersion = "1.6.3"
 val circeVersion: Option[(Long, Long)] => String = {
   case Some((2, 13)) => "0.12.0-M4"
   case _ => "0.11.1"
@@ -91,7 +94,10 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "io.scalaland" %% "chimney" % "0.3.2",
+      "io.scalaland" %% "chimney" % "0.3.5",
+      "commons-io" % "commons-io" % "2.6",
+      "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
+      "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
       "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value))
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value))

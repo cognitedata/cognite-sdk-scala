@@ -140,6 +140,10 @@ object Setter {
         case None => None
         case Some(null) => Some(SetNull()) // scalastyle:ignore null
         case Some(value: T) => Some(SetValue(value))
+        case Some(badValue) =>
+          throw new IllegalArgumentException(
+            s"Expected value of type ${manifest[T].toString} but got `${badValue.toString}` of type ${badValue.getClass.toString}"
+          )
       }
     }
 
