@@ -211,7 +211,7 @@ object GenericClient {
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val projectDecoder: Decoder[Project] = deriveDecoder[Project]
 
-  val defaultBaseUrl = Option(System.getenv("COGNITE_BASE_URL"))
+  val defaultBaseUrl: String = Option(System.getenv("COGNITE_BASE_URL"))
     .getOrElse("https://api.cognitedata.com")
 
   def parseBaseUrlOrThrow(baseUrl: String): Uri =
