@@ -24,7 +24,7 @@ class DataSets[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[DataSet]] =
-    filterWithCursor(DataSetFilter(), None, limit, None, None)
+    filterWithCursor(DataSetFilter(), cursor, limit, None, None)
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[DataSet]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
