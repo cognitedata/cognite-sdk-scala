@@ -120,7 +120,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
   override val baseUrl =
     uri"${requestSession.baseUrl}/raw/dbs/$database/tables/$table/rows"
 
-  val cursorsUri = uri"${requestSession.baseUrl}/raw/dbs/$database/tables/$table/cursors"
+  val cursorsUri: Uri = uri"${requestSession.baseUrl}/raw/dbs/$database/tables/$table/cursors"
 
   // RAW does not return the created rows in the response, so we'll always return an empty sequence.
   override def createItems(items: Items[RawRow]): F[Seq[RawRow]] = {

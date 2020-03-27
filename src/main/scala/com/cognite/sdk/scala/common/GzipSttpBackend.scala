@@ -57,7 +57,7 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minimumSize: Int
 }
 
 object GzipSttpBackend {
-  val maximumBufferSize = 65536
+  private val maximumBufferSize = 65536
 
   private[sdk] def compress(bytes: Array[Byte]): Array[Byte] = {
     val bufferSize = math.min(bytes.length, maximumBufferSize)
