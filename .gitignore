@@ -6,4 +6,6 @@ target/
 .attach*
 .bloop/
 .metals/
+project/metals.sbt
 .env
+.vscode/

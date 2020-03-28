@@ -139,7 +139,14 @@ object Setter {
         case null => Some(SetNull()) // scalastyle:ignore null
         case None => None
         case Some(null) => Some(SetNull()) // scalastyle:ignore null
+        case Some(map: Map[_, _]) if map.isEmpty =>
+          // Workaround for CDF-3540 and CDF-953
+          None
         case Some(value: T) => Some(SetValue(value))
+        case Some(badValue) =>
+          throw new IllegalArgumentException(
+            s"Expected value of type ${manifest[T].toString} but got `${badValue.toString}` of type ${badValue.getClass.toString}"
+          )
       }
     }
 
@@ -175,6 +182,9 @@ object NonNullableSetter {
     new Transformer[Option[T], Option[NonNullableSetter[T]]] {
       override def transform(src: Option[T]): Option[NonNullableSetter[T]] = src match {
         case None => None
+        case Some(map: Map[_, _]) if map.isEmpty =>
+          // Workaround for CDF-3540 and CDF-953
+          None
         case Some(value: T) =>
           require(value != null, "Invalid null value for non-nullable field update") // scalastyle:ignore null
           Some(SetValue(value))

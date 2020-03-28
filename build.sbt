@@ -2,9 +2,12 @@ import wartremover.Wart
 import sbt.project
 
 val scala213 = "2.13.1"
-val scala212 = "2.12.10"
+val scala212 = "2.12.11"
 val scala211 = "2.11.12"
 val supportedScalaVersions = List(scala212, scala213, scala211)
+
+// This is used only for tests.
+val jettyTestVersion = "9.4.27.v20200227"
 
 val sttpVersion = "1.6.3"
 val circeVersion: Option[(Long, Long)] => String = {
@@ -31,7 +34,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "1.2.3-SNAPSHOT",
+  version := "1.2.3",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -91,7 +94,10 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "io.scalaland" %% "chimney" % "0.3.2",
+      "io.scalaland" %% "chimney" % "0.3.5",
+      "commons-io" % "commons-io" % "2.6",
+      "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
+      "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
       "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value))
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value))

@@ -176,6 +176,7 @@ class GenericClient[F[_]: Monad, S](
   lazy val dataPoints = new DataPointsResource[F](requestSession)
   lazy val sequences = new SequencesResource[F](requestSession)
   lazy val sequenceRows = new SequenceRows[F](requestSession)
+  lazy val dataSets = new DataSets[F](requestSession)
 
   lazy val rawDatabases = new RawDatabases[F](requestSession)
   def rawTables(database: String): RawTables[F] = new RawTables(requestSession, database)
@@ -210,7 +211,7 @@ object GenericClient {
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val projectDecoder: Decoder[Project] = deriveDecoder[Project]
 
-  val defaultBaseUrl = Option(System.getenv("COGNITE_BASE_URL"))
+  val defaultBaseUrl: String = Option(System.getenv("COGNITE_BASE_URL"))
     .getOrElse("https://api.cognitedata.com")
 
   def parseBaseUrlOrThrow(baseUrl: String): Uri =

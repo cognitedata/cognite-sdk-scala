@@ -6,13 +6,13 @@ import com.softwaremill.sttp._
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
 
-private[sdk] class DataSets[F[_]](val requestSession: RequestSession[F])
+class DataSets[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with PartitionedReadable[DataSet, F]
+    with Readable[DataSet, F]
     with Create[DataSet, DataSetCreate, F]
     with RetrieveByIds[DataSet, F]
     with RetrieveByExternalIds[DataSet, F]
-    with PartitionedFilter[DataSet, DataSetFilter, F]
+    with Filter[DataSet, DataSetFilter, F]
     with Search[DataSet, DataSetQuery, F]
     with UpdateById[DataSet, DataSetUpdate, F]
     with UpdateByExternalId[DataSet, DataSetUpdate, F] {
@@ -24,14 +24,7 @@ private[sdk] class DataSets[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[DataSet]] =
-    Readable.readWithCursor(
-      requestSession,
-      baseUrl,
-      cursor,
-      limit,
-      partition,
-      Constants.defaultBatchSize
-    )
+    filterWithCursor(DataSetFilter(), cursor, limit, None, None)
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[DataSet]] =
     RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
@@ -74,13 +67,14 @@ private[sdk] class DataSets[F[_]](val requestSession: RequestSession[F])
 }
 
 object DataSets {
-  implicit val dataSetUpdateEncoder: Encoder[DataSetUpdate] = deriveEncoder
-  implicit val dataSetFilterEncoder: Encoder[DataSetFilter] = deriveEncoder
-  implicit val dataSetFilterRequestEncoder: Encoder[FilterRequest[DataSetFilter]] = deriveEncoder
   implicit val dataSetDecoder: Decoder[DataSet] = deriveDecoder
-  implicit val dataSetItemsDecoder: Decoder[Items[DataSet]] = deriveDecoder
   implicit val dataSetItemsWithCursorDecoder: Decoder[ItemsWithCursor[DataSet]] = deriveDecoder
+  implicit val dataSetItemsDecoder: Decoder[Items[DataSet]] = deriveDecoder
   implicit val dataSetCreateEncoder: Encoder[DataSetCreate] = deriveEncoder
   implicit val dataSetCreateItemsEncoder: Encoder[Items[DataSetCreate]] = deriveEncoder
+  implicit val dataSetUpdateEncoder: Encoder[DataSetUpdate] = deriveEncoder
+  implicit val dataSetUpdateItemsEncoder: Encoder[Items[DataSetUpdate]] = deriveEncoder
+  implicit val dataSetFilterEncoder: Encoder[DataSetFilter] = deriveEncoder
+  implicit val dataSetFilterRequestEncoder: Encoder[FilterRequest[DataSetFilter]] = deriveEncoder
   implicit val dataSetListQueryEncoder: Encoder[DataSetQuery] = deriveEncoder
 }
