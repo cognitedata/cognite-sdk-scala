@@ -13,6 +13,8 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
 
   it should behave like readableWithRetrieveByExternalId(client.dataSets, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
+  it should behave like readableWithRetrieveUnknownIds(client.dataSets)
+
   it should behave like writable(
     client.dataSets,
     None,

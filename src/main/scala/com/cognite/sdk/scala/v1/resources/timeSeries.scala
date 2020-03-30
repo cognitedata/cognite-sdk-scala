@@ -9,8 +9,8 @@ import io.circe.{Decoder, Encoder}
 class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[TimeSeries, F]
-    with RetrieveByIds[TimeSeries, F]
-    with RetrieveByExternalIds[TimeSeries, F]
+    with RetrieveByIdsWithIgnoreUnknownIds[TimeSeries, F]
+    with RetrieveByExternalIdsWithIgnoreUnknownIds[TimeSeries, F]
     with Create[TimeSeries, TimeSeriesCreate, F]
     with DeleteByIdsWithIgnoreUnknownIds[F, Long]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
@@ -35,11 +35,27 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
       Constants.defaultBatchSize
     )
 
-  override def retrieveByIds(ids: Seq[Long]): F[Seq[TimeSeries]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
+  override def retrieveByIds(
+      ids: Seq[Long],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[TimeSeries]] =
+    RetrieveByIdsWithIgnoreUnknownIds.retrieveByIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
+    )
 
-  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[TimeSeries]] =
-    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUrl, externalIds)
+  override def retrieveByExternalIds(
+      externalIds: Seq[String],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[TimeSeries]] =
+    RetrieveByExternalIdsWithIgnoreUnknownIds.retrieveByExternalIds(
+      requestSession,
+      baseUrl,
+      externalIds,
+      ignoreUnknownIds
+    )
 
   override def createItems(items: Items[TimeSeriesCreate]): F[Seq[TimeSeries]] =
     Create.createItems[F, TimeSeries, TimeSeriesCreate](requestSession, baseUrl, items)
