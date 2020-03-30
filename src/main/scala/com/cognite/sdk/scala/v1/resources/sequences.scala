@@ -8,8 +8,8 @@ import io.circe.derivation.{deriveDecoder, deriveEncoder}
 class SequencesResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[Sequence, F]
-    with RetrieveByIds[Sequence, F]
-    with RetrieveByExternalIds[Sequence, F]
+    with RetrieveByIdsWithIgnoreUnknownIds[Sequence, F]
+    with RetrieveByExternalIdsWithIgnoreUnknownIds[Sequence, F]
     with Create[Sequence, SequenceCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
@@ -34,11 +34,27 @@ class SequencesResource[F[_]](val requestSession: RequestSession[F])
       Constants.defaultBatchSize
     )
 
-  override def retrieveByIds(ids: Seq[Long]): F[Seq[Sequence]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
+  override def retrieveByIds(
+      ids: Seq[Long],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[Sequence]] =
+    RetrieveByIdsWithIgnoreUnknownIds.retrieveByIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
+    )
 
-  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[Sequence]] =
-    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUrl, externalIds)
+  override def retrieveByExternalIds(
+      externalIds: Seq[String],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[Sequence]] =
+    RetrieveByExternalIdsWithIgnoreUnknownIds.retrieveByExternalIds(
+      requestSession,
+      baseUrl,
+      externalIds,
+      ignoreUnknownIds
+    )
 
   override def createItems(items: Items[SequenceCreate]): F[Seq[Sequence]] =
     Create.createItems[F, Sequence, SequenceCreate](requestSession, baseUrl, items)

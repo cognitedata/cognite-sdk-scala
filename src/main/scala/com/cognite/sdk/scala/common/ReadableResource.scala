@@ -141,6 +141,31 @@ object RetrieveByIds {
   }
 }
 
+trait RetrieveByIdsWithIgnoreUnknownIds[R, F[_]] extends RetrieveByIds[R, F] {
+  override def retrieveByIds(ids: Seq[Long]): F[Seq[R]] =
+    retrieveByIds(ids, ignoreUnknownIds = false)
+  def retrieveByIds(ids: Seq[Long], ignoreUnknownIds: Boolean): F[Seq[R]]
+}
+
+object RetrieveByIdsWithIgnoreUnknownIds {
+  def retrieveByIds[F[_], R](
+      requestSession: RequestSession[F],
+      baseUrl: Uri,
+      ids: Seq[Long],
+      ignoreUnknownIds: Boolean
+  )(
+      implicit itemsDecoder: Decoder[Items[R]]
+  ): F[Seq[R]] = {
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
+    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds](
+      ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
+      uri"$baseUrl/byids",
+      value => value.items
+    )
+  }
+}
+
 trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[R]]
   @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
@@ -162,6 +187,31 @@ object RetrieveByExternalIds {
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession.post[Seq[R], Items[R], Items[CogniteExternalId]](
       Items(externalIds.map(CogniteExternalId)),
+      uri"$baseUrl/byids",
+      value => value.items
+    )
+  }
+}
+
+trait RetrieveByExternalIdsWithIgnoreUnknownIds[R, F[_]] extends RetrieveByExternalIds[R, F] {
+  override def retrieveByExternalIds(ids: Seq[String]): F[Seq[R]] =
+    retrieveByExternalIds(ids, ignoreUnknownIds = false)
+  def retrieveByExternalIds(ids: Seq[String], ignoreUnknownIds: Boolean): F[Seq[R]]
+}
+
+object RetrieveByExternalIdsWithIgnoreUnknownIds {
+  def retrieveByExternalIds[F[_], R](
+      requestSession: RequestSession[F],
+      baseUrl: Uri,
+      externalIds: Seq[String],
+      ignoreUnknownIds: Boolean
+  )(
+      implicit itemsDecoder: Decoder[Items[R]]
+  ): F[Seq[R]] = {
+    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
+      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
+    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds](
+      ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId), ignoreUnknownIds),
       uri"$baseUrl/byids",
       value => value.items
     )

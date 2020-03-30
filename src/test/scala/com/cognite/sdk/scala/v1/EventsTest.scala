@@ -19,6 +19,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like readableWithRetrieveByExternalId(client.events, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
+  it should behave like readableWithRetrieveUnknownIds(client.dataSets)
+
   it should behave like writable(
     client.events,
     None,

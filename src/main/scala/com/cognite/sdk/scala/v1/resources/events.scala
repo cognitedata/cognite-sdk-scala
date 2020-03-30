@@ -9,8 +9,8 @@ import io.circe.derivation.{deriveDecoder, deriveEncoder}
 class Events[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[Event, F]
-    with RetrieveByIds[Event, F]
-    with RetrieveByExternalIds[Event, F]
+    with RetrieveByIdsWithIgnoreUnknownIds[Event, F]
+    with RetrieveByExternalIdsWithIgnoreUnknownIds[Event, F]
     with Create[Event, EventCreate, F]
     with DeleteByIdsWithIgnoreUnknownIds[F, Long]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
@@ -35,11 +35,27 @@ class Events[F[_]](val requestSession: RequestSession[F])
       Constants.defaultBatchSize
     )
 
-  override def retrieveByIds(ids: Seq[Long]): F[Seq[Event]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
+  override def retrieveByIds(
+      ids: Seq[Long],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[Event]] =
+    RetrieveByIdsWithIgnoreUnknownIds.retrieveByIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
+    )
 
-  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[Event]] =
-    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUrl, externalIds)
+  override def retrieveByExternalIds(
+      externalIds: Seq[String],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[Event]] =
+    RetrieveByExternalIdsWithIgnoreUnknownIds.retrieveByExternalIds(
+      requestSession,
+      baseUrl,
+      externalIds,
+      ignoreUnknownIds
+    )
 
   override def createItems(items: Items[EventCreate]): F[Seq[Event]] =
     Create.createItems[F, Event, EventCreate](requestSession, baseUrl, items)

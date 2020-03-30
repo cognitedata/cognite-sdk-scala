@@ -14,6 +14,8 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
   it should behave like readableWithRetrieveByExternalId(client.timeSeries, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
+  it should behave like readableWithRetrieveUnknownIds(client.dataSets)
+
   it should behave like writable(
     client.timeSeries,
     Some(client.timeSeries),

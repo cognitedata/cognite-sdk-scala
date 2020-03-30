@@ -11,8 +11,8 @@ class Assets[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[Asset, F]
     with Create[Asset, AssetCreate, F]
-    with RetrieveByIds[Asset, F]
-    with RetrieveByExternalIds[Asset, F]
+    with RetrieveByIdsWithIgnoreUnknownIds[Asset, F]
+    with RetrieveByExternalIdsWithIgnoreUnknownIds[Asset, F]
     with DeleteByIdsWithIgnoreUnknownIds[F, Long]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
     with PartitionedFilter[Asset, AssetsFilter, F]
@@ -36,11 +36,27 @@ class Assets[F[_]](val requestSession: RequestSession[F])
       Constants.defaultBatchSize
     )
 
-  override def retrieveByIds(ids: Seq[Long]): F[Seq[Asset]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
+  override def retrieveByIds(
+      ids: Seq[Long],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[Asset]] =
+    RetrieveByIdsWithIgnoreUnknownIds.retrieveByIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
+    )
 
-  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[Asset]] =
-    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUrl, externalIds)
+  override def retrieveByExternalIds(
+      externalIds: Seq[String],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[Asset]] =
+    RetrieveByExternalIdsWithIgnoreUnknownIds.retrieveByExternalIds(
+      requestSession,
+      baseUrl,
+      externalIds,
+      ignoreUnknownIds
+    )
 
   override def createItems(items: Items[AssetCreate]): F[Seq[Asset]] =
     Create.createItems[F, Asset, AssetCreate](requestSession, baseUrl, items)

@@ -1,5 +1,8 @@
 package com.cognite.sdk.scala.common
 
+import java.util.UUID
+import java.util.concurrent.ThreadLocalRandom
+
 import com.softwaremill.sttp.Id
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -173,6 +176,53 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
             duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
         }
       }
+    }
+  }
+
+  def readableWithRetrieveUnknownIds[R <: WithExternalId with WithId[Long], W](
+    readable: Readable[R, Id] with RetrieveByExternalIdsWithIgnoreUnknownIds[R, Id]
+                              with RetrieveByIdsWithIgnoreUnknownIds[R, Id]
+  ): Unit = {
+    // TODO: this test is not very stable as the fetched item may be deleted before it is fetched again by the external id
+    val firstTwoItemItems =
+      readable.list().filter(_.externalId.isDefined).take(2).compile.toList
+    val firstTwoExternalIds = firstTwoItemItems.map(_.externalId.get)
+    val firstTwoIds = firstTwoItemItems.map(_.id)
+    val nonExistentExternalId = "does-not-exist/" + UUID.randomUUID
+    val nonExistentId = ThreadLocalRandom.current().nextLong(1, 9007199254740991L)
+
+    it should "support retrieving items by external id with ignoreUnknownIds=true" in {
+      firstTwoExternalIds should have size 2
+      val maybeItemsRead = readable.retrieveByExternalIds(firstTwoExternalIds ++ Seq(nonExistentExternalId), ignoreUnknownIds = true)
+      val itemsReadIds = maybeItemsRead.map(_.externalId.get)
+      itemsReadIds should contain theSameElementsAs firstTwoExternalIds
+      itemsReadIds should have size firstTwoExternalIds.size.toLong
+    }
+
+    it should "allow retrieving empty items with ignoreUnknownIds=true" in {
+      val maybeItemsRead = readable.retrieveByExternalIds(Seq(nonExistentExternalId), ignoreUnknownIds = true)
+      maybeItemsRead shouldBe empty
+    }
+
+    it should "throw when retrieving items by external id with ignoreUnknownIds=false" in {
+      val exception = intercept[CdpApiException] {
+        readable.retrieveByExternalIds(firstTwoExternalIds ++ Seq(nonExistentExternalId), ignoreUnknownIds = false)
+      }
+      exception.message should include("ids not found")
+    }
+
+    it should "support retrieving items by id with ignoreUnknownIds=true" in {
+      val maybeItemsRead = readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = true)
+      val itemsReadIds = maybeItemsRead.map(_.externalId.get)
+      itemsReadIds should contain theSameElementsAs firstTwoExternalIds
+      itemsReadIds should have size firstTwoExternalIds.size.toLong
+    }
+
+    it should "throw when retrieving items by id with ignoreUnknownIds=false" in {
+      val exception = intercept[CdpApiException] {
+        readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = false)
+      }
+      exception.message should include("ids not found")
     }
   }
 }

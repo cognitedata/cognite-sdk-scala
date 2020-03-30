@@ -10,8 +10,8 @@ class DataSets[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with Readable[DataSet, F]
     with Create[DataSet, DataSetCreate, F]
-    with RetrieveByIds[DataSet, F]
-    with RetrieveByExternalIds[DataSet, F]
+    with RetrieveByIdsWithIgnoreUnknownIds[DataSet, F]
+    with RetrieveByExternalIdsWithIgnoreUnknownIds[DataSet, F]
     with Filter[DataSet, DataSetFilter, F]
     with Search[DataSet, DataSetQuery, F]
     with UpdateById[DataSet, DataSetUpdate, F]
@@ -26,11 +26,27 @@ class DataSets[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[DataSet]] =
     filterWithCursor(DataSetFilter(), cursor, limit, None, None)
 
-  override def retrieveByIds(ids: Seq[Long]): F[Seq[DataSet]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
+  override def retrieveByIds(
+      ids: Seq[Long],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[DataSet]] =
+    RetrieveByIdsWithIgnoreUnknownIds.retrieveByIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
+    )
 
-  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[DataSet]] =
-    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUrl, externalIds)
+  override def retrieveByExternalIds(
+      externalIds: Seq[String],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[DataSet]] =
+    RetrieveByExternalIdsWithIgnoreUnknownIds.retrieveByExternalIds(
+      requestSession,
+      baseUrl,
+      externalIds,
+      ignoreUnknownIds
+    )
 
   override def createItems(items: Items[DataSetCreate]): F[Seq[DataSet]] =
     Create.createItems[F, DataSet, DataSetCreate](requestSession, baseUrl, items)
