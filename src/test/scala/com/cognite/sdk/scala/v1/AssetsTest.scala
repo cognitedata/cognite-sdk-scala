@@ -49,7 +49,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     idsThatDoNotExist
   )
 
-  it should "support deleting entire asset subtrees recursively" in {
+  it should "support deleting entire asset subtrees recursively by externalId" in {
     val assetTree = Seq(
         AssetCreate(name = "root", externalId = Some("recursive-root")),
         AssetCreate(name = "child", externalId = Some("recursive-child"), parentExternalId = Some("recursive-root")),
@@ -63,6 +63,27 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     )
 
     client.assets.deleteByExternalIds(Seq("recursive-root"), true, true)
+
+    retryWithExpectedResult[Seq[Asset]](
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some("recursive"))).compile.toList,
+      r => r should have size 0
+    )
+  }
+
+  it should "support deleting entire asset subtrees recursively by id" in {
+    val assetTree = Seq(
+      AssetCreate(name = "root", externalId = Some("recursive-root")),
+      AssetCreate(name = "child", externalId = Some("recursive-child"), parentExternalId = Some("recursive-root")),
+      AssetCreate(name = "grandchild", externalId = Some("recursive-grandchild"), parentExternalId = Some("recursive-child"))
+    )
+    val createdItems = client.assets.create(assetTree)
+
+    retryWithExpectedResult[Seq[Asset]](
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some("recursive"))).compile.toList,
+      r => r should have size 3
+    )
+
+    client.assets.deleteByIds(Seq(createdItems.head.id), true, true)
 
     retryWithExpectedResult[Seq[Asset]](
       client.assets.filter(AssetsFilter(externalIdPrefix = Some("recursive"))).compile.toList,
