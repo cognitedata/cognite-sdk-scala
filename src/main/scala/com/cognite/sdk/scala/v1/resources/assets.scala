@@ -60,6 +60,21 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   override def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean): F[Unit] =
     DeleteByIds.deleteByIdsWithIgnoreUnknownIds(requestSession, baseUrl, ids, ignoreUnknownIds)
 
+  def deleteByIds(
+      ids: Seq[Long],
+      recursive: Boolean,
+      ignoreUnknownIds: Boolean
+  ): F[Unit] =
+    requestSession.post[Unit, Unit, ItemsWithRecursiveAndIgnoreUnknownIds](
+      ItemsWithRecursiveAndIgnoreUnknownIds(
+        ids.map(CogniteInternalId),
+        recursive,
+        ignoreUnknownIds
+      ),
+      uri"$baseUrl/delete",
+      _ => ()
+    )
+
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     deleteByExternalIds(externalIds, false)
 
