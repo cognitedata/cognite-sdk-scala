@@ -19,6 +19,7 @@ final case class Event(
     dataSetId: Option[Long] = None
 ) extends WithId[Long]
     with WithExternalId
+    with WithCreatedTime
 
 final case class EventCreate(
     startTime: Option[Instant] = None,

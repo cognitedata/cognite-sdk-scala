@@ -15,6 +15,7 @@ final case class DataSet(
     lastUpdatedTime: Instant = Instant.ofEpochMilli(0)
 ) extends WithId[Long]
     with WithExternalId
+    with WithCreatedTime
 
 final case class DataSetCreate(
     externalId: Option[String] = None,

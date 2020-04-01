@@ -114,6 +114,10 @@ trait WithExternalId {
   val externalId: Option[String]
 }
 
+trait WithCreatedTime {
+  val createdTime: Instant
+}
+
 trait WithSetExternalId {
   val externalId: Option[Setter[String]]
 }

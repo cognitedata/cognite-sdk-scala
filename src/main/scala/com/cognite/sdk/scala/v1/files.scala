@@ -2,7 +2,14 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 
-import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
+import com.cognite.sdk.scala.common.{
+  NonNullableSetter,
+  SearchQuery,
+  Setter,
+  WithCreatedTime,
+  WithExternalId,
+  WithId
+}
 
 final case class File(
     id: Long = 0,
@@ -20,6 +27,7 @@ final case class File(
     dataSetId: Option[Long] = None
 ) extends WithId[Long]
     with WithExternalId
+    with WithCreatedTime
 
 final case class FileCreate(
     name: String,
