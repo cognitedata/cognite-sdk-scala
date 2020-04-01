@@ -19,6 +19,7 @@ final case class Asset(
     parentExternalId: Option[String] = None
 ) extends WithId[Long]
     with WithExternalId
+    with WithCreatedTime
 
 final case class AssetCreate(
     name: String,

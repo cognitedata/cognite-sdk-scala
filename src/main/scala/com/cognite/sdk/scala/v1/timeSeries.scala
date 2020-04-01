@@ -19,6 +19,7 @@ final case class TimeSeries(
     dataSetId: Option[Long] = None
 ) extends WithId[Long]
     with WithExternalId
+    with WithCreatedTime
 
 final case class TimeSeriesCreate(
     externalId: Option[String] = None,

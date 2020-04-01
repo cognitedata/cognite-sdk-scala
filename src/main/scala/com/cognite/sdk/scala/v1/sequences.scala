@@ -3,7 +3,14 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 
 import cats.data.NonEmptyList
-import com.cognite.sdk.scala.common.{NonNullableSetter, SearchQuery, Setter, WithExternalId, WithId}
+import com.cognite.sdk.scala.common.{
+  NonNullableSetter,
+  SearchQuery,
+  Setter,
+  WithCreatedTime,
+  WithExternalId,
+  WithId
+}
 
 final case class SequenceColumn(
     name: Option[String] = None,
@@ -42,6 +49,7 @@ final case class Sequence(
     dataSetId: Option[Long] = None
 ) extends WithId[Long]
     with WithExternalId
+    with WithCreatedTime
 
 final case class SequenceCreate(
     name: Option[String] = None,
