@@ -47,7 +47,7 @@ object DeleteByIds {
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
-    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds](
+    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
       ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
       uri"$baseUrl/delete",
       _ => ()
@@ -81,7 +81,7 @@ object DeleteByExternalIds {
   ): F[Unit] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
-    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds](
+    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
       ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId), ignoreUnknownIds),
       uri"$baseUrl/delete",
       _ => ()

@@ -29,7 +29,6 @@ final case class StringDataPointsByIdResponse(
     id: Long,
     externalId: Option[String],
     isString: Boolean,
-    isStep: Option[Boolean],
     unit: Option[String],
     datapoints: Seq[StringDataPoint]
 )
@@ -38,7 +37,6 @@ final case class StringDataPointsByExternalIdResponse(
     id: Long,
     externalId: String,
     isString: Boolean,
-    isStep: Option[Boolean],
     unit: Option[String],
     datapoints: Seq[StringDataPoint]
 )

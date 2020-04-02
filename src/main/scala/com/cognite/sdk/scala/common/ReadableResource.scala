@@ -158,7 +158,7 @@ object RetrieveByIdsWithIgnoreUnknownIds {
   ): F[Seq[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
-    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds](
+    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteId]](
       ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
       uri"$baseUrl/byids",
       value => value.items
@@ -210,7 +210,7 @@ object RetrieveByExternalIdsWithIgnoreUnknownIds {
   ): F[Seq[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
-    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds](
+    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteId]](
       ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId), ignoreUnknownIds),
       uri"$baseUrl/byids",
       value => value.items
