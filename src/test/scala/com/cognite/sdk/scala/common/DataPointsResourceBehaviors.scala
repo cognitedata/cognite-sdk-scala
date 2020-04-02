@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.common
 
 import java.time.Instant
 
-import com.cognite.sdk.scala.v1.{DataPointsByIdResponse, TimeSeries}
+import com.cognite.sdk.scala.v1.{DataPointsByExternalIdResponse, DataPointsByIdResponse, TimeSeries}
 import com.cognite.sdk.scala.v1.resources.DataPointsResource
 import com.softwaremill.sttp.Id
 import org.scalatest.{FlatSpec, Matchers}
@@ -50,12 +50,12 @@ trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: FlatS
         )
 
         dataPoints.insertByExternalId(timeSeriesExternalId, testDataPoints)
-        retryWithExpectedResult[DataPointsByIdResponse](
+        retryWithExpectedResult[DataPointsByExternalIdResponse](
           dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
           p2 => p2.datapoints should have size testDataPoints.size.toLong
         )
 
-        retryWithExpectedResult[DataPointsByIdResponse](
+        retryWithExpectedResult[DataPointsByExternalIdResponse](
           dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1), Some(5)),
           p2 => p2.datapoints should have size 5
         )
@@ -69,7 +69,7 @@ trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: FlatS
         )
 
         dataPoints.deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
-        retryWithExpectedResult[DataPointsByIdResponse](
+        retryWithExpectedResult[DataPointsByExternalIdResponse](
           dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
           pad => pad.datapoints should have size 0
         )

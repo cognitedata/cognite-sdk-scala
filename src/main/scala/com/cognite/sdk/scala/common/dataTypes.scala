@@ -11,7 +11,7 @@ import io.scalaland.chimney.dsl._
 
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
 final case class Items[A](items: Seq[A])
-final case class ItemsWithIgnoreUnknownIds(items: Seq[CogniteId], ignoreUnknownIds: Boolean)
+final case class ItemsWithIgnoreUnknownIds[A](items: Seq[A], ignoreUnknownIds: Boolean)
 final case class ItemsWithRecursiveAndIgnoreUnknownIds(
     items: Seq[CogniteId],
     recursive: Boolean,

@@ -141,71 +141,6 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
       (r: Response[Unit]) => r.unsafeBody
     )
 
-  def parseStringDataPoints(response: DataPointListResponse): Seq[StringDataPointsByIdResponse] =
-    response.items
-      .map(
-        x =>
-          StringDataPointsByIdResponse(
-            x.id,
-            Some(x.externalId),
-            x.isString,
-            Some(x.isStep),
-            Some(x.unit),
-            x.getStringDatapoints.datapoints
-              .map(s => StringDataPoint(Instant.ofEpochMilli(s.timestamp), s.value))
-          )
-      )
-
-  def parseNumericDataPoints(response: DataPointListResponse): Seq[DataPointsByIdResponse] =
-    response.items
-      .map(
-        x => {
-          DataPointsByIdResponse(
-            x.id,
-            Some(x.externalId),
-            x.isString,
-            x.isStep,
-            Some(x.unit),
-            x.getNumericDatapoints.datapoints
-              .map(n => DataPoint(Instant.ofEpochMilli(n.timestamp), n.value))
-          )
-        }
-      )
-
-  def screenOutNan(d: Double): Option[Double] =
-    if (d.isNaN) None else Some(d)
-
-  def parseAggregateDataPoints(response: DataPointListResponse): Seq[QueryAggregatesResponse] =
-    response.items
-      .map(
-        x => {
-          QueryAggregatesResponse(
-            x.id,
-            Some(x.externalId),
-            x.isString,
-            x.isStep,
-            Some(x.unit),
-            x.getAggregateDatapoints.datapoints
-              .map(
-                a =>
-                  AggregateDataPoint(
-                    Instant.ofEpochMilli(a.timestamp),
-                    screenOutNan(a.average),
-                    screenOutNan(a.max),
-                    screenOutNan(a.min),
-                    screenOutNan(a.count),
-                    screenOutNan(a.sum),
-                    screenOutNan(a.interpolation),
-                    screenOutNan(a.stepInterpolation),
-                    screenOutNan(a.totalVariation),
-                    screenOutNan(a.continuousVariance),
-                    screenOutNan(a.discreteVariance)
-                  )
-              )
-          )
-        }
-      )
-
   def insertStringsByExternalId(externalId: String, dataPoints: Seq[StringDataPoint]): F[Unit] =
     requestSession.post[Unit, Unit, Items[StringDataPointsByExternalId]](
       Items(Seq(StringDataPointsByExternalId(externalId, dataPoints))),
@@ -256,7 +191,8 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
       ids: Seq[Long],
       inclusiveStart: Instant,
       exclusiveEnd: Instant,
-      limit: Option[Int] = None
+      limit: Option[Int] = None,
+      ignoreUnknownIds: Boolean = false
   ): F[Seq[DataPointsByIdResponse]] = {
     val queries = ids.map(
       id =>
@@ -268,7 +204,9 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         )
     )
 
-    queryProtobuf(Items(queries))(parseNumericDataPoints)
+    queryProtobuf(ItemsWithIgnoreUnknownIds(queries, ignoreUnknownIds))(
+      parseNumericDataPoints
+    )
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
@@ -277,20 +215,21 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
       inclusiveStart: Instant,
       exclusiveEnd: Instant,
       limit: Option[Int] = None
-  ): F[DataPointsByIdResponse] =
+  ): F[DataPointsByExternalIdResponse] =
     // The API returns an error causing an exception to be thrown if the item isn't found,
     // so .head is safe here.
     requestSession.map(
       queryByExternalIds(Seq(externalId), inclusiveStart, exclusiveEnd, limit),
-      (r1: Seq[DataPointsByIdResponse]) => r1.head
+      (r1: Seq[DataPointsByExternalIdResponse]) => r1.head
     )
 
   def queryByExternalIds(
       externalIds: Seq[String],
       inclusiveStart: Instant,
       exclusiveEnd: Instant,
-      limit: Option[Int] = None
-  ): F[Seq[DataPointsByIdResponse]] = {
+      limit: Option[Int] = None,
+      ignoreUnknownIds: Boolean = false
+  ): F[Seq[DataPointsByExternalIdResponse]] = {
     val queries = externalIds.map(
       externalId =>
         QueryRangeByExternalId(
@@ -300,7 +239,9 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
           Some(limit.getOrElse(Constants.dataPointsBatchSize))
         )
     )
-    queryProtobuf(Items(queries))(parseNumericDataPoints)
+    queryProtobuf(ItemsWithIgnoreUnknownIds(queries, ignoreUnknownIds))(
+      parseNumericDataPointsByExternalId
+    )
   }
 
   def queryAggregatesById(
@@ -381,35 +322,73 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         accept = "application/protobuf"
       )
 
+  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   def queryStringsById(
       id: Long,
       inclusiveStart: Instant,
       exclusiveEnd: Instant,
       limit: Option[Int] = None
-  ): F[Seq[StringDataPointsByIdResponse]] = {
-    val query = QueryRangeById(
-      id,
-      inclusiveStart.toEpochMilli.toString,
-      exclusiveEnd.toEpochMilli.toString,
-      Some(limit.getOrElse(Constants.dataPointsBatchSize))
+  ): F[StringDataPointsByIdResponse] =
+    // The API returns an error causing an exception to be thrown if the item isn't found,
+    // so .head is safe here.
+    requestSession.map(
+      queryStringsByIds(Seq(id), inclusiveStart, exclusiveEnd, limit),
+      (r: Seq[StringDataPointsByIdResponse]) => r.head
     )
-    queryProtobuf(Items(Seq(query)))(parseStringDataPoints)
-  }
 
+  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   def queryStringsByExternalId(
       externalId: String,
       inclusiveStart: Instant,
       exclusiveEnd: Instant,
       limit: Option[Int] = None
+  ): F[StringDataPointsByExternalIdResponse] =
+    // The API returns an error causing an exception to be thrown if the item isn't found,
+    // so .head is safe here.
+    requestSession.map(
+      queryStringsByExternalIds(Seq(externalId), inclusiveStart, exclusiveEnd, limit),
+      (r: Seq[StringDataPointsByExternalIdResponse]) => r.head
+    )
+
+  def queryStringsByIds(
+      ids: Seq[Long],
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
+      limit: Option[Int] = None,
+      ignoreUnknownIds: Boolean = false
   ): F[Seq[StringDataPointsByIdResponse]] = {
+    val query = ids.map(
+      id =>
+        QueryRangeById(
+          id,
+          inclusiveStart.toEpochMilli.toString,
+          exclusiveEnd.toEpochMilli.toString,
+          Some(limit.getOrElse(Constants.dataPointsBatchSize))
+        )
+    )
+    queryProtobuf(ItemsWithIgnoreUnknownIds(query, ignoreUnknownIds))(parseStringDataPoints)
+  }
+
+  def queryStringsByExternalIds(
+      externalIds: Seq[String],
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
+      limit: Option[Int] = None,
+      ignoreUnknownIds: Boolean = false
+  ): F[Seq[StringDataPointsByExternalIdResponse]] = {
     val query =
-      QueryRangeByExternalId(
-        externalId,
-        inclusiveStart.toEpochMilli.toString,
-        exclusiveEnd.toEpochMilli.toString,
-        Some(limit.getOrElse(Constants.dataPointsBatchSize))
+      externalIds.map(
+        id =>
+          QueryRangeByExternalId(
+            id,
+            inclusiveStart.toEpochMilli.toString,
+            exclusiveEnd.toEpochMilli.toString,
+            Some(limit.getOrElse(Constants.dataPointsBatchSize))
+          )
       )
-    queryProtobuf(Items(Seq(query)))(parseStringDataPoints)
+    queryProtobuf(ItemsWithIgnoreUnknownIds(query, ignoreUnknownIds))(
+      parseStringDataPointsByExternalId
+    )
   }
 
   def getLatestDataPointById(id: Long): F[Option[DataPoint]] =
@@ -438,10 +417,15 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         }
     )
 
-  def getLatestDataPointsByIds(ids: Seq[Long]): F[Map[Long, Option[DataPoint]]] =
+  def getLatestDataPointsByIds(
+      ids: Seq[Long],
+      ignoreUnknownIds: Boolean = false
+  ): F[Map[Long, Option[DataPoint]]] =
     requestSession
-      .post[Map[Long, Option[DataPoint]], Items[DataPointsByIdResponse], Items[CogniteInternalId]](
-        Items(ids.map(CogniteInternalId)),
+      .post[Map[Long, Option[DataPoint]], Items[DataPointsByIdResponse], ItemsWithIgnoreUnknownIds[
+        CogniteId
+      ]](
+        ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
         uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
@@ -449,12 +433,15 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
           }.toMap
       )
 
-  def getLatestDataPointsByExternalIds(ids: Seq[String]): F[Map[String, Option[DataPoint]]] =
+  def getLatestDataPointsByExternalIds(
+      ids: Seq[String],
+      ignoreUnknownIds: Boolean = false
+  ): F[Map[String, Option[DataPoint]]] =
     requestSession
-      .post[Map[String, Option[DataPoint]], Items[DataPointsByExternalIdResponse], Items[
-        CogniteExternalId
+      .post[Map[String, Option[DataPoint]], Items[DataPointsByExternalIdResponse], ItemsWithIgnoreUnknownIds[
+        CogniteId
       ]](
-        Items(ids.map(CogniteExternalId)),
+        ItemsWithIgnoreUnknownIds(ids.map(CogniteExternalId), ignoreUnknownIds),
         uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
@@ -488,12 +475,15 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         }
     )
 
-  def getLatestStringDataPointByIds(ids: Seq[Long]): F[Map[Long, Option[StringDataPoint]]] =
+  def getLatestStringDataPointByIds(
+      ids: Seq[Long],
+      ignoreUnknownIds: Boolean = false
+  ): F[Map[Long, Option[StringDataPoint]]] =
     requestSession
-      .post[Map[Long, Option[StringDataPoint]], Items[StringDataPointsByIdResponse], Items[
-        CogniteInternalId
+      .post[Map[Long, Option[StringDataPoint]], Items[StringDataPointsByIdResponse], ItemsWithIgnoreUnknownIds[
+        CogniteId
       ]](
-        Items(ids.map(CogniteInternalId)),
+        ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
         uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
@@ -502,13 +492,14 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
       )
 
   def getLatestStringDataPointByExternalIds(
-      ids: Seq[String]
+      ids: Seq[String],
+      ignoreUnknownIds: Boolean = false
   ): F[Map[String, Option[StringDataPoint]]] =
     requestSession
-      .post[Map[String, Option[StringDataPoint]], Items[StringDataPointsByExternalIdResponse], Items[
-        CogniteExternalId
+      .post[Map[String, Option[StringDataPoint]], Items[StringDataPointsByExternalIdResponse], ItemsWithIgnoreUnknownIds[
+        CogniteId
       ]](
-        Items(ids.map(CogniteExternalId)),
+        ItemsWithIgnoreUnknownIds(ids.map(CogniteExternalId), ignoreUnknownIds),
         uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
@@ -563,12 +554,123 @@ object DataPointsResource {
     deriveEncoder
   implicit val queryRangeByIdEncoder: Encoder[QueryRangeById] = deriveEncoder
   implicit val queryRangeByIdItemsEncoder: Encoder[Items[QueryRangeById]] = deriveEncoder
+  implicit val queryRangeByIdItems2Encoder: Encoder[ItemsWithIgnoreUnknownIds[QueryRangeById]] =
+    deriveEncoder
   implicit val queryRangeByExternalIdEncoder: Encoder[QueryRangeByExternalId] = deriveEncoder
   implicit val queryRangeByExternalIdItemsEncoder: Encoder[Items[QueryRangeByExternalId]] =
+    deriveEncoder
+  implicit val queryRangeByExternalIdItems2Encoder
+      : Encoder[ItemsWithIgnoreUnknownIds[QueryRangeByExternalId]] =
     deriveEncoder
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val aggregateDataPointDecoder: Decoder[AggregateDataPoint] = deriveDecoder
   implicit val aggregateDataPointEncoder: Encoder[AggregateDataPoint] = deriveEncoder
+
+  // protobuf can't represent `null`, so we'll assume that empty string is null...
+  private def optionalString(x: String) =
+    if (x.isEmpty) {
+      None
+    } else {
+      Some(x)
+    }
+
+  def parseStringDataPoints(response: DataPointListResponse): Seq[StringDataPointsByIdResponse] =
+    response.items
+      .map(
+        x =>
+          StringDataPointsByIdResponse(
+            x.id,
+            optionalString(x.externalId),
+            x.isString,
+            optionalString(x.unit),
+            x.getStringDatapoints.datapoints
+              .map(s => StringDataPoint(Instant.ofEpochMilli(s.timestamp), s.value))
+          )
+      )
+
+  def parseStringDataPointsByExternalId(
+      response: DataPointListResponse
+  ): Seq[StringDataPointsByExternalIdResponse] =
+    response.items
+      .map(
+        x =>
+          StringDataPointsByExternalIdResponse(
+            x.id,
+            x.externalId,
+            x.isString,
+            optionalString(x.unit),
+            x.getStringDatapoints.datapoints
+              .map(s => StringDataPoint(Instant.ofEpochMilli(s.timestamp), s.value))
+          )
+      )
+
+  def parseNumericDataPoints(response: DataPointListResponse): Seq[DataPointsByIdResponse] =
+    response.items
+      .map(
+        x => {
+          DataPointsByIdResponse(
+            x.id,
+            optionalString(x.externalId),
+            x.isString,
+            x.isStep,
+            optionalString(x.unit),
+            x.getNumericDatapoints.datapoints
+              .map(n => DataPoint(Instant.ofEpochMilli(n.timestamp), n.value))
+          )
+        }
+      )
+
+  def parseNumericDataPointsByExternalId(
+      response: DataPointListResponse
+  ): Seq[DataPointsByExternalIdResponse] =
+    response.items
+      .map(
+        x => {
+          DataPointsByExternalIdResponse(
+            x.id,
+            x.externalId,
+            x.isString,
+            x.isStep,
+            optionalString(x.unit),
+            x.getNumericDatapoints.datapoints
+              .map(n => DataPoint(Instant.ofEpochMilli(n.timestamp), n.value))
+          )
+        }
+      )
+
+  def screenOutNan(d: Double): Option[Double] =
+    if (d.isNaN) None else Some(d)
+
+  def parseAggregateDataPoints(response: DataPointListResponse): Seq[QueryAggregatesResponse] =
+    response.items
+      .map(
+        x => {
+          QueryAggregatesResponse(
+            x.id,
+            Some(x.externalId),
+            x.isString,
+            x.isStep,
+            Some(x.unit),
+            x.getAggregateDatapoints.datapoints
+              .map(
+                a =>
+                  AggregateDataPoint(
+                    Instant.ofEpochMilli(a.timestamp),
+                    screenOutNan(a.average),
+                    screenOutNan(a.max),
+                    screenOutNan(a.min),
+                    screenOutNan(a.count),
+                    screenOutNan(a.sum),
+                    screenOutNan(a.interpolation),
+                    screenOutNan(a.stepInterpolation),
+                    screenOutNan(a.totalVariation),
+                    screenOutNan(a.continuousVariance),
+                    screenOutNan(a.discreteVariance)
+                  )
+              )
+          )
+        }
+      )
 
   private def asProtobufOrError(uri: Uri) =
     asByteArray.mapWithMetadata((response, metadata) => {
