@@ -13,13 +13,13 @@ import io.circe.derivation.{deriveDecoder, deriveEncoder}
 
 class Files[F[_]: Applicative](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with Readable[File, F]
+    with PartitionedReadable[File, F]
     with RetrieveByIds[File, F]
     with RetrieveByExternalIds[File, F]
     with Create[File, FileCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
-    with Filter[File, FilesFilter, F]
+    with PartitionedFilter[File, FilesFilter, F]
     with Search[File, FilesQuery, F]
     with UpdateById[File, FileUpdate, F]
     with UpdateByExternalId[File, FileUpdate, F] {
@@ -84,7 +84,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
       baseUrl,
       cursor,
       limit,
-      None,
+      partition,
       Constants.defaultBatchSize
     )
 
@@ -119,7 +119,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
       filter,
       cursor,
       limit,
-      partition = None,
+      partition,
       Constants.defaultBatchSize
     )
 

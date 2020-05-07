@@ -8,7 +8,8 @@ import com.cognite.sdk.scala.common.{
   Setter,
   WithCreatedTime,
   WithExternalId,
-  WithId
+  WithId,
+  WithSetExternalId
 }
 
 final case class File(
@@ -23,8 +24,11 @@ final case class File(
     uploadedTime: Option[Instant] = None,
     createdTime: Instant = Instant.ofEpochMilli(0),
     lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
-    uploadUrl: Option[String] = None,
-    dataSetId: Option[Long] = None
+    dataSetId: Option[Long] = None,
+    sourceCreatedTime: Option[Instant] = None,
+    sourceModifiedTime: Option[Instant] = None,
+    securityCategories: Option[Seq[Long]] = None,
+    uploadUrl: Option[String] = None
 ) extends WithId[Long]
     with WithExternalId
     with WithCreatedTime
@@ -36,16 +40,23 @@ final case class FileCreate(
     mimeType: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
     assetIds: Option[Seq[Long]] = None,
-    dataSetId: Option[Long] = None
-)
+    dataSetId: Option[Long] = None,
+    sourceCreatedTime: Option[Instant] = None,
+    sourceModifiedTime: Option[Instant] = None,
+    securityCategories: Option[Seq[Long]] = None
+) extends WithExternalId
 
 final case class FileUpdate(
     externalId: Option[Setter[String]] = None,
     source: Option[Setter[String]] = None,
+    mimeType: Option[Setter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
     assetIds: Option[NonNullableSetter[Seq[Long]]] = None,
+    sourceCreatedTime: Option[Setter[Instant]] = None,
+    sourceModifiedTime: Option[Setter[Instant]] = None,
+    securityCategories: Option[NonNullableSetter[Seq[Long]]] = None,
     dataSetId: Option[Setter[Long]] = None
-)
+) extends WithSetExternalId
 
 final case class FilesFilter(
     name: Option[String] = None,
@@ -65,7 +76,7 @@ final case class FilesFilter(
 )
 
 final case class FilesSearch(
-    name: Option[String]
+    name: Option[String] = None
 )
 
 final case class FilesQuery(
