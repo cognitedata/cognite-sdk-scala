@@ -7,20 +7,17 @@ import java.util.UUID
 
 import org.scalatest.Matchers
 import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
+import fs2.Stream
 
 class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with Matchers with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
-  (it should behave).like(readable(client.files))
+  it should behave like readable(client.files)
 
-  (it should behave).like(
-    readableWithRetrieve(
-      client.files,
-      idsThatDoNotExist,
-      supportsMissingAndThrown = true
-    )
-  )
+  it should behave like partitionedReadable(client.files)
+
+  it should behave like readableWithRetrieve(client.files, idsThatDoNotExist, supportsMissingAndThrown = true)
 
   it should behave like readableWithRetrieveByExternalId(client.files, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
@@ -143,6 +140,18 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       .toList
     assert(createdTimeFilterResults.length == 22)
 
+    val createdTimeFilterPartitionResults = client.files
+      .filterPartitions(
+        FilesFilter(
+          createdTime =
+            Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+        ), 20
+      )
+      .fold(Stream.empty)(_ ++ _)
+      .compile
+      .toList
+    assert(createdTimeFilterPartitionResults.length == 22)
+
     val createdTimeFilterResultsWithLimit = client.files
       .filter(
         FilesFilter(
@@ -213,8 +222,8 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       )
     assert(limitTimeSearchResults.length == 5)
   }
-  it should "support upload" in {
 
+  it should "support upload" in {
     val inputStream = new BufferedInputStream(
       new FileInputStream(
         new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
@@ -230,6 +239,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
 
     assert(file.name == "uploadTest123.txt")
   }
+
   it should "support download" in {
     val file =
       client.files.upload(

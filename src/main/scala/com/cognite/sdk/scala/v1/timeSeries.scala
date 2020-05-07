@@ -42,7 +42,7 @@ final case class TimeSeriesUpdate(
     unit: Option[Setter[String]] = None,
     assetId: Option[Setter[Long]] = None,
     description: Option[Setter[String]] = None,
-    securityCategories: Option[Setter[Seq[Long]]] = None,
+    securityCategories: Option[NonNullableSetter[Seq[Long]]] = None,
     dataSetId: Option[Setter[Long]] = None
 ) extends WithSetExternalId
 
