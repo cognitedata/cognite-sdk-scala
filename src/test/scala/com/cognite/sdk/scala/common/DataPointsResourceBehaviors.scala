@@ -5,7 +5,7 @@ import java.time.Instant
 import com.cognite.sdk.scala.v1.{DataPointsByExternalIdResponse, DataPointsByIdResponse, TimeSeries}
 import com.cognite.sdk.scala.v1.resources.DataPointsResource
 import com.softwaremill.sttp.Id
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
 trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: FlatSpec =>
   private val startTime = System.currentTimeMillis()

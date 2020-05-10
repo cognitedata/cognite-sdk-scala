@@ -14,10 +14,11 @@ import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
-import org.scalatest.{BeforeAndAfter, FlatSpec, OptionValues}
+import org.scalatest.{BeforeAndAfter, OptionValues}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
+import org.scalatest.flatspec.AnyFlatSpec
 
 class EchoServlet extends HttpServlet {
   override def doPost(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
@@ -30,7 +31,7 @@ class EchoServlet extends HttpServlet {
   }
 }
 
-class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter {
+class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAfter {
   implicit val cs: ContextShift[IO] = IO.contextShift(global)
   implicit val timer: Timer[IO] = IO.timer(global)
 
