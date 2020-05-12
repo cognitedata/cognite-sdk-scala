@@ -1,13 +1,15 @@
 package com.cognite.sdk.scala.v1.resources
 
+import cats.Monad
+import cats.implicits._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.derivation.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder}
+import io.circe.{Decoder, Encoder, Json}
 
-class SequenceRows[F[_]](val requestSession: RequestSession[F])
+class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Monad[F])
     extends WithRequestSession[F]
     with BaseUrl {
   import SequenceRows._
@@ -55,50 +57,105 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
         _ => ()
       )
 
+  private def sendQuery(query: SequenceRowsQuery, batchSize: Int) =
+    requestSession
+      .post[SequenceRowsResponse, SequenceRowsResponse, SequenceRowsQuery](
+        query.withCursorAndLimit(
+          query.cursor,
+          Some(math.min(batchSize, query.limit.getOrElse(batchSize)))
+        ),
+        uri"$baseUrl/list",
+        (v: SequenceRowsResponse) => v
+      )
+
+  private def pullQueryResults(
+      query: SequenceRowsQuery,
+      batchSize: Int
+  ): fs2.Pull[F, SequenceRowsResponse, Unit] =
+    Readable.pageThroughCursors[F, Option[Int], SequenceRowsResponse](
+      query.cursor,
+      query.limit,
+      (cursor: Option[String], limit: Option[Int]) =>
+        if (limit.exists(_ <= 0)) {
+          F.pure(Option.empty)
+        } else {
+          sendQuery(query.withCursorAndLimit(cursor, limit), batchSize)
+            .map(r => Some((r, limit.map(_ - r.rows.length))))
+        }
+    )
+
+  private def pullFollowingItems(
+      nextCursor: Option[String],
+      firstPageCount: Int,
+      query: SequenceRowsQuery,
+      batchSize: Int
+  ): fs2.Stream[F, SequenceRow] =
+    nextCursor match {
+      case None => fs2.Stream.empty
+      case Some(cursor) =>
+        pullQueryResults(
+          query.withCursorAndLimit(Some(cursor), query.limit.map(_ - firstPageCount)),
+          batchSize
+        ).stream.flatMap(r => fs2.Stream.emits(r.rows))
+    }
+
+  private def queryColumnsAndStream(
+      query: SequenceRowsQuery,
+      batchSize: Int
+  ): F[(Seq[SequenceColumnSignature], fs2.Stream[F, SequenceRow])] =
+    sendQuery(query, batchSize).map(
+      response =>
+        (
+          response.columns,
+          fs2.Stream.emits(response.rows) ++ pullFollowingItems(
+            response.nextCursor,
+            response.rows.length,
+            query,
+            batchSize
+          )
+        )
+    )
+
   def queryById(
       id: Long,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
+      inclusiveStart: Option[Long],
+      exclusiveEnd: Option[Long],
       limit: Option[Int] = None,
-      columns: Option[Seq[String]] = None
-  ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
-    requestSession
-      .post[(Seq[SequenceColumnId], Seq[SequenceRow]), SequenceRowsResponse, SequenceRowsQueryById](
-        SequenceRowsQueryById(id, inclusiveStart, exclusiveEnd, limit, columns),
-        uri"$baseUrl/list",
-        value => (value.columns.toList, value.rows)
-      )
+      columns: Option[Seq[String]] = None,
+      batchSize: Int = Constants.rowsBatchSize
+  ): F[(Seq[SequenceColumnSignature], fs2.Stream[F, SequenceRow])] =
+    queryColumnsAndStream(
+      SequenceRowsQueryById(id, inclusiveStart, exclusiveEnd, limit, None, columns),
+      batchSize
+    )
 
   def queryByExternalId(
       externalId: String,
-      inclusiveStart: Long,
-      exclusiveEnd: Long,
+      inclusiveStart: Option[Long],
+      exclusiveEnd: Option[Long],
       limit: Option[Int] = None,
-      columns: Option[Seq[String]] = None
-  ): F[(Seq[SequenceColumnId], Seq[SequenceRow])] =
-    requestSession
-      .post[
-        (Seq[SequenceColumnId], Seq[SequenceRow]),
-        SequenceRowsResponse,
-        SequenceRowsQueryByExternalId
-      ](
-        SequenceRowsQueryByExternalId(
-          externalId,
-          inclusiveStart,
-          exclusiveEnd,
-          limit,
-          columns
-        ),
-        uri"$baseUrl/list",
-        value => (value.columns.toList, value.rows)
-      )
+      columns: Option[Seq[String]] = None,
+      batchSize: Int = Constants.rowsBatchSize
+  ): F[(Seq[SequenceColumnSignature], fs2.Stream[F, SequenceRow])] =
+    queryColumnsAndStream(
+      SequenceRowsQueryByExternalId(
+        externalId,
+        inclusiveStart,
+        exclusiveEnd,
+        limit,
+        None,
+        columns
+      ),
+      batchSize
+    )
 
 }
 
 object SequenceRows {
   implicit val cogniteIdEncoder: Encoder[CogniteInternalId] = deriveEncoder
   implicit val cogniteExternalIdEncoder: Encoder[CogniteExternalId] = deriveEncoder
-  implicit val sequenceColumnIdDecoder: Decoder[SequenceColumnId] = deriveDecoder
+  @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
+  implicit val sequenceColumnIdDecoder: Decoder[SequenceColumnSignature] = deriveDecoder
   implicit val sequenceRowEncoder: Encoder[SequenceRow] = deriveEncoder
   implicit val sequenceRowDecoder: Decoder[SequenceRow] = deriveDecoder
   implicit val sequenceRowsInsertByIdEncoder: Encoder[SequenceRowsInsertById] = deriveEncoder
@@ -127,4 +184,13 @@ object SequenceRows {
     Array("org.wartremover.warts.Product", "org.wartremover.warts.Serializable")
   )
   implicit val sequenceRowsResponseDecoder: Decoder[SequenceRowsResponse] = deriveDecoder
+
+  implicit val sequenceRowsQueryEncoder: Encoder[SequenceRowsQuery] =
+    new Encoder[SequenceRowsQuery] {
+      final def apply(q: SequenceRowsQuery): Json =
+        q match {
+          case q: SequenceRowsQueryById => sequenceRowsQueryByIdEncoder(q)
+          case q: SequenceRowsQueryByExternalId => sequenceRowsQueryByExternalIdEncoder(q)
+        }
+    }
 }

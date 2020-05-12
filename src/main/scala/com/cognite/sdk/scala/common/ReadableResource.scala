@@ -73,6 +73,21 @@ object Readable {
       }
     }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
+  private[sdk] def pageThroughCursors[F[_], State, Resp <: ResponseWithCursor](
+      cursor: Option[String],
+      state: State,
+      get: (Option[String], State) => F[Option[(Resp, State)]]
+  ): Pull[F, Resp, Unit] =
+    Pull.eval(get(cursor, state)).flatMap {
+      case None => Pull.done
+      case Some((response, state)) =>
+        Pull.output1(response) >>
+          response.nextCursor
+            .map(cursor => pageThroughCursors(Some(cursor), state, get))
+            .getOrElse(Pull.done)
+    }
+
   private def uriWithCursorAndLimit(
       baseUrl: Uri,
       cursor: Option[String],
