@@ -9,7 +9,11 @@ import io.circe.derivation.deriveDecoder
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
 
+trait ResponseWithCursor {
+  val nextCursor: Option[String]
+}
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
+    extends ResponseWithCursor
 final case class Items[A](items: Seq[A])
 final case class ItemsWithIgnoreUnknownIds[A](items: Seq[A], ignoreUnknownIds: Boolean)
 final case class ItemsWithRecursiveAndIgnoreUnknownIds(

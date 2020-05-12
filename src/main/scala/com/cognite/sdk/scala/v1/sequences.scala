@@ -9,7 +9,8 @@ import com.cognite.sdk.scala.common.{
   Setter,
   WithCreatedTime,
   WithExternalId,
-  WithId
+  WithId,
+  WithSetExternalId
 }
 
 final case class SequenceColumn(
@@ -68,7 +69,7 @@ final case class SequenceUpdate(
     externalId: Option[Setter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
     dataSetId: Option[Setter[Long]] = None
-)
+) extends WithSetExternalId
 
 final case class SequenceFilter(
     name: Option[String] = None,
