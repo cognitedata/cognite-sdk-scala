@@ -1,15 +1,14 @@
-def label = "cognite-sdk-scala-${UUID.randomUUID().toString().substring(0, 5)}"
+@Library("jenkins-helpers@yaml-helpers") _
 
-podTemplate(label: label,
-            containers: [containerTemplate(name: 'sbt',
+podTemplate(containers: [containerTemplate(name: 'sbt',
                                            image: 'eu.gcr.io/cognitedata/openjdk-sbt:jdk8-2020-03-20-3631d83',
                                            resourceRequestCpu: '1000m',
                                            resourceLimitCpu: '3800m',
                                            resourceLimitMemory: '3500Mi',
                                            envVars: [secretEnvVar(key: 'TEST_API_KEY', secretName: 'jetfire-test-api-key', secretKey: 'playgroundApiKey'),
                                                      secretEnvVar(key: 'TEST_API_KEY_GREENFIELD', secretName: 'jetfire-test-api-key', secretKey: 'greenfieldApiKey'),
-                                                     secretEnvVar(key: 'CODECOV_TOKEN', secretName: 'codecov-tokens', secretKey: 'cognite-sdk-scala'),
                                                      secretEnvVar(key: 'GPG_KEY_PASSWORD', secretName: 'sbt-credentials', secretKey: 'gpg-key-password'),
+                                                     envVar(key: 'CODECOV_TOKEN', value: '415effb1-689d-4841-9bdf-93921ce11b02'),
                                                      // /codecov-script/upload-report.sh relies on the following
                                                      // Jenkins and GitHub environment variables.
                                                      envVar(key: 'JENKINS_URL', value: env.JENKINS_URL),
@@ -21,13 +20,9 @@ podTemplate(label: label,
                                            ttyEnabled: true,
                                            command: '/bin/cat -')],
             envVars: [envVar(key: 'MAVEN_OPTS', value: '-Dmaven.artifact.threads=30')],
-            nodeSelector: 'cloud.google.com/gke-local-ssd=true',
-            volumes: [secretVolume(secretName: 'sbt-credentials', mountPath: '/sbt-credentials'),
-                      configMapVolume(configMapName: 'codecov-script-configmap', mountPath: '/codecov-script'),
-                      hostPathVolume(hostPath: '/mnt/disks/ssd0/ivy2', mountPath: '/root/.ivy2'),
-                      hostPathVolume(hostPath: '/mnt/disks/ssd0/sbt', mountPath: '/root/.sbt'),]) {
+            volumes: [secretVolume(secretName: 'sbt-credentials', mountPath: '/sbt-credentials')]) {
     properties([buildDiscarder(logRotator(daysToKeepStr: '30', numToKeepStr: '20'))])
-    node(label) {
+    node(POD_LABEL) {
         container('jnlp') {
             stage('Checkout') {
                 checkout(scm)
@@ -48,7 +43,7 @@ podTemplate(label: label,
                     sh('cat /dev/null | sbt -Dsbt.log.noformat=true scalastyle test:scalastyle scalafmtCheck coverage +test coverageReport')
                 }
                 stage("Upload report to codecov.io") {
-                    sh('bash </codecov-script/upload-report.sh')
+                    jenkinsHelpersUtil.uploadCodecovReport()
                 }
                 stage('Build JAR file') {
                     sh('cat /dev/null | sbt -Dsbt.log.noformat=true'
