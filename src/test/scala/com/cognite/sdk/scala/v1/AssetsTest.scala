@@ -52,49 +52,45 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   )
 
   it should "support deleting entire asset subtrees recursively by externalId" in {
-    val random = shortRandom()
+    val key = shortRandom()
     val assetTree = Seq(
-        AssetCreate(name = "root", externalId = Some(s"recursive-$random-root")),
-        AssetCreate(name = "child", externalId = Some(s"recursive-$random-child"),
-          parentExternalId = Some(s"recursive-$random-root")),
-        AssetCreate(name = "grandchild", externalId = Some(s"recursive-$random-grandchild"),
-          parentExternalId = Some(s"recursive-$random-child"))
+        AssetCreate(name = "root", externalId = Some(s"$key-recursive-root")),
+        AssetCreate(name = "child", externalId = Some(s"$key-recursive-child"), parentExternalId = Some(s"$key-recursive-root")),
+        AssetCreate(name = "grandchild", externalId = Some(s"$key-recursive-grandchild"), parentExternalId = Some(s"$key-recursive-child"))
     )
     client.assets.create(assetTree)
 
     retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"recursive-$random"))).compile.toList,
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
       r => r should have size 3
     )
 
-    client.assets.deleteByExternalIds(Seq(s"recursive-$random-root"), true, true)
+    client.assets.deleteByExternalIds(Seq(s"$key-recursive-root"), true, true)
 
     retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"recursive-$random"))).compile.toList,
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
       r => r should have size 0
     )
   }
 
   it should "support deleting entire asset subtrees recursively by id" in {
-    val random = shortRandom()
+    val key = shortRandom()
     val assetTree = Seq(
-      AssetCreate(name = "root", externalId = Some(s"recursive-$random-root")),
-      AssetCreate(name = "child", externalId = Some(s"recursive-$random-child"),
-        parentExternalId = Some(s"recursive-$random-root")),
-      AssetCreate(name = "grandchild", externalId = Some(s"recursive-$random-grandchild"),
-        parentExternalId = Some(s"recursive-$random-child"))
+      AssetCreate(name = "root", externalId = Some(s"$key-recursive-root")),
+      AssetCreate(name = "child", externalId = Some(s"$key-recursive-child"), parentExternalId = Some(s"$key-recursive-root")),
+      AssetCreate(name = "grandchild", externalId = Some(s"$key-recursive-grandchild"), parentExternalId = Some(s"$key-recursive-child"))
     )
     val createdItems = client.assets.create(assetTree)
 
     retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"recursive-$random"))).compile.toList,
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
       r => r should have size 3
     )
 
     client.assets.deleteByIds(Seq(createdItems.head.id), true, true)
 
     retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"recursive-$random"))).compile.toList,
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
       r => r should have size 0
     )
   }
