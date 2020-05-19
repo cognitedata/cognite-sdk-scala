@@ -38,10 +38,10 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
 
 abstract class SdkTestSpec extends FlatSpec with Matchers {
   // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
-  lazy val client: GenericClient[Id, Nothing] = GenericClient.forAuth[Id, Nothing](
+  lazy val client: GenericClient[Id] = GenericClient.forAuth[Id](
     "scala-sdk-test", auth)(implicitly, sttpBackend)
 
-  lazy val greenfieldClient: GenericClient[Id, Nothing] = GenericClient.forAuth[Id, Nothing](
+  lazy val greenfieldClient: GenericClient[Id] = GenericClient.forAuth[Id](
     "scala-sdk-test", greenfieldAuth, "https://greenfield.cognitedata.com")(implicitly, sttpBackend)
 
   lazy val projectName: String = client.login.status().project
