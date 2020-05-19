@@ -18,12 +18,12 @@ import scala.concurrent.duration._
 
 class ClientTest extends SdkTestSpec {
   "Client" should "fetch the project using login/status if necessary" in {
-    noException should be thrownBy GenericClient.forAuth[Id, Nothing](
+    noException should be thrownBy GenericClient.forAuth[Id](
       "scala-sdk-test", auth)(
       implicitly,
       sttpBackend
     )
-    GenericClient.forAuth[Id, Nothing]("scala-sdk-test", auth)(
+    GenericClient.forAuth[Id]("scala-sdk-test", auth)(
       implicitly,
       sttpBackend
     ).projectName should not be empty
@@ -47,7 +47,7 @@ class ClientTest extends SdkTestSpec {
     val respondWithoutApiKeyId = SttpBackendStub.synchronous
       .whenAnyRequest
       .thenRespond(loginStatusResponseWithoutApiKeyId)
-    new GenericClient[Id, Nothing](
+    new GenericClient[Id](
       "scala-sdk-test", projectName, auth = auth)(
       implicitly,
       respondWithoutApiKeyId
@@ -72,7 +72,7 @@ class ClientTest extends SdkTestSpec {
     val respondWithApiKeyId = SttpBackendStub.synchronous
       .whenAnyRequest
       .thenRespond(loginStatusResponseWithApiKeyId)
-    new GenericClient[Id, Nothing](
+    new GenericClient[Id](
       "scala-sdk-test", projectName, auth = auth)(
       implicitly,
       respondWithApiKeyId
@@ -82,7 +82,7 @@ class ClientTest extends SdkTestSpec {
   it should "support async IO clients" in {
     implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
     implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
-    GenericClient.forAuth[IO, Nothing]("scala-sdk-test", auth)(
+    GenericClient.forAuth[IO]("scala-sdk-test", auth)(
       implicitly,
       new RetryingBackend[IO, Nothing](AsyncHttpClientCatsBackend[IO]())
     ).unsafeRunSync().projectName should not be empty
@@ -90,7 +90,7 @@ class ClientTest extends SdkTestSpec {
 
   it should "throw an exception if the authentication is invalid and project is not specified" in {
     implicit val auth: Auth = ApiKeyAuth("invalid-key")
-    an[InvalidAuthentication] should be thrownBy GenericClient.forAuth[Id, Nothing](
+    an[InvalidAuthentication] should be thrownBy GenericClient.forAuth[Id](
       "scala-sdk-test", auth)(
       implicitly,
       sttpBackend
@@ -99,7 +99,7 @@ class ClientTest extends SdkTestSpec {
 
   it should "not throw an exception if the authentication is invalid and project is specified" in {
     implicit val auth: Auth = ApiKeyAuth("invalid-key", project = Some("random-project"))
-    noException should be thrownBy new GenericClient[Id, Nothing](
+    noException should be thrownBy new GenericClient[Id](
       "scala-sdk-test", projectName, auth = auth)(
       implicitly,
       sttpBackend
@@ -109,7 +109,7 @@ class ClientTest extends SdkTestSpec {
   it should "be possible to use the sdk with greenfield.cognite.data.com" in {
     implicit val auth: Auth = ApiKeyAuth(Option(System.getenv("TEST_API_KEY_GREENFIELD"))
       .getOrElse(throw new RuntimeException("TEST_API_KEY_GREENFIELD not set")))
-    noException should be thrownBy new GenericClient[Id, Nothing](
+    noException should be thrownBy new GenericClient[Id](
       "cdp-spark-datasource-test",
       projectName,
       "https://greenfield.cognitedata.com",
@@ -175,13 +175,13 @@ class ClientTest extends SdkTestSpec {
 
   it should "retry certain failed requests" in {
     assertThrows[CdpApiException] {
-      GenericClient.forAuth[Id, Nothing]("scala-sdk-test", auth)(
+      GenericClient.forAuth[Id]("scala-sdk-test", auth)(
         implicitly,
         makeTestingBackend()
       ).threeDModels.list()
     }
 
-    val _ = GenericClient.forAuth[Id, Nothing]("scala-sdk-test", auth)(
+    val _ = GenericClient.forAuth[Id]("scala-sdk-test", auth)(
       implicitly,
       new RetryingBackend[Id, Nothing](
         makeTestingBackend(),
@@ -190,7 +190,7 @@ class ClientTest extends SdkTestSpec {
     ).threeDModels.list()
 
     assertThrows[CdpApiException] {
-      GenericClient.forAuth[Id, Nothing]("scala-sdk-test", auth)(
+      GenericClient.forAuth[Id]("scala-sdk-test", auth)(
         implicitly,
         new RetryingBackend[Id, Nothing](
           makeTestingBackend(),
@@ -218,7 +218,7 @@ class ClientTest extends SdkTestSpec {
         unavailableResponse,
         serverError,
         loginStatusResponse)
-    val client = new GenericClient[Id, Nothing]("scala-sdk-test",
+    val client = new GenericClient[Id]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
       ApiKeyAuth("irrelevant", Some("randomproject"))
@@ -278,7 +278,7 @@ class ClientTest extends SdkTestSpec {
         badRequest,
         assetsResponse
       )
-    val client = new GenericClient[Id, Nothing]("scala-sdk-test",
+    val client = new GenericClient[Id]("scala-sdk-test",
       projectName,
       "https://www.cognite1999.com/nowhere-at-all",
       ApiKeyAuth("irrelevant", Some("randomproject"))
@@ -316,7 +316,7 @@ class ClientTest extends SdkTestSpec {
         serverErrorHtmlBytes,
         badRequestBytes,
         protobufResponse)
-    val client2 = new GenericClient[Id, Nothing]("scala-sdk-test",
+    val client2 = new GenericClient[Id]("scala-sdk-test",
       projectName,
       "https://www.cognite1999.com/nowhere-at-all",
       ApiKeyAuth("irrelevant", Some("randomproject"))

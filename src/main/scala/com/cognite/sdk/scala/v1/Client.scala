@@ -149,14 +149,14 @@ final case class RequestSession[F[_]: Monad](
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
-class GenericClient[F[_]: Monad, S](
+class GenericClient[F[_]: Monad](
     applicationName: String,
     val projectName: String,
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
     auth: Auth = Auth.defaultAuth
 )(
-    implicit sttpBackend: SttpBackend[F, S]
+    implicit sttpBackend: SttpBackend[F, Nothing]
 ) {
   import GenericClient._
   val uri: Uri = parseBaseUrlOrThrow(baseUrl)
@@ -214,6 +214,11 @@ object GenericClient {
   val defaultBaseUrl: String = Option(System.getenv("COGNITE_BASE_URL"))
     .getOrElse("https://api.cognitedata.com")
 
+  def apply[F[_]: Monad](applicationName: String, projectName: String, baseUrl: String, auth: Auth)(
+      implicit sttpBackend: SttpBackend[F, Nothing]
+  ): GenericClient[F] =
+    new GenericClient(applicationName, projectName, baseUrl, auth)(implicitly, sttpBackend)
+
   def parseBaseUrlOrThrow(baseUrl: String): Uri =
     try {
       uri"$baseUrl"
@@ -224,11 +229,11 @@ object GenericClient {
         )
     }
 
-  def forAuth[F[_]: Monad, S](
+  def forAuth[F[_]: Monad](
       applicationName: String,
       auth: Auth,
       baseUrl: String = defaultBaseUrl
-  )(implicit sttpBackend: SttpBackend[F, S]): F[GenericClient[F, S]] = {
+  )(implicit sttpBackend: SttpBackend[F, Nothing]): F[GenericClient[F]] = {
     val login = new Login[F](
       RequestSession(applicationName, parseBaseUrlOrThrow(baseUrl), sttpBackend, auth)
     )
@@ -239,7 +244,7 @@ object GenericClient {
       if (projectName.trim.isEmpty) {
         throw InvalidAuthentication()
       } else {
-        new GenericClient[F, S](applicationName, projectName, baseUrl, auth)(
+        new GenericClient[F](applicationName, projectName, baseUrl, auth)(
           implicitly,
           sttpBackend
         )
@@ -247,7 +252,7 @@ object GenericClient {
   }
 }
 
-final case class Client(
+class Client(
     applicationName: String,
     override val projectName: String,
     baseUrl: String =
@@ -255,4 +260,10 @@ final case class Client(
     auth: Auth = Auth.defaultAuth
 )(
     implicit sttpBackend: SttpBackend[Id, Nothing]
-) extends GenericClient[Id, Nothing](applicationName, projectName, baseUrl, auth)
+) extends GenericClient[Id](applicationName, projectName, baseUrl, auth)
+
+object Client {
+  def apply(applicationName: String, projectName: String, baseUrl: String, auth: Auth)(
+      implicit sttpBackend: SttpBackend[Id, Nothing]
+  ): Client = new Client(applicationName, projectName, baseUrl, auth)(sttpBackend)
+}
