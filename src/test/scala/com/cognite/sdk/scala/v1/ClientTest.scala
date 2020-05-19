@@ -48,7 +48,7 @@ class ClientTest extends SdkTestSpec {
       .whenAnyRequest
       .thenRespond(loginStatusResponseWithoutApiKeyId)
     new GenericClient[Id, Nothing](
-      "scala-sdk-test", projectName, auth)(
+      "scala-sdk-test", projectName, auth = auth)(
       implicitly,
       respondWithoutApiKeyId
     ).login.status().apiKeyId shouldBe empty
@@ -73,7 +73,7 @@ class ClientTest extends SdkTestSpec {
       .whenAnyRequest
       .thenRespond(loginStatusResponseWithApiKeyId)
     new GenericClient[Id, Nothing](
-      "scala-sdk-test", projectName, auth)(
+      "scala-sdk-test", projectName, auth = auth)(
       implicitly,
       respondWithApiKeyId
     ).login.status().apiKeyId shouldBe Some(12147483647L)
@@ -100,7 +100,7 @@ class ClientTest extends SdkTestSpec {
   it should "not throw an exception if the authentication is invalid and project is specified" in {
     implicit val auth: Auth = ApiKeyAuth("invalid-key", project = Some("random-project"))
     noException should be thrownBy new GenericClient[Id, Nothing](
-      "scala-sdk-test", projectName, auth)(
+      "scala-sdk-test", projectName, auth = auth)(
       implicitly,
       sttpBackend
     )
@@ -112,8 +112,8 @@ class ClientTest extends SdkTestSpec {
     noException should be thrownBy new GenericClient[Id, Nothing](
       "cdp-spark-datasource-test",
       projectName,
-      auth,
-      "https://greenfield.cognitedata.com"
+      "https://greenfield.cognitedata.com",
+      auth
     )(implicitly,
       sttpBackend
     )
@@ -124,24 +124,24 @@ class ClientTest extends SdkTestSpec {
       Client(
         "relationships-unit-tests",
         projectName,
-        auth,
-        ""
+        "",
+        auth
       )(new LoggingSttpBackend[Id, Nothing](sttpBackend)).login.status()
     }
     assertThrows[SdkException] {
       Client(
         "url-test-2",
         projectName,
-        auth,
-        "api.cognitedata.com"
+        "api.cognitedata.com",
+        auth
       )(sttpBackend).login.status()
     }
     assertThrows[UnknownHostException] {
       Client(
         "url-test-3",
         projectName,
-        auth,
-        "thisShouldThrowAnUnknownHostException:)"
+        "thisShouldThrowAnUnknownHostException:)",
+        auth
       )(sttpBackend).login.status()
     }
   }
@@ -220,8 +220,9 @@ class ClientTest extends SdkTestSpec {
         loginStatusResponse)
     val client = new GenericClient[Id, Nothing]("scala-sdk-test",
       projectName,
-      ApiKeyAuth("irrelevant", Some("randomproject")),
-      "https://www.cognite.com/nowhereatall"
+      "https://www.cognite.com/nowhereatall",
+      ApiKeyAuth("irrelevant", Some("randomproject"))
+
     )(
       implicitly,
       new RetryingBackend[Id, Nothing](backendStub,
@@ -279,8 +280,8 @@ class ClientTest extends SdkTestSpec {
       )
     val client = new GenericClient[Id, Nothing]("scala-sdk-test",
       projectName,
-      ApiKeyAuth("irrelevant", Some("randomproject")),
-      "https://www.cognite1999.com/nowhere-at-all"
+      "https://www.cognite1999.com/nowhere-at-all",
+      ApiKeyAuth("irrelevant", Some("randomproject"))
     )(
       implicitly,
       new RetryingBackend[Id, Nothing](
@@ -317,8 +318,8 @@ class ClientTest extends SdkTestSpec {
         protobufResponse)
     val client2 = new GenericClient[Id, Nothing]("scala-sdk-test",
       projectName,
-      ApiKeyAuth("irrelevant", Some("randomproject")),
-      "https://www.cognite1999.com/nowhere-at-all"
+      "https://www.cognite1999.com/nowhere-at-all",
+      ApiKeyAuth("irrelevant", Some("randomproject"))
     )(
       implicitly,
       new RetryingBackend[Id, Nothing](

@@ -30,8 +30,8 @@ class ReadTest extends SdkTestSpec {
     })
     lazy val dummyClient = Client("foo",
       projectName,
-      auth,
-      "https://api.cognitedata.com")(requestHijacker)
+      "https://api.cognitedata.com",
+      auth)(requestHijacker)
     val dummyRequestSession = dummyClient.requestSession
 
     Readable.readWithCursor(
