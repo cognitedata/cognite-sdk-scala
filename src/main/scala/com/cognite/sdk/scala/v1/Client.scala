@@ -152,9 +152,9 @@ final case class RequestSession[F[_]: Monad](
 class GenericClient[F[_]: Monad, S](
     applicationName: String,
     val projectName: String,
-    auth: Auth,
     baseUrl: String =
-      Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com")
+      Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
+    auth: Auth = Auth.defaultAuth
 )(
     implicit sttpBackend: SttpBackend[F, S]
 ) {
@@ -239,7 +239,7 @@ object GenericClient {
       if (projectName.trim.isEmpty) {
         throw InvalidAuthentication()
       } else {
-        new GenericClient[F, S](applicationName, projectName, auth, baseUrl)(
+        new GenericClient[F, S](applicationName, projectName, baseUrl, auth)(
           implicitly,
           sttpBackend
         )
@@ -250,9 +250,9 @@ object GenericClient {
 final case class Client(
     applicationName: String,
     override val projectName: String,
-    auth: Auth = Auth.defaultAuth,
     baseUrl: String =
-      Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com")
+      Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
+    auth: Auth = Auth.defaultAuth
 )(
     implicit sttpBackend: SttpBackend[Id, Nothing]
-) extends GenericClient[Id, Nothing](applicationName, projectName, auth, baseUrl)
+) extends GenericClient[Id, Nothing](applicationName, projectName, baseUrl, auth)
