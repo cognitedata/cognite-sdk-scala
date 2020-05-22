@@ -37,7 +37,6 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
     - name: Run tests
-      continue-on-error: true
       env:
         TEST_API_KEY: ${{ secrets.playgroundApiKey }}
         TEST_API_KEY_GREENFIELD: ${{ secrets.greenfieldApiKey }}
