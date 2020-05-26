@@ -243,6 +243,59 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
       parseNumericDataPointsByExternalId
     )
   }
+  def queryAggregatesByIds(
+      ids: Seq[Long],
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
+      granularity: String,
+      aggregates: Seq[String],
+      limit: Option[Int] = None,
+      ignoreUnknownIds: Boolean = false
+  ): F[Map[String, Seq[DataPointsByIdResponse]]] =
+    queryProtobuf(
+      ItemsWithIgnoreUnknownIds(
+        ids.map(
+          QueryRangeById(
+            _,
+            inclusiveStart.toEpochMilli.toString,
+            exclusiveEnd.toEpochMilli.toString,
+            Some(limit.getOrElse(Constants.aggregatesBatchSize)),
+            Some(granularity),
+            Some(aggregates)
+          )
+        ),
+        ignoreUnknownIds
+      )
+    ) { dataPointListResponse =>
+      toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
+    }
+
+  def queryAggregatesByExternalIds(
+      externalIds: Seq[String],
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
+      granularity: String,
+      aggregates: Seq[String],
+      limit: Option[Int] = None,
+      ignoreUnknownIds: Boolean = false
+  ): F[Map[String, Seq[DataPointsByIdResponse]]] =
+    queryProtobuf(
+      ItemsWithIgnoreUnknownIds(
+        externalIds.map(
+          QueryRangeByExternalId(
+            _,
+            inclusiveStart.toEpochMilli.toString,
+            exclusiveEnd.toEpochMilli.toString,
+            Some(limit.getOrElse(Constants.aggregatesBatchSize)),
+            Some(granularity),
+            Some(aggregates)
+          )
+        ),
+        ignoreUnknownIds
+      )
+    ) { dataPointListResponse =>
+      toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
+    }
 
   def queryAggregatesById(
       id: Long,
@@ -252,22 +305,7 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
       aggregates: Seq[String],
       limit: Option[Int] = None
   ): F[Map[String, Seq[DataPointsByIdResponse]]] =
-    queryProtobuf(
-      Items(
-        Seq(
-          QueryRangeById(
-            id,
-            inclusiveStart.toEpochMilli.toString,
-            exclusiveEnd.toEpochMilli.toString,
-            Some(limit.getOrElse(Constants.aggregatesBatchSize)),
-            Some(granularity),
-            Some(aggregates)
-          )
-        )
-      )
-    ) { dataPointListResponse =>
-      toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
-    }
+    queryAggregatesByIds(Seq(id), inclusiveStart, exclusiveEnd, granularity, aggregates, limit)
 
   def queryAggregatesByExternalId(
       externalId: String,
@@ -277,22 +315,14 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
       aggregates: Seq[String],
       limit: Option[Int] = None
   ): F[Map[String, Seq[DataPointsByIdResponse]]] =
-    queryProtobuf(
-      Items(
-        Seq(
-          QueryRangeByExternalId(
-            externalId,
-            inclusiveStart.toEpochMilli.toString,
-            exclusiveEnd.toEpochMilli.toString,
-            Some(limit.getOrElse(Constants.aggregatesBatchSize)),
-            Some(granularity),
-            Some(aggregates)
-          )
-        )
-      )
-    ) { dataPointListResponse =>
-      toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
-    }
+    queryAggregatesByExternalIds(
+      Seq(externalId),
+      inclusiveStart,
+      exclusiveEnd,
+      granularity,
+      aggregates,
+      limit
+    )
 
   private def queryProtobuf[Q: Encoder, R](
       query: Q
@@ -644,7 +674,7 @@ object DataPointsResource {
   def parseAggregateDataPoints(response: DataPointListResponse): Seq[QueryAggregatesResponse] =
     response.items
       .map(
-        x => {
+        x =>
           QueryAggregatesResponse(
             x.id,
             Some(x.externalId),
@@ -669,7 +699,6 @@ object DataPointsResource {
                   )
               )
           )
-        }
       )
 
   private def asProtobufOrError(uri: Uri) =
