@@ -154,7 +154,8 @@ class GenericClient[F[_]: Monad](
     val projectName: String,
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
-    auth: Auth = Auth.defaultAuth
+    auth: Auth = Auth.defaultAuth,
+    apiVersion: Option[String] = None
 )(
     implicit sttpBackend: SttpBackend[F, Nothing]
 ) {
@@ -164,7 +165,7 @@ class GenericClient[F[_]: Monad](
   lazy val requestSession =
     RequestSession(
       applicationName,
-      uri"$uri/api/v1/projects/$projectName",
+      uri"$uri/api/${apiVersion.getOrElse("v1")}/projects/$projectName",
       sttpBackend,
       auth
     )
@@ -190,6 +191,11 @@ class GenericClient[F[_]: Monad](
     new ThreeDAssetMappings(requestSession, modelId, revisionId)
   def threeDNodes(modelId: Long, revisionId: Long): ThreeDNodes[F] =
     new ThreeDNodes(requestSession, modelId, revisionId)
+
+  lazy val functions = new Functions[F](requestSession)
+  def functionCalls(functionId: Long): FunctionCalls[F] =
+    new FunctionCalls(requestSession, functionId)
+  lazy val functionSchedules = new FunctionSchedules[F](requestSession)
 
   def project: F[Project] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Project]] =
@@ -232,7 +238,8 @@ object GenericClient {
   def forAuth[F[_]: Monad](
       applicationName: String,
       auth: Auth,
-      baseUrl: String = defaultBaseUrl
+      baseUrl: String = defaultBaseUrl,
+      apiVersion: Option[String] = None
   )(implicit sttpBackend: SttpBackend[F, Nothing]): F[GenericClient[F]] = {
     val login = new Login[F](
       RequestSession(applicationName, parseBaseUrlOrThrow(baseUrl), sttpBackend, auth)
@@ -244,7 +251,7 @@ object GenericClient {
       if (projectName.trim.isEmpty) {
         throw InvalidAuthentication()
       } else {
-        new GenericClient[F](applicationName, projectName, baseUrl, auth)(
+        new GenericClient[F](applicationName, projectName, baseUrl, auth, apiVersion)(
           implicitly,
           sttpBackend
         )
