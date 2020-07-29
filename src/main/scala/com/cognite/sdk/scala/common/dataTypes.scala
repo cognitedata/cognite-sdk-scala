@@ -152,7 +152,7 @@ object Setter {
           None
         case Some(value: T) => Some(SetValue(value))
         case Some(badValue) =>
-          throw new IllegalArgumentException(
+          throw new SdkException(
             s"Expected value of type ${manifest[T].toString} but got `${badValue.toString}` of type ${badValue.getClass.toString}"
           )
       }
