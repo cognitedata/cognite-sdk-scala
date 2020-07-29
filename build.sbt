@@ -99,7 +99,9 @@ lazy val core = (project in file("."))
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
-      "org.typelevel" %% "cats-effect" % catsEffectVersion(CrossVersion.partialVersion(scalaVersion.value)),
+      "org.typelevel" %% "cats-effect" % catsEffectVersion(
+        CrossVersion.partialVersion(scalaVersion.value)
+      ),
       "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value))
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value))
   )
@@ -115,32 +117,32 @@ val scalaTestDeps = Seq(
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp" %% "core" % sttpVersion,
-  "com.softwaremill.sttp" %% "circe" % sttpVersion
-    // We specify our own version of circe.
-    exclude("io.circe", "circe-core_2.11")
-    exclude("io.circe", "circe-core_2.12")
-    exclude("io.circe", "circe-core_2.13")
-    exclude("io.circe", "circe-parser_2.11")
-    exclude("io.circe", "circe-parser_2.12")
-    exclude("io.circe", "circe-parser_2.13"),
+  ("com.softwaremill.sttp" %% "circe" % sttpVersion)
+  // We specify our own version of circe.
+    .exclude("io.circe", "circe-core_2.11")
+    .exclude("io.circe", "circe-core_2.12")
+    .exclude("io.circe", "circe-core_2.13")
+    .exclude("io.circe", "circe-parser_2.11")
+    .exclude("io.circe", "circe-parser_2.12")
+    .exclude("io.circe", "circe-parser_2.13"),
   "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion % Test
 )
 
 def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
   Seq(
     // We use the cats version included in the cats-effect version we specify.
-    "io.circe" %% "circe-core" % circeVersion(scalaVersion)
-      exclude("org.typelevel", "cats-core_2.11")
-      exclude("org.typelevel", "cats-core_2.12")
-      exclude("org.typelevel", "cats-core_2.13"),
-    "io.circe" %% "circe-derivation" % circeDerivationVersion(scalaVersion)
-      exclude("org.typelevel", "cats-core_2.11")
-      exclude("org.typelevel", "cats-core_2.12")
-      exclude("org.typelevel", "cats-core_2.13"),
-    "io.circe" %% "circe-parser" % circeVersion(scalaVersion)
-      exclude("org.typelevel", "cats-core_2.11")
-      exclude("org.typelevel", "cats-core_2.12")
-      exclude("org.typelevel", "cats-core_2.13")
+    ("io.circe" %% "circe-core" % circeVersion(scalaVersion))
+      .exclude("org.typelevel", "cats-core_2.11")
+      .exclude("org.typelevel", "cats-core_2.12")
+      .exclude("org.typelevel", "cats-core_2.13"),
+    ("io.circe" %% "circe-derivation" % circeDerivationVersion(scalaVersion))
+      .exclude("org.typelevel", "cats-core_2.11")
+      .exclude("org.typelevel", "cats-core_2.12")
+      .exclude("org.typelevel", "cats-core_2.13"),
+    ("io.circe" %% "circe-parser" % circeVersion(scalaVersion))
+      .exclude("org.typelevel", "cats-core_2.11")
+      .exclude("org.typelevel", "cats-core_2.12")
+      .exclude("org.typelevel", "cats-core_2.13")
   )
 
 //addCompilerPlugin(scalafixSemanticdb)
