@@ -114,6 +114,10 @@ trait WithId[I] {
   val id: I
 }
 
+trait WithMandatoryExternalId {
+  val externalId: String
+}
+
 trait WithExternalId {
   val externalId: Option[String]
 }

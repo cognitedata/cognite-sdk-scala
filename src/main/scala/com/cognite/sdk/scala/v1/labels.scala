@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 
-import com.cognite.sdk.scala.common.WithCreatedTime
+import com.cognite.sdk.scala.common.{WithCreatedTime, WithMandatoryExternalId}
 
 final case class Label(
     externalId: String,
@@ -10,12 +10,13 @@ final case class Label(
     description: Option[String] = None,
     createdTime: Instant = Instant.ofEpochMilli(0)
 ) extends WithCreatedTime
+    with WithMandatoryExternalId
 
 final case class LabelCreate(
     externalId: String,
     name: String,
     description: Option[String] = None
-)
+) extends WithMandatoryExternalId
 
 final case class LabelFilter(
     name: Option[String] = None,
