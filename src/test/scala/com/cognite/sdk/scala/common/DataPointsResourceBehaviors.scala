@@ -13,7 +13,7 @@ trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: FlatS
   private val endTime = startTime + 20*1000
   private val end = Instant.ofEpochMilli(endTime)
   private val testDataPoints = (startTime to endTime by 1000).map(t =>
-    DataPoint(Instant.ofEpochMilli(t), math.random))
+    DataPoint(Instant.ofEpochMilli(t), java.lang.Math.random()))
 
   def withTimeSeries(testCode: TimeSeries => Any): Unit
 

@@ -14,7 +14,7 @@ trait StringDataPointsResourceBehaviors extends Matchers with RetryWhile { this:
   private val endTime = startTime + 20*1000
   private val end = Instant.ofEpochMilli(endTime)
   private val testStringDataPoints = (startTime to endTime by 1000).map(t =>
-    StringDataPoint(Instant.ofEpochMilli(t), math.random.toString))
+    StringDataPoint(Instant.ofEpochMilli(t), java.lang.Math.random().toString))
 
   def withStringTimeSeries(testCode: TimeSeries => Any): Unit
 
