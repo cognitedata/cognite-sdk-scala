@@ -298,7 +298,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     val startTime = System.currentTimeMillis()
     val endTime = startTime + 20*1000
     val dp = (startTime to endTime by 1000).map(t =>
-        DataPoint(Instant.ofEpochMilli(t), math.random))
+        DataPoint(Instant.ofEpochMilli(t), java.lang.Math.random()))
     client.dataPoints.insertById(timeSeriesID, dp)
     retryWithExpectedResult[DataPointsByIdResponse](
       client.dataPoints.queryById(
