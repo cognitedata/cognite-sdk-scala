@@ -1,8 +1,8 @@
 import wartremover.Wart
 import sbt.project
 
-val scala213 = "2.13.2"
-val scala212 = "2.12.11"
+val scala213 = "2.13.3"
+val scala212 = "2.12.12"
 val scala211 = "2.11.12"
 val supportedScalaVersions = List(scala212, scala213, scala211)
 
@@ -34,7 +34,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "1.3.4",
+  version := "1.3.5",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),

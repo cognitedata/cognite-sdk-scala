@@ -111,7 +111,7 @@ It is possible to insert and delete numeric data points for specified time serie
 specify the time series for which to insert data and the data points to insert:
 
 ```scala
-val testDataPoints = (startTime to endTime by 1000).map(t => DataPoint(Instant.ofEpochMilli(t), math.random))
+val testDataPoints = (startTime to endTime by 1000).map(t => DataPoint(Instant.ofEpochMilli(t), math.random()))
 c.dataPoints.insertById(timeSeriesId, testDataPoints)
 ```
 
