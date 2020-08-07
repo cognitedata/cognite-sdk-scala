@@ -6,7 +6,7 @@ import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
 import com.softwaremill.sttp.Id
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
 trait ReadBehaviours extends Matchers { this: FlatSpec =>
   def readable[R, InternalId, PrimitiveId](

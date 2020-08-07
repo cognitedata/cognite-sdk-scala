@@ -5,9 +5,9 @@ import java.nio.file.{Files, Paths}
 import java.time.Instant
 import java.util.UUID
 
-import org.scalatest.Matchers
 import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
 import fs2.Stream
+import org.scalatest.matchers.should.Matchers
 
 class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with Matchers with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
