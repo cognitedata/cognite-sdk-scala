@@ -2,6 +2,7 @@ package com.cognite.sdk.scala.common
 
 import java.time.Instant
 
+import cats.Id
 import com.cognite.sdk.scala.v1.CogniteId
 import com.softwaremill.sttp.Uri
 import io.circe.{Decoder, Encoder, Json, JsonObject}
@@ -114,8 +115,17 @@ trait WithId[I] {
   val id: I
 }
 
-trait WithExternalId {
-  val externalId: Option[String]
+trait WithExternalIdGeneric[F[_]] {
+  val externalId: F[String]
+  def getExternalId(): Option[String] // We could have implemented Foldable instead
+}
+
+trait WithExternalId extends WithExternalIdGeneric[Option] {
+  def getExternalId(): Option[String] = externalId
+}
+
+trait WithRequiredExternalId extends WithExternalIdGeneric[Id] {
+  def getExternalId(): Option[String] = Some(externalId)
 }
 
 trait WithCreatedTime {

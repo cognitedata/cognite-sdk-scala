@@ -91,7 +91,47 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
     //       id in the same api call for V1
   }
 
-  def writableWithExternalId[R <: WithExternalId, W <: WithExternalId](
+  def writableWithExternalId[R <: WithExternalIdGeneric[Option], W <: WithExternalIdGeneric[
+    Option
+  ]](
+      writable: Create[R, W, Id],
+      maybeDeletable: Option[DeleteByExternalIds[Id]],
+      readExamples: Seq[R],
+      createExamples: Seq[W],
+      externalIdsThatDoNotExist: Seq[String],
+      supportsMissingAndThrown: Boolean
+  )(implicit t: Transformer[R, W]) =
+    writableWithExternalIdGeneric[Option, R, W](
+      writable,
+      maybeDeletable,
+      readExamples,
+      createExamples,
+      externalIdsThatDoNotExist,
+      supportsMissingAndThrown
+    )
+
+  def writableWithRequiredExternalId[R <: WithExternalIdGeneric[Id], W <: WithExternalIdGeneric[
+    Id
+  ]](
+      writable: Create[R, W, Id],
+      maybeDeletable: Option[DeleteByExternalIds[Id]],
+      readExamples: Seq[R],
+      createExamples: Seq[W],
+      externalIdsThatDoNotExist: Seq[String],
+      supportsMissingAndThrown: Boolean
+  )(implicit t: Transformer[R, W]) =
+    writableWithExternalIdGeneric[Id, R, W](
+      writable,
+      maybeDeletable,
+      readExamples,
+      createExamples,
+      externalIdsThatDoNotExist,
+      supportsMissingAndThrown
+    )
+
+  def writableWithExternalIdGeneric[A[_], R <: WithExternalIdGeneric[A], W <: WithExternalIdGeneric[
+    A
+  ]](
       writable: Create[R, W, Id],
       maybeDeletable: Option[DeleteByExternalIds[Id]],
       readExamples: Seq[R],
@@ -137,7 +177,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
     it should "create and delete items using the read class and external ids" in {
       val createdItems = writable.createFromRead(readExamples)
       createdItems should have size readExamples.size.toLong
-      val createdExternalIds = createdItems.map(_.externalId.get)
+      val createdExternalIds = createdItems.flatMap(_.getExternalId())
       createdExternalIds should have size readExamples.size.toLong
       maybeDeletable.map(_.deleteByExternalIds(createdExternalIds))
     }
@@ -146,7 +186,7 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       // create multiple items
       val createdItems = writable.create(createExamples)
       createdItems should have size createExamples.size.toLong
-      val createdIds = createdItems.map(_.externalId.get)
+      val createdIds = createdItems.flatMap(_.getExternalId())
       createdIds should have size createExamples.size.toLong
       maybeDeletable.map(_.deleteByExternalIds(createdIds))
     }
