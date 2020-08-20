@@ -34,7 +34,7 @@ class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter
   implicit val cs: ContextShift[IO] = IO.contextShift(global)
   implicit val timer: Timer[IO] = IO.timer(global)
 
-  val port: Int = 50000 + (math.random * 1000).toInt
+  val port: Int = 50000 + (java.lang.Math.random() * 1000).toInt
 
   var server: Server = _
   val gzipHandler = new GzipHandler()

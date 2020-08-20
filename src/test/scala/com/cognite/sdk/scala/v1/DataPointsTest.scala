@@ -88,7 +88,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     extAverages.map(_.timestamp).tail should contain theSameElementsInOrderAs extStepInterpolation.map(_.timestamp)
     extAverages.map(_.timestamp) shouldBe sorted
     extStepInterpolation.map(_.timestamp) shouldBe sorted
-    aggregates.keys should contain only("average", "stepInterpolation")
+    aggregates.keys should contain only (Seq("average", "stepInterpolation"):_*)
     extAverages.head.value should equal(2.7346077636587798)
     extAverages.last.value should equal(2.7051279586700723)
     extStepInterpolation.last.value should equal(2.8424909114837646)
@@ -156,7 +156,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     val extSum2 = extAggregates2("sum").head.datapoints
     val extStepInterpolation2 = extAggregates2("stepInterpolation").head.datapoints
     extSum2.map(_.timestamp).tail should contain theSameElementsInOrderAs extStepInterpolation2.map(_.timestamp)
-    aggregates2.keys should contain only("sum", "stepInterpolation")
+    aggregates2.keys should contain only (Seq("sum", "stepInterpolation"):_*)
     assertThrows[CdpApiException] {
       val _ = client.dataPoints.queryAggregatesById(
         54577852743225L,

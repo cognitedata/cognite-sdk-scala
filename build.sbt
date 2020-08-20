@@ -1,13 +1,13 @@
 import wartremover.Wart
 import sbt.project
 
-val scala213 = "2.13.2"
-val scala212 = "2.12.11"
+val scala213 = "2.13.3"
+val scala212 = "2.12.12"
 val scala211 = "2.11.12"
 val supportedScalaVersions = List(scala212, scala213, scala211)
 
 // This is used only for tests.
-val jettyTestVersion = "9.4.28.v20200408"
+val jettyTestVersion = "9.4.31.v20200723"
 
 val sttpVersion = "1.7.2"
 val circeVersion: Option[(Long, Long)] => String = {
@@ -20,7 +20,7 @@ val circeDerivationVersion: Option[(Long, Long)] => String = {
 }
 val catsEffectVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.0.0"
-  case _ => "2.1.3"
+  case _ => "2.1.4"
 }
 val fs2Version: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.1.0"
@@ -34,7 +34,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "1.3.3",
+  version := "1.4.0",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),

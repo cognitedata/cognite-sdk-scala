@@ -32,7 +32,6 @@ final case class ApiKey(
 ) extends WithId[Long]
 
 final case class Capability(
-    version: Int,
     actions: Seq[String],
     scope: Map[String, Map[String, Json]]
 )
