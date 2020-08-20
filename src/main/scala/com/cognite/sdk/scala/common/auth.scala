@@ -24,7 +24,7 @@ object Auth {
 
 final case class NoAuthentication() extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
-    throw new RuntimeException(
+    throw new SdkException(
       s"Authentication not provided and environment variable ${Auth.apiKeyEnvironmentVariable} not set"
     )
 }

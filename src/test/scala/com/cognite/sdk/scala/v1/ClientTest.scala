@@ -1,5 +1,7 @@
 package com.cognite.sdk.scala.v1
 
+import BuildInfo.BuildInfo
+
 import java.net.UnknownHostException
 import java.nio.charset.Charset
 import java.time.Instant
@@ -17,6 +19,47 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class ClientTest extends SdkTestSpec {
+  private val loginStatus = client.login.status()
+  private val loginStatusResponse = new Response(Right(
+    s"""
+       |{
+       |  "data": {
+       |    "user": "tom@example.com",
+       |    "loggedIn": true,
+       |    "project": "${loginStatus.project}",
+       |    "projectId": ${loginStatus.projectId}
+       |  }
+       |}
+       |""".stripMargin), 200, "",
+    Seq(("x-request-id", "test-request-header"), ("content-type", "application/json; charset=utf-8")),
+    Nil)
+  private def makeTestingBackend(): SttpBackend[Id, Nothing] = {
+    val errorResponse = new Response(Right("{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Some error\"\n  }\n}"),
+      429, "", Seq(("x-request-id", "test-request-header")), Nil)
+    val successResponse = new Response(Right(
+      "{\n  \"items\": [\n{\n  \"id\": 5238663994907390,\n  \"createdTime\":" +
+        " 1550760030463,\n  \"name\": \"model_793601675501121482\"\n}\n  ]\n}"),
+      200, "", Seq(("x-request-id", "test-request-header")), Nil)
+    SttpBackendStub.synchronous
+      .whenAnyRequest
+      .thenRespondCyclicResponses(loginStatusResponse, errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse
+      )
+  }
+  val loginStatusResponseWithApiKeyId = new Response(Right(
+      s"""
+         |{
+         |  "data": {
+         |    "user": "tom@example.com",
+         |    "loggedIn": true,
+         |    "project": "${loginStatus.project}",
+         |    "projectId": ${loginStatus.projectId},
+         |    "apiKeyId": 12147483647
+         |  }
+         |}
+         |""".stripMargin), 200, "",
+      Seq(("x-request-id", "test-request-header"), ("content-type", "application/json; charset=utf-8")),
+      Nil)
+
   "Client" should "fetch the project using login/status if necessary" in {
     noException should be thrownBy GenericClient.forAuth[Id](
       "scala-sdk-test", auth)(
@@ -55,20 +98,6 @@ class ClientTest extends SdkTestSpec {
   }
 
   it should "handle an apiKeyId which is larger than an int" in {
-    val loginStatusResponseWithApiKeyId = new Response(Right(
-      s"""
-         |{
-         |  "data": {
-         |    "user": "tom@example.com",
-         |    "loggedIn": true,
-         |    "project": "${loginStatus.project}",
-         |    "projectId": ${loginStatus.projectId},
-         |    "apiKeyId": 12147483647
-         |  }
-         |}
-         |""".stripMargin), 200, "",
-      Seq(("x-request-id", "test-request-header"), ("content-type", "application/json; charset=utf-8")),
-      Nil)
     val respondWithApiKeyId = SttpBackendStub.synchronous
       .whenAnyRequest
       .thenRespond(loginStatusResponseWithApiKeyId)
@@ -77,6 +106,21 @@ class ClientTest extends SdkTestSpec {
       implicitly,
       respondWithApiKeyId
     ).login.status().apiKeyId shouldBe Some(12147483647L)
+  }
+
+  it should "set x-cdp headers" in {
+    var headers = Seq.empty[(String, String)]
+    val saveHeadersStub = SttpBackendStub.synchronous
+      .whenAnyRequest
+      .thenRespondWrapped { req =>
+        headers = req.headers
+        Response.ok(loginStatusResponseWithApiKeyId).copy(headers = req.headers)
+      }
+    new GenericClient[Id]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, saveHeadersStub)
+      .login.status()
+    headers should contain (("x-cdp-clienttag", "client-test"))
+    headers should contain (("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}"))
+    headers should contain (("x-cdp-app", "scala-sdk-test"))
   }
 
   it should "support async IO clients" in {
@@ -144,33 +188,6 @@ class ClientTest extends SdkTestSpec {
         auth
       )(sttpBackend).login.status()
     }
-  }
-
-  private val loginStatus = client.login.status()
-  private val loginStatusResponse = new Response(Right(
-    s"""
-       |{
-       |  "data": {
-       |    "user": "tom@example.com",
-       |    "loggedIn": true,
-       |    "project": "${loginStatus.project}",
-       |    "projectId": ${loginStatus.projectId}
-       |  }
-       |}
-       |""".stripMargin), 200, "",
-    Seq(("x-request-id", "test-request-header"), ("content-type", "application/json; charset=utf-8")),
-    Nil)
-  private def makeTestingBackend(): SttpBackend[Id, Nothing] = {
-    val errorResponse = new Response(Right("{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Some error\"\n  }\n}"),
-      429, "", Seq(("x-request-id", "test-request-header")), Nil)
-    val successResponse = new Response(Right(
-      "{\n  \"items\": [\n{\n  \"id\": 5238663994907390,\n  \"createdTime\":" +
-        " 1550760030463,\n  \"name\": \"model_793601675501121482\"\n}\n  ]\n}"),
-      200, "", Seq(("x-request-id", "test-request-header")), Nil)
-    SttpBackendStub.synchronous
-      .whenAnyRequest
-      .thenRespondCyclicResponses(loginStatusResponse, errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse
-      )
   }
 
   it should "retry certain failed requests" in {

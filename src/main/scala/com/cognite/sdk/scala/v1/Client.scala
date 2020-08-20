@@ -18,7 +18,8 @@ final case class RequestSession[F[_]: Monad](
     applicationName: String,
     baseUrl: Uri,
     sttpBackend: SttpBackend[F, _],
-    auth: Auth
+    auth: Auth,
+    clientTag: Option[String] = None
 ) {
   def send[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[Response[R]] =
     r(
@@ -26,19 +27,25 @@ final case class RequestSession[F[_]: Monad](
         .readTimeout(90.seconds)
     ).send()(sttpBackend, implicitly)
 
-  private val sttpRequest = sttp
-    .followRedirects(false)
-    .auth(auth)
-    .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
-    .header("x-cdp-app", applicationName)
-    .readTimeout(90.seconds)
-    .parseResponseIfMetadata { md =>
-      md.contentLength.forall(_ > 0) && md.contentType.exists(
-        // This is a bit ugly, but we're highly unlikely to use any other ContentType
-        // any time soon.
-        ct => ct.startsWith(MediaTypes.Json) || ct.startsWith("application/protobuf")
-      )
+  private val sttpRequest = {
+    val baseRequest = sttp
+      .followRedirects(false)
+      .auth(auth)
+      .header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}")
+      .header("x-cdp-app", applicationName)
+      .readTimeout(90.seconds)
+      .parseResponseIfMetadata { md =>
+        md.contentLength.forall(_ > 0) && md.contentType.exists(
+          // This is a bit ugly, but we're highly unlikely to use any other ContentType
+          // any time soon.
+          ct => ct.startsWith(MediaTypes.Json) || ct.startsWith("application/protobuf")
+        )
+      }
+    clientTag match {
+      case Some(tag) => baseRequest.header("x-cdp-clienttag", tag)
+      case None => baseRequest
     }
+  }
 
   private def parseResponse[T, R](uri: Uri, mapResult: T => R)(
       implicit decoder: Decoder[Either[CdpApiError, T]]
@@ -154,7 +161,9 @@ class GenericClient[F[_]: Monad](
     val projectName: String,
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
-    auth: Auth = Auth.defaultAuth
+    auth: Auth = Auth.defaultAuth,
+    apiVersion: Option[String] = None,
+    clientTag: Option[String] = None
 )(
     implicit sttpBackend: SttpBackend[F, Nothing]
 ) {
@@ -164,11 +173,12 @@ class GenericClient[F[_]: Monad](
   lazy val requestSession =
     RequestSession(
       applicationName,
-      uri"$uri/api/v1/projects/$projectName",
+      uri"$uri/api/${apiVersion.getOrElse("v1")}/projects/$projectName",
       sttpBackend,
-      auth
+      auth,
+      clientTag
     )
-  lazy val login = new Login[F](RequestSession(applicationName, uri, sttpBackend, auth))
+  lazy val login = new Login[F](RequestSession(applicationName, uri, sttpBackend, auth, clientTag))
   lazy val assets = new Assets[F](requestSession)
   lazy val events = new Events[F](requestSession)
   lazy val files = new Files[F](requestSession)
@@ -177,6 +187,7 @@ class GenericClient[F[_]: Monad](
   lazy val sequences = new SequencesResource[F](requestSession)
   lazy val sequenceRows = new SequenceRows[F](requestSession)
   lazy val dataSets = new DataSets[F](requestSession)
+  lazy val labels = new Labels[F](requestSession)
 
   lazy val rawDatabases = new RawDatabases[F](requestSession)
   def rawTables(database: String): RawTables[F] = new RawTables(requestSession, database)
@@ -190,6 +201,11 @@ class GenericClient[F[_]: Monad](
     new ThreeDAssetMappings(requestSession, modelId, revisionId)
   def threeDNodes(modelId: Long, revisionId: Long): ThreeDNodes[F] =
     new ThreeDNodes(requestSession, modelId, revisionId)
+
+  lazy val functions = new Functions[F](requestSession)
+  def functionCalls(functionId: Long): FunctionCalls[F] =
+    new FunctionCalls(requestSession, functionId)
+  lazy val functionSchedules = new FunctionSchedules[F](requestSession)
 
   def project: F[Project] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Project]] =
@@ -232,7 +248,8 @@ object GenericClient {
   def forAuth[F[_]: Monad](
       applicationName: String,
       auth: Auth,
-      baseUrl: String = defaultBaseUrl
+      baseUrl: String = defaultBaseUrl,
+      apiVersion: Option[String] = None
   )(implicit sttpBackend: SttpBackend[F, Nothing]): F[GenericClient[F]] = {
     val login = new Login[F](
       RequestSession(applicationName, parseBaseUrlOrThrow(baseUrl), sttpBackend, auth)
@@ -244,7 +261,7 @@ object GenericClient {
       if (projectName.trim.isEmpty) {
         throw InvalidAuthentication()
       } else {
-        new GenericClient[F](applicationName, projectName, baseUrl, auth)(
+        new GenericClient[F](applicationName, projectName, baseUrl, auth, apiVersion)(
           implicitly,
           sttpBackend
         )

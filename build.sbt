@@ -1,8 +1,8 @@
 import wartremover.Wart
 import sbt.project
 
-val scala213 = "2.13.2"
-val scala212 = "2.12.11"
+val scala213 = "2.13.3"
+val scala212 = "2.12.12"
 val scala211 = "2.11.12"
 val supportedScalaVersions = List(scala212, scala213, scala211)
 
@@ -34,7 +34,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "1.3.1",
+  version := "1.3.6",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -115,15 +115,32 @@ val scalaTestDeps = Seq(
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp" %% "core" % sttpVersion,
-  "com.softwaremill.sttp" %% "circe" % sttpVersion,
+  "com.softwaremill.sttp" %% "circe" % sttpVersion
+    // We specify our own version of circe.
+    exclude("io.circe", "circe-core_2.11")
+    exclude("io.circe", "circe-core_2.12")
+    exclude("io.circe", "circe-core_2.13")
+    exclude("io.circe", "circe-parser_2.11")
+    exclude("io.circe", "circe-parser_2.12")
+    exclude("io.circe", "circe-parser_2.13"),
   "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion % Test
 )
 
 def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
   Seq(
-    "io.circe" %% "circe-core" % circeVersion(scalaVersion),
-    "io.circe" %% "circe-derivation" % circeDerivationVersion(scalaVersion),
+    // We use the cats version included in the cats-effect version we specify.
+    "io.circe" %% "circe-core" % circeVersion(scalaVersion)
+      exclude("org.typelevel", "cats-core_2.11")
+      exclude("org.typelevel", "cats-core_2.12")
+      exclude("org.typelevel", "cats-core_2.13"),
+    "io.circe" %% "circe-derivation" % circeDerivationVersion(scalaVersion)
+      exclude("org.typelevel", "cats-core_2.11")
+      exclude("org.typelevel", "cats-core_2.12")
+      exclude("org.typelevel", "cats-core_2.13"),
     "io.circe" %% "circe-parser" % circeVersion(scalaVersion)
+      exclude("org.typelevel", "cats-core_2.11")
+      exclude("org.typelevel", "cats-core_2.12")
+      exclude("org.typelevel", "cats-core_2.13")
   )
 
 //addCompilerPlugin(scalafixSemanticdb)
