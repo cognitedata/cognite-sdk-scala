@@ -15,7 +15,11 @@ import com.cognite.sdk.scala.common.{
 
 final case class SequenceColumn(
     name: Option[String] = None,
-    externalId: String,
+    // externalId must be optional until all data created using v0.6
+    // of the API has been migrated and this field has been marked as
+    // required in the official API docs.
+    // See also our custom transformer in common/package.scala
+    externalId: Option[String] = None,
     description: Option[String] = None,
     // TODO: Turn this into an enum.
     //       See https://github.com/circe/circe-derivation/issues/8

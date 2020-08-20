@@ -2,9 +2,19 @@ package com.cognite.sdk.scala
 
 import java.time.Instant
 
-import com.cognite.sdk.scala.v1.{CogniteExternalId, CogniteId, CogniteInternalId, TimeRange}
+import com.cognite.sdk.scala.v1.{
+  CogniteExternalId,
+  CogniteId,
+  CogniteInternalId,
+  Sequence,
+  SequenceColumn,
+  SequenceColumnCreate,
+  SequenceCreate,
+  TimeRange
+}
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.derivation.deriveEncoder
+import io.scalaland.chimney.Transformer
 
 package object common {
   implicit val cogniteIdEncoder: Encoder[CogniteId] = new Encoder[CogniteId] {
@@ -29,4 +39,18 @@ package object common {
       : Encoder[ItemsWithIgnoreUnknownIds[CogniteId]] =
     deriveEncoder
 
+  // externalId optional when reading, despite being required when
+  // writing. This is due to it being optional in v0.6, and data from
+  // there has not yet been migrated.
+  // When it has, and externalId has been marked as required in the
+  // official API docs, we should be able to remove this.
+  implicit val sequenceColumnToCreateTransformer
+      : Transformer[SequenceColumn, SequenceColumnCreate] =
+    Transformer
+      .define[SequenceColumn, SequenceColumnCreate]
+      .withFieldComputed(_.externalId, r => r.externalId.getOrElse(""))
+      .buildTransformer
+
+  implicit val sequenceToCreateTransformer: Transformer[Sequence, SequenceCreate] =
+    Transformer.define[Sequence, SequenceCreate].buildTransformer
 }
