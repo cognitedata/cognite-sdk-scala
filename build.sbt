@@ -20,7 +20,7 @@ val circeDerivationVersion: Option[(Long, Long)] => String = {
 }
 val catsEffectVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.0.0"
-  case _ => "2.1.3"
+  case _ => "2.1.4"
 }
 val fs2Version: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.1.0"
