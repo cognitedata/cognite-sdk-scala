@@ -34,13 +34,13 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
         Sequence(
           name = Some("scala-sdk-write-example-1"),
           columns = NonEmptyList.of(
-            SequenceColumn(name = Some("col1"), externalId = s"ext1-$eid", valueType = "DOUBLE"),
-            SequenceColumn(name = Some("col2"), externalId = s"ext2-$eid")
+            SequenceColumn(name = Some("col1"), externalId = Some(s"ext1-$eid"), valueType = "DOUBLE"),
+            SequenceColumn(name = Some("col2"), externalId = Some(s"ext2-$eid"))
           )
         ),
         Sequence(
           name = Some("scala-sdk-write-example-2"),
-          columns = NonEmptyList.of(SequenceColumn(name = Some("col1"), externalId = s"ext1-$eid", valueType = "LONG"))
+          columns = NonEmptyList.of(SequenceColumn(name = Some("col1"), externalId = Some(s"ext1-$eid"), valueType = "LONG"))
         )
       ),
       Seq(
@@ -76,13 +76,13 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
           name = Some("scala-sdk-write-external-example-1"),
           externalId = Some(shortRandom()),
           columns =
-            NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = s"ext2-$eid"))
+            NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some(s"ext2-$eid")))
         ),
         Sequence(
           name = Some("scala-sdk-write-external-example-2"),
           externalId = Some(shortRandom()),
           columns =
-            NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = s"ext2-$eid"))
+            NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some(s"ext2-$eid")))
         )
       ),
       Seq(
@@ -106,15 +106,15 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
     Sequence(
       name = Some("scala-sdk-write-example-1"),
       description = Some("description-1"),
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = s"string-column-$eid"))
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some(s"string-column-$eid")))
     ),
     Sequence(
       name = Some("scala-sdk-write-example-2"),
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = s"string-column-$eid"))
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some(s"string-column-$eid")))
     ),
     Sequence(
       name = Some("scala-sdk-write-example-3"),
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = s"string-column-$eid")),
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some(s"string-column-$eid"))),
       dataSetId = Some(testDataSet.id)
     )
   )
@@ -122,17 +122,17 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
     Sequence(
       name = Some("scala-sdk-write-example-1-1"),
       description = Some(null), // scalastyle:ignore null
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = s"string-column-$eid"))
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some(s"string-column-$eid")))
     ),
     Sequence(
       name = Some("scala-sdk-write-example-2-1"),
       description = Some("scala-sdk-write-example-2"),
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = s"string-column-$eid")),
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some(s"string-column-$eid"))),
       dataSetId = Some(testDataSet.id)
     ),
     Sequence(
       name = Some("scala-sdk-write-example-3-1"),
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = s"string-column-$eid")),
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some(s"string-column-$eid"))),
       dataSetId = Some(testDataSet.id)
     )
   )
@@ -186,10 +186,10 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
     client.sequences,
     Some(client.sequences),
     Seq(Sequence(
-      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = s"string-column-$eid")),
+      columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some(s"string-column-$eid"))),
       externalId = Some(s"update-1-externalId-$eid")),
       Sequence(columns = NonEmptyList.of(
-        SequenceColumn(name = Some("string-column"), externalId = s"string-column-$eid")), externalId = Some(s"update-2-externalId-$eid"))),
+        SequenceColumn(name = Some("string-column"), externalId = Some(s"string-column-$eid"))), externalId = Some(s"update-2-externalId-$eid"))),
     Map(s"update-1-externalId-$eid" -> SequenceUpdate(externalId = Some(SetValue(s"update-1-externalId-$eid-1"))),
       s"update-2-externalId-$eid" -> SequenceUpdate(externalId = Some(SetValue(s"update-2-externalId-$eid-1")))),
     (readSequences: Seq[Sequence], updatedSequences: Seq[Sequence]) => {
