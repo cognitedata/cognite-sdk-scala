@@ -24,7 +24,7 @@ val catsEffectVersion: Option[(Long, Long)] => String = {
 }
 val fs2Version: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.1.0"
-  case _ => "2.3.0"
+  case _ => "2.4.4"
 }
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
