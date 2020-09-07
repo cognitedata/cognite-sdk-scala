@@ -85,10 +85,40 @@ final case class CdpApiException(
     duplicated: Option[Seq[JsonObject]],
     missingFields: Option[Seq[String]],
     requestId: Option[String]
-) extends Throwable(
-      s"Request ${requestId.map(id => s"with id $id ").getOrElse("")}to ${url
-        .toString()} failed with status ${code.toString}: $message"
-    )
+) extends Throwable({
+      import CdpApiException._
+      val maybeId = requestId.map(id => s"with id $id ").getOrElse("")
+      val details = Seq(
+        missingFields.map(fields => s" Missing fields: [${fields.mkString(", ")}]."),
+        duplicated.map(describeErrorList("Duplicated")),
+        missing.map(describeErrorList("Missing"))
+      ).flatMap(_.toList).mkString
+
+      s"Request ${maybeId}to ${url.toString} failed with status ${code.toString}: $message.$details"
+    })
+
+object CdpApiException {
+  private def describeErrorList(kind: String)(items: Seq[JsonObject]): String =
+    items
+      .flatMap(_.toIterable)
+      .groupBy { case (key, _) => key }
+      .toList
+      .sortBy { case (key, _) => key } // Ensure deterministic ordering
+      .map {
+        case (key, entries) =>
+          // Example:
+          //    Duplicated ids: [1234567, 1234568]. Duplicated externalIds: [externalId-1, externalId-2].
+
+          val commaSeparatedValues =
+            entries
+              .map { case (_, value) => value.asString.getOrElse(value.toString) } // Print strings without quotes
+              .sorted // Ensure deterministic ordering
+              .mkString(", ")
+
+          s" $kind ${key}s: [$commaSeparatedValues]."
+      }
+      .mkString
+}
 
 final case class DataPoint(
     timestamp: Instant,
