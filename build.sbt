@@ -110,7 +110,7 @@ lazy val core = (project in file("."))
   )
 
 val scalaTestDeps = Seq(
-  "org.scalactic" %% "scalactic" % "3.0.8",
+  "org.scalactic" %% "scalactic" % "3.0.9",
   "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 )
 val sttpDeps = Seq(
