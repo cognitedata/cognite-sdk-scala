@@ -24,7 +24,7 @@ val catsEffectVersion: Option[(Long, Long)] => String = {
 }
 val fs2Version: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.1.0"
-  case _ => "2.3.0"
+  case _ => "2.4.4"
 }
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
@@ -34,7 +34,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "1.4.1-SNAPSHOT",
+  version := "1.4.2-SNAPSHOT",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -95,7 +95,7 @@ lazy val core = (project in file("."))
     commonSettings,
     libraryDependencies ++= Seq(
       "io.scalaland" %% "chimney" % "0.5.3",
-      "commons-io" % "commons-io" % "2.7",
+      "commons-io" % "commons-io" % "2.8.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
@@ -111,7 +111,7 @@ lazy val core = (project in file("."))
 
 val scalaTestDeps = Seq(
   "org.scalactic" %% "scalactic" % "3.0.8",
-  "org.scalatest" %% "scalatest" % "3.2.2" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.9" % "test"
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp" %% "core" % sttpVersion,
