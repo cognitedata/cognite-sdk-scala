@@ -61,3 +61,15 @@ final case class TicketAuth(authTicket: String, override val project: Option[Str
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     r.header("auth-ticket", authTicket)
 }
+
+final case class ClientCredentialsAuth(
+    authority: String = "https://login.microsoftonline.com/",
+    tenant: String,
+    clientId: String,
+    clientSecret: String,
+    scopes: List[String]
+) extends Auth
+{
+  override def middleware[F[_], S](backend: SttpBackend[F, S]): SttpBackend[F, S] =
+    new OAuth2ClientCredentialsSttpBackend[F, S](backend, this)
+}
