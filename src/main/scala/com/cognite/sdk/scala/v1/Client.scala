@@ -20,10 +20,12 @@ import scala.util.control.NonFatal
 final case class RequestSession[F[_]: Monad](
     applicationName: String,
     baseUrl: Uri,
-    sttpBackend: SttpBackend[F, _],
+    baseSttpBackend: SttpBackend[F, _],
     auth: Auth,
     clientTag: Option[String] = None
 ) {
+  val sttpBackend: SttpBackend[F, _] = auth.middleware(baseSttpBackend)
+
   def send[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[Response[R]] =
     r(
       sttp
@@ -33,7 +35,6 @@ final case class RequestSession[F[_]: Monad](
   private val sttpRequest = {
     val baseRequest = sttp
       .followRedirects(false)
-      .auth(auth)
       .header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}")
       .header("x-cdp-app", applicationName)
       .readTimeout(90.seconds)
