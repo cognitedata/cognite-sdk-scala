@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.common
 
-import com.softwaremill.sttp.{MonadError, Request, RequestT, Response, SttpBackend}
+import com.softwaremill.sttp._
 
 final case class InvalidAuthentication() extends Throwable(s"Invalid authentication")
 
@@ -63,7 +63,7 @@ final case class TicketAuth(authTicket: String, override val project: Option[Str
 }
 
 final case class ClientCredentialsAuth(
-    authority: String = "https://login.microsoftonline.com/",
+    authority: Uri = uri"https://login.microsoftonline.com",
     tenant: String,
     clientId: String,
     clientSecret: String,
