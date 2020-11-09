@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.common
 
+import cats.{Applicative, Monad}
 import com.softwaremill.sttp.RequestT
 
 final case class InvalidAuthentication() extends Throwable(s"Invalid authentication")
@@ -48,4 +49,14 @@ final case class TicketAuth(authTicket: String, override val project: Option[Str
     extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     r.header("auth-ticket", authTicket)
+}
+
+trait AuthProvider[F[_]] {
+  def getAuth: F[Auth]
+}
+
+object AuthProvider {
+  def apply[F[_]: Monad](auth: Auth): AuthProvider[F] = new AuthProvider[F] {
+    def getAuth: F[Auth] = Applicative[F].pure(auth)
+  }
 }

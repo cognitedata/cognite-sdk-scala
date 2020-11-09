@@ -62,7 +62,6 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
     requestSession.map(
       sttp
         .followRedirects(false)
-        .auth(requestSession.auth)
         .contentType("application/protobuf")
         .header("accept", "application/json")
         .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
@@ -108,7 +107,6 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
     requestSession.map(
       sttp
         .followRedirects(false)
-        .auth(requestSession.auth)
         .contentType("application/protobuf")
         .header("accept", "application/json")
         .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
