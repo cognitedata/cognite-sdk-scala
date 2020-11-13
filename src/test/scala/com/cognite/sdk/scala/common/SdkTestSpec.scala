@@ -67,3 +67,13 @@ abstract class SdkTestSpec extends FlatSpec with Matchers {
     })
   }
 }
+
+class PrintTestProjects extends SdkTestSpec {
+  val loginEuropeWest1 = client.login.status()
+  val loginGreenfield = greenfieldClient.login.status()
+  println( // scalastyle:ignore
+    s"""Running tests using the following service accounts:
+       |  europe-west1: ${loginEuropeWest1.user} (${loginEuropeWest1.project})
+       |  greenfield: ${loginGreenfield.user} (${loginGreenfield.project})
+       |""".stripMargin)
+}
