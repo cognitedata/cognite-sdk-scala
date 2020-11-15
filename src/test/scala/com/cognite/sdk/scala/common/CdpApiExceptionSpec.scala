@@ -1,10 +1,11 @@
 package com.cognite.sdk.scala.common
 
-import org.scalatest.{FlatSpec, Matchers}
 import com.softwaremill.sttp._
 import io.circe._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CdpApiExceptionSpec extends FlatSpec with Matchers {
+class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {
   it should "format messages without request ID" in {
     val ex = CdpApiException(
       url = uri"https://api.cognitedata.com",
