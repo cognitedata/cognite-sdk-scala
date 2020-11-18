@@ -60,4 +60,5 @@ object Relationships {
     deriveDecoder[ItemsWithCursor[Relationship]]
   implicit val relationshipItemsDecoder: Decoder[Items[Relationship]] =
     deriveDecoder[Items[Relationship]]
+  implicit val cogniteExternalIdDecoder: Decoder[CogniteExternalId] = deriveDecoder[CogniteExternalId]
 }

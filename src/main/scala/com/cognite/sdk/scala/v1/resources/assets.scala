@@ -190,4 +190,5 @@ object Assets {
   implicit val deleteRequestWithRecursiveAndIgnoreUnknownIdsEncoder
       : Encoder[ItemsWithRecursiveAndIgnoreUnknownIds] =
     deriveEncoder[ItemsWithRecursiveAndIgnoreUnknownIds]
+  implicit val cogniteExternalIdDecoder: Decoder[CogniteExternalId] = deriveDecoder[CogniteExternalId]
 }
