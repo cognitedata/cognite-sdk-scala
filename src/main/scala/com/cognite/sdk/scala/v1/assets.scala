@@ -19,7 +19,8 @@ final case class Asset(
     rootId: Option[Long] = None,
     aggregates: Option[Map[String, Long]] = None,
     dataSetId: Option[Long] = None,
-    parentExternalId: Option[String] = None
+    parentExternalId: Option[String] = None,
+    labels: Option[Seq[CogniteExternalId]] = None
 ) extends WithId[Long]
     with WithExternalId
     with WithCreatedTime
