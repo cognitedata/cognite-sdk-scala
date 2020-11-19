@@ -61,6 +61,7 @@ final case class EventsFilter(
     subtype: Option[String] = None,
     createdTime: Option[TimeRange] = None,
     lastUpdatedTime: Option[TimeRange] = None,
+    activeAtTime: Option[TimeRange] = None,
     externalIdPrefix: Option[String] = None,
     dataSetIds: Option[Seq[CogniteId]] = None
 )

@@ -59,7 +59,8 @@ final case class AssetsFilter(
     root: Option[Boolean] = None,
     externalIdPrefix: Option[String] = None,
     dataSetIds: Option[Seq[CogniteId]] = None,
-    parentExternalIds: Option[Seq[String]] = None
+    parentExternalIds: Option[Seq[String]] = None,
+    labels: Option[LabelContainsAnyAll] = None
 )
 
 final case class AssetsSearch(
