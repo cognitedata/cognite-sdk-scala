@@ -6,13 +6,16 @@ package com.cognite.sdk.scala.v1.resources
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.softwaremill.sttp._
-import io.circe.derivation.deriveDecoder
-import io.circe.Decoder
+import io.circe.derivation.{deriveDecoder, deriveEncoder}
+import io.circe.{Decoder, Encoder}
 
 class Relationships[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[Relationship, F]
-    with RetrieveByExternalIdsWithIgnoreUnknownIds[Relationship, F] {
+    with Filter[Relationship, RelationshipFilter, F]
+    with RetrieveByExternalIdsWithIgnoreUnknownIds[Relationship, F]
+    with DeleteByExternalIdsWithIgnoreUnknownIds[F]
+    with Create[Relationship, RelationshipCreate, F]{
   import Relationships._
   override val baseUrl = uri"${requestSession.baseUrl}/relationships"
 
@@ -40,6 +43,41 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
       externalIds,
       ignoreUnknownIds
     )
+
+  override def createItems(items: Items[RelationshipCreate]): F[Seq[Relationship]] =
+    Create.createItems[F, Relationship, RelationshipCreate](requestSession, baseUrl, items)
+
+  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
+    deleteByExternalIds(externalIds, false)
+
+  override def deleteByExternalIds(
+                                    externalIds: Seq[String],
+                                    ignoreUnknownIds: Boolean = false
+                                  ): F[Unit] =
+    DeleteByExternalIds.deleteByExternalIdsWithIgnoreUnknownIds(
+      requestSession,
+      baseUrl,
+      externalIds,
+      ignoreUnknownIds
+    )
+
+  override private[sdk] def filterWithCursor(
+      filter: RelationshipFilter,
+      cursor: Option[String],
+      limit: Option[StatusCode],
+      partition: Option[Partition],
+      aggregatedProperties: Option[Seq[String]]
+  ): F[ItemsWithCursor[Relationship]] =
+    Filter.filterWithCursor(
+      requestSession,
+      baseUrl,
+      filter,
+      cursor,
+      limit,
+      partition,
+      Constants.defaultBatchSize,
+      aggregatedProperties
+    )
 }
 
 object Relationships {
@@ -49,4 +87,14 @@ object Relationships {
   implicit val relationshipItemsDecoder: Decoder[Items[Relationship]] =
     deriveDecoder[Items[Relationship]]
   implicit val cogniteExternalIdDecoder: Decoder[CogniteExternalId] = deriveDecoder[CogniteExternalId]
+  implicit val createRelationEncoder: Encoder[RelationshipCreate] = deriveEncoder[RelationshipCreate]
+  implicit val createRelationsItemsEncoder: Encoder[Items[RelationshipCreate]] =
+    deriveEncoder[Items[RelationshipCreate]]
+  implicit val relationshipsFilterEncoder: Encoder[RelationshipFilter] =
+    deriveEncoder[RelationshipFilter]
+  implicit val relationshipsFilterRequestEncoder: Encoder[FilterRequest[RelationshipFilter]] =
+    deriveEncoder[FilterRequest[RelationshipFilter]]
+  implicit val confidenceRangeEncoder: Encoder[ConfidenceRange] = deriveEncoder[ConfidenceRange]
+  implicit val LabelContainsAnyEncoder: Encoder[LabelContainsAny] = deriveEncoder[LabelContainsAny]
+  implicit val LabelContainsAllAnyEncoder: Encoder[LabelContainsAll] = deriveEncoder[LabelContainsAll]
 }
