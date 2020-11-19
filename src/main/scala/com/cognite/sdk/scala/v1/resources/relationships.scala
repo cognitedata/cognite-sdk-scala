@@ -95,6 +95,5 @@ object Relationships {
   implicit val relationshipsFilterRequestEncoder: Encoder[FilterRequest[RelationshipFilter]] =
     deriveEncoder[FilterRequest[RelationshipFilter]]
   implicit val confidenceRangeEncoder: Encoder[ConfidenceRange] = deriveEncoder[ConfidenceRange]
-  implicit val LabelContainsAnyEncoder: Encoder[LabelContainsAny] = deriveEncoder[LabelContainsAny]
-  implicit val LabelContainsAllAnyEncoder: Encoder[LabelContainsAll] = deriveEncoder[LabelContainsAll]
+  implicit val LabelContainsAnyAllEncoder: Encoder[LabelContainsAnyAll] = deriveEncoder[LabelContainsAnyAll]
 }

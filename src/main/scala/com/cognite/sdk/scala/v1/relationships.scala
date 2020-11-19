@@ -47,5 +47,5 @@ final case class RelationshipFilter(
    createdTime: Option[TimeRange] = None,
    lastUpdatedTime: Option[TimeRange] = None,
    activeAtTime: Option[TimeRange] = None,
-   labels: Option[Seq[Either[LabelContainsAll, LabelContainsAny]]] = None
+   labels: Option[LabelContainsAnyAll] = None
 )

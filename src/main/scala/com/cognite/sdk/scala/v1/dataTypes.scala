@@ -10,8 +10,8 @@ sealed trait CogniteId
 final case class CogniteExternalId(externalId: String) extends CogniteId
 final case class CogniteInternalId(id: Long) extends CogniteId
 
-final case class TimeRange(min: Instant, max: Instant)
-final case class ConfidenceRange(min: Double, max: Double)
+// min and max needs to optional, since one of them can be provided alone.
+final case class TimeRange(min: Option[Instant], max: Option[Instant])
+final case class ConfidenceRange(min: Option[Double], max: Option[Double])
 
-final case class LabelContainsAny(containsAny: CogniteExternalId)
-final case class LabelContainsAll(containsAll: CogniteExternalId)
+final case class LabelContainsAnyAll(containsAny: Option[Seq[CogniteExternalId]] = None, containsAll: Option[Seq[CogniteExternalId]] = None)
