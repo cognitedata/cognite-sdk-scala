@@ -7,8 +7,7 @@ import java.time.Instant
 import com.cognite.sdk.scala.common._
 
 final case class Relationship(
-    id: Long = 0,
-    externalId: Option[String] = None,
+    externalId: String,
     sourceExternalId: String,
     sourceType: String,
     targetExternalId: String,
@@ -20,6 +19,5 @@ final case class Relationship(
     lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
     dataSetId: Option[Long] = None,
     labels: Option[Seq[CogniteExternalId]] = None
-) extends WithId[Long]
-    with WithExternalId
+) extends WithRequiredExternalId
     with WithCreatedTime

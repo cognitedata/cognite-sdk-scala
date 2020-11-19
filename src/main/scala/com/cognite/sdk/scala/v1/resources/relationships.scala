@@ -12,7 +12,6 @@ import io.circe.Decoder
 class Relationships[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[Relationship, F]
-    with RetrieveByIdsWithIgnoreUnknownIds[Relationship, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Relationship, F] {
   import Relationships._
   override val baseUrl = uri"${requestSession.baseUrl}/relationships"
@@ -29,17 +28,6 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
       limit,
       partition,
       Constants.defaultBatchSize
-    )
-
-  override def retrieveByIds(
-      ids: Seq[Long],
-      ignoreUnknownIds: Boolean
-  ): F[Seq[Relationship]] =
-    RetrieveByIdsWithIgnoreUnknownIds.retrieveByIds(
-      requestSession,
-      baseUrl,
-      ids,
-      ignoreUnknownIds
     )
 
   override def retrieveByExternalIds(
