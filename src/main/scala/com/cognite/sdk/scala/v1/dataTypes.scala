@@ -11,3 +11,7 @@ final case class CogniteExternalId(externalId: String) extends CogniteId
 final case class CogniteInternalId(id: Long) extends CogniteId
 
 final case class TimeRange(min: Instant, max: Instant)
+final case class ConfidenceRange(min: Double, max: Double)
+
+final case class LabelContainsAny(containsAny: CogniteExternalId)
+final case class LabelContainsAll(containsAll: CogniteExternalId)
