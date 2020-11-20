@@ -209,7 +209,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
         SequenceQuery(
           filter = Some(
             SequenceFilter(
-              createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(0)))
+              createdTime = Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(0))))
             )
           )
         )
@@ -221,7 +221,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
           filter = Some(
             SequenceFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1568975105000L)))
+                Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1568975105000L))))
             )
           )
         )
@@ -232,7 +232,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
         filter = Some(
           SequenceFilter(
             createdTime = Some(
-              TimeRange(Instant.ofEpochMilli(1535964900000L), Instant.ofEpochMilli(1568979128000L))
+              TimeRange(Option(Instant.ofEpochMilli(1535964900000L)), Option(Instant.ofEpochMilli(1568979128000L)))
             )
           )
         )
@@ -246,7 +246,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
           SequenceFilter(
             externalIdPrefix = Some("test"),
             createdTime =
-              Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1568980123000L)))
+              Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1568980123000L))))
           )
         )
       )
@@ -259,7 +259,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
           SequenceFilter(
             externalIdPrefix = Some("test"),
             createdTime =
-              Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1568980123000L)))
+              Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1568980123000L))))
           )
         ),
         search = Some(SequenceSearch(name = Some("relevant")))
@@ -272,7 +272,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
         filter = Some(
           SequenceFilter(
             createdTime = Some(
-              TimeRange(Instant.ofEpochMilli(0L), Instant.ofEpochMilli(1568979128000L))
+              TimeRange(Option(Instant.ofEpochMilli(0L)), Option(Instant.ofEpochMilli(1568979128000L)))
             )
           )
         ),
@@ -288,7 +288,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
           SequenceFilter(
             externalIdPrefix = Some("test"),
             createdTime =
-              Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1568980123000L)))
+              Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1568980123000L))))
           )
         )
       )
@@ -304,8 +304,8 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
         client.sequences.search(SequenceQuery(Some(SequenceFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min = createdTimes.min,
-            max = createdTimes.max
+            min = Option(createdTimes.min),
+            max = Option(createdTimes.max)
           ))
         )))),
         (a: Seq[_]) => a should not be empty
