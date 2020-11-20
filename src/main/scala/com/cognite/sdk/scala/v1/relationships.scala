@@ -36,16 +36,16 @@ final case class RelationshipCreate(
 ) extends WithRequiredExternalId
 
 final case class RelationshipsFilter(
-   sourceExternalIds: Option[Seq[String]] = None,
-   sourceType: Option[Seq[String]] = None,
-   targetExternalId: Option[Seq[String]] = None,
-   targetType: Option[Seq[String]] = None,
-   dataSetIds: Option[Seq[CogniteId]] = None,
-   startTime: Option[TimeRange] = None,
-   endTime: Option[TimeRange] = None,
-   confidence: Option[ConfidenceRange] = None,
-   createdTime: Option[TimeRange] = None,
-   lastUpdatedTime: Option[TimeRange] = None,
-   activeAtTime: Option[TimeRange] = None,
-   labels: Option[LabelContainsFilter] = None
+    sourceExternalIds: Option[Seq[String]] = None,
+    sourceType: Option[Seq[String]] = None,
+    targetExternalId: Option[Seq[String]] = None,
+    targetType: Option[Seq[String]] = None,
+    dataSetIds: Option[Seq[CogniteId]] = None,
+    startTime: Option[TimeRange] = None,
+    endTime: Option[TimeRange] = None,
+    confidence: Option[ConfidenceRange] = None,
+    createdTime: Option[TimeRange] = None,
+    lastUpdatedTime: Option[TimeRange] = None,
+    activeAtTime: Option[TimeRange] = None,
+    labels: Option[LabelContainsFilter] = None
 )

@@ -15,7 +15,7 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
     with Filter[Relationship, RelationshipsFilter, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Relationship, F]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
-    with Create[Relationship, RelationshipCreate, F]{
+    with Create[Relationship, RelationshipCreate, F] {
   import Relationships._
   override val baseUrl = uri"${requestSession.baseUrl}/relationships"
 
@@ -51,9 +51,9 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
     deleteByExternalIds(externalIds, false)
 
   override def deleteByExternalIds(
-    externalIds: Seq[String],
-    ignoreUnknownIds: Boolean = false
-): F[Unit] =
+      externalIds: Seq[String],
+      ignoreUnknownIds: Boolean = false
+  ): F[Unit] =
     DeleteByExternalIds.deleteByExternalIdsWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
@@ -86,8 +86,10 @@ object Relationships {
     deriveDecoder[ItemsWithCursor[Relationship]]
   implicit val relationshipItemsDecoder: Decoder[Items[Relationship]] =
     deriveDecoder[Items[Relationship]]
-  implicit val cogniteExternalIdDecoder: Decoder[CogniteExternalId] = deriveDecoder[CogniteExternalId]
-  implicit val createRelationEncoder: Encoder[RelationshipCreate] = deriveEncoder[RelationshipCreate]
+  implicit val cogniteExternalIdDecoder: Decoder[CogniteExternalId] =
+    deriveDecoder[CogniteExternalId]
+  implicit val createRelationEncoder: Encoder[RelationshipCreate] =
+    deriveEncoder[RelationshipCreate]
   implicit val createRelationsItemsEncoder: Encoder[Items[RelationshipCreate]] =
     deriveEncoder[Items[RelationshipCreate]]
   implicit val relationshipsFilterEncoder: Encoder[RelationshipsFilter] =
@@ -95,5 +97,6 @@ object Relationships {
   implicit val relationshipsFilterRequestEncoder: Encoder[FilterRequest[RelationshipsFilter]] =
     deriveEncoder[FilterRequest[RelationshipsFilter]]
   implicit val confidenceRangeEncoder: Encoder[ConfidenceRange] = deriveEncoder[ConfidenceRange]
-  implicit val LabelContainsAnyAllEncoder: Encoder[LabelContainsFilter] = deriveEncoder[LabelContainsFilter]
+  implicit val LabelContainsAnyAllEncoder: Encoder[LabelContainsFilter] =
+    deriveEncoder[LabelContainsFilter]
 }
