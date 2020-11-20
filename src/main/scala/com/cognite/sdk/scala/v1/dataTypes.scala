@@ -10,7 +10,7 @@ sealed trait CogniteId
 final case class CogniteExternalId(externalId: String) extends CogniteId
 final case class CogniteInternalId(id: Long) extends CogniteId
 
-// min and max needs to optional, since one of them can be provided alone.
+// min and max need to be optional, since one of them can be provided alone.
 final case class TimeRange(min: Option[Instant] = None, max: Option[Instant] = None)
 final case class ConfidenceRange(min: Option[Double] = None, max: Option[Double] = None)
 
