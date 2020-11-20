@@ -35,7 +35,7 @@ final case class RelationshipCreate(
     labels: Option[Seq[CogniteExternalId]] = None
 ) extends WithRequiredExternalId
 
-final case class RelationshipFilter(
+final case class RelationshipsFilter(
    sourceExternalIds: Option[Seq[String]] = None,
    sourceType: Option[Seq[String]] = None,
    targetExternalId: Option[Seq[String]] = None,
@@ -47,5 +47,5 @@ final case class RelationshipFilter(
    createdTime: Option[TimeRange] = None,
    lastUpdatedTime: Option[TimeRange] = None,
    activeAtTime: Option[TimeRange] = None,
-   labels: Option[LabelContainsAnyAll] = None
+   labels: Option[LabelContainsFilter] = None
 )

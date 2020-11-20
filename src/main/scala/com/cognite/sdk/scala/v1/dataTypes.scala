@@ -14,4 +14,6 @@ final case class CogniteInternalId(id: Long) extends CogniteId
 final case class TimeRange(min: Option[Instant] = None, max: Option[Instant] = None)
 final case class ConfidenceRange(min: Option[Double] = None, max: Option[Double] = None)
 
-final case class LabelContainsAnyAll(containsAny: Option[Seq[CogniteExternalId]] = None, containsAll: Option[Seq[CogniteExternalId]] = None)
+// Used for filtering by label, labels: {containsAny: [{externalId: "label1"}, {externalId: "label2}]}
+// or labels: {containsAll: [{externalId: "label1"}, {externalId: "label2}]}
+final case class LabelContainsFilter(containsAny: Option[Seq[CogniteExternalId]] = None, containsAll: Option[Seq[CogniteExternalId]] = None)

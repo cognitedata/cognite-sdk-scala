@@ -60,7 +60,7 @@ final case class AssetsFilter(
     externalIdPrefix: Option[String] = None,
     dataSetIds: Option[Seq[CogniteId]] = None,
     parentExternalIds: Option[Seq[String]] = None,
-    labels: Option[LabelContainsAnyAll] = None
+    labels: Option[LabelContainsFilter] = None
 )
 
 final case class AssetsSearch(
