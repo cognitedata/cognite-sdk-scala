@@ -20,3 +20,11 @@ final case class LabelContainsFilter(
     containsAny: Option[Seq[CogniteExternalId]] = None,
     containsAll: Option[Seq[CogniteExternalId]] = None
 )
+
+// Used for updating labels on a data type (only assets for now), examples:
+// labels: {add: [{externalId: "label1"}, {externalId: "label2}]}, remove: [{externalId: "label3"}]}
+// labels: {add: [{externalId: "label1"}, {externalId: "label2}]}}
+final case class LabelsOnUpdate(
+    add: Option[Seq[CogniteExternalId]] = None,
+    remove: Option[Seq[CogniteExternalId]] = None
+)

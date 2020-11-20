@@ -12,13 +12,13 @@ final case class Relationship(
     sourceType: String,
     targetExternalId: String,
     targetType: String,
-    confidence: Option[Double] = None,
     startTime: Option[Instant] = None,
     endTime: Option[Instant] = None,
-    createdTime: Instant = Instant.ofEpochMilli(0),
-    lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
+    confidence: Option[Double] = None,
     dataSetId: Option[Long] = None,
-    labels: Option[Seq[CogniteExternalId]] = None
+    labels: Option[Seq[CogniteExternalId]] = None,
+    createdTime: Instant = Instant.ofEpochMilli(0),
+    lastUpdatedTime: Instant = Instant.ofEpochMilli(0)
 ) extends WithRequiredExternalId
     with WithCreatedTime
 
@@ -28,24 +28,24 @@ final case class RelationshipCreate(
     sourceType: String,
     targetExternalId: String,
     targetType: String,
-    confidence: Option[Double] = None,
     startTime: Option[Instant] = None,
     endTime: Option[Instant] = None,
+    confidence: Option[Double] = None,
     dataSetId: Option[Long] = None,
     labels: Option[Seq[CogniteExternalId]] = None
 ) extends WithRequiredExternalId
 
 final case class RelationshipsFilter(
     sourceExternalIds: Option[Seq[String]] = None,
-    sourceType: Option[Seq[String]] = None,
+    sourceTypes: Option[Seq[String]] = None,
     targetExternalId: Option[Seq[String]] = None,
-    targetType: Option[Seq[String]] = None,
+    targetTypes: Option[Seq[String]] = None,
     dataSetIds: Option[Seq[CogniteId]] = None,
     startTime: Option[TimeRange] = None,
     endTime: Option[TimeRange] = None,
     confidence: Option[ConfidenceRange] = None,
-    createdTime: Option[TimeRange] = None,
     lastUpdatedTime: Option[TimeRange] = None,
+    createdTime: Option[TimeRange] = None,
     activeAtTime: Option[TimeRange] = None,
     labels: Option[LabelContainsFilter] = None
 )

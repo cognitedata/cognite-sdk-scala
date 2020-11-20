@@ -194,4 +194,6 @@ object Assets {
     deriveDecoder[CogniteExternalId]
   implicit val LabelContainsAnyAllEncoder: Encoder[LabelContainsFilter] =
     deriveEncoder[LabelContainsFilter]
+  implicit val LabelsOnUpdateEncoder: Encoder[LabelsOnUpdate] =
+    deriveEncoder[LabelsOnUpdate]
 }
