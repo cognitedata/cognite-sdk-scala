@@ -16,4 +16,7 @@ final case class ConfidenceRange(min: Option[Double] = None, max: Option[Double]
 
 // Used for filtering by label, labels: {containsAny: [{externalId: "label1"}, {externalId: "label2}]}
 // or labels: {containsAll: [{externalId: "label1"}, {externalId: "label2}]}
-final case class LabelContainsFilter(containsAny: Option[Seq[CogniteExternalId]] = None, containsAll: Option[Seq[CogniteExternalId]] = None)
+final case class LabelContainsFilter(
+    containsAny: Option[Seq[CogniteExternalId]] = None,
+    containsAll: Option[Seq[CogniteExternalId]] = None
+)
