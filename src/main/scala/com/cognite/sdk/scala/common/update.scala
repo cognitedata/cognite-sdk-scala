@@ -45,6 +45,7 @@ trait UpdateById[R <: WithId[Long], U, F[_]] extends WithRequestSession[F] with 
 
 object UpdateById {
   implicit val assetUpdateEncoder: Encoder[AssetUpdate] = deriveEncoder
+  implicit val labelsOnUpdateEncoder: Encoder[LabelsOnUpdate] = deriveEncoder
   implicit val updateRequestEncoder: Encoder[UpdateRequest] = deriveEncoder
   implicit val updateRequestItemsEncoder: Encoder[Items[UpdateRequest]] = deriveEncoder
   def updateById[F[_], R, U: Encoder](
@@ -83,6 +84,7 @@ trait UpdateByExternalId[R, U, F[_]] extends WithRequestSession[F] with BaseUrl 
 
 object UpdateByExternalId {
   implicit val assetUpdateEncoder: Encoder[AssetUpdate] = deriveEncoder
+  implicit val labelsOnUpdateEncoder: Encoder[LabelsOnUpdate] = deriveEncoder
   implicit val updateRequestExternalIdEncoder: Encoder[UpdateRequestExternalId] = deriveEncoder
   implicit val updateRequestExternalIdItemsEncoder: Encoder[Items[UpdateRequestExternalId]] =
     deriveEncoder

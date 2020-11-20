@@ -33,7 +33,8 @@ final case class AssetCreate(
     externalId: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
     parentExternalId: Option[String] = None,
-    dataSetId: Option[Long] = None
+    dataSetId: Option[Long] = None,
+    labels: Option[Seq[CogniteExternalId]] = None
 ) extends WithExternalId
 
 final case class AssetUpdate(
@@ -44,7 +45,8 @@ final case class AssetUpdate(
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
     parentId: Option[Setter[Long]] = None,
     parentExternalId: Option[Setter[String]] = None,
-    dataSetId: Option[Setter[Long]] = None
+    dataSetId: Option[Setter[Long]] = None,
+    labels: Option[LabelsOnUpdate] = None
 ) extends WithSetExternalId
 
 final case class AssetsFilter(
