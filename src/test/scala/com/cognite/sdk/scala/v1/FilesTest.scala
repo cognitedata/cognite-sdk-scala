@@ -138,7 +138,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       .filter(
         FilesFilter(
           createdTime =
-            Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+            Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1563284224550L))))
         )
       )
       .compile
@@ -149,7 +149,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       .filterPartitions(
         FilesFilter(
           createdTime =
-            Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+            Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1563284224550L))))
         ), 20
       )
       .fold(Stream.empty)(_ ++ _)
@@ -161,7 +161,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       .filter(
         FilesFilter(
           createdTime =
-            Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+            Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1563284224550L))))
         ),
         limit = Some(20)
       )
@@ -177,7 +177,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
           filter = Some(
             FilesFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+                Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1563284224550L))))
             )
           )
         )
@@ -189,7 +189,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
           filter = Some(
             FilesFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L))),
+                Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1563284224550L)))),
               mimeType = Some("txt")
             )
           )
@@ -202,7 +202,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
           filter = Some(
             FilesFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+                Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1563284224550L))))
             )
           ),
           search = Some(
@@ -220,7 +220,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
           filter = Some(
             FilesFilter(
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1563284224550L)))
+                Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1563284224550L))))
             )
           )
         )
@@ -282,8 +282,8 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
         client.files.search(FilesQuery(Some(FilesFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min = createdTimes.min,
-            max = createdTimes.max
+            min = Option(createdTimes.min),
+            max = Option(createdTimes.max)
           ))
         )))),
         a => a should not be empty

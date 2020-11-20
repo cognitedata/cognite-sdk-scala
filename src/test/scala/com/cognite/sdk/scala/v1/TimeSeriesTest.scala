@@ -219,7 +219,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
         TimeSeriesQuery(
           filter = Some(
             TimeSeriesSearchFilter(
-              createdTime = Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(0)))
+              createdTime = Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(0))))
             )
           )
         )
@@ -230,7 +230,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
         filter = Some(
           TimeSeriesSearchFilter(
             createdTime = Some(
-              TimeRange(Instant.ofEpochMilli(1535964900000L), Instant.ofEpochMilli(1549000000000L))
+              TimeRange(Option(Instant.ofEpochMilli(1535964900000L)), Option(Instant.ofEpochMilli(1549000000000L)))
             )
           )
         )
@@ -244,7 +244,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
           TimeSeriesSearchFilter(
             unit = Some("m"),
             createdTime =
-              Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1549638383707L)))
+              Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1549638383707L))))
           )
         )
       )
@@ -258,7 +258,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
             TimeSeriesSearchFilter(
               unit = Some("m"),
               createdTime =
-                Some(TimeRange(Instant.ofEpochMilli(0), Instant.ofEpochMilli(1549638383707L)))
+                Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1549638383707L))))
             )
           ),
           search = Some(TimeSeriesSearch(name = Some("W0405")))
@@ -271,7 +271,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
         filter = Some(
           TimeSeriesSearchFilter(
             createdTime = Some(
-              TimeRange(Instant.ofEpochMilli(1553632871254L), Instant.ofEpochMilli(1553632871254L))
+              TimeRange(Option(Instant.ofEpochMilli(1553632871254L)), Option(Instant.ofEpochMilli(1553632871254L)))
             )
           )
         ),
@@ -286,7 +286,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
         filter = Some(
           TimeSeriesSearchFilter(
             createdTime = Some(
-              TimeRange(Instant.ofEpochMilli(1553632871254L), Instant.ofEpochMilli(1553632871254L))
+              TimeRange(Option(Instant.ofEpochMilli(1553632871254L)), Option(Instant.ofEpochMilli(1553632871254L)))
             )
           )
         ),
@@ -318,8 +318,8 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
         client.timeSeries.search(TimeSeriesQuery(Some(TimeSeriesSearchFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min = createdTimes.min,
-            max = createdTimes.max
+            min = Option(createdTimes.min),
+            max = Option(createdTimes.max)
           ))
         )))),
         (a: Seq[_]) => a should not be empty

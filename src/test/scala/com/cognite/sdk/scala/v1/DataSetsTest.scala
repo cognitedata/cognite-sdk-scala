@@ -124,7 +124,7 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
         .filter(
           DataSetFilter(
             createdTime = Some(
-              TimeRange(Instant.ofEpochMilli(1584403200000L), Instant.ofEpochMilli(1584525600000L))
+              TimeRange(Option(Instant.ofEpochMilli(1584403200000L)), Option(Instant.ofEpochMilli(1584525600000L)))
             )
           )
         )
@@ -136,7 +136,7 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
         .filter(
           DataSetFilter(
             createdTime = Some(
-              TimeRange(Instant.ofEpochMilli(1584403200000L), Instant.ofEpochMilli(1584525600000L))
+              TimeRange(Option(Instant.ofEpochMilli(1584403200000L)), Option(Instant.ofEpochMilli(1584525600000L)))
             ),
             externalIdPrefix = Some("test")
           ),
