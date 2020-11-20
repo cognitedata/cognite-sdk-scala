@@ -51,9 +51,9 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
     deleteByExternalIds(externalIds, false)
 
   override def deleteByExternalIds(
-                                    externalIds: Seq[String],
-                                    ignoreUnknownIds: Boolean = false
-                                  ): F[Unit] =
+    externalIds: Seq[String],
+    ignoreUnknownIds: Boolean = false
+): F[Unit] =
     DeleteByExternalIds.deleteByExternalIdsWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
