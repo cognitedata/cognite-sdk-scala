@@ -12,7 +12,7 @@ import io.circe.{Decoder, Encoder}
 class Relationships[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[Relationship, F]
-    with Filter[Relationship, RelationshipFilter, F]
+    with Filter[Relationship, RelationshipsFilter, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Relationship, F]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
     with Create[Relationship, RelationshipCreate, F]{
@@ -62,7 +62,7 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
     )
 
   override private[sdk] def filterWithCursor(
-      filter: RelationshipFilter,
+      filter: RelationshipsFilter,
       cursor: Option[String],
       limit: Option[StatusCode],
       partition: Option[Partition],
@@ -90,10 +90,10 @@ object Relationships {
   implicit val createRelationEncoder: Encoder[RelationshipCreate] = deriveEncoder[RelationshipCreate]
   implicit val createRelationsItemsEncoder: Encoder[Items[RelationshipCreate]] =
     deriveEncoder[Items[RelationshipCreate]]
-  implicit val relationshipsFilterEncoder: Encoder[RelationshipFilter] =
-    deriveEncoder[RelationshipFilter]
-  implicit val relationshipsFilterRequestEncoder: Encoder[FilterRequest[RelationshipFilter]] =
-    deriveEncoder[FilterRequest[RelationshipFilter]]
+  implicit val relationshipsFilterEncoder: Encoder[RelationshipsFilter] =
+    deriveEncoder[RelationshipsFilter]
+  implicit val relationshipsFilterRequestEncoder: Encoder[FilterRequest[RelationshipsFilter]] =
+    deriveEncoder[FilterRequest[RelationshipsFilter]]
   implicit val confidenceRangeEncoder: Encoder[ConfidenceRange] = deriveEncoder[ConfidenceRange]
-  implicit val LabelContainsAnyAllEncoder: Encoder[LabelContainsAnyAll] = deriveEncoder[LabelContainsAnyAll]
+  implicit val LabelContainsAnyAllEncoder: Encoder[LabelContainsFilter] = deriveEncoder[LabelContainsFilter]
 }

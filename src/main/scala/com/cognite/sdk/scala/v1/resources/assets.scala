@@ -191,5 +191,5 @@ object Assets {
       : Encoder[ItemsWithRecursiveAndIgnoreUnknownIds] =
     deriveEncoder[ItemsWithRecursiveAndIgnoreUnknownIds]
   implicit val cogniteExternalIdDecoder: Decoder[CogniteExternalId] = deriveDecoder[CogniteExternalId]
-  implicit val LabelContainsAnyAllEncoder: Encoder[LabelContainsAnyAll] = deriveEncoder[LabelContainsAnyAll]
+  implicit val LabelContainsAnyAllEncoder: Encoder[LabelContainsFilter] = deriveEncoder[LabelContainsFilter]
 }
