@@ -19,9 +19,7 @@ final case class UpdateRequestExternalId(update: Json, externalId: String)
 trait UpdateById[R <: WithId[Long], U, F[_]] extends WithRequestSession[F] with BaseUrl {
   def updateById(items: Map[Long, U]): F[Seq[R]]
 
-  def updateFromRead(items: Seq[R])(implicit
-      t: Transformer[R, U]
-  ): F[Seq[R]] =
+  def updateFromRead(items: Seq[R])(implicit t: Transformer[R, U]): F[Seq[R]] =
     updateById(items.map(a => a.id -> a.transformInto[U]).toMap)
 
   def updateOneById(id: Long, item: U): F[R] =
@@ -34,9 +32,7 @@ trait UpdateById[R <: WithId[Long], U, F[_]] extends WithRequestSession[F] with 
         }
     )
 
-  def updateOneFromRead(item: R)(implicit
-      t: Transformer[R, U]
-  ): F[R] =
+  def updateOneFromRead(item: R)(implicit t: Transformer[R, U]): F[R] =
     requestSession.map(
       updateFromRead(Seq(item)),
       (r1: Seq[R]) =>

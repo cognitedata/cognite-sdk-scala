@@ -49,8 +49,8 @@ trait PartitionedReadable[R, F[_]] extends Readable[R, F] {
         .stream
     }
 
-  def listConcurrently(numPartitions: Int, limitPerPartition: Option[Int] = None)(implicit
-      c: Concurrent[F]
+  def listConcurrently(numPartitions: Int, limitPerPartition: Option[Int] = None)(
+      implicit c: Concurrent[F]
   ): Stream[F, R] =
     listPartitions(numPartitions, limitPerPartition).fold(Stream.empty)(_.merge(_))
 }
@@ -109,9 +109,7 @@ object Readable {
       maxItemsReturned: Option[Int],
       partition: Option[Partition],
       batchSize: Int
-  )(implicit
-      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]
-  ): F[ItemsWithCursor[R]] = {
+  )(implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]): F[ItemsWithCursor[R]] = {
     val uriWithCursor = uriWithCursorAndLimit(baseUrl, cursor, maxItemsReturned, batchSize)
     val uriWithCursorAndPartition = partition.fold(uriWithCursor) { p =>
       uriWithCursor.param("partition", p.toString)
@@ -123,9 +121,7 @@ object Readable {
   private[sdk] def readSimple[F[_], R](
       requestSession: RequestSession[F],
       uri: Uri
-  )(implicit
-      itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]
-  ): F[ItemsWithCursor[R]] = {
+  )(implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]): F[ItemsWithCursor[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
 
@@ -171,9 +167,7 @@ object RetrieveByIdsWithIgnoreUnknownIds {
       baseUrl: Uri,
       ids: Seq[Long],
       ignoreUnknownIds: Boolean
-  )(implicit
-      itemsDecoder: Decoder[Items[R]]
-  ): F[Seq[R]] = {
+  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteId]](
@@ -198,9 +192,7 @@ object RetrieveByExternalIds {
       requestSession: RequestSession[F],
       baseUrl: Uri,
       externalIds: Seq[String]
-  )(implicit
-      itemsDecoder: Decoder[Items[R]]
-  ): F[Seq[R]] = {
+  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession.post[Seq[R], Items[R], Items[CogniteExternalId]](
@@ -223,9 +215,7 @@ object RetrieveByExternalIdsWithIgnoreUnknownIds {
       baseUrl: Uri,
       externalIds: Seq[String],
       ignoreUnknownIds: Boolean
-  )(implicit
-      itemsDecoder: Decoder[Items[R]]
-  ): F[Seq[R]] = {
+  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteId]](

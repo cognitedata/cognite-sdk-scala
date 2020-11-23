@@ -19,8 +19,8 @@ trait Search[R, Q, F[_]] extends WithRequestSession[F] with BaseUrl {
 }
 
 object Search {
-  def search[F[_], R, Q](requestSession: RequestSession[F], baseUrl: Uri, searchQuery: Q)(implicit
-      itemsDecoder: Decoder[Items[R]],
+  def search[F[_], R, Q](requestSession: RequestSession[F], baseUrl: Uri, searchQuery: Q)(
+      implicit itemsDecoder: Decoder[Items[R]],
       searchQueryEncoder: Encoder[Q]
   ): F[Seq[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
