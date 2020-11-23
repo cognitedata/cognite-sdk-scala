@@ -10,15 +10,15 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
-  ignore should "authenticate using OAuth2" in { // TODO: Add credentials
+  it should "authenticate with Azure AD using OAuth2 in bluefield" in {
     val ec: ExecutionContext = ExecutionContext.global
     implicit val cs: ContextShift[IO] = IO.contextShift(ec)
     implicit val timer: Timer[IO] = IO.timer(ec)
     implicit val sttpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend[IO]()
 
-    val tenant = sys.env("TEST_TOKEN_URL")
-    val clientId = sys.env("TEST_OAUTH2_CLIENT_ID_BLUEFIELD")
-    val clientSecret = sys.env("TEST_OAUTH2_CLIENT_SECRET_BLUEFIELD")
+    val tenant = sys.env("TEST_AAD_TENANT_BLUEFIELD")
+    val clientId = sys.env("TEST_CLIENT_ID_BLUEFIELD")
+    val clientSecret = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
 
     val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
