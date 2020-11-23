@@ -1,6 +1,8 @@
 import wartremover.Wart
 import sbt.project
 
+addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+
 val scala213 = "2.13.3"
 val scala212 = "2.12.12"
 val scala211 = "2.11.12"
@@ -82,7 +84,10 @@ lazy val commonSettings = Seq(
           Wart.Overloading
         )
     }),
-  wartremoverExcluded += baseDirectory.value / "target" / "protobuf-generated"
+  wartremoverExcluded ++= Seq(
+    baseDirectory.value / "target" / "protobuf-generated",
+    baseDirectory.value / "src" / "main" / "scala" / "com" / "cognite" / "sdk" / "scala" / "common" / "internal" / "CachedResource.scala"
+  )
 )
 
 PB.targets in Compile := Seq(
@@ -100,6 +105,7 @@ lazy val core = (project in file("."))
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
       "org.typelevel" %% "cats-effect" % catsEffectVersion(CrossVersion.partialVersion(scalaVersion.value)),
+      "org.typelevel" %% "cats-effect-laws" % catsEffectVersion(CrossVersion.partialVersion(scalaVersion.value)) % Test,
       "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value))
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value))
   )
