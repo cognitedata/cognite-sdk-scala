@@ -73,7 +73,7 @@ jobs:
           secrets/decrypt.sh secrets/pubring.asc.gpg ~/.sbt/gpg/pubring.asc
           secrets/decrypt.sh secrets/secring.asc.gpg ~/.sbt/gpg/secring.asc
 
-      - name: Buil JAR file
+      - name: Build JAR file
         run: |
           cat /dev/null | sbt -Dsbt.log.noformat=true "set test in Test := {}" "set compile/skip := true" +package
 
