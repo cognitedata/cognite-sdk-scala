@@ -18,6 +18,7 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minimumSize: Int
     keyAndValue._1.equalsIgnoreCase(HeaderNames.ContentEncoding) &&
       keyAndValue._2.equalsIgnoreCase("gzip")
 
+  @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
   private def isGzippedContent(keyAndValue: Tuple2[String, String]) =
     keyAndValue._1.equalsIgnoreCase(HeaderNames.ContentType) &&
       keyAndValue._2.toLowerCase.contains("/gzip")
