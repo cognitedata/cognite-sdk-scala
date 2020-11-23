@@ -70,7 +70,12 @@ object Readable {
         Pull.output(Chunk.seq(items.items)) >>
           items.nextCursor
             .map { s =>
-              pullFromCursor(Some(s), maxItemsReturned.map(_ - items.items.size), partition, get)
+              pullFromCursor(
+                Some(s),
+                maxItemsReturned.map(_ - items.items.size),
+                partition,
+                get
+              )
             }
             .getOrElse(Pull.done)
       }
