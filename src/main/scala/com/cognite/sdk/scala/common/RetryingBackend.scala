@@ -38,8 +38,8 @@ class RetryingBackend[R[_], S](
     maxRetries: Option[Int] = None,
     initialRetryDelay: FiniteDuration = Constants.DefaultInitialRetryDelay,
     maxRetryDelay: FiniteDuration = Constants.DefaultMaxBackoffDelay
-)(
-    implicit sleepImpl: Sleep[R]
+)(implicit
+    sleepImpl: Sleep[R]
 ) extends SttpBackend[R, S] {
   override def send[T](
       request: Request[T, S]
@@ -62,8 +62,8 @@ class RetryingBackend[R[_], S](
     val maybeRetry: (Option[Int], Throwable) => R[Response[T]] =
       (code: Option[Int], exception: Throwable) =>
         if (retriesRemaining > 0 && code.forall(shouldRetry)) {
-          responseMonad.flatMap(sleepImpl.sleep(initialDelay))(
-            _ => sendWithRetryCounter(request, retriesRemaining - 1, nextDelay)
+          responseMonad.flatMap(sleepImpl.sleep(initialDelay))(_ =>
+            sendWithRetryCounter(request, retriesRemaining - 1, nextDelay)
           )
         } else {
           responseMonad.error(exception)
@@ -79,8 +79,8 @@ class RetryingBackend[R[_], S](
       // This can happen when we get empty responses, as we sometimes do for
       // Service Unavailable or Bad Gateway.
       if (retriesRemaining > 0 && shouldRetry(resp.code.toInt)) {
-        responseMonad.flatMap(sleepImpl.sleep(initialDelay))(
-          _ => sendWithRetryCounter(request, retriesRemaining - 1, nextDelay)
+        responseMonad.flatMap(sleepImpl.sleep(initialDelay))(_ =>
+          sendWithRetryCounter(request, retriesRemaining - 1, nextDelay)
         )
       } else {
         responseMonad.unit(resp)

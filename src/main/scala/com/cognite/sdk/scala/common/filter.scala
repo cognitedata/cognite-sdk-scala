@@ -53,8 +53,8 @@ trait PartitionedFilterF[R, Fi, F[_]] extends Filter[R, Fi, F] {
       filter: Fi,
       numPartitions: Int,
       limitPerPartition: Option[Int] = None
-  )(
-      implicit F: Concurrent[F]
+  )(implicit
+      F: Concurrent[F]
   ): Stream[F, R] =
     Stream
       .eval(filterPartitionsF(filter, numPartitions, limitPerPartition))
@@ -97,8 +97,8 @@ object Filter {
       partition: Option[Partition],
       batchSize: Int,
       aggregatedProperties: Option[Seq[String]] = None
-  )(
-      implicit readItemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
+  )(implicit
+      readItemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
       filterRequestEncoder: Encoder[FilterRequest[Fi]]
   ): F[ItemsWithCursor[R]] = {
     implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =

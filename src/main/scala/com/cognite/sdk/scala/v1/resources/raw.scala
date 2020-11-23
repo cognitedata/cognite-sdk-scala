@@ -14,8 +14,8 @@ import io.circe.{Decoder, Encoder}
 import fs2._
 
 object RawResource {
-  def deleteByIds[F[_], I](requestSession: RequestSession[F], baseUrl: Uri, ids: Seq[I])(
-      implicit idsItemsEncoder: Encoder[Items[I]]
+  def deleteByIds[F[_], I](requestSession: RequestSession[F], baseUrl: Uri, ids: Seq[I])(implicit
+      idsItemsEncoder: Encoder[Items[I]]
   ): F[Unit] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]
@@ -184,16 +184,15 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
           cursorsUriWithParams,
           value => value
         )
-      streams = cursors.items.map(
-        cursor =>
-          Readable
-            .pullFromCursor(
-              Some(cursor),
-              limitPerPartition,
-              None,
-              filterWithCursor(filter, _, _, _)
-            )
-            .stream
+      streams = cursors.items.map(cursor =>
+        Readable
+          .pullFromCursor(
+            Some(cursor),
+            limitPerPartition,
+            None,
+            filterWithCursor(filter, _, _, _)
+          )
+          .stream
       )
     } yield streams
   }
@@ -207,16 +206,16 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
           columns.mkString(",")
         }
       }
-    ).collect {
-      case (key, Some(value)) => key -> value
+    ).collect { case (key, Some(value)) =>
+      key -> value
     } ++ lastUpdatedTimeFilterToParams(filter)
 
   def lastUpdatedTimeFilterToParams(filter: RawRowFilter): Map[String, String] =
     Map(
       "minLastUpdatedTime" -> filter.minLastUpdatedTime.map(_.toEpochMilli.toString),
       "maxLastUpdatedTime" -> filter.maxLastUpdatedTime.map(_.toEpochMilli.toString)
-    ).collect {
-      case (key, Some(value)) => key -> value
+    ).collect { case (key, Some(value)) =>
+      key -> value
     }
 }
 

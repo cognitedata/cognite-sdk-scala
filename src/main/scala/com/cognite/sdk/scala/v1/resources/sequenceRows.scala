@@ -106,17 +106,16 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Mona
       query: SequenceRowsQuery,
       batchSize: Int
   ): F[(Seq[SequenceColumnSignature], fs2.Stream[F, SequenceRow])] =
-    sendQuery(query, batchSize).map(
-      response =>
-        (
-          response.columns,
-          fs2.Stream.emits(response.rows) ++ pullFollowingItems(
-            response.nextCursor,
-            response.rows.length,
-            query,
-            batchSize
-          )
+    sendQuery(query, batchSize).map(response =>
+      (
+        response.columns,
+        fs2.Stream.emits(response.rows) ++ pullFollowingItems(
+          response.nextCursor,
+          response.rows.length,
+          query,
+          batchSize
         )
+      )
     )
 
   def queryById(

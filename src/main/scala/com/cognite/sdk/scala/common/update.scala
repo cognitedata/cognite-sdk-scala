@@ -19,8 +19,8 @@ final case class UpdateRequestExternalId(update: Json, externalId: String)
 trait UpdateById[R <: WithId[Long], U, F[_]] extends WithRequestSession[F] with BaseUrl {
   def updateById(items: Map[Long, U]): F[Seq[R]]
 
-  def updateFromRead(items: Seq[R])(
-      implicit t: Transformer[R, U]
+  def updateFromRead(items: Seq[R])(implicit
+      t: Transformer[R, U]
   ): F[Seq[R]] =
     updateById(items.map(a => a.id -> a.transformInto[U]).toMap)
 
@@ -34,8 +34,8 @@ trait UpdateById[R <: WithId[Long], U, F[_]] extends WithRequestSession[F] with 
         }
     )
 
-  def updateOneFromRead(item: R)(
-      implicit t: Transformer[R, U]
+  def updateOneFromRead(item: R)(implicit
+      t: Transformer[R, U]
   ): F[R] =
     requestSession.map(
       updateFromRead(Seq(item)),
@@ -62,9 +62,8 @@ object UpdateById {
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
       .post[Seq[R], Items[R], Items[UpdateRequest]](
-        Items(updates.map {
-          case (id, update) =>
-            UpdateRequest(update.asJson, id)
+        Items(updates.map { case (id, update) =>
+          UpdateRequest(update.asJson, id)
         }.toSeq),
         uri"$baseUrl/update",
         value => value.items
@@ -105,9 +104,8 @@ object UpdateByExternalId {
       EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
       .post[Seq[R], Items[R], Items[UpdateRequestExternalId]](
-        Items(updates.map {
-          case (id, update) =>
-            UpdateRequestExternalId(update.asJson, id)
+        Items(updates.map { case (id, update) =>
+          UpdateRequestExternalId(update.asJson, id)
         }.toSeq),
         uri"$baseUrl/update",
         value => value.items

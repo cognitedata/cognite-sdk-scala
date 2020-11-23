@@ -67,14 +67,9 @@ object GzipSttpBackend {
     val bos = new ByteArrayOutputStream(bufferSize)
     try {
       val gzip = new GZIPOutputStream(bos, bufferSize)
-      try {
-        gzip.write(bytes)
-      } finally {
-        gzip.close()
-      }
-    } finally {
-      bos.close()
-    }
+      try gzip.write(bytes)
+      finally gzip.close()
+    } finally bos.close()
     bos.toByteArray
   }
 
