@@ -1,3 +1,6 @@
+// Copyright 2020 Cognite AS
+// SPDX-License-Identifier: Apache-2.0
+
 package com.cognite.sdk.scala.v1
 
 import java.io.{BufferedInputStream, ByteArrayOutputStream, FileInputStream}
@@ -20,6 +23,8 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
   it should behave like readableWithRetrieve(client.files, idsThatDoNotExist, supportsMissingAndThrown = true)
 
   it should behave like readableWithRetrieveByExternalId(client.files, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
+
+  it should behave like readableWithRetrieveUnknownIds(client.dataSets)
 
   private val externalId = UUID.randomUUID().toString.substring(0, 8)
 

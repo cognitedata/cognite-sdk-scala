@@ -1,3 +1,6 @@
+// Copyright 2020 Cognite AS
+// SPDX-License-Identifier: Apache-2.0
+
 package com.cognite.sdk.scala.common
 
 import java.io.ByteArrayOutputStream
@@ -15,6 +18,7 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minimumSize: Int
     keyAndValue._1.equalsIgnoreCase(HeaderNames.ContentEncoding) &&
       keyAndValue._2.equalsIgnoreCase("gzip")
 
+  @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
   private def isGzippedContent(keyAndValue: Tuple2[String, String]) =
     keyAndValue._1.equalsIgnoreCase(HeaderNames.ContentType) &&
       keyAndValue._2.toLowerCase.contains("/gzip")

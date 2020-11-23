@@ -1,3 +1,6 @@
+// Copyright 2020 Cognite AS
+// SPDX-License-Identifier: Apache-2.0
+
 package com.cognite.sdk.scala.v1.resources
 
 import java.io.{BufferedInputStream, FileInputStream}
@@ -14,8 +17,8 @@ import io.circe.derivation.{deriveDecoder, deriveEncoder}
 class Files[F[_]: Applicative](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[File, F]
-    with RetrieveByIds[File, F]
-    with RetrieveByExternalIds[File, F]
+    with RetrieveByIdsWithIgnoreUnknownIds[File, F]
+    with RetrieveByExternalIdsWithIgnoreUnknownIds[File, F]
     with Create[File, FileCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
@@ -88,11 +91,24 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
       Constants.defaultBatchSize
     )
 
-  override def retrieveByIds(ids: Seq[Long]): F[Seq[File]] =
-    RetrieveByIds.retrieveByIds(requestSession, baseUrl, ids)
+  override def retrieveByIds(ids: Seq[Long], ignoreUnknownIds: Boolean): F[Seq[File]] =
+    RetrieveByIdsWithIgnoreUnknownIds.retrieveByIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
+    )
 
-  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[File]] =
-    RetrieveByExternalIds.retrieveByExternalIds(requestSession, baseUrl, externalIds)
+  override def retrieveByExternalIds(
+      externalIds: Seq[String],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[File]] =
+    RetrieveByExternalIdsWithIgnoreUnknownIds.retrieveByExternalIds(
+      requestSession,
+      baseUrl,
+      externalIds,
+      ignoreUnknownIds
+    )
 
   override def updateById(items: Map[Long, FileUpdate]): F[Seq[File]] =
     UpdateById.updateById[F, File, FileUpdate](requestSession, baseUrl, items)
