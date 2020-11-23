@@ -104,18 +104,19 @@ object CdpApiException {
       .groupBy { case (key, _) => key }
       .toList
       .sortBy { case (key, _) => key } // Ensure deterministic ordering
-      .map {
-        case (key, entries) =>
-          // Example:
-          //    Duplicated ids: [1234567, 1234568]. Duplicated externalIds: [externalId-1, externalId-2].
+      .map { case (key, entries) =>
+        // Example:
+        //    Duplicated ids: [1234567, 1234568]. Duplicated externalIds: [externalId-1, externalId-2].
 
-          val commaSeparatedValues =
-            entries
-              .map { case (_, value) => value.asString.getOrElse(value.toString) } // Print strings without quotes
-              .sorted // Ensure deterministic ordering
-              .mkString(", ")
+        val commaSeparatedValues =
+          entries
+            .map { case (_, value) =>
+              value.asString.getOrElse(value.toString)
+            } // Print strings without quotes
+            .sorted // Ensure deterministic ordering
+            .mkString(", ")
 
-          s" $kind ${key}s: [$commaSeparatedValues]."
+        s" $kind ${key}s: [$commaSeparatedValues]."
       }
       .mkString
 }
@@ -237,7 +238,10 @@ object NonNullableSetter {
           // Workaround for CDF-3540 and CDF-953
           None
         case Some(value: T) =>
-          require(value != null, "Invalid null value for non-nullable field update") // scalastyle:ignore null
+          require(
+            value != null,
+            "Invalid null value for non-nullable field update"
+          ) // scalastyle:ignore null
           Some(SetValue(value))
       }
     }
@@ -253,8 +257,8 @@ object NonNullableSetter {
       override def transform(value: T): Option[NonNullableSetter[T]] = Some(SetValue(value))
     }
 
-  implicit def encodeNonNullableSetter[T](
-      implicit encodeT: Encoder[T]
+  implicit def encodeNonNullableSetter[T](implicit
+      encodeT: Encoder[T]
   ): Encoder[NonNullableSetter[T]] = new Encoder[NonNullableSetter[T]] {
     final def apply(a: NonNullableSetter[T]): Json = a match {
       case SetValue(value) => Json.obj(("set", encodeT.apply(value)))

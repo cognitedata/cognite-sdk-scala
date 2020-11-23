@@ -50,50 +50,48 @@ final case class RequestSession[F[_]: Monad](
     }
   }
 
-  private def parseResponse[T, R](uri: Uri, mapResult: T => R)(
-      implicit decoder: Decoder[Either[CdpApiError, T]]
+  private def parseResponse[T, R](uri: Uri, mapResult: T => R)(implicit
+      decoder: Decoder[Either[CdpApiError, T]]
   ) =
-    asJson[Either[CdpApiError, T]].mapWithMetadata(
-      (response, metadata) =>
-        response match {
-          case Left(value) =>
-            // As of 2020-02-17, content length is not reliably set.
-            // Checking the content type explicitly for JSON and protobuf isn't
-            // ideal either, but we're not likely to add other content types
-            // any time soon.
-            val shouldHaveParsed = // metadata.contentLength.exists(_ > 0) &&
-              metadata.contentType.exists(_.startsWith(MediaTypes.Json)) ||
-                metadata.contentType.exists(_.startsWith("application/protobuf"))
-            if (shouldHaveParsed) {
-              throw SdkException(
-                s"Failed to parse response, reason: ${value.error.getMessage}",
-                Some(uri),
-                metadata.header("x-request-id"),
-                Some(metadata.code)
-              )
+    asJson[Either[CdpApiError, T]].mapWithMetadata((response, metadata) =>
+      response match {
+        case Left(value) =>
+          // As of 2020-02-17, content length is not reliably set.
+          // Checking the content type explicitly for JSON and protobuf isn't
+          // ideal either, but we're not likely to add other content types
+          // any time soon.
+          val shouldHaveParsed = // metadata.contentLength.exists(_ > 0) &&
+            metadata.contentType.exists(_.startsWith(MediaTypes.Json)) ||
+              metadata.contentType.exists(_.startsWith("application/protobuf"))
+          if (shouldHaveParsed) {
+            throw SdkException(
+              s"Failed to parse response, reason: ${value.error.getMessage}",
+              Some(uri),
+              metadata.header("x-request-id"),
+              Some(metadata.code)
+            )
+          } else {
+            val message = if (metadata.statusText.isEmpty) {
+              "Unknown error (no status text)"
             } else {
-              val message = if (metadata.statusText.isEmpty) {
-                "Unknown error (no status text)"
-              } else {
-                metadata.statusText
-              }
-              throw SdkException(
-                message,
-                Some(uri),
-                metadata.header("x-request-id"),
-                Some(metadata.code)
-              )
+              metadata.statusText
             }
-          case Right(Left(cdpApiError)) =>
-            throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
-          case Right(Right(value)) => mapResult(value)
-        }
+            throw SdkException(
+              message,
+              Some(uri),
+              metadata.header("x-request-id"),
+              Some(metadata.code)
+            )
+          }
+        case Right(Left(cdpApiError)) =>
+          throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
+        case Right(Right(value)) => mapResult(value)
+      }
     )
 
   private def unsafeBody[R](uri: Uri, response: Response[R]): R =
-    try {
-      response.unsafeBody
-    } catch {
+    try response.unsafeBody
+    catch {
       // sttp's .unsafeBody returns a NoSuchElementException if the status wasn't
       // a 200 and there is no body to return.
       case _: NoSuchElementException =>
@@ -167,8 +165,8 @@ class GenericClient[F[_]: Monad](
     auth: Auth = Auth.defaultAuth,
     apiVersion: Option[String] = None,
     clientTag: Option[String] = None
-)(
-    implicit sttpBackend: SttpBackend[F, Nothing]
+)(implicit
+    sttpBackend: SttpBackend[F, Nothing]
 ) {
   import GenericClient._
   val uri: Uri = parseBaseUrlOrThrow(baseUrl)
@@ -239,9 +237,8 @@ object GenericClient {
     new GenericClient(applicationName, projectName, baseUrl, auth)(implicitly, sttpBackend)
 
   def parseBaseUrlOrThrow(baseUrl: String): Uri =
-    try {
-      uri"$baseUrl"
-    } catch {
+    try uri"$baseUrl"
+    catch {
       case NonFatal(_) =>
         throw new IllegalArgumentException(
           s"Unable to parse baseUrl = ${baseUrl} as a valid URI."
@@ -278,12 +275,12 @@ class Client(
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
     auth: Auth = Auth.defaultAuth
-)(
-    implicit sttpBackend: SttpBackend[Id, Nothing]
+)(implicit
+    sttpBackend: SttpBackend[Id, Nothing]
 ) extends GenericClient[Id](applicationName, projectName, baseUrl, auth)
 
 object Client {
-  def apply(applicationName: String, projectName: String, baseUrl: String, auth: Auth)(
-      implicit sttpBackend: SttpBackend[Id, Nothing]
+  def apply(applicationName: String, projectName: String, baseUrl: String, auth: Auth)(implicit
+      sttpBackend: SttpBackend[Id, Nothing]
   ): Client = new Client(applicationName, projectName, baseUrl, auth)(sttpBackend)
 }

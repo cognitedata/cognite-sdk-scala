@@ -110,8 +110,8 @@ trait Create[R, W, F[_]] extends WithRequestSession[F] with CreateOne[R, W, F] w
   def create(items: Seq[W]): F[Seq[R]] =
     createItems(Items(items))
 
-  def createFromRead(items: Seq[R])(
-      implicit t: Transformer[R, W]
+  def createFromRead(items: Seq[R])(implicit
+      t: Transformer[R, W]
   ): F[Seq[R]] =
     createItems(Items(items.map(_.transformInto[W])))
 
@@ -128,7 +128,8 @@ trait Create[R, W, F[_]] extends WithRequestSession[F] with CreateOne[R, W, F] w
 
 object Create {
   def createItems[F[_], R, W](requestSession: RequestSession[F], baseUrl: Uri, items: Items[W])(
-      implicit readDecoder: Decoder[ItemsWithCursor[R]],
+      implicit
+      readDecoder: Decoder[ItemsWithCursor[R]],
       itemsEncoder: Encoder[Items[W]]
   ): F[Seq[R]] = {
     implicit val errorOrItemsWithCursorDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
@@ -144,15 +145,15 @@ object Create {
 trait CreateOne[R, W, F[_]] extends WithRequestSession[F] with BaseUrl {
   def createOne(item: W): F[R]
 
-  def createOneFromRead(item: R)(
-      implicit t: Transformer[R, W]
+  def createOneFromRead(item: R)(implicit
+      t: Transformer[R, W]
   ): F[R] = createOne(item.transformInto[W])
 
 }
 
 object CreateOne {
-  def createOne[F[_], R, W](requestSession: RequestSession[F], baseUrl: Uri, item: W)(
-      implicit readDecoder: Decoder[R],
+  def createOne[F[_], R, W](requestSession: RequestSession[F], baseUrl: Uri, item: W)(implicit
+      readDecoder: Decoder[R],
       itemsEncoder: Encoder[W]
   ): F[R] = {
     implicit val errorOrItemsWithCursorDecoder: Decoder[Either[CdpApiError, R]] =
