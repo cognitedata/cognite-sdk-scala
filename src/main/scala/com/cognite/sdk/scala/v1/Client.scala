@@ -50,8 +50,8 @@ final case class RequestSession[F[_]: Monad](
     }
   }
 
-  private def parseResponse[T, R](uri: Uri, mapResult: T => R)(implicit
-      decoder: Decoder[Either[CdpApiError, T]]
+  private def parseResponse[T, R](uri: Uri, mapResult: T => R)(
+      implicit decoder: Decoder[Either[CdpApiError, T]]
   ) =
     asJson[Either[CdpApiError, T]].mapWithMetadata((response, metadata) =>
       response match {
@@ -165,9 +165,7 @@ class GenericClient[F[_]: Monad](
     auth: Auth = Auth.defaultAuth,
     apiVersion: Option[String] = None,
     clientTag: Option[String] = None
-)(implicit
-    sttpBackend: SttpBackend[F, Nothing]
-) {
+)(implicit sttpBackend: SttpBackend[F, Nothing]) {
   import GenericClient._
   val uri: Uri = parseBaseUrlOrThrow(baseUrl)
 
@@ -275,12 +273,11 @@ class Client(
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
     auth: Auth = Auth.defaultAuth
-)(implicit
-    sttpBackend: SttpBackend[Id, Nothing]
-) extends GenericClient[Id](applicationName, projectName, baseUrl, auth)
+)(implicit sttpBackend: SttpBackend[Id, Nothing])
+    extends GenericClient[Id](applicationName, projectName, baseUrl, auth)
 
 object Client {
-  def apply(applicationName: String, projectName: String, baseUrl: String, auth: Auth)(implicit
-      sttpBackend: SttpBackend[Id, Nothing]
+  def apply(applicationName: String, projectName: String, baseUrl: String, auth: Auth)(
+      implicit sttpBackend: SttpBackend[Id, Nothing]
   ): Client = new Client(applicationName, projectName, baseUrl, auth)(sttpBackend)
 }

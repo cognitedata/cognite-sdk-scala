@@ -14,8 +14,8 @@ import io.circe.{Decoder, Encoder}
 import fs2._
 
 object RawResource {
-  def deleteByIds[F[_], I](requestSession: RequestSession[F], baseUrl: Uri, ids: Seq[I])(implicit
-      idsItemsEncoder: Encoder[Items[I]]
+  def deleteByIds[F[_], I](requestSession: RequestSession[F], baseUrl: Uri, ids: Seq[I])(
+      implicit idsItemsEncoder: Encoder[Items[I]]
   ): F[Unit] = {
     implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
       EitherDecoder.eitherDecoder[CdpApiError, Unit]

@@ -257,8 +257,8 @@ object NonNullableSetter {
       override def transform(value: T): Option[NonNullableSetter[T]] = Some(SetValue(value))
     }
 
-  implicit def encodeNonNullableSetter[T](implicit
-      encodeT: Encoder[T]
+  implicit def encodeNonNullableSetter[T](
+      implicit encodeT: Encoder[T]
   ): Encoder[NonNullableSetter[T]] = new Encoder[NonNullableSetter[T]] {
     final def apply(a: NonNullableSetter[T]): Json = a match {
       case SetValue(value) => Json.obj(("set", encodeT.apply(value)))

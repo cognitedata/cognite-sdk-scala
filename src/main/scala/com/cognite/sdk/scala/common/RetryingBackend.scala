@@ -38,9 +38,8 @@ class RetryingBackend[R[_], S](
     maxRetries: Option[Int] = None,
     initialRetryDelay: FiniteDuration = Constants.DefaultInitialRetryDelay,
     maxRetryDelay: FiniteDuration = Constants.DefaultMaxBackoffDelay
-)(implicit
-    sleepImpl: Sleep[R]
-) extends SttpBackend[R, S] {
+)(implicit sleepImpl: Sleep[R])
+    extends SttpBackend[R, S] {
   override def send[T](
       request: Request[T, S]
   ): R[Response[T]] =
