@@ -314,8 +314,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         client.assets.search(AssetsQuery(Some(AssetsFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min = Option(createdTimes.min),
-            max = Option(createdTimes.max)
+            min = Some(createdTimes.min),
+            max = Some(createdTimes.max)
           ))
         )))),
         a => a should not be empty

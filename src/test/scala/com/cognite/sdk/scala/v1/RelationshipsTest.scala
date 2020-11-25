@@ -7,49 +7,50 @@ import java.time.temporal.ChronoUnit
 import java.time.Instant
 import com.cognite.sdk.scala.common._
 class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
-//  private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZB", "6VhKQqtTJqBHGulwA")
+  private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
 //  it should behave like readableWithRequiredExternalId(client.relationships, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
-//  it should behave like writableWithRequiredExternalId(
-//    client.relationships,
-//    Some(client.relationships),
-//    Seq(
-//      Relationship(
-//        sourceExternalId = "scala-sdk-relationships-test-event1",
-//        sourceType = "event",
-//        targetExternalId = "scala-sdk-relationships-test-event2",
-//        targetType = "event",
-//        externalId = shortRandom()
-//      ),
-//      Relationship(
-//        sourceExternalId = "scala-sdk-relationships-test-event1",
-//        sourceType = "event",
-//        targetExternalId = "scala-sdk-relationships-test-event2",
-//        targetType = "event",
-//        externalId = shortRandom()
-//      )
-//    ),
-//    Seq(
-//      RelationshipCreate(
-//        sourceExternalId = "scala-sdk-relationships-test-event1",
-//        sourceType = "event",
-//        targetExternalId = "scala-sdk-relationships-test-event2",
-//        targetType = "event",
-//        externalId = shortRandom()
-//      ),
-//      RelationshipCreate(
-//        sourceExternalId = "scala-sdk-relationships-test-event1",
-//        sourceType = "event",
-//        targetExternalId = "scala-sdk-relationships-test-event2",
-//        targetType = "event",
-//        externalId = shortRandom()
-//      )
-//    ),
-//    externalIdsThatDoNotExist,
-//    supportsMissingAndThrown = true
-//  )
-//
+  it should behave like writableWithRequiredExternalId(
+    client.relationships,
+    Some(client.relationships),
+    Seq(
+      Relationship(
+        sourceExternalId = "scala-sdk-relationships-test-event1",
+        sourceType = "event",
+        targetExternalId = "scala-sdk-relationships-test-event2",
+        targetType = "event",
+        externalId = shortRandom()
+      ),
+      Relationship(
+        sourceExternalId = "scala-sdk-relationships-test-event1",
+        sourceType = "event",
+        targetExternalId = "scala-sdk-relationships-test-event2",
+        targetType = "event",
+        externalId = shortRandom()
+      )
+    ),
+    Seq(
+      RelationshipCreate(
+        sourceExternalId = "scala-sdk-relationships-test-event1",
+        sourceType = "event",
+        targetExternalId = "scala-sdk-relationships-test-event2",
+        targetType = "event",
+        externalId = shortRandom()
+      ),
+      RelationshipCreate(
+        sourceExternalId = "scala-sdk-relationships-test-event1",
+        sourceType = "event",
+        targetExternalId = "scala-sdk-relationships-test-event2",
+        targetType = "event",
+        externalId = shortRandom()
+      )
+    ),
+    externalIdsThatDoNotExist,
+    supportsMissingAndThrown = true,
+    trySameIdsThatDoNotExist = false
+  )
+
   it should "create necessary relationships for filter tests" in {
     client.relationships.deleteByExternalIds(externalIds = Seq(
       "scala-sdk-relationships-test-example-1",

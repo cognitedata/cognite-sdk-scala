@@ -121,7 +121,8 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       readExamples: Seq[R],
       createExamples: Seq[W],
       externalIdsThatDoNotExist: Seq[String],
-      supportsMissingAndThrown: Boolean
+      supportsMissingAndThrown: Boolean,
+      trySameIdsThatDoNotExist: Boolean = true
   )(implicit t: Transformer[R, W]) =
     writableWithExternalIdGeneric[Id, R, W](
       writable,
@@ -129,8 +130,9 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       readExamples,
       createExamples,
       externalIdsThatDoNotExist,
-      supportsMissingAndThrown
-    )
+      supportsMissingAndThrown,
+      trySameIdsThatDoNotExist
+  )
 
   def writableWithExternalIdGeneric[A[_], R <: WithExternalIdGeneric[A], W <: WithExternalIdGeneric[
     A
@@ -140,7 +142,8 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
       readExamples: Seq[R],
       createExamples: Seq[W],
       externalIdsThatDoNotExist: Seq[String],
-      supportsMissingAndThrown: Boolean
+      supportsMissingAndThrown: Boolean,
+      trySameIdsThatDoNotExist: Boolean = true
   )(implicit t: Transformer[R, W]): Unit = {
     it should "be an error to delete using external ids that does not exist" in {
       maybeDeletable.map { deletable =>
@@ -154,25 +157,36 @@ trait WritableBehaviors extends Matchers { this: FlatSpec =>
           missingIds should have size externalIdsThatDoNotExist.size.toLong
           missingIds should contain theSameElementsAs externalIdsThatDoNotExist
         }
-
-        val sameIdsThatDoNotExist =
-          Seq(externalIdsThatDoNotExist.head, externalIdsThatDoNotExist.head)
-        val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByExternalIds(
-          sameIdsThatDoNotExist
-        )
-        if (supportsMissingAndThrown) {
-          // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
-          // if duplicated ids that do not exist are specified.
-          val sameMissingIds = sameIdsThrown.duplicated match {
-            case Some(duplicatedIds) =>
-              duplicatedIds.flatMap(jsonObj => jsonObj("externalId").get.asString)
-            case None =>
-              sameIdsThrown.missing
-                .getOrElse(Seq.empty)
-                .flatMap(jsonObj => jsonObj("externalId").get.asString)
+        if (trySameIdsThatDoNotExist) {
+          // Relationships do not return the items in "missing" if we query for the same missing items within the same request.
+          // It only returns a message so we skip this test in that case. I think this could be reported to API developers
+          // since it does not follow the same style with the others, you need to experiment to see it.
+          // ie. {
+          //    "error": {
+          //        "code": 400,
+          //        "message": "Request had 1 item(s) with one or more constraint violations:
+          //        [items is not a distinct set; duplicates: [{\"externalId\":\"AT_Matzen a469\"}]]"
+          //    }
+          //}
+          val sameIdsThatDoNotExist =
+            Seq(externalIdsThatDoNotExist.head, externalIdsThatDoNotExist.head)
+          val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByExternalIds(
+            sameIdsThatDoNotExist
+          )
+          if (supportsMissingAndThrown) {
+            // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
+            // if duplicated ids that do not exist are specified.
+            val sameMissingIds = sameIdsThrown.duplicated match {
+              case Some(duplicatedIds) =>
+                duplicatedIds.flatMap(jsonObj => jsonObj("externalId").get.asString)
+              case None =>
+                sameIdsThrown.missing
+                  .getOrElse(Seq.empty)
+                  .flatMap(jsonObj => jsonObj("externalId").get.asString)
+            }
+            sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+            sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           }
-          sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
-          sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
         }
       }
     }
