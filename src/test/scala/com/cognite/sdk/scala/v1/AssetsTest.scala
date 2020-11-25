@@ -171,7 +171,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         .filter(
           AssetsFilter(
             createdTime = Some(
-              TimeRange(Option(Instant.ofEpochMilli(1560756441301L)), Option(Instant.ofEpochMilli(1560756445000L)))))
+              TimeRange(Some(Instant.ofEpochMilli(1560756441301L)), Some(Instant.ofEpochMilli(1560756445000L)))))
         )
         .compile
         .toList,
@@ -182,7 +182,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       .filter(
         AssetsFilter(
           createdTime = Some(
-            TimeRange(Option(Instant.ofEpochMilli(1560756441301L)), Option(Instant.ofEpochMilli(1560756445000L)))))
+            TimeRange(Some(Instant.ofEpochMilli(1560756441301L)), Some(Instant.ofEpochMilli(1560756445000L)))))
       )
       .compile
       .toList
@@ -192,7 +192,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       .filter(
         AssetsFilter(
           createdTime = Some(
-            TimeRange(Option(Instant.ofEpochMilli(1560756441301L)), Option(Instant.ofEpochMilli(1560756445000L)))))
+            TimeRange(Some(Instant.ofEpochMilli(1560756441301L)), Some(Instant.ofEpochMilli(1560756445000L)))))
       )
       .compile
       .toList
@@ -202,7 +202,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       .filter(
         AssetsFilter(
           createdTime = Some(
-            TimeRange(Option(Instant.ofEpochMilli(1560756441301L)), Option(Instant.ofEpochMilli(1560756445000L))))),
+            TimeRange(Some(Instant.ofEpochMilli(1560756441301L)), Some(Instant.ofEpochMilli(1560756445000L))))),
         Some(10)
       )
       .compile
@@ -254,8 +254,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
             AssetsFilter(
               createdTime = Some(
                 TimeRange(
-                  Option(Instant.ofEpochMilli(1560756441301L)),
-                  Option(Instant.ofEpochMilli(1560756445000L))
+                  Some(Instant.ofEpochMilli(1560756441301L)),
+                  Some(Instant.ofEpochMilli(1560756445000L))
                 )
               )
             )
@@ -269,7 +269,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
           filter = Some(
             AssetsFilter(
               createdTime =
-                Some(TimeRange(Option(Instant.ofEpochMilli(0)), Option(Instant.ofEpochMilli(1560756460294L)))),
+                Some(TimeRange(Some(Instant.ofEpochMilli(0)), Some(Instant.ofEpochMilli(1560756460294L)))),
               parentIds = Some(Seq(1790957171927257L, 2436611095973105L, 6078796607206585L))
             )
           ),
