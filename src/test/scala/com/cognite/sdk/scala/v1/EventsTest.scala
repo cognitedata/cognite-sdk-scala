@@ -149,7 +149,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       .filter(
         EventsFilter(
           createdTime = Some(
-            TimeRange(Option(Instant.ofEpochMilli(1581098334114L)), Option(Instant.ofEpochMilli(1581098400000L)))
+            TimeRange(Some(Instant.ofEpochMilli(1581098334114L)), Some(Instant.ofEpochMilli(1581098400000L)))
           )
         )
       )
@@ -160,7 +160,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       .filterPartitions(
         EventsFilter(
           createdTime = Some(
-            TimeRange(Option(Instant.ofEpochMilli(1581098334114L)), Option(Instant.ofEpochMilli(1581098400000L)))
+            TimeRange(Some(Instant.ofEpochMilli(1581098334114L)), Some(Instant.ofEpochMilli(1581098400000L)))
           )
         ), 20
       )
@@ -172,7 +172,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       .filter(
         EventsFilter(
           createdTime = Some(
-            TimeRange(Option(Instant.ofEpochMilli(1581098334114L)), Option(Instant.ofEpochMilli(1581098400000L)))
+            TimeRange(Some(Instant.ofEpochMilli(1581098334114L)), Some(Instant.ofEpochMilli(1581098400000L)))
           )
         ),
         limit = Some(1)
@@ -190,8 +190,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
             EventsFilter(
               createdTime = Some(
                 TimeRange(
-                  Option(Instant.ofEpochMilli(1581098334114L)),
-                  Option(Instant.ofEpochMilli(1581098400000L))
+                  Some(Instant.ofEpochMilli(1581098334114L)),
+                  Some(Instant.ofEpochMilli(1581098400000L))
                 )
               )
             )
@@ -206,8 +206,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
             EventsFilter(
               createdTime = Some(
                 TimeRange(
-                  Option(Instant.ofEpochMilli(1581098334114L)),
-                  Option(Instant.ofEpochMilli(1581102000000L))
+                  Some(Instant.ofEpochMilli(1581098334114L)),
+                  Some(Instant.ofEpochMilli(1581102000000L))
                 )
               ),
               `type` = Some("test-data-populator"),
@@ -223,7 +223,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Option(Instant.ofEpochMilli(1581098334114L)), Option(Instant.ofEpochMilli(1581102000000L))))
+                Some(TimeRange(Some(Instant.ofEpochMilli(1581098334114L)), Some(Instant.ofEpochMilli(1581102000000L))))
             )
           ),
           search = Some(
@@ -240,7 +240,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Option(Instant.ofEpochMilli(1581098334114L)), Option(Instant.ofEpochMilli(1581102000000L))))
+                Some(TimeRange(Some(Instant.ofEpochMilli(1581098334114L)), Some(Instant.ofEpochMilli(1581102000000L))))
             )
           ),
           search = Some(
@@ -258,7 +258,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
           filter = Some(
             EventsFilter(
               createdTime =
-                Some(TimeRange(Option(Instant.ofEpochMilli(1581098334114L)), Option(Instant.ofEpochMilli(1581102000000L))))
+                Some(TimeRange(Some(Instant.ofEpochMilli(1581098334114L)), Some(Instant.ofEpochMilli(1581102000000L))))
             )
           ),
           search = Some(
@@ -280,8 +280,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         client.events.search(EventsQuery(Some(EventsFilter(
           dataSetIds = Some(Seq(CogniteInternalId(testDataSet.id))),
           createdTime = Some(TimeRange(
-            min = Option(createdTimes.min),
-            max = Option(createdTimes.max)
+            min = Some(createdTimes.min),
+            max = Some(createdTimes.max)
           ))
         )))),
         a => a should not be empty
