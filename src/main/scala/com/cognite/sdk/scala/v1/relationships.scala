@@ -38,7 +38,7 @@ final case class RelationshipCreate(
 final case class RelationshipsFilter(
     sourceExternalIds: Option[Seq[String]] = None,
     sourceTypes: Option[Seq[String]] = None,
-    targetExternalId: Option[Seq[String]] = None,
+    targetExternalIds: Option[Seq[String]] = None,
     targetTypes: Option[Seq[String]] = None,
     dataSetIds: Option[Seq[CogniteId]] = None,
     startTime: Option[TimeRange] = None,
