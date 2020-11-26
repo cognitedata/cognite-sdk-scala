@@ -5,11 +5,10 @@ package com.cognite.sdk.scala.v1
 import com.cognite.sdk.scala.common.{ReadBehaviours, RetryWhile, SdkTestSpec, WritableBehaviors}
 import java.time.temporal.ChronoUnit
 import java.time.Instant
-import com.cognite.sdk.scala.common._
 class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
-//  it should behave like readableWithRequiredExternalId(client.relationships, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
+  it should behave like readableWithRetrieveByRequiredExternalId(client.relationships, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
   it should behave like writableWithRequiredExternalId(
     client.relationships,
