@@ -59,11 +59,8 @@ package object common {
         }
       )
     }
-  implicit val labelContainsFilterItemsEncoder: Encoder[Items[LabelContainsFilter]] = deriveEncoder
   implicit val containsAnyEncoder: Encoder[ContainsAny] = deriveEncoder
-  implicit val containsAnyItemsEncoder: Encoder[Items[ContainsAny]] = deriveEncoder
   implicit val containsAllEncoder: Encoder[ContainsAll] = deriveEncoder
-  implicit val containsAllItemsEncoder: Encoder[Items[ContainsAll]] = deriveEncoder
 
   implicit val instantEncoder: Encoder[Instant] = Encoder.encodeLong.contramap(_.toEpochMilli)
   implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
