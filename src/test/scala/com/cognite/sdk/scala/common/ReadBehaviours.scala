@@ -133,6 +133,48 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
     }
   }
 
+  private def fetchTestItemsWithRequiredExternalIds[R <: WithRequiredExternalId with WithCreatedTime](readable: Readable[R, Id]): List[R] = {
+    // only use rows older than 10 minutes, to exclude items created by concurrently running tests which might be deleted quickly
+    val minAge = Instant.now().minus(10, ChronoUnit.MINUTES)
+    readable
+      .list()
+      .filter(_.createdTime.isBefore(minAge))
+      .take(2)
+      .compile
+      .toList
+  }
+
+  def readableWithRetrieveByRequiredExternalId[R <: WithRequiredExternalId with WithCreatedTime, W](
+     readable: Readable[R, Id] with RetrieveByExternalIds[R, Id],
+     idsThatDoNotExist: Seq[String],
+     supportsMissingAndThrown: Boolean
+   ): Unit = {
+    it should "support retrieving items by external id" in {
+      // TODO: this test is not very stable as the fetched item may be deleted before it is fetched again by the external id
+      val firstTwoItemIds = fetchTestItemsWithRequiredExternalIds(readable).map(_.externalId)
+
+      firstTwoItemIds should have size 2
+      val maybeItemsRead = readable.retrieveByExternalIds(firstTwoItemIds)
+      val itemsReadIds = maybeItemsRead.map(_.externalId)
+      itemsReadIds should have size firstTwoItemIds.size.toLong
+      itemsReadIds should contain theSameElementsAs firstTwoItemIds
+    }
+
+    it should "return information about missing external ids" in {
+      val thrown = the[CdpApiException] thrownBy readable
+        .retrieveByExternalIds(idsThatDoNotExist)
+      if (supportsMissingAndThrown) {
+        val itemsNotFound = thrown.missing
+
+        val notFoundIds =
+          itemsNotFound.get.map(jsonObj => jsonObj("externalId").get.asString.get)
+        notFoundIds should have size idsThatDoNotExist.size.toLong
+        notFoundIds should contain theSameElementsAs idsThatDoNotExist
+      }
+    }
+  }
+
+
   private def fetchTestItems[R <: WithExternalId with WithCreatedTime](readable: Readable[R, Id]): List[R] = {
     // only use rows older than 10 minutes, to exclude items created by concurrently running tests which might be deleted quickly
     val minAge = Instant.now().minus(10, ChronoUnit.MINUTES)
