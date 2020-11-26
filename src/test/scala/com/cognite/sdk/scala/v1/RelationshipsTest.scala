@@ -198,7 +198,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
         RelationshipsFilter(
           createdTime = createdTimeRange,
           dataSetIds = dataSetIds,
-          labels = Some(LabelContainsFilter(containsAny = Some(labels)))
+          labels = Some(ContainsAny(containsAny = labels))
         )
       )
       .compile
@@ -210,7 +210,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
         RelationshipsFilter(
           createdTime = createdTimeRange,
           dataSetIds = dataSetIds,
-          labels = Some(LabelContainsFilter(containsAll = Some(labels)))
+          labels = Some(ContainsAll(containsAll = labels))
         )
       )
       .compile
