@@ -12,7 +12,7 @@ import io.circe.{Decoder, Encoder}
 class Relationships[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[Relationship, F]
-    with PartitionedFilter[Relationship, RelationshipsFilter, F]
+    with Filter[Relationship, RelationshipsFilter, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Relationship, F]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
     with Create[Relationship, RelationshipCreate, F] {
