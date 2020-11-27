@@ -1,8 +1,7 @@
 package com.cognite.sdk.scala.common
 
-import java.util.concurrent.Executors
-
 import cats.effect._
+import cats.effect.laws.util.TestContext
 import cats.implicits.catsStdInstancesForList
 import cats.syntax.all._
 import com.cognite.sdk.scala.v1._
@@ -12,20 +11,20 @@ import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.Json
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
-  val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
-  implicit val cs: ContextShift[IO] = IO.contextShift(ec)
-  implicit val timer: Timer[IO] = IO.timer(ec)
-  implicit val sttpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend[IO]()
-
   val tenant = sys.env("TEST_AAD_TENANT_BLUEFIELD")
   val clientId = sys.env("TEST_CLIENT_ID_BLUEFIELD")
   val clientSecret = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
 
   it should "authenticate with Azure AD using OAuth2 in bluefield" in {
+    lazy val testContext = TestContext()
+    implicit lazy val timer: Timer[IO] = testContext.timer
+    implicit lazy val cs: ContextShift[IO] = testContext.contextShift
+
+    implicit val sttpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend[IO]()
+
     val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
       clientId = clientId,
@@ -57,6 +56,10 @@ class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
 
     var numTokenRequests = 0
 
+    lazy val testContext = TestContext()
+    implicit lazy val timer: Timer[IO] = testContext.timer
+    implicit lazy val cs: ContextShift[IO] = testContext.contextShift
+
     implicit val mockSttpBackend = SttpBackendStub(implicitly[MonadError[IO]])
       .whenRequestMatches(req => req.method == Method.POST && req.uri.path == Seq("token"))
       .thenRespondWrapped {
@@ -76,12 +79,11 @@ class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
       scopes = List("irrelevant")
     )
 
-    val authProvider = OAuth2.ClientCredentialsProvider[IO](credentials, refreshSecondsBeforeTTL = 1).unsafeRunTimed(1.second).get
-
-    val io = for {
+    val io: IO[Unit] = for {
+      authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials, refreshSecondsBeforeTTL = 1)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- IO { numTokenRequests shouldBe 1 }
-      _ <- timer.sleep(1.seconds)
+      _ <- IO { testContext.tick(1.seconds) }
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- IO { numTokenRequests shouldBe 2 }
     } yield ()
