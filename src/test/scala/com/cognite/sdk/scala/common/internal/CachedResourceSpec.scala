@@ -101,7 +101,7 @@ class ConcurrentCachedResourceSpec
         timer.sleep(acquireSleep).uncancelable *> Resources.alloc(ids, pool)) {
         obj =>
           (timer.sleep(releaseSleep).uncancelable *> Resources
-            .basicRelease(pool)
+            .basicRelease
             .apply(obj)).uncancelable
       }
       cr <- ConcurrentCachedResource(res)
@@ -130,7 +130,7 @@ class ConcurrentCachedResourceSpec
 
       val resource = Resource.make(alloc) { obj =>
         Resources
-          .basicRelease(pool)
+          .basicRelease
           .apply(obj)
           .uncancelable
       }
@@ -183,8 +183,8 @@ class Obj(val id: Int) {
 
   private var _alive: Boolean = true
 
-  def alive: Boolean = synchronized(_alive)
-  def unsafeRelease(): Unit = synchronized(_alive = false)
+  def alive: Boolean = synchronized { _alive }
+  def unsafeRelease(): Unit = synchronized { _alive = false }
 
   def assertLive[F[_]](implicit F: ApplicativeError[F, Throwable]): F[Unit] =
     Applicative[F].unlessA(alive)(
@@ -217,14 +217,14 @@ trait BaseCachedResourceBehavior[F[_]] extends Matchers with Inspectors {
         }
       }
 
-    def basicRelease(pool: Pool)(implicit F: Sync[F]): Obj => F[Unit] =
+    def basicRelease(implicit F: Sync[F]): Obj => F[Unit] =
       obj => F.delay(obj.unsafeRelease())
 
     def basic(implicit F: Sync[F]): F[(Pool, Resource[F, Obj])] =
       for {
         pool <- Ref[F].of(Map.empty[Int, Obj])
         ids <- Ref[F].of(1)
-      } yield pool -> Resource.make(alloc(ids, pool))(basicRelease(pool))
+      } yield pool -> Resource.make(alloc(ids, pool))(basicRelease)
 
   }
 
@@ -379,7 +379,7 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
         _ <- cr.invalidate // Make sure the last task is to invalidate
         objects <- pool.get
       } yield {
-        all(results) shouldBe 'right
+        all(results) shouldBe Symbol("right")
         if (withCleanup) {
           forAll(objects.values) { obj =>
             obj.alive shouldBe false
