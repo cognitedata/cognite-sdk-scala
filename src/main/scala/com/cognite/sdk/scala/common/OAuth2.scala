@@ -23,8 +23,7 @@ object OAuth2 {
       cache: CachedResource[F, TokenState]
   )(
       implicit F: Monad[F],
-      clock: Clock[F],
-      sttpBackend: SttpBackend[F, Nothing]
+      clock: Clock[F]
   ) extends AuthProvider[F]
       with Serializable {
     def getAuth: F[Auth] =
