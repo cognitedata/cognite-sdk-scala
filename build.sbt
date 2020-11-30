@@ -84,7 +84,7 @@ lazy val commonSettings = Seq(
           Wart.Overloading
         )
     }),
-  wartremoverExcluded ++= Seq(
+  wartremoverExcluded in (Compile, compile) ++= Seq(
     baseDirectory.value / "target" / "protobuf-generated",
     baseDirectory.value / "src" / "main" / "scala" / "com" / "cognite" / "sdk" / "scala" / "common" / "internal" / "CachedResource.scala"
   )
