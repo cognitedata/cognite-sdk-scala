@@ -95,6 +95,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
     val res = client.relationships.create(randomItems)
     assert(res.length == 3)
   }
+
   it should "support filter" in {
 
     val minAge = Instant.now().minus(10, ChronoUnit.MINUTES)
