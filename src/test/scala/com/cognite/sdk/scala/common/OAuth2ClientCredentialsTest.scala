@@ -18,11 +18,15 @@ class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
   val clientId = sys.env("TEST_CLIENT_ID_BLUEFIELD")
   val clientSecret = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
 
-  it should "authenticate with Azure AD using OAuth2 in bluefield" in {
-    lazy val testContext = TestContext()
-    implicit lazy val timer: Timer[IO] = testContext.timer
-    implicit lazy val cs: ContextShift[IO] = testContext.contextShift
+  implicit val testContext: TestContext = TestContext()
+  // Explicitly pass Async[IO] because sometimes scalac wants to compile
+  // to 'ctx.contextShift(IO.ioConcurrentEffect(this.CS))`, which is recursive, and explodes.
+  // And yes, "sometimes", because implicit resolution is slightly nondeterministic
+  implicit val CS: ContextShift[IO] = testContext.contextShift[IO](IO.ioEffect)
+  implicit val timer: Timer[IO] = testContext.timer[IO]
 
+
+  it should "authenticate with Azure AD using OAuth2 in bluefield" in {
     implicit val sttpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend[IO]()
 
     val credentials = OAuth2.ClientCredentials(
@@ -55,10 +59,6 @@ class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
     import com.softwaremill.sttp.impl.cats.implicits._
 
     var numTokenRequests = 0
-
-    lazy val testContext = TestContext()
-    implicit lazy val timer: Timer[IO] = testContext.timer
-    implicit lazy val cs: ContextShift[IO] = testContext.contextShift
 
     implicit val mockSttpBackend = SttpBackendStub(implicitly[MonadError[IO]])
       .whenRequestMatches(req => req.method == Method.POST && req.uri.path == Seq("token"))
