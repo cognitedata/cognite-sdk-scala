@@ -84,10 +84,17 @@ lazy val commonSettings = Seq(
           Wart.Overloading
         )
     }),
+  // This is here with Compile, compile to try to make IntelliJ happy,
+  // and (intentionally) again below, globally, to make SBT happy.
   wartremoverExcluded in (Compile, compile) ++= Seq(
     baseDirectory.value / "target" / "protobuf-generated",
     baseDirectory.value / "src" / "main" / "scala" / "com" / "cognite" / "sdk" / "scala" / "common" / "internal" / "CachedResource.scala"
   )
+)
+
+wartremoverExcluded ++= Seq(
+  baseDirectory.value / "target" / "protobuf-generated",
+  baseDirectory.value / "src" / "main" / "scala" / "com" / "cognite" / "sdk" / "scala" / "common" / "internal" / "CachedResource.scala"
 )
 
 PB.targets in Compile := Seq(
