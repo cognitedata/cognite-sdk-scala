@@ -12,6 +12,7 @@ import com.cognite.sdk.scala.v1.{
   ContainsAll,
   ContainsAny,
   LabelContainsFilter,
+  LabelsOnUpdate,
   Sequence,
   SequenceColumn,
   SequenceColumnCreate,
@@ -84,4 +85,25 @@ package object common {
 
   implicit val sequenceToCreateTransformer: Transformer[Sequence, SequenceCreate] =
     Transformer.define[Sequence, SequenceCreate].buildTransformer
+
+  implicit val strSeqToLabelsOnUpdateTransformer
+      : Transformer[Option[Seq[String]], Option[LabelsOnUpdate]] =
+    new Transformer[Option[Seq[String]], Option[LabelsOnUpdate]] {
+      override def transform(src: Option[Seq[String]]) = src match {
+        case None => None
+        case Some(value: Seq[String]) =>
+          Some(LabelsOnUpdate(add = Some(value.map(CogniteExternalId))))
+      }
+    }
+
+  implicit val extIdSeqToLabelsOnUpdateTransformer
+      : Transformer[Option[Seq[CogniteExternalId]], Option[LabelsOnUpdate]] =
+    new Transformer[Option[Seq[CogniteExternalId]], Option[LabelsOnUpdate]] {
+      override def transform(src: Option[Seq[CogniteExternalId]]) = src match {
+        case None => None
+        case Some(value: Seq[CogniteExternalId]) => Some(LabelsOnUpdate(add = Some(value)))
+      }
+    }
+
+  implicit val labelsOnUpdateEncoder: Encoder[LabelsOnUpdate] = deriveEncoder
 }
