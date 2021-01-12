@@ -192,6 +192,4 @@ object Assets {
     deriveEncoder[ItemsWithRecursiveAndIgnoreUnknownIds]
   implicit val cogniteExternalIdDecoder: Decoder[CogniteExternalId] =
     deriveDecoder[CogniteExternalId]
-  implicit val LabelsOnUpdateEncoder: Encoder[LabelsOnUpdate] =
-    deriveEncoder[LabelsOnUpdate]
 }
