@@ -90,9 +90,9 @@ package object common {
       : Transformer[Option[Seq[String]], Option[LabelsOnUpdate]] =
     new Transformer[Option[Seq[String]], Option[LabelsOnUpdate]] {
       override def transform(src: Option[Seq[String]]) = src match {
-        case None => None
         case Some(value: Seq[String]) =>
           Some(LabelsOnUpdate(add = Some(value.map(CogniteExternalId))))
+        case _ => None
       }
     }
 
@@ -100,8 +100,8 @@ package object common {
       : Transformer[Option[Seq[CogniteExternalId]], Option[LabelsOnUpdate]] =
     new Transformer[Option[Seq[CogniteExternalId]], Option[LabelsOnUpdate]] {
       override def transform(src: Option[Seq[CogniteExternalId]]) = src match {
-        case None => None
         case Some(value: Seq[CogniteExternalId]) => Some(LabelsOnUpdate(add = Some(value)))
+        case _ => None
       }
     }
 
