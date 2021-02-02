@@ -29,7 +29,7 @@ object OAuth2 {
     def getAuth: F[Auth] =
       for {
         now <- clock.monotonic(TimeUnit.SECONDS)
-        _ <- cache.invalidateIfNeeded(state => state.expiresAt <= now)
+        _ <- cache.invalidateIfNeeded(_.expiresAt <= now)
         auth <- cache.run(state => F.pure(BearerTokenAuth(state.token)))
       } yield auth
   }

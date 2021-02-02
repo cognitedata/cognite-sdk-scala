@@ -17,18 +17,19 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
-  val tenant = sys.env("TEST_AAD_TENANT_BLUEFIELD")
-  val clientId = sys.env("TEST_CLIENT_ID_BLUEFIELD")
-  val clientSecret = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
+  val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
+  val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
+  val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
 
   implicit val testContext: TestContext = TestContext()
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1)))
   implicit val timer: Timer[IO] = testContext.timer[IO]
 
 
+  // Override sttpBackend because this doesn't work with the testing backend
+  implicit val sttpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend[IO]()
+
   it should "authenticate with Azure AD using OAuth2 in bluefield" in {
-    // Override sttpBackend because this doesn't work with the testing backend
-    implicit val sttpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend[IO]()
 
     val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
@@ -48,7 +49,7 @@ class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
       clientTag = None
     )
 
-    // Reenable this when login.status for tokensis fixed
+//    Reenable this when login.status for tokens is fixed
 //    val loginStatus = client.login.status().unsafeRunTimed(10.seconds).get
 //    assert(loginStatus.loggedIn)
 
@@ -57,12 +58,25 @@ class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
     }
   }
 
+  it should "throw a valid error when authenticating with bad credentials" in {
+    val credentials = OAuth2.ClientCredentials(
+      tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
+      clientId = "clientId",
+      clientSecret = "clientSecret",
+      scopes = List("https://bluefield.cognitedata.com/.default")
+    )
+
+    an[SdkException] shouldBe thrownBy {
+      OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).get.getAuth.unsafeRunSync()
+    }
+  }
+
   it should "refresh tokens when they expire" in {
     import com.softwaremill.sttp.impl.cats.implicits._
 
     var numTokenRequests = 0
 
-    implicit val mockSttpBackend = SttpBackendStub(implicitly[MonadError[IO]])
+    implicit val mockSttpBackend: SttpBackendStub[IO, Nothing] = SttpBackendStub(implicitly[MonadError[IO]])
       .whenRequestMatches(req => req.method == Method.POST && req.uri.path == Seq("token"))
       .thenRespondWrapped {
         for {
