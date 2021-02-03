@@ -45,7 +45,7 @@ jobs:
         TEST_CLIENT_SECRET_BLUEFIELD: ${{ secrets.BLUEFIELD_CLIENT_SECRET }}
       # run: sbt test
       run: |
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G scalastyle test:scalastyle scalafmtCheck coverage +test coverageReport
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC scalastyle test:scalastyle scalafmtCheck coverage +test coverageReport
 
     - name: Upload test coverage report
       uses: codecov/codecov-action@v1
@@ -78,7 +78,7 @@ jobs:
 
       - name: Build JAR file
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G "set test in Test := {}" "set compile/skip := true" +package
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC "set test in Test := {}" "set compile/skip := true" +package
 
       - name: Publish package
         env:
