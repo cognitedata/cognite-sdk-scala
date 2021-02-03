@@ -14,7 +14,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   // Use greenfieldClient for readable tests since publicdata has a lot of events,
   // so it's painfully slow to read them all sequentially.
-  it should behave like readable(client.events)
+  println(greenfieldClient.login.status())
+  //it should behave like readable(greenfieldClient.events)
 
   it should behave like partitionedReadable(greenfieldClient.events)
 
