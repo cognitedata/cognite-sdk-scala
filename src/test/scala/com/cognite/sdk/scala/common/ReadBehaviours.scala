@@ -16,7 +16,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       readable: Readable[R, Id],
       supportsLimit: Boolean = true
   ): Unit = {
-    val listLength = readable.list().compile.toList.length
+    val listLength = readable.list(Some(100)).compile.toList.length
     it should "read items" in {
       readable.read().items should not be empty
     }
