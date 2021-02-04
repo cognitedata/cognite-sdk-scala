@@ -13,10 +13,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up JDK 1.8
+    - name: Set up JDK 11
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8
+        java-version: 11
 
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
     # Can we do something better here?
@@ -40,9 +40,12 @@ jobs:
       env:
         TEST_API_KEY: ${{ secrets.playgroundApiKey }}
         TEST_API_KEY_GREENFIELD: ${{ secrets.greenfieldApiKey }}
+        TEST_AAD_TENANT_BLUEFIELD: "b86328db-09aa-4f0e-9a03-0136f604d20a"
+        TEST_CLIENT_ID_BLUEFIELD: ${{ secrets.BLUEFIELD_CLIENT_ID }}
+        TEST_CLIENT_SECRET_BLUEFIELD: ${{ secrets.BLUEFIELD_CLIENT_SECRET }}
       # run: sbt test
       run: |
-        cat /dev/null | sbt -Dsbt.log.noformat=true scalastyle test:scalastyle scalafmtCheck coverage +test coverageReport
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC scalastyle test:scalastyle scalafmtCheck coverage +test coverageReport
 
     - name: Upload test coverage report
       uses: codecov/codecov-action@v1
@@ -57,10 +60,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up JDK 1.8
+      - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
+          java-version: 11
 
       - name: Set up SBT
         env:
@@ -73,9 +76,9 @@ jobs:
           secrets/decrypt.sh secrets/pubring.asc.gpg ~/.sbt/gpg/pubring.asc
           secrets/decrypt.sh secrets/secring.asc.gpg ~/.sbt/gpg/secring.asc
 
-      - name: Buil JAR file
+      - name: Build JAR file
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true "set test in Test := {}" "set compile/skip := true" +package
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC "set test in Test := {}" "set compile/skip := true" +package
 
       - name: Publish package
         env:

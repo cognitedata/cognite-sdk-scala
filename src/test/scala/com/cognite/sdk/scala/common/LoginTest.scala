@@ -14,7 +14,7 @@ class LoginTest extends SdkTestSpec {
   )
   it should "read login status" in {
     val login =
-      new Login(RequestSession("scala-sdk-test", uri"https://api.cognitedata.com", backend, auth))
+      new Login(RequestSession[Id]("scala-sdk-test", uri"https://api.cognitedata.com", backend, AuthProvider[Id](auth)))
     val status = login.status()
     status.loggedIn should be(true)
     status.project should not be empty

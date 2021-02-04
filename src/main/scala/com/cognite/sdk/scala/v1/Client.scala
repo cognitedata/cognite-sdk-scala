@@ -17,13 +17,27 @@ import io.circe.derivation.deriveDecoder
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
+class AuthSttpBackend[R[_], -S](delegate: SttpBackend[R, S], authProvider: AuthProvider[R])
+    extends SttpBackend[R, S] {
+  override def send[T](request: Request[T, S]): R[Response[T]] =
+    responseMonad.flatMap(authProvider.getAuth) { auth: Auth =>
+      delegate.send(auth.auth(request))
+    }
+
+  override def close(): Unit = delegate.close()
+
+  override def responseMonad: MonadError[R] = delegate.responseMonad
+}
+
 final case class RequestSession[F[_]: Monad](
     applicationName: String,
     baseUrl: Uri,
-    sttpBackend: SttpBackend[F, _],
-    auth: Auth,
+    baseSttpBackend: SttpBackend[F, _],
+    auth: AuthProvider[F],
     clientTag: Option[String] = None
 ) {
+  val sttpBackend: SttpBackend[F, _] = new AuthSttpBackend(baseSttpBackend, auth)
+
   def send[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[Response[R]] =
     r(
       sttp
@@ -33,7 +47,6 @@ final case class RequestSession[F[_]: Monad](
   private val sttpRequest = {
     val baseRequest = sttp
       .followRedirects(false)
-      .auth(auth)
       .header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}")
       .header("x-cdp-app", applicationName)
       .readTimeout(90.seconds)
@@ -157,16 +170,26 @@ final case class RequestSession[F[_]: Monad](
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
-class GenericClient[F[_]: Monad](
+class GenericClient[F[_]](
     applicationName: String,
     val projectName: String,
-    baseUrl: String =
-      Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
-    auth: Auth = Auth.defaultAuth,
-    apiVersion: Option[String] = None,
-    clientTag: Option[String] = None
-)(implicit sttpBackend: SttpBackend[F, Nothing]) {
+    baseUrl: String,
+    authProvider: AuthProvider[F],
+    apiVersion: Option[String],
+    clientTag: Option[String]
+)(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Nothing]) {
+  def this(
+      applicationName: String,
+      projectName: String,
+      baseUrl: String = GenericClient.defaultBaseUrl,
+      auth: Auth = Auth.defaultAuth,
+      apiVersion: Option[String] = None,
+      clientTag: Option[String] = None
+  )(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Nothing]) =
+    this(applicationName, projectName, baseUrl, AuthProvider[F](auth), apiVersion, clientTag)
+
   import GenericClient._
+
   val uri: Uri = parseBaseUrlOrThrow(baseUrl)
 
   lazy val requestSession =
@@ -174,10 +197,11 @@ class GenericClient[F[_]: Monad](
       applicationName,
       uri"$uri/api/${apiVersion.getOrElse("v1")}/projects/$projectName",
       sttpBackend,
-      auth,
+      authProvider,
       clientTag
     )
-  lazy val login = new Login[F](RequestSession(applicationName, uri, sttpBackend, auth, clientTag))
+  lazy val login =
+    new Login[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
   lazy val assets = new Assets[F](requestSession)
   lazy val events = new Events[F](requestSession)
   lazy val files = new Files[F](requestSession)
@@ -248,11 +272,22 @@ object GenericClient {
       applicationName: String,
       auth: Auth,
       baseUrl: String = defaultBaseUrl,
-      apiVersion: Option[String] = None
+      apiVersion: Option[String] = None,
+      clientTag: Option[String] = None
+  )(implicit sttpBackend: SttpBackend[F, Nothing]): F[GenericClient[F]] =
+    forAuthProvider(applicationName, AuthProvider(auth), baseUrl, apiVersion, clientTag)
+
+  def forAuthProvider[F[_]: Monad](
+      applicationName: String,
+      authProvider: AuthProvider[F],
+      baseUrl: String = defaultBaseUrl,
+      apiVersion: Option[String] = None,
+      clientTag: Option[String] = None
   )(implicit sttpBackend: SttpBackend[F, Nothing]): F[GenericClient[F]] = {
     val login = new Login[F](
-      RequestSession(applicationName, parseBaseUrlOrThrow(baseUrl), sttpBackend, auth)
+      RequestSession(applicationName, parseBaseUrlOrThrow(baseUrl), sttpBackend, authProvider)
     )
+
     for {
       status <- login.status()
       projectName = status.project
@@ -260,7 +295,14 @@ object GenericClient {
       if (projectName.trim.isEmpty) {
         throw InvalidAuthentication()
       } else {
-        new GenericClient[F](applicationName, projectName, baseUrl, auth, apiVersion)(
+        new GenericClient[F](
+          applicationName,
+          projectName,
+          baseUrl,
+          authProvider,
+          apiVersion,
+          clientTag
+        )(
           implicitly,
           sttpBackend
         )
