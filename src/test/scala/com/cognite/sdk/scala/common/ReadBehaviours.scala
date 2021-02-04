@@ -72,6 +72,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       val allLength = readable.list(Some(3)).compile.toList.length
       allLength should be(3)
       val unlimitedLength = readable.list().map(_ => 1).compile.toList.length
+      Thread.sleep(1000L)
       val partitionsLength = readable
         .listPartitions(40)
         .reduce(_ ++ _)
@@ -79,6 +80,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
         .compile
         .toList
         .length
+      Thread.sleep(1000L)
       assert(unlimitedLength <= partitionsLength)
     }
   }
