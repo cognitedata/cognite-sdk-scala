@@ -273,7 +273,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
           ignoreUnknownIds = false
         )
       }
-      exception.message should include("ids not found")
+      exception.message should (include("ids not found") or include("id not found"))
     }
 
     it should "support retrieving items by id with ignoreUnknownIds=true" in {
@@ -288,7 +288,7 @@ trait ReadBehaviours extends Matchers { this: FlatSpec =>
       val exception = intercept[CdpApiException] {
         readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = false)
       }
-      exception.message should include("ids not found")
+      exception.message should (include("ids not found") or include("id not found"))
     }
   }
 }

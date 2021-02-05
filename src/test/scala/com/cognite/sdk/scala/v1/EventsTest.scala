@@ -12,7 +12,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
-  it should behave like readable(client.events)
+  it should behave like readable(greenfieldClient.events)
 
   it should behave like partitionedReadable(greenfieldClient.events)
 
@@ -20,7 +20,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like readableWithRetrieveByExternalId(client.events, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
-  it should behave like readableWithRetrieveUnknownIds(client.dataSets)
+  it should behave like readableWithRetrieveUnknownIds(client.events)
 
   it should behave like writable(
     client.events,
