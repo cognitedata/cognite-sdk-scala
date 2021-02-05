@@ -3,8 +3,8 @@ import sbt.project
 
 addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
 
-val scala213 = "2.13.3"
-val scala212 = "2.12.12"
+val scala213 = "2.13.4"
+val scala212 = "2.12.13"
 val scala211 = "2.11.12"
 val supportedScalaVersions = List(scala212, scala213, scala211)
 
@@ -18,15 +18,15 @@ val circeVersion: Option[(Long, Long)] => String = {
 }
 val circeDerivationVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "0.12.0-M3"
-  case _ => "0.13.0-M4"
+  case _ => "0.13.0-M5"
 }
 val catsEffectVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.0.0"
-  case _ => "2.1.4"
+  case _ => "2.3.1"
 }
 val fs2Version: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.1.0"
-  case _ => "2.4.4"
+  case _ => "2.5.0"
 }
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))

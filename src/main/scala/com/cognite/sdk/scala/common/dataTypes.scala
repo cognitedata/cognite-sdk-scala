@@ -243,6 +243,7 @@ object NonNullableSetter {
             "Invalid null value for non-nullable field update"
           ) // scalastyle:ignore null
           Some(SetValue(value))
+        case x => throw new IllegalArgumentException(s"${x.getClass.toString} can't be transformed.") // To make Scala 2.13.4 happy
       }
     }
 
