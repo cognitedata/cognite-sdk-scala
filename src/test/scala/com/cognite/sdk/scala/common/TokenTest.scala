@@ -23,8 +23,6 @@ class TokenTest extends SdkTestSpec {
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1)))
   implicit val timer: Timer[IO] = testContext.timer[IO]
 
-
-  // Override sttpBackend because this doesn't work with the testing backend
   implicit val sttpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend[IO]()
 
   it should "read token inspect result" in {
@@ -41,7 +39,6 @@ class TokenTest extends SdkTestSpec {
     val token =
       new Token(RequestSession[IO]("CogniteScalaSDK-OAuth-Test", uri"https://bluefield.cognitedata.com", sttpBackend, authProvider))
     val status = token.inspect().unsafeRunTimed(10.seconds).get
-    println(status)
     assert(status.subject != "")
   }
 }
