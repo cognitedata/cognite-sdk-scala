@@ -3,15 +3,12 @@
 
 package com.cognite.sdk.scala.common
 
-import java.util.concurrent.Executors
-
-import cats.effect.laws.util.TestContext
 import cats.effect.{ContextShift, IO, Timer}
 import com.cognite.sdk.scala.v1.RequestSession
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 class TokenTest extends SdkTestSpec {
@@ -19,9 +16,8 @@ class TokenTest extends SdkTestSpec {
   val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
 
-  implicit val testContext: TestContext = TestContext()
-  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4)))
-  implicit val timer: Timer[IO] = testContext.timer[IO]
+  implicit val cs: ContextShift[IO] = IO.contextShift(global)
+  implicit val timer: Timer[IO] = IO.timer(global)
 
   implicit val sttpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend[IO]()
 
