@@ -202,6 +202,8 @@ class GenericClient[F[_]](
     )
   lazy val login =
     new Login[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
+  lazy val token =
+    new Token[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
   lazy val assets = new Assets[F](requestSession)
   lazy val events = new Events[F](requestSession)
   lazy val files = new Files[F](requestSession)
