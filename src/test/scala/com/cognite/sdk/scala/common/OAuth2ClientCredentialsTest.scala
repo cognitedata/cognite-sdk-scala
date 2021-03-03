@@ -22,7 +22,7 @@ class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
 
   implicit val testContext: TestContext = TestContext()
-  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1)))
+  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4)))
   implicit val timer: Timer[IO] = testContext.timer[IO]
 
 

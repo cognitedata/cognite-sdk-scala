@@ -20,7 +20,7 @@ class TokenTest extends SdkTestSpec {
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
 
   implicit val testContext: TestContext = TestContext()
-  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1)))
+  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4)))
   implicit val timer: Timer[IO] = testContext.timer[IO]
 
   implicit val sttpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend[IO]()
