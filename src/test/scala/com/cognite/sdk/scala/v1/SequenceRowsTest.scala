@@ -6,7 +6,6 @@ package com.cognite.sdk.scala.v1
 import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common._
 import io.circe.syntax._
-import org.scalatest.ParallelTestExecution
 
 class SequenceRowsTest extends SdkTestSpec with RetryWhile {
   def withSequence(testCode: Sequence => Any): Unit = {
