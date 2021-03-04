@@ -184,7 +184,7 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
   // Explicitly pass Async[IO] because sometimes scalac wants to compile
   // to 'ctx.contextShift(IO.ioConcurrentEffect(this.CS))`, which is recursive, and explodes.
   // And yes, "sometimes", because implicit resolution is slightly nondeterministic
-  implicit val CS: ContextShift[IO] = ctx.contextShift[IO](IO.ioEffect)
+  implicit val contextShift: ContextShift[IO] = ctx.contextShift[IO](IO.ioEffect)
   implicit val timer: Timer[IO] = ctx.timer[IO]
 
   def concurrentCachedResource(
@@ -327,18 +327,18 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
 
   final override protected def toFuture(fa: IO[Assertion])(
       implicit pos: Position): Future[Assertion] = {
-    val year = 365.day
+    val maxTestDuration = 1.minute
     val test = fa
       .timeoutTo(
-        year,
+        maxTestDuration,
         IO.raiseError(
           new Exception(
-            "Test case did not complete within 1 year. Deadlock is likely"))
+            s"Test case did not complete within $maxTestDuration. Deadlock is likely"))
       )
       .unsafeToFuture() // Begin eager test execution async
     // Resolve `IO` concurrency inside `test` by advancing the clock
-    ctx.tick(year)
-    ctx.tick(1.minute) // Definitely past our `timeoutTo`
+    ctx.tick(maxTestDuration)
+    ctx.tick(10.seconds) // Definitely past our `timeoutTo`
 
     val tasksAfterTick = ctx.state.tasks
     if (tasksAfterTick.isEmpty) {
