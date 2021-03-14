@@ -5,7 +5,7 @@ package com.cognite.sdk.scala.common
 
 import com.softwaremill.sttp.Id
 import io.scalaland.chimney.Transformer
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
 trait WritableBehaviors extends Matchers { this: FlatSpec =>
   // scalastyle:off
