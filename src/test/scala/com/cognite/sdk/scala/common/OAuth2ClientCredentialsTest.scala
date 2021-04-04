@@ -11,12 +11,13 @@ import com.softwaremill.sttp._
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.Json
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
+class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers {
   val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
   val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
