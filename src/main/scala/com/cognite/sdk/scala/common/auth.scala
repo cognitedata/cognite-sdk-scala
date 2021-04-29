@@ -45,6 +45,21 @@ final case class BearerTokenAuth(bearerToken: String, override val project: Opti
     r.header("Authorization", s"Bearer $bearerToken")
 }
 
+final case class OIDCTokenAuth(bearerToken: String, override val project: Option[String] = None)
+    extends Auth {
+  def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
+    project match {
+      case Some(proj) =>
+        r.header("Authorization", s"Bearer $bearerToken")
+          .header("project", proj)
+      case _ =>
+        throw new SdkException(
+          s"Invalid Auth: Can't create OIDCTokenAuth since project header is not provided"
+        )
+    }
+
+}
+
 final case class TicketAuth(authTicket: String, override val project: Option[String] = None)
     extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
