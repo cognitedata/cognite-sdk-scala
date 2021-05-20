@@ -9,10 +9,10 @@ import cats.implicits._
 import cats.Applicative
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
+import sttp.client3._
+import sttp.client3.circe._
 import io.circe.{Decoder, Encoder}
-import io.circe.derivation.{deriveDecoder, deriveEncoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 class Files[F[_]: Applicative](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -57,7 +57,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
             }
             requestSession.map(
               response,
-              (res: Response[String]) =>
+              (res: Response[Either[String, String]]) =>
                 if (res.isSuccess) {
                   file
                 } else {
@@ -166,13 +166,13 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
         }
         requestSession.map(
           response,
-          (res: Response[Array[Byte]]) =>
-            if (res.isSuccess) {
-              out.write(res.unsafeBody)
-            } else {
-              throw SdkException(
-                s"File download of file ${item.toString()} failed with error code ${res.code.toString()}"
-              )
+          (res: Response[Either[String, Array[Byte]]]) =>
+            res.body match {
+              case Right(bytes) => out.write(bytes)
+              case Left(_) =>
+                throw SdkException(
+                  s"File download of file ${item.toString} failed with error code ${res.code.toString()}"
+                )
             }
         )
       }

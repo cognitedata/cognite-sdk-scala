@@ -5,8 +5,8 @@ package com.cognite.sdk.scala.common
 
 import cats.effect.{ContextShift, IO, Timer}
 import com.cognite.sdk.scala.v1.RequestSession
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
+import sttp.client3._
+import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -19,7 +19,7 @@ class TokenTest extends SdkTestSpec {
   implicit val cs: ContextShift[IO] = IO.contextShift(global)
   implicit val timer: Timer[IO] = IO.timer(global)
 
-  implicit val sttpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend[IO]()
+  implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
 
   it should "read token inspect result" in {
 

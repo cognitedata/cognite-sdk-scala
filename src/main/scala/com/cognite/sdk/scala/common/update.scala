@@ -4,14 +4,14 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1._
-
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
+import sttp.client3._
+import sttp.client3.circe._
 import io.circe.{Decoder, Encoder, Json, Printer}
 import io.circe.syntax._
-import io.circe.derivation.deriveEncoder
+import io.circe.generic.semiauto.deriveEncoder
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
+import sttp.model.Uri
 
 final case class UpdateRequest(update: Json, id: Long)
 final case class UpdateRequestExternalId(update: Json, externalId: String)
@@ -53,8 +53,6 @@ object UpdateById {
   )(implicit decodeReadItems: Decoder[Items[R]]): F[Seq[R]] = {
     require(updates.keys.forall(id => id > 0), "Updating by id requires an id to be set")
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
       .post[Seq[R], Items[R], Items[UpdateRequest]](
         Items(updates.map { case (id, update) =>
@@ -94,8 +92,6 @@ object UpdateByExternalId {
       "Updating by externalId requires externalId to be set "
     )
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
     requestSession
       .post[Seq[R], Items[R], Items[UpdateRequestExternalId]](
         Items(updates.map { case (id, update) =>

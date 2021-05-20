@@ -6,13 +6,13 @@ package com.cognite.sdk.scala
 import scala.concurrent.duration._
 
 import cats.Id
-import com.softwaremill.sttp.{HttpURLConnectionBackend, SttpBackend}
+import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 import com.cognite.sdk.scala.common.{GzipSttpBackend, RetryingBackend}
 
 package object v1 {
-  implicit val sttpBackend: SttpBackend[Id, Nothing] =
-    new RetryingBackend[Id, Nothing](
-      new GzipSttpBackend[Id, Nothing](
+  implicit val sttpBackend: SttpBackend[Id, Any] =
+    new RetryingBackend[Id, Any](
+      new GzipSttpBackend[Id, Any](
         HttpURLConnectionBackend()
       ),
       initialRetryDelay = 100.millis,

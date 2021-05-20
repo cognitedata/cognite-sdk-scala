@@ -6,25 +6,27 @@ package com.cognite.sdk.scala.common
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.zip.GZIPOutputStream
-
-import com.softwaremill.sttp._
+import sttp.client3._
 import org.apache.commons.io.IOUtils
+import sttp.capabilities.Effect
+import sttp.model.{Header, HeaderNames}
+import sttp.monad.MonadError
 
-class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minimumSize: Int = 1000)
-    extends SttpBackend[R, S] {
+class GzipSttpBackend[F[_], +P](delegate: SttpBackend[F, P], val minimumSize: Int = 1000)
+    extends SttpBackend[F, P] {
   import GzipSttpBackend._
 
-  private def isGzipped(keyAndValue: Tuple2[String, String]) =
-    keyAndValue._1.equalsIgnoreCase(HeaderNames.ContentEncoding) &&
-      keyAndValue._2.equalsIgnoreCase("gzip")
+  private def isGzipped(header: Header) =
+    header.name.equalsIgnoreCase(HeaderNames.ContentEncoding) &&
+      header.value.equalsIgnoreCase("gzip")
 
   @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
-  private def isGzippedContent(keyAndValue: Tuple2[String, String]) =
-    keyAndValue._1.equalsIgnoreCase(HeaderNames.ContentType) &&
-      keyAndValue._2.toLowerCase.contains("/gzip")
+  private def isGzippedContent(header: Header) =
+    header.name.equalsIgnoreCase(HeaderNames.ContentType) &&
+      header.value.toLowerCase.contains("/gzip")
 
   @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-  override def send[T](request: Request[T, S]): R[Response[T]] = {
+  override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] = {
     val headers = request.headers
     val newRequest = request.body match {
       case body: BasicRequestBody
@@ -36,7 +38,7 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minimumSize: Int
             request
               .copy(
                 body = newBody,
-                headers = headers.filterNot(_._1.equalsIgnoreCase(HeaderNames.ContentLength))
+                headers = headers.filterNot(_.name.equalsIgnoreCase(HeaderNames.ContentLength))
               )
               .header(HeaderNames.ContentLength, bytes.length.toString)
               .header(HeaderNames.ContentEncoding, "gzip")
@@ -55,9 +57,9 @@ class GzipSttpBackend[R[_], S](delegate: SttpBackend[R, S], val minimumSize: Int
     delegate.send(newRequest)
   }
 
-  override def close(): Unit = delegate.close()
+  override def close(): F[Unit] = delegate.close()
 
-  override def responseMonad: MonadError[R] = delegate.responseMonad
+  override def responseMonad: MonadError[F] = delegate.responseMonad
 }
 
 object GzipSttpBackend {

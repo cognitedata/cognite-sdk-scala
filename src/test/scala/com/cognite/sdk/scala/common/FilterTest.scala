@@ -4,10 +4,11 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1.Client
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.testing.SttpBackendStub
+import sttp.client3._
+import sttp.client3.testing.SttpBackendStub
 import io.circe.parser.decode
-import io.circe.derivation.{deriveDecoder, deriveEncoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import sttp.model.StatusCode
 
 case class DummyFilter()
 
@@ -32,12 +33,12 @@ class FilterTest extends SdkTestSpec {
 
   def filterWithCursor(batchSize: Int, limit: Option[Int])(test: Int => Any): Any = {
     var hijackedRequest: FilterRequest[DummyFilter] = null // scalastyle:ignore
-    val requestHijacker = SttpBackendStub.synchronous.whenAnyRequest.thenRespondWrapped(req => {
+    val requestHijacker = SttpBackendStub.synchronous.whenAnyRequest.thenRespondF(req => {
       hijackedRequest = decode[FilterRequest[DummyFilter]](req.body.asInstanceOf[StringBody].s) match {
         case Right(x) => x
         case Left(e) => throw e
       }
-      Response(Right(ItemsWithCursor(Seq(0, 1, 2), None)), 200, "OK")
+      Response(ItemsWithCursor(Seq(0, 1, 2), None), StatusCode.Ok, "OK")
     })
     lazy val dummyClient = Client("foo",
       projectName,

@@ -4,14 +4,13 @@
 package com.cognite.sdk.scala.common
 
 import java.time.Instant
-
 import cats.Id
 import com.cognite.sdk.scala.v1.CogniteId
-import com.softwaremill.sttp.Uri
 import io.circe.{Decoder, Encoder, Json, JsonObject}
-import io.circe.derivation.deriveDecoder
+import io.circe.generic.semiauto.deriveDecoder
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
+import sttp.model.Uri
 
 trait ResponseWithCursor {
   val nextCursor: Option[String]
@@ -46,7 +45,7 @@ object SdkException {
       .map(u => s", in response$responseCodeMessage to request sent to ${u.toString()}")
       .getOrElse(responseCodeMessage)
     val requestIdMessage = requestId.map(id => s", with request id $id").getOrElse("")
-    val exceptionMessage = if (message.length > 0) {
+    val exceptionMessage = if (message.nonEmpty) {
       message
     } else {
       "Missing error message"
@@ -225,19 +224,19 @@ object NonNullableSetter {
     Array(
       "org.wartremover.warts.Null",
       "org.wartremover.warts.Equals",
+      "org.wartremover.warts.OptionPartial",
       "scalafix:DisableSyntax.null",
       "scalafix:DisableSyntax.!="
     )
   )
-  implicit def optionToNonNullableSetter[T: Manifest]
-      : Transformer[Option[T], Option[NonNullableSetter[T]]] =
+  implicit def optionToNonNullableSetter[T]: Transformer[Option[T], Option[NonNullableSetter[T]]] =
     new Transformer[Option[T], Option[NonNullableSetter[T]]] {
       override def transform(src: Option[T]): Option[NonNullableSetter[T]] = src match {
         case None => None
         case Some(map: Map[_, _]) if map.isEmpty =>
           // Workaround for CDF-3540 and CDF-953
           None
-        case Some(value: T) =>
+        case Some(value) =>
           require(
             value != null,
             "Invalid null value for non-nullable field update"
@@ -246,13 +245,12 @@ object NonNullableSetter {
       }
     }
 
-  implicit def toNonNullableSetter[T: Manifest]: Transformer[T, NonNullableSetter[T]] =
+  implicit def toNonNullableSetter[T]: Transformer[T, NonNullableSetter[T]] =
     new Transformer[T, NonNullableSetter[T]] {
       override def transform(value: T): NonNullableSetter[T] = SetValue(value)
     }
 
-  implicit def toOptionNonNullableSetter[T: Manifest]
-      : Transformer[T, Option[NonNullableSetter[T]]] =
+  implicit def toOptionNonNullableSetter[T]: Transformer[T, Option[NonNullableSetter[T]]] =
     new Transformer[T, Option[NonNullableSetter[T]]] {
       override def transform(value: T): Option[NonNullableSetter[T]] = Some(SetValue(value))
     }

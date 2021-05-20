@@ -6,8 +6,8 @@ package com.cognite.sdk.scala.v1.resources
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import io.circe.Decoder
-import io.circe.derivation.deriveDecoder
-import com.softwaremill.sttp._
+import io.circe.generic.semiauto.deriveDecoder
+import sttp.client3._
 
 class ServiceAccounts[F[_]](val requestSession: RequestSession[F])
     extends Readable[ServiceAccount, F] {

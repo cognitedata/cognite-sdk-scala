@@ -5,8 +5,8 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.softwaremill.sttp._
-import io.circe.derivation.{deriveDecoder, deriveEncoder}
+import sttp.client3._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
 class Relationships[F[_]](val requestSession: RequestSession[F])
@@ -64,7 +64,7 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
   override private[sdk] def filterWithCursor(
       filter: RelationshipsFilter,
       cursor: Option[String],
-      limit: Option[StatusCode],
+      limit: Option[Int],
       partition: Option[Partition],
       aggregatedProperties: Option[Seq[String]]
   ): F[ItemsWithCursor[Relationship]] =

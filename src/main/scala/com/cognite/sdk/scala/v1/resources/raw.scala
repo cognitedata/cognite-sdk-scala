@@ -7,24 +7,22 @@ import cats.Applicative
 import cats.implicits._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
-import io.circe.derivation.{deriveDecoder, deriveEncoder}
+import sttp.client3._
+import sttp.client3.circe._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import fs2._
+import sttp.model.Uri
 
 object RawResource {
   def deleteByIds[F[_], I](requestSession: RequestSession[F], baseUrl: Uri, ids: Seq[I])(
       implicit idsItemsEncoder: Encoder[Items[I]]
-  ): F[Unit] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Unit]
+  ): F[Unit] =
     requestSession.post[Unit, Unit, Items[I]](
       Items(ids),
       uri"$baseUrl/delete",
       _ => ()
     )
-  }
 }
 
 class RawDatabases[F[_]](val requestSession: RequestSession[F])
@@ -126,15 +124,12 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
   val cursorsUri: Uri = uri"${requestSession.baseUrl}/raw/dbs/$database/tables/$table/cursors"
 
   // RAW does not return the created rows in the response, so we'll always return an empty sequence.
-  override def createItems(items: Items[RawRow]): F[Seq[RawRow]] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Unit]
+  override def createItems(items: Items[RawRow]): F[Seq[RawRow]] =
     requestSession.post[Seq[RawRow], Unit, Items[RawRow]](
       items,
       baseUrl,
       _ => Seq.empty[RawRow]
     )
-  }
 
   // ... and since RAW doesn't return the created rows, we just return the one we sent here.
   override def createOne(item: RawRow): F[RawRow] =
@@ -162,7 +157,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
   ): F[ItemsWithCursor[RawRow]] =
     Readable.readWithCursor(
       requestSession,
-      baseUrl.params(filterToParams(filter)),
+      baseUrl.addParams(filterToParams(filter)),
       cursor,
       limit,
       None,
@@ -175,8 +170,8 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       limitPerPartition: Option[Int]
   )(implicit F: Applicative[F]): F[Seq[Stream[F, RawRow]]] = {
     val cursorsUriWithParams = cursorsUri
-      .param("numberOfCursors", numPartitions.toString)
-      .params(lastUpdatedTimeFilterToParams(filter))
+      .addParam("numberOfCursors", numPartitions.toString)
+      .addParams(lastUpdatedTimeFilterToParams(filter))
 
     for {
       cursors <- requestSession

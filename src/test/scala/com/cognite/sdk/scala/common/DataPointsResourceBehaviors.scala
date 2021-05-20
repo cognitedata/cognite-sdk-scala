@@ -3,14 +3,15 @@
 
 package com.cognite.sdk.scala.common
 
-import java.time.Instant
+import cats.Id
 
+import java.time.Instant
 import com.cognite.sdk.scala.v1.{DataPointsByExternalIdResponse, DataPointsByIdResponse, TimeSeries}
 import com.cognite.sdk.scala.v1.resources.DataPointsResource
-import com.softwaremill.sttp.Id
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: FlatSpec =>
+trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: AnyFlatSpec =>
   private val startTime = System.currentTimeMillis()
   private val start = Instant.ofEpochMilli(startTime)
   private val endTime = startTime + 20*1000

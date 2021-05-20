@@ -6,8 +6,9 @@ package com.cognite.sdk.scala.common
 import cats.Applicative
 import cats.effect.Concurrent
 import com.cognite.sdk.scala.v1.RequestSession
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
+import sttp.client3._
+import sttp.client3.circe._
+import sttp.model._
 import fs2._
 import io.circe.{Decoder, Encoder, Json, Printer}
 import io.circe.syntax._
@@ -86,7 +87,7 @@ trait PartitionedFilter[R, Fi, F[_]] extends PartitionedFilterF[R, Fi, F] {
 
 object Filter {
   //scalastyle:off parameter.number
-  def filterWithCursor[F[_], R, Fi: Encoder](
+  def filterWithCursor[F[_], R, Fi](
       requestSession: RequestSession[F],
       baseUrl: Uri,
       filter: Fi,
@@ -99,8 +100,6 @@ object Filter {
       implicit readItemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
       filterRequestEncoder: Encoder[FilterRequest[Fi]]
   ): F[ItemsWithCursor[R]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
     // avoid sending aggregatedProperties to resources that do not support it
     implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
     val body =

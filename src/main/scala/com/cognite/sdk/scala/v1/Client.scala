@@ -8,25 +8,28 @@ import cats.{Id, Monad}
 import cats.implicits._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.resources._
-import com.softwaremill.sttp.SttpBackend
-import com.softwaremill.sttp.{Id => _, _}
-import com.softwaremill.sttp.circe.asJson
+import sttp.client3._
+import sttp.client3.circe.asJsonEither
 import io.circe.Decoder
-import io.circe.derivation.deriveDecoder
+import io.circe.generic.semiauto.deriveDecoder
+import sttp.capabilities.Effect
+import sttp.model.Uri
+import sttp.monad.MonadError
 
+import java.net.{InetAddress, UnknownHostException}
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
-class AuthSttpBackend[R[_], -S](delegate: SttpBackend[R, S], authProvider: AuthProvider[R])
-    extends SttpBackend[R, S] {
-  override def send[T](request: Request[T, S]): R[Response[T]] =
+class AuthSttpBackend[F[_], +P](delegate: SttpBackend[F, P], authProvider: AuthProvider[F])
+    extends SttpBackend[F, P] {
+  override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] =
     responseMonad.flatMap(authProvider.getAuth) { auth: Auth =>
       delegate.send(auth.auth(request))
     }
 
-  override def close(): Unit = delegate.close()
+  override def close(): F[Unit] = delegate.close()
 
-  override def responseMonad: MonadError[R] = delegate.responseMonad
+  override def responseMonad: MonadError[F] = delegate.responseMonad
 }
 
 final case class RequestSession[F[_]: Monad](
@@ -38,25 +41,24 @@ final case class RequestSession[F[_]: Monad](
 ) {
   val sttpBackend: SttpBackend[F, _] = new AuthSttpBackend(baseSttpBackend, auth)
 
-  def send[R](r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing]): F[Response[R]] =
-    r(
-      sttp
-        .readTimeout(90.seconds)
-    ).send()(sttpBackend, implicitly)
+  def send[R](
+      r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any]
+  ): F[Response[R]] =
+    r(emptyRequest.readTimeout(90.seconds)).send(sttpBackend)
 
   private val sttpRequest = {
-    val baseRequest = sttp
+    val baseRequest = basicRequest
       .followRedirects(false)
       .header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}")
       .header("x-cdp-app", applicationName)
       .readTimeout(90.seconds)
-      .parseResponseIfMetadata { md =>
-        md.contentLength.forall(_ > 0) && md.contentType.exists(
-          // This is a bit ugly, but we're highly unlikely to use any other ContentType
-          // any time soon.
-          ct => ct.startsWith(MediaTypes.Json) || ct.startsWith("application/protobuf")
-        )
-      }
+//      .parseResponseIfMetadata { md =>
+//        md.contentLength.forall(_ > 0) && md.contentType.exists(
+//          // This is a bit ugly, but we're highly unlikely to use any other ContentType
+//          // any time soon.
+//          ct => ct.startsWith(MediaTypes.Json) || ct.startsWith("application/protobuf")
+//        )
+//      }
     clientTag match {
       case Some(tag) => baseRequest.header("x-cdp-clienttag", tag)
       case None => baseRequest
@@ -64,46 +66,25 @@ final case class RequestSession[F[_]: Monad](
   }
 
   private def parseResponse[T, R](uri: Uri, mapResult: T => R)(
-      implicit decoder: Decoder[Either[CdpApiError, T]]
+      implicit decoder: Decoder[T]
   ) =
-    asJson[Either[CdpApiError, T]].mapWithMetadata((response, metadata) =>
+    asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
       response match {
-        case Left(value) =>
-          // As of 2020-02-17, content length is not reliably set.
-          // Checking the content type explicitly for JSON and protobuf isn't
-          // ideal either, but we're not likely to add other content types
-          // any time soon.
-          val shouldHaveParsed = // metadata.contentLength.exists(_ > 0) &&
-            metadata.contentType.exists(_.startsWith(MediaTypes.Json)) ||
-              metadata.contentType.exists(_.startsWith("application/protobuf"))
-          if (shouldHaveParsed) {
-            throw SdkException(
-              s"Failed to parse response, reason: ${value.error.getMessage}",
-              Some(uri),
-              metadata.header("x-request-id"),
-              Some(metadata.code)
-            )
-          } else {
-            val message = if (metadata.statusText.isEmpty) {
-              "Unknown error (no status text)"
-            } else {
-              metadata.statusText
-            }
-            throw SdkException(
-              message,
-              Some(uri),
-              metadata.header("x-request-id"),
-              Some(metadata.code)
-            )
-          }
-        case Right(Left(cdpApiError)) =>
+        case Left(DeserializationException(_, error)) =>
+          throw SdkException(
+            s"Failed to parse response, reason: ${error.getMessage}",
+            Some(uri),
+            metadata.header("x-request-id"),
+            Some(metadata.code.code)
+          )
+        case Left(HttpError(cdpApiError, _)) =>
           throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
-        case Right(Right(value)) => mapResult(value)
+        case Right(value) => mapResult(value)
       }
     )
 
   private def unsafeBody[R](uri: Uri, response: Response[R]): R =
-    try response.unsafeBody
+    try response.body
     catch {
       // sttp's .unsafeBody returns a NoSuchElementException if the status wasn't
       // a 200 and there is no body to return.
@@ -113,7 +94,7 @@ final case class RequestSession[F[_]: Monad](
           s"Unexpected status code $code",
           Some(uri),
           response.header("x-request-id"),
-          Some(response.code)
+          Some(response.code.code)
         )
       case NonFatal(e) =>
         throw SdkException(
@@ -128,13 +109,13 @@ final case class RequestSession[F[_]: Monad](
       mapResult: T => R,
       contentType: String = "application/json",
       accept: String = "application/json"
-  )(implicit decoder: Decoder[Either[CdpApiError, T]]): F[R] =
+  )(implicit decoder: Decoder[T]): F[R] =
     sttpRequest
       .contentType(contentType)
       .header("accept", accept)
       .get(uri)
       .response(parseResponse(uri, mapResult))
-      .send()(sttpBackend, implicitly)
+      .send(sttpBackend)
       .map(unsafeBody(uri, _))
 
   def post[R, T, I](
@@ -143,18 +124,18 @@ final case class RequestSession[F[_]: Monad](
       mapResult: T => R,
       contentType: String = "application/json",
       accept: String = "application/json"
-  )(implicit serializer: BodySerializer[I], decoder: Decoder[Either[CdpApiError, T]]): F[R] =
+  )(implicit serializer: BodySerializer[I], decoder: Decoder[T]): F[R] =
     sttpRequest
       .contentType(contentType)
       .header("accept", accept)
       .post(uri)
       .body(body)
       .response(parseResponse(uri, mapResult))
-      .send()(sttpBackend, implicitly)
+      .send(sttpBackend)
       .map(unsafeBody(uri, _))
 
   def sendCdf[R](
-      r: RequestT[Empty, String, Nothing] => RequestT[Id, R, Nothing],
+      r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any],
       contentType: String = "application/json",
       accept: String = "application/json"
   ): F[R] = {
@@ -163,7 +144,7 @@ final case class RequestSession[F[_]: Monad](
         .contentType(contentType)
         .header("accept", accept)
     )
-    request.send()(sttpBackend, implicitly).map(unsafeBody(request.uri, _))
+    request.send(sttpBackend).map(unsafeBody(request.uri, _))
   }
 
   def map[R, R1](r: F[R], f: R => R1): F[R1] = r.map(f)
@@ -177,7 +158,7 @@ class GenericClient[F[_]](
     authProvider: AuthProvider[F],
     apiVersion: Option[String],
     clientTag: Option[String]
-)(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Nothing]) {
+)(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Any]) {
   def this(
       applicationName: String,
       projectName: String,
@@ -185,14 +166,14 @@ class GenericClient[F[_]](
       auth: Auth = Auth.defaultAuth,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None
-  )(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Nothing]) =
+  )(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Any]) =
     this(applicationName, projectName, baseUrl, AuthProvider[F](auth), apiVersion, clientTag)
 
   import GenericClient._
 
   val uri: Uri = parseBaseUrlOrThrow(baseUrl)
 
-  lazy val requestSession =
+  lazy val requestSession: RequestSession[F] =
     RequestSession(
       applicationName,
       uri"$uri/api/${apiVersion.getOrElse("v1")}/projects/$projectName",
@@ -233,14 +214,11 @@ class GenericClient[F[_]](
     new FunctionCalls(requestSession, functionId)
   lazy val functionSchedules = new FunctionSchedules[F](requestSession)
 
-  def project: F[Project] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Project]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Project]
+  def project: F[Project] =
     requestSession.get[Project, Project](
       requestSession.baseUrl,
       value => value
     )
-  }
   lazy val serviceAccounts = new ServiceAccounts[F](requestSession)
   lazy val apiKeys = new ApiKeys[F](requestSession)
   lazy val groups = new Groups[F](requestSession)
@@ -257,16 +235,34 @@ object GenericClient {
     .getOrElse("https://api.cognitedata.com")
 
   def apply[F[_]: Monad](applicationName: String, projectName: String, baseUrl: String, auth: Auth)(
-      implicit sttpBackend: SttpBackend[F, Nothing]
+      implicit sttpBackend: SttpBackend[F, Any]
   ): GenericClient[F] =
     new GenericClient(applicationName, projectName, baseUrl, auth)(implicitly, sttpBackend)
 
   def parseBaseUrlOrThrow(baseUrl: String): Uri =
-    try uri"$baseUrl"
-    catch {
+    try {
+      // sttp allows this, but we don't.
+      if (baseUrl.isEmpty) {
+        throw new IllegalArgumentException()
+      }
+      val uri = uri"$baseUrl"
+      val uriWithScheme = if (uri.scheme.isEmpty) {
+        uri"https://$baseUrl"
+      } else {
+        uri
+      }
+      uriWithScheme.host match {
+        case Some(host) =>
+          // Validate that this is a valid hostname.
+          val _ = InetAddress.getByName(host)
+          uriWithScheme
+        case None => throw new UnknownHostException(s"Unknown host in baseUrl: $baseUrl")
+      }
+    } catch {
+      case e: UnknownHostException => throw e
       case NonFatal(_) =>
         throw new IllegalArgumentException(
-          s"Unable to parse baseUrl = ${baseUrl} as a valid URI."
+          s"Unable to parse this baseUrl as a valid URI: $baseUrl"
         )
     }
 
@@ -276,7 +272,7 @@ object GenericClient {
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None
-  )(implicit sttpBackend: SttpBackend[F, Nothing]): F[GenericClient[F]] =
+  )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
     forAuthProvider(applicationName, AuthProvider(auth), baseUrl, apiVersion, clientTag)
 
   def forAuthProvider[F[_]: Monad](
@@ -285,7 +281,7 @@ object GenericClient {
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None
-  )(implicit sttpBackend: SttpBackend[F, Nothing]): F[GenericClient[F]] = {
+  )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] = {
     val login = new Login[F](
       RequestSession(applicationName, parseBaseUrlOrThrow(baseUrl), sttpBackend, authProvider)
     )
@@ -318,11 +314,11 @@ class Client(
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
     auth: Auth = Auth.defaultAuth
-)(implicit sttpBackend: SttpBackend[Id, Nothing])
+)(implicit sttpBackend: SttpBackend[Id, Any])
     extends GenericClient[Id](applicationName, projectName, baseUrl, auth)
 
 object Client {
   def apply(applicationName: String, projectName: String, baseUrl: String, auth: Auth)(
-      implicit sttpBackend: SttpBackend[Id, Nothing]
+      implicit sttpBackend: SttpBackend[Id, Any]
   ): Client = new Client(applicationName, projectName, baseUrl, auth)(sttpBackend)
 }

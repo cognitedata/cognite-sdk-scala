@@ -4,10 +4,10 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1.Client
-import com.softwaremill.sttp.Uri.QueryFragment
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.testing.SttpBackendStub
-import io.circe.derivation.deriveDecoder
+import sttp.client3._
+import sttp.client3.testing.SttpBackendStub
+import io.circe.generic.semiauto.deriveDecoder
+import sttp.model.Uri.QuerySegment
 
 class ReadTest extends SdkTestSpec {
   implicit val dummyItemsWithCursorDecoder = deriveDecoder[ItemsWithCursor[Int]]
@@ -25,11 +25,11 @@ class ReadTest extends SdkTestSpec {
 
   def readWithCursor(batchSize: Int, limit: Option[Int])(test: Int => Any): Any = {
     var totalLimit = 0
-    val requestHijacker = SttpBackendStub.synchronous.whenAnyRequest.thenRespondWrapped(req => {
-      totalLimit = req.uri.queryFragments.collectFirst {
-        case q @ QueryFragment.KeyValue("limit", _, _, _) => q.v.toInt
+    val requestHijacker = SttpBackendStub.synchronous.whenAnyRequest.thenRespondF(req => {
+      totalLimit = req.uri.querySegments.collectFirst {
+        case q @ QuerySegment.KeyValue("limit", _, _, _) => q.v.toInt
       }.get
-      Response(Right(0), 200, "OK")
+      Response.ok(0)
     })
     lazy val dummyClient = Client("foo",
       projectName,

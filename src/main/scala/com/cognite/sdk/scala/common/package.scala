@@ -20,7 +20,7 @@ import com.cognite.sdk.scala.v1.{
   TimeRange
 }
 import io.circe.{Decoder, Encoder, Json}
-import io.circe.derivation.deriveEncoder
+import io.circe.generic.semiauto.deriveEncoder
 import io.scalaland.chimney.Transformer
 
 package object common {

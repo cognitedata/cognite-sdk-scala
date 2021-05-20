@@ -3,15 +3,16 @@
 
 package com.cognite.sdk.scala.common
 
+import cats.Id
+
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-import com.softwaremill.sttp.Id
-import org.scalatest.{FlatSpec, Matchers}
-
-trait ReadBehaviours extends Matchers { this: FlatSpec =>
+trait ReadBehaviours extends Matchers { this: AnyFlatSpec =>
   def readable[R, InternalId, PrimitiveId](
       readable: Readable[R, Id],
       supportsLimit: Boolean = true

@@ -8,20 +8,21 @@ package com.cognite.sdk.scala.common.internal
 
 import fs2.Stream
 import org.scalactic.source.Position
-import org.scalatest.words.ResultOfStringPassedToVerb
 import org.scalatest._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Random
 import scala.util.control.NoStackTrace
-
 import cats.effect.concurrent.{Deferred, Ref}
 import cats.effect.{ContextShift, IO, Resource, Sync, Timer}
 import cats.{Applicative, ApplicativeError, FlatMap}
 import cats.effect.laws.util.TestContext
 import cats.instances.all._
 import cats.syntax.all._
+import org.scalatest.flatspec.AsyncFlatSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.verbs.ResultOfStringPassedToVerb
 
 class ConcurrentCachedObjectSpec
     extends AsyncFlatSpec with ConcurrentCachedResourceBehavior {
