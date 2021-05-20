@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1.RequestSession
-import com.softwaremill.sttp.Uri
+import sttp.model.Uri
 
 object Resource {
   val defaultLimit: Int = 1000

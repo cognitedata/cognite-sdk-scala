@@ -1,22 +1,25 @@
 package com.cognite.sdk.scala.common
 
 import java.util.concurrent.Executors
-
 import cats.effect._
 import cats.effect.laws.util.TestContext
 import cats.implicits.catsStdInstancesForList
 import cats.syntax.all._
 import com.cognite.sdk.scala.v1._
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
-import com.softwaremill.sttp.testing.SttpBackendStub
+import sttp.client3._
+import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
+import sttp.client3.testing.SttpBackendStub
 import io.circe.Json
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import sttp.model.{Header, Method, StatusCode}
+import sttp.monad.MonadError
 
+import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
+class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers {
   val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
   val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
@@ -27,7 +30,7 @@ class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
 
 
   // Override sttpBackend because this doesn't work with the testing backend
-  implicit val sttpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend[IO]()
+  implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
 
   it should "authenticate with Azure AD using OAuth2 in bluefield" in {
 
@@ -72,20 +75,20 @@ class OAuth2ClientCredentialsTest extends FlatSpec with Matchers {
   }
 
   it should "refresh tokens when they expire" in {
-    import com.softwaremill.sttp.impl.cats.implicits._
+    import sttp.client3.impl.cats.implicits._
 
     var numTokenRequests = 0
 
-    implicit val mockSttpBackend: SttpBackendStub[IO, Nothing] = SttpBackendStub(implicitly[MonadError[IO]])
+    implicit val mockSttpBackend: SttpBackendStub[IO, Any] = SttpBackendStub(implicitly[MonadError[IO]])
       .whenRequestMatches(req => req.method == Method.POST && req.uri.path == Seq("token"))
-      .thenRespondWrapped {
+      .thenRespondF {
         for {
           _ <- IO { numTokenRequests += 1 }
           body = Json.obj(
             "access_token" -> Json.fromString("foo"),
             "expires_in" -> Json.fromString("2")
           )
-        } yield Response(Right(body.noSpaces), 200, "OK", List("content-type" -> "application/json"), Nil)
+        } yield Response(body.noSpaces, StatusCode.Ok, "OK", Seq(Header("content-type", "application/json")))
       }
 
     val credentials = OAuth2.ClientCredentials(

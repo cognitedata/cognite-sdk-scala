@@ -5,10 +5,11 @@ package com.cognite.sdk.scala.common
 
 import cats.effect.Concurrent
 import com.cognite.sdk.scala.v1._
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
+import sttp.client3._
+import sttp.client3.circe._
 import fs2._
 import io.circe.Decoder
+import sttp.model.Uri
 
 // TODO: Verify that index and numPartitions are valid
 final case class Partition(index: Int = 1, numPartitions: Int = 1) {
@@ -102,9 +103,9 @@ object Readable {
       limit: Option[Int],
       batchSize: Int
   ) = {
-    val uriWithCursor = cursor.fold(baseUrl)(baseUrl.param("cursor", _))
+    val uriWithCursor = cursor.fold(baseUrl)(baseUrl.addParam("cursor", _))
     val l = limit.getOrElse(batchSize)
-    uriWithCursor.param("limit", math.min(l, batchSize).toString)
+    uriWithCursor.addParam("limit", math.min(l, batchSize).toString)
   }
 
   private[sdk] def readWithCursor[F[_], R](
@@ -117,7 +118,7 @@ object Readable {
   )(implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]): F[ItemsWithCursor[R]] = {
     val uriWithCursor = uriWithCursorAndLimit(baseUrl, cursor, maxItemsReturned, batchSize)
     val uriWithCursorAndPartition = partition.fold(uriWithCursor) { p =>
-      uriWithCursor.param("partition", p.toString)
+      uriWithCursor.addParam("partition", p.toString)
     }
 
     readSimple(requestSession, uriWithCursorAndPartition)
@@ -126,15 +127,11 @@ object Readable {
   private[sdk] def readSimple[F[_], R](
       requestSession: RequestSession[F],
       uri: Uri
-  )(implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]): F[ItemsWithCursor[R]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
-
+  )(implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]): F[ItemsWithCursor[R]] =
     requestSession.get[ItemsWithCursor[R], ItemsWithCursor[R]](
       uri,
       value => value
     )
-  }
 }
 
 trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
@@ -149,15 +146,12 @@ trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
 object RetrieveByIds {
   def retrieveByIds[F[_], R](requestSession: RequestSession[F], baseUrl: Uri, ids: Seq[Long])(
       implicit itemsDecoder: Decoder[Items[R]]
-  ): F[Seq[R]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
+  ): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], Items[CogniteInternalId]](
       Items(ids.map(CogniteInternalId)),
       uri"$baseUrl/byids",
       value => value.items
     )
-  }
 }
 
 trait RetrieveByIdsWithIgnoreUnknownIds[R, F[_]] extends RetrieveByIds[R, F] {
@@ -172,15 +166,12 @@ object RetrieveByIdsWithIgnoreUnknownIds {
       baseUrl: Uri,
       ids: Seq[Long],
       ignoreUnknownIds: Boolean
-  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
+  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteId]](
       ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
       uri"$baseUrl/byids",
       value => value.items
     )
-  }
 }
 
 trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
@@ -197,15 +188,12 @@ object RetrieveByExternalIds {
       requestSession: RequestSession[F],
       baseUrl: Uri,
       externalIds: Seq[String]
-  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
+  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], Items[CogniteExternalId]](
       Items(externalIds.map(CogniteExternalId)),
       uri"$baseUrl/byids",
       value => value.items
     )
-  }
 }
 
 trait RetrieveByExternalIdsWithIgnoreUnknownIds[R, F[_]] extends RetrieveByExternalIds[R, F] {
@@ -220,13 +208,10 @@ object RetrieveByExternalIdsWithIgnoreUnknownIds {
       baseUrl: Uri,
       externalIds: Seq[String],
       ignoreUnknownIds: Boolean
-  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
+  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteId]](
       ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId), ignoreUnknownIds),
       uri"$baseUrl/byids",
       value => value.items
     )
-  }
 }

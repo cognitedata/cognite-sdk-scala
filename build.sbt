@@ -3,30 +3,26 @@ import sbt.project
 
 addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
 
-val scala213 = "2.13.3"
-val scala212 = "2.12.12"
+val scala213 = "2.13.6"
+val scala212 = "2.12.13"
 val scala211 = "2.11.12"
 val supportedScalaVersions = List(scala212, scala213, scala211)
 
 // This is used only for tests.
 val jettyTestVersion = "9.4.35.v20201120"
 
-val sttpVersion = "1.7.2"
+val sttpVersion = "3.3.3"
 val circeVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "0.12.0-M3"
-  case _ => "0.13.0"
-}
-val circeDerivationVersion: Option[(Long, Long)] => String = {
-  case Some((2, 11)) => "0.12.0-M3"
-  case _ => "0.13.0-M4"
+  case _ => "0.14.0-M7"
 }
 val catsEffectVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.0.0"
-  case _ => "2.1.4"
+  case _ => "2.5.1"
 }
 val fs2Version: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.1.0"
-  case _ => "2.4.4"
+  case _ => "2.5.6"
 }
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
@@ -69,7 +65,7 @@ lazy val commonSettings = Seq(
     if (gpgPass.isDefined) gpgPass.map(_.toCharArray)
     else None
   },
-  wartremoverErrors in (Compile, compile) :=
+  Compile/wartremoverErrors :=
     (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor <= 11 =>
         Seq.empty[wartremover.Wart]
@@ -83,24 +79,19 @@ lazy val commonSettings = Seq(
           Wart.ToString,
           Wart.Overloading
         )
-    }),
-  // This is here with Compile, compile to try to make IntelliJ happy,
-  // and (intentionally) again below, globally, to make SBT happy.
-  wartremoverExcluded in (Compile, compile) ++= Seq(
-    baseDirectory.value / "target" / "protobuf-generated",
-    baseDirectory.value / "src" / "main" / "scala" / "com" / "cognite" / "sdk" / "scala" / "common" / "internal" / "CachedResource.scala"
-  )
+    })
 )
 
 wartremoverExcluded ++= Seq(
   baseDirectory.value / "target" / "protobuf-generated",
+  baseDirectory.value / "src" / "test",
   baseDirectory.value / "src" / "main" / "scala" / "com" / "cognite" / "sdk" / "scala" / "common" / "internal" / "CachedResource.scala"
 )
 
-PB.targets in Compile := Seq(
+Compile/PB.targets := Seq(
   scalapb.gen() -> (target.value / "protobuf-generated")
 )
-managedSourceDirectories in Compile += target.value / "protobuf-generated"
+Compile/managedSourceDirectories += target.value / "protobuf-generated"
 
 lazy val core = (project in file("."))
   .settings(
@@ -123,12 +114,11 @@ lazy val core = (project in file("."))
   )
 
 val scalaTestDeps = Seq(
-  "org.scalactic" %% "scalactic" % "3.0.8",
-  "org.scalatest" %% "scalatest" % "3.0.9" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 )
 val sttpDeps = Seq(
-  "com.softwaremill.sttp" %% "core" % sttpVersion,
-  "com.softwaremill.sttp" %% "circe" % sttpVersion
+  "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
+  "com.softwaremill.sttp.client3" %% "circe" % sttpVersion
     // We specify our own version of circe.
     exclude("io.circe", "circe-core_2.11")
     exclude("io.circe", "circe-core_2.12")
@@ -136,7 +126,7 @@ val sttpDeps = Seq(
     exclude("io.circe", "circe-parser_2.11")
     exclude("io.circe", "circe-parser_2.12")
     exclude("io.circe", "circe-parser_2.13"),
-  "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion % Test
+  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion % Test
 )
 
 def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
@@ -146,7 +136,7 @@ def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
       exclude("org.typelevel", "cats-core_2.11")
       exclude("org.typelevel", "cats-core_2.12")
       exclude("org.typelevel", "cats-core_2.13"),
-    "io.circe" %% "circe-derivation" % circeDerivationVersion(scalaVersion)
+    "io.circe" %% "circe-generic" % circeVersion(scalaVersion)
       exclude("org.typelevel", "cats-core_2.11")
       exclude("org.typelevel", "cats-core_2.12")
       exclude("org.typelevel", "cats-core_2.13"),
@@ -178,8 +168,8 @@ scalastyleFailOnWarning := true
 lazy val mainScalastyle = taskKey[Unit]("mainScalastyle")
 lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 
-mainScalastyle := scalastyle.in(Compile).toTask("").value
-testScalastyle := scalastyle.in(Test).toTask("").value
+mainScalastyle := (Compile/scalastyle).toTask("").value
+testScalastyle := (Test/scalastyle).toTask("").value
 
-(test in Test) := (test in Test).dependsOn(testScalastyle).value
-(test in Test) := (test in Test).dependsOn(mainScalastyle).value
+Test/test := (Test/test).dependsOn(testScalastyle).value
+Test/test := (Test/test).dependsOn(mainScalastyle).value

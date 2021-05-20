@@ -3,10 +3,13 @@
 
 package com.cognite.sdk.scala.common
 
-import java.net.ConnectException
+import cats.Id
 
+import java.net.ConnectException
 import cats.effect.Timer
-import com.softwaremill.sttp.{Id, MonadError, Request, Response, SttpBackend}
+import sttp.capabilities.Effect
+import sttp.client3.{Request, Response, SttpBackend}
+import sttp.monad.MonadError
 
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.TimeoutException
@@ -33,32 +36,30 @@ object Sleep {
   }
 }
 
-class RetryingBackend[R[_], S](
-    delegate: SttpBackend[R, S],
+class RetryingBackend[F[_], +P](
+    delegate: SttpBackend[F, P],
     maxRetries: Option[Int] = None,
     initialRetryDelay: FiniteDuration = Constants.DefaultInitialRetryDelay,
     maxRetryDelay: FiniteDuration = Constants.DefaultMaxBackoffDelay
-)(implicit sleepImpl: Sleep[R])
-    extends SttpBackend[R, S] {
-  override def send[T](
-      request: Request[T, S]
-  ): R[Response[T]] =
+)(implicit sleepImpl: Sleep[F])
+    extends SttpBackend[F, P] {
+  override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] =
     sendWithRetryCounter(
       request,
       maxRetries.getOrElse(Constants.DefaultMaxRetries)
     )
 
   @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-  def sendWithRetryCounter[T](
-      request: Request[T, S],
+  def sendWithRetryCounter[T, R >: P with Effect[F]](
+      request: Request[T, R],
       retriesRemaining: Int,
       initialDelay: FiniteDuration = initialRetryDelay
-  ): R[Response[T]] = {
+  ): F[Response[T]] = {
     val exponentialDelay = (maxRetryDelay / 2).min(initialDelay * 2)
     val randomDelayScale = (maxRetryDelay / 2).min(initialDelay * 2).toMillis
     val nextDelay = Random.nextInt(randomDelayScale.toInt).millis + exponentialDelay
 
-    val maybeRetry: (Option[Int], Throwable) => R[Response[T]] =
+    val maybeRetry: (Option[Int], Throwable) => F[Response[T]] =
       (code: Option[Int], exception: Throwable) =>
         if (retriesRemaining > 0 && code.forall(shouldRetry)) {
           responseMonad.flatMap(sleepImpl.sleep(initialDelay))(_ =>
@@ -77,7 +78,7 @@ class RetryingBackend[R[_], S](
     responseMonad.flatMap(r) { resp =>
       // This can happen when we get empty responses, as we sometimes do for
       // Service Unavailable or Bad Gateway.
-      if (retriesRemaining > 0 && shouldRetry(resp.code.toInt)) {
+      if (retriesRemaining > 0 && shouldRetry(resp.code.code)) {
         responseMonad.flatMap(sleepImpl.sleep(initialDelay))(_ =>
           sendWithRetryCounter(request, retriesRemaining - 1, nextDelay)
         )
@@ -93,6 +94,6 @@ class RetryingBackend[R[_], S](
       case _ => false
     }
 
-  override def close(): Unit = delegate.close()
-  override def responseMonad: MonadError[R] = delegate.responseMonad
+  override def close(): F[Unit] = delegate.close()
+  override def responseMonad: MonadError[F] = delegate.responseMonad
 }

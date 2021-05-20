@@ -6,10 +6,10 @@ package com.cognite.sdk.scala.v1.resources
 import cats.Applicative
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
+import sttp.client3._
+import sttp.client3.circe._
 import cats.implicits._
-import io.circe.derivation.{deriveDecoder, deriveEncoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
 class ThreeDModels[F[_]](val requestSession: RequestSession[F])
@@ -22,9 +22,7 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
   import ThreeDModels._
   override val baseUrl = uri"${requestSession.baseUrl}/3d/models"
 
-  override def deleteByIds(ids: Seq[Long]): F[Unit] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Unit]
+  override def deleteByIds(ids: Seq[Long]): F[Unit] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
@@ -33,7 +31,6 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
         uri"$baseUrl/delete",
         _ => ()
       )
-  }
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -154,9 +151,7 @@ class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], 
   override val baseUrl =
     uri"${requestSession.baseUrl}/3d/models/$modelId/revisions"
 
-  override def deleteByIds(ids: Seq[Long]): F[Unit] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Unit]
+  override def deleteByIds(ids: Seq[Long]): F[Unit] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
@@ -165,7 +160,6 @@ class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], 
         uri"$baseUrl/delete",
         _ => ()
       )
-  }
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -181,11 +175,8 @@ class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], 
       Constants.defaultBatchSize
     )
 
-  override def retrieveById(id: Long): F[ThreeDRevision] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, ThreeDRevision]] =
-      EitherDecoder.eitherDecoder[CdpApiError, ThreeDRevision]
+  override def retrieveById(id: Long): F[ThreeDRevision] =
     requestSession.get[ThreeDRevision, ThreeDRevision](uri"$baseUrl/$id", value => value)
-  }
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDRevision]] =
     ids.toList.traverse(retrieveById).map(_.toSeq)

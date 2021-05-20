@@ -4,17 +4,19 @@
 package com.cognite.sdk.scala.common
 
 import java.util.UUID
-
 import cats.Id
 import com.cognite.sdk.scala.v1._
 import com.cognite.sdk.scala.v1.resources.DataSets
-import com.softwaremill.sttp.{MonadError, Request, Response, SttpBackend}
-import org.scalatest.{FlatSpec, Matchers}
+import sttp.client3.{Request, Response, SttpBackend}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import sttp.capabilities.Effect
+import sttp.monad.MonadError
 
 import scala.util.control.NonFatal
 
-class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBackend[R, S] {
-  override def send[T](request: Request[T, S]): R[Response[T]] =
+class LoggingSttpBackend[F[_], +P](delegate: SttpBackend[F, P]) extends SttpBackend[F, P] {
+  override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] =
     responseMonad.map(try {
       responseMonad.handleError(delegate.send(request)) {
         case e: Exception =>
@@ -27,7 +29,7 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
         throw e
     }) { response =>
       println(s"request ${request.body.toString}") // scalastyle:ignore
-      println(s"response ${response.toString()}") // scalastyle:ignore
+      println(s"response ${response.toString}") // scalastyle:ignore
       if (response.isSuccess) {
         println(s"For request: $request got response: $response") // scalastyle:ignore
       } else {
@@ -35,11 +37,11 @@ class LoggingSttpBackend[R[_], S](delegate: SttpBackend[R, S]) extends SttpBacke
       }
       response
     }
-  override def close(): Unit = delegate.close()
-  override def responseMonad: MonadError[R] = delegate.responseMonad
+  override def close(): F[Unit] = delegate.close()
+  override def responseMonad: MonadError[F] = delegate.responseMonad
 }
 
-abstract class SdkTestSpec extends FlatSpec with Matchers {
+abstract class SdkTestSpec extends AnyFlatSpec with Matchers {
   // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
   lazy val client: GenericClient[Id] = GenericClient.forAuth[Id](
     "scala-sdk-test", auth)(implicitly, sttpBackend)

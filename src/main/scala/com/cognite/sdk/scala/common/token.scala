@@ -4,9 +4,9 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1.RequestSession
-import com.softwaremill.sttp._
+import sttp.client3._
 import io.circe.Decoder
-import io.circe.derivation.deriveDecoder
+import io.circe.generic.semiauto.deriveDecoder
 
 final case class ProjectDetails(projectUrlName: String, groups: Seq[Long])
 

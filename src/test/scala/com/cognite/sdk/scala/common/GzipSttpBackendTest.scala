@@ -8,16 +8,17 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.zip.GZIPInputStream
-
 import cats.effect.{ContextShift, IO, Timer}
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
+import sttp.client3._
+import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
+
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
-import org.scalatest.{BeforeAndAfter, FlatSpec, OptionValues}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.{BeforeAndAfter, EitherValues, OptionValues}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
@@ -33,7 +34,7 @@ class EchoServlet extends HttpServlet {
   }
 }
 
-class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter {
+class GzipSttpBackendTest extends AnyFlatSpec with EitherValues with OptionValues with BeforeAndAfter {
   implicit val cs: ContextShift[IO] = IO.contextShift(global)
   implicit val timer: Timer[IO] = IO.timer(global)
 
@@ -60,91 +61,91 @@ class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter
 
   private val longTestString = "aaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbb" * 50
 
-  implicit val sttpBackend: SttpBackend[IO, Nothing] =
-    new GzipSttpBackend[IO, Nothing](
-      AsyncHttpClientCatsBackend[IO]()
+  implicit val sttpBackend: SttpBackend[IO, Any] =
+    new GzipSttpBackend[IO, Any](
+      AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
     )
 
   "GzipSttpBackend" should "not compress small string bodies" in {
     val smallTestString = "abcd"
-    val request = sttp
+    val request = basicRequest
       .body(smallTestString)
       .post(uri"http://localhost:$port/string")
-    val r = request.send().unsafeRunSync()
+    val r = request.send(sttpBackend).unsafeRunSync()
     // Very small strings will be larger when compressed.
     assert(
       r.header(GzipSttpBackendTest.originalLength).value.toInt == smallTestString.getBytes().length
     )
-    assert(r.unsafeBody == smallTestString)
+    assert(r.body.value contains smallTestString)
   }
 
   it should "compress larger string bodies" in {
-    val request = sttp
+    val request = basicRequest
       .body(longTestString)
       .post(uri"http://localhost:$port/string")
-    val r = request.send().unsafeRunSync()
+    val r = request.send(sttpBackend).unsafeRunSync()
     assert(
       r.header(GzipSttpBackendTest.originalLength).value.toInt < longTestString.getBytes().length
     )
-    assert(r.unsafeBody == longTestString)
+    assert(r.body.value contains longTestString)
   }
 
   it should "compress byte array bodies" in {
-    val request = sttp
+    val request = basicRequest
       .body(longTestString.getBytes)
       .post(uri"http://localhost:$port/bytearray")
-    val r = request.send().unsafeRunSync()
+    val r = request.send(sttpBackend).unsafeRunSync()
     assert(
       r.header(GzipSttpBackendTest.originalLength).value.toInt < longTestString.getBytes().length
     )
-    assert(r.unsafeBody == longTestString)
+    assert(r.body.value contains longTestString)
   }
 
   it should "compress byte buffer bodies" in {
-    val request = sttp
+    val request = basicRequest
       .body(ByteBuffer.wrap(longTestString.getBytes))
       .post(uri"http://localhost:$port/bytebuffer")
-    val r = request.send().unsafeRunSync()
+    val r = request.send(sttpBackend).unsafeRunSync()
     assert(
       r.header(GzipSttpBackendTest.originalLength).value.toInt < longTestString.getBytes().length
     )
-    assert(r.unsafeBody == longTestString)
+    assert(r.body.value contains longTestString)
   }
 
   it should "compress input stream bodies" in {
-    val request = sttp
+    val request = basicRequest
       .body(new ByteArrayInputStream(longTestString.getBytes))
       .post(uri"http://localhost:$port/inputstream")
-    val r = request.send().unsafeRunSync()
+    val r = request.send(sttpBackend).unsafeRunSync()
     assert(
       r.header(GzipSttpBackendTest.originalLength).value.toInt < longTestString.getBytes().length
     )
-    assert(r.unsafeBody == longTestString)
+    assert(r.body.value contains longTestString)
   }
 
   it should "not interfere with multipart bodies" in {
-    val request = sttp
+    val request = basicRequest
       .multipartBody(
         multipart("string", "abc"),
         multipart("inputstream", new ByteArrayInputStream("defg".getBytes))
       )
       .post(uri"http://localhost:$port/multipart")
-    val r = request.send().unsafeRunSync()
-    assert(r.unsafeBody.contains("abc"))
-    assert(r.unsafeBody.contains("defg"))
+    val r = request.send(sttpBackend).unsafeRunSync()
+    assert(r.body.value contains "abc")
+    assert(r.body.value contains "defg")
   }
 
   it should "not compress file input bodies" in {
     // TODO: Except, maybe we should.
-    val request = sttp
+    val request = basicRequest
       .body(new File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt"))
       .post(uri"http://localhost:$port/file")
-    val r = request.send().unsafeRunSync()
+    val r = request.send(sttpBackend).unsafeRunSync()
     val source = Source.fromFile(
       Paths.get("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt").toFile
     )
     try {
-      assert(r.unsafeBody == source.mkString)
+      assert(r.body.value contains source.mkString)
     } finally {
       source.close()
     }
@@ -152,22 +153,22 @@ class GzipSttpBackendTest extends FlatSpec with OptionValues with BeforeAndAfter
 
   it should "not compress an already compressed request" in {
     val compressedBody = GzipSttpBackend.compress(longTestString.getBytes("utf-8"))
-    val request = sttp
+    val request = basicRequest
       .body(compressedBody)
       .header("Content-encoding", "gzip")
       .post(uri"http://localhost:$port/donotcompress")
-    val r = request.send().unsafeRunSync()
+    val r = request.send(sttpBackend).unsafeRunSync()
     assert(r.header(GzipSttpBackendTest.originalLength).value.toInt == compressedBody.length)
-    assert(r.unsafeBody == longTestString)
+    assert(r.body.value contains longTestString)
 
-    val request2 = sttp
+    val request2 = basicRequest
       .body(compressedBody)
       .response(asByteArray)
       .header("Content-type", "text/gzip")
       .post(uri"http://localhost:$port/donotcompress")
-    val r2 = request2.send().unsafeRunSync()
+    val r2 = request2.send(sttpBackend).unsafeRunSync()
 
-    val gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(r2.unsafeBody))
+    val gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(r2.body.value))
     try {
       val uncompressedBody = new String(IOUtils.toByteArray(gzipInputStream), StandardCharsets.UTF_8)
       assert(r2.header(GzipSttpBackendTest.originalLength).value.toInt == compressedBody.length)

@@ -5,14 +5,12 @@ package com.cognite.sdk.scala.v1.resources
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-
 import BuildInfo.BuildInfo
-import cats.{Monad, Show}
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
-import io.circe.derivation.{deriveDecoder, deriveEncoder}
+import sttp.client3._
+import sttp.client3.circe._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import io.circe.syntax._
 import com.cognite.v1.timeseries.proto.data_point_insertion_request.{
@@ -28,11 +26,12 @@ import com.cognite.v1.timeseries.proto.data_points.{
 }
 import com.cognite.sdk.scala.common.Constants
 import io.circe.parser.decode
+import sttp.model.{MediaType, Uri}
 
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
-class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
+class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
 
@@ -60,14 +59,14 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
   //  identical handling for this method and insertStringsById()
   def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Unit] =
     requestSession.map(
-      sttp
+      basicRequest
         .followRedirects(false)
         .contentType("application/protobuf")
         .header("accept", "application/json")
         .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
         .header("x-cdp-app", requestSession.applicationName)
         .readTimeout(90.seconds)
-        .parseResponseIf(_ => true)
+        //.parseResponseIf(_ => true)
         .post(baseUrl)
         .body(
           DataPointInsertionRequest(
@@ -85,15 +84,15 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         .response(
           asJson[Either[CdpApiError, Unit]].mapWithMetadata((response, metadata) =>
             response match {
-              case Left(value) => throw value.error
+              case Left(value) => throw value
               case Right(Left(cdpApiError)) =>
                 throw cdpApiError.asException(uri"$baseUrl", metadata.header("x-request-id"))
               case Right(Right(_)) => ()
             }
           )
         )
-        .send()(requestSession.sttpBackend, implicitly),
-      (r: Response[Unit]) => r.unsafeBody
+        .send(requestSession.sttpBackend),
+      (r: Response[Unit]) => r.body
     )
 
   def insertByExternalId(externalId: String, dataPoints: Seq[DataPoint]): F[Unit] =
@@ -105,13 +104,13 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
 
   def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Unit] =
     requestSession.map(
-      sttp
+      basicRequest
         .followRedirects(false)
         .contentType("application/protobuf")
         .header("accept", "application/json")
         .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
         .header("x-cdp-app", requestSession.applicationName)
-        .parseResponseIf(_ => true)
+        //.parseResponseIf(_ => true)
         .post(baseUrl)
         .body(
           DataPointInsertionRequest(
@@ -129,15 +128,15 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
         .response(
           asJson[Either[CdpApiError, Unit]].mapWithMetadata((response, metadata) =>
             response match {
-              case Left(value) => throw value.error
+              case Left(value) => throw value
               case Right(Left(cdpApiError)) =>
                 throw cdpApiError.asException(uri"$baseUrl", metadata.header("x-request-id"))
               case Right(Right(_)) => ()
             }
           )
         )
-        .send()(requestSession.sttpBackend, implicitly),
-      (r: Response[Unit]) => r.unsafeBody
+        .send(requestSession.sttpBackend),
+      (r: Response[Unit]) => r.body
     )
 
   def insertStringsByExternalId(externalId: String, dataPoints: Seq[StringDataPoint]): F[Unit] =
@@ -332,17 +331,8 @@ class DataPointsResource[F[_]: Monad](val requestSession: RequestSession[F])
             .body(query)
             .response(
               asProtobufOrError(uri"$baseUrl/list")
-                .mapWithMetadata((response, metadata) =>
-                  response match {
-                    case Left(value) =>
-                      throw value.error
-                    case Right(Left(cdpApiError)) =>
-                      throw cdpApiError
-                        .asException(uri"$baseUrl/list", metadata.header("x-request-id"))
-                    case Right(Right(dataPointListResponse)) =>
-                      mapDataPointList(dataPointListResponse)
-                  }
-                )
+                .mapRight(mapDataPointList)
+                .getRight
             ),
         accept = "application/protobuf"
       )
@@ -692,36 +682,70 @@ object DataPointsResource {
         )
       )
 
-  private def asProtobufOrError(uri: Uri) =
-    asByteArray.mapWithMetadata { (response, metadata) =>
-      // TODO: Can use the HTTP headers in .mapWithMetaData to choose to parse as json or protbuf
-      try Right(Right(DataPointListResponse.parseFrom(response)))
-      catch {
-        case NonFatal(_) =>
-          val s = new String(response, StandardCharsets.UTF_8)
-          val shouldParse = metadata.contentLength.exists(_ > 0) &&
-            metadata.contentType.exists(_.startsWith(MediaTypes.Json))
-          if (shouldParse) {
-            decode[CdpApiError](s) match {
-              case Left(error) =>
-                Left(DeserializationError(s, error, Show[io.circe.Error].show(error)))
-              case Right(cdpApiError) => Right(Left(cdpApiError))
-            }
-          } else {
-            val message = if (metadata.statusText.isEmpty) {
-              "Unknown error (no status text)"
-            } else {
-              metadata.statusText
-            }
-            throw SdkException(
-              message,
-              Some(uri),
-              metadata.header("x-request-id"),
-              Some(metadata.code)
-            )
-          }
+  private def asJsonOrSdkException(uri: Uri) = asJsonAlways[CdpApiError].mapWithMetadata {
+    (response, metadata) =>
+      response match {
+        case Left(error) =>
+          throw SdkException(
+            s"Failed to parse response, reason: ${error.getMessage}",
+            Some(uri),
+            metadata.header("x-request-id"),
+            Some(metadata.code.code)
+          )
+        case Right(cdpApiError) =>
+          throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
       }
+  }
+
+  private def asProtoBuf(uri: Uri) = asByteArray.mapWithMetadata { (response, metadata) =>
+    // TODO: Can use the HTTP headers in .mapWithMetaData to choose to parse as json or protobuf
+    response match {
+      case Left(_) =>
+        val message = if (metadata.statusText.isEmpty) {
+          "Unknown error (no status text)"
+        } else {
+          metadata.statusText
+        }
+        throw SdkException(
+          message,
+          Some(uri),
+          metadata.header("x-request-id"),
+          Some(metadata.code.code)
+        )
+      case Right(bytes) =>
+        try DataPointListResponse.parseFrom(bytes)
+        catch {
+          case NonFatal(_) =>
+            val s = new String(bytes, StandardCharsets.UTF_8)
+            val shouldParse = metadata.contentLength.exists(_ > 0) &&
+              metadata.contentType.exists(_.startsWith(MediaType.ApplicationJson.toString()))
+            if (shouldParse) {
+              decode[CdpApiError](s) match {
+                case Left(error) => throw error
+                case Right(cdpApiError) =>
+                  throw cdpApiError.asException(uri, metadata.header("x-request-id"))
+              }
+            } else {
+              val message = if (metadata.statusText.isEmpty) {
+                "Unknown error (no status text)"
+              } else {
+                metadata.statusText
+              }
+              throw SdkException(
+                message,
+                Some(uri),
+                metadata.header("x-request-id"),
+                Some(metadata.code.code)
+              )
+            }
+        }
     }
+  }
+
+  private def asProtobufOrError(
+      uri: Uri
+  ): ResponseAs[Either[CdpApiError, DataPointListResponse], Any] =
+    asEither(asJsonOrSdkException(uri), asProtoBuf(uri))
 
   private def toAggregateMap(
       aggregateDataPoints: Seq[QueryAggregatesResponse]

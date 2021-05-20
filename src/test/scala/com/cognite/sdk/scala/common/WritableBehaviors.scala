@@ -3,11 +3,12 @@
 
 package com.cognite.sdk.scala.common
 
-import com.softwaremill.sttp.Id
+import cats.Id
 import io.scalaland.chimney.Transformer
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-trait WritableBehaviors extends Matchers { this: FlatSpec =>
+trait WritableBehaviors extends Matchers { this: AnyFlatSpec =>
   // scalastyle:off
   def writable[R <: WithId[PrimitiveId], W, PrimitiveId](
       writable: Create[R, W, Id] with CreateOne[R, W, Id],

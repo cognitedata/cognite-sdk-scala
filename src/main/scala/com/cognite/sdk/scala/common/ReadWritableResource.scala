@@ -4,11 +4,12 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1._
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
+import sttp.client3._
+import sttp.client3.circe._
 import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl._
+import sttp.model.Uri
 
 trait DeleteByIds[F[_], PrimitiveId] {
   def deleteByIds(ids: Seq[PrimitiveId]): F[Unit]
@@ -28,9 +29,7 @@ object DeleteByIds {
       requestSession: RequestSession[F],
       baseUrl: Uri,
       ids: Seq[Long]
-  ): F[Unit] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Unit]
+  ): F[Unit] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.post[Unit, Unit, Items[CogniteInternalId]](
@@ -38,16 +37,13 @@ object DeleteByIds {
       uri"$baseUrl/delete",
       _ => ()
     )
-  }
 
   def deleteByIdsWithIgnoreUnknownIds[F[_]](
       requestSession: RequestSession[F],
       baseUrl: Uri,
       ids: Seq[Long],
       ignoreUnknownIds: Boolean
-  ): F[Unit] = {
-    implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Unit]
+  ): F[Unit] =
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
@@ -55,7 +51,6 @@ object DeleteByIds {
       uri"$baseUrl/delete",
       _ => ()
     )
-  }
 
 }
 
@@ -128,15 +123,12 @@ object Create {
   def createItems[F[_], R, W](requestSession: RequestSession[F], baseUrl: Uri, items: Items[W])(
       implicit readDecoder: Decoder[ItemsWithCursor[R]],
       itemsEncoder: Encoder[Items[W]]
-  ): F[Seq[R]] = {
-    implicit val errorOrItemsWithCursorDecoder: Decoder[Either[CdpApiError, ItemsWithCursor[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, ItemsWithCursor[R]]
+  ): F[Seq[R]] =
     requestSession.post[Seq[R], ItemsWithCursor[R], Items[W]](
       items,
       baseUrl,
       value => value.items
     )
-  }
 }
 
 trait CreateOne[R, W, F[_]] extends WithRequestSession[F] with BaseUrl {
@@ -152,13 +144,10 @@ object CreateOne {
   def createOne[F[_], R, W](requestSession: RequestSession[F], baseUrl: Uri, item: W)(
       implicit readDecoder: Decoder[R],
       itemsEncoder: Encoder[W]
-  ): F[R] = {
-    implicit val errorOrItemsWithCursorDecoder: Decoder[Either[CdpApiError, R]] =
-      EitherDecoder.eitherDecoder[CdpApiError, R]
+  ): F[R] =
     requestSession.post[R, R, W](
       item,
       baseUrl,
       value => value
     )
-  }
 }

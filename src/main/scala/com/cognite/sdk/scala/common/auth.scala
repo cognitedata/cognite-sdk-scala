@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import cats.{Applicative, Monad}
-import com.softwaremill.sttp.RequestT
+import sttp.client3.RequestT
 
 final case class InvalidAuthentication() extends Throwable(s"Invalid authentication")
 
@@ -20,8 +20,8 @@ object Auth {
       .map(ApiKeyAuth(_, None))
       .getOrElse[Auth](NoAuthentication())
 
-  implicit class AuthSttpExtension[U[_], T, +S](val r: RequestT[U, T, S]) {
-    def auth(auth: Auth): RequestT[U, T, S] =
+  implicit class AuthSttpExtension[U[_], T, -R](val r: RequestT[U, T, R]) {
+    def auth(auth: Auth): RequestT[U, T, R] =
       auth.auth(r)
   }
 }

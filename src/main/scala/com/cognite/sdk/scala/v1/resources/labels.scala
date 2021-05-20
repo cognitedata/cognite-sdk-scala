@@ -5,9 +5,9 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.softwaremill.sttp._
+import sttp.client3._
 import io.circe.{Decoder, Encoder}
-import io.circe.derivation.{deriveDecoder, deriveEncoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 class Labels[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -24,7 +24,7 @@ class Labels[F[_]](val requestSession: RequestSession[F])
   override private[sdk] def filterWithCursor(
       filter: LabelsFilter,
       cursor: Option[String],
-      limit: Option[StatusCode],
+      limit: Option[Int],
       partition: Option[Partition],
       aggregatedProperties: Option[Seq[String]]
   ): F[ItemsWithCursor[Label]] =

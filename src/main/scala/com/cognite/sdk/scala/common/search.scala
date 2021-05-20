@@ -4,9 +4,10 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1._
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.circe._
+import sttp.client3._
+import sttp.client3.circe._
 import io.circe.{Decoder, Encoder}
+import sttp.model.Uri
 
 trait SearchQuery[F, S] {
   val filter: Option[F]
@@ -22,14 +23,11 @@ object Search {
   def search[F[_], R, Q](requestSession: RequestSession[F], baseUrl: Uri, searchQuery: Q)(
       implicit itemsDecoder: Decoder[Items[R]],
       searchQueryEncoder: Encoder[Q]
-  ): F[Seq[R]] = {
-    implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[R]]] =
-      EitherDecoder.eitherDecoder[CdpApiError, Items[R]]
+  ): F[Seq[R]] =
     requestSession
       .post[Seq[R], Items[R], Q](
         searchQuery,
         uri"$baseUrl/search",
         value => value.items
       )
-  }
 }

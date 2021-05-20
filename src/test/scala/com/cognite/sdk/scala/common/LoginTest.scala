@@ -3,13 +3,14 @@
 
 package com.cognite.sdk.scala.common
 
+import cats.Id
 import com.cognite.sdk.scala.v1.RequestSession
-import com.softwaremill.sttp._
+import sttp.client3._
 
 import scala.concurrent.duration._
 
 class LoginTest extends SdkTestSpec {
-  implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend(
+  implicit val backend: SttpBackend[Id, Any] = HttpURLConnectionBackend(
     options = SttpBackendOptions.connectionTimeout(90.seconds)
   )
   it should "read login status" in {
