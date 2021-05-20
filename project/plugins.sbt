@@ -4,10 +4,8 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.2")
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.17")
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.2")
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0")
-// scala-steward:off
-// This is the last version that still supports Scala 2.11
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.1")
-// scala-steward:on
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.8.1")
+addSbtPlugin("au.com.onegeek" %% "sbt-dotenv" % "2.1.227")
 addSbtPlugin("au.com.onegeek" %% "sbt-dotenv" % "2.1.233")
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.13")
 
