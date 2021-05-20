@@ -65,6 +65,13 @@ lazy val commonSettings = Seq(
     if (gpgPass.isDefined) gpgPass.map(_.toCharArray)
     else None
   },
+  coverageEnabled := {
+    // Scala 2.11 is no longer supported by sbt-scoverage
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 11)) => false
+      case _ => coverageEnabled.value
+    }
+  },
   Compile/wartremoverErrors :=
     (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor <= 11 =>
