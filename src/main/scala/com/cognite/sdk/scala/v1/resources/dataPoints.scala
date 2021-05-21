@@ -66,7 +66,6 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
         .header("x-cdp-app", requestSession.applicationName)
         .readTimeout(90.seconds)
-        //.parseResponseIf(_ => true)
         .post(baseUrl)
         .body(
           DataPointInsertionRequest(
@@ -110,7 +109,6 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         .header("accept", "application/json")
         .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
         .header("x-cdp-app", requestSession.applicationName)
-        //.parseResponseIf(_ => true)
         .post(baseUrl)
         .body(
           DataPointInsertionRequest(
