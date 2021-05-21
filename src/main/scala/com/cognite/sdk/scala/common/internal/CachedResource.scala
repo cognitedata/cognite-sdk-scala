@@ -86,16 +86,17 @@ class ConcurrentCachedObject[F[_], R] private (acquire: F[R])(
 ) extends CachedResource[F, R] {
 
   /** Resource state */
-  private sealed trait RState
+  private trait RState
   private type Gate = Deferred[F, Unit]
 
   private case object Empty extends RState
-  private case class Ready(r: R) extends RState
-  private case class Pending(gate: Gate) extends RState
+  private sealed case class Ready(r: R) extends RState
+  private sealed case class Pending(gate: Gate) extends RState
 
   override def invalidate: F[Unit] =
     transition[Unit](_ => Empty -> F.unit)
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   override def run[A](f: R => F[A]): F[A] = transition[A] {
     case s @ Ready(r) =>
       s -> f(r)
@@ -107,6 +108,7 @@ class ConcurrentCachedObject[F[_], R] private (acquire: F[R])(
     case s @ Pending(gate) =>
       s -> (gate.get >> run(f))
 
+    case _ => throw new RuntimeException("Unexpected state")
   }
 
   override def invalidateIfNeeded(shouldInvalidate: R => Boolean): F[Unit] =

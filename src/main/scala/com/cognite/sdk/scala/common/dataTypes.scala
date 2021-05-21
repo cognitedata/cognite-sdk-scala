@@ -8,8 +8,6 @@ import cats.Id
 import com.cognite.sdk.scala.v1.CogniteId
 import io.circe.{Decoder, Encoder, Json, JsonObject}
 import io.circe.generic.semiauto.deriveDecoder
-import io.scalaland.chimney.Transformer
-import io.scalaland.chimney.dsl._
 import sttp.model.Uri
 
 trait ResponseWithCursor {
@@ -64,11 +62,15 @@ final case class CdpApiErrorPayload(
 
 final case class CdpApiError(error: CdpApiErrorPayload) {
   def asException(url: Uri, requestId: Option[String]): CdpApiException =
-    this.error
-      .into[CdpApiException]
-      .withFieldConst(_.url, url)
-      .withFieldConst(_.requestId, requestId)
-      .transform
+    CdpApiException(
+      url,
+      error.code,
+      error.message,
+      error.missing,
+      error.duplicated,
+      error.missingFields,
+      requestId
+    )
 }
 
 object CdpApiError {
@@ -169,6 +171,14 @@ trait WithSetExternalId {
   val externalId: Option[Setter[String]]
 }
 
+trait ToCreate[W] {
+  def toCreate: W
+}
+
+trait ToUpdate[U] {
+  def toUpdate: U
+}
+
 object EitherDecoder {
   def eitherDecoder[A, B](implicit a: Decoder[A], b: Decoder[B]): Decoder[Either[A, B]] = {
     val l: Decoder[Either[A, B]] = a.map(Left.apply)
@@ -184,30 +194,22 @@ final case class SetNull[+T]() extends Setter[T]
 
 object Setter {
   @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
-  implicit def optionToSetter[T: Manifest]: Transformer[Option[T], Option[Setter[T]]] =
-    new Transformer[Option[T], Option[Setter[T]]] {
-      override def transform(src: Option[T]) = src match {
-        case null => Some(SetNull()) // scalastyle:ignore null
-        case None => None
-        case Some(null) => Some(SetNull()) // scalastyle:ignore null
-        case Some(map: Map[_, _]) if map.isEmpty =>
-          // Workaround for CDF-3540 and CDF-953
-          None
-        case Some(value: T) => Some(SetValue(value))
-        case Some(badValue) =>
-          throw new SdkException(
-            s"Expected value of type ${manifest[T].toString} but got `${badValue.toString}` of type ${badValue.getClass.toString}"
-          )
-      }
+  def fromOption[T](option: Option[T]): Option[Setter[T]] =
+    option match {
+      case null => Some(SetNull()) // scalastyle:ignore null
+      case None => None
+      case Some(null) => Some(SetNull()) // scalastyle:ignore null
+      case Some(map: Map[_, _]) if map.isEmpty =>
+        // Workaround for CDF-3540 and CDF-953
+        None
+      case Some(value) => Some(SetValue(value))
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
-  implicit def anyToSetter[T]: Transformer[T, Option[Setter[T]]] =
-    new Transformer[T, Option[Setter[T]]] {
-      override def transform(src: T): Option[Setter[T]] = src match {
-        case null => Some(SetNull()) // scalastyle:ignore null
-        case value => Some(SetValue(value))
-      }
+  def fromAny[T](optionValue: T): Option[Setter[T]] =
+    optionValue match {
+      case null => Some(SetNull()) // scalastyle:ignore null
+      case value => Some(SetValue(value))
     }
 
   implicit def encodeSetter[T](implicit encodeT: Encoder[T]): Encoder[Setter[T]] =
@@ -229,31 +231,21 @@ object NonNullableSetter {
       "scalafix:DisableSyntax.!="
     )
   )
-  implicit def optionToNonNullableSetter[T]: Transformer[Option[T], Option[NonNullableSetter[T]]] =
-    new Transformer[Option[T], Option[NonNullableSetter[T]]] {
-      override def transform(src: Option[T]): Option[NonNullableSetter[T]] = src match {
-        case None => None
-        case Some(map: Map[_, _]) if map.isEmpty =>
-          // Workaround for CDF-3540 and CDF-953
-          None
-        case Some(value) =>
-          require(
-            value != null,
-            "Invalid null value for non-nullable field update"
-          ) // scalastyle:ignore null
-          Some(SetValue(value))
-      }
+  def fromOption[T](option: Option[T]): Option[NonNullableSetter[T]] =
+    option match {
+      case None => None
+      case Some(map: Map[_, _]) if map.isEmpty =>
+        // Workaround for CDF-3540 and CDF-953
+        None
+      case Some(value) =>
+        require(
+          value != null,
+          "Invalid null value for non-nullable field update"
+        ) // scalastyle:ignore null
+        Some(SetValue(value))
     }
 
-  implicit def toNonNullableSetter[T]: Transformer[T, NonNullableSetter[T]] =
-    new Transformer[T, NonNullableSetter[T]] {
-      override def transform(value: T): NonNullableSetter[T] = SetValue(value)
-    }
-
-  implicit def toOptionNonNullableSetter[T]: Transformer[T, Option[NonNullableSetter[T]]] =
-    new Transformer[T, Option[NonNullableSetter[T]]] {
-      override def transform(value: T): Option[NonNullableSetter[T]] = Some(SetValue(value))
-    }
+  def fromAny[T](value: T): NonNullableSetter[T] = SetValue(value)
 
   implicit def encodeNonNullableSetter[T](
       implicit encodeT: Encoder[T]

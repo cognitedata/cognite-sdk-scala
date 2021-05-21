@@ -8,10 +8,11 @@ import java.time.Instant
 import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common.{ReadBehaviours, RetryWhile, SdkTestSpec, SetNull, SetValue, WritableBehaviors}
 
+@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Null"))
 class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("sequence-5PNii0w", "sequence-6VhKQqt")
-  val eid = shortRandom()
+  private val eid = shortRandom()
 
   (it should behave).like(readable(client.sequences))
 
@@ -147,7 +148,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
       sequencesUpdates,
       (id: Long, item: Sequence) => item.copy(id = id),
       (a: Sequence, b: Sequence) => {
-        a.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) == b.copy(
+        a.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) === b.copy(
           lastUpdatedTime = Instant.ofEpochMilli(0)
         )
       },
@@ -156,10 +157,10 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
         assert(readSequence.size == sequencesToCreate.size)
         assert(updatedSequence.size == sequencesUpdates.size)
         assert(updatedSequence.zip(readSequence).forall {
-          case (updated, read) => updated.name == read.name.map(n => s"${n}-1")
+          case (updated, read) => updated.name === read.name.map(n => s"${n}-1")
         })
         assert(updatedSequence.head.description.isEmpty)
-        assert(updatedSequence(1).description == sequencesUpdates(1).description)
+        assert(updatedSequence(1).description === sequencesUpdates(1).description)
         val dataSets = updatedSequence.map(_.dataSetId)
         assert(List(None, Some(testDataSet.id), Some(testDataSet.id)) === dataSets)
         ()
@@ -178,7 +179,9 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
     ),
     (readSequences: Seq[Sequence], updatedSequences: Seq[Sequence]) => {
       assert(readSequences.size == updatedSequences.size)
-      assert(updatedSequences.zip(readSequences).forall { case (updated, read) =>  updated.name.get == s"${read.name.get}-1" })
+      assert(updatedSequences.zip(readSequences).forall { case (updated, read) =>
+        updated.name.value === s"${read.name.value}-1"
+      })
       val dataSets = updatedSequences.map(_.dataSetId)
       assert(List(None, Some(testDataSet.id), None) === dataSets)
       ()
@@ -198,7 +201,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
     (readSequences: Seq[Sequence], updatedSequences: Seq[Sequence]) => {
       assert(readSequences.size == updatedSequences.size)
       assert(updatedSequences.zip(readSequences).forall { case (updated, read) =>
-        updated.externalId.getOrElse("") == s"${read.externalId.getOrElse("")}-1" })
+        updated.externalId.getOrElse("") === s"${read.externalId.getOrElse("")}-1" })
       ()
     }
   )
@@ -311,7 +314,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
         (a: Seq[_]) => a should not be empty
       )
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
-      created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)
+      created.filter(_.dataSetId.isDefined).map(_.id) should contain theSameElementsAs foundItems.map(_.id)
     } finally {
       client.sequences.deleteByIds(created.map(_.id))
     }

@@ -148,7 +148,7 @@ object RetrieveByIds {
       implicit itemsDecoder: Decoder[Items[R]]
   ): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], Items[CogniteInternalId]](
-      Items(ids.map(CogniteInternalId)),
+      Items(ids.map(CogniteInternalId.apply)),
       uri"$baseUrl/byids",
       value => value.items
     )
@@ -168,7 +168,7 @@ object RetrieveByIdsWithIgnoreUnknownIds {
       ignoreUnknownIds: Boolean
   )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteId]](
-      ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
+      ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId.apply), ignoreUnknownIds),
       uri"$baseUrl/byids",
       value => value.items
     )
@@ -190,7 +190,7 @@ object RetrieveByExternalIds {
       externalIds: Seq[String]
   )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], Items[CogniteExternalId]](
-      Items(externalIds.map(CogniteExternalId)),
+      Items(externalIds.map(CogniteExternalId.apply)),
       uri"$baseUrl/byids",
       value => value.items
     )
@@ -210,7 +210,7 @@ object RetrieveByExternalIdsWithIgnoreUnknownIds {
       ignoreUnknownIds: Boolean
   )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteId]](
-      ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId), ignoreUnknownIds),
+      ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId.apply), ignoreUnknownIds),
       uri"$baseUrl/byids",
       value => value.items
     )

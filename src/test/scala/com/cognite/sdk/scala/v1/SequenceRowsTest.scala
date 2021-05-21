@@ -6,9 +6,10 @@ package com.cognite.sdk.scala.v1
 import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common._
 import io.circe.syntax._
-import org.scalatest.ParallelTestExecution
+import org.scalatest.{OptionValues, ParallelTestExecution}
 
-class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with RetryWhile {
+@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements"))
+class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with RetryWhile with OptionValues {
   def withSequence(testCode: Sequence => Any): Unit = {
     val externalId = shortRandom()
     val sequence = client.sequences.createOneFromRead(
@@ -79,7 +80,7 @@ class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with Retry
   }
 
   it should "be possible to insert, update and delete sequence rows using externalId" in withSequence { sequence =>
-    val externalId = sequence.externalId.get
+    val externalId = sequence.externalId.value
     client.sequenceRows.insertByExternalId(externalId, sequence.columns.map(_.externalId.getOrElse(
       throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows)
     val rows = retryWithExpectedResult[Seq[SequenceRow]](

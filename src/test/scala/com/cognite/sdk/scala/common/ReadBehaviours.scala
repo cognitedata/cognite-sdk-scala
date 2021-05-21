@@ -13,6 +13,7 @@ import java.util.concurrent.ThreadLocalRandom
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
 trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
   def readable[R, InternalId, PrimitiveId](
       readable: Readable[R, Id],
@@ -25,8 +26,8 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
 
     if (supportsLimit) {
       it should "read items with limit" in {
-        (readable.read(limit = Some(1)).items should have).length(Math.min(listLength.toLong, 1))
-        (readable.read(limit = Some(2)).items should have).length(Math.min(listLength.toLong, 2))
+        readable.read(limit = Some(1)).items should have length Math.min(listLength.toLong, 1)
+        readable.read(limit = Some(2)).items should have length Math.min(listLength.toLong, 2)
       }
     }
 
@@ -50,7 +51,7 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
       val partitionStreams10 = readable.listPartitions(10)
       (partitionStreams should have).length(2)
       (partitionStreams10 should have).length(10)
-      val partition1Items = partitionStreams.head.take(2).compile.toList
+      val partition1Items = partitionStreams(0).take(2).compile.toList
       val partition2Items = partitionStreams(1).take(2).compile.toList
       partition1Items.size should be <= 2
       partition2Items.size should be <= 2
@@ -60,7 +61,7 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
     it should "read item partitions with limit" in {
       val partitionStreams = readable.listPartitions(2, limitPerPartition = Some(2))
       (partitionStreams should have).length(2)
-      val partition1Items = partitionStreams.head.compile.toList
+      val partition1Items = partitionStreams(0).compile.toList
       val partition2Items = partitionStreams(1).compile.toList
       partition1Items.size should be <= 2
       partition2Items.size should be <= 2
@@ -76,7 +77,7 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
       val unlimitedLength = readable.list().map(_ => 1).compile.toList.length
       val partitionsLength = readable
         .listPartitions(40)
-        .reduce(_ ++ _)
+        .fold(fs2.Stream.empty)(_ ++ _)
         .map(_ => 1)
         .compile
         .toList
@@ -112,7 +113,7 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
         notFoundIds should contain theSameElementsAs idsThatDoNotExist
       }
 
-      val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
+      val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
       val sameIdsThrown = the[CdpApiException] thrownBy readable
         .retrieveByIds(sameIdsThatDoNotExist)
       if (supportsMissingAndThrown) {
@@ -169,7 +170,7 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
         val itemsNotFound = thrown.missing
 
         val notFoundIds =
-          itemsNotFound.get.map(jsonObj => jsonObj("externalId").get.asString.get)
+          itemsNotFound.value.map(jsonObj => jsonObj("externalId").value.asString.value)
         notFoundIds should have size idsThatDoNotExist.size.toLong
         notFoundIds should contain theSameElementsAs idsThatDoNotExist
       }
@@ -196,11 +197,11 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
   ): Unit = {
     it should "support retrieving items by external id" in {
       // TODO: this test is not very stable as the fetched item may be deleted before it is fetched again by the external id
-      val firstTwoItemIds = fetchTestItems(readable).map(_.externalId.get)
+      val firstTwoItemIds = fetchTestItems(readable).map(_.externalId.value)
 
       firstTwoItemIds should have size 2
       val maybeItemsRead = readable.retrieveByExternalIds(firstTwoItemIds)
-      val itemsReadIds = maybeItemsRead.map(_.externalId.get)
+      val itemsReadIds = maybeItemsRead.map(_.externalId.value)
       itemsReadIds should have size firstTwoItemIds.size.toLong
       itemsReadIds should contain theSameElementsAs firstTwoItemIds
     }
@@ -212,26 +213,26 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
         val itemsNotFound = thrown.missing
 
         val notFoundIds =
-          itemsNotFound.get.map(jsonObj => jsonObj("externalId").get.asString.get)
+          itemsNotFound.value.map(jsonObj => jsonObj("externalId").value.asString.value)
         notFoundIds should have size idsThatDoNotExist.size.toLong
         notFoundIds should contain theSameElementsAs idsThatDoNotExist
       }
 
-      val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
+      val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
       val sameIdsThrown = the[CdpApiException] thrownBy readable
         .retrieveByExternalIds(sameIdsThatDoNotExist)
       if (supportsMissingAndThrown) {
         sameIdsThrown.missing match {
           case Some(missingItems) =>
             val sameNotFoundIds =
-              missingItems.map(jsonObj => jsonObj("externalId").get.asString.get).toSet
+              missingItems.map(jsonObj => jsonObj("externalId").value.asString.value).toSet
             // it's a bit funny that the same missing ids are returned duplicated,
             // but that's how it works as of 2019-06-02.
             //sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
             sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           case None =>
-            val duplicatedNotFoundIds = sameIdsThrown.duplicated.get
-              .map(jsonObj => jsonObj("externalId").get.asString.get)
+            val duplicatedNotFoundIds = sameIdsThrown.duplicated.value
+              .map(jsonObj => jsonObj("externalId").value.asString.value)
               .toSet
             //duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
             duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
@@ -246,9 +247,9 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
         with RetrieveByIdsWithIgnoreUnknownIds[R, Id]
   ): Unit = {
     val firstTwoItemItems = fetchTestItems(readable)
-    val firstTwoExternalIds = firstTwoItemItems.map(_.externalId.get)
+    val firstTwoExternalIds = firstTwoItemItems.map(_.externalId.value)
     val firstTwoIds = firstTwoItemItems.map(_.id)
-    val nonExistentExternalId = "does-not-exist/" + UUID.randomUUID
+    val nonExistentExternalId = s"does-not-exist/${UUID.randomUUID.toString}"
     val nonExistentId = ThreadLocalRandom.current().nextLong(1, 9007199254740991L)
 
     it should "support retrieving items by external id with ignoreUnknownIds=true" in {
@@ -257,7 +258,7 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
         firstTwoExternalIds ++ Seq(nonExistentExternalId),
         ignoreUnknownIds = true
       )
-      val itemsReadIds = maybeItemsRead.map(_.externalId.get)
+      val itemsReadIds = maybeItemsRead.map(_.externalId.value)
       itemsReadIds should contain theSameElementsAs firstTwoExternalIds
       itemsReadIds should have size firstTwoExternalIds.size.toLong
     }
@@ -281,7 +282,7 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
     it should "support retrieving items by id with ignoreUnknownIds=true" in {
       val maybeItemsRead =
         readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = true)
-      val itemsReadIds = maybeItemsRead.map(_.externalId.get)
+      val itemsReadIds = maybeItemsRead.map(_.externalId.value)
       itemsReadIds should contain theSameElementsAs firstTwoExternalIds
       itemsReadIds should have size firstTwoExternalIds.size.toLong
     }

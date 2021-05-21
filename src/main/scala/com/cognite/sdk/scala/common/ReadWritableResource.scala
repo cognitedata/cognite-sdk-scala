@@ -7,8 +7,6 @@ import com.cognite.sdk.scala.v1._
 import sttp.client3._
 import sttp.client3.circe._
 import io.circe.{Decoder, Encoder}
-import io.scalaland.chimney.Transformer
-import io.scalaland.chimney.dsl._
 import sttp.model.Uri
 
 trait DeleteByIds[F[_], PrimitiveId] {
@@ -33,7 +31,7 @@ object DeleteByIds {
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.post[Unit, Unit, Items[CogniteInternalId]](
-      Items(ids.map(CogniteInternalId)),
+      Items(ids.map(CogniteInternalId.apply)),
       uri"$baseUrl/delete",
       _ => ()
     )
@@ -47,7 +45,7 @@ object DeleteByIds {
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
-      ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
+      ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId.apply), ignoreUnknownIds),
       uri"$baseUrl/delete",
       _ => ()
     )
@@ -80,7 +78,7 @@ object DeleteByExternalIds {
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
-      ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId), ignoreUnknownIds),
+      ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId.apply), ignoreUnknownIds),
       uri"$baseUrl/delete",
       _ => ()
     )
@@ -93,20 +91,23 @@ object DeleteByExternalIds {
     // TODO: group deletes by max deletion request size
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.post[Unit, Unit, Items[CogniteExternalId]](
-      Items(externalIds.map(CogniteExternalId)),
+      Items(externalIds.map(CogniteExternalId.apply)),
       uri"$baseUrl/delete",
       _ => ()
     )
 }
 
-trait Create[R, W, F[_]] extends WithRequestSession[F] with CreateOne[R, W, F] with BaseUrl {
+trait Create[R <: ToCreate[W], W, F[_]]
+    extends WithRequestSession[F]
+    with CreateOne[R, W, F]
+    with BaseUrl {
   def createItems(items: Items[W]): F[Seq[R]]
 
   def create(items: Seq[W]): F[Seq[R]] =
     createItems(Items(items))
 
-  def createFromRead(items: Seq[R])(implicit t: Transformer[R, W]): F[Seq[R]] =
-    createItems(Items(items.map(_.transformInto[W])))
+  def createFromRead(items: Seq[R]): F[Seq[R]] =
+    createItems(Items(items.map(_.toCreate)))
 
   def createOne(item: W): F[R] =
     requestSession.map(
@@ -131,13 +132,10 @@ object Create {
     )
 }
 
-trait CreateOne[R, W, F[_]] extends WithRequestSession[F] with BaseUrl {
+trait CreateOne[R <: ToCreate[W], W, F[_]] extends WithRequestSession[F] with BaseUrl {
   def createOne(item: W): F[R]
 
-  def createOneFromRead(item: R)(implicit t: Transformer[R, W]): F[R] = createOne(
-    item.transformInto[W]
-  )
-
+  def createOneFromRead(item: R): F[R] = createOne(item.toCreate)
 }
 
 object CreateOne {

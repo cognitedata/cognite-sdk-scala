@@ -23,11 +23,38 @@ final case class TimeSeries(
 ) extends WithId[Long]
     with WithExternalId
     with WithCreatedTime
+    with ToCreate[TimeSeriesCreate]
+    with ToUpdate[TimeSeriesUpdate] {
+  override def toCreate: TimeSeriesCreate =
+    TimeSeriesCreate(
+      externalId,
+      name,
+      isString,
+      metadata,
+      unit,
+      assetId,
+      isStep,
+      description,
+      securityCategories,
+      dataSetId
+    )
+
+  override def toUpdate: TimeSeriesUpdate =
+    TimeSeriesUpdate(
+      Setter.fromOption(name),
+      Setter.fromOption(externalId),
+      NonNullableSetter.fromOption(metadata),
+      Setter.fromOption(unit),
+      Setter.fromOption(assetId),
+      Setter.fromOption(description),
+      NonNullableSetter.fromOption(securityCategories),
+      Setter.fromOption(dataSetId)
+    )
+}
 
 final case class TimeSeriesCreate(
     externalId: Option[String] = None,
     name: Option[String] = None,
-    legacyName: Option[String] = None,
     isString: Boolean = false,
     metadata: Option[Map[String, String]] = None,
     unit: Option[String] = None,

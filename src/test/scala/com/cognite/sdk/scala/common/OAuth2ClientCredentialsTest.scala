@@ -4,12 +4,13 @@ import java.util.concurrent.Executors
 import cats.effect._
 import cats.effect.laws.util.TestContext
 import cats.implicits.catsStdInstancesForList
-import cats.syntax.all._
+import cats.syntax.parallel._
 import com.cognite.sdk.scala.v1._
 import sttp.client3._
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.testing.SttpBackendStub
 import io.circe.Json
+import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sttp.model.{Header, Method, StatusCode}
@@ -19,7 +20,8 @@ import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers {
+@SuppressWarnings(Array("org.wartremover.warts.Var"))
+class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionValues {
   val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
   val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
@@ -41,7 +43,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers {
       scopes = List("https://bluefield.cognitedata.com/.default")
     )
 
-    val authProvider = OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).get
+    val authProvider = OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value
 
     val client = new GenericClient(
       applicationName = "CogniteScalaSDK-OAuth-Test",
@@ -57,7 +59,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers {
 //    assert(loginStatus.loggedIn)
 
     noException shouldBe thrownBy {
-      client.rawDatabases.list().compile.toVector.unsafeRunTimed(10.seconds).get
+      client.rawDatabases.list().compile.toVector.unsafeRunTimed(10.seconds).value
     }
   }
 
@@ -70,7 +72,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers {
     )
 
     an[SdkException] shouldBe thrownBy {
-      OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).get.getAuth.unsafeRunSync()
+      OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value.getAuth.unsafeRunSync()
     }
   }
 
@@ -80,7 +82,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers {
     var numTokenRequests = 0
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] = SttpBackendStub(implicitly[MonadError[IO]])
-      .whenRequestMatches(req => req.method == Method.POST && req.uri.path == Seq("token"))
+      .whenRequestMatches(req => req.method === Method.POST && req.uri.path === Seq("token"))
       .thenRespondF {
         for {
           _ <- IO { numTokenRequests += 1 }
@@ -107,6 +109,6 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers {
       _ <- IO { numTokenRequests shouldBe 2 }
     } yield ()
 
-    io.unsafeRunTimed(10.seconds).get
+    io.unsafeRunTimed(10.seconds).value
   }
 }

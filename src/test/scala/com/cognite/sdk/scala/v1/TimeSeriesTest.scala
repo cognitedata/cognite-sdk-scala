@@ -7,6 +7,7 @@ import java.time.Instant
 import com.cognite.sdk.scala.common._
 import fs2.Stream
 
+@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Null"))
 class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L, 999993L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
@@ -67,14 +68,16 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     timeSeriesToCreate,
     timeSeriesUpdates,
     (id: Long, item: TimeSeries) => item.copy(id = id),
-    (a: TimeSeries, b: TimeSeries) => { a.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) == b.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) },
+    (a: TimeSeries, b: TimeSeries) => { a.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) === b.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) },
     (readTimeSeries: Seq[TimeSeries], updatedTimeSeries: Seq[TimeSeries]) => {
       assert(readTimeSeries.size == timeSeriesUpdates.size)
       assert(readTimeSeries.size == timeSeriesToCreate.size)
       assert(updatedTimeSeries.size == timeSeriesUpdates.size)
-      assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) => updated.name == Some(s"${read.name.get}-1")})
+      assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) =>
+        updated.name === Some(s"${read.name.value}-1")
+      })
       assert(updatedTimeSeries.head.description.isEmpty)
-      assert(updatedTimeSeries(1).description == timeSeriesUpdates(1).description)
+      assert(updatedTimeSeries(1).description === timeSeriesUpdates(1).description)
       val dataSets = updatedTimeSeries.map(_.dataSetId)
       assert(List(Some(testDataSet.id), Some(testDataSet.id)) === dataSets)
       ()
@@ -91,7 +94,9 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     ),
     (readTimeSeries: Seq[TimeSeries], updatedTimeSeries: Seq[TimeSeries]) => {
       assert(readTimeSeries.size == updatedTimeSeries.size)
-      assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) =>  updated.name.get == s"${read.name.get}-1" })
+      assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) =>
+        updated.name.value === s"${read.name.value}-1"
+      })
       val dataSets = updatedTimeSeries.map(_.dataSetId)
       assert(List(None, None) === dataSets)
       ()
@@ -108,7 +113,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     (readTimeSeries: Seq[TimeSeries], updatedTimeSeries: Seq[TimeSeries]) => {
       assert(readTimeSeries.size == updatedTimeSeries.size)
       assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) =>
-        updated.name.getOrElse("") == s"${read.name.getOrElse("")}-1" })
+        updated.name.getOrElse("") === s"${read.name.getOrElse("")}-1" })
       ()
     }
   )
@@ -325,7 +330,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
         (a: Seq[_]) => a should not be empty
       )
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
-      created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)
+      created.filter(_.dataSetId.isDefined).map(_.id) should contain theSameElementsAs foundItems.map(_.id)
     } finally {
       client.timeSeries.deleteByIds(created.map(_.id))
     }

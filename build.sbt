@@ -1,12 +1,11 @@
 import wartremover.Wart
 import sbt.project
 
-addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
-
+val scala3 = "3.0.0"
 val scala213 = "2.13.6"
 val scala212 = "2.12.13"
 val scala211 = "2.11.12"
-val supportedScalaVersions = List(scala212, scala213, scala211)
+val supportedScalaVersions = List(scala212, scala213, scala211, scala3)
 
 // This is used only for tests.
 val jettyTestVersion = "9.4.41.v20210516"
@@ -14,7 +13,7 @@ val jettyTestVersion = "9.4.41.v20210516"
 val sttpVersion = "3.3.5"
 val circeVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "0.12.0-M3"
-  case _ => "0.14.0-M7"
+  case _ => "0.14.0"
 }
 val catsEffectVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.0.0"
@@ -66,15 +65,23 @@ lazy val commonSettings = Seq(
     else None
   },
   coverageEnabled := {
-    // Scala 2.11 is no longer supported by sbt-scoverage
     CrossVersion.partialVersion(scalaVersion.value) match {
+      // Scala 2.11 is no longer supported by sbt-scoverage
       case Some((2, 11)) => false
+      // Scala 3 is not supported by scoverage
+      // https://github.com/scoverage/scalac-scoverage-plugin/issues/299
+      case Some((3, _)) => false
       case _ => coverageEnabled.value
     }
   },
-  Compile/wartremoverErrors :=
+  Compile / wartremoverErrors :=
     (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, minor)) if minor <= 11 =>
+      case Some((2, 11)) =>
+        // Scala 2.11 is no longer supported by Wartremover
+        Seq.empty[wartremover.Wart]
+      case Some((2, 12)) =>
+        // We do this to make IntelliJ happy, as it doesn't understand Wartremover properly.
+        // Since we currently put 2.12 first in cross version, that's what IntelliJ is using.
         Seq.empty[wartremover.Wart]
       case _ =>
         Warts.allBut(
@@ -89,35 +96,45 @@ lazy val commonSettings = Seq(
     })
 )
 
-wartremoverExcluded ++= Seq(
-  baseDirectory.value / "target" / "protobuf-generated",
-  baseDirectory.value / "src" / "test",
-  baseDirectory.value / "src" / "main" / "scala" / "com" / "cognite" / "sdk" / "scala" / "common" / "internal" / "CachedResource.scala"
-)
-
-Compile/PB.targets := Seq(
-  scalapb.gen() -> (target.value / "protobuf-generated")
-)
-Compile/managedSourceDirectories += target.value / "protobuf-generated"
-
 lazy val core = (project in file("."))
+  .enablePlugins(BuildInfoPlugin)
+  .settings(
+    buildInfoUsePackageAsPath := true,
+    buildInfoKeys := Seq[BuildInfoKey](organization, version, organizationName),
+    buildInfoPackage := "BuildInfo"
+  )
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "io.scalaland" %% "chimney" % "0.5.3",
-      "commons-io" % "commons-io" % "2.9.0",
+      "commons-io" % "commons-io" % "2.8.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
-      "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
-      "org.typelevel" %% "cats-effect" % catsEffectVersion(CrossVersion.partialVersion(scalaVersion.value)),
-      "org.typelevel" %% "cats-effect-laws" % catsEffectVersion(CrossVersion.partialVersion(scalaVersion.value)) % Test,
-      "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value))
-    ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value))
-  )
-  .enablePlugins(BuildInfoPlugin)
-  .settings(
-    buildInfoKeys := Seq[BuildInfoKey](organization, version, organizationName),
-    buildInfoPackage := "BuildInfo"
+      "org.typelevel" %% "cats-effect" % catsEffectVersion(
+        CrossVersion.partialVersion(scalaVersion.value)
+      ),
+      "org.typelevel" %% "cats-effect-laws" % catsEffectVersion(
+        CrossVersion.partialVersion(scalaVersion.value)
+      ) % Test,
+      "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value)),
+      "com.google.protobuf" % "protobuf-java" % "3.15.8"
+    ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
+    scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, minor)) if minor == 13 =>
+        List(
+          // We use JavaConverters to remain backwards compatible with Scala 2.11
+          "-Wconf:cat=deprecation:i"
+        )
+      case _ =>
+        List.empty[String]
+    }),
+    compileOrder := CompileOrder.JavaThenScala,
+    PB.additionalDependencies := Seq.empty,
+    // Fixes collision with BuildInfo, see
+    // https://github.com/thesamet/sbt-protoc/issues/6#issuecomment-353028192
+    PB.deleteTargetDirectory := false,
+    Compile / PB.targets := Seq(
+      PB.gens.java -> (Compile / sourceManaged).value
+    )
   )
 
 val scalaTestDeps = Seq(
@@ -125,39 +142,33 @@ val scalaTestDeps = Seq(
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
-  "com.softwaremill.sttp.client3" %% "circe" % sttpVersion
+  ("com.softwaremill.sttp.client3" %% "circe" % sttpVersion)
     // We specify our own version of circe.
-    exclude("io.circe", "circe-core_2.11")
-    exclude("io.circe", "circe-core_2.12")
-    exclude("io.circe", "circe-core_2.13")
-    exclude("io.circe", "circe-parser_2.11")
-    exclude("io.circe", "circe-parser_2.12")
-    exclude("io.circe", "circe-parser_2.13"),
+    .exclude("io.circe", "circe-core_2.11")
+    .exclude("io.circe", "circe-core_2.12")
+    .exclude("io.circe", "circe-core_2.13")
+    .exclude("io.circe", "circe-parser_2.11")
+    .exclude("io.circe", "circe-parser_2.12")
+    .exclude("io.circe", "circe-parser_2.13"),
   "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion % Test
 )
 
 def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
   Seq(
     // We use the cats version included in the cats-effect version we specify.
-    "io.circe" %% "circe-core" % circeVersion(scalaVersion)
-      exclude("org.typelevel", "cats-core_2.11")
-      exclude("org.typelevel", "cats-core_2.12")
-      exclude("org.typelevel", "cats-core_2.13"),
-    "io.circe" %% "circe-generic" % circeVersion(scalaVersion)
-      exclude("org.typelevel", "cats-core_2.11")
-      exclude("org.typelevel", "cats-core_2.12")
-      exclude("org.typelevel", "cats-core_2.13"),
-    "io.circe" %% "circe-parser" % circeVersion(scalaVersion)
-      exclude("org.typelevel", "cats-core_2.11")
-      exclude("org.typelevel", "cats-core_2.12")
-      exclude("org.typelevel", "cats-core_2.13")
+    ("io.circe" %% "circe-core" % circeVersion(scalaVersion))
+      .exclude("org.typelevel", "cats-core_2.11")
+      .exclude("org.typelevel", "cats-core_2.12")
+      .exclude("org.typelevel", "cats-core_2.13"),
+    ("io.circe" %% "circe-generic" % circeVersion(scalaVersion))
+      .exclude("org.typelevel", "cats-core_2.11")
+      .exclude("org.typelevel", "cats-core_2.12")
+      .exclude("org.typelevel", "cats-core_2.13"),
+    ("io.circe" %% "circe-parser" % circeVersion(scalaVersion))
+      .exclude("org.typelevel", "cats-core_2.11")
+      .exclude("org.typelevel", "cats-core_2.12")
+      .exclude("org.typelevel", "cats-core_2.13")
   )
-
-//addCompilerPlugin(scalafixSemanticdb)
-scalacOptions ++= List(
-  "-Yrangepos" // required by SemanticDB compiler plugin
-  //"-Ywarn-unused-import" // required by `RemoveUnused` rule
-)
 
 scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
   case Some((2, minor)) if minor == 12 =>
@@ -175,8 +186,8 @@ scalastyleFailOnWarning := true
 lazy val mainScalastyle = taskKey[Unit]("mainScalastyle")
 lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 
-mainScalastyle := (Compile/scalastyle).toTask("").value
-testScalastyle := (Test/scalastyle).toTask("").value
+mainScalastyle := (Compile / scalastyle).toTask("").value
+testScalastyle := (Test / scalastyle).toTask("").value
 
-Test/test := (Test/test).dependsOn(testScalastyle).value
-Test/test := (Test/test).dependsOn(mainScalastyle).value
+Test / test := (Test / test).dependsOn(testScalastyle).value
+Test / test := (Test / test).dependsOn(mainScalastyle).value

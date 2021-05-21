@@ -7,6 +7,7 @@ import java.time.Instant
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.common.SetValue
 
+@SuppressWarnings(Array("org.wartremover.warts.Null", "org.wartremover.warts.TraversableOps"))
 class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
@@ -65,7 +66,7 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
     datasetUpdates,
     (id: Long, item: DataSet) => item.copy(id = id),
     (a: DataSet, b: DataSet) => {
-      a.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) == b.copy(lastUpdatedTime = Instant.ofEpochMilli(0))
+      a.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) === b.copy(lastUpdatedTime = Instant.ofEpochMilli(0))
     },
     (readDatasets: Seq[DataSet], updatedDatasets: Seq[DataSet]) => {
       assert(datasetsToCreate.size == datasetUpdates.size)
@@ -74,11 +75,11 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
       assert(updatedDatasets.zip(readDatasets).forall { case (updated, read) =>
         updated.description.nonEmpty &&
           read.description.nonEmpty &&
-          updated.description.forall { description => description == s"${read.description.get}-1"}
+          updated.description.forall { description => description === s"${read.description.value}-1"}
       })
       assert(readDatasets.head.name.isDefined)
       assert(updatedDatasets.head.name.isEmpty)
-      assert(updatedDatasets(1).name == datasetUpdates(1).name)
+      assert(updatedDatasets(1).name === datasetUpdates(1).name)
       ()
     }
   )
@@ -94,7 +95,9 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
     ),
     (readDatasets: Seq[DataSet], updatedDatasets: Seq[DataSet]) => {
       assert(readDatasets.size == updatedDatasets.size)
-      assert(updatedDatasets.zip(readDatasets).forall { case (updated, read) =>  updated.description.get == s"${read.description.get}-1" })
+      assert(updatedDatasets.zip(readDatasets).forall { case (updated, read) =>
+        updated.description.value === s"${read.description.value}-1"
+      })
       val names = updatedDatasets.map(_.name)
       assert(List(None, None, None) === names)
       ()
@@ -113,8 +116,8 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
     (readDatasets: Seq[DataSet], updatedDatasets: Seq[DataSet]) => {
       assert(readDatasets.size == updatedDatasets.size)
       assert(updatedDatasets.zip(readDatasets).forall { case (updated, read) =>
-        updated.description.getOrElse("") == s"${read.description.getOrElse("")}-1" })
-      assert(updatedDatasets.zip(readDatasets).forall { case (updated, read) => updated.externalId == read.externalId })
+        updated.description.getOrElse("") === s"${read.description.getOrElse("")}-1" })
+      assert(updatedDatasets.zip(readDatasets).forall { case (updated, read) => updated.externalId === read.externalId })
       ()
     }
   )

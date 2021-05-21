@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import cats.Id
+import cats.catsInstancesForId
 import com.cognite.sdk.scala.v1.RequestSession
 import sttp.client3._
 
@@ -17,7 +18,7 @@ class LoginTest extends SdkTestSpec {
     val login =
       new Login(RequestSession[Id]("scala-sdk-test", uri"https://api.cognitedata.com", backend, AuthProvider[Id](auth)))
     val status = login.status()
-    status.loggedIn should be(true)
+    assert(status.loggedIn)
     status.project should not be empty
   }
 }

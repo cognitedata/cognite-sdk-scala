@@ -86,7 +86,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   ): F[Unit] =
     requestSession.post[Unit, Unit, ItemsWithRecursiveAndIgnoreUnknownIds](
       ItemsWithRecursiveAndIgnoreUnknownIds(
-        ids.map(CogniteInternalId),
+        ids.map(CogniteInternalId.apply),
         recursive,
         ignoreUnknownIds
       ),
@@ -112,7 +112,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   ): F[Unit] =
     requestSession.post[Unit, Unit, ItemsWithRecursiveAndIgnoreUnknownIds](
       ItemsWithRecursiveAndIgnoreUnknownIds(
-        externalIds.map(CogniteExternalId),
+        externalIds.map(CogniteExternalId.apply),
         recursive,
         ignoreUnknownIds
       ),

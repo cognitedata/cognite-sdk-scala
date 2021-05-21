@@ -4,8 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
-import com.cognite.sdk.scala.common.{NonNullableSetter, WithId}
+import com.cognite.sdk.scala.common.{NonNullableSetter, ToCreate, ToUpdate, WithId}
 
 final case class ThreeDModel(
     name: String,
@@ -13,6 +12,17 @@ final case class ThreeDModel(
     createdTime: Instant = Instant.ofEpochMilli(0),
     metadata: Option[Map[String, String]] = None
 ) extends WithId[Long]
+    with ToCreate[ThreeDModelCreate]
+    with ToUpdate[ThreeDModelUpdate] {
+  override def toCreate: ThreeDModelCreate = ThreeDModelCreate(name, metadata)
+
+  override def toUpdate: ThreeDModelUpdate =
+    ThreeDModelUpdate(
+      id,
+      Some(NonNullableSetter.fromAny(name)),
+      NonNullableSetter.fromOption(metadata)
+    )
+}
 
 final case class ThreeDModelCreate(
     name: String,
@@ -52,6 +62,26 @@ final case class ThreeDRevision(
     assetMappingCount: Long = 0,
     createdTime: Instant = Instant.ofEpochMilli(0)
 ) extends WithId[Long]
+    with ToCreate[ThreeDRevisionCreate]
+    with ToUpdate[ThreeDRevisionUpdate] {
+  override def toCreate: ThreeDRevisionCreate =
+    ThreeDRevisionCreate(
+      published,
+      rotation,
+      metadata,
+      camera,
+      fileId
+    )
+
+  override def toUpdate: ThreeDRevisionUpdate =
+    ThreeDRevisionUpdate(
+      id,
+      Some(NonNullableSetter.fromAny(published)),
+      NonNullableSetter.fromOption(rotation),
+      NonNullableSetter.fromOption(camera),
+      NonNullableSetter.fromOption(metadata)
+    )
+}
 
 final case class ThreeDRevisionCreate(
     published: Boolean,
