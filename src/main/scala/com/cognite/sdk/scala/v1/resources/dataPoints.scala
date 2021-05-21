@@ -13,21 +13,12 @@ import sttp.client3.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import io.circe.syntax._
-import com.cognite.v1.timeseries.proto.data_point_insertion_request.{
-  DataPointInsertionItem,
-  DataPointInsertionRequest
-}
-import com.cognite.v1.timeseries.proto.data_point_list_response.DataPointListResponse
-import com.cognite.v1.timeseries.proto.data_points.{
-  NumericDatapoint,
-  NumericDatapoints,
-  StringDatapoint,
-  StringDatapoints
-}
 import com.cognite.sdk.scala.common.Constants
+import com.cognite.v1.timeseries.proto._
 import io.circe.parser.decode
 import sttp.model.{MediaType, Uri}
 
+import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
@@ -39,20 +30,27 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   override val baseUrl = uri"${requestSession.baseUrl}/timeseries/data"
 
-  implicit val errorOrDataPointsByIdResponseDecoder
-      : Decoder[Either[CdpApiError, Items[DataPointsByIdResponse]]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Items[DataPointsByIdResponse]]
-  implicit val errorOrDataPointsByExternalIdResponseDecoder
-      : Decoder[Either[CdpApiError, Items[DataPointsByExternalIdResponse]]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Items[DataPointsByExternalIdResponse]]
-  implicit val errorOrStringDataPointsByIdResponseDecoder
-      : Decoder[Either[CdpApiError, Items[StringDataPointsByIdResponse]]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Items[StringDataPointsByIdResponse]]
-  implicit val errorOrStringDataPointsByExternalIdResponseDecoder
-      : Decoder[Either[CdpApiError, Items[StringDataPointsByExternalIdResponse]]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Items[StringDataPointsByExternalIdResponse]]
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Unit]
+  private def protoNumericDataPoints(dataPoints: Seq[DataPoint]) =
+    NumericDatapoints
+      .newBuilder()
+      .addAllDatapoints(dataPoints.map { dp =>
+        NumericDatapoint
+          .newBuilder()
+          .setValue(dp.value)
+          .setTimestamp(dp.timestamp.toEpochMilli)
+          .build()
+      }.asJava)
+
+  private def protoStringDataPoints(dataPoints: Seq[StringDataPoint]) =
+    StringDatapoints
+      .newBuilder()
+      .addAllDatapoints(dataPoints.map { dp =>
+        StringDatapoint
+          .newBuilder()
+          .setValue(dp.value)
+          .setTimestamp(dp.timestamp.toEpochMilli)
+          .build()
+      }.asJava)
 
   // FIXME: Using requestSession.post() resulted in 500 errors when the request involves protobuf because of some
   //  serialization error. Should investigate the error and use requestSession.post rather than having its own
@@ -68,17 +66,17 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         .readTimeout(90.seconds)
         .post(baseUrl)
         .body(
-          DataPointInsertionRequest(
-            Seq(
-              DataPointInsertionItem(
-                DataPointInsertionItem.IdOrExternalId.Id(id),
-                DataPointInsertionItem.DatapointType
-                  .NumericDatapoints(NumericDatapoints(dataPoints.map { dp =>
-                    NumericDatapoint(dp.timestamp.toEpochMilli, dp.value)
-                  }))
-              )
+          DataPointInsertionRequest
+            .newBuilder()
+            .addItems(
+              DataPointInsertionItem
+                .newBuilder()
+                .setId(id)
+                .setNumericDatapoints(protoNumericDataPoints(dataPoints))
+                .build()
             )
-          ).toByteArray
+            .build()
+            .toByteArray
         )
         .response(
           asJsonEither[CdpApiError, Unit].mapWithMetadata((response, metadata) =>
@@ -120,17 +118,19 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         .header("x-cdp-app", requestSession.applicationName)
         .post(baseUrl)
         .body(
-          DataPointInsertionRequest(
-            Seq(
-              DataPointInsertionItem(
-                DataPointInsertionItem.IdOrExternalId.Id(id),
-                DataPointInsertionItem.DatapointType
-                  .StringDatapoints(StringDatapoints(dataPoints.map { dp =>
-                    StringDatapoint(dp.timestamp.toEpochMilli, dp.value)
-                  }))
-              )
+          DataPointInsertionRequest
+            .newBuilder()
+            .addItems(
+              DataPointInsertionItem
+                .newBuilder()
+                .setId(id)
+                .setStringDatapoints(
+                  protoStringDataPoints(dataPoints)
+                    .build()
+                )
             )
-          ).toByteArray
+            .build()
+            .toByteArray
         )
         .response(
           asJsonEither[CdpApiError, Unit].mapWithMetadata((response, metadata) =>
@@ -454,7 +454,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       .post[Map[Long, Option[DataPoint]], Items[DataPointsByIdResponse], ItemsWithIgnoreUnknownIds[
         CogniteId
       ]](
-        ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
+        ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId.apply), ignoreUnknownIds),
         uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
@@ -472,7 +472,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       ], ItemsWithIgnoreUnknownIds[
         CogniteId
       ]](
-        ItemsWithIgnoreUnknownIds(ids.map(CogniteExternalId), ignoreUnknownIds),
+        ItemsWithIgnoreUnknownIds(ids.map(CogniteExternalId.apply), ignoreUnknownIds),
         uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
@@ -516,7 +516,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       ], ItemsWithIgnoreUnknownIds[
         CogniteId
       ]](
-        ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId), ignoreUnknownIds),
+        ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId.apply), ignoreUnknownIds),
         uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
@@ -534,7 +534,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       ], ItemsWithIgnoreUnknownIds[
         CogniteId
       ]](
-        ItemsWithIgnoreUnknownIds(ids.map(CogniteExternalId), ignoreUnknownIds),
+        ItemsWithIgnoreUnknownIds(ids.map(CogniteExternalId.apply), ignoreUnknownIds),
         uri"$baseUrl/latest",
         value =>
           value.items.map { item =>
@@ -552,8 +552,7 @@ object DataPointsResource {
   implicit val dataPointsByExternalIdResponseDecoder: Decoder[DataPointsByExternalIdResponse] =
     deriveDecoder
   implicit val dataPointsByExternalIdResponseItemsDecoder
-      : Decoder[Items[DataPointsByExternalIdResponse]] =
-    deriveDecoder
+      : Decoder[Items[DataPointsByExternalIdResponse]] = deriveDecoder
 
   // WartRemover gets confused by circe-derivation
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
@@ -562,14 +561,11 @@ object DataPointsResource {
   implicit val stringDataPointsByIdResponseDecoder: Decoder[StringDataPointsByIdResponse] =
     deriveDecoder
   implicit val stringDataPointsByIdResponseItemsDecoder
-      : Decoder[Items[StringDataPointsByIdResponse]] =
-    deriveDecoder
+      : Decoder[Items[StringDataPointsByIdResponse]] = deriveDecoder
   implicit val stringDataPointsByExternalIdResponseDecoder
-      : Decoder[StringDataPointsByExternalIdResponse] =
-    deriveDecoder
+      : Decoder[StringDataPointsByExternalIdResponse] = deriveDecoder
   implicit val stringDataPointsByExternalIdResponseItemsDecoder
-      : Decoder[Items[StringDataPointsByExternalIdResponse]] =
-    deriveDecoder
+      : Decoder[Items[StringDataPointsByExternalIdResponse]] = deriveDecoder
   implicit val dataPointsByExternalIdEncoder: Encoder[DataPointsByExternalId] = deriveEncoder
   implicit val dataPointsByExternalIdItemsEncoder: Encoder[Items[DataPointsByExternalId]] =
     deriveEncoder
@@ -595,8 +591,7 @@ object DataPointsResource {
   implicit val queryRangeByExternalIdItemsEncoder: Encoder[Items[QueryRangeByExternalId]] =
     deriveEncoder
   implicit val queryRangeByExternalIdItems2Encoder
-      : Encoder[ItemsWithIgnoreUnknownIds[QueryRangeByExternalId]] =
-    deriveEncoder
+      : Encoder[ItemsWithIgnoreUnknownIds[QueryRangeByExternalId]] = deriveEncoder
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val aggregateDataPointDecoder: Decoder[AggregateDataPoint] = deriveDecoder
   implicit val aggregateDataPointEncoder: Encoder[AggregateDataPoint] = deriveEncoder
@@ -610,93 +605,99 @@ object DataPointsResource {
     }
 
   def parseStringDataPoints(response: DataPointListResponse): Seq[StringDataPointsByIdResponse] =
-    response.items
+    response.getItemsList.asScala
       .map(x =>
         StringDataPointsByIdResponse(
-          x.id,
-          optionalString(x.externalId),
-          x.isString,
-          optionalString(x.unit),
-          x.getStringDatapoints.datapoints
-            .map(s => StringDataPoint(Instant.ofEpochMilli(s.timestamp), s.value))
+          x.getId,
+          optionalString(x.getExternalId),
+          x.getIsString,
+          optionalString(x.getUnit),
+          x.getStringDatapoints.getDatapointsList.asScala
+            .map(s => StringDataPoint(Instant.ofEpochMilli(s.getTimestamp), s.getValue))
+            .toSeq
         )
       )
+      .toSeq
 
   def parseStringDataPointsByExternalId(
       response: DataPointListResponse
   ): Seq[StringDataPointsByExternalIdResponse] =
-    response.items
+    response.getItemsList.asScala
       .map(x =>
         StringDataPointsByExternalIdResponse(
-          x.id,
-          x.externalId,
-          x.isString,
-          optionalString(x.unit),
-          x.getStringDatapoints.datapoints
-            .map(s => StringDataPoint(Instant.ofEpochMilli(s.timestamp), s.value))
+          x.getId,
+          x.getExternalId,
+          x.getIsString,
+          optionalString(x.getUnit),
+          x.getStringDatapoints.getDatapointsList.asScala
+            .map(s => StringDataPoint(Instant.ofEpochMilli(s.getTimestamp), s.getValue))
+            .toSeq
         )
       )
+      .toSeq
 
   def parseNumericDataPoints(response: DataPointListResponse): Seq[DataPointsByIdResponse] =
-    response.items
-      .map { x =>
-        DataPointsByIdResponse(
-          x.id,
-          optionalString(x.externalId),
-          x.isString,
-          x.isStep,
-          optionalString(x.unit),
-          x.getNumericDatapoints.datapoints
-            .map(n => DataPoint(Instant.ofEpochMilli(n.timestamp), n.value))
-        )
-      }
+    response.getItemsList.asScala.map { x =>
+      DataPointsByIdResponse(
+        x.getId,
+        optionalString(x.getExternalId),
+        x.getIsString,
+        x.getIsStep,
+        optionalString(x.getUnit),
+        x.getNumericDatapoints.getDatapointsList.asScala
+          .map(n => DataPoint(Instant.ofEpochMilli(n.getTimestamp), n.getValue))
+          .toSeq
+      )
+    }.toSeq
 
   def parseNumericDataPointsByExternalId(
       response: DataPointListResponse
   ): Seq[DataPointsByExternalIdResponse] =
-    response.items
-      .map { x =>
-        DataPointsByExternalIdResponse(
-          x.id,
-          x.externalId,
-          x.isString,
-          x.isStep,
-          optionalString(x.unit),
-          x.getNumericDatapoints.datapoints
-            .map(n => DataPoint(Instant.ofEpochMilli(n.timestamp), n.value))
-        )
-      }
+    response.getItemsList.asScala.map { x =>
+      DataPointsByExternalIdResponse(
+        x.getId,
+        x.getExternalId,
+        x.getIsString,
+        x.getIsStep,
+        optionalString(x.getUnit),
+        x.getNumericDatapoints.getDatapointsList.asScala
+          .map(n => DataPoint(Instant.ofEpochMilli(n.getTimestamp), n.getValue))
+          .toSeq
+      )
+    }.toSeq
 
   def screenOutNan(d: Double): Option[Double] =
     if (d.isNaN) None else Some(d)
 
   def parseAggregateDataPoints(response: DataPointListResponse): Seq[QueryAggregatesResponse] =
-    response.items
+    response.getItemsList.asScala
       .map(x =>
         QueryAggregatesResponse(
-          x.id,
-          Some(x.externalId),
-          x.isString,
-          x.isStep,
-          Some(x.unit),
-          x.getAggregateDatapoints.datapoints
+          x.getId,
+          Some(x.getExternalId),
+          x.getIsString,
+          x.getIsStep,
+          Some(x.getUnit),
+          x.getAggregateDatapoints.getDatapointsList.asScala
             .map(a =>
               AggregateDataPoint(
-                Instant.ofEpochMilli(a.timestamp),
-                screenOutNan(a.average),
-                screenOutNan(a.max),
-                screenOutNan(a.min),
-                screenOutNan(a.count),
-                screenOutNan(a.sum),
-                screenOutNan(a.interpolation),
-                screenOutNan(a.stepInterpolation),
-                screenOutNan(a.totalVariation),
-                screenOutNan(a.continuousVariance),
-                screenOutNan(a.discreteVariance)
+                Instant.ofEpochMilli(a.getTimestamp),
+                screenOutNan(a.getAverage),
+                screenOutNan(a.getMax),
+                screenOutNan(a.getMin),
+                screenOutNan(a.getCount),
+                screenOutNan(a.getSum),
+                screenOutNan(a.getInterpolation),
+                screenOutNan(a.getStepInterpolation),
+                screenOutNan(a.getTotalVariation),
+                screenOutNan(a.getContinuousVariance),
+                screenOutNan(a.getDiscreteVariance)
               )
             )
+            .toSeq
         )
       )
+      .toSeq
 
   private def asJsonOrSdkException(uri: Uri) = asJsonAlways[CdpApiError].mapWithMetadata {
     (response, metadata) =>

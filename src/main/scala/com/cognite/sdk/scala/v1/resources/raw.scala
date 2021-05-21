@@ -51,7 +51,7 @@ class RawDatabases[F[_]](val requestSession: RequestSession[F])
     Create.createItems[F, RawDatabase, RawDatabase](requestSession, baseUrl, items)
 
   override def deleteByIds(ids: Seq[String]): F[Unit] =
-    RawResource.deleteByIds(requestSession, baseUrl, ids.map(RawDatabase))
+    RawResource.deleteByIds(requestSession, baseUrl, ids.map(RawDatabase.apply))
 }
 
 object RawDatabases {
@@ -92,7 +92,7 @@ class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
     Create.createItems[F, RawTable, RawTable](requestSession, baseUrl, items)
 
   override def deleteByIds(ids: Seq[String]): F[Unit] =
-    RawResource.deleteByIds(requestSession, baseUrl, ids.map(RawTable))
+    RawResource.deleteByIds(requestSession, baseUrl, ids.map(RawTable.apply))
 }
 
 object RawTables {
@@ -146,7 +146,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
     Readable.readWithCursor(requestSession, baseUrl, cursor, limit, None, Constants.rowsBatchSize)
 
   override def deleteByIds(ids: Seq[String]): F[Unit] =
-    RawResource.deleteByIds(requestSession, baseUrl, ids.map(RawRowKey))
+    RawResource.deleteByIds(requestSession, baseUrl, ids.map(RawRowKey.apply))
 
   override private[sdk] def filterWithCursor(
       filter: RawRowFilter,

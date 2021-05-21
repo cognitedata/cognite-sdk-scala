@@ -6,6 +6,7 @@ package com.cognite.sdk.scala.v1
 import BuildInfo.BuildInfo
 import cats.{Id, Monad}
 import cats.implicits._
+import cats.catsInstancesForId
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.resources._
 import sttp.client3._
@@ -23,7 +24,7 @@ import scala.util.control.NonFatal
 class AuthSttpBackend[F[_], +P](delegate: SttpBackend[F, P], authProvider: AuthProvider[F])
     extends SttpBackend[F, P] {
   override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] =
-    responseMonad.flatMap(authProvider.getAuth) { auth: Auth =>
+    responseMonad.flatMap(authProvider.getAuth) { (auth: Auth) =>
       delegate.send(auth.auth(request))
     }
 

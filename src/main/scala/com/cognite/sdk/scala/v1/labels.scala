@@ -13,6 +13,14 @@ final case class Label(
     createdTime: Instant = Instant.ofEpochMilli(0)
 ) extends WithRequiredExternalId
     with WithCreatedTime
+    with ToCreate[LabelCreate] {
+  override def toCreate: LabelCreate =
+    LabelCreate(
+      externalId,
+      name,
+      description
+    )
+}
 
 final case class LabelCreate(
     externalId: String,

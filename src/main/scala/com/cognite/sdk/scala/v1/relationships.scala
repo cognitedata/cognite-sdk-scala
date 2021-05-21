@@ -21,6 +21,21 @@ final case class Relationship(
     lastUpdatedTime: Instant = Instant.ofEpochMilli(0)
 ) extends WithRequiredExternalId
     with WithCreatedTime
+    with ToCreate[RelationshipCreate] {
+  override def toCreate: RelationshipCreate =
+    RelationshipCreate(
+      externalId,
+      sourceExternalId,
+      sourceType,
+      targetExternalId,
+      targetType,
+      startTime,
+      endTime,
+      confidence,
+      dataSetId,
+      labels
+    )
+}
 
 final case class RelationshipCreate(
     externalId: String,

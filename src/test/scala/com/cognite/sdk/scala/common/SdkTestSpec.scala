@@ -5,6 +5,7 @@ package com.cognite.sdk.scala.common
 
 import java.util.UUID
 import cats.Id
+import cats.catsInstancesForId
 import com.cognite.sdk.scala.v1._
 import com.cognite.sdk.scala.v1.resources.DataSets
 import sttp.client3.{Request, Response, SttpBackend}
@@ -20,20 +21,20 @@ class LoggingSttpBackend[F[_], +P](delegate: SttpBackend[F, P]) extends SttpBack
     responseMonad.map(try {
       responseMonad.handleError(delegate.send(request)) {
         case e: Exception =>
-          println(s"Exception when sending request: $request, ${e.toString}") // scalastyle:ignore
+          println(s"Exception when sending request: ${request.toString}, ${e.toString}") // scalastyle:ignore
           responseMonad.error(e)
       }
     } catch {
       case NonFatal(e) =>
-        println(s"Exception when sending request: $request, ${e.toString}") // scalastyle:ignore
+        println(s"Exception when sending request: ${request.toString}, ${e.toString}") // scalastyle:ignore
         throw e
     }) { response =>
       println(s"request ${request.body.toString}") // scalastyle:ignore
       println(s"response ${response.toString}") // scalastyle:ignore
       if (response.isSuccess) {
-        println(s"For request: $request got response: $response") // scalastyle:ignore
+        println(s"For request: ${request.toString} got response: ${response.toString}") // scalastyle:ignore
       } else {
-        println(s"For request: $request got response: $response") // scalastyle:ignore
+        println(s"For request: ${request.toString} got response: ${response.toString}") // scalastyle:ignore
       }
       response
     }

@@ -24,6 +24,34 @@ final case class Asset(
 ) extends WithId[Long]
     with WithExternalId
     with WithCreatedTime
+    with ToCreate[AssetCreate]
+    with ToUpdate[AssetUpdate] {
+  override def toCreate: AssetCreate =
+    AssetCreate(
+      name,
+      parentId,
+      description,
+      source,
+      externalId,
+      metadata,
+      parentExternalId,
+      dataSetId,
+      labels
+    )
+
+  override def toUpdate: AssetUpdate =
+    AssetUpdate(
+      Some(NonNullableSetter.fromAny(name)),
+      Setter.fromOption(description),
+      Setter.fromOption(source),
+      Setter.fromOption(externalId),
+      NonNullableSetter.fromOption(metadata),
+      Setter.fromOption(parentId),
+      Setter.fromOption(parentExternalId),
+      Setter.fromOption(dataSetId),
+      labels.map(ls => LabelsOnUpdate(Some(ls), None))
+    )
+}
 
 final case class AssetCreate(
     name: String,

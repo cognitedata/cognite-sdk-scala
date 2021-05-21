@@ -13,15 +13,10 @@ import com.cognite.sdk.scala.v1.{
   ContainsAny,
   LabelContainsFilter,
   LabelsOnUpdate,
-  Sequence,
-  SequenceColumn,
-  SequenceColumnCreate,
-  SequenceCreate,
   TimeRange
 }
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.deriveEncoder
-import io.scalaland.chimney.Transformer
 
 package object common {
   implicit val cogniteIdEncoder: Encoder[CogniteId] = new Encoder[CogniteId] {
@@ -67,43 +62,7 @@ package object common {
   implicit val instantDecoder: Decoder[Instant] = Decoder.decodeLong.map(Instant.ofEpochMilli)
   implicit val timeRangeEncoder: Encoder[TimeRange] = deriveEncoder
 
-  implicit val deleteRequestWithIgnoreUnknownIdsEncoder
-      : Encoder[ItemsWithIgnoreUnknownIds[CogniteId]] =
+  implicit val itemsWithIgnoreUnknownIdsEncoder: Encoder[ItemsWithIgnoreUnknownIds[CogniteId]] =
     deriveEncoder
-
-  // externalId optional when reading, despite being required when
-  // writing. This is due to it being optional in v0.6, and data from
-  // there has not yet been migrated.
-  // When it has, and externalId has been marked as required in the
-  // official API docs, we should be able to remove this.
-  implicit val sequenceColumnToCreateTransformer
-      : Transformer[SequenceColumn, SequenceColumnCreate] =
-    Transformer
-      .define[SequenceColumn, SequenceColumnCreate]
-      .withFieldComputed(_.externalId, r => r.externalId.getOrElse(""))
-      .buildTransformer
-
-  implicit val sequenceToCreateTransformer: Transformer[Sequence, SequenceCreate] =
-    Transformer.define[Sequence, SequenceCreate].buildTransformer
-
-  implicit val strSeqToLabelsOnUpdateTransformer
-      : Transformer[Option[Seq[String]], Option[LabelsOnUpdate]] =
-    new Transformer[Option[Seq[String]], Option[LabelsOnUpdate]] {
-      override def transform(src: Option[Seq[String]]) = src match {
-        case Some(value: Seq[String]) =>
-          Some(LabelsOnUpdate(add = Some(value.map(CogniteExternalId))))
-        case _ => None
-      }
-    }
-
-  implicit val extIdSeqToLabelsOnUpdateTransformer
-      : Transformer[Option[Seq[CogniteExternalId]], Option[LabelsOnUpdate]] =
-    new Transformer[Option[Seq[CogniteExternalId]], Option[LabelsOnUpdate]] {
-      override def transform(src: Option[Seq[CogniteExternalId]]) = src match {
-        case Some(value: Seq[CogniteExternalId]) => Some(LabelsOnUpdate(add = Some(value)))
-        case _ => None
-      }
-    }
-
   implicit val labelsOnUpdateEncoder: Encoder[LabelsOnUpdate] = deriveEncoder
 }

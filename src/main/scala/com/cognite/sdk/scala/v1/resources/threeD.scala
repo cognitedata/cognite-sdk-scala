@@ -27,7 +27,7 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
       .post[Unit, Unit, Items[CogniteInternalId]](
-        Items(ids.map(CogniteInternalId)),
+        Items(ids.map(CogniteInternalId.apply)),
         uri"$baseUrl/delete",
         _ => ()
       )
@@ -156,7 +156,7 @@ class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], 
     //       or assert that length of `ids` is less than max deletion request size
     requestSession
       .post[Unit, Unit, Items[CogniteInternalId]](
-        Items(ids.map(CogniteInternalId)),
+        Items(ids.map(CogniteInternalId.apply)),
         uri"$baseUrl/delete",
         _ => ()
       )

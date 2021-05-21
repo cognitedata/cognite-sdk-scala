@@ -11,6 +11,11 @@ import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile
 import fs2.Stream
 import org.scalatest.matchers.should.Matchers
 
+@SuppressWarnings(Array(
+  "org.wartremover.warts.NonUnitStatements",
+  "org.wartremover.warts.TraversableOps",
+  "org.wartremover.warts.Var",
+  "org.wartremover.warts.While"))
 class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with Matchers with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
@@ -51,16 +56,16 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     filesToCreate,
     filesUpdates,
     (id: Long, item: File) => item.copy(id = id),
-    (a: File, b: File) => { normalizeFile(a) == normalizeFile(b) },
+    (a: File, b: File) => { normalizeFile(a) === normalizeFile(b) },
     (readFiles: Seq[File], updatedEvents: Seq[File]) => {
       assert(filesToCreate.size == filesUpdates.size)
       assert(readFiles.size == filesToCreate.size)
       assert(readFiles.size == updatedEvents.size)
       assert(updatedEvents.zip(readFiles).forall { case (updated, read) =>
-          updated.name == read.name
+          updated.name === read.name
       })
       assert(Some(s"${externalId}-1") === updatedEvents(0).externalId)
-      assert("b" === updatedEvents(1).metadata.get("a"))
+      assert("b" === updatedEvents(1).metadata.value.get("a").value)
       val dataSets = updatedEvents.map(_.dataSetId)
       assert(List(Some(testDataSet.id), Some(testDataSet.id)) === dataSets)
       ()
@@ -73,7 +78,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       .deleteByIds(idsThatDoNotExist)
     val missingIds = thrown.missing
       .getOrElse(Seq.empty)
-      .flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+      .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
     missingIds should have size idsThatDoNotExist.size.toLong
     missingIds should contain theSameElementsAs idsThatDoNotExist
 
@@ -84,11 +89,11 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     // if duplicated ids that do not exist are specified.
     val sameMissingIds = sameIdsThrown.duplicated match {
       case Some(duplicatedIds) =>
-        duplicatedIds.flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+        duplicatedIds.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
       case None =>
         sameIdsThrown.missing
           .getOrElse(Seq.empty)
-          .flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+          .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
     }
     sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
     sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
@@ -117,18 +122,18 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     val createdItem = client.files.createOneFromRead(testFile)
     val updatedFile = client.files.updateById(Map(createdItem.id -> FileUpdate(externalId = Some(SetValue("test-externalId-1-1")))))
     assert(updatedFile.length == 1)
-    assert(createdItem.name == updatedFile.head.name)
-    assert(updatedFile.head.externalId.get == s"${testFile.externalId.get}-1")
+    assert(createdItem.name === updatedFile.head.name)
+    assert(updatedFile.head.externalId.value === s"${testFile.externalId.value}-1")
     client.files.deleteByExternalId("test-externalId-1-1")
   }
 
   it should "allow updates by externalId" in {
     val testFile = File(name = "test-file-1", externalId = Some("test-externalId-1"), source = Some("source-1"))
     val createdItem = client.files.createOneFromRead(testFile)
-    val updatedFile = client.files.updateByExternalId(Map(createdItem.externalId.get -> FileUpdate(source = Some(SetValue("source-1-1")))))
+    val updatedFile = client.files.updateByExternalId(Map(createdItem.externalId.value -> FileUpdate(source = Some(SetValue("source-1-1")))))
     assert(updatedFile.length == 1)
-    assert(createdItem.name == updatedFile.head.name)
-    assert(updatedFile.head.source.get == s"${testFile.source.get}-1")
+    assert(createdItem.name === updatedFile.head.name)
+    assert(updatedFile.head.source.value === s"${testFile.source.value}-1")
     client.files.deleteByExternalId("test-externalId-1")
   }
 
@@ -241,7 +246,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
 
     client.files.deleteById(file.id)
 
-    assert(file.name == "uploadTest123.txt")
+    assert(file.name === "uploadTest123.txt")
   }
 
   it should "support download" in {
@@ -289,7 +294,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       )
 
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
-      created.filter(_.dataSetId.isDefined).map(_.id) should contain only (foundItems.map(_.id): _*)
+      created.filter(_.dataSetId.isDefined).map(_.id) should contain theSameElementsAs foundItems.map(_.id)
     } finally {
       client.files.deleteByIds(created.map(_.id))
     }

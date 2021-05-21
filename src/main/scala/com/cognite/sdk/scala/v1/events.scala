@@ -23,6 +23,36 @@ final case class Event(
 ) extends WithId[Long]
     with WithExternalId
     with WithCreatedTime
+    with ToCreate[EventCreate]
+    with ToUpdate[EventUpdate] {
+  override def toCreate: EventCreate =
+    EventCreate(
+      startTime,
+      endTime,
+      description,
+      `type`,
+      subtype,
+      metadata,
+      assetIds,
+      source,
+      externalId,
+      dataSetId
+    )
+
+  override def toUpdate: EventUpdate =
+    EventUpdate(
+      Setter.fromOption(startTime),
+      Setter.fromOption(endTime),
+      Setter.fromOption(description),
+      Setter.fromOption(`type`),
+      Setter.fromOption(subtype),
+      NonNullableSetter.fromOption(metadata),
+      NonNullableSetter.fromOption(assetIds),
+      Setter.fromOption(source),
+      Setter.fromOption(externalId),
+      Setter.fromOption(dataSetId)
+    )
+}
 
 final case class EventCreate(
     startTime: Option[Instant] = None,

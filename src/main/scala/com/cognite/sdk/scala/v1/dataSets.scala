@@ -19,6 +19,26 @@ final case class DataSet(
 ) extends WithId[Long]
     with WithExternalId
     with WithCreatedTime
+    with ToCreate[DataSetCreate]
+    with ToUpdate[DataSetUpdate] {
+  override def toCreate: DataSetCreate =
+    DataSetCreate(
+      externalId,
+      name,
+      description,
+      metadata,
+      writeProtected
+    )
+
+  override def toUpdate: DataSetUpdate =
+    DataSetUpdate(
+      Setter.fromOption(externalId),
+      Setter.fromOption(name),
+      Setter.fromOption(description),
+      NonNullableSetter.fromOption(metadata),
+      Some(NonNullableSetter.fromAny(writeProtected))
+    )
+}
 
 final case class DataSetCreate(
     externalId: Option[String] = None,

@@ -4,11 +4,12 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
 import com.cognite.sdk.scala.common.{
   NonNullableSetter,
   SearchQuery,
   Setter,
+  ToCreate,
+  ToUpdate,
   WithCreatedTime,
   WithExternalId,
   WithId,
@@ -35,6 +36,35 @@ final case class File(
 ) extends WithId[Long]
     with WithExternalId
     with WithCreatedTime
+    with ToCreate[FileCreate]
+    with ToUpdate[FileUpdate] {
+  override def toCreate: FileCreate =
+    FileCreate(
+      name,
+      source,
+      externalId,
+      mimeType,
+      metadata,
+      assetIds,
+      dataSetId,
+      sourceCreatedTime,
+      sourceModifiedTime,
+      securityCategories
+    )
+
+  override def toUpdate: FileUpdate =
+    FileUpdate(
+      Setter.fromOption(externalId),
+      Setter.fromOption(source),
+      Setter.fromOption(mimeType),
+      NonNullableSetter.fromOption(metadata),
+      NonNullableSetter.fromOption(assetIds),
+      Setter.fromOption(sourceCreatedTime),
+      Setter.fromOption(sourceModifiedTime),
+      NonNullableSetter.fromOption(securityCategories),
+      Setter.fromOption(dataSetId)
+    )
+}
 
 final case class FileCreate(
     name: String,

@@ -12,6 +12,7 @@ import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
 trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryWhile { this: AnyFlatSpec =>
   private val startTime = System.currentTimeMillis()
   private val start = Instant.ofEpochMilli(startTime)
@@ -27,7 +28,7 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
     it should "be possible to insert and delete numerical data points" in withTimeSeries {
       timeSeries =>
         val timeSeriesId = timeSeries.id
-        val timeSeriesExternalId = timeSeries.externalId.get
+        val timeSeriesExternalId = timeSeries.externalId.value
         dataPoints.insertById(timeSeriesId, testDataPoints)
 
         retryWithExpectedResult[DataPointsByIdResponse](
@@ -44,7 +45,7 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
           dataPoints.getLatestDataPointById(timeSeriesId),
           dp => {
             dp.isDefined shouldBe true
-            testDataPoints.toList should contain(dp.get)
+            testDataPoints.toList should contain(dp.value)
           }
         )
 
@@ -69,7 +70,7 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
           dataPoints.getLatestDataPointByExternalId(timeSeriesExternalId),
           { l2 =>
             l2.isDefined shouldBe true
-            testDataPoints.toList should contain(l2.get)
+            testDataPoints.toList should contain(l2.value)
           }
         )
 

@@ -24,7 +24,19 @@ final case class Function(
     status: Option[String] = None,
     externalId: Option[String] = None,
     error: Option[FunctionError] = None
-)
+) extends ToCreate[FunctionCreate] {
+  override def toCreate: FunctionCreate =
+    FunctionCreate(
+      name,
+      fileId,
+      owner,
+      description,
+      apiKey,
+      secrets,
+      externalId,
+      error
+    )
+}
 
 final case class FunctionCreate(
     name: String = "",
@@ -72,7 +84,16 @@ final case class FunctionSchedule(
     description: Option[String] = None,
     cronExpression: Option[String] = None,
     data: Option[Json] = None
-)
+) extends ToCreate[FunctionScheduleCreate] {
+  override def toCreate: FunctionScheduleCreate =
+    FunctionScheduleCreate(
+      name,
+      functionExternalId,
+      description,
+      cronExpression.getOrElse(""),
+      data
+    )
+}
 
 final case class FunctionScheduleCreate(
     name: String = "",
