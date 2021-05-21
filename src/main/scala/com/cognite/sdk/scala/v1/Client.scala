@@ -83,27 +83,6 @@ final case class RequestSession[F[_]: Monad](
       }
     )
 
-  private def unsafeBody[R](uri: Uri, response: Response[R]): R =
-    try response.body
-    catch {
-      // sttp's .unsafeBody returns a NoSuchElementException if the status wasn't
-      // a 200 and there is no body to return.
-      case _: NoSuchElementException =>
-        val code = response.code.toString
-        throw SdkException(
-          s"Unexpected status code $code",
-          Some(uri),
-          response.header("x-request-id"),
-          Some(response.code.code)
-        )
-      case NonFatal(e) =>
-        throw SdkException(
-          s"Unexpected exception ${e.toString} while reading response body",
-          Some(uri),
-          response.header("x-request-id")
-        )
-    }
-
   def get[R, T](
       uri: Uri,
       mapResult: T => R,
@@ -116,7 +95,7 @@ final case class RequestSession[F[_]: Monad](
       .get(uri)
       .response(parseResponse(uri, mapResult))
       .send(sttpBackend)
-      .map(unsafeBody(uri, _))
+      .map(_.body)
 
   def post[R, T, I](
       body: I,
@@ -132,20 +111,20 @@ final case class RequestSession[F[_]: Monad](
       .body(body)
       .response(parseResponse(uri, mapResult))
       .send(sttpBackend)
-      .map(unsafeBody(uri, _))
+      .map(_.body)
 
   def sendCdf[R](
       r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any],
       contentType: String = "application/json",
       accept: String = "application/json"
-  ): F[R] = {
-    val request = r(
+  ): F[R] =
+    r(
       sttpRequest
         .contentType(contentType)
         .header("accept", accept)
     )
-    request.send(sttpBackend).map(unsafeBody(request.uri, _))
-  }
+      .send(sttpBackend)
+      .map(_.body)
 
   def map[R, R1](r: F[R], f: R => R1): F[R1] = r.map(f)
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
