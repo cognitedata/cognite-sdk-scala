@@ -43,7 +43,7 @@ class ConcurrentCachedObjectSpec
 }
 
 class Obj(val id: Int) {
-
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
   private var _alive: Boolean = true
 
   def alive: Boolean = synchronized { _alive }
@@ -53,6 +53,7 @@ class Obj(val id: Int) {
     Applicative[F].unlessA(alive)(
       F.raiseError(new Exception(s"Obj ${this.id} is dead")))
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   override def equals(obj: Any): Boolean = obj match {
     case that: Obj => this eq that
     case _         => false
@@ -109,7 +110,8 @@ trait BaseCachedResourceBehavior[F[_]] extends Matchers with Inspectors {
 
 }
 
-trait CachedResourceBehavior[F[_]] extends BaseCachedResourceBehavior[F] {
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
+trait CachedResourceBehavior[F[_]] extends BaseCachedResourceBehavior[F] with OptionValues {
   this: AsyncFlatSpec =>
 
   /** should behave like cachedResource(create) */
@@ -140,7 +142,7 @@ trait CachedResourceBehavior[F[_]] extends BaseCachedResourceBehavior[F] {
         obj <- pool.get.map(_.get(id))
       } yield {
         if (withCleanup)
-          obj.get.alive shouldEqual false
+          obj.value.alive shouldEqual false
         else succeed
       }
     }
@@ -178,6 +180,7 @@ trait CachedResourceBehavior[F[_]] extends BaseCachedResourceBehavior[F] {
 
 }
 
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
 trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
   this: AsyncFlatSpec =>
 
@@ -248,7 +251,7 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
             obj.alive shouldBe false
           }
         }
-        val numAllocated = objects.keySet.max
+        val numAllocated = objects.keySet.foldLeft(0)((x, y) => if (x >= y) x else y)
         val maxAllocated = tasks / 2 // div by 2 because half are run, half invalidate
         numAllocated should be <= maxAllocated
       }
@@ -259,12 +262,12 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
         def id: Int
         def run(cr: CachedResource[F, Obj]): F[Unit]
       }
-      case class Sleep(id: Int, dur: Int) extends Task {
+      final case class Sleep(id: Int, dur: Int) extends Task {
         def run(cr: CachedResource[F, Obj]): F[Unit] =
           cr.run(r => timer.sleep(dur.nanos) *> r.assertLive[F])
       }
       case object Ex extends Exception("ok") with NoStackTrace
-      case class Err(id: Int) extends Task {
+      final case class Err(id: Int) extends Task {
         val err: F[Unit] = IO.raiseError(Ex)
 
         def run(cr: CachedResource[F, Obj]): F[Unit] =
@@ -272,7 +275,7 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
             case Ex => IO.unit
           }
       }
-      case class Invalidate(id: Int) extends Task {
+      final case class Invalidate(id: Int) extends Task {
         def run(cr: CachedResource[F, Obj]): F[Unit] =
           cr.invalidate
       }

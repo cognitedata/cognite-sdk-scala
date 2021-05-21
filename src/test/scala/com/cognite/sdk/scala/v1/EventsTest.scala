@@ -8,6 +8,7 @@ import java.time.Instant
 import fs2._
 import com.cognite.sdk.scala.common.{ReadBehaviours, RetryWhile, SdkTestSpec, SetNull, SetValue, WritableBehaviors}
 
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.TraversableOps", "org.wartremover.warts.Null"))
 class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
@@ -77,7 +78,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     eventsToCreate,
     eventUpdates,
     (id: Long, item: Event) => item.copy(id = id),
-    (a: Event, b: Event) => { a == b },
+    (a: Event, b: Event) => { a === b },
     (readEvents: Seq[Event], updatedEvents: Seq[Event]) => {
       assert(eventsToCreate.size == eventUpdates.size)
       assert(readEvents.size == eventsToCreate.size)
@@ -85,11 +86,11 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       assert(updatedEvents.zip(readEvents).forall { case (updated, read) =>
         updated.description.nonEmpty &&
           read.description.nonEmpty &&
-          updated.description.forall { description => description == s"${read.description.get}-1"}
+          updated.description.forall { description => description === s"${read.description.value}-1"}
       })
       assert(readEvents.head.subtype.isDefined)
       assert(updatedEvents.head.subtype.isEmpty)
-      assert(updatedEvents(1).subtype == eventUpdates(1).subtype)
+      assert(updatedEvents(1).subtype === eventUpdates(1).subtype)
       val dataSets = updatedEvents.map(_.dataSetId)
       assert(List(None, Some(testDataSet.id), Some(testDataSet.id)) === dataSets)
       ()
@@ -107,7 +108,9 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     ),
     (readEvents: Seq[Event], updatedEvents: Seq[Event]) => {
       assert(readEvents.size == updatedEvents.size)
-      assert(updatedEvents.zip(readEvents).forall { case (updated, read) =>  updated.description.get == s"${read.description.get}-1" })
+      assert(updatedEvents.zip(readEvents).forall { case (updated, read) =>
+        updated.description.value === s"${read.description.value}-1"
+      })
       val dataSets = updatedEvents.map(_.dataSetId)
       assert(List(None, None, None) === dataSets)
       ()
@@ -122,10 +125,11 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     Map("update-1-externalId" -> EventUpdate(description = Some(SetValue("description-1-1"))),
       "update-2-externalId" -> EventUpdate(description = Some(SetValue("description-2-1")))),
     (readEvents: Seq[Event], updatedEvents: Seq[Event]) => {
-      assert(readEvents.size == updatedEvents.size)
+      assert(readEvents.size === updatedEvents.size)
       assert(updatedEvents.zip(readEvents).forall { case (updated, read) =>
-        updated.description.getOrElse("") == s"${read.description.getOrElse("")}-1" })
-      assert(updatedEvents.zip(readEvents).forall { case (updated, read) => updated.externalId == read.externalId })
+        updated.description.getOrElse("") === s"${read.description.getOrElse("")}-1"
+      })
+      assert(updatedEvents.zip(readEvents).forall { case (updated, read) => updated.externalId === read.externalId })
       ()
     }
   )
@@ -138,8 +142,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       Map(createEvents.head.id -> EventUpdate(description = Some(SetValue("description-1-1"))),
         createEvents.tail.head.id -> EventUpdate(description = Some(SetValue("description-2-1")))))
     assert(updatedEvents.zip(createEvents).forall {
-      case (updated, read) => updated.description.get == s"${read.description.get}-1" })
-    assert(updatedEvents.zip(createEvents).forall { case (updated, read) => updated.id == read.id })
+      case (updated, read) => updated.description.value === s"${read.description.value}-1" })
+    assert(updatedEvents.zip(createEvents).forall { case (updated, read) => updated.id === read.id })
   }
 
   it should "support filter" in {

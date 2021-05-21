@@ -10,16 +10,19 @@ import java.time.Instant
 import java.util.Base64
 import cats.Id
 import cats.effect._
+import cats.effect.laws.util.TestContext
 import com.cognite.sdk.scala.common.{ApiKeyAuth, Auth, CdpApiException, InvalidAuthentication, LoggingSttpBackend, RetryingBackend, SdkException, SdkTestSpec}
 import sttp.client3.{Response, SttpBackend}
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.testing.SttpBackendStub
 import sttp.model.{Header, StatusCode}
 
+import java.util.concurrent.Executors
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
 class ClientTest extends SdkTestSpec {
   private val loginStatus = client.login.status()
   private val loginStatusResponse = Response(
@@ -46,7 +49,7 @@ class ClientTest extends SdkTestSpec {
       .thenRespondCyclicResponses(loginStatusResponse, errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse
       )
   }
-  val loginStatusResponseWithApiKeyId = Response(
+  private val loginStatusResponseWithApiKeyId = Response(
       s"""
          |{
          |  "data": {
@@ -123,8 +126,9 @@ class ClientTest extends SdkTestSpec {
   }
 
   it should "support async IO clients" in {
-    implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-    implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
+    implicit val testContext: TestContext = TestContext()
+    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4)))
+    implicit val timer: Timer[IO] = testContext.timer[IO]
     GenericClient.forAuth[IO]("scala-sdk-test", auth)(
       implicitly,
       new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
@@ -345,7 +349,7 @@ class ClientTest extends SdkTestSpec {
     val points = client2.dataPoints.queryById(123, Instant.ofEpochMilli(1546300800000L), Instant.ofEpochMilli(1546900000000L), None)
     // True value is 1.8239872455596924, but to avoid issues with Scala 2.13 deprecation of
     // double ordering we compare at integer level.
-    scala.math.floor(points.datapoints.head.value * 10).toInt shouldBe 18
-    scala.math.ceil(points.datapoints.head.value * 10).toInt shouldBe 19
+    scala.math.floor(points.datapoints(0).value * 10).toInt shouldBe 18
+    scala.math.ceil(points.datapoints(0).value * 10).toInt shouldBe 19
   }
 }

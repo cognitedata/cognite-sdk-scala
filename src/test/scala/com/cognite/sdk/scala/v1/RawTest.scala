@@ -7,8 +7,10 @@ import cats.syntax.either._
 import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTestSpec, WritableBehaviors}
 import fs2.Stream
 import io.circe.syntax._
+import org.scalatest.OptionValues
 
-class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
+@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements"))
+class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with OptionValues {
   private val idsThatDoNotExist = Seq("nodatabase", "randomdatabase")
 
   it should behave like readable(client.rawDatabases)
@@ -86,7 +88,7 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
     // while avoiding deprecation warnings on Scala 2.13, which does not need that import.
     // use it for some nonsense here to make the import "used" also for Scala 2.13
     val either: Either[String, String] = Either.right("asdf")
-    assert(either.forall(_ == "asdf"))
+    assert(either.forall(_ === "asdf"))
 
     val rowsResponseAfterCreate = rows.list().compile.toList
     assert(rowsResponseAfterCreate.size === 2)
@@ -144,7 +146,7 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
       val currentRows = rows.list().compile.toList
       assert(currentRows.length === 4)
 
-      val maxLastUpdatedTime = prevRows.map(_.lastUpdatedTime.get).max
+      val maxLastUpdatedTime = prevRows.map(_.lastUpdatedTime.value).max
       assert(
         rows
           .filter(RawRowFilter(minLastUpdatedTime = Some(maxLastUpdatedTime)))

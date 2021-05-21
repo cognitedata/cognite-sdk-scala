@@ -8,6 +8,7 @@ import java.util.UUID
 
 import com.cognite.sdk.scala.common.{CdpApiException, DataPointsResourceBehaviors, SdkTestSpec}
 
+@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements"))
 class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
   override def withTimeSeries(testCode: TimeSeries => Any): Unit = {
     val name = Some(s"data-points-test-${UUID.randomUUID().toString}")
@@ -193,7 +194,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     aggregates shouldBe empty
   }
 
-  val sumsOnly = client.dataPoints.queryAggregatesById(
+  private val sumsOnly = client.dataPoints.queryAggregatesById(
     54577852743225L,
     Instant.ofEpochMilli(0L),
     Instant.ofEpochMilli(1553795183461L),
@@ -211,7 +212,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         Instant.ofEpochMilli(1553795183461L)
       )
     }
-    caught.missing.get.head.toMap("id").toString() shouldEqual missingId.toString
+    caught.missing.value.head.toMap("id").toString() shouldEqual missingId.toString
 
     val sCaught = intercept[CdpApiException] {
       client.dataPoints.queryById(
@@ -220,7 +221,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         Instant.ofEpochMilli(1553795183461L)
       )
     }
-    sCaught.missing.get.head.toMap("id").toString() shouldEqual missingId.toString
+    sCaught.missing.value.head.toMap("id").toString() shouldEqual missingId.toString
 
     val aggregateCaught = intercept[CdpApiException] {
       client.dataPoints.queryAggregatesById(
@@ -231,7 +232,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         Seq("average")
       )
     }
-    aggregateCaught.missing.get.head.toMap("id").toString() shouldEqual missingId.toString
+    aggregateCaught.missing.value.head.toMap("id").toString() shouldEqual missingId.toString
   }
 
 }

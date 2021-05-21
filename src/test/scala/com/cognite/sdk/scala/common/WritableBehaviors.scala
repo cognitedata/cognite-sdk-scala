@@ -9,6 +9,7 @@ import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
 trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =>
   // scalastyle:off
   def writable[R <: WithId[PrimitiveId], W, PrimitiveId](
@@ -30,7 +31,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
           missingIds should contain theSameElementsAs idsThatDoNotExist
         }
 
-        val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
+        val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
         val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByIds(
           sameIdsThatDoNotExist
         )
@@ -63,7 +64,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       // create a single item
       val createdItem = writable.createFromRead(readExamples.take(1))
       createdItem should have size 1
-      createdItem.head.id should not be 0
+      createdItem.headOption.value.id should not be 0
 
       maybeDeletable.map(_.deleteByIds(createdItem.map(_.id)))
 
@@ -80,7 +81,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       // create a single item
       val createdItem = writable.create(createExamples.take(1))
       createdItem should have size 1
-      createdItem.head.id should not be 0
+      createdItem.headOption.value.id should not be 0
 
       maybeDeletable.map(_.deleteByIds(createdItem.map(_.id)))
 
@@ -105,7 +106,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       createExamples: Seq[W],
       externalIdsThatDoNotExist: Seq[String],
       supportsMissingAndThrown: Boolean
-  )(implicit t: Transformer[R, W]) =
+  )(implicit t: Transformer[R, W]): Unit =
     writableWithExternalIdGeneric[Option, R, W](
       writable,
       maybeDeletable,
@@ -125,7 +126,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       externalIdsThatDoNotExist: Seq[String],
       supportsMissingAndThrown: Boolean,
       trySameIdsThatDoNotExist: Boolean = true
-  )(implicit t: Transformer[R, W]) =
+  )(implicit t: Transformer[R, W]): Unit =
     writableWithExternalIdGeneric[Id, R, W](
       writable,
       maybeDeletable,
@@ -170,8 +171,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
           //        [items is not a distinct set; duplicates: [{\"externalId\":\"AT_Matzen a469\"}]]"
           //    }
           //}
-          val sameIdsThatDoNotExist =
-            Seq(externalIdsThatDoNotExist.head, externalIdsThatDoNotExist.head)
+          val sameIdsThatDoNotExist = Seq.fill(2)(externalIdsThatDoNotExist(0))
           val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByExternalIds(
             sameIdsThatDoNotExist
           )
@@ -196,7 +196,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
     it should "create and delete items using the read class and external ids" in {
       val createdItems = writable.createFromRead(readExamples)
       createdItems should have size readExamples.size.toLong
-      val createdExternalIds = createdItems.flatMap(_.getExternalId())
+      val createdExternalIds = createdItems.map(_.getExternalId().value)
       createdExternalIds should have size readExamples.size.toLong
       maybeDeletable.map(_.deleteByExternalIds(createdExternalIds))
     }
@@ -205,7 +205,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       // create multiple items
       val createdItems = writable.create(createExamples)
       createdItems should have size createExamples.size.toLong
-      val createdIds = createdItems.flatMap(_.getExternalId())
+      val createdIds = createdItems.map(_.getExternalId().value)
       createdIds should have size createExamples.size.toLong
       maybeDeletable.map(_.deleteByExternalIds(createdIds))
     }
@@ -261,7 +261,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       val updatedItems = resource.updateByExternalId(updatesToMake)
       expectedBehaviors(createdItems, updatedItems)
 
-      maybeDeletable.map(_.deleteByExternalIds(updatedItems.map(_.externalId.get)))
+      maybeDeletable.map(_.deleteByExternalIds(updatedItems.map(_.externalId.value)))
     }
 
   def updatableById[R <: WithId[Long], W, U](
@@ -293,11 +293,11 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       val createdAndSomeNonExistingIds = createdIds ++ idsThatDoNotExist
       writable.deleteByIds(createdAndSomeNonExistingIds, ignoreUnknownIds = true)
       val retrieveDeletedException = intercept[CdpApiException](writable.retrieveByIds(createdIds))
-      assert(retrieveDeletedException.code == 400)
+      assert(retrieveDeletedException.code === 400)
       val doNotIgnoreException = intercept[CdpApiException](
         writable.deleteByIds(idsThatDoNotExist)
       )
-      assert(doNotIgnoreException.code == 400)
+      assert(doNotIgnoreException.code === 400)
     }
 
 //    it should "create and delete items using the create class" in {

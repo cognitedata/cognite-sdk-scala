@@ -7,6 +7,7 @@ import java.time.Instant
 import com.cognite.sdk.scala.common._
 import fs2.Stream
 
+@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Null"))
 class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
@@ -90,7 +91,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       r => r should have size 3
     )
 
-    client.assets.deleteByIds(Seq(createdItems.head.id), true, true)
+    client.assets.deleteByIds(Seq(createdItems(0).id), true, true)
 
     retryWithExpectedResult[Seq[Asset]](
       client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
@@ -113,15 +114,15 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     assetUpdates,
     (id: Long, item: Asset) => item.copy(id = id),
     (a: Asset, b: Asset) => {
-      a.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) == b.copy(lastUpdatedTime = Instant.ofEpochMilli(0))
+      a.copy(lastUpdatedTime = Instant.ofEpochMilli(0)) === b.copy(lastUpdatedTime = Instant.ofEpochMilli(0))
     },
     (readAssets: Seq[Asset], updatedAssets: Seq[Asset]) => {
       assert(assetsToCreate.size == assetUpdates.size)
       assert(readAssets.size == assetsToCreate.size)
       assert(updatedAssets.size == assetUpdates.size)
-      assert(updatedAssets.zip(readAssets).forall { case (updated, read) =>  updated.name == s"${read.name}-1" })
-      assert(updatedAssets.head.description.isEmpty)
-      assert(updatedAssets(1).description == readAssets(1).description)
+      assert(updatedAssets.zip(readAssets).forall { case (updated, read) =>  updated.name === s"${read.name}-1" })
+      assert(updatedAssets(0).description.isEmpty)
+      assert(updatedAssets(1).description === readAssets(1).description)
       val dataSets = updatedAssets.map(_.dataSetId)
       assert(List(Some(testDataSet.id), Some(testDataSet.id)) === dataSets)
       ()
@@ -140,7 +141,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       assert(assetsToCreate.size == assetUpdates.size)
       assert(readAssets.size == assetsToCreate.size)
       assert(updatedAssets.size == assetUpdates.size)
-      assert(updatedAssets.zip(readAssets).forall { case (updated, read) => updated.name == s"${read.name}-1" })
+      assert(updatedAssets.zip(readAssets).forall { case (updated, read) => updated.name === s"${read.name}-1" })
       val dataSets = updatedAssets.map(_.dataSetId)
       assert(List(None, None) === dataSets)
       ()
@@ -159,8 +160,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       assert(assetsToCreate.size == assetUpdates.size)
       assert(readAssets.size == assetsToCreate.size)
       assert(updatedAssets.size == assetUpdates.size)
-      assert(updatedAssets.zip(readAssets).forall { case (updated, read) =>  updated.name == s"${read.name}-1" })
-      assert(updatedAssets.zip(readAssets).forall { case (updated, read) => updated.externalId == read.externalId })
+      assert(updatedAssets.zip(readAssets).forall { case (updated, read) =>  updated.name === s"${read.name}-1" })
+      assert(updatedAssets.zip(readAssets).forall { case (updated, read) => updated.externalId === read.externalId })
       ()
     }
   )
@@ -240,7 +241,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         ), Some(5), Some(Seq("childCount")))
         .compile.toList,
       a => {
-        val bool = a.map(_.aggregates.get("childCount")).exists(_ > 0)
+        val bool = a.map(_.aggregates.value.get("childCount").value).exists(_ > 0)
         bool shouldBe true
       }
     )
@@ -299,7 +300,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
           filter = Some(AssetsFilter(parentExternalIds = Some(Seq("test-root"))))
         )
       )
-    assert(testAssets.map(_.parentExternalId) == Seq(Some("test-root"), Some("test-root")))
+    assert(testAssets.map(_.parentExternalId) === Seq(Some("test-root"), Some("test-root")))
   }
 
   it should "not be an error to request more assets than the API limit" in {

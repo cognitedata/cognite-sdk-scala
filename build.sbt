@@ -72,7 +72,7 @@ lazy val commonSettings = Seq(
       case _ => coverageEnabled.value
     }
   },
-  Compile/wartremoverErrors :=
+  Compile / wartremoverErrors :=
     (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor <= 11 =>
         Seq.empty[wartremover.Wart]
@@ -86,21 +86,26 @@ lazy val commonSettings = Seq(
           Wart.ToString,
           Wart.Overloading
         )
-    })
+    }),
 )
 
-wartremoverExcluded ++= Seq(
-  baseDirectory.value / "target" / "protobuf-generated",
-  baseDirectory.value / "src" / "test",
-  baseDirectory.value / "src" / "main" / "scala" / "com" / "cognite" / "sdk" / "scala" / "common" / "internal" / "CachedResource.scala"
-)
-
-Compile/PB.targets := Seq(
-  scalapb.gen() -> (target.value / "protobuf-generated")
-)
-Compile/managedSourceDirectories += target.value / "protobuf-generated"
+lazy val protoBufs = project.in(file("protobufs"))
+  .settings(
+    commonSettings,
+    name := "cognite-sdk-scala-protobufs",
+    crossScalaVersions := supportedScalaVersions,
+    libraryDependencies += "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
+    scalacOptions -= "-Xfatal-warnings",
+    Test / wartremoverErrors := Seq.empty[wartremover.Wart],
+    Compile / wartremoverErrors := Seq.empty[wartremover.Wart],
+    Compile / PB.targets := Seq(
+      scalapb.gen() -> (Compile / sourceManaged).value,
+    ),
+  )
 
 lazy val core = (project in file("."))
+  .aggregate(protoBufs)
+  .dependsOn(protoBufs)
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
@@ -116,9 +121,10 @@ lazy val core = (project in file("."))
   )
   .enablePlugins(BuildInfoPlugin)
   .settings(
+    buildInfoUsePackageAsPath := true,
     buildInfoKeys := Seq[BuildInfoKey](organization, version, organizationName),
-    buildInfoPackage := "BuildInfo"
-  )
+    buildInfoPackage := "BuildInfo",
+)
 
 val scalaTestDeps = Seq(
   "org.scalatest" %% "scalatest" % "3.2.9" % "test"

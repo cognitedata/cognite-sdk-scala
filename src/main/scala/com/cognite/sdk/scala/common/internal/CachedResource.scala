@@ -86,7 +86,7 @@ class ConcurrentCachedObject[F[_], R] private (acquire: F[R])(
 ) extends CachedResource[F, R] {
 
   /** Resource state */
-  private sealed trait RState
+  private trait RState
   private type Gate = Deferred[F, Unit]
 
   private case object Empty extends RState
@@ -96,6 +96,7 @@ class ConcurrentCachedObject[F[_], R] private (acquire: F[R])(
   override def invalidate: F[Unit] =
     transition[Unit](_ => Empty -> F.unit)
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   override def run[A](f: R => F[A]): F[A] = transition[A] {
     case s @ Ready(r) =>
       s -> f(r)
