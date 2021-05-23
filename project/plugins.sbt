@@ -9,7 +9,7 @@ addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.1")
 // scala-steward:on
 addSbtPlugin("au.com.onegeek" %% "sbt-dotenv" % "2.1.227")
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.13")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.15")
 
 
 // Warning: These must be synced with
