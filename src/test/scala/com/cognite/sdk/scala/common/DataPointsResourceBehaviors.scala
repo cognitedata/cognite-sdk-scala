@@ -22,7 +22,7 @@ trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: AnyFl
   def withTimeSeries(testCode: TimeSeries => Any): Unit
 
    // scalastyle:off
-  def dataPointsResource(dataPoints: DataPointsResource[Id]): Unit =
+  def dataPointsResource(dataPoints: DataPointsResource[Id]): Unit = {
     it should "be possible to insert and delete numerical data points" in withTimeSeries {
       timeSeries =>
         val timeSeriesId = timeSeries.id
@@ -78,4 +78,26 @@ trait DataPointsResourceBehaviors extends Matchers with RetryWhile { this: AnyFl
           pad => pad.datapoints should have size 0
         )
     }
+
+    it should "be an error to insert numerical data points for non-existing time series" in {
+      val unknownId = 991919L
+      val thrown = the[CdpApiException] thrownBy dataPoints.insertById(unknownId, testDataPoints)
+
+      val itemsNotFound = thrown.missing.value
+      val notFoundIds =
+        itemsNotFound.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
+      itemsNotFound should have size 1
+      assert(notFoundIds.headOption.value === unknownId)
+    }
+
+    it should "be an error to delete numerical data points for non-existing time series" in {
+      val unknownId = 991999L
+      val thrown = the[CdpApiException] thrownBy dataPoints.deleteRangeById(unknownId, start, end)
+      val itemsNotFound = thrown.missing.value
+      val notFoundIds =
+        itemsNotFound.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
+      itemsNotFound should have size 1
+      assert(notFoundIds.headOption.value === unknownId)
+    }
+  }
 }

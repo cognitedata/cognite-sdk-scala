@@ -81,12 +81,21 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
           ).toByteArray
         )
         .response(
-          asJson[Either[CdpApiError, Unit]].mapWithMetadata((response, metadata) =>
+          asJsonEither[CdpApiError, Unit].mapWithMetadata((response, metadata) =>
             response match {
-              case Left(value) => throw value
-              case Right(Left(cdpApiError)) =>
-                throw cdpApiError.asException(uri"$baseUrl", metadata.header("x-request-id"))
-              case Right(Right(_)) => ()
+              case Left(value) =>
+                value match {
+                  case HttpError(cdpApiError, _) =>
+                    throw cdpApiError.asException(baseUrl, metadata.header("x-request-id"))
+                  case DeserializationException(_, error) =>
+                    throw SdkException(
+                      s"Failed to parse response, reason: ${error.getMessage}",
+                      Some(baseUrl),
+                      metadata.header("x-request-id"),
+                      Some(metadata.code.code)
+                    )
+                }
+              case Right(_) => ()
             }
           )
         )
@@ -124,12 +133,21 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
           ).toByteArray
         )
         .response(
-          asJson[Either[CdpApiError, Unit]].mapWithMetadata((response, metadata) =>
+          asJsonEither[CdpApiError, Unit].mapWithMetadata((response, metadata) =>
             response match {
-              case Left(value) => throw value
-              case Right(Left(cdpApiError)) =>
-                throw cdpApiError.asException(uri"$baseUrl", metadata.header("x-request-id"))
-              case Right(Right(_)) => ()
+              case Left(value) =>
+                value match {
+                  case HttpError(cdpApiError, _) =>
+                    throw cdpApiError.asException(baseUrl, metadata.header("x-request-id"))
+                  case DeserializationException(_, error) =>
+                    throw SdkException(
+                      s"Failed to parse response, reason: ${error.getMessage}",
+                      Some(baseUrl),
+                      metadata.header("x-request-id"),
+                      Some(metadata.code.code)
+                    )
+                }
+              case Right(_) => ()
             }
           )
         )

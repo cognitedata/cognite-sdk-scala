@@ -103,5 +103,26 @@ trait StringDataPointsResourceBehaviors extends Matchers with RetryWhile { this:
       dataPoints.queryByIds(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
       dataPoints.queryStringsByIds(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
     }
+
+    it should "be an error insert or delete string data points for non-existing time series" in {
+      val unknownId = 991919L
+      val thrown = the[CdpApiException] thrownBy dataPoints.insertStringsById(unknownId, testStringDataPoints)
+
+      val itemsNotFound = thrown.missing.value
+      val notFoundIds =
+        itemsNotFound.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
+      itemsNotFound should have size 1
+      assert(notFoundIds.headOption.value === unknownId)
+    }
+
+    it should "be an error to delete string data points for non-existing time series" in {
+      val unknownId = 991999L
+      val thrown = the[CdpApiException] thrownBy dataPoints.deleteRangeById(unknownId, start, end)
+      val itemsNotFound = thrown.missing.value
+      val notFoundIds =
+        itemsNotFound.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
+      itemsNotFound should have size 1
+      assert(notFoundIds.headOption.value === unknownId)
+    }
   }
 }
