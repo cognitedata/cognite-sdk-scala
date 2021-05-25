@@ -9,10 +9,11 @@ import java.time.Instant
 import java.util.UUID
 import com.cognite.sdk.scala.v1.{StringDataPointsByExternalIdResponse, StringDataPointsByIdResponse, TimeSeries}
 import com.cognite.sdk.scala.v1.resources.DataPointsResource
+import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-trait StringDataPointsResourceBehaviors extends Matchers with RetryWhile { this: AnyFlatSpec =>
+trait StringDataPointsResourceBehaviors extends Matchers with OptionValues with RetryWhile { this: AnyFlatSpec =>
   private val startTime = System.currentTimeMillis()
   private val start = Instant.ofEpochMilli(startTime)
   private val endTime = startTime + 20*1000

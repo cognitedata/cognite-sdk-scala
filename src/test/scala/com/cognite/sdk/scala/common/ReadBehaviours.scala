@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import cats.Id
+import org.scalatest.OptionValues
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -12,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-trait ReadBehaviours extends Matchers { this: AnyFlatSpec =>
+trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
   def readable[R, InternalId, PrimitiveId](
       readable: Readable[R, Id],
       supportsLimit: Boolean = true
@@ -106,7 +107,7 @@ trait ReadBehaviours extends Matchers { this: AnyFlatSpec =>
         val itemsNotFound = thrown.missing
 
         val notFoundIds =
-          itemsNotFound.get.flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+          itemsNotFound.value.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
         notFoundIds should have size idsThatDoNotExist.size.toLong
         notFoundIds should contain theSameElementsAs idsThatDoNotExist
       }
@@ -118,14 +119,14 @@ trait ReadBehaviours extends Matchers { this: AnyFlatSpec =>
         sameIdsThrown.missing match {
           case Some(missingItems) =>
             val sameNotFoundIds =
-              missingItems.flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong).toSet
+              missingItems.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value).toSet
             // it's a bit funny that the same missing ids are returned duplicated,
             // but that's how it works as of 2019-06-02.
             //sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
             sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           case None =>
-            val duplicatedNotFoundIds = sameIdsThrown.duplicated.get
-              .flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+            val duplicatedNotFoundIds = sameIdsThrown.duplicated.value
+              .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
               .toSet
             //duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
             duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet

@@ -5,10 +5,11 @@ package com.cognite.sdk.scala.common
 
 import cats.Id
 import io.scalaland.chimney.Transformer
+import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-trait WritableBehaviors extends Matchers { this: AnyFlatSpec =>
+trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =>
   // scalastyle:off
   def writable[R <: WithId[PrimitiveId], W, PrimitiveId](
       writable: Create[R, W, Id] with CreateOne[R, W, Id],
@@ -24,7 +25,7 @@ trait WritableBehaviors extends Matchers { this: AnyFlatSpec =>
         if (supportsMissingAndThrown) {
           val missingIds = thrown.missing
             .getOrElse(Seq.empty)
-            .flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+            .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
           missingIds should have size idsThatDoNotExist.size.toLong
           missingIds should contain theSameElementsAs idsThatDoNotExist
         }
@@ -38,11 +39,11 @@ trait WritableBehaviors extends Matchers { this: AnyFlatSpec =>
           // if duplicated ids that do not exist are specified.
           val sameMissingIds = sameIdsThrown.duplicated match {
             case Some(duplicatedIds) =>
-              duplicatedIds.flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+              duplicatedIds.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
             case None =>
               sameIdsThrown.missing
                 .getOrElse(Seq.empty)
-                .flatMap(jsonObj => jsonObj("id").get.asNumber.get.toLong)
+                .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
           }
           sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
           sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
@@ -154,7 +155,7 @@ trait WritableBehaviors extends Matchers { this: AnyFlatSpec =>
         if (supportsMissingAndThrown) {
           val missingIds = thrown.missing
             .getOrElse(Seq.empty)
-            .flatMap(jsonObj => jsonObj("externalId").get.asString)
+            .map(jsonObj => jsonObj("externalId").value.asString.value)
           missingIds should have size externalIdsThatDoNotExist.size.toLong
           missingIds should contain theSameElementsAs externalIdsThatDoNotExist
         }
@@ -179,11 +180,11 @@ trait WritableBehaviors extends Matchers { this: AnyFlatSpec =>
             // if duplicated ids that do not exist are specified.
             val sameMissingIds = sameIdsThrown.duplicated match {
               case Some(duplicatedIds) =>
-                duplicatedIds.flatMap(jsonObj => jsonObj("externalId").get.asString)
+                duplicatedIds.map(jsonObj => jsonObj("externalId").value.asString.value)
               case None =>
                 sameIdsThrown.missing
                   .getOrElse(Seq.empty)
-                  .flatMap(jsonObj => jsonObj("externalId").get.asString)
+                  .map(jsonObj => jsonObj("externalId").value.asString.value)
             }
             sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
             sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
