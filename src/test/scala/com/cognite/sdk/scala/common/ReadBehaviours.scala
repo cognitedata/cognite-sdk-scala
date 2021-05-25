@@ -249,7 +249,7 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
     val firstTwoItemItems = fetchTestItems(readable)
     val firstTwoExternalIds = firstTwoItemItems.map(_.externalId.value)
     val firstTwoIds = firstTwoItemItems.map(_.id)
-    val nonExistentExternalId = s"does-not-exist/${UUID.randomUUID}"
+    val nonExistentExternalId = s"does-not-exist/${UUID.randomUUID.toString}"
     val nonExistentId = ThreadLocalRandom.current().nextLong(1, 9007199254740991L)
 
     it should "support retrieving items by external id with ignoreUnknownIds=true" in {

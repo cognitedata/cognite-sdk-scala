@@ -91,7 +91,7 @@ trait StringDataPointsResourceBehaviors extends Matchers with OptionValues with 
     }
 
     it should "support support query by externalId when ignoreUnknownIds=true" in {
-      val doesNotExist = s"does-not-exist-${UUID.randomUUID}"
+      val doesNotExist = s"does-not-exist-${UUID.randomUUID.toString}"
       dataPoints.getLatestStringDataPointByExternalIds(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
       dataPoints.getLatestDataPointsByExternalIds(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
       dataPoints.queryByExternalIds(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty

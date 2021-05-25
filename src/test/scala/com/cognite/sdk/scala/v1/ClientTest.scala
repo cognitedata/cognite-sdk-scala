@@ -32,7 +32,7 @@ class ClientTest extends SdkTestSpec {
        |    "user": "tom@example.com",
        |    "loggedIn": true,
        |    "project": "${loginStatus.project}",
-       |    "projectId": ${loginStatus.projectId}
+       |    "projectId": ${loginStatus.projectId.toString}
        |  }
        |}
        |""".stripMargin, StatusCode.Ok, "OK",
@@ -56,7 +56,7 @@ class ClientTest extends SdkTestSpec {
          |    "user": "tom@example.com",
          |    "loggedIn": true,
          |    "project": "${loginStatus.project}",
-         |    "projectId": ${loginStatus.projectId},
+         |    "projectId": ${loginStatus.projectId.toString},
          |    "apiKeyId": 12147483647
          |  }
          |}

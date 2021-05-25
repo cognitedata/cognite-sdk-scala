@@ -51,7 +51,7 @@ class Obj(val id: Int) {
 
   def assertLive[F[_]](implicit F: ApplicativeError[F, Throwable]): F[Unit] =
     Applicative[F].unlessA(alive)(
-      F.raiseError(new Exception(s"Obj ${this.id} is dead")))
+      F.raiseError(new Exception(s"Obj ${this.id.toString} is dead")))
 
   @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   override def equals(obj: Any): Boolean = obj match {
@@ -61,7 +61,7 @@ class Obj(val id: Int) {
 
   override def hashCode(): Int = id.hashCode()
 
-  override def toString: String = s"Obj($id alive=$alive)"
+  override def toString: String = s"Obj(${id.toString} alive=${alive.toString})"
 }
 
 trait BaseCachedResourceBehavior[F[_]] extends Matchers with Inspectors {
@@ -337,7 +337,7 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
         maxTestDuration,
         IO.raiseError(
           new Exception(
-            s"Test case did not complete within $maxTestDuration. Deadlock is likely"))
+            s"Test case did not complete within ${maxTestDuration.toString}. Deadlock is likely"))
       )
       .unsafeToFuture() // Begin eager test execution async
     // Resolve `IO` concurrency inside `test` by advancing the clock
@@ -352,8 +352,8 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
       // `Future` has no ability to cancel, so hopefully it gets GC'd
       throw new IllegalStateException(
         s"""Test probably deadlocked.
-           | tasksAfterTick=$tasksAfterTick
-           | pos=$pos""".stripMargin
+           | tasksAfterTick=${tasksAfterTick.toString}
+           | pos=${pos.toString}""".stripMargin
       )
     }
   }
