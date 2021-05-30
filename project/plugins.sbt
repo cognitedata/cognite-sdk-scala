@@ -1,7 +1,7 @@
 //addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.5")
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.10.0")
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.2")
-addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.18")
+addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.19")
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.2")
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.8.2")
