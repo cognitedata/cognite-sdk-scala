@@ -105,7 +105,7 @@ lazy val core = (project in file("."))
     commonSettings,
     libraryDependencies ++= Seq(
       "io.scalaland" %% "chimney" % "0.5.3",
-      "commons-io" % "commons-io" % "2.8.0",
+      "commons-io" % "commons-io" % "2.9.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
