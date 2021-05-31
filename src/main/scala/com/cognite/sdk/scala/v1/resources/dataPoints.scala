@@ -614,7 +614,7 @@ object DataPointsResource {
           optionalString(x.getUnit),
           x.getStringDatapoints.getDatapointsList.asScala
             .map(s => StringDataPoint(Instant.ofEpochMilli(s.getTimestamp), s.getValue))
-            .toSeq
+            .toSeq // Required by Scala 2.13 and later, to make this immutable
         )
       )
       .toSeq
@@ -631,7 +631,7 @@ object DataPointsResource {
           optionalString(x.getUnit),
           x.getStringDatapoints.getDatapointsList.asScala
             .map(s => StringDataPoint(Instant.ofEpochMilli(s.getTimestamp), s.getValue))
-            .toSeq
+            .toSeq // Required by Scala 2.13 and later, to make this immutable
         )
       )
       .toSeq
@@ -646,7 +646,7 @@ object DataPointsResource {
         optionalString(x.getUnit),
         x.getNumericDatapoints.getDatapointsList.asScala
           .map(n => DataPoint(Instant.ofEpochMilli(n.getTimestamp), n.getValue))
-          .toSeq
+          .toSeq // Required by Scala 2.13 and later, to make this immutable
       )
     }.toSeq
 
@@ -662,7 +662,7 @@ object DataPointsResource {
         optionalString(x.getUnit),
         x.getNumericDatapoints.getDatapointsList.asScala
           .map(n => DataPoint(Instant.ofEpochMilli(n.getTimestamp), n.getValue))
-          .toSeq
+          .toSeq // Required by Scala 2.13 and later, to make this immutable
       )
     }.toSeq
 
@@ -694,7 +694,7 @@ object DataPointsResource {
                 screenOutNan(a.getDiscreteVariance)
               )
             )
-            .toSeq
+            .toSeq // Required by Scala 2.13 and later, to make this immutable
         )
       )
       .toSeq
