@@ -30,7 +30,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   override val baseUrl = uri"${requestSession.baseUrl}/timeseries/data"
 
-  private def protoNumericDataPoints(dataPoints: Seq[DataPoint]) =
+  private def protoNumericDataPoints(dataPoints: Seq[DataPoint]): NumericDatapoints.Builder =
     NumericDatapoints
       .newBuilder()
       .addAllDatapoints(dataPoints.map { dp =>
@@ -41,7 +41,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
           .build()
       }.asJava)
 
-  private def protoStringDataPoints(dataPoints: Seq[StringDataPoint]) =
+  private def protoStringDataPoints(dataPoints: Seq[StringDataPoint]): StringDatapoints.Builder =
     StringDatapoints
       .newBuilder()
       .addAllDatapoints(dataPoints.map { dp =>
