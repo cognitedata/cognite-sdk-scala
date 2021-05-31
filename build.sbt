@@ -124,6 +124,7 @@ lazy val core = (project in file("."))
           // We use JavaConverters to remain backwards compatible with Scala 2.11
           "-Wconf:cat=deprecation:i"
         )
+      case Some((3, _)) => List("-source:3.0-migration")
       case _ =>
         List.empty[String]
     }),
@@ -180,6 +181,14 @@ scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
   case _ =>
     List.empty[String]
 })
+
+// Filter out "-source future" on Scala 3, as we need Scala 2.13 compatibility.
+// This will no longer be necessary once we upgrade to a version that includes
+// https://github.com/DavidGregory084/sbt-tpolecat/pull/44
+val filterOutSourceFuture = { options: Seq[String] =>
+  options.filterNot(Set("-source", "future"))
+}
+scalacOptions ~= filterOutSourceFuture
 
 scalastyleFailOnWarning := true
 
