@@ -53,13 +53,6 @@ final case class RequestSession[F[_]: Monad](
       .header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}")
       .header("x-cdp-app", applicationName)
       .readTimeout(90.seconds)
-//      .parseResponseIfMetadata { md =>
-//        md.contentLength.forall(_ > 0) && md.contentType.exists(
-//          // This is a bit ugly, but we're highly unlikely to use any other ContentType
-//          // any time soon.
-//          ct => ct.startsWith(MediaTypes.Json) || ct.startsWith("application/protobuf")
-//        )
-//      }
     clientTag match {
       case Some(tag) => baseRequest.header("x-cdp-clienttag", tag)
       case None => baseRequest
