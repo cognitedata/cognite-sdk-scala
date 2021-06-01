@@ -200,3 +200,11 @@ testScalastyle := (Test / scalastyle).toTask("").value
 
 Test / test := (Test / test).dependsOn(testScalastyle).value
 Test / test := (Test / test).dependsOn(mainScalastyle).value
+
+// Scala 2.11 doesn't support mixed projects as ours, so just disable docs for that release.
+Compile / doc / sources := (CrossVersion.partialVersion(scalaVersion.value) match {
+  case Some((2, minor)) if minor == 11 =>
+    Seq.empty
+  case _ =>
+    (Compile / doc / sources).value
+})
