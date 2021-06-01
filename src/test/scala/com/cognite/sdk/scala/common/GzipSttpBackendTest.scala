@@ -12,7 +12,7 @@ import cats.effect.{ContextShift, IO, Timer}
 import sttp.client3._
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
@@ -47,7 +47,7 @@ class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAf
   gzipHandler.addIncludedMethods("POST")
   gzipHandler.setInflateBufferSize(8096)
   private val servletHandler = new ServletContextHandler(ServletContextHandler.NO_SESSIONS)
-  servletHandler.setGzipHandler(gzipHandler)
+  servletHandler.insertHandler(gzipHandler)
   servletHandler.setInitParameter("gzip", "true")
   servletHandler.addServlet(classOf[EchoServlet], "/")
 
