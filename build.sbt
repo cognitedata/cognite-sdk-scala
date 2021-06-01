@@ -182,14 +182,6 @@ scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
     List.empty[String]
 })
 
-// Filter out "-source future" on Scala 3, as we need Scala 2.13 compatibility.
-// This will no longer be necessary once we upgrade to a version that includes
-// https://github.com/DavidGregory084/sbt-tpolecat/pull/44
-val filterOutSourceFuture = { options: Seq[String] =>
-  options.filterNot(Set("-source", "future"))
-}
-scalacOptions ~= filterOutSourceFuture
-
 scalastyleFailOnWarning := true
 
 lazy val mainScalastyle = taskKey[Unit]("mainScalastyle")
