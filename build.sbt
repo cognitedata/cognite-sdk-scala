@@ -13,7 +13,7 @@ val jettyTestVersion = "11.0.3"
 val sttpVersion = "3.3.5"
 val circeVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "0.12.0-M3"
-  case _ => "0.14.0"
+  case _ => "0.14.1"
 }
 val catsEffectVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.0.0"
