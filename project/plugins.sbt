@@ -10,5 +10,5 @@ addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.15")
 
 // Warning: These must be synced with
 // https://github.com/cognitedata/cdp-spark-datasource/blob/master/project/protoc.sbt
-addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.0") // See warning above
+addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.4") // See warning above
 libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.3"
