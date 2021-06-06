@@ -116,7 +116,7 @@ lazy val core = (project in file("."))
         CrossVersion.partialVersion(scalaVersion.value)
       ) % Test,
       "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value)),
-      "com.google.protobuf" % "protobuf-java" % "3.15.8"
+      "com.google.protobuf" % "protobuf-java" % "3.17.2"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor == 13 =>
