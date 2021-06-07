@@ -1,9 +1,8 @@
 package com.cognite.sdk.scala.common
 
-import java.util.concurrent.TimeUnit
 import cats.Monad
 import cats.syntax.all._
-import cats.effect.{Clock, ConcurrentEffect}
+import cats.effect.{Async, Clock}
 import com.cognite.sdk.scala.common.internal.{CachedResource, ConcurrentCachedObject}
 import sttp.client3._
 import sttp.client3.circe.asJson
@@ -28,8 +27,8 @@ object OAuth2 {
       with Serializable {
     def getAuth: F[Auth] =
       for {
-        now <- clock.monotonic(TimeUnit.SECONDS)
-        _ <- cache.invalidateIfNeeded(_.expiresAt <= now)
+        now <- clock.monotonic
+        _ <- cache.invalidateIfNeeded(_.expiresAt <= now.toSeconds)
         auth <- cache.run(state => F.pure(BearerTokenAuth(state.token)))
       } yield auth
   }
@@ -39,7 +38,7 @@ object OAuth2 {
         credentials: ClientCredentials,
         refreshSecondsBeforeTTL: Long = 30
     )(
-        implicit F: ConcurrentEffect[F],
+        implicit F: Async[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[ClientCredentialsProvider[F]] = {
@@ -70,15 +69,15 @@ object OAuth2 {
                     )
                   )
                 case DeserializationException(_, error) =>
-                  F.raiseError[ClientCredentialsResponse](
+                  F.raiseError(
                     new SdkException(
                       s"Failed to parse response from IdP: ${error.getMessage}"
                     )
                   )
               }
           }
-          acquiredAt <- clock.monotonic(TimeUnit.SECONDS)
-          expiresAt = acquiredAt + payload.expires_in - refreshSecondsBeforeTTL
+          acquiredAt <- clock.monotonic
+          expiresAt = acquiredAt.toSeconds + payload.expires_in - refreshSecondsBeforeTTL
         } yield TokenState(payload.access_token, expiresAt)
       }
 
