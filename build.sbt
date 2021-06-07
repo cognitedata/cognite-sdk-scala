@@ -1,7 +1,7 @@
 import wartremover.Wart
 import sbt.project
 
-val scala3 = "3.0.1"
+val scala3 = "3.1.1"
 val scala213 = "2.13.7"
 val scala212 = "2.12.15"
 val supportedScalaVersions = List(scala212, scala213, scala3)
@@ -9,13 +9,10 @@ val supportedScalaVersions = List(scala212, scala213, scala3)
 // This is used only for tests.
 val jettyTestVersion = "9.4.45.v20220203"
 
-val sttpVersion = "3.3.15"
-val circeVersion: Option[(Long, Long)] => String = {
-  case Some((3, _)) => "0.14.1"
-  case _ => "0.13.0" // Must use 0.13.0 for Spark compatibility (shapeless 2.3.3)
-}
-val catsEffectVersion = "2.5.4"
-val fs2Version = "2.5.10"
+val sttpVersion = "3.4.1"
+val circeVersion = "0.14.1"
+val catsEffectVersion = "3.3.5"
+val fs2Version = "3.2.4"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -24,7 +21,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "1.5.22",
+  version := "2.0.0-SNAPSHOT",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -100,12 +97,15 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
+      "org.typelevel" %% "cats-effect-kernel-testkit" % catsEffectVersion % Test,
+      "co.fs2" %% "fs2-core" % fs2Version,
       "com.google.protobuf" % "protobuf-java" % "3.19.4"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor == 13 =>
         List(
-          // We use JavaConverters to avoid a dependency on scala-collection-compat,
+          // We use JavaConverters to remain backwards compatible with Scala 2.12,
+          // and to avoid a dependency on scala-collection-compat
           "-Wconf:cat=deprecation:i"
         )
       case Some((3, _)) => List("-source:3.0-migration")
@@ -135,22 +135,19 @@ val sttpDeps = Seq(
     .exclude("io.circe", "circe-parser_2.11")
     .exclude("io.circe", "circe-parser_2.12")
     .exclude("io.circe", "circe-parser_2.13"),
-  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion % Test
+  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test
 )
 
 def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
   Seq(
     // We use the cats version included in the cats-effect version we specify.
-    ("io.circe" %% "circe-core" % circeVersion(scalaVersion))
-      .exclude("org.typelevel", "cats-core_2.11")
+    ("io.circe" %% "circe-core" % circeVersion)
       .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13"),
-    ("io.circe" %% "circe-generic" % circeVersion(scalaVersion))
-      .exclude("org.typelevel", "cats-core_2.11")
+    ("io.circe" %% "circe-generic" % circeVersion)
       .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13"),
-    ("io.circe" %% "circe-parser" % circeVersion(scalaVersion))
-      .exclude("org.typelevel", "cats-core_2.11")
+    ("io.circe" %% "circe-parser" % circeVersion)
       .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13")
   )
@@ -176,6 +173,7 @@ testScalastyle := (Test / scalastyle).toTask("").value
 
 Test / test := (Test / test).dependsOn(testScalastyle).value
 Test / test := (Test / test).dependsOn(mainScalastyle).value
+Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oD")
 
 // Scala 2.11 doesn't support mixed projects as ours, so just disable docs for that release.
 Compile / doc / sources := (CrossVersion.partialVersion(scalaVersion.value) match {

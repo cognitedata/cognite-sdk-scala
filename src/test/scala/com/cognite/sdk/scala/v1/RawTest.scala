@@ -4,7 +4,6 @@
 package com.cognite.sdk.scala.v1
 
 import cats.syntax.either._
-import cats.catsInstancesForId
 import com.cognite.sdk.scala.common.{Items, ReadBehaviours, SdkTestSpec, WritableBehaviors}
 import fs2.Stream
 import io.circe.syntax._
