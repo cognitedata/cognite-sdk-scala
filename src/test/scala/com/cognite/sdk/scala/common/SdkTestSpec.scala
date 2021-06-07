@@ -5,7 +5,6 @@ package com.cognite.sdk.scala.common
 
 import java.util.UUID
 import cats.Id
-import cats.catsInstancesForId
 import com.cognite.sdk.scala.v1._
 import com.cognite.sdk.scala.v1.resources.DataSets
 import sttp.client3.{Request, Response, SttpBackend}
