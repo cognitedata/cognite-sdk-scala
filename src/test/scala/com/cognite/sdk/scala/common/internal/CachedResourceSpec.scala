@@ -14,15 +14,15 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Random
 import scala.util.control.NoStackTrace
-import cats.effect.concurrent.{Deferred, Ref}
-import cats.effect.{ContextShift, IO, Resource, Sync, Timer}
+import cats.effect.{Async, Deferred, IO, Ref, Resource}
 import cats.{Applicative, ApplicativeError, FlatMap}
-import cats.effect.laws.util.TestContext
+import cats.effect.kernel.testkit.TestContext
 import cats.instances.all._
 import cats.syntax.all._
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.verbs.ResultOfStringPassedToVerb
+import cats.effect.unsafe.implicits.global
 
 class ConcurrentCachedObjectSpec extends AsyncFlatSpec with ConcurrentCachedResourceBehavior {
 
@@ -79,10 +79,10 @@ trait BaseCachedResourceBehavior[F[_]] extends Matchers with Inspectors {
         }
       }
 
-    def basicRelease(implicit F: Sync[F]): Obj => F[Unit] =
+    def basicRelease(implicit F: Async[F]): Obj => F[Unit] =
       obj => F.delay(obj.unsafeRelease())
 
-    def basic(implicit F: Sync[F]): F[(Pool, Resource[F, Obj])] =
+    def basic(implicit F: Async[F]): F[(Pool, Resource[F, Obj])] =
       for {
         pool <- Ref[F].of(Map.empty[Int, Obj])
         ids <- Ref[F].of(1)
@@ -115,7 +115,7 @@ trait CachedResourceBehavior[F[_]] extends BaseCachedResourceBehavior[F] with Op
       create: F[(Pool, CachedResource[F, Obj])],
       withCleanup: Boolean =
         true // Whether or not this resource is expected to clean up Obj on invalidate
-  )(implicit F: Sync[F]): Unit = {
+  )(implicit F: Async[F]): Unit = {
 
     (it should "run with no previous state").inIO {
       create.flatMap { case (_, cr) =>
@@ -182,11 +182,6 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
   this: AsyncFlatSpec =>
 
   implicit val ctx: TestContext = TestContext()
-  // Explicitly pass Async[IO] because sometimes scalac wants to compile
-  // to 'ctx.contextShift(IO.ioConcurrentEffect(this.CS))`, which is recursive, and explodes.
-  // And yes, "sometimes", because implicit resolution is slightly nondeterministic
-  implicit val contextShift: ContextShift[IO] = ctx.contextShift[IO](IO.ioEffect)
-  implicit val timer: Timer[IO] = ctx.timer[IO]
 
   def concurrentCachedResource(
       create: IO[(Pool, CachedResource[IO, Obj])],
@@ -198,7 +193,10 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
     (it should "get a new resource after invalidating (concurrently)").inIO {
       create.flatMap { case (_, cr) =>
         for {
-          id1 <- cr.run(r => timer.sleep(time) *> r.assertLive[F].as(r.id))
+          id1 <- cr.run { r =>
+            ctx.tickAll(time)
+            r.assertLive[F].as(r.id)
+          }
           _ <- cr.invalidate
           id2 <- cr.run(r => r.assertLive[F].as(r.id))
         } yield (id1 should not).equal(id2)
@@ -212,7 +210,7 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
           // use gate so run can't complete until after another concurrent run starts
           run1 <- cr.run(r => gate.get.as(r.id)).start
           id2 <- cr.run(r => gate.complete(()).as(r.id))
-          id1 <- run1.join
+          id1 <- run1.joinWithNever
         } yield id1 shouldEqual id2
       }
     }
@@ -220,7 +218,10 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
     (it should "defer releasing for invalidate until in flight run completes").inIO {
       create.flatMap { case (_, cr) =>
         for {
-          run <- cr.run(r => timer.sleep(time) *> r.assertLive[F]).start
+          run <- cr.run { r =>
+            ctx.tickAll(time)
+            r.assertLive[F]
+          }.start
           _ <- cr.invalidate
           _ <- run.join
         } yield succeed
@@ -234,7 +235,10 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
           parLimit = 8 // arbitrary
           tasks = 100 // arbitrary
           results <- Stream(
-            cr.run(r => timer.sleep(r.id.millis) *> r.assertLive[F]).attempt,
+            cr.run { r =>
+              ctx.tickAll(r.id.millis)
+              r.assertLive[F]
+            }.attempt,
             cr.invalidate.attempt
           ).covary[F]
             .repeat
@@ -265,7 +269,10 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
       }
       final case class Sleep(id: Int, dur: Int) extends Task {
         def run(cr: CachedResource[F, Obj]): F[Unit] =
-          cr.run(r => timer.sleep(dur.nanos) *> r.assertLive[F])
+          cr.run { r =>
+            ctx.tickAll(dur.nanos)
+            r.assertLive[F]
+          }
       }
       case object Ex extends Exception("ok") with NoStackTrace
       final case class Err(id: Int) extends Task {
@@ -306,7 +313,7 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
           .mapAsyncUnordered(taskCount) { case (t, f) =>
             for {
               // Timeout will only fail if we deadlocked
-              e <- Sync[F].ifM(bool)(f.cancel.attempt, f.join.timeout(1.hour).attempt)
+              e <- Async[F].ifM(bool)(f.cancel.void.attempt, f.join.timeout(1.hour).void.attempt)
             } yield t.toString -> e
           } // Cancel/join in non-deterministic order
         for {

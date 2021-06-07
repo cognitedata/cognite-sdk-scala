@@ -11,16 +11,16 @@ import java.util.Base64
 import cats.Id
 import cats.catsInstancesForId
 import cats.effect._
-import cats.effect.laws.util.TestContext
 import com.cognite.sdk.scala.common.{ApiKeyAuth, Auth, CdpApiException, InvalidAuthentication, LoggingSttpBackend, RetryingBackend, SdkException, SdkTestSpec}
 import sttp.client3.{Response, SttpBackend}
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.testing.SttpBackendStub
 import sttp.model.{Header, StatusCode}
+import cats.effect.unsafe.implicits.global
+import sttp.client3.impl.cats.implicits.asyncMonadError
+import sttp.monad.MonadAsyncError
 
-import java.util.concurrent.Executors
 import scala.collection.immutable.Seq
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
@@ -38,14 +38,14 @@ class ClientTest extends SdkTestSpec {
        |}
        |""".stripMargin, StatusCode.Ok, "OK",
     Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
-  private def makeTestingBackend(): SttpBackend[Id, Any] = {
+  private def makeTestingBackend(): SttpBackend[IO, Any] = {
     val errorResponse = Response("{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Some error\"\n  }\n}",
       StatusCode.TooManyRequests, "", Seq(Header("x-request-id", "test-request-header")))
     val successResponse = Response(
       "{\n  \"items\": [\n{\n  \"id\": 5238663994907390,\n  \"createdTime\":" +
         " 1550760030463,\n  \"name\": \"model_793601675501121482\"\n}\n  ]\n}",
       StatusCode.Ok, "", Seq(Header("x-request-id", "test-request-header")))
-    SttpBackendStub.synchronous
+    SttpBackendStub(implicitly[MonadAsyncError[IO]])
       .whenAnyRequest
       .thenRespondCyclicResponses(loginStatusResponse, errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse
       )
@@ -127,9 +127,6 @@ class ClientTest extends SdkTestSpec {
   }
 
   it should "support async IO clients" in {
-    implicit val testContext: TestContext = TestContext()
-    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4)))
-    implicit val timer: Timer[IO] = testContext.timer[IO]
     GenericClient.forAuth[IO]("scala-sdk-test", auth)(
       implicitly,
       new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
@@ -196,29 +193,29 @@ class ClientTest extends SdkTestSpec {
 
   it should "retry certain failed requests" in {
     assertThrows[CdpApiException] {
-      GenericClient.forAuth[Id]("scala-sdk-test", auth)(
+      GenericClient.forAuth[IO]("scala-sdk-test", auth)(
         implicitly,
         makeTestingBackend()
-      ).threeDModels.list()
+      ).unsafeRunSync().threeDModels.list().compile.toList.unsafeRunSync()
     }
 
-    val _ = GenericClient.forAuth[Id]("scala-sdk-test", auth)(
+    val _ = GenericClient.forAuth[IO]("scala-sdk-test", auth)(
       implicitly,
-      new RetryingBackend[Id, Any](
+      new RetryingBackend[IO, Any](
         makeTestingBackend(),
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
-    ).threeDModels.list()
+    ).unsafeRunSync().threeDModels.list().compile.toList.unsafeRunSync()
 
     assertThrows[CdpApiException] {
-      GenericClient.forAuth[Id]("scala-sdk-test", auth)(
+      GenericClient.forAuth[IO]("scala-sdk-test", auth)(
         implicitly,
-        new RetryingBackend[Id, Any](
+        new RetryingBackend[IO, Any](
           makeTestingBackend(),
           Some(4),
           initialRetryDelay = 1.millis,
           maxRetryDelay = 2.millis)
-      ).threeDModels.list()
+      ).unsafeRunSync().threeDModels.list().compile.toList.unsafeRunSync()
     }
   }
 
@@ -231,7 +228,7 @@ class ClientTest extends SdkTestSpec {
       StatusCode.ServiceUnavailable, "", Seq(Header("content-type", "application/json; charset=utf-8")))
     val serverError = Response("",
       StatusCode.ServiceUnavailable, "", Seq(Header("content-type", "application/protobuf")))
-    val backendStub = SttpBackendStub.synchronous
+    val backendStub = SttpBackendStub(implicitly[MonadAsyncError[IO]])
       .whenAnyRequest
       .thenRespondCyclicResponses(
         badGatewayResponseLeft,
@@ -239,18 +236,18 @@ class ClientTest extends SdkTestSpec {
         unavailableResponse,
         serverError,
         loginStatusResponse)
-    val client = new GenericClient[Id]("scala-sdk-test",
+    val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
       ApiKeyAuth("irrelevant", Some("randomproject"))
 
     )(
       implicitly,
-      new RetryingBackend[Id, Any](backendStub,
+      new RetryingBackend[IO, Any](backendStub,
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
     )
-    client.login.status().project shouldBe (loginStatus.project)
+    client.login.status().unsafeRunSync().project shouldBe (loginStatus.project)
   }
 
   it should "retry JSON requests based on response code if content type is unknown" in {
@@ -282,7 +279,7 @@ class ClientTest extends SdkTestSpec {
          |}
          |""".stripMargin, StatusCode.Ok, "OK",
       Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
-    val badRequestBackendStub = SttpBackendStub.synchronous
+    val badRequestBackendStub = SttpBackendStub(implicitly[MonadAsyncError[IO]])
       .whenAnyRequest
       .thenRespondCyclicResponses(
         badGatewayResponse,
@@ -298,19 +295,19 @@ class ClientTest extends SdkTestSpec {
         badRequest,
         assetsResponse
       )
-    val client = new GenericClient[Id]("scala-sdk-test",
+    val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
       ApiKeyAuth("irrelevant", Some("randomproject"))
     )(
       implicitly,
-      new RetryingBackend[Id, Any](
+      new RetryingBackend[IO, Any](
         badRequestBackendStub,
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
     )
-    client.login.status().project shouldBe loginStatus.project
-    client.assets.list().compile.toList.length should be > 0
+    client.login.status().unsafeRunSync().project shouldBe loginStatus.project
+    client.assets.list().compile.toList.unsafeRunSync().length should be > 0
   }
 
   it should "retry protobuf requests based on response code if content type is unknown" in {
@@ -328,7 +325,7 @@ class ClientTest extends SdkTestSpec {
       StatusCode.ServiceUnavailable, "", Seq(Header("content-type", "text/html; charset=UTF-8")))
     val badRequestBytes: Response[Array[Byte]]  = Response("".getBytes("utf-8"),
       StatusCode.ServiceUnavailable, "", Seq(Header("content-type", "unknown")))
-    val badRequestBackendStub1 = SttpBackendStub.synchronous
+    val badRequestBackendStub1 = SttpBackendStub(implicitly[MonadAsyncError[IO]])
       .whenAnyRequest
       .thenRespondCyclicResponses(badGatewayResponseBytes,
         unavailableResponseBytes,
@@ -336,18 +333,19 @@ class ClientTest extends SdkTestSpec {
         serverErrorHtmlBytes,
         badRequestBytes,
         protobufResponse)
-    val client2 = new GenericClient[Id]("scala-sdk-test",
+    val client2 = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
       ApiKeyAuth("irrelevant", Some("randomproject"))
     )(
       implicitly,
-      new RetryingBackend[Id, Any](
+      new RetryingBackend[IO, Any](
         badRequestBackendStub1,
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
     )
     val points = client2.dataPoints.queryById(123, Instant.ofEpochMilli(1546300800000L), Instant.ofEpochMilli(1546900000000L), None)
+      .unsafeRunSync()
     // True value is 1.8239872455596924, but to avoid issues with Scala 2.13 deprecation of
     // double ordering we compare at integer level.
     scala.math.floor(points.datapoints(0).value * 10).toInt shouldBe 18

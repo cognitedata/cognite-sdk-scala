@@ -4,25 +4,15 @@ import sbt.project
 val scala3 = "3.0.0"
 val scala213 = "2.13.6"
 val scala212 = "2.12.14"
-val scala211 = "2.11.12"
-val supportedScalaVersions = List(scala212, scala213, scala211, scala3)
+val supportedScalaVersions = List(scala212, scala213, scala3)
 
 // This is used only for tests.
 val jettyTestVersion = "11.0.3"
 
 val sttpVersion = "3.3.6"
-val circeVersion: Option[(Long, Long)] => String = {
-  case Some((2, 11)) => "0.12.0-M3"
-  case _ => "0.14.1"
-}
-val catsEffectVersion: Option[(Long, Long)] => String = {
-  case Some((2, 11)) => "2.0.0"
-  case _ => "2.5.1"
-}
-val fs2Version: Option[(Long, Long)] => String = {
-  case Some((2, 11)) => "2.1.0"
-  case _ => "2.5.6"
-}
+val circeVersion = "0.14.1"
+val catsEffectVersion = "3.1.1"
+val fs2Version = "3.0.4"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -31,7 +21,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "1.5.0",
+  version := "1.6.0-SNAPSHOT",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -66,8 +56,6 @@ lazy val commonSettings = Seq(
   },
   coverageEnabled := {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      // Scala 2.11 is no longer supported by sbt-scoverage
-      case Some((2, 11)) => false
       // Scala 3 is not supported by scoverage
       // https://github.com/scoverage/scalac-scoverage-plugin/issues/299
       case Some((3, _)) => false
@@ -76,9 +64,6 @@ lazy val commonSettings = Seq(
   },
   Compile / wartremoverErrors :=
     (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 11)) =>
-        // Scala 2.11 is no longer supported by Wartremover
-        Seq.empty[wartremover.Wart]
       case Some((2, 12)) =>
         // We do this to make IntelliJ happy, as it doesn't understand Wartremover properly.
         // Since we currently put 2.12 first in cross version, that's what IntelliJ is using.
@@ -109,19 +94,15 @@ lazy val core = (project in file("."))
       "commons-io" % "commons-io" % "2.8.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
-      "org.typelevel" %% "cats-effect" % catsEffectVersion(
-        CrossVersion.partialVersion(scalaVersion.value)
-      ),
-      "org.typelevel" %% "cats-effect-laws" % catsEffectVersion(
-        CrossVersion.partialVersion(scalaVersion.value)
-      ) % Test,
-      "co.fs2" %% "fs2-core" % fs2Version(CrossVersion.partialVersion(scalaVersion.value)),
+      "org.typelevel" %% "cats-effect" % catsEffectVersion,
+      "org.typelevel" %% "cats-effect-kernel-testkit" % catsEffectVersion % Test,
+      "co.fs2" %% "fs2-core" % fs2Version,
       "com.google.protobuf" % "protobuf-java" % "3.15.8"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor == 13 =>
         List(
-          // We use JavaConverters to remain backwards compatible with Scala 2.11
+          // We use JavaConverters to remain backwards compatible with Scala 2.12
           "-Wconf:cat=deprecation:i"
         )
       case Some((3, _)) => List("-source:3.0-migration")
@@ -151,22 +132,19 @@ val sttpDeps = Seq(
     .exclude("io.circe", "circe-parser_2.11")
     .exclude("io.circe", "circe-parser_2.12")
     .exclude("io.circe", "circe-parser_2.13"),
-  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion % Test
+  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test
 )
 
 def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
   Seq(
     // We use the cats version included in the cats-effect version we specify.
-    ("io.circe" %% "circe-core" % circeVersion(scalaVersion))
-      .exclude("org.typelevel", "cats-core_2.11")
+    ("io.circe" %% "circe-core" % circeVersion)
       .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13"),
-    ("io.circe" %% "circe-generic" % circeVersion(scalaVersion))
-      .exclude("org.typelevel", "cats-core_2.11")
+    ("io.circe" %% "circe-generic" % circeVersion)
       .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13"),
-    ("io.circe" %% "circe-parser" % circeVersion(scalaVersion))
-      .exclude("org.typelevel", "cats-core_2.11")
+    ("io.circe" %% "circe-parser" % circeVersion)
       .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13")
   )
