@@ -40,7 +40,8 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
       clientId = clientId,
       clientSecret = clientSecret,
-      scopes = List("https://bluefield.cognitedata.com/.default")
+      scopes = List("https://bluefield.cognitedata.com/.default"),
+      cdfProjectName = "extractor-bluefield-testing"
     )
 
     val authProvider = OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value
@@ -68,7 +69,8 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
       clientId = "clientId",
       clientSecret = "clientSecret",
-      scopes = List("https://bluefield.cognitedata.com/.default")
+      scopes = List("https://bluefield.cognitedata.com/.default"),
+      cdfProjectName = "extractor-bluefield-testing"
     )
 
     an[SdkException] shouldBe thrownBy {
@@ -97,7 +99,8 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       tokenUri = uri"http://whatever.com/token",
       clientId = "irrelevant",
       clientSecret = "irrelevant",
-      scopes = List("irrelevant")
+      scopes = List("irrelevant"),
+      cdfProjectName = "irrelevant"
     )
 
     val io: IO[Unit] = for {
