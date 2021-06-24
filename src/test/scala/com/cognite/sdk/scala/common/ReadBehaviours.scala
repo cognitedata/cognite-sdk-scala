@@ -29,6 +29,17 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
         readable.read(limit = Some(1)).items should have length Math.min(listLength.toLong, 1)
         readable.read(limit = Some(2)).items should have length Math.min(listLength.toLong, 2)
       }
+
+      it should "be able to page items by one" in {
+        val itemsPagedByOne =
+          Readable.pullFromCursor(None, None, None, (c, l, p) => readable.readWithCursor(c, Some(1), p))
+            .stream
+            .take(5)
+            .compile.toList
+        itemsPagedByOne.length should be(Math.min(5, listLength))
+        // all are distinct
+        itemsPagedByOne.distinct.length shouldBe itemsPagedByOne.length
+      }
     }
 
     it should "read all items" in {

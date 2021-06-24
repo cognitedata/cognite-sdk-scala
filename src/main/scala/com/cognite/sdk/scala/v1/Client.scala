@@ -168,6 +168,7 @@ class GenericClient[F[_]](
   lazy val dataSets = new DataSets[F](requestSession)
   lazy val labels = new Labels[F](requestSession)
   lazy val relationships = new Relationships[F](requestSession)
+  lazy val transformations = new Transformations[F](requestSession)
 
   lazy val rawDatabases = new RawDatabases[F](requestSession)
   def rawTables(database: String): RawTables[F] = new RawTables(requestSession, database)
