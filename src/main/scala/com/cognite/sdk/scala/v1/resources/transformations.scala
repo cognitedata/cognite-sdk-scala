@@ -137,9 +137,8 @@ class Transformations[F[_]: Monad](val requestSession: RequestSession[F])
 
   def queryOne[I](
       q: String
-  )(implicit itemDecoder: Decoder[I]): F[I] = {
+  )(implicit itemDecoder: Decoder[I]): F[I] =
     query[I](q, limit = 1).map(_.results.items.head)
-  }
 }
 
 object Transformations {
