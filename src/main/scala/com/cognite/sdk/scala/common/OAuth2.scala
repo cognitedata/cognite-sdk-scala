@@ -16,7 +16,8 @@ object OAuth2 {
       tokenUri: Uri,
       clientId: String,
       clientSecret: String,
-      scopes: List[String]
+      scopes: List[String],
+      cdfProjectName: String
   )
 
   class ClientCredentialsProvider[F[_]] private (
@@ -30,7 +31,7 @@ object OAuth2 {
       for {
         now <- clock.monotonic(TimeUnit.SECONDS)
         _ <- cache.invalidateIfNeeded(_.expiresAt <= now)
-        auth <- cache.run(state => F.pure(BearerTokenAuth(state.token)))
+        auth <- cache.run(state => F.pure(OidcTokenAuth(state.token, state.cdfProjectName)))
       } yield auth
   }
 
@@ -79,7 +80,7 @@ object OAuth2 {
           }
           acquiredAt <- clock.monotonic(TimeUnit.SECONDS)
           expiresAt = acquiredAt + payload.expires_in - refreshSecondsBeforeTTL
-        } yield TokenState(payload.access_token, expiresAt)
+        } yield TokenState(payload.access_token, expiresAt, credentials.cdfProjectName)
       }
 
       ConcurrentCachedObject(authenticate).map(new ClientCredentialsProvider[F](_))
@@ -91,5 +92,5 @@ object OAuth2 {
     implicit val decoder: Decoder[ClientCredentialsResponse] = deriveDecoder
   }
 
-  private final case class TokenState(token: String, expiresAt: Long)
+  private final case class TokenState(token: String, expiresAt: Long, cdfProjectName: String)
 }
