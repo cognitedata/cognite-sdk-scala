@@ -115,24 +115,36 @@ class TransformationsTest extends SdkTestSpec with ReadBehaviours with WritableB
     }
   )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  it should behave like updatableByBothIds(
+    greenfieldClient.transformations,
+    Some(greenfieldClient.transformations),
+    transformsToCreate,
+    Seq(
+      StandardTransformConfigUpdate(name = Some(SetValue("scala-sdk-update-1-1"))),
+      StandardTransformConfigUpdate(
+        destination = Some(SetValue(Json.obj("type" -> Json.fromString("datapoints")))),
+        query = Some(SetValue("select 2")),
+        sourceApiKey = Some(SetValue(greenfieldAuth.asInstanceOf[ApiKeyAuth].apiKey)),
+        isPublic = Some(SetValue(true))
+      )
+    ),
+    (read: Seq[TransformConfigRead], updated: Seq[TransformConfigRead]) => {
+      assert(read.size == updated.size)
+      assert(read.size == transformsToCreate.size)
+      assert(read.size == transformUpdates.size)
+      assert(updated.map(_.name) == List("scala-sdk-update-1-1", "scala-sdk-read-example-2"))
+      assert(updated(1).isPublic)
+      assert(!read(1).isPublic)
+      assert(updated(1).hasSourceApiKey)
+      assert(updated(1).query == "select 2")
+      ()
+    }
+  )
 
   case class RawAggregationResponse(average: Double)
 
   it should "query average" in {
+    greenfieldClient.transformations.list().compile.toList
     val response = greenfieldClient.transformations.queryOne[RawAggregationResponse](
       "select avg(` V1 vcross (m/s)`) as average from ORCA.VAN_net"
     )
@@ -153,42 +165,4 @@ class TransformationsTest extends SdkTestSpec with ReadBehaviours with WritableB
     println(response)
     assert(response.nonEmpty)
   }
-
-//  it should behave like updatableById(
-//    client.assets,
-//    Some(client.assets),
-//    assetsToCreate,
-//    Seq(
-//      AssetUpdate(name = Some(SetValue("scala-sdk-update-1-1"))),
-//      AssetUpdate(name = Some(SetValue("scala-sdk-update-2-1")), dataSetId = Some(SetNull()))
-//    ),
-//    (readAssets: Seq[Asset], updatedAssets: Seq[Asset]) => {
-//      assert(assetsToCreate.size == assetUpdates.size)
-//      assert(readAssets.size == assetsToCreate.size)
-//      assert(updatedAssets.size == assetUpdates.size)
-//      assert(updatedAssets.zip(readAssets).forall { case (updated, read) => updated.name === s"${read.name}-1" })
-//      assert(readAssets)
-//      assert(List(None, None) === dataSets)
-//      ()
-//    }
-//  )
-//
-//  it should behave like updatableByExternalId(
-//    client.assets,
-//    Some(client.assets),
-//    Seq(
-//      Asset(name = "update-1", externalId = Some("update-1-externalId")),
-//      Asset(name = "update-2", externalId = Some("update-2-externalId"))),
-//    Map("update-1-externalId" -> AssetUpdate(name = Some(SetValue("update-1-1"))),
-//      "update-2-externalId" -> AssetUpdate(name = Some(SetValue("update-2-1")))),
-//    (readAssets: Seq[Asset], updatedAssets: Seq[Asset]) => {
-//      assert(assetsToCreate.size == assetUpdates.size)
-//      assert(readAssets.size == assetsToCreate.size)
-//      assert(updatedAssets.size == assetUpdates.size)
-//      assert(updatedAssets.zip(readAssets).forall { case (updated, read) =>  updated.name === s"${read.name}-1" })
-//      assert(updatedAssets.zip(readAssets).forall { case (updated, read) => updated.externalId === read.externalId })
-//      ()
-//    }
-//  )
-
 }

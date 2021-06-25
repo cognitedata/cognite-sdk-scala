@@ -103,8 +103,8 @@ final case class StandardTransformConfigUpdate(
   destination: Option[NonNullableSetter[Json]] = None,
   conflictMode: Option[NonNullableSetter[String]] = None,
   query: Option[NonNullableSetter[String]] = None,
-  //sourceOidcCredentials: Option[Setter[FlatOidcCredentialsUpdate]] = None,
-  //destinationOidcCredentials: Option[Setter[FlatOidcCredentialsUpdate]] = None,
+  sourceOidcCredentials: Option[Setter[FlatOidcCredentialsUpdate]] = None,
+  destinationOidcCredentials: Option[Setter[FlatOidcCredentialsUpdate]] = None,
   sourceApiKey: Option[Setter[String]] = None,
   destinationApiKey: Option[Setter[String]] = None,
   isPublic: Option[NonNullableSetter[Boolean]] = None
@@ -117,6 +117,10 @@ final case class FlatOidcCredentialsUpdate(
   tokenUri: Option[String] = None,
   cdfProjectName: Option[String] = None
 )
+
+object FlatOidcCredentialsUpdate {
+  implicit val encoder: Encoder[FlatOidcCredentialsUpdate] = deriveEncoder[FlatOidcCredentialsUpdate]
+}
 
 final case class QueryQuery(query: String)
 
