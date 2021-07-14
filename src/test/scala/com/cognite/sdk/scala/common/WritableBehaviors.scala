@@ -279,6 +279,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       maybeDeletable.map(_.deleteByIds(updatedItems.map(_.id)))
     }
 
+  @SuppressWarnings(Array("org.wartremover.warts.OptionPartial"))
   def updatableByBothIds[R <: ToCreate[W] with ToUpdate[U] with WithId[Long] with WithExternalId, W, U](
     resource: Create[R, W, Id] with UpdateById[R, U, Id] with UpdateByExternalId[R, U, Id] with RetrieveByIds[R, Id],
     maybeDeletable: Option[DeleteByIds[Id, Long] with DeleteByExternalIds[Id]],

@@ -48,7 +48,7 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers {
     "scala-sdk-test", auth)(implicitly, sttpBackend)
 
   lazy val greenfieldClient: GenericClient[Id] = GenericClient.forAuth[Id](
-    "scala-sdk-test", greenfieldAuth, "https://greenfield.cognitedata.com", apiVersion = Some("playground"))(implicitly, sttpBackend)
+    "scala-sdk-test", greenfieldAuth, "http://localhost:4001", apiVersion = Some("playground"))(implicitly, sttpBackend)
 
   lazy val projectName: String = client.login.status().project
 
