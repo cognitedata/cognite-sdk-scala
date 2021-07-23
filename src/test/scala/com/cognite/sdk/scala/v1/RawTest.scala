@@ -5,7 +5,7 @@ package com.cognite.sdk.scala.v1
 
 import cats.syntax.either._
 import cats.catsInstancesForId
-import com.cognite.sdk.scala.common.{ReadBehaviours, SdkTestSpec, WritableBehaviors}
+import com.cognite.sdk.scala.common.{Items, ReadBehaviours, SdkTestSpec, WritableBehaviors}
 import fs2.Stream
 import io.circe.syntax._
 import org.scalatest.OptionValues
@@ -110,6 +110,21 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
     rows.createOne(RawRow("1b3", Map("abc" -> "cdf".asJson)))
     val rowsResponseAfterCreateOne = rows.list().compile.toList
     assert(rowsResponseAfterCreateOne.size === 2)
+  }
+
+  it should "ensure parent" in {
+    val database = s"raw-test-ensureParent-${shortRandom()}"
+    val table =  s"raw-test-${shortRandom()}"
+    try {
+      client.rawRows(database, table).createItems(Items(Seq(RawRow("something", Map()))), ensureParent = true)
+      assert(client.rawTables(database).list().compile.toList.map(_.id).contains(table))
+    } finally {
+      try {
+        client.rawTables(database).deleteByIds(Seq(table))
+      } finally {
+        client.rawDatabases.deleteByIds(Seq(database))
+      }
+    }
   }
 
   it should "allow partition read and filtering of rows" in withDatabaseTables {
