@@ -1,7 +1,7 @@
 import wartremover.Wart
 import sbt.project
 
-val scala3 = "3.0.0"
+val scala3 = "3.0.1"
 val scala213 = "2.13.6"
 val scala212 = "2.12.14"
 val scala211 = "2.11.12"
@@ -13,7 +13,8 @@ val jettyTestVersion = "11.0.6"
 val sttpVersion = "3.3.13"
 val circeVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "0.12.0-M3"
-  case _ => "0.14.1"
+  case Some((3, _)) => "0.14.1"
+  case _ => "0.14.0" // Must use <= 0.14.0 for Spark compatibility
 }
 val catsEffectVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "2.0.0"
@@ -31,7 +32,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "1.5.3",
+  version := "1.5.4",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
