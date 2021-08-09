@@ -8,9 +8,9 @@ val scala211 = "2.11.12"
 val supportedScalaVersions = List(scala212, scala213, scala211, scala3)
 
 // This is used only for tests.
-val jettyTestVersion = "11.0.3"
+val jettyTestVersion = "11.0.6"
 
-val sttpVersion = "3.3.6"
+val sttpVersion = "3.3.13"
 val circeVersion: Option[(Long, Long)] => String = {
   case Some((2, 11)) => "0.12.0-M3"
   case _ => "0.14.1"
@@ -31,7 +31,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "1.5.1",
+  version := "1.5.2",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -106,7 +106,7 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "commons-io" % "commons-io" % "2.8.0",
+      "commons-io" % "commons-io" % "2.11.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion(

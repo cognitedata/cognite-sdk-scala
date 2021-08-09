@@ -9,7 +9,7 @@ import com.cognite.sdk.scala.v1.CogniteId
 import io.circe.{Decoder, Encoder, Json, JsonObject}
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.model.Uri
-
+// scalastyle:off number.of.types
 trait ResponseWithCursor {
   val nextCursor: Option[String]
 }
@@ -150,9 +150,12 @@ trait WithId[I] {
   val id: I
 }
 
-trait WithExternalIdGeneric[F[_]] {
+trait WithGetExternalId {
+  def getExternalId(): Option[String]
+}
+
+trait WithExternalIdGeneric[F[_]] extends WithGetExternalId {
   val externalId: F[String]
-  def getExternalId(): Option[String] // We could have implemented Foldable instead
 }
 
 trait WithExternalId extends WithExternalIdGeneric[Option] {
@@ -167,8 +170,13 @@ trait WithCreatedTime {
   val createdTime: Instant
 }
 
-trait WithSetExternalId {
+trait WithSetExternalId extends WithGetExternalId {
   val externalId: Option[Setter[String]]
+  override def getExternalId(): Option[String] =
+    externalId match {
+      case Some(SetValue(v)) => Some(v)
+      case _ => None
+    }
 }
 
 trait ToCreate[W] {
