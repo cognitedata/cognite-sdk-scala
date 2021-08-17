@@ -16,7 +16,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Set up JDK 8
-      uses: olafurpg/setup-scala@v10
+      uses: olafurpg/setup-scala@v13
 
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
     # Can we do something better here?
@@ -60,11 +60,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-
+      - name: Set up JDK 8
+        uses: olafurpg/setup-scala@v13
       - name: Set up SBT
         env:
           SECRETS_KEY: ${{ secrets.secrets_key }}
