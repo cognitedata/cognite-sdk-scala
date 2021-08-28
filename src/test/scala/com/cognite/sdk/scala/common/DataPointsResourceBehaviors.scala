@@ -6,7 +6,7 @@ package com.cognite.sdk.scala.common
 import cats.Id
 
 import java.time.Instant
-import com.cognite.sdk.scala.v1.{DataPointsByExternalIdResponse, DataPointsByIdResponse, TimeSeries}
+import com.cognite.sdk.scala.v1.{CogniteExternalId, CogniteInternalId, DataPointsByExternalIdResponse, DataPointsByIdResponse, TimeSeries}
 import com.cognite.sdk.scala.v1.resources.DataPointsResource
 import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
@@ -29,7 +29,7 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
       timeSeries =>
         val timeSeriesId = timeSeries.id
         val timeSeriesExternalId = timeSeries.externalId.value
-        dataPoints.insertById(timeSeriesId, testDataPoints)
+        dataPoints.insert(CogniteInternalId(timeSeriesId), testDataPoints)
 
         retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryById(timeSeriesId, start, end.plusMillis(1)),
@@ -42,7 +42,7 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
         )
 
         retryWithExpectedResult[Option[DataPoint]](
-          dataPoints.getLatestDataPointById(timeSeriesId),
+          dataPoints.getLatestDataPoint(CogniteInternalId(timeSeriesId)),
           dp => {
             dp.isDefined shouldBe true
             testDataPoints.toList should contain(dp.value)
@@ -55,7 +55,7 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
           dp => dp.datapoints should have size 0
         )
 
-        dataPoints.insertByExternalId(timeSeriesExternalId, testDataPoints)
+        dataPoints.insert(CogniteExternalId(timeSeriesExternalId), testDataPoints)
         retryWithExpectedResult[DataPointsByExternalIdResponse](
           dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
           p2 => p2.datapoints should have size testDataPoints.size.toLong
@@ -67,7 +67,7 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
         )
 
         retryWithExpectedResult[Option[DataPoint]](
-          dataPoints.getLatestDataPointByExternalId(timeSeriesExternalId),
+          dataPoints.getLatestDataPoint(CogniteExternalId(timeSeriesExternalId)),
           { l2 =>
             l2.isDefined shouldBe true
             testDataPoints.toList should contain(l2.value)
@@ -83,7 +83,7 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
 
     it should "be an error to insert numerical data points for non-existing time series" in {
       val unknownId = 991919L
-      val thrown = the[CdpApiException] thrownBy dataPoints.insertById(unknownId, testDataPoints)
+      val thrown = the[CdpApiException] thrownBy dataPoints.insert(CogniteInternalId(unknownId), testDataPoints)
 
       val itemsNotFound = thrown.missing.value
       val notFoundIds =
