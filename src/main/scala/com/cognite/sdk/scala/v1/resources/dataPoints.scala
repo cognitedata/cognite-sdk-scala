@@ -12,7 +12,6 @@ import sttp.client3._
 import sttp.client3.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
-import io.circe.syntax._
 import com.cognite.sdk.scala.common.Constants
 import com.cognite.v1.timeseries.proto._
 import io.circe.parser.decode
@@ -54,8 +53,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   // FIXME: Using requestSession.post() resulted in 500 errors when the request involves protobuf because of some
   //  serialization error. Should investigate the error and use requestSession.post rather than having its own
-  //  identical handling for this method and insertStringsById()
-  def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Unit] =
+  //  identical handling for this method and insertStrings()
+  def insert(id: CogniteId, dataPoints: Seq[DataPoint]): F[Unit] =
     requestSession.map(
       basicRequest
         .followRedirects(false)
@@ -68,13 +67,14 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         .body(
           DataPointInsertionRequest
             .newBuilder()
-            .addItems(
-              DataPointInsertionItem
-                .newBuilder()
-                .setId(id)
-                .setNumericDatapoints(protoNumericDataPoints(dataPoints))
+            .addItems {
+              val b = DataPointInsertionItem.newBuilder()
+              (id match {
+                case CogniteInternalId(id) => b.setId(id)
+                case CogniteExternalId(externalId) => b.setExternalId(externalId)
+              }).setNumericDatapoints(protoNumericDataPoints(dataPoints))
                 .build()
-            )
+            }
             .build()
             .toByteArray
         )
@@ -101,14 +101,15 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       (r: Response[Unit]) => r.body
     )
 
-  def insertByExternalId(externalId: String, dataPoints: Seq[DataPoint]): F[Unit] =
-    requestSession.post[Unit, Unit, Items[DataPointsByExternalId]](
-      Items(Seq(DataPointsByExternalId(externalId, dataPoints))),
-      baseUrl,
-      _ => ()
-    )
+  /*
+  def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Unit] =
+    insert(CogniteInternalId(id), dataPoints)
 
-  def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Unit] =
+  def insertByExternalId(externalId: String, dataPoints: Seq[DataPoint]): F[Unit] =
+    insert(CogniteExternalId(externalId), dataPoints)
+   */
+
+  def insertStrings(id: CogniteId, dataPoints: Seq[StringDataPoint]): F[Unit] =
     requestSession.map(
       basicRequest
         .followRedirects(false)
@@ -120,15 +121,16 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         .body(
           DataPointInsertionRequest
             .newBuilder()
-            .addItems(
-              DataPointInsertionItem
-                .newBuilder()
-                .setId(id)
-                .setStringDatapoints(
-                  protoStringDataPoints(dataPoints)
-                    .build()
-                )
-            )
+            .addItems {
+              val b = DataPointInsertionItem.newBuilder()
+              (id match {
+                case CogniteInternalId(id) => b.setId(id)
+                case CogniteExternalId(externalId) => b.setExternalId(externalId)
+              }).setStringDatapoints(
+                protoStringDataPoints(dataPoints)
+                  .build()
+              )
+            }
             .build()
             .toByteArray
         )
@@ -154,13 +156,11 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         .send(requestSession.sttpBackend),
       (r: Response[Unit]) => r.body
     )
+  /*def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Unit] =
+    insertStrings(CogniteInternalId(id), dataPoints)
 
   def insertStringsByExternalId(externalId: String, dataPoints: Seq[StringDataPoint]): F[Unit] =
-    requestSession.post[Unit, Unit, Items[StringDataPointsByExternalId]](
-      Items(Seq(StringDataPointsByExternalId(externalId, dataPoints))),
-      baseUrl,
-      _ => ()
-    )
+    insertStrings(CogniteExternalId(externalId), dataPoints) */
 
   def deleteRanges(ranges: Seq[DeleteDataPointsRange]): F[Unit] =
     requestSession.post[Unit, Unit, Items[DeleteDataPointsRange]](
@@ -169,37 +169,27 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       _ => ()
     )
 
+  def deleteRange(id: CogniteId, inclusiveStart: Instant, exclusiveEnd: Instant): F[Unit] =
+    deleteRanges(
+      Seq(DeleteDataPointsRange(id, inclusiveStart.toEpochMilli, exclusiveEnd.toEpochMilli))
+    )
   def deleteRangeById(id: Long, inclusiveStart: Instant, exclusiveEnd: Instant): F[Unit] =
-    deleteRanges(Seq(DeleteRangeById(id, inclusiveStart.toEpochMilli, exclusiveEnd.toEpochMilli)))
+    deleteRange(CogniteInternalId(id), inclusiveStart, exclusiveEnd)
 
   def deleteRangeByExternalId(
       externalId: String,
       inclusiveStart: Instant,
       exclusiveEnd: Instant
   ): F[Unit] =
-    deleteRanges(
-      Seq(
-        DeleteRangeByExternalId(
-          externalId,
-          inclusiveStart.toEpochMilli,
-          exclusiveEnd.toEpochMilli
-        )
-      )
-    )
+    deleteRange(CogniteExternalId(externalId), inclusiveStart, exclusiveEnd)
 
-  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   def queryById(
       id: Long,
       inclusiveStart: Instant,
       exclusiveEnd: Instant,
       limit: Option[Int] = None
   ): F[DataPointsByIdResponse] =
-    // The API returns an error causing an exception to be thrown if the item isn't found,
-    // so .head is safe here.
-    requestSession.map(
-      queryByIds(Seq(id), inclusiveStart, exclusiveEnd, limit),
-      (r1: Seq[DataPointsByIdResponse]) => r1.head
-    )
+    queryOne(CogniteInternalId(id), inclusiveStart, exclusiveEnd, limit)
 
   def queryByIds(
       ids: Seq[Long],
@@ -207,16 +197,38 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       exclusiveEnd: Instant,
       limit: Option[Int] = None,
       ignoreUnknownIds: Boolean = false
+  ): F[Seq[DataPointsByIdResponse]] =
+    query(ids.map(CogniteInternalId(_)), inclusiveStart, exclusiveEnd, limit, ignoreUnknownIds)
+
+  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
+  def queryOne(
+      id: CogniteId,
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
+      limit: Option[Int] = None
+  ): F[DataPointsByIdResponse] =
+    // The API returns an error causing an exception to be thrown if the item isn't found,
+    // so .head is safe here.
+    requestSession.map(
+      query(Seq(id), inclusiveStart, exclusiveEnd, limit),
+      (r1: Seq[DataPointsByIdResponse]) => r1.head
+    )
+
+  def query(
+      ids: Seq[CogniteId],
+      inclusiveStart: Instant,
+      exclusiveEnd: Instant,
+      limit: Option[Int] = None,
+      ignoreUnknownIds: Boolean = false
   ): F[Seq[DataPointsByIdResponse]] = {
-    val queries = ids.map(id =>
-      QueryRangeById(
+    val queries: Seq[QueryDataPointsRange] = ids.map { id =>
+      QueryDataPointsRange(
         id,
         inclusiveStart.toEpochMilli.toString,
         exclusiveEnd.toEpochMilli.toString,
         Some(limit.getOrElse(Constants.dataPointsBatchSize))
       )
-    )
-
+    }
     queryProtobuf(ItemsWithIgnoreUnknownIds(queries, ignoreUnknownIds))(
       parseNumericDataPoints
     )
@@ -244,8 +256,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       ignoreUnknownIds: Boolean = false
   ): F[Seq[DataPointsByExternalIdResponse]] = {
     val queries = externalIds.map(externalId =>
-      QueryRangeByExternalId(
-        externalId,
+      QueryDataPointsRange(
+        CogniteExternalId(externalId),
         inclusiveStart.toEpochMilli.toString,
         exclusiveEnd.toEpochMilli.toString,
         Some(limit.getOrElse(Constants.dataPointsBatchSize))
@@ -255,8 +267,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       parseNumericDataPointsByExternalId
     )
   }
-  def queryAggregatesByIds(
-      ids: Seq[Long],
+  def queryAggregates(
+      ids: Seq[CogniteId],
       inclusiveStart: Instant,
       exclusiveEnd: Instant,
       granularity: String,
@@ -267,34 +279,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     queryProtobuf(
       ItemsWithIgnoreUnknownIds(
         ids.map(
-          QueryRangeById(
-            _,
-            inclusiveStart.toEpochMilli.toString,
-            exclusiveEnd.toEpochMilli.toString,
-            Some(limit.getOrElse(Constants.aggregatesBatchSize)),
-            Some(granularity),
-            Some(aggregates)
-          )
-        ),
-        ignoreUnknownIds
-      )
-    ) { dataPointListResponse =>
-      toAggregateMap(parseAggregateDataPoints(dataPointListResponse))
-    }
-
-  def queryAggregatesByExternalIds(
-      externalIds: Seq[String],
-      inclusiveStart: Instant,
-      exclusiveEnd: Instant,
-      granularity: String,
-      aggregates: Seq[String],
-      limit: Option[Int] = None,
-      ignoreUnknownIds: Boolean = false
-  ): F[Map[String, Seq[DataPointsByIdResponse]]] =
-    queryProtobuf(
-      ItemsWithIgnoreUnknownIds(
-        externalIds.map(
-          QueryRangeByExternalId(
+          QueryDataPointsRange(
             _,
             inclusiveStart.toEpochMilli.toString,
             exclusiveEnd.toEpochMilli.toString,
@@ -317,7 +302,14 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       aggregates: Seq[String],
       limit: Option[Int] = None
   ): F[Map[String, Seq[DataPointsByIdResponse]]] =
-    queryAggregatesByIds(Seq(id), inclusiveStart, exclusiveEnd, granularity, aggregates, limit)
+    queryAggregates(
+      Seq(CogniteInternalId(id)),
+      inclusiveStart,
+      exclusiveEnd,
+      granularity,
+      aggregates,
+      limit
+    )
 
   def queryAggregatesByExternalId(
       externalId: String,
@@ -327,8 +319,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       aggregates: Seq[String],
       limit: Option[Int] = None
   ): F[Map[String, Seq[DataPointsByIdResponse]]] =
-    queryAggregatesByExternalIds(
-      Seq(externalId),
+    queryAggregates(
+      Seq(CogniteExternalId(externalId)),
       inclusiveStart,
       exclusiveEnd,
       granularity,
@@ -363,7 +355,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     // The API returns an error causing an exception to be thrown if the item isn't found,
     // so .head is safe here.
     requestSession.map(
-      queryStringsByIds(Seq(id), inclusiveStart, exclusiveEnd, limit),
+      queryStrings(Seq(CogniteInternalId(id)), inclusiveStart, exclusiveEnd, limit),
       (r: Seq[StringDataPointsByIdResponse]) => r.head
     )
 
@@ -381,15 +373,15 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       (r: Seq[StringDataPointsByExternalIdResponse]) => r.head
     )
 
-  def queryStringsByIds(
-      ids: Seq[Long],
+  def queryStrings(
+      ids: Seq[CogniteId],
       inclusiveStart: Instant,
       exclusiveEnd: Instant,
       limit: Option[Int] = None,
       ignoreUnknownIds: Boolean = false
   ): F[Seq[StringDataPointsByIdResponse]] = {
     val query = ids.map(id =>
-      QueryRangeById(
+      QueryDataPointsRange(
         id,
         inclusiveStart.toEpochMilli.toString,
         exclusiveEnd.toEpochMilli.toString,
@@ -408,8 +400,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
   ): F[Seq[StringDataPointsByExternalIdResponse]] = {
     val query =
       externalIds.map(id =>
-        QueryRangeByExternalId(
-          id,
+        QueryDataPointsRange(
+          CogniteExternalId(id),
           inclusiveStart.toEpochMilli.toString,
           exclusiveEnd.toEpochMilli.toString,
           Some(limit.getOrElse(Constants.dataPointsBatchSize))
@@ -420,126 +412,72 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     )
   }
 
-  def getLatestDataPointById(id: Long): F[Option[DataPoint]] =
+  def getLatestDataPoint(id: CogniteId): F[Option[DataPoint]] =
     requestSession.map(
-      getLatestDataPointsByIds(Seq(id)),
-      (idToLatest: Map[Long, Option[DataPoint]]) =>
+      getLatestDataPoints(Seq(id)),
+      (idToLatest: Map[CogniteId, Option[DataPoint]]) =>
         idToLatest.get(id) match {
           case Some(latest) => latest
           case None =>
             throw SdkException(
-              s"Unexpected missing id ${id.toString} when retrieving latest data point"
+              s"Unexpected missing ${id.toString} when retrieving latest data point"
             )
         }
     )
 
-  def getLatestDataPointByExternalId(externalId: String): F[Option[DataPoint]] =
-    requestSession.map(
-      getLatestDataPointsByExternalIds(Seq(externalId)),
-      (idToLatest: Map[String, Option[DataPoint]]) =>
-        idToLatest.get(externalId) match {
-          case Some(latest) => latest
-          case None =>
-            throw SdkException(
-              s"Unexpected missing external id ${externalId.toString} when retrieving latest data point"
-            )
-        }
-    )
-
-  def getLatestDataPointsByIds(
-      ids: Seq[Long],
+  def getLatestDataPoints(
+      ids: Seq[CogniteId],
       ignoreUnknownIds: Boolean = false
-  ): F[Map[Long, Option[DataPoint]]] =
-    requestSession
-      .post[Map[Long, Option[DataPoint]], Items[DataPointsByIdResponse], ItemsWithIgnoreUnknownIds[
-        CogniteId
-      ]](
-        ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId.apply), ignoreUnknownIds),
-        uri"$baseUrl/latest",
-        value =>
-          value.items.map { item =>
-            item.id -> item.datapoints.headOption
-          }.toMap
-      )
+  ): F[Map[CogniteId, Option[DataPoint]]] =
+    getLatestDataPointsCommon[DataPoint, DataPointsByIdResponse](ids, ignoreUnknownIds)
 
-  def getLatestDataPointsByExternalIds(
-      ids: Seq[String],
-      ignoreUnknownIds: Boolean = false
-  ): F[Map[String, Option[DataPoint]]] =
-    requestSession
-      .post[Map[String, Option[DataPoint]], Items[
-        DataPointsByExternalIdResponse
-      ], ItemsWithIgnoreUnknownIds[
-        CogniteId
-      ]](
-        ItemsWithIgnoreUnknownIds(ids.map(CogniteExternalId.apply), ignoreUnknownIds),
-        uri"$baseUrl/latest",
-        value =>
-          value.items.map { item =>
-            item.externalId -> item.datapoints.headOption
-          }.toMap
-      )
-
-  def getLatestStringDataPointById(id: Long): F[Option[StringDataPoint]] =
+  def getLatestStringDataPoint(id: CogniteId): F[Option[StringDataPoint]] =
     requestSession.map(
-      getLatestStringDataPointByIds(Seq(id)),
-      (idToLatest: Map[Long, Option[StringDataPoint]]) =>
+      getLatestStringDataPoints(Seq(id)),
+      (idToLatest: Map[CogniteId, Option[StringDataPoint]]) =>
         idToLatest.get(id) match {
           case Some(latest) => latest
           case None =>
             throw SdkException(
-              s"Unexpected missing id ${id.toString} when retrieving latest data point"
+              s"Unexpected missing ${id.toString} when retrieving latest data point"
             )
         }
     )
 
-  def getLatestStringDataPointByExternalId(externalId: String): F[Option[StringDataPoint]] =
-    requestSession.map(
-      getLatestStringDataPointByExternalIds(Seq(externalId)),
-      (idToLatest: Map[String, Option[StringDataPoint]]) =>
-        idToLatest.get(externalId) match {
-          case Some(latest) => latest
-          case None =>
-            throw SdkException(
-              s"Unexpected missing id ${externalId.toString} when retrieving latest data point"
-            )
+  def getLatestStringDataPoints(
+      ids: Seq[CogniteId],
+      ignoreUnknownIds: Boolean = false
+  ): F[Map[CogniteId, Option[StringDataPoint]]] =
+    getLatestDataPointsCommon[StringDataPoint, StringDataPointsByIdResponse](ids, ignoreUnknownIds)
+
+  private def getLatestDataPointsCommon[D, T <: DataPointsResponse[D]](
+      ids: Seq[CogniteId],
+      ignoreUnknownIds: Boolean
+  )(implicit decoder: Decoder[Items[T]]): F[Map[CogniteId, Option[D]]] =
+    requestSession
+      .post[Map[CogniteId, Option[D]], Items[
+        T
+      ], ItemsWithIgnoreUnknownIds[
+        CogniteId
+      ]](
+        ItemsWithIgnoreUnknownIds(ids, ignoreUnknownIds),
+        uri"$baseUrl/latest",
+        value => {
+          val idMap = value.items.map(item => item.id -> item.datapoints.headOption).toMap
+          val externalIdMap =
+            value.items.map(item => item.getExternalId -> item.datapoints.headOption).toMap
+          ids
+            .map { i =>
+              i -> (i match {
+                case CogniteInternalId(id) => idMap.get(id)
+                case CogniteExternalId(externalId) => externalIdMap.get(Some(externalId))
+              })
+            }
+            .collect { case (id, Some(v)) =>
+              id -> v
+            }
+            .toMap
         }
-    )
-
-  def getLatestStringDataPointByIds(
-      ids: Seq[Long],
-      ignoreUnknownIds: Boolean = false
-  ): F[Map[Long, Option[StringDataPoint]]] =
-    requestSession
-      .post[Map[Long, Option[StringDataPoint]], Items[
-        StringDataPointsByIdResponse
-      ], ItemsWithIgnoreUnknownIds[
-        CogniteId
-      ]](
-        ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId.apply), ignoreUnknownIds),
-        uri"$baseUrl/latest",
-        value =>
-          value.items.map { item =>
-            item.id -> item.datapoints.headOption
-          }.toMap
-      )
-
-  def getLatestStringDataPointByExternalIds(
-      ids: Seq[String],
-      ignoreUnknownIds: Boolean = false
-  ): F[Map[String, Option[StringDataPoint]]] =
-    requestSession
-      .post[Map[String, Option[StringDataPoint]], Items[
-        StringDataPointsByExternalIdResponse
-      ], ItemsWithIgnoreUnknownIds[
-        CogniteId
-      ]](
-        ItemsWithIgnoreUnknownIds(ids.map(CogniteExternalId.apply), ignoreUnknownIds),
-        uri"$baseUrl/latest",
-        value =>
-          value.items.map { item =>
-            item.externalId -> item.datapoints.headOption
-          }.toMap
       )
 }
 
@@ -573,25 +511,11 @@ object DataPointsResource {
     deriveEncoder
   implicit val stringDataPointsByExternalIdItemsEncoder
       : Encoder[Items[StringDataPointsByExternalId]] = deriveEncoder
-  implicit val deleteRangeByIdEncoder: Encoder[DeleteRangeById] = deriveEncoder
-  implicit val deleteRangeByIdItemsEncoder: Encoder[Items[DeleteRangeById]] = deriveEncoder
-  implicit val deleteRangeEncoder: Encoder[DeleteDataPointsRange] = Encoder.instance {
-    case byId @ DeleteRangeById(_, _, _) => byId.asJson
-    case byExternalId @ DeleteRangeByExternalId(_, _, _) => byExternalId.asJson
-  }
   implicit val deleteRangeItemsEncoder: Encoder[Items[DeleteDataPointsRange]] = deriveEncoder
-  implicit val deleteRangeByExternalIdEncoder: Encoder[DeleteRangeByExternalId] = deriveEncoder
-  implicit val deleteRangeByExternalIdItemsEncoder: Encoder[Items[DeleteRangeByExternalId]] =
+  implicit val queryRangeByIdItemsEncoder: Encoder[Items[QueryDataPointsRange]] = deriveEncoder
+  implicit val queryRangeByIdItems2Encoder
+      : Encoder[ItemsWithIgnoreUnknownIds[QueryDataPointsRange]] =
     deriveEncoder
-  implicit val queryRangeByIdEncoder: Encoder[QueryRangeById] = deriveEncoder
-  implicit val queryRangeByIdItemsEncoder: Encoder[Items[QueryRangeById]] = deriveEncoder
-  implicit val queryRangeByIdItems2Encoder: Encoder[ItemsWithIgnoreUnknownIds[QueryRangeById]] =
-    deriveEncoder
-  implicit val queryRangeByExternalIdEncoder: Encoder[QueryRangeByExternalId] = deriveEncoder
-  implicit val queryRangeByExternalIdItemsEncoder: Encoder[Items[QueryRangeByExternalId]] =
-    deriveEncoder
-  implicit val queryRangeByExternalIdItems2Encoder
-      : Encoder[ItemsWithIgnoreUnknownIds[QueryRangeByExternalId]] = deriveEncoder
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val aggregateDataPointDecoder: Decoder[AggregateDataPoint] = deriveDecoder
   implicit val aggregateDataPointEncoder: Encoder[AggregateDataPoint] = deriveEncoder

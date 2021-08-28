@@ -7,7 +7,7 @@ import cats.Id
 
 import java.time.Instant
 import java.util.UUID
-import com.cognite.sdk.scala.v1.{StringDataPointsByExternalIdResponse, StringDataPointsByIdResponse, TimeSeries}
+import com.cognite.sdk.scala.v1.{CogniteExternalId, CogniteInternalId, StringDataPointsByExternalIdResponse, StringDataPointsByIdResponse, TimeSeries}
 import com.cognite.sdk.scala.v1.resources.DataPointsResource
 import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
@@ -30,7 +30,7 @@ trait StringDataPointsResourceBehaviors extends Matchers with OptionValues with 
       stringTimeSeries =>
       val stringTimeSeriesId = stringTimeSeries.id
         val stringTimeSeriesExternalId = stringTimeSeries.externalId.value
-        dataPoints.insertStringsById(stringTimeSeriesId, testStringDataPoints)
+        dataPoints.insertStrings(CogniteInternalId(stringTimeSeriesId), testStringDataPoints)
 
         retryWithExpectedResult[StringDataPointsByIdResponse](
           dataPoints.queryStringsById(stringTimeSeriesId, start, end.plusMillis(1)),
@@ -38,7 +38,7 @@ trait StringDataPointsResourceBehaviors extends Matchers with OptionValues with 
         )
 
         retryWithExpectedResult[Option[StringDataPoint]](
-          dataPoints.getLatestStringDataPointById(stringTimeSeriesId),
+          dataPoints.getLatestStringDataPoint(CogniteInternalId(stringTimeSeriesId)),
           dp => {
             dp.isDefined shouldBe true
             testStringDataPoints.toList should contain(dp.value)
@@ -56,11 +56,11 @@ trait StringDataPointsResourceBehaviors extends Matchers with OptionValues with 
         resultId.isString shouldBe true
         resultId.id shouldBe stringTimeSeries.id
 
-        val resultId2: Seq[_] = dataPoints.queryStringsByIds(Seq(stringTimeSeriesId), start, end.plusMillis(1))
+        val resultId2: Seq[_] = dataPoints.queryStrings(Seq(CogniteInternalId(stringTimeSeriesId)), start, end.plusMillis(1))
         resultId2.length shouldBe 1
         resultId2.headOption.value shouldBe resultId
 
-        dataPoints.insertStringsByExternalId(stringTimeSeriesExternalId, testStringDataPoints)
+        dataPoints.insertStrings(CogniteExternalId(stringTimeSeriesExternalId), testStringDataPoints)
         val resultExternalId: StringDataPointsByExternalIdResponse = retryWithExpectedResult[StringDataPointsByExternalIdResponse](
           dataPoints.queryStringsByExternalId(stringTimeSeriesExternalId, start, end.plusMillis(1)),
           p2 => p2.datapoints should have size testStringDataPoints.size.toLong
@@ -76,7 +76,7 @@ trait StringDataPointsResourceBehaviors extends Matchers with OptionValues with 
         resultExternalId2.headOption.value shouldBe resultExternalId
 
         retryWithExpectedResult[Option[StringDataPoint]](
-          dataPoints.getLatestStringDataPointByExternalId(stringTimeSeriesExternalId),
+          dataPoints.getLatestStringDataPoint(CogniteExternalId(stringTimeSeriesExternalId)),
           l2 => {
             l2.isDefined shouldBe true
             testStringDataPoints.toList should contain(l2.value)
@@ -91,24 +91,24 @@ trait StringDataPointsResourceBehaviors extends Matchers with OptionValues with 
     }
 
     it should "support support query by externalId when ignoreUnknownIds=true" in {
-      val doesNotExist = s"does-not-exist-${UUID.randomUUID.toString}"
-      dataPoints.getLatestStringDataPointByExternalIds(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
-      dataPoints.getLatestDataPointsByExternalIds(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
-      dataPoints.queryByExternalIds(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
-      dataPoints.queryStringsByExternalIds(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
+      val doesNotExist = CogniteExternalId(s"does-not-exist-${UUID.randomUUID.toString}")
+      dataPoints.getLatestStringDataPoints(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
+      dataPoints.getLatestDataPoints(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
+      dataPoints.query(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
+      dataPoints.queryStrings(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
     }
 
     it should "support support query by internal id when ignoreUnknownIds=true" in {
-      val doesNotExist = 9007199254740991L
-      dataPoints.getLatestStringDataPointByIds(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
-      dataPoints.getLatestDataPointsByIds(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
-      dataPoints.queryByIds(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
-      dataPoints.queryStringsByIds(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
+      val doesNotExist = CogniteInternalId(9007199254740991L)
+      dataPoints.getLatestStringDataPoints(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
+      dataPoints.getLatestDataPoints(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
+      dataPoints.queryByIds(Seq(doesNotExist.id), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
+      dataPoints.queryStrings(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
     }
 
     it should "be an error insert or delete string data points for non-existing time series" in {
       val unknownId = 991919L
-      val thrown = the[CdpApiException] thrownBy dataPoints.insertStringsById(unknownId, testStringDataPoints)
+      val thrown = the[CdpApiException] thrownBy dataPoints.insertStrings(CogniteInternalId(unknownId), testStringDataPoints)
 
       val itemsNotFound = thrown.missing.value
       val notFoundIds =

@@ -182,8 +182,8 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
   }
 
   it should "be possible to query aggregate values with ignoreUnknownIds" in {
-    val aggregates = client.dataPoints.queryAggregatesByIds(
-      Seq(123L),
+    val aggregates = client.dataPoints.queryAggregates(
+      Seq(CogniteInternalId(123L)),
       Instant.ofEpochMilli(0L),
       Instant.ofEpochMilli(1553795183461L),
       "1d",
