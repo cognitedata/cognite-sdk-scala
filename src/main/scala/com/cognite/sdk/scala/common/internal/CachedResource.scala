@@ -16,8 +16,8 @@ trait CachedResource[F[_], R] extends CachedResource.Runner[F, R] {
   /** Invalidates any current instance of `R`, guaranteeing that ??? */
   def invalidate: F[Unit]
 
-  /** Run `f` with an instance of `R`, possibly allocating a new one, or possibly reusing an existing one.
-    *  Guarantees that `R` will not be invalidated until `f` returns
+  /** Run `f` with an instance of `R`, possibly allocating a new one, or possibly reusing an
+    * existing one. Guarantees that `R` will not be invalidated until `f` returns
     */
   def run[A](f: R => F[A]): F[A]
 
@@ -29,8 +29,9 @@ object CachedResource {
 
   /** Run `f` with `get`, and if `f` fails and `shouldInvalidate` returns `true`
     *
-    * @param shouldInvalidate If true, invalidate. If false or not defined, do not invalidate.
-    *                         Default: always invalidate (assuming NonFatal)
+    * @param shouldInvalidate
+    *   If true, invalidate. If false or not defined, do not invalidate. Default: always invalidate
+    *   (assuming NonFatal)
     */
   def runAndInvalidateOnError[F[_], R, A](cr: CachedResource[F, R])(
       f: R => F[A],
@@ -46,7 +47,9 @@ object CachedResource {
         F.whenA(willInvalidate)(cr.invalidate)
     }
 
-  /** Runner that checks if refresh is needed before each `run` call, and additionally can invalidate on errors */
+  /** Runner that checks if refresh is needed before each `run` call, and additionally can
+    * invalidate on errors
+    */
   def runner[F[_], R, A](cr: CachedResource[F, R])(
       shouldRefresh: R => Boolean,
       shouldInvalidate: PartialFunction[Throwable, Boolean] = { case NonFatal(_) =>

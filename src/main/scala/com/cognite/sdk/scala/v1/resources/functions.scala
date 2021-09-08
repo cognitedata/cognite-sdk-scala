@@ -96,7 +96,7 @@ class FunctionCalls[F[_]](val requestSession: RequestSession[F], val functionId:
     requestSession
       .post[Items[FunctionCall], Items[FunctionCall], FilterRequest[FunctionCallFilter]](
         FilterRequest(filter, None, None, None, None),
-        uri"${baseUrl}/list",
+        uri"$baseUrl/list",
         value => value
       )
   }
