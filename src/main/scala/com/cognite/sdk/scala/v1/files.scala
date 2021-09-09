@@ -19,6 +19,7 @@ import com.cognite.sdk.scala.common.{
 final case class File(
     id: Long = 0,
     name: String,
+    directory: Option[String] = None,
     source: Option[String] = None,
     externalId: Option[String] = None,
     mimeType: Option[String] = None,
@@ -41,6 +42,7 @@ final case class File(
   override def toCreate: FileCreate =
     FileCreate(
       name,
+      directory,
       source,
       externalId,
       mimeType,
@@ -56,6 +58,7 @@ final case class File(
     FileUpdate(
       Setter.fromOption(externalId),
       Setter.fromOption(source),
+      Setter.fromOption(directory),
       Setter.fromOption(mimeType),
       NonNullableSetter.fromOption(metadata),
       NonNullableSetter.fromOption(assetIds),
@@ -68,6 +71,7 @@ final case class File(
 
 final case class FileCreate(
     name: String,
+    directory: Option[String] = None,
     source: Option[String] = None,
     externalId: Option[String] = None,
     mimeType: Option[String] = None,
@@ -82,6 +86,7 @@ final case class FileCreate(
 final case class FileUpdate(
     externalId: Option[Setter[String]] = None,
     source: Option[Setter[String]] = None,
+    directory: Option[Setter[String]] = None,
     mimeType: Option[Setter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
     assetIds: Option[NonNullableSetter[Seq[Long]]] = None,
