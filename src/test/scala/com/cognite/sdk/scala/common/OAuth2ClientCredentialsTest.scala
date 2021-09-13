@@ -64,13 +64,12 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
     }
   }
 
-  // TODO don't ignore after creating secrets in jenkins
-  ignore should "authenticate with Aize using OAuth2" in {
+  it should "authenticate with Aize using OAuth2" in {
 
     val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"https://login.aize.io/oauth/token",
-      clientId = "",
-      clientSecret = "",
+      clientId = sys.env("AIZE_CLIENT_ID"),
+      clientSecret = sys.env("AIZE_CLIENT_SECRET"),
       cdfProjectName = "aize",
       audience = Some("https://twindata.io/cdf/T101014843")
     )
