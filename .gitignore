@@ -10,3 +10,4 @@ project/metals.sbt
 .env
 .vscode/
 /.bsp/
+.DS_Store

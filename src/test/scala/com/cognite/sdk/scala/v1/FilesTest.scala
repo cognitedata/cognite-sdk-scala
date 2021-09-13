@@ -128,12 +128,20 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
   }
 
   it should "allow updates by externalId" in {
-    val testFile = File(name = "test-file-1", externalId = Some("test-externalId-1"), source = Some("source-1"))
+    val testFile = File(name = "test-file-1", externalId = Some("test-externalId-1"), source = Some("source-1"), directory = Some("/dir-1"))
     val createdItem = client.files.createOneFromRead(testFile)
-    val updatedFile = client.files.updateByExternalId(Map(createdItem.externalId.value -> FileUpdate(source = Some(SetValue("source-1-1")))))
+    val updatedFile = client.files.updateByExternalId(
+      Map(
+        createdItem.externalId.value -> FileUpdate(
+          source = Some(SetValue("source-1-1")),
+          directory = Some(SetValue("/dir-1-1"))
+        )
+      )
+    )
     assert(updatedFile.length == 1)
     assert(createdItem.name === updatedFile.head.name)
     assert(updatedFile.head.source.value === s"${testFile.source.value}-1")
+    assert(updatedFile.head.directory.value === s"${testFile.directory.value}-1")
     client.files.deleteByExternalId("test-externalId-1")
   }
 
