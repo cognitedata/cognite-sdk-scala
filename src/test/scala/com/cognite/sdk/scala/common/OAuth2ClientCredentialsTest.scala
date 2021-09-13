@@ -64,6 +64,34 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
     }
   }
 
+  // TODO don't ignore after creating secrets in jenkins
+  ignore should "authenticate with Aize using OAuth2" in {
+
+    val credentials = OAuth2.ClientCredentials(
+      tokenUri = uri"https://login.aize.io/oauth/token",
+      clientId = "",
+      clientSecret = "",
+      cdfProjectName = "aize",
+      audience = Some("https://twindata.io/cdf/T101014843")
+    )
+
+    val authProvider = OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value
+
+    val client = new GenericClient(
+      applicationName = "CogniteScalaSDK-OAuth-Test",
+      projectName = "aize",
+      baseUrl = "https://api.cognitedata.com",
+      authProvider = authProvider,
+      apiVersion = None,
+      clientTag = None
+    )
+
+    noException shouldBe thrownBy {
+      client.rawDatabases.list().compile.toVector.unsafeRunTimed(10.seconds).value
+    }
+  }
+
+
   it should "throw a valid error when authenticating with bad credentials" in {
     val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
