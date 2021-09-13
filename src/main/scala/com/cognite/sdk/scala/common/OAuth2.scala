@@ -16,8 +16,9 @@ object OAuth2 {
       tokenUri: Uri,
       clientId: String,
       clientSecret: String,
-      scopes: List[String],
-      cdfProjectName: String
+      scopes: List[String] = List.empty,
+      cdfProjectName: String,
+      audience: Option[String] = None
   )
 
   class ClientCredentialsProvider[F[_]] private (
@@ -35,6 +36,7 @@ object OAuth2 {
       } yield auth
   }
 
+  // scalastyle:off method.length
   object ClientCredentialsProvider {
     def apply[F[_]](
         credentials: ClientCredentials,
@@ -47,9 +49,14 @@ object OAuth2 {
       val authenticate: F[TokenState] = {
         val body = Map[String, String](
           "grant_type" -> "client_credentials",
-          "scope" -> credentials.scopes.mkString(" "),
           "client_id" -> credentials.clientId,
-          "client_secret" -> credentials.clientSecret
+          "client_secret" -> credentials.clientSecret,
+          // Aize auth flow requires this to be empty in general
+          "scope" -> credentials.scopes.mkString(" "), // Send empty scopes when it is not provided
+          // AAD auth flow requires this to be empty
+          "audience" -> credentials.audience.getOrElse(
+            ""
+          ) // Send empty audience when it is not provided
         )
         for {
           response <- basicRequest
@@ -86,6 +93,7 @@ object OAuth2 {
       ConcurrentCachedObject(authenticate).map(new ClientCredentialsProvider[F](_))
     }
   }
+  // scalastyle:on method.length
 
   private final case class ClientCredentialsResponse(access_token: String, expires_in: Long)
   private object ClientCredentialsResponse {
