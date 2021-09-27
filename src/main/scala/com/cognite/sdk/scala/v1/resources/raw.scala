@@ -131,7 +131,9 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       _ => Seq.empty[RawRow]
     )
 
-  /** Creates RAW rows. When ensureParent=true it also creates the table and database if it does not exist */
+  /** Creates RAW rows. When ensureParent=true it also creates the table and database if it does not
+    * exist
+    */
   def createItems(items: Items[RawRow], ensureParent: Boolean): F[Unit] =
     requestSession.post[Unit, Unit, Items[RawRow]](
       items,
