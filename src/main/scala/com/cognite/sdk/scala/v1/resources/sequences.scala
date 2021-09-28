@@ -10,7 +10,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 class SequencesResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with Readable[Sequence, F]
+    with PartitionedReadable[Sequence, F]
     with RetrieveByIdsWithIgnoreUnknownIds[Sequence, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Sequence, F]
     with Create[Sequence, SequenceCreate, F]
