@@ -5,7 +5,7 @@ package com.cognite.sdk.scala.common
 
 import java.time.Instant
 import cats.Id
-import com.cognite.sdk.scala.v1.CogniteId
+import com.cognite.sdk.scala.v1.{CogniteExternalId, CogniteId, CogniteInternalId}
 import io.circe.{Decoder, Encoder, Json, JsonObject}
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.model.Uri
@@ -96,7 +96,28 @@ final case class CdpApiException(
       ).flatMap(_.toList).mkString
 
       s"Request ${maybeId}to ${url.toString} failed with status ${code.toString}: $message.$details"
-    })
+    }) {
+  def missingIds: Seq[CogniteId] =
+    missing.getOrElse(Seq.empty).flatMap(CdpApiException.decodeId)
+  def missingExternalIds: Seq[String] =
+    missingIds.collect { case CogniteExternalId(externalId) =>
+      externalId
+    }
+  def missingInternalIds: Seq[Long] =
+    missingIds.collect { case CogniteInternalId(id) =>
+      id
+    }
+  def duplicatedIds: Seq[CogniteId] =
+    duplicated.getOrElse(Seq.empty).flatMap(CdpApiException.decodeId)
+  def duplicatedExternalIds: Seq[String] =
+    duplicatedIds.collect { case CogniteExternalId(externalId) =>
+      externalId
+    }
+  def duplicatedInternalIds: Seq[Long] =
+    duplicatedIds.collect { case CogniteInternalId(id) =>
+      id
+    }
+}
 
 object CdpApiException {
   private def describeErrorList(kind: String)(items: Seq[JsonObject]): String =
@@ -120,6 +141,20 @@ object CdpApiException {
         s" $kind ${key}s: [$commaSeparatedValues]."
       }
       .mkString
+
+  private val externalIdDecoder: Decoder[CogniteExternalId] = deriveDecoder
+  private val internalIdDecoder: Decoder[CogniteInternalId] = deriveDecoder
+  private def decodeId(jsonObject: JsonObject): Option[CogniteId] = {
+    val json = Json.fromJsonObject(jsonObject)
+    internalIdDecoder.decodeJson(json) match {
+      case Right(id: CogniteId) => Some(id)
+      case _ =>
+        externalIdDecoder.decodeJson(json) match {
+          case Right(id) => Some(id)
+          case _ => None
+        }
+    }
+  }
 }
 
 final case class DataPoint(

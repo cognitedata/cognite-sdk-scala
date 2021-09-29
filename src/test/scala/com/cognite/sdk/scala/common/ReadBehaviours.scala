@@ -29,6 +29,17 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
         readable.read(limit = Some(1)).items should have length Math.min(listLength.toLong, 1)
         readable.read(limit = Some(2)).items should have length Math.min(listLength.toLong, 2)
       }
+
+      it should "be able to page items by one" in {
+        val itemsPagedByOne =
+          Readable.pullFromCursor(None, None, None, (c, _, p) => readable.readWithCursor(c, Some(1), p))
+            .stream
+            .take(5)
+            .compile.toList
+        itemsPagedByOne.length should be(Math.min(5, listLength))
+        // all are distinct
+        itemsPagedByOne.distinct.length shouldBe itemsPagedByOne.length
+      }
     }
 
     it should "read all items" in {
@@ -180,11 +191,11 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
 
   private def fetchTestItems[R <: WithExternalId with WithCreatedTime](readable: Readable[R, Id]): List[R] = {
     // only use rows older than 10 minutes, to exclude items created by concurrently running tests which might be deleted quickly
-    val minAge = Instant.now().minus(10, ChronoUnit.MINUTES)
+    //val minAge = Instant.now().minus(10, ChronoUnit.MINUTES)
     readable
       .list()
       .filter(_.externalId.isDefined)
-      .filter(_.createdTime.isBefore(minAge))
+      //.filter(_.createdTime.isBefore(minAge))
       .take(2)
       .compile
       .toList
@@ -244,13 +255,13 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
   def readableWithRetrieveUnknownIds[R <: WithExternalId with WithId[Long] with WithCreatedTime, W](
       readable: Readable[R, Id]
         with RetrieveByExternalIdsWithIgnoreUnknownIds[R, Id]
-        with RetrieveByIdsWithIgnoreUnknownIds[R, Id]
+        with RetrieveByIdsWithIgnoreUnknownIds[R, Id],
+    nonExistentId: Long = ThreadLocalRandom.current().nextLong(1, 9007199254740991L),
+    nonExistentExternalId: String = s"does-not-exist/${UUID.randomUUID.toString}"
   ): Unit = {
     val firstTwoItemItems = fetchTestItems(readable)
     val firstTwoExternalIds = firstTwoItemItems.map(_.externalId.value)
     val firstTwoIds = firstTwoItemItems.map(_.id)
-    val nonExistentExternalId = s"does-not-exist/${UUID.randomUUID.toString}"
-    val nonExistentId = ThreadLocalRandom.current().nextLong(1, 9007199254740991L)
 
     it should "support retrieving items by external id with ignoreUnknownIds=true" in {
       firstTwoExternalIds should have size 2
@@ -276,7 +287,8 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
           ignoreUnknownIds = false
         )
       }
-      exception.message should include("ids not found")
+      exception.message should include("not found")
+      exception.missingExternalIds shouldBe Seq(nonExistentExternalId)
     }
 
     it should "support retrieving items by id with ignoreUnknownIds=true" in {
@@ -291,7 +303,8 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
       val exception = intercept[CdpApiException] {
         readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = false)
       }
-      exception.message should include("ids not found")
+      exception.message should include("not found")
+      exception.missingInternalIds shouldBe Seq(nonExistentId)
     }
   }
 }
