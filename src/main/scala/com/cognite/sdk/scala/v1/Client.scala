@@ -6,7 +6,6 @@ package com.cognite.sdk.scala.v1
 import BuildInfo.BuildInfo
 import cats.{Id, Monad}
 import cats.implicits._
-import cats.catsInstancesForId
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.resources._
 import sttp.client3._

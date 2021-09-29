@@ -14,7 +14,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
   private val externalIdsThatDoNotExist = Seq("sequence-5PNii0w", "sequence-6VhKQqt")
   private val eid = shortRandom()
 
-  (it should behave).like(readable(client.sequences))
+  (it should behave).like(partitionedReadable(client.sequences))
 
   (it should behave).like(
     readableWithRetrieve(client.sequences, idsThatDoNotExist, supportsMissingAndThrown = true)
