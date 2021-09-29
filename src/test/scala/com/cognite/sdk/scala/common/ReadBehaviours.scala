@@ -51,7 +51,7 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
       val partitionStreams10 = readable.listPartitions(10)
       (partitionStreams should have).length(2)
       (partitionStreams10 should have).length(10)
-      val partition1Items = partitionStreams.head.take(2).compile.toList
+      val partition1Items = partitionStreams(0).take(2).compile.toList
       val partition2Items = partitionStreams(1).take(2).compile.toList
       partition1Items.size should be <= 2
       partition2Items.size should be <= 2
@@ -61,7 +61,7 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
     it should "read item partitions with limit" in {
       val partitionStreams = readable.listPartitions(2, limitPerPartition = Some(2))
       (partitionStreams should have).length(2)
-      val partition1Items = partitionStreams.head.compile.toList
+      val partition1Items = partitionStreams(0).compile.toList
       val partition2Items = partitionStreams(1).compile.toList
       partition1Items.size should be <= 2
       partition2Items.size should be <= 2
