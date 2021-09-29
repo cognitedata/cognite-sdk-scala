@@ -33,7 +33,7 @@ class SequencesResource[F[_]](val requestSession: RequestSession[F])
       baseUrl,
       cursor,
       limit,
-      None,
+      partition,
       Constants.defaultBatchSize
     )
 
