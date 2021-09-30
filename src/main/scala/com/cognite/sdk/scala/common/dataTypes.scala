@@ -199,6 +199,7 @@ sealed trait Setter[+T]
 sealed trait NonNullableSetter[+T]
 final case class SetValue[+T](set: T) extends Setter[T] with NonNullableSetter[T]
 final case class SetNull[+T]() extends Setter[T]
+final case class AddRemove[+T](add: T, remove: T) extends NonNullableSetter[T]
 
 object Setter {
   @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
@@ -260,6 +261,10 @@ object NonNullableSetter {
   ): Encoder[NonNullableSetter[T]] = new Encoder[NonNullableSetter[T]] {
     final def apply(a: NonNullableSetter[T]): Json = a match {
       case SetValue(value) => Json.obj(("set", encodeT.apply(value)))
+      case AddRemove(None, None) =>
+        Json.obj(("add", Json.arr()), ("remove", Json.arr()))
+      case AddRemove(add, remove) =>
+        Json.obj(("add", encodeT.apply(add)), ("remove", encodeT.apply(remove)))
     }
   }
 }
