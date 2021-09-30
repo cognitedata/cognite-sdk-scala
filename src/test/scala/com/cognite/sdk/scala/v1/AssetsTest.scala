@@ -163,10 +163,10 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         labels = Some(SetValue(Seq(CogniteExternalId(externalId2)))))
      )
     )
-    assert(updatedAssets.head.labels.get == Seq(CogniteExternalId(externalId2)))
-    assert(updatedAssets(1).labels.get == Seq(CogniteExternalId(externalId2)))
+    assert(updatedAssets.head.labels.contains(Seq(CogniteExternalId(externalId2))))
+    assert(updatedAssets(1).labels.contains(Seq(CogniteExternalId(externalId2))))
     updatedAssets.head.metadata.get  should contain theSameElementsAs  Map("test1"->"test1", "test2"->"test2")
-    assert(updatedAssets(1).metadata.get == Map("test2"->"test2"))
+    assert(updatedAssets(1).metadata.contains(Map("test2"->"test2")))
 
     // Test that omitting properties on AddRemoveArr doesn't have any effect
     // Test with empty lists on add/remove, basically do nothing
