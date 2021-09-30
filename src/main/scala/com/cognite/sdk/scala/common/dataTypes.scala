@@ -197,8 +197,15 @@ object EitherDecoder {
 
 sealed trait Setter[+T]
 sealed trait NonNullableSetter[+T]
+sealed trait NonNullableIterableSetter[+T]
 final case class SetValue[+T](set: T) extends Setter[T] with NonNullableSetter[T]
 final case class SetNull[+T]() extends Setter[T]
+// For add/remove on updates for assets_ids, labels (array types)
+final case class AddRemoveArr[+T](add: Seq[T] = Seq.empty, remove: Seq[T] = Seq.empty)
+    extends NonNullableSetter[Seq[T]]
+// For metadata add/remove on updates
+final case class AddRemoveMap(add: Map[String, String] = Map.empty, remove: Seq[String] = Seq.empty)
+    extends NonNullableSetter[Map[String, String]]
 
 object Setter {
   @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
@@ -255,11 +262,44 @@ object NonNullableSetter {
 
   def fromAny[T](value: T): NonNullableSetter[T] = SetValue(value)
 
+  @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
   implicit def encodeNonNullableSetter[T](
       implicit encodeT: Encoder[T]
   ): Encoder[NonNullableSetter[T]] = new Encoder[NonNullableSetter[T]] {
     final def apply(a: NonNullableSetter[T]): Json = a match {
       case SetValue(value) => Json.obj(("set", encodeT.apply(value)))
+      // The following cases are covered separately
+      case AddRemoveMap(_, _) => null // scalastyle:ignore null
+      case AddRemoveArr(_, _) => null // scalastyle:ignore null
     }
   }
+
+  implicit def encodeNonNullableSetterArr[T](
+      implicit encodeT: Encoder[T]
+  ): Encoder[NonNullableSetter[Seq[T]]] = new Encoder[NonNullableSetter[Seq[T]]] {
+    final def apply(a: NonNullableSetter[Seq[T]]): Json = a match {
+      case SetValue(value) => Json.obj(("set", Json.arr(value.map(encodeT.apply): _*)))
+      case AddRemoveArr(add, remove) =>
+        Json.obj(
+          ("add" -> Json.arr(add.map(encodeT.apply): _*)),
+          ("remove" -> Json.arr(remove.map(encodeT.apply): _*))
+        )
+    }
+  }
+
+  implicit def encodeNonNullableSetterMap(
+      implicit encodeT: Encoder[Map[String, String]]
+  ): Encoder[NonNullableSetter[Map[String, String]]] =
+    new Encoder[NonNullableSetter[Map[String, String]]] {
+      final def apply(a: NonNullableSetter[Map[String, String]]): Json = a match {
+        case SetValue(value) =>
+          Json.obj(("set", encodeT.apply(value)))
+        case AddRemoveMap(add, remove) =>
+          Json.obj(
+            ("add" -> encodeT.apply(add)),
+            ("remove" -> Json.arr(remove.map(Json.fromString): _*))
+          )
+      }
+    }
+
 }

@@ -12,7 +12,6 @@ import com.cognite.sdk.scala.v1.{
   ContainsAll,
   ContainsAny,
   LabelContainsFilter,
-  LabelsOnUpdate,
   TimeRange
 }
 import io.circe.{Decoder, Encoder, Json}
@@ -64,5 +63,4 @@ package object common {
 
   implicit val itemsWithIgnoreUnknownIdsEncoder: Encoder[ItemsWithIgnoreUnknownIds[CogniteId]] =
     deriveEncoder
-  implicit val labelsOnUpdateEncoder: Encoder[LabelsOnUpdate] = deriveEncoder
 }
