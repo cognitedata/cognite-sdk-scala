@@ -165,15 +165,17 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     )
     assert(updatedAssets.head.labels.contains(Seq(CogniteExternalId(externalId2))))
     assert(updatedAssets(1).labels.contains(Seq(CogniteExternalId(externalId2))))
-    updatedAssets.head.metadata.get  should contain theSameElementsAs  Map("test1"->"test1", "test2"->"test2")
+    updatedAssets.head.metadata.toList.head  should contain theSameElementsAs  Map("test1"->"test1", "test2"->"test2")
     assert(updatedAssets(1).metadata.contains(Map("test2"->"test2")))
 
     // Test that omitting properties on AddRemoveArr doesn't have any effect
     // Test with empty lists on add/remove, basically do nothing
     client.assets.updateOneByExternalId(externalId1, AssetUpdate(labels=Some(AddRemoveArr())))
     // Test with empty list on remove, basically add label with externalId3
-    val updated = client.assets.updateOneByExternalId(externalId1, AssetUpdate(labels=Some(AddRemoveArr(add=Seq(CogniteExternalId(externalId3))))))
-    updated.labels.get should contain theSameElementsAs Seq(CogniteExternalId(externalId2), CogniteExternalId(externalId3))
+    val updated = client.assets.updateOneByExternalId(externalId1,
+      AssetUpdate(labels=Some(AddRemoveArr(add=Seq(CogniteExternalId(externalId3))))))
+    updated.labels.toList.head should contain theSameElementsAs Seq(CogniteExternalId(externalId2),
+      CogniteExternalId(externalId3))
 
     client.assets.deleteByExternalIds(Seq(externalId1, externalId2))
     client.labels.deleteByExternalIds(Seq(externalId1, externalId2, externalId3))
