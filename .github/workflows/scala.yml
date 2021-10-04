@@ -41,7 +41,6 @@ jobs:
     - name: Run tests
       env:
         TEST_API_KEY: ${{ secrets.playgroundApiKey }}
-        TEST_API_KEY_GREENFIELD: ${{ secrets.greenfieldApiKey }}
         TEST_AAD_TENANT_BLUEFIELD: "b86328db-09aa-4f0e-9a03-0136f604d20a"
         TEST_CLIENT_ID_BLUEFIELD: ${{ secrets.BLUEFIELD_CLIENT_ID }}
         TEST_CLIENT_SECRET_BLUEFIELD: ${{ secrets.BLUEFIELD_CLIENT_SECRET }}
