@@ -3,7 +3,7 @@ package com.cognite.sdk.scala.common
 import java.util.concurrent.TimeUnit
 import cats.Monad
 import cats.syntax.all._
-import cats.effect.{Clock, ConcurrentEffect}
+import cats.effect.{Clock, Concurrent}
 import com.cognite.sdk.scala.common.internal.{CachedResource, ConcurrentCachedObject}
 import sttp.client3._
 import sttp.client3.circe.asJson
@@ -42,7 +42,7 @@ object OAuth2 {
         credentials: ClientCredentials,
         refreshSecondsBeforeTTL: Long = 30
     )(
-        implicit F: ConcurrentEffect[F],
+        implicit F: Concurrent[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[ClientCredentialsProvider[F]] = {
