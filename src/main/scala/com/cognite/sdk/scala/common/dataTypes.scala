@@ -266,7 +266,6 @@ object NonNullableSetter {
 
   def fromAny[T](value: T): NonNullableSetter[T] = SetValue(value)
 
-  @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
   implicit def encodeNonNullableSetter[T](
       implicit encodeT: Encoder[T]
   ): Encoder[NonNullableSetter[T]] = new Encoder[NonNullableSetter[T]] {
