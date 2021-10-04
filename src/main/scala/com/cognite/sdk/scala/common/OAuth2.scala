@@ -42,7 +42,7 @@ object OAuth2 {
         credentials: ClientCredentials,
         refreshSecondsBeforeTTL: Long = 30
     )(
-        implicit F: ConcurrentEffect[F],
+        implicit F: Concurrent[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[ClientCredentialsProvider[F]] = {
