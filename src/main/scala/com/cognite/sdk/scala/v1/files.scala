@@ -4,8 +4,9 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
+
 import com.cognite.sdk.scala.common.{
-  NonNullableSetter,
+  NonNullableIterableSetter,
   SearchQuery,
   Setter,
   ToCreate,
@@ -60,11 +61,11 @@ final case class File(
       Setter.fromOption(source),
       Setter.fromOption(directory),
       Setter.fromOption(mimeType),
-      NonNullableSetter.fromOption(metadata),
-      NonNullableSetter.fromOption(assetIds),
+      NonNullableIterableSetter.fromOption(metadata),
+      NonNullableIterableSetter.fromOption(assetIds),
       Setter.fromOption(sourceCreatedTime),
       Setter.fromOption(sourceModifiedTime),
-      NonNullableSetter.fromOption(securityCategories),
+      NonNullableIterableSetter.fromOption(securityCategories),
       Setter.fromOption(dataSetId)
     )
 }
@@ -88,11 +89,11 @@ final case class FileUpdate(
     source: Option[Setter[String]] = None,
     directory: Option[Setter[String]] = None,
     mimeType: Option[Setter[String]] = None,
-    metadata: Option[NonNullableSetter[Map[String, String]]] = None,
-    assetIds: Option[NonNullableSetter[Seq[Long]]] = None,
+    metadata: Option[NonNullableIterableSetter[Map[String, String]]] = None,
+    assetIds: Option[NonNullableIterableSetter[Seq[Long]]] = None,
     sourceCreatedTime: Option[Setter[Instant]] = None,
     sourceModifiedTime: Option[Setter[Instant]] = None,
-    securityCategories: Option[NonNullableSetter[Seq[Long]]] = None,
+    securityCategories: Option[NonNullableIterableSetter[Seq[Long]]] = None,
     dataSetId: Option[Setter[Long]] = None
 ) extends WithSetExternalId
 

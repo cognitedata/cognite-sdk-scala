@@ -45,11 +45,11 @@ final case class Asset(
       Setter.fromOption(description),
       Setter.fromOption(source),
       Setter.fromOption(externalId),
-      NonNullableSetter.fromOption(metadata),
+      NonNullableIterableSetter.fromOption(metadata),
       Setter.fromOption(parentId),
       Setter.fromOption(parentExternalId),
       Setter.fromOption(dataSetId),
-      NonNullableSetter.fromOption(labels)
+      NonNullableIterableSetter.fromOption(labels)
     )
 }
 
@@ -70,11 +70,11 @@ final case class AssetUpdate(
     description: Option[Setter[String]] = None,
     source: Option[Setter[String]] = None,
     externalId: Option[Setter[String]] = None,
-    metadata: Option[NonNullableSetter[Map[String, String]]] = None,
+    metadata: Option[NonNullableIterableSetter[Map[String, String]]] = None,
     parentId: Option[Setter[Long]] = None,
     parentExternalId: Option[Setter[String]] = None,
     dataSetId: Option[Setter[Long]] = None,
-    labels: Option[NonNullableSetter[Seq[CogniteExternalId]]] = None
+    labels: Option[NonNullableIterableSetter[Seq[CogniteExternalId]]] = None
 ) extends WithSetExternalId
 
 final case class AssetsFilter(

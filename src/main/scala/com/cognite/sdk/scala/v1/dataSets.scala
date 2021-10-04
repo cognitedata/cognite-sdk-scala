@@ -35,7 +35,7 @@ final case class DataSet(
       Setter.fromOption(externalId),
       Setter.fromOption(name),
       Setter.fromOption(description),
-      NonNullableSetter.fromOption(metadata),
+      NonNullableIterableSetter.fromOption(metadata),
       Some(NonNullableSetter.fromAny(writeProtected))
     )
 }
@@ -52,7 +52,7 @@ final case class DataSetUpdate(
     externalId: Option[Setter[String]] = None,
     name: Option[Setter[String]] = None,
     description: Option[Setter[String]] = None,
-    metadata: Option[NonNullableSetter[Map[String, String]]] = None,
+    metadata: Option[NonNullableIterableSetter[Map[String, String]]] = None,
     writeProtected: Option[NonNullableSetter[Boolean]] = None
 ) extends WithSetExternalId
 

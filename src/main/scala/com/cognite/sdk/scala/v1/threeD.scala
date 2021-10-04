@@ -4,7 +4,14 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-import com.cognite.sdk.scala.common.{NonNullableSetter, ToCreate, ToUpdate, WithId}
+
+import com.cognite.sdk.scala.common.{
+  NonNullableIterableSetter,
+  NonNullableSetter,
+  ToCreate,
+  ToUpdate,
+  WithId
+}
 
 final case class ThreeDModel(
     name: String,
@@ -20,7 +27,7 @@ final case class ThreeDModel(
     ThreeDModelUpdate(
       id,
       Some(NonNullableSetter.fromAny(name)),
-      NonNullableSetter.fromOption(metadata)
+      NonNullableIterableSetter.fromOption(metadata)
     )
 }
 
@@ -32,7 +39,7 @@ final case class ThreeDModelCreate(
 final case class ThreeDModelUpdate(
     id: Long = 0,
     name: Option[NonNullableSetter[String]] = None,
-    metadata: Option[NonNullableSetter[Map[String, String]]] = None
+    metadata: Option[NonNullableIterableSetter[Map[String, String]]] = None
 ) extends WithId[Long]
 
 final case class Camera(
@@ -79,7 +86,7 @@ final case class ThreeDRevision(
       Some(NonNullableSetter.fromAny(published)),
       NonNullableSetter.fromOption(rotation),
       NonNullableSetter.fromOption(camera),
-      NonNullableSetter.fromOption(metadata)
+      NonNullableIterableSetter.fromOption(metadata)
     )
 }
 
@@ -96,7 +103,7 @@ final case class ThreeDRevisionUpdate(
     published: Option[NonNullableSetter[Boolean]],
     rotation: Option[NonNullableSetter[Seq[Double]]] = None,
     camera: Option[NonNullableSetter[Camera]] = None,
-    metadata: Option[NonNullableSetter[Map[String, String]]] = None
+    metadata: Option[NonNullableIterableSetter[Map[String, String]]] = None
 ) extends WithId[Long]
 
 final case class ThreeDAssetMapping(

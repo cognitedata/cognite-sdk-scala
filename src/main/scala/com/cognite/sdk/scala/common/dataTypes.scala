@@ -198,14 +198,18 @@ object EitherDecoder {
 sealed trait Setter[+T]
 sealed trait NonNullableSetter[+T]
 sealed trait NonNullableIterableSetter[+T]
-final case class SetValue[+T](set: T) extends Setter[T] with NonNullableSetter[T]
+final case class SetValue[+T](set: T)
+    extends Setter[T]
+    with NonNullableSetter[T]
+    with NonNullableIterableSetter[T]
 final case class SetNull[+T]() extends Setter[T]
+
 // For add/remove on updates for assets_ids, labels (array types)
 final case class AddRemoveArr[+T](add: Seq[T] = Seq.empty, remove: Seq[T] = Seq.empty)
-    extends NonNullableSetter[Seq[T]]
+    extends NonNullableIterableSetter[Seq[T]]
 // For metadata add/remove on updates
 final case class AddRemoveMap(add: Map[String, String] = Map.empty, remove: Seq[String] = Seq.empty)
-    extends NonNullableSetter[Map[String, String]]
+    extends NonNullableIterableSetter[Map[String, String]]
 
 object Setter {
   @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
@@ -268,18 +272,18 @@ object NonNullableSetter {
   ): Encoder[NonNullableSetter[T]] = new Encoder[NonNullableSetter[T]] {
     final def apply(a: NonNullableSetter[T]): Json = a match {
       case SetValue(value) => Json.obj(("set", encodeT.apply(value)))
-      // The following cases are covered separately
-      case AddRemoveMap(_, _) => null // scalastyle:ignore null
-      case AddRemoveArr(_, _) => null // scalastyle:ignore null
     }
   }
+}
 
+object NonNullableIterableSetter {
   implicit def encodeNonNullableSetterArr[T](
       implicit encodeT: Encoder[T]
-  ): Encoder[NonNullableSetter[Seq[T]]] = new Encoder[NonNullableSetter[Seq[T]]] {
-    final def apply(a: NonNullableSetter[Seq[T]]): Json = a match {
-      case SetValue(value) => Json.obj(("set", Json.arr(value.map(encodeT.apply): _*)))
-      case AddRemoveArr(add, remove) =>
+  ): Encoder[NonNullableIterableSetter[Seq[T]]] = new Encoder[NonNullableIterableSetter[Seq[T]]] {
+    final def apply(a: NonNullableIterableSetter[Seq[T]]): Json = a match {
+      case SetValue(value) =>
+        Json.obj(("set", Json.arr(value.map(encodeT.apply): _*)))
+      case AddRemoveArr(add: Seq[T], remove: Seq[T]) =>
         Json.obj(
           ("add" -> Json.arr(add.map(encodeT.apply): _*)),
           ("remove" -> Json.arr(remove.map(encodeT.apply): _*))
@@ -289,12 +293,12 @@ object NonNullableSetter {
 
   implicit def encodeNonNullableSetterMap(
       implicit encodeT: Encoder[Map[String, String]]
-  ): Encoder[NonNullableSetter[Map[String, String]]] =
-    new Encoder[NonNullableSetter[Map[String, String]]] {
-      final def apply(a: NonNullableSetter[Map[String, String]]): Json = a match {
+  ): Encoder[NonNullableIterableSetter[Map[String, String]]] =
+    new Encoder[NonNullableIterableSetter[Map[String, String]]] {
+      final def apply(a: NonNullableIterableSetter[Map[String, String]]): Json = a match {
         case SetValue(value) =>
           Json.obj(("set", encodeT.apply(value)))
-        case AddRemoveMap(add, remove) =>
+        case AddRemoveMap(add: Map[String, String], remove: Seq[String]) =>
           Json.obj(
             ("add" -> encodeT.apply(add)),
             ("remove" -> Json.arr(remove.map(Json.fromString): _*))
@@ -302,4 +306,16 @@ object NonNullableSetter {
       }
     }
 
+  def fromOption[T](option: Option[T]): Option[NonNullableIterableSetter[T]] = option match {
+    case None => None
+    case Some(map: Map[_, _]) if map.isEmpty =>
+      // Workaround for CDF-3540 and CDF-953
+      None
+    case Some(value) =>
+      require(
+        value != null,
+        "Invalid null value for non-nullable field update"
+      ) // scalastyle:ignore null
+      Some(SetValue(value))
+  }
 }
