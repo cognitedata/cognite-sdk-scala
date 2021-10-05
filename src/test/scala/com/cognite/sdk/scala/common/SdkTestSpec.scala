@@ -47,9 +47,6 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers {
   lazy val client: GenericClient[Id] = GenericClient.forAuth[Id](
     "scala-sdk-test", auth)(implicitly, sttpBackend)
 
-  lazy val greenfieldClient: GenericClient[Id] = GenericClient.forAuth[Id](
-    "scala-sdk-test", greenfieldAuth, "https://greenfield.cognitedata.com")(implicitly, sttpBackend)
-
   lazy val projectName: String = client.login.status().project
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
@@ -57,9 +54,6 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers {
   private lazy val apiKey = Option(System.getenv("TEST_API_KEY"))
     .getOrElse(throw new RuntimeException("TEST_API_KEY not set"))
   implicit lazy val auth: Auth = ApiKeyAuth(apiKey)
-  private lazy val greenfieldApiKey = Option(System.getenv("TEST_API_KEY_GREENFIELD"))
-    .getOrElse(throw new RuntimeException("TEST_API_KEY_GREENFIELD not set"))
-  implicit lazy val greenfieldAuth: Auth = ApiKeyAuth(greenfieldApiKey)
 
   lazy val dataSetResource = new DataSets(client.requestSession)
 

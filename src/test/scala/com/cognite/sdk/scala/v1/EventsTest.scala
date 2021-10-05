@@ -15,7 +15,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   // it should behave like readable(client.events)
 
-  it should behave like partitionedReadable(greenfieldClient.events)
+  it should behave like partitionedReadable(client.events)
 
   it should behave like readableWithRetrieve(client.events, idsThatDoNotExist, supportsMissingAndThrown = true)
 

@@ -154,19 +154,6 @@ class ClientTest extends SdkTestSpec {
     )
   }
 
-  it should "be possible to use the sdk with greenfield.cognite.data.com" in {
-    implicit val auth: Auth = ApiKeyAuth(Option(System.getenv("TEST_API_KEY_GREENFIELD"))
-      .getOrElse(throw new RuntimeException("TEST_API_KEY_GREENFIELD not set")))
-    noException should be thrownBy new GenericClient[Id](
-      "cdp-spark-datasource-test",
-      projectName,
-      "https://greenfield.cognitedata.com",
-      auth
-    )(implicitly,
-      sttpBackend
-    )
-  }
-
   it should "give a friendly error message when using a malformed base url" in {
     assertThrows[IllegalArgumentException] {
       Client(
