@@ -13,6 +13,7 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[Relationship, F]
     with Filter[Relationship, RelationshipsFilter, F]
+    with RetrieveByIdsWithIgnoreUnknownIds[Relationship, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Relationship, F]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
     with Create[Relationship, RelationshipCreate, F]
@@ -85,6 +86,14 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
       requestSession,
       baseUrl,
       items
+    )
+
+  override def retrieveByIds(ids: Seq[Long], ignoreUnknownIds: Boolean): F[Seq[Relationship]] =
+    RetrieveByIdsWithIgnoreUnknownIds.retrieveByIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
     )
 }
 
