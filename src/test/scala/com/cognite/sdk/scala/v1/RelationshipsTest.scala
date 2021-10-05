@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 package com.cognite.sdk.scala.v1
-import com.cognite.sdk.scala.common.{ReadBehaviours, RetryWhile, SdkTestSpec, WritableBehaviors}
+import com.cognite.sdk.scala.common._
+
 import java.time.temporal.ChronoUnit
 import java.time.Instant
 class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
@@ -48,6 +49,51 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
     externalIdsThatDoNotExist,
     supportsMissingAndThrown = true,
     trySameIdsThatDoNotExist = false
+  )
+
+  private val externalId = shortRandom()
+
+  it should behave like updatableByExternalId(
+    client.relationships,
+    None,
+    Seq(
+      Relationship(
+        sourceExternalId = "scala-sdk-relationships-test-asset1",
+        sourceType = "asset",
+        targetExternalId = "scala-sdk-relationships-test-asset2",
+        targetType = "asset",
+        startTime = Some(Instant.ofEpochMilli(1605866626000L)),
+        endTime = Some(Instant.ofEpochMilli(1606125826000L)),
+        labels = Some(Seq(CogniteExternalId("scala-sdk-relationships-test-label1"))),
+        externalId = "scala-sdk-relationships-test-example-1",
+        dataSetId = Some(2694232156565845L)
+      ),
+      Relationship(
+        sourceExternalId = "scala-sdk-relationships-test-event1",
+        sourceType = "event",
+        targetExternalId = "scala-sdk-relationships-test-event2",
+        targetType = "event",
+        confidence = Some(0.6),
+        labels = Some(Seq(
+          CogniteExternalId("scala-sdk-relationships-test-label1"),
+          CogniteExternalId("scala-sdk-relationships-test-label2"))
+        ),
+        startTime = Some(Instant.ofEpochMilli(1602354975000L)),
+        endTime = Some(Instant.ofEpochMilli(1602527775000L)),
+        externalId = "scala-sdk-relationships-test-example-2",
+        dataSetId = Some(2694232156565845L)
+      )
+    ),
+    Map(s"update-1-externalId-${externalId}" -> RelationshipUpdate(externalId = Some(SetValue(s"$externalId-1"))),
+      s"update-2-externalId-${externalId}" -> RelationshipUpdate(externalId = Some(SetValue(s"$externalId-1")))),
+    (readRelationships: Seq[Relationship], updatedRelationships: Seq[Relationship]) => {
+      assert(readRelationships.size == updatedRelationships.size)
+      assert(updatedRelationships.zip(readRelationships).forall { case (updated, read) =>
+        updated.externalId === s"${read.externalId}-1" })
+      assert(updatedRelationships.zip(readRelationships).forall { case (updated, read) =>
+        updated.externalId === read.externalId })
+      ()
+    }
   )
 
   it should "create necessary relationships for filter tests" in {
