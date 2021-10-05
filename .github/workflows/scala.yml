@@ -7,6 +7,114 @@ on:
     branches: [ master ]
 
 jobs:
+  compile_scala_211:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/master'
+
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 8
+        uses: olafurpg/setup-scala@v13
+        with:
+          java-version: adopt@1.8
+
+      # Caching dependencies in Pull Requests based on branch name and build.sbt.
+      # Can we do something better here?
+      - name: Cache Coursier dependencies
+        uses: actions/cache@v1
+        env:
+          cache-name: coursier-cache
+        with:
+          path: ~/.cache/coursier/v1
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
+
+      - name: Cache Ivy 2 cache
+        uses: actions/cache@v1
+        env:
+          cache-name: sbt-ivy2-cache
+        with:
+          path: ~/.ivy2/cache
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
+
+      - name: Compile
+        run: |
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.11.12 Test/compile
+
+  compile_scala_213:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/master'
+
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 8
+        uses: olafurpg/setup-scala@v13
+        with:
+          java-version: adopt@1.8
+
+      # Caching dependencies in Pull Requests based on branch name and build.sbt.
+      # Can we do something better here?
+      - name: Cache Coursier dependencies
+        uses: actions/cache@v1
+        env:
+          cache-name: coursier-cache
+        with:
+          path: ~/.cache/coursier/v1
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
+
+      - name: Cache Ivy 2 cache
+        uses: actions/cache@v1
+        env:
+          cache-name: sbt-ivy2-cache
+        with:
+          path: ~/.ivy2/cache
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
+
+      - name: Compile
+        run: |
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13.6 Test/compile
+
+  compile_scala_3:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/master'
+
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 8
+        uses: olafurpg/setup-scala@v13
+        with:
+          java-version: adopt@1.8
+
+      # Caching dependencies in Pull Requests based on branch name and build.sbt.
+      # Can we do something better here?
+      - name: Cache Coursier dependencies
+        uses: actions/cache@v1
+        env:
+          cache-name: coursier-cache
+        with:
+          path: ~/.cache/coursier/v1
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
+
+      - name: Cache Ivy 2 cache
+        uses: actions/cache@v1
+        env:
+          cache-name: sbt-ivy2-cache
+        with:
+          path: ~/.ivy2/cache
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
+
+      - name: Compile
+        run: |
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++3.0.1 Test/compile
+
   test:
     runs-on: ubuntu-latest
 
@@ -48,7 +156,7 @@ jobs:
         AIZE_CLIENT_SECRET: ${{ secrets.AIZE_CLIENT_SECRET }}
       # run: sbt test
       run: |
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC scalastyle test:scalastyle scalafmtCheck coverage +Test/compile test coverageReport
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13.6 scalastyle test:scalastyle scalafmtCheck coverage test coverageReport
 
     - name: Upload test coverage report
       uses: codecov/codecov-action@v1
