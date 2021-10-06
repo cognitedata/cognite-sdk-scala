@@ -258,9 +258,9 @@ object NonNullableSetter {
         None
       case Some(value) =>
         require(
-          value != null,
+          value != null, // scalastyle:ignore null
           "Invalid null value for non-nullable field update"
-        ) // scalastyle:ignore null
+        )
         Some(SetValue(value))
     }
 
