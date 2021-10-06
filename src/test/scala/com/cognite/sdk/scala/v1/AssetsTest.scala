@@ -138,16 +138,16 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     // Create labels
     client.labels.createItems(
-      Items(Seq(LabelCreate(externalId =externalId1, name=externalId1),
-        LabelCreate(externalId =externalId2, name=externalId2),
-        LabelCreate(externalId =externalId3, name=externalId3)
+      Items(Seq(LabelCreate(externalId = externalId1, name = externalId1),
+        LabelCreate(externalId = externalId2, name = externalId2),
+        LabelCreate(externalId = externalId3, name = externalId3)
       )))
 
     // Create assets
     val assetToCreate = Seq(
-      AssetCreate(externalId=Some(externalId1),
+      AssetCreate(externalId = Some(externalId1),
         name=externalId1, labels = Some(Seq(CogniteExternalId(externalId1))), metadata = Some(Map("test1" -> "test1"))),
-      AssetCreate(externalId=Some(externalId2), name=externalId2)
+      AssetCreate(externalId = Some(externalId2), name=externalId2)
     )
     client.assets.createItems(Items(assetToCreate))
 
@@ -155,11 +155,11 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     val updatedAssets: Seq[Asset] = client.assets.updateByExternalId(Map(
       // Add the label with externalId=externalId2 and remove the label with externalId=externalId1 on asset1
       // Also test metadata partial updates
-      externalId1 -> AssetUpdate(metadata = Some(AddRemoveMap(add=Map("test2"->"test2"))),
-        labels = Some(AddRemoveArr(add=Seq(CogniteExternalId(externalId2)),
-          remove=Seq(CogniteExternalId(externalId1))))),
+      externalId1 -> AssetUpdate(metadata = Some(UpdateMap(add = Map("test2"->"test2"))),
+        labels = Some(UpdateArray(add = Seq(CogniteExternalId(externalId2)),
+          remove = Seq(CogniteExternalId(externalId1))))),
       // Set labels to label with externalId=externalId2 on asset2
-      externalId2 -> AssetUpdate(metadata = Some(SetValue(set=Map("test2"->"test2"))),
+      externalId2 -> AssetUpdate(metadata = Some(SetValue(set = Map("test2"->"test2"))),
         labels = Some(SetValue(Seq(CogniteExternalId(externalId2)))))
      )
     )
@@ -170,10 +170,10 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     // Test that omitting properties on AddRemoveArr doesn't have any effect
     // Test with empty lists on add/remove, basically do nothing
-    client.assets.updateOneByExternalId(externalId1, AssetUpdate(labels=Some(AddRemoveArr())))
+    client.assets.updateOneByExternalId(externalId1, AssetUpdate(labels = Some(UpdateArray())))
     // Test with empty list on remove, basically add label with externalId3
     val updated = client.assets.updateOneByExternalId(externalId1,
-      AssetUpdate(labels=Some(AddRemoveArr(add=Seq(CogniteExternalId(externalId3))))))
+      AssetUpdate(labels = Some(UpdateArray(add = Seq(CogniteExternalId(externalId3))))))
     updated.labels.toList.head should contain theSameElementsAs Seq(CogniteExternalId(externalId2),
       CogniteExternalId(externalId3))
 

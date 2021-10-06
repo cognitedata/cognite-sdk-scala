@@ -205,10 +205,10 @@ final case class SetValue[+T](set: T)
 final case class SetNull[+T]() extends Setter[T]
 
 // For add/remove on updates for assets_ids, labels (array types)
-final case class AddRemoveArr[+T](add: Seq[T] = Seq.empty, remove: Seq[T] = Seq.empty)
+final case class UpdateArray[+T](add: Seq[T] = Seq.empty, remove: Seq[T] = Seq.empty)
     extends NonNullableIterableSetter[Seq[T]]
 // For metadata add/remove on updates
-final case class AddRemoveMap(add: Map[String, String] = Map.empty, remove: Seq[String] = Seq.empty)
+final case class UpdateMap(add: Map[String, String] = Map.empty, remove: Seq[String] = Seq.empty)
     extends NonNullableIterableSetter[Map[String, String]]
 
 object Setter {
@@ -282,10 +282,10 @@ object NonNullableIterableSetter {
     final def apply(a: NonNullableIterableSetter[Seq[T]]): Json = a match {
       case SetValue(value) =>
         Json.obj(("set", Json.arr(value.map(encodeT.apply): _*)))
-      case AddRemoveArr(add: Seq[T], remove: Seq[T]) =>
+      case UpdateArray(add: Seq[T], remove: Seq[T]) =>
         Json.obj(
-          ("add" -> Json.arr(add.map(encodeT.apply): _*)),
-          ("remove" -> Json.arr(remove.map(encodeT.apply): _*))
+          "add" -> Json.arr(add.map(encodeT.apply): _*),
+          "remove" -> Json.arr(remove.map(encodeT.apply): _*)
         )
     }
   }
@@ -297,10 +297,10 @@ object NonNullableIterableSetter {
       final def apply(a: NonNullableIterableSetter[Map[String, String]]): Json = a match {
         case SetValue(value) =>
           Json.obj(("set", encodeT.apply(value)))
-        case AddRemoveMap(add: Map[String, String], remove: Seq[String]) =>
+        case UpdateMap(add: Map[String, String], remove: Seq[String]) =>
           Json.obj(
-            ("add" -> encodeT.apply(add)),
-            ("remove" -> Json.arr(remove.map(Json.fromString): _*))
+            "add" -> encodeT.apply(add),
+            "remove" -> Json.arr(remove.map(Json.fromString): _*)
           )
       }
     }
