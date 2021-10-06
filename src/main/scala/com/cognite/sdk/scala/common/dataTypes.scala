@@ -305,6 +305,15 @@ object NonNullableIterableSetter {
       }
     }
 
+  @SuppressWarnings(
+    Array(
+      "org.wartremover.warts.Null",
+      "org.wartremover.warts.Equals",
+      "org.wartremover.warts.OptionPartial",
+      "scalafix:DisableSyntax.null",
+      "scalafix:DisableSyntax.!="
+    )
+  )
   def fromOption[T](option: Option[T]): Option[NonNullableIterableSetter[T]] = option match {
     case None => None
     case Some(map: Map[_, _]) if map.isEmpty =>
