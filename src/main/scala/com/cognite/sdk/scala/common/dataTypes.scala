@@ -262,19 +262,13 @@ object NonNullableSetter {
 
   def fromAny[T](value: T): NonNullableSetter[T] = SetValue(value)
 
-  @SuppressWarnings(
-    Array(
-      "org.wartremover.warts.Null",
-      "scalafix:DisableSyntax.null"
-    )
-  )
   implicit def encodeNonNullableSetter[T](
       implicit encodeT: Encoder[T]
   ): Encoder[NonNullableSetter[T]] = new Encoder[NonNullableSetter[T]] {
     final def apply(a: NonNullableSetter[T]): Json = a match {
       case SetValue(value) => Json.obj(("set", encodeT.apply(value)))
-      case UpdateArray(_, _) => null // scalastyle:ignore null
-      case UpdateMap(_, _) => null // scalastyle:ignore null
+      case UpdateArray(_, _) => ???
+      case UpdateMap(_, _) => ???
     }
   }
 
