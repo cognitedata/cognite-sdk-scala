@@ -49,7 +49,7 @@ final case class Asset(
       Setter.fromOption(parentId),
       Setter.fromOption(parentExternalId),
       Setter.fromOption(dataSetId),
-      labels.map(ls => LabelsOnUpdate(Some(ls), None))
+      NonNullableSetter.fromOption(labels)
     )
 }
 
@@ -74,7 +74,7 @@ final case class AssetUpdate(
     parentId: Option[Setter[Long]] = None,
     parentExternalId: Option[Setter[String]] = None,
     dataSetId: Option[Setter[Long]] = None,
-    labels: Option[LabelsOnUpdate] = None
+    labels: Option[NonNullableSetter[Seq[CogniteExternalId]]] = None
 ) extends WithSetExternalId
 
 final case class AssetsFilter(

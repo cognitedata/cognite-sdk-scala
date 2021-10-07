@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
+
 import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common.{
   NonNullableSetter,
