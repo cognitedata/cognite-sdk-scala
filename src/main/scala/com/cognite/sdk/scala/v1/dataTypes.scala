@@ -41,14 +41,6 @@ object CogniteId {
 final case class TimeRange(min: Option[Instant] = None, max: Option[Instant] = None)
 final case class ConfidenceRange(min: Option[Double] = None, max: Option[Double] = None)
 
-// Used for updating labels on a data type (only assets for now), examples:
-// labels: {add: [{externalId: "label1"}, {externalId: "label2}]}, remove: [{externalId: "label3"}]}
-// labels: {add: [{externalId: "label1"}, {externalId: "label2}]}}
-final case class LabelsOnUpdate(
-    add: Option[Seq[CogniteExternalId]] = None,
-    remove: Option[Seq[CogniteExternalId]] = None
-)
-
 // Used for filtering by label, labels: {containsAny: [{externalId: "label1"}, {externalId: "label2}]}
 // or labels: {containsAll: [{externalId: "label1"}, {externalId: "label2}]}
 sealed trait LabelContainsFilter
