@@ -94,12 +94,13 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
     }
   )
 
-  it should "create necessary relationships for filter tests" in {
-    client.relationships.deleteByExternalIds(externalIds = Seq(
-      "scala-sdk-relationships-test-example-1",
-      "scala-sdk-relationships-test-example-2",
-      "scala-sdk-relationships-test-example-3"), ignoreUnknownIds = true
-    )
+  it should "support filter" in {
+
+    val existingItems = client.relationships
+      .filterWithCursor(RelationshipsFilter(dataSetIds = Some(Seq(CogniteInternalId(2694232156565845L)))), None, None, None, None)
+      .items.map(_.externalId)
+
+    client.relationships.deleteByExternalIds(externalIds = existingItems, ignoreUnknownIds = true)
     val randomItems = Seq(
       RelationshipCreate(
         sourceExternalId = "scala-sdk-relationships-test-asset1",
@@ -136,11 +137,8 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
         dataSetId = Some(2694232156565845L)
       )
     )
-    val res = client.relationships.create(randomItems)
-    assert(res.length == 3)
-  }
+    client.relationships.create(randomItems)
 
-  it should "support filter" in {
 
     val minAge = Instant.now().minus(10, ChronoUnit.MINUTES)
     val createdTimeRange = Some(
