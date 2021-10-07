@@ -137,9 +137,9 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
         dataSetId = Some(2694232156565845L)
       )
     )
-    client.relationships.create(randomItems)
+    val createdItems = client.relationships.create(randomItems)
 
-
+    assert(createdItems.length == 3)
     val minAge = Instant.now().minus(10, ChronoUnit.MINUTES)
     val createdTimeRange = Some(
       TimeRange(min = Some(minAge))
