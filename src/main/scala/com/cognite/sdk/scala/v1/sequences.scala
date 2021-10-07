@@ -7,7 +7,7 @@ import java.time.Instant
 
 import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common.{
-  NonNullableIterableSetter,
+  NonNullableSetter,
   SearchQuery,
   Setter,
   ToCreate,
@@ -94,7 +94,7 @@ final case class Sequence(
       Setter.fromOption(description),
       Setter.fromOption(assetId),
       Setter.fromOption(externalId),
-      NonNullableIterableSetter.fromOption(metadata),
+      NonNullableSetter.fromOption(metadata),
       Setter.fromOption(dataSetId)
     )
 }
@@ -114,7 +114,7 @@ final case class SequenceUpdate(
     description: Option[Setter[String]] = None,
     assetId: Option[Setter[Long]] = None,
     externalId: Option[Setter[String]] = None,
-    metadata: Option[NonNullableIterableSetter[Map[String, String]]] = None,
+    metadata: Option[NonNullableSetter[Map[String, String]]] = None,
     dataSetId: Option[Setter[Long]] = None
 ) extends WithSetExternalId
 

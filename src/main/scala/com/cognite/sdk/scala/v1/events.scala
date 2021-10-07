@@ -46,8 +46,8 @@ final case class Event(
       Setter.fromOption(description),
       Setter.fromOption(`type`),
       Setter.fromOption(subtype),
-      NonNullableIterableSetter.fromOption(metadata),
-      NonNullableIterableSetter.fromOption(assetIds),
+      NonNullableSetter.fromOption(metadata),
+      NonNullableSetter.fromOption(assetIds),
       Setter.fromOption(source),
       Setter.fromOption(externalId),
       Setter.fromOption(dataSetId)
@@ -73,8 +73,8 @@ final case class EventUpdate(
     description: Option[Setter[String]] = None,
     `type`: Option[Setter[String]] = None,
     subtype: Option[Setter[String]] = None,
-    metadata: Option[NonNullableIterableSetter[Map[String, String]]] = None,
-    assetIds: Option[NonNullableIterableSetter[Seq[Long]]] = None,
+    metadata: Option[NonNullableSetter[Map[String, String]]] = None,
+    assetIds: Option[NonNullableSetter[Seq[Long]]] = None,
     source: Option[Setter[String]] = None,
     externalId: Option[Setter[String]] = None,
     dataSetId: Option[Setter[Long]] = None
