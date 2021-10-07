@@ -55,31 +55,31 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
 
   it should behave like updatableByRequiredExternalId(
     client.relationships,
-    None,
+    Some(client.relationships),
     Seq(
       Relationship(
         sourceExternalId = "relationships-update-test-1",
-        sourceType = "asset",
+        sourceType = "sequence",
         targetExternalId = "scala-sdk-relationships-update-test-asset2",
-        targetType = "asset",
-        startTime = Some(Instant.ofEpochMilli(1605866626000L)),
-        endTime = Some(Instant.ofEpochMilli(1606125826000L)),
+        targetType = "sequence",
+        startTime = Some(Instant.now().minus(10, ChronoUnit.DAYS)),
+        endTime = Some(Instant.now().minus(9, ChronoUnit.DAYS)),
         labels = Some(Seq(CogniteExternalId("scala-sdk-relationships-test-label1"))),
         externalId = s"update-1-externalId-$randomExternalId",
         dataSetId = Some(2694232156565845L)
       ),
       Relationship(
         sourceExternalId = "relationships-update-test-2",
-        sourceType = "event",
+        sourceType = "file",
         targetExternalId = "scala-sdk-relationships-update-test-event2",
-        targetType = "event",
+        targetType = "file",
         confidence = Some(0.6),
         labels = Some(Seq(
           CogniteExternalId("scala-sdk-relationships-test-label1"),
           CogniteExternalId("scala-sdk-relationships-test-label2"))
         ),
-        startTime = Some(Instant.ofEpochMilli(1602354975000L)),
-        endTime = Some(Instant.ofEpochMilli(1602527775000L)),
+        startTime = Some(Instant.now().minus(10, ChronoUnit.DAYS)),
+        endTime = Some(Instant.now().minus(9, ChronoUnit.DAYS)),
         externalId = s"update-2-externalId-$randomExternalId",
         dataSetId = Some(2694232156565845L)
       )
