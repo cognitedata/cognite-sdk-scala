@@ -81,6 +81,41 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
         )
     }
 
+    it should "be possible to insertById and insertByExternalId and delete numerical data points" in withTimeSeries {
+      timeSeries =>
+        val timeSeriesId = timeSeries.id
+        val timeSeriesExternalId = timeSeries.externalId.value
+        dataPoints.insertById(timeSeriesId, testDataPoints)
+
+        retryWithExpectedResult[DataPointsByIdResponse](
+          dataPoints.queryById(timeSeriesId, start, end.plusMillis(1)),
+          p => p.datapoints should have size testDataPoints.size.toLong
+        )
+
+        dataPoints.deleteRangeById(timeSeriesId, start, end.plusMillis(1))
+        retryWithExpectedResult[DataPointsByIdResponse](
+          dataPoints.queryById(timeSeriesId, start, end.plusMillis(1)),
+          dp => dp.datapoints should have size 0
+        )
+
+        dataPoints.insertByExternalId(timeSeriesExternalId, testDataPoints)
+        retryWithExpectedResult[DataPointsByExternalIdResponse](
+          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
+          p2 => p2.datapoints should have size testDataPoints.size.toLong
+        )
+
+        retryWithExpectedResult[DataPointsByExternalIdResponse](
+          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1), Some(5)),
+          p2 => p2.datapoints should have size 5
+        )
+
+        dataPoints.deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
+        retryWithExpectedResult[DataPointsByExternalIdResponse](
+          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
+          pad => pad.datapoints should have size 0
+        )
+    }
+
     it should "be an error to insert numerical data points for non-existing time series" in {
       val unknownId = 991919L
       val thrown = the[CdpApiException] thrownBy dataPoints.insert(CogniteInternalId(unknownId), testDataPoints)

@@ -90,6 +90,70 @@ trait StringDataPointsResourceBehaviors extends Matchers with OptionValues with 
         )
     }
 
+    it should "be possible to insertStringsById and insertStringsByExternalId and delete string data points" in withStringTimeSeries {
+      stringTimeSeries =>
+        val stringTimeSeriesId = stringTimeSeries.id
+        val stringTimeSeriesExternalId = stringTimeSeries.externalId.value
+        dataPoints.insertStringsById(stringTimeSeriesId, testStringDataPoints)
+
+        retryWithExpectedResult[StringDataPointsByIdResponse](
+          dataPoints.queryStringsById(stringTimeSeriesId, start, end.plusMillis(1)),
+          p => p.datapoints should have size testStringDataPoints.size.toLong
+        )
+
+        retryWithExpectedResult[Option[StringDataPoint]](
+          dataPoints.getLatestStringDataPoint(CogniteInternalId(stringTimeSeriesId)),
+          dp => {
+            dp.isDefined shouldBe true
+            testStringDataPoints.toList should contain(dp.value)
+          }
+        )
+
+        dataPoints.deleteRangeById(stringTimeSeriesId, start, end.plusMillis(1))
+        val resultId = retryWithExpectedResult[StringDataPointsByIdResponse](
+          dataPoints.queryStringsById(stringTimeSeriesId, start, end.plusMillis(1)),
+          dp => dp.datapoints should have size 0
+        )
+
+        resultId.externalId shouldBe Some(stringTimeSeriesExternalId)
+        resultId.unit shouldBe stringTimeSeries.unit
+        resultId.isString shouldBe true
+        resultId.id shouldBe stringTimeSeries.id
+
+        val resultId2: Seq[_] = dataPoints.queryStrings(Seq(CogniteInternalId(stringTimeSeriesId)), start, end.plusMillis(1))
+        resultId2.length shouldBe 1
+        resultId2.headOption.value shouldBe resultId
+
+        dataPoints.insertStringsByExternalId(stringTimeSeriesExternalId, testStringDataPoints)
+        val resultExternalId: StringDataPointsByExternalIdResponse = retryWithExpectedResult[StringDataPointsByExternalIdResponse](
+          dataPoints.queryStringsByExternalId(stringTimeSeriesExternalId, start, end.plusMillis(1)),
+          p2 => p2.datapoints should have size testStringDataPoints.size.toLong
+        )
+
+        resultExternalId.externalId shouldBe stringTimeSeriesExternalId
+        resultExternalId.unit shouldBe stringTimeSeries.unit
+        resultExternalId.isString shouldBe true
+        resultExternalId.id shouldBe stringTimeSeries.id
+
+        val resultExternalId2: Seq[StringDataPointsByExternalIdResponse] = dataPoints.queryStringsByExternalIds(Seq(stringTimeSeriesExternalId), start, end.plusMillis(1))
+        resultExternalId2.length shouldBe 1
+        resultExternalId2.headOption.value shouldBe resultExternalId
+
+        retryWithExpectedResult[Option[StringDataPoint]](
+          dataPoints.getLatestStringDataPoint(CogniteExternalId(stringTimeSeriesExternalId)),
+          l2 => {
+            l2.isDefined shouldBe true
+            testStringDataPoints.toList should contain(l2.value)
+          }
+        )
+
+        dataPoints.deleteRangeById(stringTimeSeriesId, start, end.plusMillis(1))
+        retryWithExpectedResult[StringDataPointsByExternalIdResponse](
+          dataPoints.queryStringsByExternalId(stringTimeSeriesExternalId, start, end.plusMillis(1)),
+          pad => pad.datapoints should have size 0
+        )
+    }
+
     it should "support support query by externalId when ignoreUnknownIds=true" in {
       val doesNotExist = CogniteExternalId(s"does-not-exist-${UUID.randomUUID.toString}")
       dataPoints.getLatestStringDataPoints(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty

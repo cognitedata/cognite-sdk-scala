@@ -21,6 +21,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
+// scalastyle:off number.of.methods
 class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
@@ -101,13 +102,41 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       (r: Response[Unit]) => r.body
     )
 
-  /*
+  private def arrayByteSerializer(a: Array[Byte]): ByteArrayBody = ByteArrayBody(a)
+
   def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Unit] =
-    insert(CogniteInternalId(id), dataPoints)
+    requestSession.post[Unit, Unit, Array[Byte]](
+      DataPointInsertionRequest
+        .newBuilder()
+        .addItems {
+          val b = DataPointInsertionItem.newBuilder()
+          b.setId(id)
+            .setNumericDatapoints(protoNumericDataPoints(dataPoints))
+            .build()
+        }
+        .build()
+        .toByteArray,
+      baseUrl,
+      _ => (),
+      "application/protobuf"
+    )(arrayByteSerializer, implicitly)
 
   def insertByExternalId(externalId: String, dataPoints: Seq[DataPoint]): F[Unit] =
-    insert(CogniteExternalId(externalId), dataPoints)
-   */
+    requestSession.post[Unit, Unit, Array[Byte]](
+      DataPointInsertionRequest
+        .newBuilder()
+        .addItems {
+          val b = DataPointInsertionItem.newBuilder()
+          b.setExternalId(externalId)
+            .setNumericDatapoints(protoNumericDataPoints(dataPoints))
+            .build()
+        }
+        .build()
+        .toByteArray,
+      baseUrl,
+      _ => (),
+      "application/protobuf"
+    )(arrayByteSerializer, implicitly)
 
   def insertStrings(id: CogniteId, dataPoints: Seq[StringDataPoint]): F[Unit] =
     requestSession.map(
@@ -156,11 +185,40 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         .send(requestSession.sttpBackend),
       (r: Response[Unit]) => r.body
     )
-  /*def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Unit] =
-    insertStrings(CogniteInternalId(id), dataPoints)
+
+  def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Unit] =
+    requestSession.post[Unit, Unit, Array[Byte]](
+      DataPointInsertionRequest
+        .newBuilder()
+        .addItems {
+          val b = DataPointInsertionItem.newBuilder()
+          b.setId(id)
+            .setStringDatapoints(protoStringDataPoints(dataPoints))
+            .build()
+        }
+        .build()
+        .toByteArray,
+      baseUrl,
+      _ => (),
+      "application/protobuf"
+    )(arrayByteSerializer, implicitly)
 
   def insertStringsByExternalId(externalId: String, dataPoints: Seq[StringDataPoint]): F[Unit] =
-    insertStrings(CogniteExternalId(externalId), dataPoints) */
+    requestSession.post[Unit, Unit, Array[Byte]](
+      DataPointInsertionRequest
+        .newBuilder()
+        .addItems {
+          val b = DataPointInsertionItem.newBuilder()
+          b.setExternalId(externalId)
+            .setStringDatapoints(protoStringDataPoints(dataPoints))
+            .build()
+        }
+        .build()
+        .toByteArray,
+      baseUrl,
+      _ => (),
+      "application/protobuf"
+    )(arrayByteSerializer, implicitly)
 
   def deleteRanges(ranges: Seq[DeleteDataPointsRange]): F[Unit] =
     requestSession.post[Unit, Unit, Items[DeleteDataPointsRange]](
