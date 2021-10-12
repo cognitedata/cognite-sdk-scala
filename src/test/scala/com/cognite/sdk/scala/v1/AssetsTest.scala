@@ -4,6 +4,8 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
+import java.util.UUID
+
 import com.cognite.sdk.scala.common._
 import fs2.Stream
 
@@ -128,6 +130,56 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       ()
     }
   )
+
+  it should "update labels on assets" in {
+    val externalId1 = UUID.randomUUID.toString
+    val externalId2 = UUID.randomUUID.toString
+    val externalId3 = UUID.randomUUID.toString
+
+    // Create labels
+    client.labels.createItems(
+      Items(Seq(LabelCreate(externalId = externalId1, name = externalId1),
+        LabelCreate(externalId = externalId2, name = externalId2),
+        LabelCreate(externalId = externalId3, name = externalId3)
+      )))
+
+    // Create assets
+    val assetToCreate = Seq(
+      AssetCreate(externalId = Some(externalId1),
+        name=externalId1, labels = Some(Seq(CogniteExternalId(externalId1))), metadata = Some(Map("test1" -> "test1"))),
+      AssetCreate(externalId = Some(externalId2), name=externalId2)
+    )
+    client.assets.createItems(Items(assetToCreate))
+
+    // Update assets to test updates with labels
+    val updatedAssets: Seq[Asset] = client.assets.updateByExternalId(Map(
+      // Add the label with externalId=externalId2 and remove the label with externalId=externalId1 on asset1
+      // Also test metadata partial updates
+      externalId1 -> AssetUpdate(metadata = Some(UpdateMap(add = Map("test2"->"test2"))),
+        labels = Some(UpdateArray(add = Seq(CogniteExternalId(externalId2)),
+          remove = Seq(CogniteExternalId(externalId1))))),
+      // Set labels to label with externalId=externalId2 on asset2
+      externalId2 -> AssetUpdate(metadata = Some(SetValue(set = Map("test2"->"test2"))),
+        labels = Some(SetValue(Seq(CogniteExternalId(externalId2)))))
+     )
+    )
+    assert(updatedAssets.head.labels.contains(Seq(CogniteExternalId(externalId2))))
+    assert(updatedAssets(1).labels.contains(Seq(CogniteExternalId(externalId2))))
+    updatedAssets.head.metadata.toList.head  should contain theSameElementsAs  Map("test1"->"test1", "test2"->"test2")
+    assert(updatedAssets(1).metadata.contains(Map("test2"->"test2")))
+
+    // Test that omitting properties on AddRemoveArr doesn't have any effect
+    // Test with empty lists on add/remove, basically do nothing
+    client.assets.updateOneByExternalId(externalId1, AssetUpdate(labels = Some(UpdateArray())))
+    // Test with empty list on remove, basically add label with externalId3
+    val updated = client.assets.updateOneByExternalId(externalId1,
+      AssetUpdate(labels = Some(UpdateArray(add = Seq(CogniteExternalId(externalId3))))))
+    updated.labels.toList.head should contain theSameElementsAs Seq(CogniteExternalId(externalId2),
+      CogniteExternalId(externalId3))
+
+    client.assets.deleteByExternalIds(Seq(externalId1, externalId2))
+    client.labels.deleteByExternalIds(Seq(externalId1, externalId2, externalId3))
+  }
 
   it should behave like updatableById(
     client.assets,

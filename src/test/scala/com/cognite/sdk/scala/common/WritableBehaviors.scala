@@ -263,6 +263,21 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       maybeDeletable.map(_.deleteByExternalIds(updatedItems.map(_.externalId.value)))
     }
 
+  def updatableByRequiredExternalId[R <: ToCreate[W] with WithRequiredExternalId, W, U](
+      resource: Create[R, W, Id] with UpdateByExternalId[R, U, Id] with RetrieveByIds[R, Id],
+      maybeDeletable: Option[DeleteByExternalIds[Id]],
+      itemsToCreate: Seq[R],
+      updatesToMake: Map[String, U],
+      expectedBehaviors: (Seq[R], Seq[R]) => Unit
+  ): Unit =
+    it should "allow updating by externalId" in {
+      val createdItems = resource.createFromRead(itemsToCreate)
+      val updatedItems = resource.updateByExternalId(updatesToMake)
+      expectedBehaviors(createdItems, updatedItems)
+
+      maybeDeletable.map(_.deleteByExternalIds(updatedItems.map(_.externalId)))
+    }
+
   def updatableById[R <: ToCreate[W] with ToUpdate[U] with WithId[Long], W, U](
       resource: Create[R, W, Id] with UpdateById[R, U, Id] with RetrieveByIds[R, Id],
       maybeDeletable: Option[DeleteByIds[Id, Long]],

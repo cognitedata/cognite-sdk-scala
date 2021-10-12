@@ -4,9 +4,10 @@
 package com.cognite.sdk.scala.common
 
 import java.time.Instant
+
 import cats.Id
 import com.cognite.sdk.scala.v1.CogniteId
-import io.circe.{Decoder, Encoder, Json, JsonObject}
+import io.circe.{Decoder, Encoder, Json, JsonObject, KeyEncoder}
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.model.Uri
 // scalastyle:off number.of.types
@@ -200,6 +201,13 @@ sealed trait NonNullableSetter[+T]
 final case class SetValue[+T](set: T) extends Setter[T] with NonNullableSetter[T]
 final case class SetNull[+T]() extends Setter[T]
 
+// For add/remove on updates for assets_ids, labels (array types)
+final case class UpdateArray[+T](add: Seq[T] = Seq.empty, remove: Seq[T] = Seq.empty)
+    extends NonNullableSetter[Seq[T]]
+// For metadata add/remove on updates
+final case class UpdateMap(add: Map[String, String] = Map.empty, remove: Seq[String] = Seq.empty)
+    extends NonNullableSetter[Map[String, String]]
+
 object Setter {
   @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
   def fromOption[T](option: Option[T]): Option[Setter[T]] =
@@ -247,19 +255,50 @@ object NonNullableSetter {
         None
       case Some(value) =>
         require(
-          value != null,
+          value != null, // scalastyle:ignore null
           "Invalid null value for non-nullable field update"
-        ) // scalastyle:ignore null
+        )
         Some(SetValue(value))
     }
 
   def fromAny[T](value: T): NonNullableSetter[T] = SetValue(value)
 
+  implicit def encodeNonNullableSetterSeq[T](
+      implicit encodeT: Encoder[T]
+  ): Encoder[NonNullableSetter[Seq[T]]] = new Encoder[NonNullableSetter[Seq[T]]] {
+    private val encodeSeqT = Encoder.encodeSeq(encodeT)
+
+    final def apply(a: NonNullableSetter[Seq[T]]): Json = a match {
+      case SetValue(value) =>
+        Json.obj("set" -> encodeSeqT(value))
+      case UpdateArray(add: Seq[T] @unchecked, remove: Seq[T] @unchecked) =>
+        Json.obj("add" -> encodeSeqT(add), "remove" -> encodeSeqT(remove))
+    }
+  }
+
+  private val encodeMapStringString =
+    Encoder.encodeMap[String, String](KeyEncoder.encodeKeyString, Encoder.encodeString)
+  private val encodeSeqString = Encoder.encodeSeq[String]
+  implicit def encodeNonNullableSetterMapStringString
+      : Encoder[NonNullableSetter[Map[String, String]]] =
+    new Encoder[NonNullableSetter[Map[String, String]]] {
+      final def apply(a: NonNullableSetter[Map[String, String]]): Json = a match {
+        case SetValue(value) =>
+          Json.obj("set" -> encodeMapStringString(value))
+        case UpdateMap(add, remove) =>
+          Json.obj("add" -> encodeMapStringString(add), "remove" -> encodeSeqString(remove))
+      }
+    }
+
   implicit def encodeNonNullableSetter[T](
       implicit encodeT: Encoder[T]
   ): Encoder[NonNullableSetter[T]] = new Encoder[NonNullableSetter[T]] {
     final def apply(a: NonNullableSetter[T]): Json = a match {
-      case SetValue(value) => Json.obj(("set", encodeT.apply(value)))
+      case SetValue(value) =>
+        Json.obj("set" -> encodeT(value))
+      case _ =>
+        throw new RuntimeException("Invalid NonNullableSetter. This should never happen.")
     }
   }
+
 }

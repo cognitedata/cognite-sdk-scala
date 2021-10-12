@@ -13,9 +13,11 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[Relationship, F]
     with Filter[Relationship, RelationshipsFilter, F]
+    with RetrieveByIdsWithIgnoreUnknownIds[Relationship, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Relationship, F]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
-    with Create[Relationship, RelationshipCreate, F] {
+    with Create[Relationship, RelationshipCreate, F]
+    with UpdateByExternalId[Relationship, RelationshipUpdate, F] {
   import Relationships._
   override val baseUrl = uri"${requestSession.baseUrl}/relationships"
 
@@ -78,6 +80,21 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
       Constants.defaultBatchSize,
       aggregatedProperties
     )
+
+  override def updateByExternalId(items: Map[String, RelationshipUpdate]): F[Seq[Relationship]] =
+    UpdateByExternalId.updateByExternalId[F, Relationship, RelationshipUpdate](
+      requestSession,
+      baseUrl,
+      items
+    )
+
+  override def retrieveByIds(ids: Seq[Long], ignoreUnknownIds: Boolean): F[Seq[Relationship]] =
+    RetrieveByIdsWithIgnoreUnknownIds.retrieveByIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
+    )
 }
 
 object Relationships {
@@ -97,4 +114,6 @@ object Relationships {
   implicit val relationshipsFilterRequestEncoder: Encoder[FilterRequest[RelationshipsFilter]] =
     deriveEncoder[FilterRequest[RelationshipsFilter]]
   implicit val confidenceRangeEncoder: Encoder[ConfidenceRange] = deriveEncoder[ConfidenceRange]
+  implicit val relationshipUpdateEncoder: Encoder[RelationshipUpdate] =
+    deriveEncoder[RelationshipUpdate]
 }
