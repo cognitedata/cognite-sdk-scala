@@ -3,22 +3,19 @@
 
 package com.cognite.sdk.scala.v1.resources
 
-import java.nio.charset.StandardCharsets
-import java.time.Instant
-import BuildInfo.BuildInfo
-import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.common.{Constants, _}
 import com.cognite.sdk.scala.v1._
+import com.cognite.v1.timeseries.proto._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.parser.decode
+import io.circe.{Decoder, Encoder}
 import sttp.client3._
 import sttp.client3.circe._
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder}
-import com.cognite.sdk.scala.common.Constants
-import com.cognite.v1.timeseries.proto._
-import io.circe.parser.decode
 import sttp.model.{MediaType, Uri}
 
+import java.nio.charset.StandardCharsets
+import java.time.Instant
 import scala.collection.JavaConverters._
-import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
 // scalastyle:off number.of.methods
@@ -52,173 +49,65 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
           .build()
       }.asJava)
 
-  // FIXME: Using requestSession.post() resulted in 500 errors when the request involves protobuf because of some
-  //  serialization error. Should investigate the error and use requestSession.post rather than having its own
-  //  identical handling for this method and insertStrings()
-  def insert(id: CogniteId, dataPoints: Seq[DataPoint]): F[Unit] =
-    requestSession.map(
-      basicRequest
-        .followRedirects(false)
-        .contentType("application/protobuf")
-        .header("accept", "application/json")
-        .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
-        .header("x-cdp-app", requestSession.applicationName)
-        .readTimeout(90.seconds)
-        .post(baseUrl)
-        .body(
-          DataPointInsertionRequest
-            .newBuilder()
-            .addItems {
-              val b = DataPointInsertionItem.newBuilder()
-              (id match {
-                case CogniteInternalId(id) => b.setId(id)
-                case CogniteExternalId(externalId) => b.setExternalId(externalId)
-              }).setNumericDatapoints(protoNumericDataPoints(dataPoints))
-                .build()
-            }
-            .build()
-            .toByteArray
-        )
-        .response(
-          asJsonEither[CdpApiError, Unit].mapWithMetadata((response, metadata) =>
-            response match {
-              case Left(value) =>
-                value match {
-                  case HttpError(cdpApiError, _) =>
-                    throw cdpApiError.asException(baseUrl, metadata.header("x-request-id"))
-                  case DeserializationException(_, error) =>
-                    throw SdkException(
-                      s"Failed to parse response, reason: ${error.getMessage}",
-                      Some(baseUrl),
-                      metadata.header("x-request-id"),
-                      Some(metadata.code.code)
-                    )
-                }
-              case Right(_) => ()
-            }
-          )
-        )
-        .send(requestSession.sttpBackend),
-      (r: Response[Unit]) => r.body
-    )
-
   private def arrayByteSerializer(a: Array[Byte]): ByteArrayBody = ByteArrayBody(a)
 
-  def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Unit] =
+  def insert(id: CogniteId, dataPoints: Seq[DataPoint]): F[Unit] = {
+    val byteArrayBody = DataPointInsertionRequest
+      .newBuilder()
+      .addItems {
+        val b = DataPointInsertionItem.newBuilder()
+        (id match {
+          case CogniteInternalId(id) => b.setId(id)
+          case CogniteExternalId(externalId) => b.setExternalId(externalId)
+        }).setNumericDatapoints(protoNumericDataPoints(dataPoints))
+          .build()
+      }
+      .build()
+      .toByteArray
+
     requestSession.post[Unit, Unit, Array[Byte]](
-      DataPointInsertionRequest
-        .newBuilder()
-        .addItems {
-          val b = DataPointInsertionItem.newBuilder()
-          b.setId(id)
-            .setNumericDatapoints(protoNumericDataPoints(dataPoints))
-            .build()
-        }
-        .build()
-        .toByteArray,
+      byteArrayBody,
       baseUrl,
       _ => (),
       "application/protobuf"
     )(arrayByteSerializer, implicitly)
+  }
+
+  def insertById(id: Long, dataPoints: Seq[DataPoint]): F[Unit] =
+    insert(CogniteInternalId(id), dataPoints)
 
   def insertByExternalId(externalId: String, dataPoints: Seq[DataPoint]): F[Unit] =
-    requestSession.post[Unit, Unit, Array[Byte]](
-      DataPointInsertionRequest
-        .newBuilder()
-        .addItems {
-          val b = DataPointInsertionItem.newBuilder()
-          b.setExternalId(externalId)
-            .setNumericDatapoints(protoNumericDataPoints(dataPoints))
+    insert(CogniteExternalId(externalId), dataPoints)
+
+  def insertStrings(id: CogniteId, dataPoints: Seq[StringDataPoint]): F[Unit] = {
+    val byteArrayBody = DataPointInsertionRequest
+      .newBuilder()
+      .addItems {
+        val b = DataPointInsertionItem.newBuilder()
+        (id match {
+          case CogniteInternalId(id) => b.setId(id)
+          case CogniteExternalId(externalId) => b.setExternalId(externalId)
+        }).setStringDatapoints(
+          protoStringDataPoints(dataPoints)
             .build()
-        }
-        .build()
-        .toByteArray,
+        )
+      }
+      .build()
+      .toByteArray
+
+    requestSession.post[Unit, Unit, Array[Byte]](
+      byteArrayBody,
       baseUrl,
       _ => (),
       "application/protobuf"
     )(arrayByteSerializer, implicitly)
-
-  def insertStrings(id: CogniteId, dataPoints: Seq[StringDataPoint]): F[Unit] =
-    requestSession.map(
-      basicRequest
-        .followRedirects(false)
-        .contentType("application/protobuf")
-        .header("accept", "application/json")
-        .header("x-cdp-sdk", s"${BuildInfo.organization}-${BuildInfo.version}")
-        .header("x-cdp-app", requestSession.applicationName)
-        .post(baseUrl)
-        .body(
-          DataPointInsertionRequest
-            .newBuilder()
-            .addItems {
-              val b = DataPointInsertionItem.newBuilder()
-              (id match {
-                case CogniteInternalId(id) => b.setId(id)
-                case CogniteExternalId(externalId) => b.setExternalId(externalId)
-              }).setStringDatapoints(
-                protoStringDataPoints(dataPoints)
-                  .build()
-              )
-            }
-            .build()
-            .toByteArray
-        )
-        .response(
-          asJsonEither[CdpApiError, Unit].mapWithMetadata((response, metadata) =>
-            response match {
-              case Left(value) =>
-                value match {
-                  case HttpError(cdpApiError, _) =>
-                    throw cdpApiError.asException(baseUrl, metadata.header("x-request-id"))
-                  case DeserializationException(_, error) =>
-                    throw SdkException(
-                      s"Failed to parse response, reason: ${error.getMessage}",
-                      Some(baseUrl),
-                      metadata.header("x-request-id"),
-                      Some(metadata.code.code)
-                    )
-                }
-              case Right(_) => ()
-            }
-          )
-        )
-        .send(requestSession.sttpBackend),
-      (r: Response[Unit]) => r.body
-    )
+  }
 
   def insertStringsById(id: Long, dataPoints: Seq[StringDataPoint]): F[Unit] =
-    requestSession.post[Unit, Unit, Array[Byte]](
-      DataPointInsertionRequest
-        .newBuilder()
-        .addItems {
-          val b = DataPointInsertionItem.newBuilder()
-          b.setId(id)
-            .setStringDatapoints(protoStringDataPoints(dataPoints))
-            .build()
-        }
-        .build()
-        .toByteArray,
-      baseUrl,
-      _ => (),
-      "application/protobuf"
-    )(arrayByteSerializer, implicitly)
+    insertStrings(CogniteInternalId(id), dataPoints)
 
   def insertStringsByExternalId(externalId: String, dataPoints: Seq[StringDataPoint]): F[Unit] =
-    requestSession.post[Unit, Unit, Array[Byte]](
-      DataPointInsertionRequest
-        .newBuilder()
-        .addItems {
-          val b = DataPointInsertionItem.newBuilder()
-          b.setExternalId(externalId)
-            .setStringDatapoints(protoStringDataPoints(dataPoints))
-            .build()
-        }
-        .build()
-        .toByteArray,
-      baseUrl,
-      _ => (),
-      "application/protobuf"
-    )(arrayByteSerializer, implicitly)
+    insertStrings(CogniteExternalId(externalId), dataPoints)
 
   def deleteRanges(ranges: Seq[DeleteDataPointsRange]): F[Unit] =
     requestSession.post[Unit, Unit, Items[DeleteDataPointsRange]](
