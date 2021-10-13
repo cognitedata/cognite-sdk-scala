@@ -39,15 +39,14 @@ final case class Relationship(
 
   override def toUpdate: RelationshipUpdate =
     RelationshipUpdate(
-      Setter.fromAny(externalId),
       Some(NonNullableSetter.fromAny(sourceExternalId)),
       Some(NonNullableSetter.fromAny(sourceType)),
       Some(NonNullableSetter.fromAny(targetExternalId)),
       Some(NonNullableSetter.fromAny(targetType)),
-      NonNullableSetter.fromOption(startTime),
-      NonNullableSetter.fromOption(endTime),
-      NonNullableSetter.fromOption(confidence),
-      NonNullableSetter.fromOption(dataSetId),
+      Setter.fromOption(startTime),
+      Setter.fromOption(endTime),
+      Setter.fromOption(confidence),
+      Setter.fromOption(dataSetId),
       NonNullableSetter.fromOption(labels)
     )
 }
@@ -66,17 +65,16 @@ final case class RelationshipCreate(
 ) extends WithRequiredExternalId
 
 final case class RelationshipUpdate(
-    externalId: Option[Setter[String]] = None,
     sourceExternalId: Option[NonNullableSetter[String]] = None,
     sourceType: Option[NonNullableSetter[String]] = None,
     targetExternalId: Option[NonNullableSetter[String]] = None,
     targetType: Option[NonNullableSetter[String]] = None,
-    startTime: Option[NonNullableSetter[Instant]] = None,
-    endTime: Option[NonNullableSetter[Instant]] = None,
-    confidence: Option[NonNullableSetter[Double]] = None,
-    dataSetId: Option[NonNullableSetter[Long]] = None,
+    startTime: Option[Setter[Instant]] = None,
+    endTime: Option[Setter[Instant]] = None,
+    confidence: Option[Setter[Double]] = None,
+    dataSetId: Option[Setter[Long]] = None,
     labels: Option[NonNullableSetter[Seq[CogniteExternalId]]] = None
-) extends WithSetExternalId
+)
 
 final case class RelationshipsFilter(
     sourceExternalIds: Option[Seq[String]] = None,
