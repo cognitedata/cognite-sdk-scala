@@ -44,10 +44,10 @@ final case class Relationship(
       Some(NonNullableSetter.fromAny(sourceType)),
       Some(NonNullableSetter.fromAny(targetExternalId)),
       Some(NonNullableSetter.fromAny(targetType)),
-      NonNullableSetter.fromOption(startTime),
-      NonNullableSetter.fromOption(endTime),
-      NonNullableSetter.fromOption(confidence),
-      NonNullableSetter.fromOption(dataSetId),
+      Setter.fromOption(startTime),
+      Setter.fromOption(endTime),
+      Setter.fromOption(confidence),
+      Setter.fromOption(dataSetId),
       NonNullableSetter.fromOption(labels)
     )
 }
@@ -71,10 +71,10 @@ final case class RelationshipUpdate(
     sourceType: Option[NonNullableSetter[String]] = None,
     targetExternalId: Option[NonNullableSetter[String]] = None,
     targetType: Option[NonNullableSetter[String]] = None,
-    startTime: Option[NonNullableSetter[Instant]] = None,
-    endTime: Option[NonNullableSetter[Instant]] = None,
-    confidence: Option[NonNullableSetter[Double]] = None,
-    dataSetId: Option[NonNullableSetter[Long]] = None,
+    startTime: Option[Setter[Instant]] = None,
+    endTime: Option[Setter[Instant]] = None,
+    confidence: Option[Setter[Double]] = None,
+    dataSetId: Option[Setter[Long]] = None,
     labels: Option[NonNullableSetter[Seq[CogniteExternalId]]] = None
 ) extends WithSetExternalId
 
