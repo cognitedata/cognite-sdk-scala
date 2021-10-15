@@ -5,26 +5,26 @@ package com.cognite.sdk.scala.v1
 
 import BuildInfo.BuildInfo
 
-import java.net.UnknownHostException
+import java.net.{ConnectException, UnknownHostException}
 import java.time.Instant
 import java.util.Base64
-import cats.Id
-import cats.catsInstancesForId
+import cats.{Id, Monad, catsInstancesForId}
 import cats.effect._
 import cats.effect.laws.util.TestContext
-import com.cognite.sdk.scala.common.{ApiKeyAuth, Auth, CdpApiException, InvalidAuthentication, LoggingSttpBackend, RetryingBackend, SdkException, SdkTestSpec}
-import sttp.client3.{Response, SttpBackend}
+import com.cognite.sdk.scala.common._
+import org.scalatest.OptionValues
+import sttp.client3.{Response, SttpBackend, SttpClientException}
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.testing.SttpBackendStub
 import sttp.model.{Header, StatusCode}
 
 import java.util.concurrent.Executors
 import scala.collection.immutable.Seq
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, TimeoutException}
 import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
-class ClientTest extends SdkTestSpec {
+class ClientTest extends SdkTestSpec with OptionValues {
   private val loginStatus = client.login.status()
   private val loginStatusResponse = Response(
     s"""
@@ -202,12 +202,24 @@ class ClientTest extends SdkTestSpec {
         implicitly,
         new RetryingBackend[Id, Any](
           makeTestingBackend(),
-          Some(4),
+          maxRetries = 4,
           initialRetryDelay = 1.millis,
           maxRetryDelay = 2.millis)
       ).threeDModels.list()
     }
   }
+
+  private def retryingClient[F[_]: Monad](backend: SttpBackend[F, Any], maxRetries: Int = 10)(implicit sleepImpl: Sleep[F]) =
+    new GenericClient[F]("scala-sdk-test",
+      projectName,
+      "https://www.cognite.com/nowhereatall",
+      ApiKeyAuth("irrelevant", Some("randomproject"))
+    )(implicitly,
+      new RetryingBackend[F, Any](backend,
+        maxRetries = maxRetries,
+        initialRetryDelay = 1.millis,
+        maxRetryDelay = 2.millis)
+    )
 
   it should "retry requests based on response code if the response is empty" in {
     val badGatewayResponseLeft = Response("",
@@ -226,18 +238,30 @@ class ClientTest extends SdkTestSpec {
         unavailableResponse,
         serverError,
         loginStatusResponse)
-    val client = new GenericClient[Id]("scala-sdk-test",
-      projectName,
-      "https://www.cognite.com/nowhereatall",
-      ApiKeyAuth("irrelevant", Some("randomproject"))
+    retryingClient(backendStub).login.status().project shouldBe (loginStatus.project)
+  }
 
-    )(
-      implicitly,
-      new RetryingBackend[Id, Any](backendStub,
-        initialRetryDelay = 1.millis,
-        maxRetryDelay = 2.millis)
-    )
-    client.login.status().project shouldBe (loginStatus.project)
+  it should "retry requests when network errors occur" in {
+    val ec = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
+    implicit val cs: ContextShift[IO] = IO.contextShift(ec)
+    implicit val timer: Timer[IO] = IO.timer(ec)
+    var requestCounter = 0
+    val backendStub = AsyncHttpClientCatsBackend.stub[IO]
+      .whenAnyRequest
+      // A bit of a hack, but we need to suspend throwing exceptions and there is no `thenRespondCyclicResponsesF`.
+      .thenRespondF(req =>
+        IO {
+          requestCounter += 1
+          if (requestCounter <= 3) {
+            throw new SttpClientException.ConnectException(req, new ConnectException("connection failure"))
+          } else if (requestCounter <= 5) {
+            throw new SttpClientException.ReadException(req, new TimeoutException("timeout"))
+          } else {
+            loginStatusResponse
+          }
+      })
+    an[SttpClientException] should be thrownBy retryingClient(backendStub, 4).login.status().unsafeRunTimed(1.seconds).value
+    retryingClient(backendStub).login.status().unsafeRunTimed(1.seconds).value.project shouldBe (loginStatus.project)
   }
 
   it should "retry JSON requests based on response code if content type is unknown" in {
@@ -285,17 +309,7 @@ class ClientTest extends SdkTestSpec {
         badRequest,
         assetsResponse
       )
-    val client = new GenericClient[Id]("scala-sdk-test",
-      projectName,
-      "https://www.cognite.com/nowhere-at-all",
-      ApiKeyAuth("irrelevant", Some("randomproject"))
-    )(
-      implicitly,
-      new RetryingBackend[Id, Any](
-        badRequestBackendStub,
-        initialRetryDelay = 1.millis,
-        maxRetryDelay = 2.millis)
-    )
+    val client = retryingClient(badRequestBackendStub)
     client.login.status().project shouldBe loginStatus.project
     client.assets.list().compile.toList.length should be > 0
   }
@@ -315,7 +329,7 @@ class ClientTest extends SdkTestSpec {
       StatusCode.ServiceUnavailable, "", Seq(Header("content-type", "text/html; charset=UTF-8")))
     val badRequestBytes: Response[Array[Byte]]  = Response("".getBytes("utf-8"),
       StatusCode.ServiceUnavailable, "", Seq(Header("content-type", "unknown")))
-    val badRequestBackendStub1 = SttpBackendStub.synchronous
+    val badRequestBackendStub = SttpBackendStub.synchronous
       .whenAnyRequest
       .thenRespondCyclicResponses(badGatewayResponseBytes,
         unavailableResponseBytes,
@@ -323,18 +337,9 @@ class ClientTest extends SdkTestSpec {
         serverErrorHtmlBytes,
         badRequestBytes,
         protobufResponse)
-    val client2 = new GenericClient[Id]("scala-sdk-test",
-      projectName,
-      "https://www.cognite.com/nowhere-at-all",
-      ApiKeyAuth("irrelevant", Some("randomproject"))
-    )(
-      implicitly,
-      new RetryingBackend[Id, Any](
-        badRequestBackendStub1,
-        initialRetryDelay = 1.millis,
-        maxRetryDelay = 2.millis)
-    )
-    val points = client2.dataPoints.queryById(123, Instant.ofEpochMilli(1546300800000L), Instant.ofEpochMilli(1546900000000L), None)
+    val points = retryingClient(badRequestBackendStub)
+      .dataPoints
+      .queryById(123, Instant.ofEpochMilli(1546300800000L), Instant.ofEpochMilli(1546900000000L), None)
     // True value is 1.8239872455596924, but to avoid issues with Scala 2.13 deprecation of
     // double ordering we compare at integer level.
     scala.math.floor(points.datapoints(0).value * 10).toInt shouldBe 18

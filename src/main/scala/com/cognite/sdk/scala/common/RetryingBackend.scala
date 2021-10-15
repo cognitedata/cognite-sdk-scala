@@ -8,7 +8,7 @@ import cats.Id
 import java.net.ConnectException
 import cats.effect.Timer
 import sttp.capabilities.Effect
-import sttp.client3.{Request, Response, SttpBackend}
+import sttp.client3.{Request, Response, SttpBackend, SttpClientException}
 import sttp.monad.MonadError
 
 import scala.concurrent.duration.{FiniteDuration, _}
@@ -38,16 +38,13 @@ object Sleep {
 
 class RetryingBackend[F[_], +P](
     delegate: SttpBackend[F, P],
-    maxRetries: Option[Int] = None,
+    maxRetries: Int = Constants.DefaultMaxRetries,
     initialRetryDelay: FiniteDuration = Constants.DefaultInitialRetryDelay,
     maxRetryDelay: FiniteDuration = Constants.DefaultMaxBackoffDelay
 )(implicit sleepImpl: Sleep[F])
     extends SttpBackend[F, P] {
   override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] =
-    sendWithRetryCounter(
-      request,
-      maxRetries.getOrElse(Constants.DefaultMaxRetries)
-    )
+    sendWithRetryCounter(request, maxRetries)
 
   @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   def sendWithRetryCounter[T, R >: P with Effect[F]](
@@ -72,8 +69,8 @@ class RetryingBackend[F[_], +P](
     val r = responseMonad.handleError(delegate.send(request)) {
       case cdpError: CdpApiException => maybeRetry(Some(cdpError.code), cdpError)
       case sdkException @ SdkException(_, _, _, code @ Some(_)) => maybeRetry(code, sdkException)
-      case e @ (_: TimeoutException | _: ConnectException) => maybeRetry(None, e)
-      //case error => responseMonad.error(error)
+      case e @ (_: TimeoutException | _: ConnectException | _: SttpClientException) =>
+        maybeRetry(None, e)
     }
     responseMonad.flatMap(r) { resp =>
       // This can happen when we get empty responses, as we sometimes do for
