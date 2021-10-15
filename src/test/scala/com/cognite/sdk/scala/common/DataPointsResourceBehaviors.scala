@@ -77,7 +77,8 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
         dataPoints.deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
         retryWithExpectedResult[DataPointsByExternalIdResponse](
           dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)),
-          pad => pad.datapoints should have size 0
+          pad => pad.datapoints should have size 0,
+          retriesRemaining = 20
         )
     }
 
