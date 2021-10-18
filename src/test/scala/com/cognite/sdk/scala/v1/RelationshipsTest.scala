@@ -9,6 +9,8 @@ import java.time.Instant
 class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
+  it should behave like partitionedReadable(client.relationships)
+
   it should behave like readableWithRetrieveByRequiredExternalId(client.relationships, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
   it should behave like writableWithRequiredExternalId(
