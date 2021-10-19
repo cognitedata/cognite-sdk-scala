@@ -25,7 +25,7 @@ class Token[F[_]](val requestSession: RequestSession[F]) {
   def inspect(): F[TokenInspectResponse] =
     requestSession
       .get[TokenInspectResponse, TokenInspectResponse](
-        uri"${requestSession.baseUrl}/api/playground/token/inspect",
+        uri"${requestSession.baseUrl}/api/v1/token/inspect",
         value => value
       )
 }
