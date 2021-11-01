@@ -186,6 +186,8 @@ class GenericClient[F[_]](
     new FunctionCalls(requestSession, functionId)
   lazy val functionSchedules = new FunctionSchedules[F](requestSession)
 
+  lazy val sessions = new Sessions[F](requestSession)
+
   def project: F[Project] =
     requestSession.get[Project, Project](
       requestSession.baseUrl,
