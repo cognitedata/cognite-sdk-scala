@@ -21,7 +21,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
     val expectedResponse = Seq(Session(0, "CLIENT_CREDENTIALS", "READY", "nonce", "clientId"))
     val responseForSessionCreated = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
-        r.method == Method.POST && r.uri.path.endsWith(List("sessions")) && r.body == StringBody(
+        r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
           """{"items":[{"clientId":"clientId","clientSecret":"clientSecret"}]}""",
           "utf-8",
           MediaType.ApplicationJson
@@ -54,7 +54,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
     val expectedResponse = Seq(Session(0, "TOKEN_EXCHANGE", "READY", "nonce", "clientId"))
     val responseForSessionCreated = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
-        r.method == Method.POST && r.uri.path.endsWith(List("sessions")) && r.body == StringBody(
+        r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
           """{"items":[{"tokenExchange":true}]}""",
           "utf-8",
           MediaType.ApplicationJson
@@ -94,7 +94,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         """
     val responseForSessionCreated = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
-        r.method == Method.POST && r.uri.path.endsWith(List("sessions")) && r.body == StringBody(
+        r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
           """{"items":[]}""",
           "utf-8",
           MediaType.ApplicationJson
@@ -134,7 +134,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         """
     val responseForSessionCreated = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
-        r.method == Method.POST && r.uri.path.endsWith(List("sessions")) && r.body == StringBody(
+        r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
           """{"items":[{"clientId":"clientId","clientSecret":"clientSecret"}]}""",
           "utf-8",
           MediaType.ApplicationJson
@@ -183,7 +183,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       )
     )
     val responseForSessionList = SttpBackendStub.synchronous
-      .whenRequestMatches(r => r.method == Method.GET && r.uri.path.endsWith(List("sessions")))
+      .whenRequestMatches(r => r.method === Method.GET && r.uri.path.endsWith(List("sessions")))
       .thenRespond(
         Response(
           expectedResponse,
@@ -216,9 +216,9 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
     )
     val responseForSessionList = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
-        r.method == Method.POST && r.uri.path.endsWith(
+        r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
-        ) && r.body == StringBody(
+        ) && r.body === StringBody(
           """{"items":[{"nonce":"nonce-value"}]}""",
           "utf-8",
           MediaType.ApplicationJson
@@ -260,9 +260,9 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
     )
     val responseForSessionList = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
-        r.method == Method.POST && r.uri.path.endsWith(
+        r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
-        ) && r.body == StringBody(
+        ) && r.body === StringBody(
           """{"items":[{"sessionKey":"sessionKey-value"}]}""",
           "utf-8",
           MediaType.ApplicationJson
