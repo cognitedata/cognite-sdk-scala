@@ -16,21 +16,19 @@ class Sessions[F[_]](val requestSession: RequestSession[F])
   import Sessions._
   override val baseUrl = uri"${requestSession.baseUrl}/sessions"
 
-  def createWithTokenExchangeFlow(items: Items[SessionCreateWithToken]): F[Seq[Session]] = {
+  def createWithTokenExchangeFlow(items: Items[SessionCreateWithToken]): F[Seq[Session]] =
     requestSession.post[Seq[Session], Items[Session], Items[SessionCreateWithToken]](
       items,
       baseUrl,
       value => value.items
     )
-  }
 
-  def createWithClientCredentialFlow(items: Items[SessionCreateWithCredential]): F[Seq[Session]] = {
+  def createWithClientCredentialFlow(items: Items[SessionCreateWithCredential]): F[Seq[Session]] =
     requestSession.post[Seq[Session], Items[Session], Items[SessionCreateWithCredential]](
       items,
       baseUrl,
       value => value.items
     )
-  }
 
   def list(): F[Seq[SessionList]] =
     requestSession.get[Seq[SessionList], Items[SessionList]](
@@ -38,23 +36,21 @@ class Sessions[F[_]](val requestSession: RequestSession[F])
       value => value.items
     )
 
-  def bind(items: Items[BindSessionRequest]): F[Seq[SessionTokenResponse]] = {
+  def bind(items: Items[BindSessionRequest]): F[Seq[SessionTokenResponse]] =
     requestSession
       .post[Seq[SessionTokenResponse], Items[SessionTokenResponse], Items[BindSessionRequest]](
         items,
         uri"$baseUrl/token",
         value => value.items
       )
-  }
 
-  def refresh(items: Items[RefreshSessionRequest]): F[Seq[SessionTokenResponse]] = {
+  def refresh(items: Items[RefreshSessionRequest]): F[Seq[SessionTokenResponse]] =
     requestSession
       .post[Seq[SessionTokenResponse], Items[SessionTokenResponse], Items[RefreshSessionRequest]](
         items,
         uri"$baseUrl/token",
         value => value.items
       )
-  }
 
 }
 
