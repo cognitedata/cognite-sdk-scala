@@ -199,7 +199,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, responseForSessionList)
 
-    val responseList = client.sessions.listAll()
+    val responseList = client.sessions.list()
     responseList.size shouldBe 2
     responseList shouldBe expectedResponse
   }

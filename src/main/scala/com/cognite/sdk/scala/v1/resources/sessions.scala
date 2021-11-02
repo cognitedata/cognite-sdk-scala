@@ -6,7 +6,7 @@ package com.cognite.sdk.scala.v1.resources
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, Printer}
+import io.circe.{Decoder, Encoder}
 import sttp.client3._
 import sttp.client3.circe._
 
@@ -17,7 +17,6 @@ class Sessions[F[_]](val requestSession: RequestSession[F])
   override val baseUrl = uri"${requestSession.baseUrl}/sessions"
 
   def createWithTokenExchangeFlow(items: Items[SessionCreateWithToken]): F[Seq[Session]] = {
-    implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession.post[Seq[Session], Items[Session], Items[SessionCreateWithToken]](
       items,
       baseUrl,
@@ -26,7 +25,6 @@ class Sessions[F[_]](val requestSession: RequestSession[F])
   }
 
   def createWithClientCredentialFlow(items: Items[SessionCreateWithCredential]): F[Seq[Session]] = {
-    implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession.post[Seq[Session], Items[Session], Items[SessionCreateWithCredential]](
       items,
       baseUrl,
@@ -34,14 +32,13 @@ class Sessions[F[_]](val requestSession: RequestSession[F])
     )
   }
 
-  def listAll(): F[Seq[SessionList]] =
+  def list(): F[Seq[SessionList]] =
     requestSession.get[Seq[SessionList], Items[SessionList]](
       baseUrl,
       value => value.items
     )
 
   def bind(items: Items[BindSessionRequest]): F[Seq[SessionTokenResponse]] = {
-    implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession
       .post[Seq[SessionTokenResponse], Items[SessionTokenResponse], Items[BindSessionRequest]](
         items,
@@ -51,7 +48,6 @@ class Sessions[F[_]](val requestSession: RequestSession[F])
   }
 
   def refresh(items: Items[RefreshSessionRequest]): F[Seq[SessionTokenResponse]] = {
-    implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession
       .post[Seq[SessionTokenResponse], Items[SessionTokenResponse], Items[RefreshSessionRequest]](
         items,
