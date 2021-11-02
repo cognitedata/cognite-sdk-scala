@@ -86,7 +86,7 @@ trait PartitionedFilter[R, Fi, F[_]] extends PartitionedFilterF[R, Fi, F] {
 }
 
 object Filter {
-  //scalastyle:off parameter.number
+  // scalastyle:off parameter.number
   def filterWithCursor[F[_], R, Fi](
       requestSession: RequestSession[F],
       baseUrl: Uri,
@@ -116,5 +116,5 @@ object Filter {
       value => value
     )
   }
-  //scalastyle:off parameter.number
+  // scalastyle:off parameter.number
 }
