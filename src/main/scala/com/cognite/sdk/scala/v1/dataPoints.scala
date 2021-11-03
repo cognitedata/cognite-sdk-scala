@@ -85,7 +85,7 @@ object DeleteDataPointsRange {
   )
 }
 
-case class LatestBeforeRequest(
+final case class LatestBeforeRequest(
     before: String,
     id: CogniteId
 )
