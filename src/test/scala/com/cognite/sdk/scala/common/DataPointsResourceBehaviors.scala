@@ -41,13 +41,13 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
           p => p.datapoints should have size 3
         )
 
-        retryWithExpectedResult[Option[DataPoint]](
-          dataPoints.getLatestDataPoint(CogniteInternalId(timeSeriesId)),
-          dp => {
-            dp.isDefined shouldBe true
-            testDataPoints.toList should contain(dp.value)
-          }
-        )
+        val latestStartDp = dataPoints.getLatestDataPoint(CogniteInternalId(timeSeriesId), start.plusMillis(1))
+        latestStartDp.isDefined shouldBe true
+        testDataPoints.head.value shouldBe latestStartDp.get.value
+
+        val latestEndDp = dataPoints.getLatestDataPoint(CogniteInternalId(timeSeriesId), end.plusMillis(1))
+        latestEndDp.isDefined shouldBe true
+        testDataPoints.last.value shouldBe latestEndDp.get.value
 
         dataPoints.deleteRangeById(timeSeriesId, start, end.plusMillis(1))
         retryWithExpectedResult[DataPointsByIdResponse](
@@ -66,13 +66,13 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
           p2 => p2.datapoints should have size 5
         )
 
-        retryWithExpectedResult[Option[DataPoint]](
-          dataPoints.getLatestDataPoint(CogniteExternalId(timeSeriesExternalId)),
-          { l2 =>
-            l2.isDefined shouldBe true
-            testDataPoints.toList should contain(l2.value)
-          }
-        )
+        val latestStartDataPoint = dataPoints.getLatestDataPoint(CogniteExternalId(timeSeriesExternalId), start.plusMillis(1))
+        latestStartDataPoint.isDefined shouldBe true
+        testDataPoints.head.value shouldBe latestStartDataPoint.get.value
+
+        val latestEndDataPoint = dataPoints.getLatestDataPoint(CogniteExternalId(timeSeriesExternalId), end.plusMillis(1))
+        latestEndDataPoint.isDefined shouldBe true
+        testDataPoints.last.value shouldBe latestEndDataPoint.get.value
 
         dataPoints.deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
         retryWithExpectedResult[DataPointsByExternalIdResponse](

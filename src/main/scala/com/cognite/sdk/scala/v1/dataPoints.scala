@@ -85,6 +85,22 @@ object DeleteDataPointsRange {
   )
 }
 
+case class LatestBeforeRequest(
+    before: String,
+    id: CogniteId
+)
+object LatestBeforeRequest {
+  implicit val encoder: Encoder[LatestBeforeRequest] = Encoder.instance(v =>
+    Json.obj(
+      "before" -> Json.fromString(v.before),
+      v.id match {
+        case CogniteExternalId(externalId) => "externalId" -> Json.fromString(externalId)
+        case CogniteInternalId(id) => "id" -> Json.fromLong(id)
+      }
+    )
+  )
+}
+
 final case class QueryDataPointsRange(
     id: CogniteId,
     start: String,
