@@ -41,11 +41,25 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
           p => p.datapoints should have size 3
         )
 
-        val latestStartDp = dataPoints.getLatestDataPoint(CogniteInternalId(timeSeriesId), start.plusMillis(1))
+        retryWithExpectedResult[Option[DataPoint]](
+          dataPoints.getLatestDataPoint(CogniteInternalId(timeSeriesId)),
+          dp => {
+            dp.isDefined shouldBe true
+            testDataPoints.toList should contain(dp.value)
+          }
+        )
+
+        val latestStartDp = dataPoints.getLatestDataPoint(
+          CogniteInternalId(timeSeriesId),
+          start.plusMillis(1).toEpochMilli.toString
+        )
         latestStartDp.isDefined shouldBe true
         testDataPoints.headOption.map(_.value) shouldBe latestStartDp.map(_.value)
 
-        val latestEndDp = dataPoints.getLatestDataPoint(CogniteInternalId(timeSeriesId), end.plusMillis(1))
+        val latestEndDp = dataPoints.getLatestDataPoint(
+          CogniteInternalId(timeSeriesId),
+          end.plusMillis(1).toEpochMilli.toString
+        )
         latestEndDp.isDefined shouldBe true
         testDataPoints.lastOption.map(_.value) shouldBe latestEndDp.map(_.value)
 
@@ -66,11 +80,25 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
           p2 => p2.datapoints should have size 5
         )
 
-        val latestStartDataPoint = dataPoints.getLatestDataPoint(CogniteExternalId(timeSeriesExternalId), start.plusMillis(1))
+        retryWithExpectedResult[Option[DataPoint]](
+          dataPoints.getLatestDataPoint(CogniteExternalId(timeSeriesExternalId)),
+          { l2 =>
+            l2.isDefined shouldBe true
+            testDataPoints.toList should contain(l2.value)
+          }
+        )
+
+        val latestStartDataPoint = dataPoints.getLatestDataPoint(
+          CogniteExternalId(timeSeriesExternalId),
+          start.plusMillis(1).toEpochMilli.toString
+        )
         latestStartDataPoint.isDefined shouldBe true
         testDataPoints.headOption.map(_.value) shouldBe latestStartDataPoint.map(_.value)
 
-        val latestEndDataPoint = dataPoints.getLatestDataPoint(CogniteExternalId(timeSeriesExternalId), end.plusMillis(1))
+        val latestEndDataPoint = dataPoints.getLatestDataPoint(
+          CogniteExternalId(timeSeriesExternalId),
+          end.plusMillis(1).toEpochMilli.toString
+        )
         latestEndDataPoint.isDefined shouldBe true
         testDataPoints.lastOption.map(_.value) shouldBe latestEndDataPoint.map(_.value)
 

@@ -156,16 +156,16 @@ trait StringDataPointsResourceBehaviors extends Matchers with OptionValues with 
 
     it should "support support query by externalId when ignoreUnknownIds=true" in {
       val doesNotExist = CogniteExternalId(s"does-not-exist-${UUID.randomUUID.toString}")
-      dataPoints.getLatestStringDataPoints(Seq(doesNotExist), true, Instant.now()) shouldBe empty
-      dataPoints.getLatestDataPoints(Seq(doesNotExist), true, Instant.now()) shouldBe empty
+      dataPoints.getLatestStringDataPoints(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
+      dataPoints.getLatestDataPoints(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
       dataPoints.query(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
       dataPoints.queryStrings(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
     }
 
     it should "support support query by internal id when ignoreUnknownIds=true" in {
       val doesNotExist = CogniteInternalId(9007199254740991L)
-      dataPoints.getLatestStringDataPoints(Seq(doesNotExist), true, Instant.now()) shouldBe empty
-      dataPoints.getLatestDataPoints(Seq(doesNotExist), true, Instant.now()) shouldBe empty
+      dataPoints.getLatestStringDataPoints(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
+      dataPoints.getLatestDataPoints(Seq(doesNotExist), ignoreUnknownIds = true) shouldBe empty
       dataPoints.queryByIds(Seq(doesNotExist.id), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
       dataPoints.queryStrings(Seq(doesNotExist), Instant.EPOCH, Instant.now, ignoreUnknownIds = true) shouldBe empty
     }

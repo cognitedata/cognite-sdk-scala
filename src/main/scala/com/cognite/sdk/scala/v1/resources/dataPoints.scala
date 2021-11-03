@@ -359,7 +359,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     )
   }
 
-  def getLatestDataPoint(id: CogniteId, before: Instant = Instant.now()): F[Option[DataPoint]] =
+  def getLatestDataPoint(id: CogniteId, before: String = "now"): F[Option[DataPoint]] =
     requestSession.map(
       getLatestDataPoints(Seq(id), before = before),
       (idToLatest: Map[CogniteId, Option[DataPoint]]) =>
@@ -375,13 +375,13 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
   def getLatestDataPoints(
       ids: Seq[CogniteId],
       ignoreUnknownIds: Boolean = false,
-      before: Instant
+      before: String = "now"
   ): F[Map[CogniteId, Option[DataPoint]]] =
     getLatestDataPointsCommon[DataPoint, DataPointsByIdResponse](ids, ignoreUnknownIds, before)
 
   def getLatestStringDataPoint(
       id: CogniteId,
-      before: Instant = Instant.now()
+      before: String = "now"
   ): F[Option[StringDataPoint]] =
     requestSession.map(
       getLatestStringDataPoints(Seq(id), before = before),
@@ -398,7 +398,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
   def getLatestStringDataPoints(
       ids: Seq[CogniteId],
       ignoreUnknownIds: Boolean = false,
-      before: Instant
+      before: String = "now"
   ): F[Map[CogniteId, Option[StringDataPoint]]] =
     getLatestDataPointsCommon[StringDataPoint, StringDataPointsByIdResponse](
       ids,
@@ -409,12 +409,14 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
   private def getLatestDataPointsCommon[D, T <: DataPointsResponse[D]](
       ids: Seq[CogniteId],
       ignoreUnknownIds: Boolean,
-      before: Instant
+      /* Get datapoints before this time. The format is N[timeunit]-ago where timeunit is w,d,h,m,s.
+      Example: '2d-ago' gets data that is up to 2 days old. You can also specify time in milliseconds since epoch. */
+      before: String
   )(implicit decoder: Decoder[Items[T]]): F[Map[CogniteId, Option[D]]] =
     requestSession
       .post[Map[CogniteId, Option[D]], Items[T], ItemsWithIgnoreUnknownIds[LatestBeforeRequest]](
         ItemsWithIgnoreUnknownIds(
-          ids.map(id => LatestBeforeRequest(before.toEpochMilli.toString, id)),
+          ids.map(id => LatestBeforeRequest(before, id)),
           ignoreUnknownIds
         ),
         uri"$baseUrl/latest",
