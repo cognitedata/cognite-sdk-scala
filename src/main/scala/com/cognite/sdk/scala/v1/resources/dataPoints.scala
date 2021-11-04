@@ -359,9 +359,9 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     )
   }
 
-  def getLatestDataPoint(id: CogniteId): F[Option[DataPoint]] =
+  def getLatestDataPoint(id: CogniteId, before: String = "now"): F[Option[DataPoint]] =
     requestSession.map(
-      getLatestDataPoints(Seq(id)),
+      getLatestDataPoints(Seq(id), before = before),
       (idToLatest: Map[CogniteId, Option[DataPoint]]) =>
         idToLatest.get(id) match {
           case Some(latest) => latest
@@ -374,13 +374,17 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   def getLatestDataPoints(
       ids: Seq[CogniteId],
-      ignoreUnknownIds: Boolean = false
+      ignoreUnknownIds: Boolean = false,
+      before: String = "now"
   ): F[Map[CogniteId, Option[DataPoint]]] =
-    getLatestDataPointsCommon[DataPoint, DataPointsByIdResponse](ids, ignoreUnknownIds)
+    getLatestDataPointsCommon[DataPoint, DataPointsByIdResponse](ids, ignoreUnknownIds, before)
 
-  def getLatestStringDataPoint(id: CogniteId): F[Option[StringDataPoint]] =
+  def getLatestStringDataPoint(
+      id: CogniteId,
+      before: String = "now"
+  ): F[Option[StringDataPoint]] =
     requestSession.map(
-      getLatestStringDataPoints(Seq(id)),
+      getLatestStringDataPoints(Seq(id), before = before),
       (idToLatest: Map[CogniteId, Option[StringDataPoint]]) =>
         idToLatest.get(id) match {
           case Some(latest) => latest
@@ -393,21 +397,28 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   def getLatestStringDataPoints(
       ids: Seq[CogniteId],
-      ignoreUnknownIds: Boolean = false
+      ignoreUnknownIds: Boolean = false,
+      before: String = "now"
   ): F[Map[CogniteId, Option[StringDataPoint]]] =
-    getLatestDataPointsCommon[StringDataPoint, StringDataPointsByIdResponse](ids, ignoreUnknownIds)
+    getLatestDataPointsCommon[StringDataPoint, StringDataPointsByIdResponse](
+      ids,
+      ignoreUnknownIds,
+      before
+    )
 
   private def getLatestDataPointsCommon[D, T <: DataPointsResponse[D]](
       ids: Seq[CogniteId],
-      ignoreUnknownIds: Boolean
+      ignoreUnknownIds: Boolean,
+      /* Get datapoints before this time. The format is N[timeunit]-ago where timeunit is w,d,h,m,s.
+      Example: '2d-ago' gets data that is up to 2 days old. You can also specify time in milliseconds since epoch. */
+      before: String
   )(implicit decoder: Decoder[Items[T]]): F[Map[CogniteId, Option[D]]] =
     requestSession
-      .post[Map[CogniteId, Option[D]], Items[
-        T
-      ], ItemsWithIgnoreUnknownIds[
-        CogniteId
-      ]](
-        ItemsWithIgnoreUnknownIds(ids, ignoreUnknownIds),
+      .post[Map[CogniteId, Option[D]], Items[T], ItemsWithIgnoreUnknownIds[LatestBeforeRequest]](
+        ItemsWithIgnoreUnknownIds(
+          ids.map(id => LatestBeforeRequest(before, id)),
+          ignoreUnknownIds
+        ),
         uri"$baseUrl/latest",
         value => {
           val idMap = value.items.map(item => item.id -> item.datapoints.headOption).toMap
@@ -463,6 +474,9 @@ object DataPointsResource {
   implicit val queryRangeByIdItems2Encoder
       : Encoder[ItemsWithIgnoreUnknownIds[QueryDataPointsRange]] =
     deriveEncoder
+
+  implicit val queryLatestByIdItems2Encoder
+      : Encoder[ItemsWithIgnoreUnknownIds[LatestBeforeRequest]] = deriveEncoder
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val aggregateDataPointDecoder: Decoder[AggregateDataPoint] = deriveDecoder
   implicit val aggregateDataPointEncoder: Encoder[AggregateDataPoint] = deriveEncoder

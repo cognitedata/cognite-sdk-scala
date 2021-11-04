@@ -49,6 +49,20 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
           }
         )
 
+        val latestStartDp = dataPoints.getLatestDataPoint(
+          CogniteInternalId(timeSeriesId),
+          start.plusMillis(1).toEpochMilli.toString
+        )
+        latestStartDp.isDefined shouldBe true
+        testDataPoints.headOption.map(_.value) shouldBe latestStartDp.map(_.value)
+
+        val latestEndDp = dataPoints.getLatestDataPoint(
+          CogniteInternalId(timeSeriesId),
+          end.plusMillis(1).toEpochMilli.toString
+        )
+        latestEndDp.isDefined shouldBe true
+        testDataPoints.lastOption.map(_.value) shouldBe latestEndDp.map(_.value)
+
         dataPoints.deleteRangeById(timeSeriesId, start, end.plusMillis(1))
         retryWithExpectedResult[DataPointsByIdResponse](
           dataPoints.queryById(timeSeriesId, start, end.plusMillis(1)),
@@ -73,6 +87,20 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
             testDataPoints.toList should contain(l2.value)
           }
         )
+
+        val latestStartDataPoint = dataPoints.getLatestDataPoint(
+          CogniteExternalId(timeSeriesExternalId),
+          start.plusMillis(1).toEpochMilli.toString
+        )
+        latestStartDataPoint.isDefined shouldBe true
+        testDataPoints.headOption.map(_.value) shouldBe latestStartDataPoint.map(_.value)
+
+        val latestEndDataPoint = dataPoints.getLatestDataPoint(
+          CogniteExternalId(timeSeriesExternalId),
+          end.plusMillis(1).toEpochMilli.toString
+        )
+        latestEndDataPoint.isDefined shouldBe true
+        testDataPoints.lastOption.map(_.value) shouldBe latestEndDataPoint.map(_.value)
 
         dataPoints.deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
         retryWithExpectedResult[DataPointsByExternalIdResponse](
