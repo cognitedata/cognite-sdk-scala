@@ -7,6 +7,7 @@ import BuildInfo.BuildInfo
 import cats.{Id, Monad}
 import cats.implicits._
 import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.resources._
 import sttp.client3._
 import sttp.client3.circe.asJsonEither
@@ -57,24 +58,6 @@ final case class RequestSession[F[_]: Monad](
       case None => baseRequest
     }
   }
-
-  private def parseResponse[T, R](uri: Uri, mapResult: T => R)(
-      implicit decoder: Decoder[T]
-  ) =
-    asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
-      response match {
-        case Left(DeserializationException(_, error)) =>
-          throw SdkException(
-            s"Failed to parse response, reason: ${error.getMessage}",
-            Some(uri),
-            metadata.header("x-request-id"),
-            Some(metadata.code.code)
-          )
-        case Left(HttpError(cdpApiError, _)) =>
-          throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
-        case Right(value) => mapResult(value)
-      }
-    )
 
   def get[R, T](
       uri: Uri,
@@ -280,6 +263,24 @@ object GenericClient {
         )
       }
   }
+
+  def parseResponse[T, R](uri: Uri, mapResult: T => R)(
+      implicit decoder: Decoder[T]
+  ): ResponseAs[R, Any] =
+    asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
+      response match {
+        case Left(DeserializationException(_, error)) =>
+          throw SdkException(
+            s"Failed to parse response, reason: ${error.getMessage}",
+            Some(uri),
+            metadata.header("x-request-id"),
+            Some(metadata.code.code)
+          )
+        case Left(HttpError(cdpApiError, _)) =>
+          throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
+        case Right(value) => mapResult(value)
+      }
+    )
 }
 
 class Client(
