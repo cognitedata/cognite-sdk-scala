@@ -619,7 +619,7 @@ object DataPointsResource {
           case NonFatal(_) =>
             val s = new String(bytes, StandardCharsets.UTF_8)
             val shouldParse = metadata.contentLength.exists(_ > 0) &&
-              metadata.contentType.exists(_.startsWith(MediaType.ApplicationJson.toString()))
+              metadata.contentType.exists(_.startsWith(MediaType.ApplicationJson.toString))
             if (shouldParse) {
               decode[CdpApiError](s) match {
                 case Left(error) => throw error

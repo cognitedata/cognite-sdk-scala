@@ -62,7 +62,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
                   file
                 } else {
                   throw SdkException(
-                    s"File upload of file ${file.name} failed with error code ${res.code.toString()}"
+                    s"File upload of file ${file.name} failed with error code ${res.code.toString}"
                   )
                 }
             )
@@ -147,7 +147,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
       requestSession
         .post[Items[FileDownloadLink], Items[FileDownloadLink], Items[FileDownload]](
           Items(Seq(item)),
-          uri"${baseUrl.toString()}/downloadlink",
+          uri"${baseUrl.toString}/downloadlink",
           values => values
         )
 

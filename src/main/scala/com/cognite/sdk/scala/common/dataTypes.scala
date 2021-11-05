@@ -41,7 +41,7 @@ object SdkException {
       .map(c => s" (with response code ${c.toString})")
       .getOrElse("")
     val uriMessage = uri
-      .map(u => s", in response$responseCodeMessage to request sent to ${u.toString()}")
+      .map(u => s", in response$responseCodeMessage to request sent to ${u.toString}")
       .getOrElse(responseCodeMessage)
     val requestIdMessage = requestId.map(id => s", with request id $id").getOrElse("")
     val exceptionMessage = if (message.nonEmpty) {
