@@ -10,7 +10,7 @@ import com.cognite.sdk.scala.v1._
 import sttp.client3._
 import sttp.client3.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Decoder, Encoder}
 
 class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Monad[F])
     extends WithRequestSession[F]
@@ -150,7 +150,6 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Mona
       ),
       batchSize
     )
-
 }
 
 object SequenceRows {
@@ -187,12 +186,8 @@ object SequenceRows {
   )
   implicit val sequenceRowsResponseDecoder: Decoder[SequenceRowsResponse] = deriveDecoder
 
-  implicit val sequenceRowsQueryEncoder: Encoder[SequenceRowsQuery] =
-    new Encoder[SequenceRowsQuery] {
-      final def apply(q: SequenceRowsQuery): Json =
-        q match {
-          case q: SequenceRowsQueryById => sequenceRowsQueryByIdEncoder(q)
-          case q: SequenceRowsQueryByExternalId => sequenceRowsQueryByExternalIdEncoder(q)
-        }
-    }
+  implicit val sequenceRowsQueryEncoder: Encoder[SequenceRowsQuery] = {
+    case q: SequenceRowsQueryById => sequenceRowsQueryByIdEncoder(q)
+    case q: SequenceRowsQueryByExternalId => sequenceRowsQueryByExternalIdEncoder(q)
+  }
 }

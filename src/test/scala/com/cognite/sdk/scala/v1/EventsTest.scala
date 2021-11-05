@@ -13,6 +13,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
+  // Unpartitioned read is too slow.
   // it should behave like readable(client.events)
 
   it should behave like partitionedReadable(client.events)

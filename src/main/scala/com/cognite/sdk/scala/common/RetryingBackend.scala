@@ -28,11 +28,9 @@ object Sleep {
   implicit def catsSleep[R[_]](implicit T: Timer[R]): Sleep[R] =
     new CatsSleep[R]
 
-  implicit val idSleep: Sleep[Id] = new Sleep[Id] {
-    override def sleep(sleepDuration: FiniteDuration): Id[Unit] = {
-      Thread.sleep(sleepDuration.toMillis)
-      ()
-    }
+  implicit val idSleep: Sleep[Id] = (sleepDuration: FiniteDuration) => {
+    Thread.sleep(sleepDuration.toMillis)
+    ()
   }
 }
 

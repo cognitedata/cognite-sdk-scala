@@ -46,7 +46,7 @@ final case class BearerTokenAuth(bearerToken: String, override val project: Opti
 }
 
 final case class OidcTokenAuth(bearerToken: String, projectName: String) extends Auth {
-  override val project = Some(projectName)
+  override val project: Option[String] = Some(projectName)
 
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     r.header("Authorization", s"Bearer $bearerToken")

@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  compile_scala_211:
+  compile_scala_212:
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/master'
 
@@ -41,7 +41,7 @@ jobs:
 
       - name: Compile
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.11.12 Test/compile
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.12.15 Test/compile
 
   compile_scala_213:
     runs-on: ubuntu-latest
@@ -77,7 +77,7 @@ jobs:
 
       - name: Compile
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13.6 Test/compile
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13.7 Test/compile
 
   compile_scala_3:
     runs-on: ubuntu-latest
@@ -156,7 +156,7 @@ jobs:
         AIZE_CLIENT_SECRET: ${{ secrets.AIZE_CLIENT_SECRET }}
       # run: sbt test
       run: |
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13.6 scalastyle test:scalastyle scalafmtCheck coverage test coverageReport
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13.7 scalastyle test:scalastyle scalafmtCheck coverage test coverageReport
 
     - name: Upload test coverage report
       uses: codecov/codecov-action@v1

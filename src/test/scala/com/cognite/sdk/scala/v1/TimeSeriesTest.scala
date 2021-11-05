@@ -335,5 +335,4 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       client.timeSeries.deleteByIds(created.map(_.id))
     }
   }
-
 }

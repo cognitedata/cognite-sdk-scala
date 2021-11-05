@@ -15,14 +15,13 @@ import sttp.model.{MediaType, Uri}
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 
 // scalastyle:off number.of.methods
 class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
-
   import DataPointsResource._
 
   override val baseUrl = uri"${requestSession.baseUrl}/timeseries/data"

@@ -195,7 +195,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
     it should "create and delete items using the read class and external ids" in {
       val createdItems = writable.createFromRead(readExamples)
       createdItems should have size readExamples.size.toLong
-      val createdExternalIds = createdItems.map(_.getExternalId().value)
+      val createdExternalIds = createdItems.map(_.getExternalId.value)
       createdExternalIds should have size readExamples.size.toLong
       maybeDeletable.map(_.deleteByExternalIds(createdExternalIds))
     }
@@ -204,7 +204,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       // create multiple items
       val createdItems = writable.create(createExamples)
       createdItems should have size createExamples.size.toLong
-      val createdIds = createdItems.map(_.getExternalId().value)
+      val createdIds = createdItems.map(_.getExternalId.value)
       createdIds should have size createExamples.size.toLong
       maybeDeletable.map(_.deleteByExternalIds(createdIds))
     }
