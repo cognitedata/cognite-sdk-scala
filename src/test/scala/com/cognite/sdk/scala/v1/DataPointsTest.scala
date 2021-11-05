@@ -212,7 +212,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         Instant.ofEpochMilli(1553795183461L)
       )
     }
-    caught.missing.value.head.toMap("id").toString() shouldEqual missingId.toString
+    caught.missing.value.head.toMap("id").toString shouldEqual missingId.toString
 
     val sCaught = intercept[CdpApiException] {
       client.dataPoints.queryById(
@@ -221,7 +221,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         Instant.ofEpochMilli(1553795183461L)
       )
     }
-    sCaught.missing.value.head.toMap("id").toString() shouldEqual missingId.toString
+    sCaught.missing.value.head.toMap("id").toString shouldEqual missingId.toString
 
     val aggregateCaught = intercept[CdpApiException] {
       client.dataPoints.queryAggregatesById(
@@ -232,6 +232,6 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         Seq("average")
       )
     }
-    aggregateCaught.missing.value.head.toMap("id").toString() shouldEqual missingId.toString
+    aggregateCaught.missing.value.head.toMap("id").toString shouldEqual missingId.toString
   }
 }
