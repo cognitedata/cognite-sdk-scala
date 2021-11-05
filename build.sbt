@@ -12,7 +12,7 @@ val jettyTestVersion = "9.4.44.v20210927"
 val sttpVersion = "3.3.15"
 val circeVersion: Option[(Long, Long)] => String = {
   case Some((3, _)) => "0.14.1"
-  case _ => "0.14.0" // Must use <= 0.14.0 for Spark compatibility
+  case _ => "0.13.0" // Must use 0.13.0 for Spark compatibility (shapeless 2.3.3)
 }
 val catsEffectVersion = "2.5.1"
 val fs2Version = "2.5.6"
