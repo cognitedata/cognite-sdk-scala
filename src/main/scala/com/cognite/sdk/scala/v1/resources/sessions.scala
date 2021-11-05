@@ -51,7 +51,6 @@ class Sessions[F[_]](val requestSession: RequestSession[F])
         uri"$baseUrl/token",
         value => value.items
       )
-
 }
 
 object Sessions {
@@ -90,5 +89,4 @@ object Sessions {
     deriveDecoder[SessionTokenResponse]
   implicit val sessionTokenItemsDecoder: Decoder[Items[SessionTokenResponse]] =
     deriveDecoder[Items[SessionTokenResponse]]
-
 }

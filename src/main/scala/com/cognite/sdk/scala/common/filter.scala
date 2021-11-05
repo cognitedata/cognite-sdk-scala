@@ -12,7 +12,6 @@ import sttp.model._
 import fs2._
 import io.circe.{Decoder, Encoder, Json, Printer}
 import io.circe.syntax._
-import scala.math
 
 final case class FilterRequest[T](
     filter: T,

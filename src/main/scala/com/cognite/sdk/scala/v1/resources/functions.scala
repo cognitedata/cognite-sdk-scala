@@ -81,7 +81,7 @@ class FunctionCalls[F[_]](val requestSession: RequestSession[F], val functionId:
   def callFunction(data: Json): F[FunctionCall] =
     requestSession.post[FunctionCall, FunctionCall, Json](
       data,
-      uri"${baseUrl.toString().dropRight(1)}",
+      uri"${baseUrl.toString.dropRight(1)}",
       value => value
     )
 

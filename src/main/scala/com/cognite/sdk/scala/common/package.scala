@@ -18,42 +18,33 @@ import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.deriveEncoder
 
 package object common {
-  implicit val cogniteIdEncoder: Encoder[CogniteId] = new Encoder[CogniteId] {
-    final def apply(i: CogniteId): Json = Json.obj(
+  implicit val cogniteIdEncoder: Encoder[CogniteId] = (i: CogniteId) =>
+    Json.obj(
       i match {
         case i: CogniteInternalId => ("id", Json.fromLong(i.id))
         case e: CogniteExternalId => ("externalId", Json.fromString(e.externalId))
       }
     )
-  }
   implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
   implicit val cogniteInternalIdEncoder: Encoder[CogniteInternalId] = deriveEncoder
   implicit val cogniteInternalIdItemsEncoder: Encoder[Items[CogniteInternalId]] = deriveEncoder
   implicit val cogniteExternalIdEncoder: Encoder[CogniteExternalId] = deriveEncoder
   implicit val cogniteExternalIdItemsEncoder: Encoder[Items[CogniteExternalId]] = deriveEncoder
 
-  implicit val labelContainsEncoder: Encoder[LabelContainsFilter] =
-    new Encoder[LabelContainsFilter] {
-      final def apply(i: LabelContainsFilter): Json = Json.obj(
-        i match {
-          case ca: ContainsAny =>
-            (
-              "containsAny",
-              Json.arr(
-                ca.containsAny.map(s => Json.obj(("externalId", Json.fromString(s.externalId)))): _*
-              )
-            )
-          case conAll: ContainsAll =>
-            (
-              "containsAll",
-              Json.arr(
-                conAll.containsAll
-                  .map(s => Json.obj(("externalId", Json.fromString(s.externalId)))): _*
-              )
-            )
-        }
+  implicit val labelContainsEncoder: Encoder[LabelContainsFilter] = {
+    case ContainsAny(externalIds) =>
+      Json.obj(
+        "containsAny" -> Json.arr(
+          externalIds.map(s => Json.obj("externalId" -> Json.fromString(s.externalId))): _*
+        )
       )
-    }
+    case ContainsAll(externalIds) =>
+      Json.obj(
+        "containsAll" -> Json.arr(
+          externalIds.map(s => Json.obj("externalId" -> Json.fromString(s.externalId))): _*
+        )
+      )
+  }
   implicit val containsAnyEncoder: Encoder[ContainsAny] = deriveEncoder
   implicit val containsAllEncoder: Encoder[ContainsAll] = deriveEncoder
 
