@@ -43,6 +43,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           req.method === Method.POST && req.uri.path.endsWith(
             Seq(projectName, "sessions", "token")
           ) &&
+          req.headers.contains(Header("Authorization", "Bearer tokenFromVault")) &&
           req.body === StringBody(
             """{"sessionKey":"sessionKey-value"}""",
             "utf-8",
@@ -94,6 +95,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
       SttpBackendStub(implicitly[MonadError[IO]])
         .whenRequestMatches { req =>
           req.method === Method.POST && req.uri.path.endsWith(Seq("sessions", "token")) &&
+          req.headers.contains(Header("Authorization", "Bearer tokenFromVault")) &&
           req.body === StringBody(
             """{"sessionKey":"sessionKey-value"}""",
             "utf-8",
