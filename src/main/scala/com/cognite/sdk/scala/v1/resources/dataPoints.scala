@@ -15,14 +15,13 @@ import sttp.model.{MediaType, Uri}
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-import scala.collection.JavaConverters._
+import scala.collection.JavaConverters._ // Avoid scala.jdk to keep 2.12 compatibility without scala-collection-compat
 import scala.util.control.NonFatal
 
 // scalastyle:off number.of.methods
 class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
-
   import DataPointsResource._
 
   override val baseUrl = uri"${requestSession.baseUrl}/timeseries/data"
@@ -620,7 +619,7 @@ object DataPointsResource {
           case NonFatal(_) =>
             val s = new String(bytes, StandardCharsets.UTF_8)
             val shouldParse = metadata.contentLength.exists(_ > 0) &&
-              metadata.contentType.exists(_.startsWith(MediaType.ApplicationJson.toString()))
+              metadata.contentType.exists(_.startsWith(MediaType.ApplicationJson.toString))
             if (shouldParse) {
               decode[CdpApiError](s) match {
                 case Left(error) => throw error

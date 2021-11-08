@@ -282,7 +282,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     val expected =
       Files.readAllBytes(Paths.get("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt"))
 
-    assert(out.toByteArray().sameElements(expected))
+    assert(out.toByteArray.sameElements(expected))
     client.files.deleteById(file.id)
   }
 

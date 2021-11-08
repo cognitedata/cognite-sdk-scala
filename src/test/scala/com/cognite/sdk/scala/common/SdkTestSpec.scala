@@ -57,7 +57,7 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers {
 
   lazy val dataSetResource = new DataSets(client.requestSession)
 
-  lazy val testDataSet = {
+  lazy val testDataSet: DataSet = {
     val list = dataSetResource.filter(DataSetFilter(writeProtected = Some(false))).take(1).compile.toList
     list.headOption.getOrElse({
       dataSetResource.createOne(DataSetCreate(Some("testDataSet"), Some("data set for Scala SDK tests")))

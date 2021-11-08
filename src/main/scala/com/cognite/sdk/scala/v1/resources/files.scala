@@ -62,7 +62,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
                   file
                 } else {
                   throw SdkException(
-                    s"File upload of file ${file.name} failed with error code ${res.code.toString()}"
+                    s"File upload of file ${file.name} failed with error code ${res.code.toString}"
                   )
                 }
             )
@@ -74,7 +74,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
 
   def upload(file: java.io.File): F[File] = {
     val inputStream = new BufferedInputStream(new FileInputStream(file))
-    uploadWithName(inputStream, file.getName())
+    uploadWithName(inputStream, file.getName)
   }
 
   override private[sdk] def readWithCursor(
@@ -147,7 +147,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
       requestSession
         .post[Items[FileDownloadLink], Items[FileDownloadLink], Items[FileDownload]](
           Items(Seq(item)),
-          uri"${baseUrl.toString()}/downloadlink",
+          uri"${baseUrl.toString}/downloadlink",
           values => values
         )
 
@@ -160,7 +160,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
               uri"${files.items
                 .map(_.downloadUrl)
                 .headOption
-                .getOrElse(throw SdkException(s"File download of ${item.toString()} did not return download url"))}"
+                .getOrElse(throw SdkException(s"File download of ${item.toString} did not return download url"))}"
             )
             .response(asByteArray)
         }
@@ -171,7 +171,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
               case Right(bytes) => out.write(bytes)
               case Left(_) =>
                 throw SdkException(
-                  s"File download of file ${item.toString} failed with error code ${res.code.toString()}"
+                  s"File download of file ${item.toString} failed with error code ${res.code.toString}"
                 )
             }
         )

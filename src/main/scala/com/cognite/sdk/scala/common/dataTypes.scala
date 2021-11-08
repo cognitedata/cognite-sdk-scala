@@ -41,7 +41,7 @@ object SdkException {
       .map(c => s" (with response code ${c.toString})")
       .getOrElse("")
     val uriMessage = uri
-      .map(u => s", in response$responseCodeMessage to request sent to ${u.toString()}")
+      .map(u => s", in response$responseCodeMessage to request sent to ${u.toString}")
       .getOrElse(responseCodeMessage)
     val requestIdMessage = requestId.map(id => s", with request id $id").getOrElse("")
     val exceptionMessage = if (message.nonEmpty) {
@@ -152,7 +152,7 @@ trait WithId[I] {
 }
 
 trait WithGetExternalId {
-  def getExternalId(): Option[String]
+  def getExternalId: Option[String]
 }
 
 trait WithExternalIdGeneric[F[_]] extends WithGetExternalId {
@@ -160,11 +160,11 @@ trait WithExternalIdGeneric[F[_]] extends WithGetExternalId {
 }
 
 trait WithExternalId extends WithExternalIdGeneric[Option] {
-  def getExternalId(): Option[String] = externalId
+  def getExternalId: Option[String] = externalId
 }
 
 trait WithRequiredExternalId extends WithExternalIdGeneric[Id] {
-  def getExternalId(): Option[String] = Some(externalId)
+  def getExternalId: Option[String] = Some(externalId)
 }
 
 trait WithCreatedTime {
@@ -173,7 +173,7 @@ trait WithCreatedTime {
 
 trait WithSetExternalId extends WithGetExternalId {
   val externalId: Option[Setter[String]]
-  override def getExternalId(): Option[String] =
+  override def getExternalId: Option[String] =
     externalId match {
       case Some(SetValue(v)) => Some(v)
       case _ => None
@@ -209,7 +209,7 @@ final case class UpdateMap(add: Map[String, String] = Map.empty, remove: Seq[Str
     extends NonNullableSetter[Map[String, String]]
 
 object Setter {
-  @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
+  @SuppressWarnings(Array("org.wartremover.warts.Null"))
   def fromOption[T](option: Option[T]): Option[Setter[T]] =
     option match {
       case null => Some(SetNull()) // scalastyle:ignore null
@@ -221,20 +221,17 @@ object Setter {
       case Some(value) => Some(SetValue(value))
     }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Null", "scalafix:DisableSyntax.null"))
+  @SuppressWarnings(Array("org.wartremover.warts.Null"))
   def fromAny[T](optionValue: T): Option[Setter[T]] =
     optionValue match {
       case null => Some(SetNull()) // scalastyle:ignore null
       case value => Some(SetValue(value))
     }
 
-  implicit def encodeSetter[T](implicit encodeT: Encoder[T]): Encoder[Setter[T]] =
-    new Encoder[Setter[T]] {
-      final def apply(a: Setter[T]): Json = a match {
-        case SetValue(value) => Json.obj(("set", encodeT.apply(value)))
-        case SetNull() => Json.obj(("setNull", Json.True))
-      }
-    }
+  implicit def encodeSetter[T](implicit encodeT: Encoder[T]): Encoder[Setter[T]] = {
+    case SetValue(value) => Json.obj(("set", encodeT.apply(value)))
+    case SetNull() => Json.obj(("setNull", Json.True))
+  }
 }
 
 object NonNullableSetter {
@@ -242,9 +239,7 @@ object NonNullableSetter {
     Array(
       "org.wartremover.warts.Null",
       "org.wartremover.warts.Equals",
-      "org.wartremover.warts.OptionPartial",
-      "scalafix:DisableSyntax.null",
-      "scalafix:DisableSyntax.!="
+      "org.wartremover.warts.OptionPartial"
     )
   )
   def fromOption[T](option: Option[T]): Option[NonNullableSetter[T]] =
@@ -280,25 +275,20 @@ object NonNullableSetter {
     Encoder.encodeMap[String, String](KeyEncoder.encodeKeyString, Encoder.encodeString)
   private val encodeSeqString = Encoder.encodeSeq[String]
   implicit def encodeNonNullableSetterMapStringString
-      : Encoder[NonNullableSetter[Map[String, String]]] =
-    new Encoder[NonNullableSetter[Map[String, String]]] {
-      final def apply(a: NonNullableSetter[Map[String, String]]): Json = a match {
-        case SetValue(value) =>
-          Json.obj("set" -> encodeMapStringString(value))
-        case UpdateMap(add, remove) =>
-          Json.obj("add" -> encodeMapStringString(add), "remove" -> encodeSeqString(remove))
-      }
-    }
+      : Encoder[NonNullableSetter[Map[String, String]]] = {
+    case SetValue(value) =>
+      Json.obj("set" -> encodeMapStringString(value))
+    case UpdateMap(add, remove) =>
+      Json.obj("add" -> encodeMapStringString(add), "remove" -> encodeSeqString(remove))
+  }
 
   implicit def encodeNonNullableSetter[T](
       implicit encodeT: Encoder[T]
-  ): Encoder[NonNullableSetter[T]] = new Encoder[NonNullableSetter[T]] {
-    final def apply(a: NonNullableSetter[T]): Json = a match {
-      case SetValue(value) =>
-        Json.obj("set" -> encodeT(value))
-      case _ =>
-        throw new RuntimeException("Invalid NonNullableSetter. This should never happen.")
-    }
+  ): Encoder[NonNullableSetter[T]] = {
+    case SetValue(value) =>
+      Json.obj("set" -> encodeT(value))
+    case _ =>
+      throw new RuntimeException("Invalid NonNullableSetter. This should never happen.")
   }
 
 }

@@ -150,7 +150,8 @@ trait StringDataPointsResourceBehaviors extends Matchers with OptionValues with 
         dataPoints.deleteRangeById(stringTimeSeriesId, start, end.plusMillis(1))
         retryWithExpectedResult[StringDataPointsByExternalIdResponse](
           dataPoints.queryStringsByExternalId(stringTimeSeriesExternalId, start, end.plusMillis(1)),
-          pad => pad.datapoints should have size 0
+          pad => pad.datapoints should have size 0,
+          retriesRemaining = 20
         )
     }
 

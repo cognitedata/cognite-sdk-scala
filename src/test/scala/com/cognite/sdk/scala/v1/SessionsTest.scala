@@ -16,7 +16,6 @@ import scala.collection.immutable.Seq
   Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements")
 )
 class SessionsTest extends SdkTestSpec with ReadBehaviours {
-
   "Sessions" should "create a new session with credential flow" in {
     val expectedResponse = Seq(Session(0, "CLIENT_CREDENTIALS", "READY", "nonce", "clientId"))
     val responseForSessionCreated = SttpBackendStub.synchronous
@@ -277,5 +276,4 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
     val responseBind = client.sessions.refresh(RefreshSessionRequest("sessionKey-value"))
     responseBind shouldBe expectedResponse
   }
-
 }
