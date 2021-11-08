@@ -3,7 +3,6 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.syntax.either._
 import cats.catsInstancesForId
 import com.cognite.sdk.scala.common.{Items, ReadBehaviours, SdkTestSpec, WritableBehaviors}
 import fs2.Stream
@@ -84,12 +83,6 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
         RawRow("abc", Map("abc" -> Map("cde" -> 1).asJson))
       )
     )
-
-    // we need cats.syntax.either._ to make this backwards compatible with Scala 2.11
-    // while avoiding deprecation warnings on Scala 2.13, which does not need that import.
-    // use it for some nonsense here to make the import "used" also for Scala 2.13
-    val either: Either[String, String] = Either.right("asdf")
-    assert(either.forall(_ === "asdf"))
 
     val rowsResponseAfterCreate = rows.list().compile.toList
     assert(rowsResponseAfterCreate.size === 2)
