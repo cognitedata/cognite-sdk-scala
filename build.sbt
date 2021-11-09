@@ -16,11 +16,11 @@ val circeVersion: Option[(Long, Long)] => String = {
 }
 val catsEffectVersion: Option[(Long, Long)] => String = {
   case Some((3, _)) => "2.5.1"
-  case _ => "2.1.1" // Must use 2.1.1 for Spark compatibility
+  case _ => "2.1.0" // Must use 2.1.0 for Spark compatibility
 }
 val fs2Version: Option[(Long, Long)] => String = {
   case Some((3, _)) => "2.5.6"
-  case _ => "2.1.0" // Must use 2.1.0 for Spark compatibility
+  case _ => "2.2.0" // Must use 2.2.0 to align with cats 2.1.0
 }
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
