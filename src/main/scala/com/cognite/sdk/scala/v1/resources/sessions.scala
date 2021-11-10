@@ -36,20 +36,20 @@ class Sessions[F[_]](val requestSession: RequestSession[F])
       value => value.items
     )
 
-  def bind(items: Items[BindSessionRequest]): F[Seq[SessionTokenResponse]] =
+  def bind(bindSession: BindSessionRequest): F[SessionTokenResponse] =
     requestSession
-      .post[Seq[SessionTokenResponse], Items[SessionTokenResponse], Items[BindSessionRequest]](
-        items,
+      .post[SessionTokenResponse, SessionTokenResponse, BindSessionRequest](
+        bindSession,
         uri"$baseUrl/token",
-        value => value.items
+        value => value
       )
 
-  def refresh(items: Items[RefreshSessionRequest]): F[Seq[SessionTokenResponse]] =
+  def refresh(refreshSession: RefreshSessionRequest): F[SessionTokenResponse] =
     requestSession
-      .post[Seq[SessionTokenResponse], Items[SessionTokenResponse], Items[RefreshSessionRequest]](
-        items,
+      .post[SessionTokenResponse, SessionTokenResponse, RefreshSessionRequest](
+        refreshSession,
         uri"$baseUrl/token",
-        value => value.items
+        value => value
       )
 }
 
@@ -77,16 +77,10 @@ object Sessions {
 
   implicit val bindSessionRequestEncoder: Encoder[BindSessionRequest] =
     deriveEncoder[BindSessionRequest]
-  implicit val bindSessionRequestItemsEncoder: Encoder[Items[BindSessionRequest]] =
-    deriveEncoder[Items[BindSessionRequest]]
 
   implicit val refreshSessionRequestEncoder: Encoder[RefreshSessionRequest] =
     deriveEncoder[RefreshSessionRequest]
-  implicit val refreshSessionRequestItemsEncoder: Encoder[Items[RefreshSessionRequest]] =
-    deriveEncoder[Items[RefreshSessionRequest]]
 
   implicit val sessionTokenDecoder: Decoder[SessionTokenResponse] =
     deriveDecoder[SessionTokenResponse]
-  implicit val sessionTokenItemsDecoder: Decoder[Items[SessionTokenResponse]] =
-    deriveDecoder[Items[SessionTokenResponse]]
 }

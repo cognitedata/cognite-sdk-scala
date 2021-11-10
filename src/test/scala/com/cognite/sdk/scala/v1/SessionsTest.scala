@@ -204,21 +204,19 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
   }
 
   it should "bind a session" in {
-    val expectedResponse = Seq(
-      SessionTokenResponse(
-        1,
-        "accessToken",
-        Instant.now().toEpochMilli,
-        Instant.now().plusSeconds(60).toEpochMilli,
-        Some("sessionKey")
-      )
+    val expectedResponse = SessionTokenResponse(
+      1,
+      "accessToken",
+      Instant.now().toEpochMilli,
+      Instant.now().plusSeconds(60).toEpochMilli,
+      Some("sessionKey")
     )
     val responseForSessionList = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
         ) && r.body === StringBody(
-          """{"items":[{"nonce":"nonce-value"}]}""",
+          """{"nonce":"nonce-value"}""",
           "utf-8",
           MediaType.ApplicationJson
         )
@@ -238,31 +236,24 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, responseForSessionList)
 
-    val responseBind = client.sessions.bind(
-      Items[BindSessionRequest](
-        Seq(BindSessionRequest("nonce-value"))
-      )
-    )
-    responseBind.size shouldBe 1
+    val responseBind = client.sessions.bind(BindSessionRequest("nonce-value"))
     responseBind shouldBe expectedResponse
   }
 
   it should "refresh a session" in {
-    val expectedResponse = Seq(
-      SessionTokenResponse(
-        1,
-        "accessToken",
-        Instant.now().toEpochMilli,
-        Instant.now().plusMillis(60000).toEpochMilli,
-        Some("sessionKey")
-      )
+    val expectedResponse = SessionTokenResponse(
+      1,
+      "accessToken",
+      Instant.now().toEpochMilli,
+      Instant.now().plusMillis(60000).toEpochMilli,
+      Some("sessionKey")
     )
     val responseForSessionList = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
         ) && r.body === StringBody(
-          """{"items":[{"sessionKey":"sessionKey-value"}]}""",
+          """{"sessionKey":"sessionKey-value"}""",
           "utf-8",
           MediaType.ApplicationJson
         )
@@ -282,12 +273,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, responseForSessionList)
 
-    val responseBind = client.sessions.refresh(
-      Items[RefreshSessionRequest](
-        Seq(RefreshSessionRequest("sessionKey-value"))
-      )
-    )
-    responseBind.size shouldBe 1
+    val responseBind = client.sessions.refresh(RefreshSessionRequest("sessionKey-value"))
     responseBind shouldBe expectedResponse
   }
 }
