@@ -5,6 +5,12 @@ import cats.Monad
 import cats.syntax.all._
 import cats.effect.{Clock, Concurrent}
 import com.cognite.sdk.scala.common.internal.{CachedResource, ConcurrentCachedObject}
+import com.cognite.sdk.scala.v1.GenericClient.{defaultBaseUrl, parseResponse}
+import com.cognite.sdk.scala.v1.{RefreshSessionRequest, SessionTokenResponse}
+import com.cognite.sdk.scala.v1.resources.Sessions.{
+  refreshSessionRequestEncoder,
+  sessionTokenDecoder
+}
 import sttp.client3._
 import sttp.client3.circe.asJson
 import io.circe.Decoder
@@ -21,6 +27,21 @@ object OAuth2 {
       audience: Option[String] = None
   )
 
+  final case class Session(
+      sessionKey: String,
+      cdfProjectName: String,
+      tokenFromVault: String
+  )
+
+  private def commonGetAuth[F[_]](cache: CachedResource[F, TokenState])(
+      implicit F: Monad[F],
+      clock: Clock[F]
+  ): F[Auth] = for {
+    now <- clock.monotonic(TimeUnit.SECONDS)
+    _ <- cache.invalidateIfNeeded(_.expiresAt <= now)
+    auth <- cache.run(state => F.pure(OidcTokenAuth(state.token, state.cdfProjectName)))
+  } yield auth
+
   class ClientCredentialsProvider[F[_]] private (
       cache: CachedResource[F, TokenState]
   )(
@@ -28,12 +49,15 @@ object OAuth2 {
       clock: Clock[F]
   ) extends AuthProvider[F]
       with Serializable {
-    def getAuth: F[Auth] =
-      for {
-        now <- clock.monotonic(TimeUnit.SECONDS)
-        _ <- cache.invalidateIfNeeded(_.expiresAt <= now)
-        auth <- cache.run(state => F.pure(OidcTokenAuth(state.token, state.cdfProjectName)))
-      } yield auth
+    def getAuth: F[Auth] = commonGetAuth(cache)
+  }
+
+  class SessionProvider[F[_]] private (
+      cache: CachedResource[F, TokenState]
+  )(implicit F: Monad[F], clock: Clock[F])
+      extends AuthProvider[F]
+      with Serializable {
+    def getAuth: F[Auth] = commonGetAuth(cache)
   }
 
   // scalastyle:off method.length
@@ -94,6 +118,35 @@ object OAuth2 {
     }
   }
   // scalastyle:on method.length
+
+  object SessionProvider {
+    def apply[F[_]](sessions: Session, refreshSecondsBeforeTTL: Long = 30)(
+        implicit F: Concurrent[F],
+        clock: Clock[F],
+        sttpBackend: SttpBackend[F, Any]
+    ): F[SessionProvider[F]] = {
+      import sttp.client3.circe._
+      val authenticate: F[TokenState] = {
+        val uri = uri"${defaultBaseUrl}/api/v1/projects/${sessions.cdfProjectName}/sessions/token"
+        for {
+          payload <- basicRequest
+            .header("Accept", "application/json")
+            .header("Authorization", s"Bearer ${sessions.tokenFromVault}")
+            .post(uri)
+            .body(RefreshSessionRequest(sessions.sessionKey))
+            .response(
+              parseResponse[SessionTokenResponse, SessionTokenResponse](uri, value => value)
+            )
+            .send(sttpBackend)
+            .map(_.body)
+          acquiredAt <- clock.monotonic(TimeUnit.SECONDS)
+          expiresAt = acquiredAt + payload.expiresIn - refreshSecondsBeforeTTL
+        } yield TokenState(payload.accessToken, expiresAt, sessions.cdfProjectName)
+      }
+
+      ConcurrentCachedObject(authenticate).map(new SessionProvider[F](_))
+    }
+  }
 
   private final case class ClientCredentialsResponse(access_token: String, expires_in: Long)
   private object ClientCredentialsResponse {
