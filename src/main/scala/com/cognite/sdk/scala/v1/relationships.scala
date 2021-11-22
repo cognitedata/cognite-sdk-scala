@@ -7,7 +7,7 @@ import java.time.Instant
 import com.cognite.sdk.scala.common._
 
 final case class Relationship(
-    externalId: String,
+    externalId: Some[String],
     sourceExternalId: String,
     sourceType: String,
     targetExternalId: String,
@@ -39,7 +39,7 @@ final case class Relationship(
 
   override def toUpdate: RelationshipUpdate =
     RelationshipUpdate(
-      Setter.fromAny(externalId),
+      Setter.fromAny(externalId.get),
       Some(NonNullableSetter.fromAny(sourceExternalId)),
       Some(NonNullableSetter.fromAny(sourceType)),
       Some(NonNullableSetter.fromAny(targetExternalId)),
@@ -53,7 +53,7 @@ final case class Relationship(
 }
 
 final case class RelationshipCreate(
-    externalId: String,
+    externalId: Some[String],
     sourceExternalId: String,
     sourceType: String,
     targetExternalId: String,

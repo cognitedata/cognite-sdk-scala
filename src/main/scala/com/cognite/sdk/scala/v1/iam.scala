@@ -6,7 +6,6 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 
 import com.cognite.sdk.scala.common.WithId
-import io.circe.Json
 
 final case class ProjectAuthentication(
     validDomains: Seq[String]

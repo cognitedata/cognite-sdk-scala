@@ -2,7 +2,6 @@ package com.cognite.sdk.scala.common
 
 import org.scalatest.flatspec.AnyFlatSpec
 import sttp.client3._
-import io.circe._
 import org.scalatest.matchers.should.Matchers
 
 class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {

@@ -3,9 +3,8 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.implicits._
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import com.github.plokhotnyuk.jsoniter_scala.core.{JsonReader, JsonValueCodec, JsonWriter}
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 
 import java.time.Instant
 
@@ -15,26 +14,65 @@ final case class CogniteExternalId(externalId: String) extends CogniteId
 final case class CogniteInternalId(id: Long) extends CogniteId
 
 object CogniteExternalId {
-  implicit val encoder: Encoder[CogniteExternalId] = deriveEncoder
-  implicit val decoder: Decoder[CogniteExternalId] = deriveDecoder
+  implicit val codec: JsonValueCodec[CogniteExternalId] = JsonCodecMaker.make
 }
 object CogniteInternalId {
-  implicit val encoder: Encoder[CogniteInternalId] = deriveEncoder
-  implicit val decoder: Decoder[CogniteInternalId] = deriveDecoder
+  implicit val codec: JsonValueCodec[CogniteInternalId] = JsonCodecMaker.make
 }
 object CogniteId {
-  implicit val encoder: Encoder[CogniteId] = Encoder.instance {
-    case id @ CogniteExternalId(_) => CogniteExternalId.encoder(id)
-    case id @ CogniteInternalId(_) => CogniteInternalId.encoder(id)
+  // scalastyle:off cyclomatic.complexity
+  implicit val codec: JsonValueCodec[CogniteId] = new JsonValueCodec[CogniteId] {
+    override def decodeValue(in: JsonReader, default: CogniteId): CogniteId = {
+      if (in.isNextToken('{')) {
+        var id: Option[Long] = None
+        var externalId: Option[String] = None
+        if (!in.isNextToken('}')) {
+          in.rollbackToken()
+          var l = -1
+          while (l < 0 || in.isNextToken(',')) {
+            l = in.readKeyAsCharBuf()
+            if (in.isCharBufEqualsTo(l, "id")) {
+              id = Some(in.readLong())
+            } else if (in.isCharBufEqualsTo(l, "externalId")) {
+              externalId = Some(in.readString(null)) // scalastyle:ignore null
+            } else {
+              in.skip()
+            }
+          }
+          if (!in.isCurrentToken('}')) {
+            in.objectEndOrCommaError()
+          }
+          (id, externalId) match {
+            case (Some(internalId), None) =>
+              CogniteInternalId(internalId)
+            case (None, Some(externalId)) =>
+              CogniteExternalId(externalId)
+            case (Some(_), Some(_)) =>
+              in.decodeError("Both 'id' and 'externalId' found")
+          }
+        } else {
+          in.readNullOrTokenError(default, '{')
+        }
+      } else {
+        in.readNullOrTokenError(default, '{')
+      }
+    }
+
+    override def encodeValue(x: CogniteId, out: JsonWriter): Unit = x match {
+      case CogniteExternalId(externalId) =>
+        out.writeObjectStart()
+        out.writeKey("externalId")
+        out.writeVal(externalId)
+        out.writeObjectEnd()
+      case CogniteInternalId(id) =>
+        out.writeObjectStart()
+        out.writeKey("id")
+        out.writeVal(id)
+        out.writeObjectEnd()
+    }
+
+    override def nullValue: CogniteId = null
   }
-  @SuppressWarnings(
-    Array("org.wartremover.warts.TraversableOps")
-  )
-  implicit val decoder: Decoder[CogniteId] =
-    List[Decoder[CogniteId]](
-      Decoder[CogniteInternalId].widen,
-      Decoder[CogniteExternalId].widen
-    ).reduceLeft(_ or _)
 }
 
 // min and max need to be optional, since one of them can be provided alone.

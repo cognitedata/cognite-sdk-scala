@@ -3,8 +3,8 @@
 
 package com.cognite.sdk.scala.common
 
-import cats.{Applicative, Monad}
 import sttp.client3.RequestT
+import sttp.monad.MonadError
 
 final case class InvalidAuthentication() extends Throwable(s"Invalid authentication")
 
@@ -64,7 +64,7 @@ trait AuthProvider[F[_]] {
 }
 
 object AuthProvider {
-  def apply[F[_]: Monad](auth: Auth): AuthProvider[F] = new AuthProvider[F] {
-    def getAuth: F[Auth] = Applicative[F].pure(auth)
+  def apply[F[_]: MonadError](auth: Auth): AuthProvider[F] = new AuthProvider[F] {
+    def getAuth: F[Auth] = MonadError[F].unit(auth)
   }
 }

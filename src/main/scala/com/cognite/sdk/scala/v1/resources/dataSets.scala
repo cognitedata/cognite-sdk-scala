@@ -5,9 +5,9 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 class DataSets[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -86,14 +86,14 @@ class DataSets[F[_]](val requestSession: RequestSession[F])
 }
 
 object DataSets {
-  implicit val dataSetDecoder: Decoder[DataSet] = deriveDecoder
-  implicit val dataSetItemsWithCursorDecoder: Decoder[ItemsWithCursor[DataSet]] = deriveDecoder
-  implicit val dataSetItemsDecoder: Decoder[Items[DataSet]] = deriveDecoder
-  implicit val dataSetCreateEncoder: Encoder[DataSetCreate] = deriveEncoder
-  implicit val dataSetCreateItemsEncoder: Encoder[Items[DataSetCreate]] = deriveEncoder
-  implicit val dataSetUpdateEncoder: Encoder[DataSetUpdate] = deriveEncoder
-  implicit val dataSetUpdateItemsEncoder: Encoder[Items[DataSetUpdate]] = deriveEncoder
-  implicit val dataSetFilterEncoder: Encoder[DataSetFilter] = deriveEncoder
-  implicit val dataSetFilterRequestEncoder: Encoder[FilterRequest[DataSetFilter]] = deriveEncoder
-  implicit val dataSetListQueryEncoder: Encoder[DataSetQuery] = deriveEncoder
+  implicit val dataSetCodec: JsonValueCodec[DataSet] = JsonCodecMaker.make
+  implicit val dataSetItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[DataSet]] = JsonCodecMaker.make
+  implicit val dataSetItemsCodec: JsonValueCodec[Items[DataSet]] = JsonCodecMaker.make
+  implicit val dataSetCreateCodec: JsonValueCodec[DataSetCreate] = JsonCodecMaker.make
+  implicit val dataSetCreateItemsCodec: JsonValueCodec[Items[DataSetCreate]] = JsonCodecMaker.make
+  implicit val dataSetUpdateCodec: JsonValueCodec[DataSetUpdate] = JsonCodecMaker.make
+  implicit val dataSetUpdateItemsCodec: JsonValueCodec[Items[DataSetUpdate]] = JsonCodecMaker.make
+  implicit val dataSetFilterCodec: JsonValueCodec[DataSetFilter] = JsonCodecMaker.make
+  implicit val dataSetFilterRequestCodec: JsonValueCodec[FilterRequest[DataSetFilter]] = JsonCodecMaker.make
+  implicit val dataSetListQueryCodec: JsonValueCodec[DataSetQuery] = JsonCodecMaker.make
 }

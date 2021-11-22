@@ -316,7 +316,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
 
   it should "retry protobuf requests based on response code if content type is unknown" in {
     val protobufBase64 = "CjYIrt3fh6WwSRIYVkFMXzIzLVBESS05NjE0OTpYLlZhbHVlGhIKEAi9/ta1gC0RAAAAQA0v/T8="
-    val protobufResponse: Response[Array[Byte]] = Response(Base64.getDecoder.decode(protobufBase64),
+    val protobufResponse: Response[Array[Byte]] = Response(Base64.getCodec.decode(protobufBase64),
       StatusCode.Ok, "", Seq(Header("content-type", "application/protobuf")))
 
     val badGatewayResponseBytes: Response[Array[Byte]] = Response("Bad Gateway".getBytes("utf-8"),

@@ -4,15 +4,14 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.{JsonValueCodec, writeToString}
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import sttp.client3.circe._
-import io.circe.{Decoder, Encoder, Json, Printer}
-import io.circe.syntax._
-import io.circe.generic.semiauto.deriveEncoder
+import sttp.client3.jsoniter_scala._
 import sttp.model.Uri
 
-final case class UpdateRequest(update: Json, id: Long)
-final case class UpdateRequestExternalId(update: Json, externalId: String)
+final case class UpdateRequest[U: JsonValueCodec](update: U, id: Long)
+final case class UpdateRequestExternalId[U: JsonValueCodec](update: U, externalId: String)
 
 trait UpdateById[R <: ToUpdate[U] with WithId[Long], U, F[_]]
     extends WithRequestSession[F]
@@ -44,19 +43,19 @@ trait UpdateById[R <: ToUpdate[U] with WithId[Long], U, F[_]]
 }
 
 object UpdateById {
-  implicit val updateRequestEncoder: Encoder[UpdateRequest] = deriveEncoder
-  implicit val updateRequestItemsEncoder: Encoder[Items[UpdateRequest]] = deriveEncoder
-  def updateById[F[_], R, U: Encoder](
+  implicit val updateRequestCodec: JsonValueCodec[UpdateRequest[_]] = JsonCodecMaker.make
+  implicit val updateRequestItemsCodec: JsonValueCodec[Items[UpdateRequest[_]]] = JsonCodecMaker.make
+  def updateById[F[_], R, U: JsonValueCodec](
       requestSession: RequestSession[F],
       baseUrl: Uri,
       updates: Map[Long, U]
-  )(implicit decodeReadItems: Decoder[Items[R]]): F[Seq[R]] = {
+  )(implicit decodeReadItems: JsonValueCodec[Items[R]]): F[Seq[R]] = {
     require(updates.keys.forall(id => id > 0), "Updating by id requires an id to be set")
-    implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
+    //implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession
-      .post[Seq[R], Items[R], Items[UpdateRequest]](
+      .post[Seq[R], Items[R], Items[UpdateRequest[U]]](
         Items(updates.map { case (id, update) =>
-          UpdateRequest(update.asJson, id)
+          UpdateRequest(update, id)
         }.toSeq),
         uri"$baseUrl/update",
         value => value.items
@@ -79,19 +78,19 @@ trait UpdateByExternalId[R, U, F[_]] extends WithRequestSession[F] with BaseUrl 
 }
 
 object UpdateByExternalId {
-  implicit val updateRequestExternalIdEncoder: Encoder[UpdateRequestExternalId] = deriveEncoder
-  implicit val updateRequestExternalIdItemsEncoder: Encoder[Items[UpdateRequestExternalId]] =
-    deriveEncoder
-  def updateByExternalId[F[_], R, U: Encoder](
+  implicit val updateRequestExternalIdCodec: JsonValueCodec[UpdateRequestExternalId] = JsonCodecMaker.make
+  implicit val updateRequestExternalIdItemsCodec: JsonValueCodec[Items[UpdateRequestExternalId]] =
+    JsonCodecMaker.make
+  def updateByExternalId[F[_], R, U: JsonValueCodec](
       requestSession: RequestSession[F],
       baseUrl: Uri,
       updates: Map[String, U]
-  )(implicit decodeReadItems: Decoder[Items[R]]): F[Seq[R]] = {
+  )(implicit decodeReadItems: JsonValueCodec[Items[R]]): F[Seq[R]] = {
     require(
       updates.keys.forall(id => id > ""),
       "Updating by externalId requires externalId to be set "
     )
-    implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
+    //implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession
       .post[Seq[R], Items[R], Items[UpdateRequestExternalId]](
         Items(updates.map { case (id, update) =>

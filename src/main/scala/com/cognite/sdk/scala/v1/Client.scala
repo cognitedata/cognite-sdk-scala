@@ -4,18 +4,17 @@
 package com.cognite.sdk.scala.v1
 
 import BuildInfo.BuildInfo
-import cats.{Id, Monad}
-import cats.implicits._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.resources._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import sttp.client3.circe.asJsonEither
-import io.circe.Decoder
-import io.circe.generic.semiauto.deriveDecoder
 import sttp.capabilities.Effect
+import sttp.client3.jsoniter_scala.asJsonEither
 import sttp.model.Uri
 import sttp.monad.MonadError
+import sttp.monad.syntax._
 
 import java.net.{InetAddress, UnknownHostException}
 import scala.concurrent.duration._
@@ -33,7 +32,7 @@ class AuthSttpBackend[F[_], +P](delegate: SttpBackend[F, P], authProvider: AuthP
   override def responseMonad: MonadError[F] = delegate.responseMonad
 }
 
-final case class RequestSession[F[_]: Monad](
+final case class RequestSession[F[_]: MonadError](
     applicationName: String,
     baseUrl: Uri,
     baseSttpBackend: SttpBackend[F, _],
@@ -43,7 +42,7 @@ final case class RequestSession[F[_]: Monad](
   val sttpBackend: SttpBackend[F, _] = new AuthSttpBackend(baseSttpBackend, auth)
 
   def send[R](
-      r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any]
+      r: RequestT[Empty, Either[String, String], Any] => RequestT[Identity, R, Any]
   ): F[Response[R]] =
     r(emptyRequest.readTimeout(90.seconds)).send(sttpBackend)
 
@@ -64,7 +63,7 @@ final case class RequestSession[F[_]: Monad](
       mapResult: T => R,
       contentType: String = "application/json",
       accept: String = "application/json"
-  )(implicit decoder: Decoder[T]): F[R] =
+  )(implicit decoder: JsonValueCodec[T]): F[R] =
     sttpRequest
       .contentType(contentType)
       .header("accept", accept)
@@ -79,7 +78,7 @@ final case class RequestSession[F[_]: Monad](
       mapResult: T => R,
       contentType: String = "application/json",
       accept: String = "application/json"
-  )(implicit serializer: BodySerializer[I], decoder: Decoder[T]): F[R] =
+  )(implicit serializer: BodySerializer[I], decoder: JsonValueCodec[T]): F[R] =
     sttpRequest
       .contentType(contentType)
       .header("accept", accept)
@@ -90,7 +89,7 @@ final case class RequestSession[F[_]: Monad](
       .map(_.body)
 
   def sendCdf[R](
-      r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any],
+      r: RequestT[Empty, Either[String, String], Any] => RequestT[Identity, R, Any],
       contentType: String = "application/json",
       accept: String = "application/json"
   ): F[R] =
@@ -113,7 +112,7 @@ class GenericClient[F[_]](
     authProvider: AuthProvider[F],
     apiVersion: Option[String],
     clientTag: Option[String]
-)(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Any]) {
+)(implicit monad: MonadError[F], sttpBackend: SttpBackend[F, Any]) {
   def this(
       applicationName: String,
       projectName: String,
@@ -121,7 +120,7 @@ class GenericClient[F[_]](
       auth: Auth = Auth.defaultAuth,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None
-  )(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Any]) =
+  )(implicit monad: MonadError[F], sttpBackend: SttpBackend[F, Any]) =
     this(applicationName, projectName, baseUrl, AuthProvider[F](auth), apiVersion, clientTag)
 
   import GenericClient._
@@ -183,15 +182,15 @@ class GenericClient[F[_]](
 }
 
 object GenericClient {
-  implicit val projectAuthenticationDecoder: Decoder[ProjectAuthentication] =
-    deriveDecoder[ProjectAuthentication]
+  implicit val projectAuthenticationCodec: JsonValueCodec[ProjectAuthentication] =
+    JsonCodecMaker.make[ProjectAuthentication]
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
-  implicit val projectDecoder: Decoder[Project] = deriveDecoder[Project]
+  implicit val projectCodec: JsonValueCodec[Project] = JsonCodecMaker.make[Project]
 
   val defaultBaseUrl: String = Option(System.getenv("COGNITE_BASE_URL"))
     .getOrElse("https://api.cognitedata.com")
 
-  def apply[F[_]: Monad](applicationName: String, projectName: String, baseUrl: String, auth: Auth)(
+  def apply[F[_]: MonadError](applicationName: String, projectName: String, baseUrl: String, auth: Auth)(
       implicit sttpBackend: SttpBackend[F, Any]
   ): GenericClient[F] =
     new GenericClient(applicationName, projectName, baseUrl, auth)(implicitly, sttpBackend)
@@ -223,7 +222,7 @@ object GenericClient {
         )
     }
 
-  def forAuth[F[_]: Monad](
+  def forAuth[F[_]: MonadError](
       applicationName: String,
       auth: Auth,
       baseUrl: String = defaultBaseUrl,
@@ -232,7 +231,7 @@ object GenericClient {
   )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
     forAuthProvider(applicationName, AuthProvider(auth), baseUrl, apiVersion, clientTag)
 
-  def forAuthProvider[F[_]: Monad](
+  def forAuthProvider[F[_]: MonadError](
       applicationName: String,
       authProvider: AuthProvider[F],
       baseUrl: String = defaultBaseUrl,
@@ -265,7 +264,7 @@ object GenericClient {
   }
 
   def parseResponse[T, R](uri: Uri, mapResult: T => R)(
-      implicit decoder: Decoder[T]
+      implicit decoder: JsonValueCodec[T]
   ): ResponseAs[R, Any] =
     asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
       response match {
@@ -289,11 +288,11 @@ class Client(
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
     auth: Auth = Auth.defaultAuth
-)(implicit sttpBackend: SttpBackend[Id, Any])
-    extends GenericClient[Id](applicationName, projectName, baseUrl, auth)
+)(implicit sttpBackend: SttpBackend[Identity, Any])
+    extends GenericClient[Identity[_]](applicationName, projectName, baseUrl, auth)
 
 object Client {
   def apply(applicationName: String, projectName: String, baseUrl: String, auth: Auth)(
-      implicit sttpBackend: SttpBackend[Id, Any]
+      implicit sttpBackend: SttpBackend[Identity, Any]
   ): Client = new Client(applicationName, projectName, baseUrl, auth)(sttpBackend)
 }

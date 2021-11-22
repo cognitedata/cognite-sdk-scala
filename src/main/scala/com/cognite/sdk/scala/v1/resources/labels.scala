@@ -5,9 +5,9 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 class Labels[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -44,14 +44,12 @@ class Labels[F[_]](val requestSession: RequestSession[F])
 }
 
 object Labels {
-  implicit val labelDecoder: Decoder[Label] = deriveDecoder
-  implicit val labelsItemsWithCursorDecoder: Decoder[ItemsWithCursor[Label]] =
-    deriveDecoder
+  implicit val labelCodec: JsonValueCodec[Label] = JsonCodecMaker.make
+  implicit val labelsItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[Label]] =
+    JsonCodecMaker.make
+  implicit val labelItemsCodec: JsonValueCodec[Items[LabelCreate]] = JsonCodecMaker.make
 
-  implicit val labelEncoder: Encoder[LabelCreate] = deriveEncoder
-  implicit val labelItemsEncoder: Encoder[Items[LabelCreate]] = deriveEncoder
-
-  implicit val labelFilterEncoder: Encoder[LabelsFilter] = deriveEncoder
-  implicit val labelFilterRequestEncoder: Encoder[FilterRequest[LabelsFilter]] =
-    deriveEncoder
+  implicit val labelFilterCodec: JsonValueCodec[LabelsFilter] = JsonCodecMaker.make
+  implicit val labelFilterRequestCodec: JsonValueCodec[FilterRequest[LabelsFilter]] =
+    JsonCodecMaker.make
 }

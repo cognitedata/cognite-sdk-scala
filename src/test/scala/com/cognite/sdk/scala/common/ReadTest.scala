@@ -4,16 +4,16 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1.Client
-import io.circe.Decoder
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
 import sttp.client3.testing.SttpBackendStub
-import io.circe.generic.semiauto.deriveDecoder
 import org.scalatest.OptionValues
 import sttp.model.Uri.QuerySegment
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
 class ReadTest extends SdkTestSpec with OptionValues {
-  private implicit val dummyItemsWithCursorDecoder: Decoder[ItemsWithCursor[Int]] = deriveDecoder[ItemsWithCursor[Int]]
+  private implicit val dummyItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[Int]] = JsonCodecMaker.make[ItemsWithCursor[Int]]
   it should "set final limit to batchSize when less than limit" in readWithCursor(10, Some(100)) { finalLimit =>
     finalLimit should be(10)
   }

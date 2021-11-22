@@ -5,8 +5,8 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import io.circe.Decoder
-import io.circe.generic.semiauto.deriveDecoder
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
 
 class ServiceAccounts[F[_]](val requestSession: RequestSession[F])
@@ -26,10 +26,10 @@ class ServiceAccounts[F[_]](val requestSession: RequestSession[F])
 }
 
 object ServiceAccounts {
-  implicit val serviceAccountDecoder: Decoder[ServiceAccount] =
-    deriveDecoder[ServiceAccount]
-  implicit val serviceAccountItemsWithCursorDecoder: Decoder[ItemsWithCursor[ServiceAccount]] =
-    deriveDecoder[ItemsWithCursor[ServiceAccount]]
+  implicit val serviceAccountCodec: JsonValueCodec[ServiceAccount] =
+    JsonCodecMaker.make[ServiceAccount]
+  implicit val serviceAccountItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[ServiceAccount]] =
+    JsonCodecMaker.make[ItemsWithCursor[ServiceAccount]]
 }
 
 class ApiKeys[F[_]](val requestSession: RequestSession[F]) extends Readable[ApiKey, F] {
@@ -48,9 +48,9 @@ class ApiKeys[F[_]](val requestSession: RequestSession[F]) extends Readable[ApiK
 }
 
 object ApiKeys {
-  implicit val apiKeyDecoder: Decoder[ApiKey] = deriveDecoder[ApiKey]
-  implicit val apiKeyItemsWithCursorDecoder: Decoder[ItemsWithCursor[ApiKey]] =
-    deriveDecoder[ItemsWithCursor[ApiKey]]
+  implicit val apiKeyCodec: JsonValueCodec[ApiKey] = JsonCodecMaker.make[ApiKey]
+  implicit val apiKeyItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[ApiKey]] =
+    JsonCodecMaker.make[ItemsWithCursor[ApiKey]]
 }
 
 class Groups[F[_]](val requestSession: RequestSession[F]) extends Readable[Group, F] {
@@ -70,10 +70,10 @@ class Groups[F[_]](val requestSession: RequestSession[F]) extends Readable[Group
 
 object Groups {
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
-  implicit val capabilitiesDecoder: Decoder[Capability] = deriveDecoder[Capability]
-  implicit val groupDecoder: Decoder[Group] = deriveDecoder[Group]
-  implicit val groupItemsWithCursorDecoder: Decoder[ItemsWithCursor[Group]] =
-    deriveDecoder[ItemsWithCursor[Group]]
+  implicit val capabilitiesCodec: JsonValueCodec[Capability] = JsonCodecMaker.make[Capability]
+  implicit val groupCodec: JsonValueCodec[Group] = JsonCodecMaker.make[Group]
+  implicit val groupItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[Group]] =
+    JsonCodecMaker.make[ItemsWithCursor[Group]]
 }
 
 class SecurityCategories[F[_]](val requestSession: RequestSession[F])
@@ -97,8 +97,8 @@ class SecurityCategories[F[_]](val requestSession: RequestSession[F])
 }
 
 object SecurityCategories {
-  implicit val securityCategoryDecoder: Decoder[SecurityCategory] =
-    deriveDecoder[SecurityCategory]
-  implicit val groupItemsWithCursorDecoder: Decoder[ItemsWithCursor[SecurityCategory]] =
-    deriveDecoder[ItemsWithCursor[SecurityCategory]]
+  implicit val securityCategoryCodec: JsonValueCodec[SecurityCategory] =
+    JsonCodecMaker.make[SecurityCategory]
+  implicit val groupItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[SecurityCategory]] =
+    JsonCodecMaker.make[ItemsWithCursor[SecurityCategory]]
 }

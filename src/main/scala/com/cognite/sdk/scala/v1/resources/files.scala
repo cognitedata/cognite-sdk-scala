@@ -4,33 +4,30 @@
 package com.cognite.sdk.scala.v1.resources
 
 import java.io.{BufferedInputStream, FileInputStream}
-
-import cats.implicits._
-import cats.Applicative
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import sttp.client3.circe._
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import sttp.client3.jsoniter_scala._
+import sttp.monad.MonadError
+import sttp.monad.syntax._
 
-class Files[F[_]: Applicative](val requestSession: RequestSession[F])
+class Files[F[_]: MonadError](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with PartitionedReadable[File, F]
     with RetrieveByIdsWithIgnoreUnknownIds[File, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[File, F]
     with Create[File, FileCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
-    with PartitionedFilter[File, FilesFilter, F]
     with Search[File, FilesQuery, F]
     with UpdateById[File, FileUpdate, F]
     with UpdateByExternalId[File, FileUpdate, F] {
   import Files._
   override val baseUrl = uri"${requestSession.baseUrl}/files"
 
-  implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
-    EitherDecoder.eitherDecoder[CdpApiError, File]
+  implicit val errorOrFileCodec: JsonValueCodec[Either[CdpApiError, File]] =
+    JsonCodecMaker.make[Either[CdpApiError, File]]
 
   override def createOne(item: FileCreate): F[File] =
     requestSession
@@ -41,7 +38,11 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
       )
 
   override def createItems(items: Items[FileCreate]): F[Seq[File]] =
-    items.items.toList.traverse(createOne).map(_.toSeq)
+    items.items.foldRight(List.empty[File].unit) { (item, acc: F[List[File]]) =>
+      createOne(item).flatMap { file =>
+        acc.map(files => file :: files)
+      }
+    }.map(_.toSeq)
 
   def uploadWithName(input: java.io.InputStream, name: String): F[File] = {
     val item = FileCreate(name = name)
@@ -76,20 +77,6 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
     val inputStream = new BufferedInputStream(new FileInputStream(file))
     uploadWithName(inputStream, file.getName)
   }
-
-  override private[sdk] def readWithCursor(
-      cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition]
-  ): F[ItemsWithCursor[File]] =
-    Readable.readWithCursor(
-      requestSession,
-      baseUrl,
-      cursor,
-      limit,
-      partition,
-      Constants.defaultBatchSize
-    )
 
   override def retrieveByIds(ids: Seq[Long], ignoreUnknownIds: Boolean): F[Seq[File]] =
     RetrieveByIdsWithIgnoreUnknownIds.retrieveByIds(
@@ -181,46 +168,46 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
 }
 
 object Files {
-  implicit val fileItemsWithCursorDecoder: Decoder[ItemsWithCursor[File]] =
-    deriveDecoder[ItemsWithCursor[File]]
-  implicit val fileDecoder: Decoder[File] = deriveDecoder[File]
-  implicit val fileItemsDecoder: Decoder[Items[File]] =
-    deriveDecoder[Items[File]]
-  implicit val createFileEncoder: Encoder[FileCreate] =
-    deriveEncoder[FileCreate]
-  implicit val createFileItemsEncoder: Encoder[Items[FileCreate]] =
-    deriveEncoder[Items[FileCreate]]
-  implicit val fileUpdateEncoder: Encoder[FileUpdate] =
-    deriveEncoder[FileUpdate]
-  implicit val updateFilesItemsEncoder: Encoder[Items[FileUpdate]] =
-    deriveEncoder[Items[FileUpdate]]
-  implicit val filesFilterEncoder: Encoder[FilesFilter] =
-    deriveEncoder[FilesFilter]
-  implicit val filesSearchEncoder: Encoder[FilesSearch] =
-    deriveEncoder[FilesSearch]
-  implicit val filesQueryEncoder: Encoder[FilesQuery] =
-    deriveEncoder[FilesQuery]
-  implicit val filesFilterRequestEncoder: Encoder[FilterRequest[FilesFilter]] =
-    deriveEncoder[FilterRequest[FilesFilter]]
-  implicit val fileDownloadLinkIdDecoder: Decoder[FileDownloadLinkId] =
-    deriveDecoder[FileDownloadLinkId]
-  implicit val fileDownloadLinkExternalIdDecoder: Decoder[FileDownloadLinkExternalId] =
-    deriveDecoder[FileDownloadLinkExternalId]
-  implicit val fileDownloadIdEncoder: Encoder[FileDownloadId] =
-    deriveEncoder[FileDownloadId]
-  implicit val fileDownloadExternalIdEncoder: Encoder[FileDownloadExternalId] =
-    deriveEncoder[FileDownloadExternalId]
-  implicit val fileDownloadEncoder: Encoder[FileDownload] = Encoder.instance {
-    case downloadId @ FileDownloadId(_) => fileDownloadIdEncoder(downloadId)
+  implicit val fileItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[File]] =
+    JsonCodecMaker.make[ItemsWithCursor[File]]
+  implicit val fileCodec: JsonValueCodec[File] = JsonCodecMaker.make[File]
+  implicit val fileItemsCodec: JsonValueCodec[Items[File]] =
+    JsonCodecMaker.make[Items[File]]
+  implicit val createFileCodec: JsonValueCodec[FileCreate] =
+    JsonCodecMaker.make[FileCreate]
+  implicit val createFileItemsCodec: JsonValueCodec[Items[FileCreate]] =
+    JsonCodecMaker.make[Items[FileCreate]]
+  implicit val fileUpdateCodec: JsonValueCodec[FileUpdate] =
+    JsonCodecMaker.make[FileUpdate]
+  implicit val updateFilesItemsCodec: JsonValueCodec[Items[FileUpdate]] =
+    JsonCodecMaker.make[Items[FileUpdate]]
+  implicit val filesFilterCodec: JsonValueCodec[FilesFilter] =
+    JsonCodecMaker.make[FilesFilter]
+  implicit val filesSearchCodec: JsonValueCodec[FilesSearch] =
+    JsonCodecMaker.make[FilesSearch]
+  implicit val filesQueryCodec: JsonValueCodec[FilesQuery] =
+    JsonCodecMaker.make[FilesQuery]
+  implicit val filesFilterRequestCodec: JsonValueCodec[FilterRequest[FilesFilter]] =
+    JsonCodecMaker.make[FilterRequest[FilesFilter]]
+  implicit val fileDownloadLinkIdCodec: JsonValueCodec[FileDownloadLinkId] =
+    JsonCodecMaker.make[FileDownloadLinkId]
+  implicit val fileDownloadLinkExternalIdCodec: JsonValueCodec[FileDownloadLinkExternalId] =
+    JsonCodecMaker.make[FileDownloadLinkExternalId]
+  implicit val fileDownloadIdCodec: JsonValueCodec[FileDownloadId] =
+    JsonCodecMaker.make[FileDownloadId]
+  implicit val fileDownloadExternalIdCodec: JsonValueCodec[FileDownloadExternalId] =
+    JsonCodecMaker.make[FileDownloadExternalId]
+  implicit val fileDownloadCodec: JsonValueCodec[FileDownload] = Codec.instance {
+    case downloadId @ FileDownloadId(_) => fileDownloadIdCodec(downloadId)
     case downloadExternalId @ FileDownloadExternalId(_) =>
-      fileDownloadExternalIdEncoder(downloadExternalId)
+      fileDownloadExternalIdCodec(downloadExternalId)
   }
-  implicit val fileDownloadLinkDecoder: Decoder[FileDownloadLink] =
-    fileDownloadLinkIdDecoder.widen.or(fileDownloadLinkExternalIdDecoder.widen)
-  implicit val fileDownloadItemsEncoder: Encoder[Items[FileDownload]] =
-    deriveEncoder[Items[FileDownload]]
-  implicit val fileDownloadItemsDecoder: Decoder[Items[FileDownloadLink]] =
-    deriveDecoder[Items[FileDownloadLink]]
-  implicit val fileDownloadResponseDecoder: Decoder[Either[CdpApiError, Items[FileDownloadLink]]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Items[FileDownloadLink]]
+  implicit val fileDownloadLinkCodec: JsonValueCodec[FileDownloadLink] =
+    fileDownloadLinkIdCodec.widen.or(fileDownloadLinkExternalIdCodec.widen)
+  implicit val fileDownloadItemsCodec: JsonValueCodec[Items[FileDownload]] =
+    JsonCodecMaker.make[Items[FileDownload]]
+  implicit val fileDownloadItemsCodec: JsonValueCodec[Items[FileDownloadLink]] =
+    JsonCodecMaker.make[Items[FileDownloadLink]]
+  implicit val fileDownloadResponseCodec: JsonValueCodec[Either[CdpApiError, Items[FileDownloadLink]]] =
+    JsonCodecMaker.make[Either[CdpApiError, Items[FileDownloadLink]]]
 }

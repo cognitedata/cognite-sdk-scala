@@ -5,38 +5,22 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 class Events[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with PartitionedReadable[Event, F]
     with RetrieveByIdsWithIgnoreUnknownIds[Event, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Event, F]
     with Create[Event, EventCreate, F]
     with DeleteByIdsWithIgnoreUnknownIds[F, Long]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
-    with PartitionedFilter[Event, EventsFilter, F]
     with Search[Event, EventsQuery, F]
     with UpdateById[Event, EventUpdate, F]
     with UpdateByExternalId[Event, EventUpdate, F] {
   import Events._
   override val baseUrl = uri"${requestSession.baseUrl}/events"
-
-  override private[sdk] def readWithCursor(
-      cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition]
-  ): F[ItemsWithCursor[Event]] =
-    Readable.readWithCursor(
-      requestSession,
-      baseUrl,
-      cursor,
-      limit,
-      partition,
-      Constants.defaultBatchSize
-    )
 
   override def retrieveByIds(
       ids: Seq[Long],
@@ -110,24 +94,24 @@ class Events[F[_]](val requestSession: RequestSession[F])
 }
 
 object Events {
-  implicit val eventDecoder: Decoder[Event] = deriveDecoder[Event]
-  implicit val eventsItemsWithCursorDecoder: Decoder[ItemsWithCursor[Event]] =
-    deriveDecoder[ItemsWithCursor[Event]]
-  implicit val eventsItemsDecoder: Decoder[Items[Event]] =
-    deriveDecoder[Items[Event]]
-  implicit val createEventEncoder: Encoder[EventCreate] = deriveEncoder[EventCreate]
-  implicit val createEventsItemsEncoder: Encoder[Items[EventCreate]] =
-    deriveEncoder[Items[EventCreate]]
-  implicit val eventUpdateEncoder: Encoder[EventUpdate] =
-    deriveEncoder[EventUpdate]
-  implicit val updateEventsItemsEncoder: Encoder[Items[EventUpdate]] =
-    deriveEncoder[Items[EventUpdate]]
-  implicit val eventsFilterEncoder: Encoder[EventsFilter] =
-    deriveEncoder[EventsFilter]
-  implicit val eventsSearchEncoder: Encoder[EventsSearch] =
-    deriveEncoder[EventsSearch]
-  implicit val eventsQueryEncoder: Encoder[EventsQuery] =
-    deriveEncoder[EventsQuery]
-  implicit val eventsFilterRequestEncoder: Encoder[FilterRequest[EventsFilter]] =
-    deriveEncoder[FilterRequest[EventsFilter]]
+  implicit val eventCodec: JsonValueCodec[Event] = JsonCodecMaker.make[Event]
+  implicit val eventsItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[Event]] =
+    JsonCodecMaker.make[ItemsWithCursor[Event]]
+  implicit val eventsItemsCodec: JsonValueCodec[Items[Event]] =
+    JsonCodecMaker.make[Items[Event]]
+  implicit val createEventCodec: JsonValueCodec[EventCreate] = JsonCodecMaker.make[EventCreate]
+  implicit val createEventsItemsCodec: JsonValueCodec[Items[EventCreate]] =
+    JsonCodecMaker.make[Items[EventCreate]]
+  implicit val eventUpdateCodec: JsonValueCodec[EventUpdate] =
+    JsonCodecMaker.make[EventUpdate]
+  implicit val updateEventsItemsCodec: JsonValueCodec[Items[EventUpdate]] =
+    JsonCodecMaker.make[Items[EventUpdate]]
+  implicit val eventsFilterCodec: JsonValueCodec[EventsFilter] =
+    JsonCodecMaker.make[EventsFilter]
+  implicit val eventsSearchCodec: JsonValueCodec[EventsSearch] =
+    JsonCodecMaker.make[EventsSearch]
+  implicit val eventsQueryCodec: JsonValueCodec[EventsQuery] =
+    JsonCodecMaker.make[EventsQuery]
+  implicit val eventsFilterRequestCodec: JsonValueCodec[FilterRequest[EventsFilter]] =
+    JsonCodecMaker.make[FilterRequest[EventsFilter]]
 }

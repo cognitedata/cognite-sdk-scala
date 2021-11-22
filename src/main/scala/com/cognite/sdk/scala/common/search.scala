@@ -4,9 +4,9 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
 import sttp.client3._
-import sttp.client3.circe._
-import io.circe.{Decoder, Encoder}
+import sttp.client3.jsoniter_scala._
 import sttp.model.Uri
 
 trait SearchQuery[F, S] {
@@ -21,8 +21,8 @@ trait Search[R, Q, F[_]] extends WithRequestSession[F] with BaseUrl {
 
 object Search {
   def search[F[_], R, Q](requestSession: RequestSession[F], baseUrl: Uri, searchQuery: Q)(
-      implicit itemsDecoder: Decoder[Items[R]],
-      searchQueryEncoder: Encoder[Q]
+      implicit itemsCodec: JsonValueCodec[Items[R]],
+      searchQueryCodec: JsonValueCodec[Q]
   ): F[Seq[R]] =
     requestSession
       .post[Seq[R], Items[R], Q](

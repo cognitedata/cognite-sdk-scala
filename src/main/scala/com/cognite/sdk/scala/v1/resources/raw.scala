@@ -3,20 +3,17 @@
 
 package com.cognite.sdk.scala.v1.resources
 
-import cats.Applicative
-import cats.implicits._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import sttp.client3._
-import sttp.client3.circe._
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder}
-import fs2._
+import sttp.client3.jsoniter_scala._
+import com.github.plokhotnyuk.jsoniter_scala.macros._
+import com.github.plokhotnyuk.jsoniter_scala.core._
 import sttp.model.Uri
 
 object RawResource {
   def deleteByIds[F[_], I](requestSession: RequestSession[F], baseUrl: Uri, ids: Seq[I])(
-      implicit idsItemsEncoder: Encoder[Items[I]]
+      implicit idsItemsCodec: JsonValueCodec[Items[I]]
   ): F[Unit] =
     requestSession.post[Unit, Unit, Items[I]](
       Items(ids),
@@ -55,14 +52,11 @@ class RawDatabases[F[_]](val requestSession: RequestSession[F])
 }
 
 object RawDatabases {
-  implicit val rawDatabaseItemsWithCursorDecoder: Decoder[ItemsWithCursor[RawDatabase]] =
-    deriveDecoder[ItemsWithCursor[RawDatabase]]
-  implicit val rawDatabaseItemsDecoder: Decoder[Items[RawDatabase]] =
-    deriveDecoder[Items[RawDatabase]]
-  implicit val rawDatabaseItemsEncoder: Encoder[Items[RawDatabase]] =
-    deriveEncoder[Items[RawDatabase]]
-  implicit val rawDatabaseEncoder: Encoder[RawDatabase] = deriveEncoder[RawDatabase]
-  implicit val rawDatabaseDecoder: Decoder[RawDatabase] = deriveDecoder[RawDatabase]
+  implicit val rawDatabaseItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[RawDatabase]] =
+    JsonCodecMaker.make[ItemsWithCursor[RawDatabase]]
+  implicit val rawDatabaseItemsCodec: JsonValueCodec[Items[RawDatabase]] =
+    JsonCodecMaker.make[Items[RawDatabase]]
+  implicit val rawDatabaseCodec: JsonValueCodec[RawDatabase] = JsonCodecMaker.make[RawDatabase]
 }
 
 class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
@@ -96,26 +90,21 @@ class RawTables[F[_]](val requestSession: RequestSession[F], database: String)
 }
 
 object RawTables {
-  implicit val rawTableItemsWithCursorDecoder: Decoder[ItemsWithCursor[RawTable]] =
-    deriveDecoder[ItemsWithCursor[RawTable]]
-  implicit val rawTableItemsDecoder: Decoder[Items[RawTable]] =
-    deriveDecoder[Items[RawTable]]
-  implicit val rawTableItemsEncoder: Encoder[Items[RawTable]] =
-    deriveEncoder[Items[RawTable]]
-  implicit val rawTableEncoder: Encoder[RawTable] = deriveEncoder[RawTable]
-  implicit val rawTableDecoder: Decoder[RawTable] = deriveDecoder[RawTable]
+  implicit val rawTableItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[RawTable]] =
+    JsonCodecMaker.make[ItemsWithCursor[RawTable]]
+  implicit val rawTableItemsCodec: JsonValueCodec[Items[RawTable]] = JsonCodecMaker.make[Items[RawTable]]
+  implicit val rawTableCodec: JsonValueCodec[RawTable] = JsonCodecMaker.make[RawTable]
 }
 
 class RawRows[F[_]](val requestSession: RequestSession[F], database: String, table: String)
     extends WithRequestSession[F]
     with Readable[RawRow, F]
     with Create[RawRow, RawRow, F]
-    with DeleteByIds[F, String]
-    with PartitionedFilterF[RawRow, RawRowFilter, F] {
-  implicit val stringItemsDecoder: Decoder[Items[String]] = deriveDecoder[Items[String]]
+    with DeleteByIds[F, String] {
+  implicit val stringItemsCodec: JsonValueCodec[Items[String]] = JsonCodecMaker.make[Items[String]]
 
-  implicit val errorOrStringItemsDecoder: Decoder[Either[CdpApiError, Items[String]]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Items[String]]
+  implicit val errorOrStringItemsCodec: JsonValueCodec[Either[CdpApiError, Items[String]]] =
+    JsonCodecMaker.make
 
   import RawRows._
   override val baseUrl =
@@ -158,50 +147,6 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
   override def deleteByIds(ids: Seq[String]): F[Unit] =
     RawResource.deleteByIds(requestSession, baseUrl, ids.map(RawRowKey.apply))
 
-  override private[sdk] def filterWithCursor(
-      filter: RawRowFilter,
-      cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition],
-      aggregatedProperties: Option[Seq[String]] = None
-  ): F[ItemsWithCursor[RawRow]] =
-    Readable.readWithCursor(
-      requestSession,
-      baseUrl.addParams(filterToParams(filter)),
-      cursor,
-      limit,
-      None,
-      Constants.rowsBatchSize
-    )
-
-  override def filterPartitionsF(
-      filter: RawRowFilter,
-      numPartitions: Int,
-      limitPerPartition: Option[Int]
-  )(implicit F: Applicative[F]): F[Seq[Stream[F, RawRow]]] = {
-    val cursorsUriWithParams = cursorsUri
-      .addParam("numberOfCursors", numPartitions.toString)
-      .addParams(lastUpdatedTimeFilterToParams(filter))
-
-    for {
-      cursors <- requestSession
-        .get[Items[String], Items[String]](
-          cursorsUriWithParams,
-          value => value
-        )
-      streams = cursors.items.map(cursor =>
-        Readable
-          .pullFromCursor(
-            Some(cursor),
-            limitPerPartition,
-            None,
-            filterWithCursor(filter, _, _, _)
-          )
-          .stream
-      )
-    } yield streams
-  }
-
   def filterToParams(filter: RawRowFilter): Map[String, String] =
     Map(
       "columns" -> filter.columns.map { columns =>
@@ -225,16 +170,13 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
 }
 
 object RawRows {
-  implicit val rawRowEncoder: Encoder[RawRow] = deriveEncoder[RawRow]
-  implicit val rawRowDecoder: Decoder[RawRow] = deriveDecoder[RawRow]
-  implicit val rawRowItemsWithCursorDecoder: Decoder[ItemsWithCursor[RawRow]] =
-    deriveDecoder[ItemsWithCursor[RawRow]]
-  implicit val rawRowItemsDecoder: Decoder[Items[RawRow]] =
-    deriveDecoder[Items[RawRow]]
-  implicit val rawRowItemsEncoder: Encoder[Items[RawRow]] =
-    deriveEncoder[Items[RawRow]]
+  implicit val rawRowCodec: JsonValueCodec[RawRow] = JsonCodecMaker.make[RawRow]
+  implicit val rawRowItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[RawRow]] =
+    JsonCodecMaker.make[ItemsWithCursor[RawRow]]
+  implicit val rawRowItemsCodec: JsonValueCodec[Items[RawRow]] =
+    JsonCodecMaker.make[Items[RawRow]]
 
-  implicit val rawRowKeyEncoder: Encoder[RawRowKey] = deriveEncoder[RawRowKey]
-  implicit val rawRowKeyItemsEncoder: Encoder[Items[RawRowKey]] =
-    deriveEncoder[Items[RawRowKey]]
+  implicit val rawRowKeyCodec: JsonValueCodec[RawRowKey] = JsonCodecMaker.make[RawRowKey]
+  implicit val rawRowKeyItemsCodec: JsonValueCodec[Items[RawRowKey]] =
+    JsonCodecMaker.make[Items[RawRowKey]]
 }

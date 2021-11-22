@@ -9,7 +9,6 @@ import com.cognite.sdk.scala.v1._
 import sttp.client3._
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.testing.SttpBackendStub
-import io.circe.Json
 import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

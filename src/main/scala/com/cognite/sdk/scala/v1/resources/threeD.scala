@@ -3,14 +3,14 @@
 
 package com.cognite.sdk.scala.v1.resources
 
-import cats.Applicative
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import sttp.client3.circe._
-import cats.implicits._
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder}
+import sttp.client3.jsoniter_scala._
+import sttp.monad.MonadError
+import sttp.monad.syntax._
 
 class ThreeDModels[F[_]](val requestSession: RequestSession[F])
     extends Create[ThreeDModel, ThreeDModelCreate, F]
@@ -57,21 +57,17 @@ class ThreeDModels[F[_]](val requestSession: RequestSession[F])
 }
 
 object ThreeDModels {
-  implicit val threeDModelDecoder: Decoder[ThreeDModel] = deriveDecoder[ThreeDModel]
-  implicit val threeDModelUpdateEncoder: Encoder[ThreeDModelUpdate] =
-    deriveEncoder[ThreeDModelUpdate]
-  implicit val threeDModelItemsDecoder: Decoder[Items[ThreeDModel]] =
-    deriveDecoder[Items[ThreeDModel]]
-  implicit val threeDModelItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDModel]] =
-    deriveDecoder[ItemsWithCursor[ThreeDModel]]
-  // WartRemover gets confused by circe-derivation
-  @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
-  implicit val createThreeDModelDecoder: Decoder[ThreeDModelCreate] =
-    deriveDecoder[ThreeDModelCreate]
-  implicit val createThreeDModelEncoder: Encoder[ThreeDModelCreate] =
-    deriveEncoder[ThreeDModelCreate]
-  implicit val createThreeDModelItemsEncoder: Encoder[Items[ThreeDModelCreate]] =
-    deriveEncoder[Items[ThreeDModelCreate]]
+  implicit val threeDModelCodec: JsonValueCodec[ThreeDModel] = JsonCodecMaker.make[ThreeDModel]
+  implicit val threeDModelUpdateCodec: JsonValueCodec[ThreeDModelUpdate] =
+    JsonCodecMaker.make[ThreeDModelUpdate]
+  implicit val threeDModelItemsCodec: JsonValueCodec[Items[ThreeDModel]] =
+    JsonCodecMaker.make[Items[ThreeDModel]]
+  implicit val threeDModelItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[ThreeDModel]] =
+    JsonCodecMaker.make[ItemsWithCursor[ThreeDModel]]
+  implicit val createThreeDModelCodec: JsonValueCodec[ThreeDModelCreate] =
+    JsonCodecMaker.make[ThreeDModelCreate]
+  implicit val createThreeDModelItemsCodec: JsonValueCodec[Items[ThreeDModelCreate]] =
+    JsonCodecMaker.make[Items[ThreeDModelCreate]]
 }
 
 class ThreeDNodes[F[_]](val requestSession: RequestSession[F], modelId: Long, revisionId: Long)
@@ -128,19 +124,15 @@ class ThreeDAncestorNodes[F[_]](
 }
 
 object ThreeDNodes {
-  implicit val propertiesEncoder: Encoder[Properties] = deriveEncoder[Properties]
-  implicit val boundingBoxEncoder: Encoder[BoundingBox] = deriveEncoder[BoundingBox]
-  implicit val propertiesDecoder: Decoder[Properties] = deriveDecoder[Properties]
-  implicit val boundingBoxDecoder: Decoder[BoundingBox] = deriveDecoder[BoundingBox]
-  implicit val threeDNodeEncoder: Encoder[ThreeDNode] = deriveEncoder[ThreeDNode]
-  implicit val threeDNodeDecoder: Decoder[ThreeDNode] = deriveDecoder[ThreeDNode]
-  implicit val threeDNodeItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDNode]] =
-    deriveDecoder[ItemsWithCursor[ThreeDNode]]
-  implicit val threeDNodeItemsEncoder: Encoder[Items[ThreeDNode]] = deriveEncoder[Items[ThreeDNode]]
-  implicit val threeDNodeItemsDecoder: Decoder[Items[ThreeDNode]] = deriveDecoder[Items[ThreeDNode]]
+  implicit val propertiesCodec: JsonValueCodec[Properties] = JsonCodecMaker.make[Properties]
+  implicit val boundingBoxCodec: JsonValueCodec[BoundingBox] = JsonCodecMaker.make[BoundingBox]
+  implicit val threeDNodeCodec: JsonValueCodec[ThreeDNode] = JsonCodecMaker.make[ThreeDNode]
+  implicit val threeDNodeItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[ThreeDNode]] =
+    JsonCodecMaker.make[ItemsWithCursor[ThreeDNode]]
+  implicit val threeDNodeItemsCodec: JsonValueCodec[Items[ThreeDNode]] = JsonCodecMaker.make[Items[ThreeDNode]]
 }
 
-class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], modelId: Long)
+class ThreeDRevisions[F[_]: MonadError](val requestSession: RequestSession[F], modelId: Long)
     extends Create[ThreeDRevision, ThreeDRevisionCreate, F]
     with RetrieveByIds[ThreeDRevision, F]
     with Readable[ThreeDRevision, F]
@@ -179,7 +171,11 @@ class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], 
     requestSession.get[ThreeDRevision, ThreeDRevision](uri"$baseUrl/$id", value => value)
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDRevision]] =
-    ids.toList.traverse(retrieveById).map(_.toSeq)
+    ids.foldRight(List.empty[ThreeDRevision].unit) { (id, acc: F[List[ThreeDRevision]]) =>
+      retrieveById(id).flatMap { revision =>
+        acc.map(revisions => revision :: revisions)
+      }
+    }.map(_.toSeq)
 
   override def createItems(items: Items[ThreeDRevisionCreate]): F[Seq[ThreeDRevision]] =
     Create.createItems[F, ThreeDRevision, ThreeDRevisionCreate](requestSession, baseUrl, items)
@@ -189,21 +185,18 @@ class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], 
 }
 
 object ThreeDRevisions {
-  implicit val threeDRevisionCameraDecoder: Decoder[Camera] = deriveDecoder[Camera]
-  implicit val threeDRevisionCameraEncoder: Encoder[Camera] = deriveEncoder[Camera]
-  implicit val threeDRevisionDecoder: Decoder[ThreeDRevision] = deriveDecoder[ThreeDRevision]
-  implicit val threeDRevisionUpdateEncoder: Encoder[ThreeDRevisionUpdate] =
-    deriveEncoder[ThreeDRevisionUpdate]
-  implicit val threeDRevisionItemsDecoder: Decoder[Items[ThreeDRevision]] =
-    deriveDecoder[Items[ThreeDRevision]]
-  implicit val threeDRevisionItemsWithCursorDecoder: Decoder[ItemsWithCursor[ThreeDRevision]] =
-    deriveDecoder[ItemsWithCursor[ThreeDRevision]]
-  implicit val createThreeDRevisionDecoder: Decoder[ThreeDRevisionCreate] =
-    deriveDecoder[ThreeDRevisionCreate]
-  implicit val createThreeDRevisionEncoder: Encoder[ThreeDRevisionCreate] =
-    deriveEncoder[ThreeDRevisionCreate]
-  implicit val createThreeDRevisionItemsEncoder: Encoder[Items[ThreeDRevisionCreate]] =
-    deriveEncoder[Items[ThreeDRevisionCreate]]
+  implicit val threeDRevisionCameraCodec: JsonValueCodec[Camera] = JsonCodecMaker.make[Camera]
+  implicit val threeDRevisionCodec: JsonValueCodec[ThreeDRevision] = JsonCodecMaker.make[ThreeDRevision]
+  implicit val threeDRevisionUpdateCodec: JsonValueCodec[ThreeDRevisionUpdate] =
+    JsonCodecMaker.make[ThreeDRevisionUpdate]
+  implicit val threeDRevisionItemsCodec: JsonValueCodec[Items[ThreeDRevision]] =
+    JsonCodecMaker.make[Items[ThreeDRevision]]
+  implicit val threeDRevisionItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[ThreeDRevision]] =
+    JsonCodecMaker.make[ItemsWithCursor[ThreeDRevision]]
+  implicit val createThreeDRevisionCodec: JsonValueCodec[ThreeDRevisionCreate] =
+    JsonCodecMaker.make[ThreeDRevisionCreate]
+  implicit val createThreeDRevisionItemsCodec: JsonValueCodec[Items[ThreeDRevisionCreate]] =
+    JsonCodecMaker.make[Items[ThreeDRevisionCreate]]
 }
 
 class ThreeDAssetMappings[F[_]](
@@ -232,9 +225,9 @@ class ThreeDAssetMappings[F[_]](
 }
 
 object ThreeDAssetMappings {
-  implicit val threeDAssetMappingDecoder: Decoder[ThreeDAssetMapping] =
-    deriveDecoder[ThreeDAssetMapping]
-  implicit val threeDAssetMappingItemsWithCursorDecoder
-      : Decoder[ItemsWithCursor[ThreeDAssetMapping]] =
-    deriveDecoder[ItemsWithCursor[ThreeDAssetMapping]]
+  implicit val threeDAssetMappingCodec: JsonValueCodec[ThreeDAssetMapping] =
+    JsonCodecMaker.make[ThreeDAssetMapping]
+  implicit val threeDAssetMappingItemsWithCursorCodec
+      : JsonValueCodec[ItemsWithCursor[ThreeDAssetMapping]] =
+    JsonCodecMaker.make[ItemsWithCursor[ThreeDAssetMapping]]
 }

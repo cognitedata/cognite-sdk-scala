@@ -4,8 +4,11 @@
 package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{AggregateDataPoint, DataPoint, StringDataPoint}
-import io.circe.syntax.EncoderOps
-import io.circe.{Encoder, Json}
+import com.github.plokhotnyuk.jsoniter_scala.core.{
+  JsonReader,
+  JsonValueCodec,
+  JsonWriter
+}
 
 final case class DataPointsByExternalId(
     externalId: String,
@@ -72,17 +75,80 @@ final case class DeleteDataPointsRange(
     inclusiveBegin: Long,
     exclusiveEnd: Long
 )
+
 object DeleteDataPointsRange {
-  implicit val encoder: Encoder[DeleteDataPointsRange] = Encoder.instance(v =>
-    Json.obj(
-      "inclusiveBegin" -> Json.fromLong(v.inclusiveBegin),
-      "exclusiveEnd" -> Json.fromLong(v.exclusiveEnd),
-      v.id match {
-        case CogniteExternalId(externalId) => "externalId" -> Json.fromString(externalId)
-        case CogniteInternalId(id) => "id" -> Json.fromLong(id)
+  // scalastyle:off cyclomatic.complexity
+  implicit val encoder: JsonValueCodec[DeleteDataPointsRange] =
+    new JsonValueCodec[DeleteDataPointsRange] {
+      override def decodeValue(
+          in: JsonReader,
+          default: DeleteDataPointsRange
+      ): DeleteDataPointsRange =
+        if (in.isNextToken('{')) {
+          var inclusiveBegin = -1L
+          var exclusiveEnd = -1L
+          var id: Option[Long] = None
+          var externalId: Option[String] = None
+          if (!in.isNextToken('}')) {
+            in.rollbackToken()
+            var l = -1
+            while (l < 0 || in.isNextToken(',')) {
+              l = in.readKeyAsCharBuf()
+              if (in.isCharBufEqualsTo(l, "inclusiveBegin")) {
+                inclusiveBegin = in.readLong()
+              } else if (in.isCharBufEqualsTo(l, "exclusiveEnd")) {
+                exclusiveEnd = in.readLong()
+              } else if (in.isCharBufEqualsTo(l, "id")) {
+                id = Some(in.readLong())
+              } else if (in.isCharBufEqualsTo(l, "externalId")) {
+                externalId = Some(in.readString(null)) // scalastyle:ignore null
+              } else {
+                in.skip()
+              }
+            }
+            if (!in.isCurrentToken('}')) {
+              in.objectEndOrCommaError()
+            }
+            if (inclusiveBegin < 0) {
+              in.decodeError("'inclusiveBegin' missing")
+            }
+            if (exclusiveEnd < 0) {
+              in.decodeError("'exclusiveEnd' missing")
+            }
+            (id, externalId) match {
+              case (Some(internalId), None) =>
+                DeleteDataPointsRange(CogniteInternalId(internalId), inclusiveBegin, exclusiveEnd)
+              case (None, Some(externalId)) =>
+                DeleteDataPointsRange(CogniteExternalId(externalId), inclusiveBegin, exclusiveEnd)
+              case (Some(_), Some(_)) =>
+                in.decodeError("Both 'id' and 'externalId' found")
+            }
+          } else {
+            in.readNullOrTokenError(default, '{')
+          }
+        } else {
+          in.readNullOrTokenError(default, '{')
+        }
+
+      override def encodeValue(x: DeleteDataPointsRange, out: JsonWriter): Unit = {
+        out.writeObjectStart()
+        x.id match {
+          case CogniteExternalId(externalId) =>
+            out.writeKey("externalId")
+            out.writeVal(externalId)
+          case CogniteInternalId(id) =>
+            out.writeKey("id")
+            out.writeVal(id)
+        }
+        out.writeKey("inclusiveBegin")
+        out.writeVal(x.inclusiveBegin)
+        out.writeKey("exclusiveEnd")
+        out.writeVal(x.exclusiveEnd)
+        out.writeObjectEnd()
       }
-    )
-  )
+
+      override def nullValue: DeleteDataPointsRange = null // scalastyle:ignore null
+    }
 }
 
 final case class LatestBeforeRequest(
@@ -90,7 +156,7 @@ final case class LatestBeforeRequest(
     id: CogniteId
 )
 object LatestBeforeRequest {
-  implicit val encoder: Encoder[LatestBeforeRequest] = Encoder.instance(v =>
+  implicit val encoder: JsonValueCodec[LatestBeforeRequest] = Codec.instance(v =>
     Json.obj(
       "before" -> Json.fromString(v.before),
       v.id match {
@@ -110,19 +176,42 @@ final case class QueryDataPointsRange(
     aggregates: Option[Seq[String]] = None
 )
 object QueryDataPointsRange {
-  implicit val encoder: Encoder[QueryDataPointsRange] = Encoder.instance(v =>
-    Json.obj(
-      "start" -> Json.fromString(v.start),
-      "end" -> Json.fromString(v.end),
-      "limit" -> v.limit.asJson,
-      "granularity" -> v.granularity.asJson,
-      "aggregates" -> v.aggregates.asJson,
-      v.id match {
-        case CogniteExternalId(externalId) => "externalId" -> Json.fromString(externalId)
-        case CogniteInternalId(id) => "id" -> Json.fromLong(id)
+  implicit val encoder: JsonValueCodec[QueryDataPointsRange] = new JsonValueCodec[QueryDataPointsRange] {
+    override def decodeValue(in: JsonReader, default: QueryDataPointsRange): QueryDataPointsRange = ???
+
+    override def encodeValue(x: QueryDataPointsRange, out: JsonWriter): Unit = {
+      out.writeObjectStart()
+      x.id match {
+        case CogniteExternalId(externalId) =>
+          out.writeKey("externalId")
+          out.writeVal(externalId)
+        case CogniteInternalId(id) =>
+          out.writeKey("id")
+          out.writeVal(id)
       }
-    )
-  )
+      out.writeKey("start")
+      out.writeVal(x.start)
+      out.writeKey("end")
+      out.writeVal(x.end)
+      x.limit.foreach { limit =>
+        out.writeKey("limit")
+        out.writeVal(limit)
+      }
+      x.granularity.foreach { granularity =>
+        out.writeKey("granularity")
+        out.writeVal(granularity)
+      }
+      x.aggregates.foreach { aggregates =>
+        out.writeKey("aggregates")
+        out.writeArrayStart()
+        aggregates.foreach(out.writeVal)
+        out.writeArrayEnd()
+      }
+      out.writeObjectEnd()
+    }
+
+    override def nullValue: QueryDataPointsRange = null
+  }
 }
 
 final case class QueryAggregatesResponse(

@@ -5,12 +5,10 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import sttp.client3.circe._
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.Json
-import io.circe.Printer
+import sttp.client3.jsoniter_scala._
 import sttp.model.Uri
 
 class Functions[F[_]](val requestSession: RequestSession[F])
@@ -30,7 +28,7 @@ class Functions[F[_]](val requestSession: RequestSession[F])
     )
 
   override def createItems(items: Items[FunctionCreate]): F[Seq[Function]] = {
-    implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
+    //implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession.post[Seq[Function], Items[Function], Items[FunctionCreate]](
       items,
       baseUrl,
@@ -52,24 +50,23 @@ class Functions[F[_]](val requestSession: RequestSession[F])
 }
 
 object Functions {
-  implicit val functionErrorDecoder: Decoder[FunctionError] = deriveDecoder[FunctionError]
-  implicit val functionDecoder: Decoder[Function] = deriveDecoder[Function]
-  implicit val functionsItemsDecoder: Decoder[Items[Function]] =
-    deriveDecoder[Items[Function]]
-  implicit val functionsItemsWithCursorDecoder: Decoder[ItemsWithCursor[Function]] =
-    deriveDecoder[ItemsWithCursor[Function]]
-  implicit val functionErrorEncoder: Encoder[FunctionError] = deriveEncoder[FunctionError]
-  implicit val createFunctionEncoder: Encoder[FunctionCreate] = deriveEncoder[FunctionCreate]
-  implicit val createFunctionsItemsEncoder: Encoder[Items[FunctionCreate]] =
-    deriveEncoder[Items[FunctionCreate]]
+  implicit val functionCodec: JsonValueCodec[Function] = JsonCodecMaker.make[Function]
+  implicit val functionsItemsCodec: JsonValueCodec[Items[Function]] =
+    JsonCodecMaker.make[Items[Function]]
+  implicit val functionsItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[Function]] =
+    JsonCodecMaker.make[ItemsWithCursor[Function]]
+  implicit val functionErrorCodec: JsonValueCodec[FunctionError] = JsonCodecMaker.make[FunctionError]
+  implicit val createFunctionCodec: JsonValueCodec[FunctionCreate] = JsonCodecMaker.make[FunctionCreate]
+  implicit val createFunctionsItemsCodec: JsonValueCodec[Items[FunctionCreate]] =
+    JsonCodecMaker.make[Items[FunctionCreate]]
 
-  implicit val errorOrFunctionDecoder: Decoder[Either[CdpApiError, Items[Function]]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Items[Function]]
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Unit]
-  implicit val deleteRequestWithRecursiveAndIgnoreUnknownIdsEncoder
-      : Encoder[ItemsWithRecursiveAndIgnoreUnknownIds] =
-    deriveEncoder[ItemsWithRecursiveAndIgnoreUnknownIds]
+  implicit val errorOrFunctionCodec: JsonValueCodec[Either[CdpApiError, Items[Function]]] =
+    JsonCodecMaker.make[Either[CdpApiError, Items[Function]]]
+  implicit val errorOrUnitCodec: JsonValueCodec[Either[CdpApiError, Unit]] =
+    JsonCodecMaker.make[Either[CdpApiError, Unit]]
+  implicit val deleteRequestWithRecursiveAndIgnoreUnknownIdsCodec
+      : JsonValueCodec[ItemsWithRecursiveAndIgnoreUnknownIds] =
+    JsonCodecMaker.make[ItemsWithRecursiveAndIgnoreUnknownIds]
 }
 
 class FunctionCalls[F[_]](val requestSession: RequestSession[F], val functionId: Long)
@@ -92,7 +89,7 @@ class FunctionCalls[F[_]](val requestSession: RequestSession[F], val functionId:
     )
 
   def filter(filter: FunctionCallFilter): F[Items[FunctionCall]] = {
-    implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
+    //implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession
       .post[Items[FunctionCall], Items[FunctionCall], FilterRequest[FunctionCallFilter]](
         FilterRequest(filter, None, None, None, None),
@@ -121,34 +118,34 @@ class FunctionCalls[F[_]](val requestSession: RequestSession[F], val functionId:
 }
 
 object FunctionCalls {
-  implicit val functionCallDecoder: Decoder[FunctionCall] = deriveDecoder[FunctionCall]
-  implicit val functionCallLogEntryDecoder: Decoder[FunctionCallLogEntry] =
-    deriveDecoder[FunctionCallLogEntry]
-  implicit val functionCallResponseDecoder: Decoder[FunctionCallResponse] =
-    deriveDecoder[FunctionCallResponse]
-  implicit val functionCallItemsDecoder: Decoder[Items[FunctionCall]] =
-    deriveDecoder[Items[FunctionCall]]
-  implicit val functionCallLogEntryItemsDecoder: Decoder[Items[FunctionCallLogEntry]] =
-    deriveDecoder[Items[FunctionCallLogEntry]]
+  implicit val functionCallCodec: JsonValueCodec[FunctionCall] = JsonCodecMaker.make[FunctionCall]
+  implicit val functionCallLogEntryCodec: JsonValueCodec[FunctionCallLogEntry] =
+    JsonCodecMaker.make[FunctionCallLogEntry]
+  implicit val functionCallResponseCodec: JsonValueCodec[FunctionCallResponse] =
+    JsonCodecMaker.make[FunctionCallResponse]
+  implicit val functionCallItemsCodec: JsonValueCodec[Items[FunctionCall]] =
+    JsonCodecMaker.make[Items[FunctionCall]]
+  implicit val functionCallLogEntryItemsCodec: JsonValueCodec[Items[FunctionCallLogEntry]] =
+    JsonCodecMaker.make[Items[FunctionCallLogEntry]]
 
-  implicit val FunctionCallFilterEncoder: Encoder[FunctionCallFilter] =
-    deriveEncoder[FunctionCallFilter]
-  implicit val FunctionCallFilterRequestEncoder: Encoder[FilterRequest[FunctionCallFilter]] =
-    deriveEncoder[FilterRequest[FunctionCallFilter]]
+  implicit val FunctionCallFilterCodec: JsonValueCodec[FunctionCallFilter] =
+    JsonCodecMaker.make[FunctionCallFilter]
+  implicit val FunctionCallFilterRequestCodec: JsonValueCodec[FilterRequest[FunctionCallFilter]] =
+    JsonCodecMaker.make[FilterRequest[FunctionCallFilter]]
 
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Unit]
-  implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[FunctionCall]]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Items[FunctionCall]]
-  implicit val errorOrFunctionCallDecoder: Decoder[Either[CdpApiError, FunctionCall]] =
-    EitherDecoder.eitherDecoder[CdpApiError, FunctionCall]
-  implicit val errorOrLogEntriesDecoder: Decoder[Either[CdpApiError, Items[FunctionCallLogEntry]]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Items[FunctionCallLogEntry]]
-  implicit val errorOrFunctionResponseDecoder: Decoder[Either[CdpApiError, FunctionCallResponse]] =
-    EitherDecoder.eitherDecoder[CdpApiError, FunctionCallResponse]
-  implicit val deleteRequestWithRecursiveAndIgnoreUnknownIdsEncoder
-      : Encoder[ItemsWithRecursiveAndIgnoreUnknownIds] =
-    deriveEncoder[ItemsWithRecursiveAndIgnoreUnknownIds]
+  implicit val errorOrUnitCodec: JsonValueCodec[Either[CdpApiError, Unit]] =
+    JsonCodecMaker.make[Either[CdpApiError, Unit]]
+  implicit val errorOrItemsCodec: JsonValueCodec[Either[CdpApiError, Items[FunctionCall]]] =
+    JsonCodecMaker.make
+  implicit val errorOrFunctionCallCodec: JsonValueCodec[Either[CdpApiError, FunctionCall]] =
+    JsonCodecMaker.make[Either[CdpApiError, FunctionCall]]
+  implicit val errorOrLogEntriesCodec: JsonValueCodec[Either[CdpApiError, Items[FunctionCallLogEntry]]] =
+    JsonCodecMaker.make
+  implicit val errorOrFunctionResponseCodec: JsonValueCodec[Either[CdpApiError, FunctionCallResponse]] =
+    JsonCodecMaker.make[Either[CdpApiError, FunctionCallResponse]]
+  implicit val deleteRequestWithRecursiveAndIgnoreUnknownIdsCodec
+      : JsonValueCodec[ItemsWithRecursiveAndIgnoreUnknownIds] =
+    JsonCodecMaker.make[ItemsWithRecursiveAndIgnoreUnknownIds]
 }
 
 class FunctionSchedules[F[_]](val requestSession: RequestSession[F])
@@ -176,21 +173,21 @@ class FunctionSchedules[F[_]](val requestSession: RequestSession[F])
 }
 
 object FunctionSchedules {
-  implicit val functionScheduleDecoder: Decoder[FunctionSchedule] = deriveDecoder[FunctionSchedule]
-  implicit val createFunctionScheduleEncoder: Encoder[FunctionScheduleCreate] =
-    deriveEncoder[FunctionScheduleCreate]
-  implicit val createFunctionScheduleItemsEncoder: Encoder[Items[FunctionScheduleCreate]] =
-    deriveEncoder[Items[FunctionScheduleCreate]]
-  implicit val functionScheduleItemsDecoder: Decoder[Items[FunctionSchedule]] =
-    deriveDecoder[Items[FunctionSchedule]]
-  implicit val functionScheduleItemsWithCursorDecoder: Decoder[ItemsWithCursor[FunctionSchedule]] =
-    deriveDecoder[ItemsWithCursor[FunctionSchedule]]
+  implicit val functionScheduleCodec: JsonValueCodec[FunctionSchedule] = JsonCodecMaker.make[FunctionSchedule]
+  implicit val createFunctionScheduleCodec: JsonValueCodec[FunctionScheduleCreate] =
+    JsonCodecMaker.make[FunctionScheduleCreate]
+  implicit val createFunctionScheduleItemsCodec: JsonValueCodec[Items[FunctionScheduleCreate]] =
+    JsonCodecMaker.make[Items[FunctionScheduleCreate]]
+  implicit val functionScheduleItemsCodec: JsonValueCodec[Items[FunctionSchedule]] =
+    JsonCodecMaker.make[Items[FunctionSchedule]]
+  implicit val functionScheduleItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[FunctionSchedule]] =
+    JsonCodecMaker.make[ItemsWithCursor[FunctionSchedule]]
 
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Unit]
-  implicit val errorOrItemsDecoder: Decoder[Either[CdpApiError, Items[FunctionSchedule]]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Items[FunctionSchedule]]
-  implicit val deleteRequestWithRecursiveAndIgnoreUnknownIdsEncoder
-      : Encoder[ItemsWithRecursiveAndIgnoreUnknownIds] =
-    deriveEncoder[ItemsWithRecursiveAndIgnoreUnknownIds]
+  implicit val errorOrUnitCodec: JsonValueCodec[Either[CdpApiError, Unit]] =
+    JsonCodecMaker.make[Either[CdpApiError, Unit]]
+  implicit val errorOrItemsCodec: JsonValueCodec[Either[CdpApiError, Items[FunctionSchedule]]] =
+    JsonCodecMaker.make
+  implicit val deleteRequestWithRecursiveAndIgnoreUnknownIdsCodec
+      : JsonValueCodec[ItemsWithRecursiveAndIgnoreUnknownIds] =
+    JsonCodecMaker.make[ItemsWithRecursiveAndIgnoreUnknownIds]
 }

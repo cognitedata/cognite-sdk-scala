@@ -3,12 +3,9 @@
 
 package com.cognite.sdk.scala.common
 
-import cats.Id
-
 import java.net.ConnectException
-import cats.effect.Timer
 import sttp.capabilities.Effect
-import sttp.client3.{Request, Response, SttpBackend, SttpClientException}
+import sttp.client3.{Identity, Request, Response, SttpBackend, SttpClientException}
 import sttp.monad.MonadError
 
 import scala.concurrent.duration.{FiniteDuration, _}
@@ -20,15 +17,7 @@ trait Sleep[R[_]] {
 }
 
 object Sleep {
-  class CatsSleep[F[_]](implicit T: Timer[F]) extends Sleep[F] {
-    override def sleep(sleepDuration: FiniteDuration): F[Unit] =
-      T.sleep(sleepDuration)
-  }
-
-  implicit def catsSleep[R[_]](implicit T: Timer[R]): Sleep[R] =
-    new CatsSleep[R]
-
-  implicit val idSleep: Sleep[Id] = (sleepDuration: FiniteDuration) => {
+  implicit val idSleep: Sleep[Identity] = (sleepDuration: FiniteDuration) => {
     Thread.sleep(sleepDuration.toMillis)
     ()
   }

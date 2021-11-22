@@ -5,13 +5,12 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder}
 
 class Relationships[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with PartitionedReadable[Relationship, F]
     with Filter[Relationship, RelationshipsFilter, F]
     with RetrieveByIdsWithIgnoreUnknownIds[Relationship, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Relationship, F]
@@ -20,20 +19,6 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
     with UpdateByExternalId[Relationship, RelationshipUpdate, F] {
   import Relationships._
   override val baseUrl = uri"${requestSession.baseUrl}/relationships"
-
-  override private[sdk] def readWithCursor(
-      cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition]
-  ): F[ItemsWithCursor[Relationship]] =
-    Readable.readWithCursor(
-      requestSession,
-      baseUrl,
-      cursor,
-      limit,
-      partition,
-      Constants.defaultBatchSize
-    )
 
   override def retrieveByExternalIds(
       externalIds: Seq[String],
@@ -98,22 +83,22 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
 }
 
 object Relationships {
-  implicit val relationshipDecoder: Decoder[Relationship] = deriveDecoder[Relationship]
-  implicit val relationshipItemsWithCursorDecoder: Decoder[ItemsWithCursor[Relationship]] =
-    deriveDecoder[ItemsWithCursor[Relationship]]
-  implicit val relationshipItemsDecoder: Decoder[Items[Relationship]] =
-    deriveDecoder[Items[Relationship]]
-  implicit val cogniteExternalIdDecoder: Decoder[CogniteExternalId] =
-    deriveDecoder[CogniteExternalId]
-  implicit val createRelationEncoder: Encoder[RelationshipCreate] =
-    deriveEncoder[RelationshipCreate]
-  implicit val createRelationsItemsEncoder: Encoder[Items[RelationshipCreate]] =
-    deriveEncoder[Items[RelationshipCreate]]
-  implicit val relationshipsFilterEncoder: Encoder[RelationshipsFilter] =
-    deriveEncoder[RelationshipsFilter]
-  implicit val relationshipsFilterRequestEncoder: Encoder[FilterRequest[RelationshipsFilter]] =
-    deriveEncoder[FilterRequest[RelationshipsFilter]]
-  implicit val confidenceRangeEncoder: Encoder[ConfidenceRange] = deriveEncoder[ConfidenceRange]
-  implicit val relationshipUpdateEncoder: Encoder[RelationshipUpdate] =
-    deriveEncoder[RelationshipUpdate]
+  implicit val relationshipCodec: JsonValueCodec[Relationship] = JsonCodecMaker.make[Relationship]
+  implicit val relationshipItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[Relationship]] =
+    JsonCodecMaker.make[ItemsWithCursor[Relationship]]
+  implicit val relationshipItemsCodec: JsonValueCodec[Items[Relationship]] =
+    JsonCodecMaker.make[Items[Relationship]]
+  implicit val cogniteExternalIdCodec: JsonValueCodec[CogniteExternalId] =
+    JsonCodecMaker.make[CogniteExternalId]
+  implicit val createRelationCodec: JsonValueCodec[RelationshipCreate] =
+    JsonCodecMaker.make[RelationshipCreate]
+  implicit val createRelationsItemsCodec: JsonValueCodec[Items[RelationshipCreate]] =
+    JsonCodecMaker.make[Items[RelationshipCreate]]
+  implicit val relationshipsFilterCodec: JsonValueCodec[RelationshipsFilter] =
+    JsonCodecMaker.make[RelationshipsFilter]
+  implicit val relationshipsFilterRequestCodec: JsonValueCodec[FilterRequest[RelationshipsFilter]] =
+    JsonCodecMaker.make[FilterRequest[RelationshipsFilter]]
+  implicit val confidenceRangeCodec: JsonValueCodec[ConfidenceRange] = JsonCodecMaker.make[ConfidenceRange]
+  implicit val relationshipUpdateCodec: JsonValueCodec[RelationshipUpdate] =
+    JsonCodecMaker.make[RelationshipUpdate]
 }

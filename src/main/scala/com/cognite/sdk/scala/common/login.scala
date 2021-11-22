@@ -4,9 +4,9 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1.RequestSession
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import io.circe.Decoder
-import io.circe.generic.semiauto.deriveDecoder
 
 final case class LoginStatus(
     user: String,
@@ -19,10 +19,10 @@ final case class DataLoginStatus(data: LoginStatus)
 
 class Login[F[_]](val requestSession: RequestSession[F]) {
   @SuppressWarnings(Array("org.wartremover.warts.EitherProjectionPartial"))
-  implicit val loginStatusDecoder: Decoder[LoginStatus] = deriveDecoder[LoginStatus]
-  implicit val dataLoginStatusDecoder: Decoder[DataLoginStatus] = deriveDecoder[DataLoginStatus]
-  implicit val errorOrDataLoginStatusDecoder: Decoder[Either[CdpApiError, DataLoginStatus]] =
-    EitherDecoder.eitherDecoder[CdpApiError, DataLoginStatus]
+  implicit val loginStatusCodec: JsonValueCodec[LoginStatus] = JsonCodecMaker.make[LoginStatus]
+  implicit val dataLoginStatusCodec: JsonValueCodec[DataLoginStatus] = JsonCodecMaker.make[DataLoginStatus]
+  implicit val errorOrDataLoginStatusCodec: JsonValueCodec[Either[CdpApiError, DataLoginStatus]] =
+    JsonCodecMaker.make[Either[CdpApiError, DataLoginStatus]]
   def status(): F[LoginStatus] =
     requestSession
       .get[LoginStatus, DataLoginStatus](

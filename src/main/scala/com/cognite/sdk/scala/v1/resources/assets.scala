@@ -5,39 +5,23 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import sttp.client3.circe._
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import sttp.client3.jsoniter_scala._
 
 class Assets[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with PartitionedReadable[Asset, F]
     with Create[Asset, AssetCreate, F]
     with RetrieveByIdsWithIgnoreUnknownIds[Asset, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Asset, F]
     with DeleteByIdsWithIgnoreUnknownIds[F, Long]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
-    with PartitionedFilter[Asset, AssetsFilter, F]
     with Search[Asset, AssetsQuery, F]
     with UpdateById[Asset, AssetUpdate, F]
     with UpdateByExternalId[Asset, AssetUpdate, F] {
   import Assets._
   override val baseUrl = uri"${requestSession.baseUrl}/assets"
-
-  override private[sdk] def readWithCursor(
-      cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition]
-  ): F[ItemsWithCursor[Asset]] =
-    Readable.readWithCursor(
-      requestSession,
-      baseUrl,
-      cursor,
-      limit,
-      partition,
-      Constants.defaultBatchSize
-    )
 
   override def retrieveByIds(
       ids: Seq[Long],
@@ -120,30 +104,6 @@ class Assets[F[_]](val requestSession: RequestSession[F])
       _ => ()
     )
 
-  def filter(
-      filter: AssetsFilter,
-      limit: Option[Int],
-      aggregatedProperties: Option[Seq[String]]
-  ): fs2.Stream[F, Asset] =
-    filterWithNextCursor(filter, None, limit, aggregatedProperties)
-
-  def filterPartitions(
-      filter: AssetsFilter,
-      numPartitions: Int,
-      limitPerPartition: Option[Int],
-      aggregatedProperties: Option[Seq[String]]
-  ): Seq[fs2.Stream[F, Asset]] =
-    1.to(numPartitions).map { i =>
-      Readable
-        .pullFromCursor(
-          None,
-          limitPerPartition,
-          Some(Partition(i, numPartitions)),
-          filterWithCursor(filter, _, _, _, aggregatedProperties)
-        )
-        .stream
-    }
-
   private[sdk] def filterWithCursor(
       filter: AssetsFilter,
       cursor: Option[String],
@@ -167,29 +127,27 @@ class Assets[F[_]](val requestSession: RequestSession[F])
 }
 
 object Assets {
-  implicit val assetDecoder: Decoder[Asset] = deriveDecoder[Asset]
-  implicit val assetsItemsWithCursorDecoder: Decoder[ItemsWithCursor[Asset]] =
-    deriveDecoder[ItemsWithCursor[Asset]]
-  implicit val assetsItemsDecoder: Decoder[Items[Asset]] =
-    deriveDecoder[Items[Asset]]
-  implicit val createAssetEncoder: Encoder[AssetCreate] = deriveEncoder[AssetCreate]
-  implicit val createAssetsItemsEncoder: Encoder[Items[AssetCreate]] =
-    deriveEncoder[Items[AssetCreate]]
-  implicit val assetUpdateEncoder: Encoder[AssetUpdate] = deriveEncoder[AssetUpdate]
-  implicit val assetsFilterEncoder: Encoder[AssetsFilter] =
-    deriveEncoder[AssetsFilter]
-  implicit val assetsSearchEncoder: Encoder[AssetsSearch] =
-    deriveEncoder[AssetsSearch]
-  implicit val assetsQueryEncoder: Encoder[AssetsQuery] =
-    deriveEncoder[AssetsQuery]
-  implicit val assetsFilterRequestEncoder: Encoder[FilterRequest[AssetsFilter]] =
-    deriveEncoder[FilterRequest[AssetsFilter]]
+  implicit val assetCodec: JsonValueCodec[Asset] = JsonCodecMaker.make[Asset]
+  implicit val assetsItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[Asset]] =
+    JsonCodecMaker.make[ItemsWithCursor[Asset]]
+  implicit val assetsItemsCodec: JsonValueCodec[Items[Asset]] =
+    JsonCodecMaker.make[Items[Asset]]
+  implicit val createAssetCodec: JsonValueCodec[AssetCreate] = JsonCodecMaker.make[AssetCreate]
+  implicit val createAssetsItemsCodec: JsonValueCodec[Items[AssetCreate]] =
+    JsonCodecMaker.make[Items[AssetCreate]]
+  implicit val assetUpdateCodec: JsonValueCodec[AssetUpdate] = JsonCodecMaker.make[AssetUpdate]
+  implicit val assetsFilterCodec: JsonValueCodec[AssetsFilter] =
+    JsonCodecMaker.make[AssetsFilter]
+  implicit val assetsSearchCodec: JsonValueCodec[AssetsSearch] =
+    JsonCodecMaker.make[AssetsSearch]
+  implicit val assetsQueryCodec: JsonValueCodec[AssetsQuery] =
+    JsonCodecMaker.make[AssetsQuery]
+  implicit val assetsFilterRequestCodec: JsonValueCodec[FilterRequest[AssetsFilter]] =
+    JsonCodecMaker.make[FilterRequest[AssetsFilter]]
 
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Unit]
-  implicit val deleteRequestWithRecursiveAndIgnoreUnknownIdsEncoder
-      : Encoder[ItemsWithRecursiveAndIgnoreUnknownIds] =
-    deriveEncoder[ItemsWithRecursiveAndIgnoreUnknownIds]
-  implicit val cogniteExternalIdDecoder: Decoder[CogniteExternalId] =
-    deriveDecoder[CogniteExternalId]
+  implicit val errorOrUnitCodec: JsonValueCodec[Either[CdpApiError, Unit]] =
+    JsonCodecMaker.make[Either[CdpApiError, Unit]]
+  implicit val deleteRequestWithRecursiveAndIgnoreUnknownIdsCodec
+      : JsonValueCodec[ItemsWithRecursiveAndIgnoreUnknownIds] =
+    JsonCodecMaker.make[ItemsWithRecursiveAndIgnoreUnknownIds]
 }

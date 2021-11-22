@@ -7,7 +7,7 @@ import java.time.Instant
 import com.cognite.sdk.scala.common._
 
 final case class Label(
-    externalId: String,
+    externalId: Some[String],
     name: String,
     description: Option[String] = None,
     createdTime: Instant = Instant.ofEpochMilli(0)
@@ -23,7 +23,7 @@ final case class Label(
 }
 
 final case class LabelCreate(
-    externalId: String,
+    externalId: Some[String],
     name: String,
     description: Option[String] = None
 ) extends WithRequiredExternalId

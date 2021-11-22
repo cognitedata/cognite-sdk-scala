@@ -5,7 +5,6 @@ package com.cognite.sdk.scala.v1
 
 import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common._
-import io.circe.syntax._
 import org.scalatest.{OptionValues, ParallelTestExecution}
 
 @SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements"))

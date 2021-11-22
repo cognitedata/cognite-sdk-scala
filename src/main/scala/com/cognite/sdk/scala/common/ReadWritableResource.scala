@@ -4,9 +4,10 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import sttp.client3.circe._
-import io.circe.{Decoder, Encoder}
+import sttp.client3.jsoniter_scala._
 import sttp.model.Uri
 
 trait DeleteByIds[F[_], PrimitiveId] {
@@ -66,8 +67,8 @@ trait DeleteByExternalIdsWithIgnoreUnknownIds[F[_]] extends DeleteByExternalIds[
 }
 
 object DeleteByExternalIds {
-  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
-    EitherDecoder.eitherDecoder[CdpApiError, Unit]
+  implicit val errorOrUnitCodec: JsonValueCodec[Either[CdpApiError, Unit]] =
+    JsonCodecMaker.make[Either[CdpApiError, Unit]]
 
   def deleteByExternalIdsWithIgnoreUnknownIds[F[_]](
       requestSession: RequestSession[F],
@@ -122,8 +123,8 @@ trait Create[R <: ToCreate[W], W, F[_]]
 
 object Create {
   def createItems[F[_], R, W](requestSession: RequestSession[F], baseUrl: Uri, items: Items[W])(
-      implicit readDecoder: Decoder[ItemsWithCursor[R]],
-      itemsEncoder: Encoder[Items[W]]
+      implicit readCodec: JsonValueCodec[ItemsWithCursor[R]],
+      itemsCodec: JsonValueCodec[Items[W]]
   ): F[Seq[R]] =
     requestSession.post[Seq[R], ItemsWithCursor[R], Items[W]](
       items,
@@ -140,8 +141,8 @@ trait CreateOne[R <: ToCreate[W], W, F[_]] extends WithRequestSession[F] with Ba
 
 object CreateOne {
   def createOne[F[_], R, W](requestSession: RequestSession[F], baseUrl: Uri, item: W)(
-      implicit readDecoder: Decoder[R],
-      itemsEncoder: Encoder[W]
+      implicit readCodec: JsonValueCodec[R],
+      itemsCodec: JsonValueCodec[W]
   ): F[R] =
     requestSession.post[R, R, W](
       item,

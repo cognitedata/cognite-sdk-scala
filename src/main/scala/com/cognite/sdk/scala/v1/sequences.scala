@@ -5,7 +5,6 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 
-import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common.{
   NonNullableSetter,
   SearchQuery,
@@ -68,7 +67,7 @@ final case class Sequence(
     assetId: Option[Long] = None,
     externalId: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
-    columns: NonEmptyList[SequenceColumn],
+    columns: List[SequenceColumn],
     createdTime: Instant = Instant.ofEpochMilli(0),
     lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
     dataSetId: Option[Long] = None
@@ -105,7 +104,7 @@ final case class SequenceCreate(
     assetId: Option[Long] = None,
     externalId: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
-    columns: NonEmptyList[SequenceColumnCreate],
+    columns: List[SequenceColumnCreate],
     dataSetId: Option[Long] = None
 ) extends WithExternalId
 

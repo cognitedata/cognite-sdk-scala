@@ -3,12 +3,10 @@
 
 package com.cognite.sdk.scala.common
 
-import cats.effect.Concurrent
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
 import sttp.client3._
-import sttp.client3.circe._
-import fs2._
-import io.circe.Decoder
+import sttp.client3.jsoniter_scala._
 import sttp.model.Uri
 
 // TODO: Verify that index and numPartitions are valid
@@ -24,79 +22,9 @@ trait Readable[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   ): F[ItemsWithCursor[R]]
   def read(limit: Option[Int] = None): F[ItemsWithCursor[R]] =
     readWithCursor(None, limit, None)
-
-  private[sdk] def listWithNextCursor(
-      cursor: Option[String],
-      limit: Option[Int]
-  ): Stream[F, R] =
-    Readable
-      .pullFromCursor(cursor, limit, None, readWithCursor)
-      .stream
-
-  def list(limit: Option[Int] = None): Stream[F, R] =
-    listWithNextCursor(None, limit)
-}
-
-trait PartitionedReadable[R, F[_]] extends Readable[R, F] {
-  def listPartitions(numPartitions: Int, limitPerPartition: Option[Int] = None): Seq[Stream[F, R]] =
-    1.to(numPartitions).map { i =>
-      Readable
-        .pullFromCursor(
-          None,
-          limitPerPartition,
-          Some(Partition(i, numPartitions)),
-          readWithCursor
-        )
-        .stream
-    }
-
-  def listConcurrently(numPartitions: Int, limitPerPartition: Option[Int] = None)(
-      implicit c: Concurrent[F]
-  ): Stream[F, R] =
-    listPartitions(numPartitions, limitPerPartition).fold(Stream.empty)(_.merge(_))
 }
 
 object Readable {
-  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-  private[sdk] def pullFromCursor[F[_], R](
-      cursor: Option[String],
-      maxItemsReturned: Option[Int],
-      partition: Option[Partition],
-      get: (Option[String], Option[Int], Option[Partition]) => F[ItemsWithCursor[R]]
-  ): Pull[F, R, Unit] =
-    if (maxItemsReturned.exists(_ <= 0)) {
-      Pull.done
-    } else {
-      Pull.eval(get(cursor, maxItemsReturned, partition)).flatMap { items =>
-        Pull.output(Chunk.seq(items.items)) >>
-          items.nextCursor
-            .map { s =>
-              pullFromCursor(
-                Some(s),
-                maxItemsReturned.map(_ - items.items.size),
-                partition,
-                get
-              )
-            }
-            .getOrElse(Pull.done)
-      }
-    }
-
-  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-  private[sdk] def pageThroughCursors[F[_], State, Resp <: ResponseWithCursor](
-      cursor: Option[String],
-      state: State,
-      get: (Option[String], State) => F[Option[(Resp, State)]]
-  ): Pull[F, Resp, Unit] =
-    Pull.eval(get(cursor, state)).flatMap {
-      case None => Pull.done
-      case Some((response, state)) =>
-        Pull.output1(response) >>
-          response.nextCursor
-            .map(cursor => pageThroughCursors(Some(cursor), state, get))
-            .getOrElse(Pull.done)
-    }
-
   private def uriWithCursorAndLimit(
       baseUrl: Uri,
       cursor: Option[String],
@@ -115,7 +43,7 @@ object Readable {
       maxItemsReturned: Option[Int],
       partition: Option[Partition],
       batchSize: Int
-  )(implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]): F[ItemsWithCursor[R]] = {
+  )(implicit itemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[R]]): F[ItemsWithCursor[R]] = {
     val uriWithCursor = uriWithCursorAndLimit(baseUrl, cursor, maxItemsReturned, batchSize)
     val uriWithCursorAndPartition = partition.fold(uriWithCursor) { p =>
       uriWithCursor.addParam("partition", p.toString)
@@ -127,7 +55,7 @@ object Readable {
   private[sdk] def readSimple[F[_], R](
       requestSession: RequestSession[F],
       uri: Uri
-  )(implicit itemsWithCursorDecoder: Decoder[ItemsWithCursor[R]]): F[ItemsWithCursor[R]] =
+  )(implicit itemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[R]]): F[ItemsWithCursor[R]] =
     requestSession.get[ItemsWithCursor[R], ItemsWithCursor[R]](
       uri,
       value => value
@@ -145,7 +73,7 @@ trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
 
 object RetrieveByIds {
   def retrieveByIds[F[_], R](requestSession: RequestSession[F], baseUrl: Uri, ids: Seq[Long])(
-      implicit itemsDecoder: Decoder[Items[R]]
+      implicit itemsCodec: JsonValueCodec[Items[R]]
   ): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], Items[CogniteInternalId]](
       Items(ids.map(CogniteInternalId.apply)),
@@ -166,7 +94,7 @@ object RetrieveByIdsWithIgnoreUnknownIds {
       baseUrl: Uri,
       ids: Seq[Long],
       ignoreUnknownIds: Boolean
-  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
+  )(implicit itemsCodec: JsonValueCodec[Items[R]]): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteId]](
       ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId.apply), ignoreUnknownIds),
       uri"$baseUrl/byids",
@@ -188,7 +116,7 @@ object RetrieveByExternalIds {
       requestSession: RequestSession[F],
       baseUrl: Uri,
       externalIds: Seq[String]
-  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
+  )(implicit itemsCodec: JsonValueCodec[Items[R]]): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], Items[CogniteExternalId]](
       Items(externalIds.map(CogniteExternalId.apply)),
       uri"$baseUrl/byids",
@@ -208,7 +136,7 @@ object RetrieveByExternalIdsWithIgnoreUnknownIds {
       baseUrl: Uri,
       externalIds: Seq[String],
       ignoreUnknownIds: Boolean
-  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
+  )(implicit itemsCodec: JsonValueCodec[Items[R]]): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteId]](
       ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId.apply), ignoreUnknownIds),
       uri"$baseUrl/byids",

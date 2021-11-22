@@ -4,12 +4,11 @@
 package com.cognite.sdk.scala.common
 
 import java.time.Instant
-
-import cats.Id
-import com.cognite.sdk.scala.v1.CogniteId
-import io.circe.{Decoder, Encoder, Json, JsonObject, KeyEncoder}
-import io.circe.generic.semiauto.deriveDecoder
+import com.cognite.sdk.scala.v1.{CogniteExternalId, CogniteId, CogniteInternalId}
+import com.github.plokhotnyuk.jsoniter_scala.core.{JsonReader, JsonValueCodec, JsonWriter}
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.model.Uri
+
 // scalastyle:off number.of.types
 trait ResponseWithCursor {
   val nextCursor: Option[String]
@@ -56,8 +55,8 @@ object SdkException {
 final case class CdpApiErrorPayload(
     code: Int,
     message: String,
-    missing: Option[Seq[JsonObject]],
-    duplicated: Option[Seq[JsonObject]],
+    missing: Option[Seq[CogniteId]],
+    duplicated: Option[Seq[CogniteId]],
     missingFields: Option[Seq[String]]
 )
 
@@ -75,16 +74,16 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
 }
 
 object CdpApiError {
-  implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
-  implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
+  implicit val cdpApiErrorPayloadCodec: JsonValueCodec[CdpApiErrorPayload] = JsonCodecMaker.make
+  implicit val cdpApiErrorCodec: JsonValueCodec[CdpApiError] = JsonCodecMaker.make
 }
 
 final case class CdpApiException(
     url: Uri,
     code: Int,
     message: String,
-    missing: Option[Seq[JsonObject]],
-    duplicated: Option[Seq[JsonObject]],
+    missing: Option[Seq[CogniteId]],
+    duplicated: Option[Seq[CogniteId]],
     missingFields: Option[Seq[String]],
     requestId: Option[String]
 ) extends Throwable({
@@ -100,24 +99,26 @@ final case class CdpApiException(
     })
 
 object CdpApiException {
-  private def describeErrorList(kind: String)(items: Seq[JsonObject]): String =
+  private def describeErrorList(kind: String)(items: Seq[CogniteId]): String =
     items
-      .flatMap(_.toIterable)
-      .groupBy { case (key, _) => key }
-      .toList
-      .sortBy { case (key, _) => key } // Ensure deterministic ordering
-      .map { case (key, entries) =>
+      .groupBy(_.isInstanceOf[CogniteInternalId])
+      .map { case (isInternalId, entries) =>
         // Example:
         //    Duplicated ids: [1234567, 1234568]. Duplicated externalIds: [externalId-1, externalId-2].
 
         val commaSeparatedValues =
           entries
-            .map { case (_, value) =>
-              value.asString.getOrElse(value.toString)
-            } // Print strings without quotes
+            .map {
+              case CogniteExternalId(externalId) => externalId
+              case CogniteInternalId(id) => id.toString
+            }
             .sorted // Ensure deterministic ordering
             .mkString(", ")
-
+        val key = if (isInternalId) {
+          "id"
+        } else {
+          "externalId"
+        }
         s" $kind ${key}s: [$commaSeparatedValues]."
       }
       .mkString
@@ -163,8 +164,8 @@ trait WithExternalId extends WithExternalIdGeneric[Option] {
   def getExternalId: Option[String] = externalId
 }
 
-trait WithRequiredExternalId extends WithExternalIdGeneric[Id] {
-  def getExternalId: Option[String] = Some(externalId)
+trait WithRequiredExternalId extends WithExternalIdGeneric[Some] {
+  def getExternalId: Option[String] = externalId
 }
 
 trait WithCreatedTime {
@@ -186,14 +187,6 @@ trait ToCreate[W] {
 
 trait ToUpdate[U] {
   def toUpdate: U
-}
-
-object EitherDecoder {
-  def eitherDecoder[A, B](implicit a: Decoder[A], b: Decoder[B]): Decoder[Either[A, B]] = {
-    val l: Decoder[Either[A, B]] = a.map(Left.apply)
-    val r: Decoder[Either[A, B]] = b.map(Right.apply)
-    l.or(r)
-  }
 }
 
 sealed trait Setter[+T]
@@ -228,10 +221,25 @@ object Setter {
       case value => Some(SetValue(value))
     }
 
-  implicit def encodeSetter[T](implicit encodeT: Encoder[T]): Encoder[Setter[T]] = {
-    case SetValue(value) => Json.obj(("set", encodeT.apply(value)))
-    case SetNull() => Json.obj(("setNull", Json.True))
-  }
+  implicit def encodeSetter[T](implicit encodeT : JsonValueCodec[T]): JsonValueCodec[Setter[T]] =
+    new JsonValueCodec[Setter[T]] {
+      override def decodeValue(in: JsonReader, default: Setter[T]): Setter[T] = ???
+
+      override def encodeValue(x: Setter[T], out: JsonWriter): Unit = {
+        out.writeObjectStart()
+        x match {
+          case SetValue(set) =>
+            out.writeKey("set")
+            encodeT.encodeValue(set, out)
+          case SetNull() =>
+            out.writeKey("setNull")
+            out.writeVal(true)
+        }
+        out.writeObjectEnd()
+      }
+
+      override def nullValue: Setter[T] = null
+    }
 }
 
 object NonNullableSetter {
@@ -259,36 +267,94 @@ object NonNullableSetter {
   def fromAny[T](value: T): NonNullableSetter[T] = SetValue(value)
 
   implicit def encodeNonNullableSetterSeq[T](
-      implicit encodeT: Encoder[T]
-  ): Encoder[NonNullableSetter[Seq[T]]] = new Encoder[NonNullableSetter[Seq[T]]] {
-    private val encodeSeqT = Encoder.encodeSeq(encodeT)
+      implicit encodeT: JsonValueCodec[T]
+  ): JsonValueCodec[NonNullableSetter[Seq[T]]] = new JsonValueCodec[NonNullableSetter[Seq[T]]] {
+//    private val encodeSeqT = Codec.encodeSeq(encodeT)
+//
+//    final def apply(a: NonNullableSetter[Seq[T]]): Json = a match {
+//      case SetValue(value) =>
+//        Json.obj("set" -> encodeSeqT(value))
+//      case UpdateArray(add: Seq[T] @unchecked, remove: Seq[T] @unchecked) =>
+//        Json.obj("add" -> encodeSeqT(add), "remove" -> encodeSeqT(remove))
+//    }
 
-    final def apply(a: NonNullableSetter[Seq[T]]): Json = a match {
-      case SetValue(value) =>
-        Json.obj("set" -> encodeSeqT(value))
-      case UpdateArray(add: Seq[T] @unchecked, remove: Seq[T] @unchecked) =>
-        Json.obj("add" -> encodeSeqT(add), "remove" -> encodeSeqT(remove))
+    override def decodeValue(in: JsonReader, default: NonNullableSetter[Seq[T]]): NonNullableSetter[Seq[T]] = ???
+
+    override def encodeValue(x: NonNullableSetter[Seq[T]], out: JsonWriter): Unit = {
+      out.writeObjectStart()
+      x match {
+        case SetValue(set) =>
+          if (set.nonEmpty) {
+            out.writeKey("set")
+            out.writeArrayStart()
+            set.foreach(encodeT.encodeValue(_, out))
+            out.writeArrayEnd()
+          }
+        case UpdateArray(add, remove) =>
+          if (add.nonEmpty) {
+            out.writeKey("add")
+            out.writeArrayStart()
+            add.foreach(encodeT.encodeValue(_, out))
+            out.writeArrayEnd()
+          }
+          if (remove.nonEmpty) {
+            out.writeKey("remove")
+            out.writeArrayStart()
+            remove.foreach(encodeT.encodeValue(_, out))
+            out.writeArrayEnd()
+          }
+      }
+      out.writeObjectEnd()
     }
+
+    override def nullValue: NonNullableSetter[Seq[T]] = null
   }
 
-  private val encodeMapStringString =
-    Encoder.encodeMap[String, String](KeyEncoder.encodeKeyString, Encoder.encodeString)
-  private val encodeSeqString = Encoder.encodeSeq[String]
+//  private val encodeMapStringString =
+//    Codec.encodeMap[String, String](KeyCodec.encodeKeyString, Codec.encodeString)
+//  private val encodeSeqString = Codec.encodeSeq[String]
+  private val mapStringStringCodec: JsonValueCodec[Map[String, String]] = JsonCodecMaker.make
+  private val seqStringCodec: JsonValueCodec[Seq[String]] = JsonCodecMaker.make
   implicit def encodeNonNullableSetterMapStringString
-      : Encoder[NonNullableSetter[Map[String, String]]] = {
-    case SetValue(value) =>
-      Json.obj("set" -> encodeMapStringString(value))
-    case UpdateMap(add, remove) =>
-      Json.obj("add" -> encodeMapStringString(add), "remove" -> encodeSeqString(remove))
-  }
+      : JsonValueCodec[NonNullableSetter[Map[String, String]]] =
+    new JsonValueCodec[NonNullableSetter[Map[String, String]]] {
+      override def decodeValue(in: JsonReader, default: NonNullableSetter[Map[String, String]]): NonNullableSetter[Map[String, String]] = ???
+
+      override def encodeValue(x: NonNullableSetter[Map[String, String]], out: JsonWriter): Unit = {
+        out.writeObjectStart()
+        x match {
+          case SetValue(set) =>
+            out.writeKey("set")
+            mapStringStringCodec.encodeValue(set, out)
+          case UpdateMap(add, remove) =>
+            out.writeKey("update")
+            mapStringStringCodec.encodeValue(add, out)
+            out.writeKey("remove")
+            seqStringCodec.encodeValue(remove, out)
+        }
+        out.writeObjectEnd()
+      }
+
+      override def nullValue: NonNullableSetter[Map[String, String]] = null
+    }
 
   implicit def encodeNonNullableSetter[T](
-      implicit encodeT: Encoder[T]
-  ): Encoder[NonNullableSetter[T]] = {
-    case SetValue(value) =>
-      Json.obj("set" -> encodeT(value))
-    case _ =>
-      throw new RuntimeException("Invalid NonNullableSetter. This should never happen.")
-  }
+      implicit encodeT: JsonValueCodec[T]
+  ): JsonValueCodec[NonNullableSetter[T]] = new JsonValueCodec[NonNullableSetter[T]] {
+    override def decodeValue(in: JsonReader, default: NonNullableSetter[T]): NonNullableSetter[T] = ???
 
+    override def encodeValue(x: NonNullableSetter[T], out: JsonWriter): Unit = {
+      out.writeObjectStart()
+      x match {
+        case SetValue(value) =>
+          out.writeKey("set")
+          encodeT.encodeValue(value, out)
+        case _ =>
+          throw new RuntimeException("Invalid NonNullableSetter. This should never happen.")
+      }
+      out.writeObjectEnd()
+    }
+
+    override def nullValue: NonNullableSetter[T] = null
+  }
 }

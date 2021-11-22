@@ -5,10 +5,10 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder}
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import sttp.client3.circe._
+import sttp.client3.jsoniter_scala._
 
 class Sessions[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -54,33 +54,33 @@ class Sessions[F[_]](val requestSession: RequestSession[F])
 }
 
 object Sessions {
-  implicit val sessionDecoder: Decoder[Session] = deriveDecoder[Session]
-  implicit val sessionsItemsDecoder: Decoder[Items[Session]] =
-    deriveDecoder[Items[Session]]
-  implicit val sessionsItemsWithCursorDecoder: Decoder[ItemsWithCursor[Session]] =
-    deriveDecoder[ItemsWithCursor[Session]]
+  implicit val sessionCodec: JsonValueCodec[Session] = JsonCodecMaker.make[Session]
+  implicit val sessionsItemsCodec: JsonValueCodec[Items[Session]] =
+    JsonCodecMaker.make[Items[Session]]
+  implicit val sessionsItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[Session]] =
+    JsonCodecMaker.make[ItemsWithCursor[Session]]
 
-  implicit val sessionListDecoder: Decoder[SessionList] = deriveDecoder[SessionList]
-  implicit val sessionsListItemsDecoder: Decoder[Items[SessionList]] =
-    deriveDecoder[Items[SessionList]]
+  implicit val sessionListCodec: JsonValueCodec[SessionList] = JsonCodecMaker.make[SessionList]
+  implicit val sessionsListItemsCodec: JsonValueCodec[Items[SessionList]] =
+    JsonCodecMaker.make[Items[SessionList]]
 
-  implicit val createSessionWithTokenEncoder: Encoder[SessionCreateWithToken] =
-    deriveEncoder[SessionCreateWithToken]
-  implicit val createSessionsWithTokenItemsEncoder: Encoder[Items[SessionCreateWithToken]] =
-    deriveEncoder[Items[SessionCreateWithToken]]
+  implicit val createSessionWithTokenCodec: JsonValueCodec[SessionCreateWithToken] =
+    JsonCodecMaker.make[SessionCreateWithToken]
+  implicit val createSessionsWithTokenItemsCodec: JsonValueCodec[Items[SessionCreateWithToken]] =
+    JsonCodecMaker.make[Items[SessionCreateWithToken]]
 
-  implicit val createSessionWithCredentialEncoder: Encoder[SessionCreateWithCredential] =
-    deriveEncoder[SessionCreateWithCredential]
-  implicit val createSessionsWithCredentialItemsEncoder
-      : Encoder[Items[SessionCreateWithCredential]] =
-    deriveEncoder[Items[SessionCreateWithCredential]]
+  implicit val createSessionWithCredentialCodec: JsonValueCodec[SessionCreateWithCredential] =
+    JsonCodecMaker.make[SessionCreateWithCredential]
+  implicit val createSessionsWithCredentialItemsCodec
+      : JsonValueCodec[Items[SessionCreateWithCredential]] =
+    JsonCodecMaker.make[Items[SessionCreateWithCredential]]
 
-  implicit val bindSessionRequestEncoder: Encoder[BindSessionRequest] =
-    deriveEncoder[BindSessionRequest]
+  implicit val bindSessionRequestCodec: JsonValueCodec[BindSessionRequest] =
+    JsonCodecMaker.make[BindSessionRequest]
 
-  implicit val refreshSessionRequestEncoder: Encoder[RefreshSessionRequest] =
-    deriveEncoder[RefreshSessionRequest]
+  implicit val refreshSessionRequestCodec: JsonValueCodec[RefreshSessionRequest] =
+    JsonCodecMaker.make[RefreshSessionRequest]
 
-  implicit val sessionTokenDecoder: Decoder[SessionTokenResponse] =
-    deriveDecoder[SessionTokenResponse]
+  implicit val sessionTokenCodec: JsonValueCodec[SessionTokenResponse] =
+    JsonCodecMaker.make[SessionTokenResponse]
 }

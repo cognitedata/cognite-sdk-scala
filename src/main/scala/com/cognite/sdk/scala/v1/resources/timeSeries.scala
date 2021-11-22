@@ -5,9 +5,9 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder}
 
 class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -17,7 +17,6 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     with Create[TimeSeries, TimeSeriesCreate, F]
     with DeleteByIdsWithIgnoreUnknownIds[F, Long]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F]
-    with PartitionedFilter[TimeSeries, TimeSeriesFilter, F]
     with Search[TimeSeries, TimeSeriesQuery, F]
     with UpdateById[TimeSeries, TimeSeriesUpdate, F]
     with UpdateByExternalId[TimeSeries, TimeSeriesUpdate, F] {
@@ -92,45 +91,28 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
       ignoreUnknownIds
     )
 
-  override private[sdk] def filterWithCursor(
-      filter: TimeSeriesFilter,
-      cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition],
-      aggregatedProperties: Option[Seq[String]] = None
-  ): F[ItemsWithCursor[TimeSeries]] =
-    Filter.filterWithCursor(
-      requestSession,
-      baseUrl,
-      filter,
-      cursor,
-      limit,
-      partition,
-      Constants.defaultBatchSize
-    )
-
   override def search(searchQuery: TimeSeriesQuery): F[Seq[TimeSeries]] =
     Search.search(requestSession, baseUrl, searchQuery)
 }
 
 object TimeSeriesResource {
-  implicit val timeSeriesDecoder: Decoder[TimeSeries] = deriveDecoder[TimeSeries]
-  implicit val timeSeriesUpdateEncoder: Encoder[TimeSeriesUpdate] = deriveEncoder[TimeSeriesUpdate]
-  implicit val timeSeriesItemsWithCursorDecoder: Decoder[ItemsWithCursor[TimeSeries]] =
-    deriveDecoder[ItemsWithCursor[TimeSeries]]
-  implicit val timeSeriesItemsDecoder: Decoder[Items[TimeSeries]] =
-    deriveDecoder[Items[TimeSeries]]
-  implicit val createTimeSeriesEncoder: Encoder[TimeSeriesCreate] = deriveEncoder[TimeSeriesCreate]
-  implicit val createTimeSeriesItemsEncoder: Encoder[Items[TimeSeriesCreate]] =
-    deriveEncoder[Items[TimeSeriesCreate]]
-  implicit val timeSeriesFilterEncoder: Encoder[TimeSeriesSearchFilter] =
-    deriveEncoder[TimeSeriesSearchFilter]
-  implicit val timeSeriesSearchEncoder: Encoder[TimeSeriesSearch] =
-    deriveEncoder[TimeSeriesSearch]
-  implicit val timeSeriesQueryEncoder: Encoder[TimeSeriesQuery] =
-    deriveEncoder[TimeSeriesQuery]
-  implicit val assetsFilterEncoder: Encoder[TimeSeriesFilter] =
-    deriveEncoder[TimeSeriesFilter]
-  implicit val assetsFilterRequestEncoder: Encoder[FilterRequest[TimeSeriesFilter]] =
-    deriveEncoder[FilterRequest[TimeSeriesFilter]]
+  implicit val timeSeriesCodec: JsonValueCodec[TimeSeries] = JsonCodecMaker.make[TimeSeries]
+  implicit val timeSeriesUpdateCodec: JsonValueCodec[TimeSeriesUpdate] = JsonCodecMaker.make[TimeSeriesUpdate]
+  implicit val timeSeriesItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[TimeSeries]] =
+    JsonCodecMaker.make[ItemsWithCursor[TimeSeries]]
+  implicit val timeSeriesItemsCodec: JsonValueCodec[Items[TimeSeries]] =
+    JsonCodecMaker.make[Items[TimeSeries]]
+  implicit val createTimeSeriesCodec: JsonValueCodec[TimeSeriesCreate] = JsonCodecMaker.make[TimeSeriesCreate]
+  implicit val createTimeSeriesItemsCodec: JsonValueCodec[Items[TimeSeriesCreate]] =
+    JsonCodecMaker.make[Items[TimeSeriesCreate]]
+  implicit val timeSeriesFilterCodec: JsonValueCodec[TimeSeriesSearchFilter] =
+    JsonCodecMaker.make[TimeSeriesSearchFilter]
+  implicit val timeSeriesSearchCodec: JsonValueCodec[TimeSeriesSearch] =
+    JsonCodecMaker.make[TimeSeriesSearch]
+  implicit val timeSeriesQueryCodec: JsonValueCodec[TimeSeriesQuery] =
+    JsonCodecMaker.make[TimeSeriesQuery]
+  implicit val assetsFilterCodec: JsonValueCodec[TimeSeriesFilter] =
+    JsonCodecMaker.make[TimeSeriesFilter]
+  implicit val assetsFilterRequestCodec: JsonValueCodec[FilterRequest[TimeSeriesFilter]] =
+    JsonCodecMaker.make[FilterRequest[TimeSeriesFilter]]
 }

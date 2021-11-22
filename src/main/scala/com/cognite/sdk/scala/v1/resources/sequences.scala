@@ -4,13 +4,12 @@
 package com.cognite.sdk.scala.v1.resources
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 class SequencesResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with PartitionedReadable[Sequence, F]
     with RetrieveByIdsWithIgnoreUnknownIds[Sequence, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Sequence, F]
     with Create[Sequence, SequenceCreate, F]
@@ -22,20 +21,6 @@ class SequencesResource[F[_]](val requestSession: RequestSession[F])
   import SequencesResource._
 
   override val baseUrl = uri"${requestSession.baseUrl}/sequences"
-
-  override private[sdk] def readWithCursor(
-      cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition]
-  ): F[ItemsWithCursor[Sequence]] =
-    Readable.readWithCursor(
-      requestSession,
-      baseUrl,
-      cursor,
-      limit,
-      partition,
-      Constants.defaultBatchSize
-    )
 
   override def retrieveByIds(
       ids: Seq[Long],
@@ -83,23 +68,21 @@ class SequencesResource[F[_]](val requestSession: RequestSession[F])
 }
 
 object SequencesResource {
-  implicit val sequenceColumnEncoder: Encoder[SequenceColumn] = deriveEncoder
-  implicit val sequenceColumnCreateEncoder: Encoder[SequenceColumnCreate] = deriveEncoder
-  @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
-  implicit val sequenceColumnDecoder: Decoder[SequenceColumn] = deriveDecoder
-  implicit val sequenceDecoder: Decoder[Sequence] = deriveDecoder[Sequence]
-  implicit val sequenceUpdateEncoder: Encoder[SequenceUpdate] = deriveEncoder[SequenceUpdate]
-  implicit val sequenceItemsWithCursorDecoder: Decoder[ItemsWithCursor[Sequence]] =
-    deriveDecoder[ItemsWithCursor[Sequence]]
-  implicit val sequenceItemsDecoder: Decoder[Items[Sequence]] =
-    deriveDecoder[Items[Sequence]]
-  implicit val createSequenceEncoder: Encoder[SequenceCreate] = deriveEncoder[SequenceCreate]
-  implicit val createSequenceItemsEncoder: Encoder[Items[SequenceCreate]] =
-    deriveEncoder[Items[SequenceCreate]]
-  implicit val sequenceFilterEncoder: Encoder[SequenceFilter] =
-    deriveEncoder[SequenceFilter]
-  implicit val sequenceSearchEncoder: Encoder[SequenceSearch] =
-    deriveEncoder[SequenceSearch]
-  implicit val sequenceQueryEncoder: Encoder[SequenceQuery] =
-    deriveEncoder[SequenceQuery]
+  implicit val sequenceColumnCodec: JsonValueCodec[SequenceColumn] = JsonCodecMaker.make[SequenceColumn]
+  implicit val sequenceColumnCreateCodec: JsonValueCodec[SequenceColumnCreate] = JsonCodecMaker.make[SequenceColumnCreate]
+  implicit val sequenceCodec: JsonValueCodec[Sequence] = JsonCodecMaker.make[Sequence]
+  implicit val sequenceUpdateCodec: JsonValueCodec[SequenceUpdate] = JsonCodecMaker.make[SequenceUpdate]
+  implicit val sequenceItemsWithCursorCodec: JsonValueCodec[ItemsWithCursor[Sequence]] =
+    JsonCodecMaker.make[ItemsWithCursor[Sequence]]
+  implicit val sequenceItemsCodec: JsonValueCodec[Items[Sequence]] =
+    JsonCodecMaker.make[Items[Sequence]]
+  implicit val createSequenceCodec: JsonValueCodec[SequenceCreate] = JsonCodecMaker.make[SequenceCreate]
+  implicit val createSequenceItemsCodec: JsonValueCodec[Items[SequenceCreate]] =
+    JsonCodecMaker.make[Items[SequenceCreate]]
+  implicit val sequenceFilterCodec: JsonValueCodec[SequenceFilter] =
+    JsonCodecMaker.make[SequenceFilter]
+  implicit val sequenceSearchCodec: JsonValueCodec[SequenceSearch] =
+    JsonCodecMaker.make[SequenceSearch]
+  implicit val sequenceQueryCodec: JsonValueCodec[SequenceQuery] =
+    JsonCodecMaker.make[SequenceQuery]
 }

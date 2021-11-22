@@ -5,7 +5,6 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 import com.cognite.sdk.scala.common.{ToCreate, WithId}
-import io.circe.Json
 
 final case class RawDatabase(name: String) extends WithId[String] with ToCreate[RawDatabase] {
   override val id: String = this.name

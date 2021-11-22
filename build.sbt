@@ -10,12 +10,8 @@ val supportedScalaVersions = List(scala212, scala213, scala3)
 val jettyTestVersion = "9.4.44.v20210927"
 
 val sttpVersion = "3.3.15"
-val circeVersion: Option[(Long, Long)] => String = {
-  case Some((3, _)) => "0.14.1"
-  case _ => "0.13.0" // Must use 0.13.0 for Spark compatibility (shapeless 2.3.3)
-}
 val catsEffectVersion = "2.5.4"
-val fs2Version = "2.5.10"
+val jsoniterScalaVersion = "2.12.0"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -95,13 +91,13 @@ lazy val core = (project in file("."))
     commonSettings,
     libraryDependencies ++= Seq(
       "commons-io" % "commons-io" % "2.11.0",
+      "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-core" % jsoniterScalaVersion,
+      "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-macros" % jsoniterScalaVersion % "compile",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
-      "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
-      "co.fs2" %% "fs2-core" % fs2Version,
       "com.google.protobuf" % "protobuf-java" % "3.19.1"
-    ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
+    ) ++ scalaTestDeps ++ sttpDeps,
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor == 13 =>
         List(
@@ -127,33 +123,9 @@ val scalaTestDeps = Seq(
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
-  ("com.softwaremill.sttp.client3" %% "circe" % sttpVersion)
-    // We specify our own version of circe.
-    .exclude("io.circe", "circe-core_2.11")
-    .exclude("io.circe", "circe-core_2.12")
-    .exclude("io.circe", "circe-core_2.13")
-    .exclude("io.circe", "circe-parser_2.11")
-    .exclude("io.circe", "circe-parser_2.12")
-    .exclude("io.circe", "circe-parser_2.13"),
+  "com.softwaremill.sttp.client3" %% "json-common" % sttpVersion,
   "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion % Test
 )
-
-def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
-  Seq(
-    // We use the cats version included in the cats-effect version we specify.
-    ("io.circe" %% "circe-core" % circeVersion(scalaVersion))
-      .exclude("org.typelevel", "cats-core_2.11")
-      .exclude("org.typelevel", "cats-core_2.12")
-      .exclude("org.typelevel", "cats-core_2.13"),
-    ("io.circe" %% "circe-generic" % circeVersion(scalaVersion))
-      .exclude("org.typelevel", "cats-core_2.11")
-      .exclude("org.typelevel", "cats-core_2.12")
-      .exclude("org.typelevel", "cats-core_2.13"),
-    ("io.circe" %% "circe-parser" % circeVersion(scalaVersion))
-      .exclude("org.typelevel", "cats-core_2.11")
-      .exclude("org.typelevel", "cats-core_2.12")
-      .exclude("org.typelevel", "cats-core_2.13")
-  )
 
 scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
   case Some((2, minor)) if minor == 12 =>
@@ -176,11 +148,3 @@ testScalastyle := (Test / scalastyle).toTask("").value
 
 Test / test := (Test / test).dependsOn(testScalastyle).value
 Test / test := (Test / test).dependsOn(mainScalastyle).value
-
-// Scala 2.11 doesn't support mixed projects as ours, so just disable docs for that release.
-Compile / doc / sources := (CrossVersion.partialVersion(scalaVersion.value) match {
-  case Some((2, minor)) if minor == 11 =>
-    Seq.empty
-  case _ =>
-    (Compile / doc / sources).value
-})

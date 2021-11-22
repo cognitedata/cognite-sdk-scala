@@ -6,16 +6,15 @@ package com.cognite.sdk.scala.v1.resources
 import com.cognite.sdk.scala.common.{Constants, _}
 import com.cognite.sdk.scala.v1._
 import com.cognite.v1.timeseries.proto._
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.parser.decode
-import io.circe.{Decoder, Encoder}
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.JsonCodecMaker
 import sttp.client3._
-import sttp.client3.circe._
+import sttp.client3.jsoniter_scala._
 import sttp.model.{MediaType, Uri}
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-import scala.collection.JavaConverters._ // Avoid scala.jdk to keep 2.12 compatibility without scala-collection-compat
+import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
 // scalastyle:off number.of.methods
@@ -274,7 +273,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       limit
     )
 
-  private def queryProtobuf[Q: Encoder, R](
+  private def queryProtobuf[Q: Codec, R](
       query: Q
   )(mapDataPointList: DataPointListResponse => R): F[R] =
     requestSession
@@ -411,7 +410,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       /* Get datapoints before this time. The format is N[timeunit]-ago where timeunit is w,d,h,m,s.
       Example: '2d-ago' gets data that is up to 2 days old. You can also specify time in milliseconds since epoch. */
       before: String
-  )(implicit decoder: Decoder[Items[T]]): F[Map[CogniteId, Option[D]]] =
+  )(implicit Codec: JsonValueCodec[Items[T]]): F[Map[CogniteId, Option[D]]] =
     requestSession
       .post[Map[CogniteId, Option[D]], Items[T], ItemsWithIgnoreUnknownIds[LatestBeforeRequest]](
         ItemsWithIgnoreUnknownIds(
@@ -439,46 +438,44 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 }
 
 object DataPointsResource {
-  implicit val dataPointDecoder: Decoder[DataPoint] = deriveDecoder
-  implicit val dataPointEncoder: Encoder[DataPoint] = deriveEncoder
-  implicit val dataPointsByIdResponseDecoder: Decoder[DataPointsByIdResponse] = deriveDecoder
-  implicit val dataPointsByIdResponseItemsDecoder: Decoder[Items[DataPointsByIdResponse]] =
-    deriveDecoder
-  implicit val dataPointsByExternalIdResponseDecoder: Decoder[DataPointsByExternalIdResponse] =
-    deriveDecoder
-  implicit val dataPointsByExternalIdResponseItemsDecoder
-      : Decoder[Items[DataPointsByExternalIdResponse]] = deriveDecoder
+  implicit val dataPointCodec: JsonValueCodec[DataPoint] = JsonCodecMaker.make
+  implicit val dataPointsByIdResponseCodec: JsonValueCodec[DataPointsByIdResponse] =
+    JsonCodecMaker.make
+  implicit val dataPointsByIdResponseItemsCodec: JsonValueCodec[Items[DataPointsByIdResponse]] =
+    JsonCodecMaker.make
+  implicit val dataPointsByExternalIdResponseCodec: JsonValueCodec[DataPointsByExternalIdResponse] =
+    JsonCodecMaker.make
+  implicit val dataPointsByExternalIdResponseItemsCodec
+      : JsonValueCodec[Items[DataPointsByExternalIdResponse]] = JsonCodecMaker.make
 
-  // WartRemover gets confused by circe-derivation
-  @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
-  implicit val stringDataPointDecoder: Decoder[StringDataPoint] = deriveDecoder
-  implicit val stringDataPointEncoder: Encoder[StringDataPoint] = deriveEncoder
-  implicit val stringDataPointsByIdResponseDecoder: Decoder[StringDataPointsByIdResponse] =
-    deriveDecoder
-  implicit val stringDataPointsByIdResponseItemsDecoder
-      : Decoder[Items[StringDataPointsByIdResponse]] = deriveDecoder
-  implicit val stringDataPointsByExternalIdResponseDecoder
-      : Decoder[StringDataPointsByExternalIdResponse] = deriveDecoder
-  implicit val stringDataPointsByExternalIdResponseItemsDecoder
-      : Decoder[Items[StringDataPointsByExternalIdResponse]] = deriveDecoder
-  implicit val dataPointsByExternalIdEncoder: Encoder[DataPointsByExternalId] = deriveEncoder
-  implicit val dataPointsByExternalIdItemsEncoder: Encoder[Items[DataPointsByExternalId]] =
-    deriveEncoder
-  implicit val stringDataPointsByExternalIdEncoder: Encoder[StringDataPointsByExternalId] =
-    deriveEncoder
-  implicit val stringDataPointsByExternalIdItemsEncoder
-      : Encoder[Items[StringDataPointsByExternalId]] = deriveEncoder
-  implicit val deleteRangeItemsEncoder: Encoder[Items[DeleteDataPointsRange]] = deriveEncoder
-  implicit val queryRangeByIdItemsEncoder: Encoder[Items[QueryDataPointsRange]] = deriveEncoder
-  implicit val queryRangeByIdItems2Encoder
-      : Encoder[ItemsWithIgnoreUnknownIds[QueryDataPointsRange]] =
-    deriveEncoder
+  implicit val stringDataPointCodec: JsonValueCodec[StringDataPoint] = JsonCodecMaker.make
+  implicit val stringDataPointsByIdResponseCodec: JsonValueCodec[StringDataPointsByIdResponse] =
+    JsonCodecMaker.make
+  implicit val stringDataPointsByIdResponseItemsCodec
+      : JsonValueCodec[Items[StringDataPointsByIdResponse]] = JsonCodecMaker.make
+  implicit val stringDataPointsByExternalIdResponseCodec
+      : JsonValueCodec[StringDataPointsByExternalIdResponse] = JsonCodecMaker.make
+  implicit val stringDataPointsByExternalIdResponseItemsCodec
+      : JsonValueCodec[Items[StringDataPointsByExternalIdResponse]] = JsonCodecMaker.make
+  implicit val dataPointsByExternalIdCodec: JsonValueCodec[DataPointsByExternalId] =
+    JsonCodecMaker.make
+  implicit val dataPointsByExternalIdItemsCodec: JsonValueCodec[Items[DataPointsByExternalId]] =
+    JsonCodecMaker.make
+  implicit val stringDataPointsByExternalIdCodec: JsonValueCodec[StringDataPointsByExternalId] =
+    JsonCodecMaker.make
+  implicit val stringDataPointsByExternalIdItemsCodec
+      : JsonValueCodec[Items[StringDataPointsByExternalId]] = JsonCodecMaker.make
+  implicit val deleteRangeItemsCodec: JsonValueCodec[Items[DeleteDataPointsRange]] =
+    JsonCodecMaker.make
+  implicit val queryRangeByIdItemsCodec: JsonValueCodec[Items[QueryDataPointsRange]] =
+    JsonCodecMaker.make
+  implicit val queryRangeByIdItems2Codec
+      : JsonValueCodec[ItemsWithIgnoreUnknownIds[QueryDataPointsRange]] =
+    JsonCodecMaker.make
 
-  implicit val queryLatestByIdItems2Encoder
-      : Encoder[ItemsWithIgnoreUnknownIds[LatestBeforeRequest]] = deriveEncoder
-  @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
-  implicit val aggregateDataPointDecoder: Decoder[AggregateDataPoint] = deriveDecoder
-  implicit val aggregateDataPointEncoder: Encoder[AggregateDataPoint] = deriveEncoder
+  implicit val queryLatestByIdItems2Codec
+      : JsonValueCodec[ItemsWithIgnoreUnknownIds[LatestBeforeRequest]] = JsonCodecMaker.make
+  implicit val aggregateDataPointCodec: JsonValueCodec[AggregateDataPoint] = JsonCodecMaker.make
 
   // protobuf can't represent `null`, so we'll assume that empty string is null...
   private def optionalString(x: String) =

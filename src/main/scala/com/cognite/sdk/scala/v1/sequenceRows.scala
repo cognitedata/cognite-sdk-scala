@@ -4,7 +4,6 @@
 package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.ResponseWithCursor
-import io.circe.Json
 
 final case class SequenceColumnSignature(
     externalId: String,
