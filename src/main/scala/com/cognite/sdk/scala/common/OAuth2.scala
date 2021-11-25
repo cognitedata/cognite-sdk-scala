@@ -28,6 +28,7 @@ object OAuth2 {
   )
 
   final case class Session(
+      sessionId: Long,
       sessionKey: String,
       cdfProjectName: String,
       tokenFromVault: String
@@ -120,20 +121,20 @@ object OAuth2 {
   // scalastyle:on method.length
 
   object SessionProvider {
-    def apply[F[_]](sessions: Session, refreshSecondsBeforeTTL: Long = 30)(
+    def apply[F[_]](session: Session, refreshSecondsBeforeTTL: Long = 30)(
         implicit F: Concurrent[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[SessionProvider[F]] = {
       import sttp.client3.circe._
       val authenticate: F[TokenState] = {
-        val uri = uri"${defaultBaseUrl}/api/v1/projects/${sessions.cdfProjectName}/sessions/token"
+        val uri = uri"${defaultBaseUrl}/api/v1/projects/${session.cdfProjectName}/sessions/token"
         for {
           payload <- basicRequest
             .header("Accept", "application/json")
-            .header("Authorization", s"Bearer ${sessions.tokenFromVault}")
+            .header("Authorization", s"Bearer ${session.tokenFromVault}")
             .post(uri)
-            .body(RefreshSessionRequest(sessions.sessionKey))
+            .body(RefreshSessionRequest(session.sessionId, session.sessionKey))
             .response(
               parseResponse[SessionTokenResponse, SessionTokenResponse](uri, value => value)
             )
@@ -141,7 +142,7 @@ object OAuth2 {
             .map(_.body)
           acquiredAt <- clock.monotonic(TimeUnit.SECONDS)
           expiresAt = acquiredAt + payload.expiresIn - refreshSecondsBeforeTTL
-        } yield TokenState(payload.accessToken, expiresAt, sessions.cdfProjectName)
+        } yield TokenState(payload.accessToken, expiresAt, session.cdfProjectName)
       }
 
       ConcurrentCachedObject(authenticate).map(new SessionProvider[F](_))

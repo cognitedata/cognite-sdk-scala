@@ -45,7 +45,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           ) &&
           req.headers.contains(Header("Authorization", "Bearer tokenFromVault")) &&
           req.body === StringBody(
-            """{"sessionKey":"sessionKey-value"}""",
+            """{"sessionId":123,"sessionKey":"sessionKey-value"}""",
             "utf-8",
             MediaType.ApplicationJson
           )
@@ -53,7 +53,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         .thenRespondF {
           for {
             _ <- IO(numTokenRequests += 1)
-            body = SessionTokenResponse(1, "newAccessToken", 5, 3000, None)
+            body = SessionTokenResponse(1, "newAccessToken", 5, None, None)
 
           } yield Response(
             body,
@@ -63,7 +63,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           )
         }
 
-    val session = OAuth2.Session("sessionKey-value", "irrelevant", "tokenFromVault")
+    val session = OAuth2.Session(123, "sessionKey-value", "irrelevant", "tokenFromVault")
 
     val io: IO[Unit] = for {
       authProvider <- OAuth2.SessionProvider[IO](session, refreshSecondsBeforeTTL = 1)
@@ -78,7 +78,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
   }
 
   it should "throw a valid error when failing to refresh the session" in {
-    val session = OAuth2.Session("sessionKey-value", "irrelevant", "tokenFromVault")
+    val session = OAuth2.Session(123, "sessionKey-value", "irrelevant", "tokenFromVault")
     an[CdpApiException] shouldBe thrownBy {
       OAuth2
         .SessionProvider[IO](session)
@@ -97,7 +97,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           req.method === Method.POST && req.uri.path.endsWith(Seq("sessions", "token")) &&
           req.headers.contains(Header("Authorization", "Bearer tokenFromVault")) &&
           req.body === StringBody(
-            """{"sessionKey":"sessionKey-value"}""",
+            """{"sessionId":123,"sessionKey":"sessionKey-value"}""",
             "utf-8",
             MediaType.ApplicationJson
           )
@@ -111,7 +111,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           )
         }
 
-    val session = OAuth2.Session("sessionKey-value", "irrelevant", "tokenFromVault")
+    val session = OAuth2.Session(123, "sessionKey-value", "irrelevant", "tokenFromVault")
     an[SdkException] shouldBe thrownBy {
       OAuth2
         .SessionProvider[IO](session)

@@ -34,6 +34,7 @@ final case class BindSessionRequest(
 )
 
 final case class RefreshSessionRequest(
+    sessionId: Long,
     sessionKey: String
 )
 
@@ -41,6 +42,6 @@ final case class SessionTokenResponse(
     id: Long,
     accessToken: String,
     expiresIn: Long,
-    mustRefreshIn: Long,
+    mustRefreshIn: Option[Long],
     sessionKey: Option[String]
 )
