@@ -73,6 +73,8 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           )
         }
 
+    val session = OAuth2.Session(123, "sessionKey-value", "irrelevant", "tokenFromVault")
+
     val io: IO[Unit] = for {
       authProvider <- OAuth2.SessionProvider[IO](session, refreshSecondsBeforeTTL = 1)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
