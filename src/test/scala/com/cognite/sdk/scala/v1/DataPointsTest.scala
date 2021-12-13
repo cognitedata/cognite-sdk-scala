@@ -10,6 +10,8 @@ import com.cognite.sdk.scala.common.{CdpApiException, DataPointsResourceBehavior
 
 @SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements"))
 class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
+  private val delta = 0.00000001
+
   override def withTimeSeries(testCode: TimeSeries => Any): Unit = {
     val name = Some(s"data-points-test-${UUID.randomUUID().toString}")
     val timeSeries = client.timeSeries
@@ -39,7 +41,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     val averages = aggregates("average").head.datapoints
     val stepInterpolations = aggregates("stepInterpolation").head.datapoints
     averages.map(_.timestamp).tail should contain theSameElementsInOrderAs stepInterpolations.map(_.timestamp)
-    averages.last.value should equal(2.7051279586700723)
+    averages.last.value should equal(2.7051279586700723 +- delta)
 
     val limit = 10
     val aggregatesWithLimit = client.dataPoints.queryAggregatesById(
@@ -93,8 +95,8 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     extAverages.map(_.timestamp) shouldBe sorted
     extStepInterpolation.map(_.timestamp) shouldBe sorted
     aggregates.keys should contain only ("average", "stepInterpolation")
-    extAverages.head.value should equal(2.7346077636587798)
-    extAverages.last.value should equal(2.7051279586700723)
+    extAverages.head.value should equal(2.7346077636587798 +- delta)
+    extAverages.last.value should equal(2.7051279586700723 +- delta)
     extStepInterpolation.last.value should equal(2.8424909114837646)
     val aggregates2 = client.dataPoints.queryAggregatesById(
       54577852743225L,
