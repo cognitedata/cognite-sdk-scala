@@ -31,10 +31,12 @@ final case class File(
     createdTime: Instant = Instant.ofEpochMilli(0),
     lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
     dataSetId: Option[Long] = None,
+    labels: Option[Seq[CogniteExternalId]] = None,
     sourceCreatedTime: Option[Instant] = None,
     sourceModifiedTime: Option[Instant] = None,
     securityCategories: Option[Seq[Long]] = None,
     uploadUrl: Option[String] = None
+    // TODO: geoLocation object
 ) extends WithId[Long]
     with WithExternalId
     with WithCreatedTime
@@ -52,7 +54,8 @@ final case class File(
       dataSetId,
       sourceCreatedTime,
       sourceModifiedTime,
-      securityCategories
+      securityCategories,
+      labels
     )
 
   override def toUpdate: FileUpdate =
@@ -66,7 +69,8 @@ final case class File(
       Setter.fromOption(sourceCreatedTime),
       Setter.fromOption(sourceModifiedTime),
       NonNullableSetter.fromOption(securityCategories),
-      Setter.fromOption(dataSetId)
+      Setter.fromOption(dataSetId),
+      NonNullableSetter.fromOption(labels)
     )
 }
 
@@ -81,7 +85,8 @@ final case class FileCreate(
     dataSetId: Option[Long] = None,
     sourceCreatedTime: Option[Instant] = None,
     sourceModifiedTime: Option[Instant] = None,
-    securityCategories: Option[Seq[Long]] = None
+    securityCategories: Option[Seq[Long]] = None,
+    labels: Option[Seq[CogniteExternalId]] = None
 ) extends WithExternalId
 
 final case class FileUpdate(
@@ -94,15 +99,19 @@ final case class FileUpdate(
     sourceCreatedTime: Option[Setter[Instant]] = None,
     sourceModifiedTime: Option[Setter[Instant]] = None,
     securityCategories: Option[NonNullableSetter[Seq[Long]]] = None,
-    dataSetId: Option[Setter[Long]] = None
+    dataSetId: Option[Setter[Long]] = None,
+    labels: Option[NonNullableSetter[Seq[CogniteExternalId]]] = None
 ) extends WithSetExternalId
 
 final case class FilesFilter(
     name: Option[String] = None,
+    directoryPrefix: Option[String] = None,
     mimeType: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
     assetIds: Option[Seq[Long]] = None,
+    assetExternalIds: Option[Seq[String]] = None,
     rootAssetIds: Option[Seq[CogniteId]] = None,
+    assetSubtreeIds: Option[Seq[CogniteId]] = None,
     source: Option[String] = None,
     createdTime: Option[TimeRange] = None,
     lastUpdatedTime: Option[TimeRange] = None,
@@ -111,7 +120,8 @@ final case class FilesFilter(
     sourceModifiedTime: Option[TimeRange] = None,
     externalIdPrefix: Option[String] = None,
     uploaded: Option[Boolean] = None,
-    dataSetIds: Option[Seq[CogniteId]] = None
+    dataSetIds: Option[Seq[CogniteId]] = None,
+    labels: Option[LabelContainsFilter] = None
 )
 
 final case class FilesSearch(
