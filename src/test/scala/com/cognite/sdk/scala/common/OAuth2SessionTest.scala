@@ -34,14 +34,23 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
   it should "refresh tokens when they expire" in {
     import sttp.client3.impl.cats.implicits._
 
-    val projectName = "irrelevant"
     var numTokenRequests = 0
+
+    val session = OAuth2.Session(
+      "https://bluefield.cognitedata.com",
+      123,
+      "sessionKey-value",
+      "irrelevant",
+      "tokenFromVault"
+    )
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
       SttpBackendStub(implicitly[MonadError[IO]])
         .whenRequestMatches { req =>
-          req.method === Method.POST && req.uri.path.endsWith(
-            Seq(projectName, "sessions", "token")
+          req.method === Method.POST && req.uri.scheme.contains("https") &&
+          req.uri.host.contains("bluefield.cognitedata.com") &&
+          req.uri.path.endsWith(
+            Seq("api", "v1", "projects", session.cdfProjectName, "sessions", "token")
           ) &&
           req.headers.contains(Header("Authorization", "Bearer tokenFromVault")) &&
           req.body === StringBody(
@@ -51,6 +60,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           )
         }
         .thenRespondF {
+
           for {
             _ <- IO(numTokenRequests += 1)
             body = SessionTokenResponse(1, "newAccessToken", 5, None, None)
@@ -62,8 +72,6 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
             Seq(Header("content-type", "application/json"))
           )
         }
-
-    val session = OAuth2.Session(123, "sessionKey-value", "irrelevant", "tokenFromVault")
 
     val io: IO[Unit] = for {
       authProvider <- OAuth2.SessionProvider[IO](session, refreshSecondsBeforeTTL = 1)
@@ -78,7 +86,13 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
   }
 
   it should "throw a valid error when failing to refresh the session" in {
-    val session = OAuth2.Session(123, "sessionKey-value", "irrelevant", "tokenFromVault")
+    val session = OAuth2.Session(
+      "https://bluefield.cognitedata.com",
+      123,
+      "sessionKey-value",
+      "irrelevant",
+      "tokenFromVault"
+    )
     an[CdpApiException] shouldBe thrownBy {
       OAuth2
         .SessionProvider[IO](session)
@@ -90,11 +104,22 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
   }
 
   it should "throw an exception when failing to deserialize the refresh response" in {
+    val session = OAuth2.Session(
+      "https://bluefield.cognitedata.com",
+      123,
+      "sessionKey-value",
+      "irrelevant",
+      "tokenFromVault"
+    )
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
       SttpBackendStub(implicitly[MonadError[IO]])
         .whenRequestMatches { req =>
-          req.method === Method.POST && req.uri.path.endsWith(Seq("sessions", "token")) &&
+          req.method === Method.POST && req.uri.scheme.contains("https") &&
+          req.uri.host.contains("bluefield.cognitedata.com") &&
+          req.uri.path.endsWith(
+            Seq("api", "v1", "projects", session.cdfProjectName, "sessions", "token")
+          ) &&
           req.headers.contains(Header("Authorization", "Bearer tokenFromVault")) &&
           req.body === StringBody(
             """{"sessionId":123,"sessionKey":"sessionKey-value"}""",
@@ -111,7 +136,6 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           )
         }
 
-    val session = OAuth2.Session(123, "sessionKey-value", "irrelevant", "tokenFromVault")
     an[SdkException] shouldBe thrownBy {
       OAuth2
         .SessionProvider[IO](session)
