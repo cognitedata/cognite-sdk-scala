@@ -5,7 +5,7 @@ import cats.Monad
 import cats.syntax.all._
 import cats.effect.{Clock, Concurrent}
 import com.cognite.sdk.scala.common.internal.{CachedResource, ConcurrentCachedObject}
-import com.cognite.sdk.scala.v1.GenericClient.{defaultBaseUrl, parseResponse}
+import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.{RefreshSessionRequest, SessionTokenResponse}
 import com.cognite.sdk.scala.v1.resources.Sessions.{
   refreshSessionRequestEncoder,
@@ -28,6 +28,7 @@ object OAuth2 {
   )
 
   final case class Session(
+      baseUrl: String,
       sessionId: Long,
       sessionKey: String,
       cdfProjectName: String,
@@ -128,7 +129,7 @@ object OAuth2 {
     ): F[SessionProvider[F]] = {
       import sttp.client3.circe._
       val authenticate: F[TokenState] = {
-        val uri = uri"${defaultBaseUrl}/api/v1/projects/${session.cdfProjectName}/sessions/token"
+        val uri = uri"${session.baseUrl}/api/v1/projects/${session.cdfProjectName}/sessions/token"
         for {
           payload <- basicRequest
             .header("Accept", "application/json")
