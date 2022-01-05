@@ -1,5 +1,6 @@
 import wartremover.Wart
 import sbt.project
+import sbtassembly.AssemblyPlugin.autoImport._
 
 val scala3 = "3.0.1"
 val scala213 = "2.13.7"
@@ -24,7 +25,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "1.5.19",
+  version := "1.5.20",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -81,7 +82,14 @@ lazy val commonSettings = Seq(
           Wart.ToString,
           Wart.Overloading
         )
-    })
+    }),
+  ThisBuild / assemblyShadeRules := {
+    val shadePackage = "com.cognite.sdk.scala"
+    Seq(
+      ShadeRule.rename("shapeless.**" -> s"$shadePackage.shapeless.@1").inAll,
+      ShadeRule.rename("cats.kernel.**" -> s"$shadePackage.cats.kernel.@1").inAll
+    )
+  }
 )
 
 lazy val core = (project in file("."))
@@ -99,7 +107,16 @@ lazy val core = (project in file("."))
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
-      "co.fs2" %% "fs2-core" % fs2Version,
+      ("co.fs2" %% "fs2-core" % fs2Version)
+        .exclude("org.typelevel", "cats-core_2.11")
+        .exclude("org.typelevel", "cats-core_2.12")
+        .exclude("org.typelevel", "cats-core_2.13")
+        .exclude("org.typelevel", "cats-effect_2.11")
+        .exclude("org.typelevel", "cats-effect_2.12")
+        .exclude("org.typelevel", "cats-effect_2.13")
+        .exclude("org.typelevel", "cats-kernel_2.11")
+        .exclude("org.typelevel", "cats-kernel_2.12")
+        .exclude("org.typelevel", "cats-kernel_2.13"),
       "com.google.protobuf" % "protobuf-java" % "3.19.1"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -144,15 +161,33 @@ def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
     ("io.circe" %% "circe-core" % circeVersion(scalaVersion))
       .exclude("org.typelevel", "cats-core_2.11")
       .exclude("org.typelevel", "cats-core_2.12")
-      .exclude("org.typelevel", "cats-core_2.13"),
+      .exclude("org.typelevel", "cats-core_2.13")
+      .exclude("org.typelevel", "cats-effect_2.11")
+      .exclude("org.typelevel", "cats-effect_2.12")
+      .exclude("org.typelevel", "cats-effect_2.13")
+      .exclude("org.typelevel", "cats-kernel_2.11")
+      .exclude("org.typelevel", "cats-kernel_2.12")
+      .exclude("org.typelevel", "cats-kernel_2.13"),
     ("io.circe" %% "circe-generic" % circeVersion(scalaVersion))
       .exclude("org.typelevel", "cats-core_2.11")
       .exclude("org.typelevel", "cats-core_2.12")
-      .exclude("org.typelevel", "cats-core_2.13"),
+      .exclude("org.typelevel", "cats-core_2.13")
+      .exclude("org.typelevel", "cats-effect_2.11")
+      .exclude("org.typelevel", "cats-effect_2.12")
+      .exclude("org.typelevel", "cats-effect_2.13")
+      .exclude("org.typelevel", "cats-kernel_2.11")
+      .exclude("org.typelevel", "cats-kernel_2.12")
+      .exclude("org.typelevel", "cats-kernel_2.13"),
     ("io.circe" %% "circe-parser" % circeVersion(scalaVersion))
       .exclude("org.typelevel", "cats-core_2.11")
       .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13")
+      .exclude("org.typelevel", "cats-effect_2.11")
+      .exclude("org.typelevel", "cats-effect_2.12")
+      .exclude("org.typelevel", "cats-effect_2.13")
+      .exclude("org.typelevel", "cats-kernel_2.11")
+      .exclude("org.typelevel", "cats-kernel_2.12")
+      .exclude("org.typelevel", "cats-kernel_2.13"),
   )
 
 scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
