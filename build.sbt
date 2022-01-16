@@ -100,7 +100,7 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "3.19.2"
+      "com.google.protobuf" % "protobuf-java" % "3.19.3"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor == 13 =>
