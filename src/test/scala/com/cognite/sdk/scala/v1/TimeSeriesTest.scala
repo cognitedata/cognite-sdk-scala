@@ -198,6 +198,30 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     idsThatDoNotExist
   )
 
+  it should "support deleting by CogniteIds" in {
+    val keys = (1 to 4).map(_ => shortRandom())
+    val timeseries = keys.map(k=>
+      TimeSeriesCreate(name = Some("scala-sdk-delete-cogniteId-" + k), externalId =  Some(s"delete-cogniteId-$k")),
+    )
+    val createdItems = client.timeSeries.create(timeseries)
+
+    retryWithExpectedResult[Seq[TimeSeries]](
+      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(s"delete-cogniteId-"))).compile.toList,
+      r => r should have size 4
+    )
+
+    val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(timeseries.size/2)
+    val internalIds = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
+    val externalIds = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
+
+    client.timeSeries.deleteByCogniteIds(internalIds ++ externalIds, true)
+
+    retryWithExpectedResult[Seq[TimeSeries]](
+      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(s"delete-cogniteId-"))).compile.toList,
+      r => r should have size 0
+    )
+  }
+
   it should "return the same results using filter as filterPartitions" in {
     val timeSeriesFilter = TimeSeriesFilter(
       isStep = Some(false),

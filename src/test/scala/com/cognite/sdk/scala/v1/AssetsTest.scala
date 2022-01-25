@@ -101,6 +101,30 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     )
   }
 
+  it should "support deleting by CogniteIds" in {
+    val keys = (1 to 4).map(_ => shortRandom())
+    val assets = keys.map(k=>
+      AssetCreate(name = "scala-sdk-delete-cogniteId-" + k, externalId =  Some(s"delete-cogniteId-$k")),
+    )
+    val createdItems = client.assets.create(assets)
+
+    retryWithExpectedResult[Seq[Asset]](
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"delete-cogniteId-"))).compile.toList,
+      r => r should have size 4
+    )
+
+    val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(assets.size/2)
+    val internalIds = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
+    val externalIds = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
+
+    client.assets.deleteByCogniteIds(internalIds ++ externalIds, true)
+
+    retryWithExpectedResult[Seq[Asset]](
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"delete-cogniteId-"))).compile.toList,
+      r => r should have size 0
+    )
+  }
+
   private val assetsToCreate = Seq(
     Asset(name = "scala-sdk-update-1", description = Some("description-1")),
     Asset(name = "scala-sdk-update-2", description = Some("description-2"), dataSetId = Some(testDataSet.id))

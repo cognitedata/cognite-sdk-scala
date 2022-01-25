@@ -50,6 +50,18 @@ object DeleteByIds {
       _ => ()
     )
 
+  def deleteByCogniteIdsWithIgnoreUnknownIds[F[_]](
+      requestSession: RequestSession[F],
+      baseUrl: Uri,
+      ids: Seq[CogniteId],
+      ignoreUnknownIds: Boolean
+  ): F[Unit] =
+    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
+      ItemsWithIgnoreUnknownIds(ids, ignoreUnknownIds),
+      uri"$baseUrl/delete",
+      _ => ()
+    )
+
 }
 
 trait DeleteByExternalIds[F[_]] {

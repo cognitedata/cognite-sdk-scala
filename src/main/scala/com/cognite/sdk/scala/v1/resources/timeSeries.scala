@@ -92,6 +92,9 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
       ignoreUnknownIds
     )
 
+  def deleteByCogniteIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean): F[Unit] =
+    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(requestSession, baseUrl, ids, ignoreUnknownIds)
+
   override private[sdk] def filterWithCursor(
       filter: TimeSeriesFilter,
       cursor: Option[String],

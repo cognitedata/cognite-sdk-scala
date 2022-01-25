@@ -120,6 +120,9 @@ class Assets[F[_]](val requestSession: RequestSession[F])
       _ => ()
     )
 
+  def deleteByCogniteIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean): F[Unit] =
+    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(requestSession, baseUrl, ids, ignoreUnknownIds)
+
   def filter(
       filter: AssetsFilter,
       limit: Option[Int],

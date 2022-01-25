@@ -88,6 +88,9 @@ class Events[F[_]](val requestSession: RequestSession[F])
       ignoreUnknownIds
     )
 
+  def deleteByCogniteIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean): F[Unit] =
+    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(requestSession, baseUrl, ids, ignoreUnknownIds)
+
   private[sdk] def filterWithCursor(
       filter: EventsFilter,
       cursor: Option[String],
