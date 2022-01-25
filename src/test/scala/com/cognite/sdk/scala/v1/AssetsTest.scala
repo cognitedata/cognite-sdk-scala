@@ -114,10 +114,12 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     )
 
     val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(assets.size/2)
-    val internalIds = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
-    val externalIds = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
+    val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
+    val externalIds: Seq[CogniteId] = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
 
-    client.assets.deleteByCogniteIds(internalIds ++ externalIds, true)
+    val cogniteIds = (internalIds ++ externalIds)
+
+    client.assets.deleteByCogniteIds(cogniteIds, true)
 
     retryWithExpectedResult[Seq[Asset]](
       client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"delete-cogniteId-"))).compile.toList,

@@ -211,10 +211,12 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     )
 
     val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(timeseries.size/2)
-    val internalIds = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
-    val externalIds = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
+    val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
+    val externalIds: Seq[CogniteId]  = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
 
-    client.timeSeries.deleteByCogniteIds(internalIds ++ externalIds, true)
+    val cogniteIds = (internalIds ++ externalIds)
+
+    client.timeSeries.deleteByCogniteIds(cogniteIds, true)
 
     retryWithExpectedResult[Seq[TimeSeries]](
       client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(s"delete-cogniteId-"))).compile.toList,
