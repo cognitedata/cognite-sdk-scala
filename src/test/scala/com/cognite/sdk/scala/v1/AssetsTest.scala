@@ -104,7 +104,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   it should "support deleting by CogniteIds" in {
     val keys = (1 to 4).map(_ => shortRandom())
     val assets = keys.map(k=>
-      AssetCreate(name = "scala-sdk-delete-cogniteId-" + k, externalId =  Some(s"delete-cogniteId-$k")),
+      AssetCreate(name = "scala-sdk-delete-cogniteId-" + k, externalId =  Some(s"delete-cogniteId-$k"))
     )
     val createdItems = client.assets.create(assets)
 

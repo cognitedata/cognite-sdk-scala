@@ -201,7 +201,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
   it should "support deleting by CogniteIds" in {
     val keys = (1 to 4).map(_ => shortRandom())
     val timeseries = keys.map(k=>
-      TimeSeriesCreate(name = Some("scala-sdk-delete-cogniteId-" + k), externalId =  Some(s"delete-cogniteId-$k")),
+      TimeSeriesCreate(name = Some("scala-sdk-delete-cogniteId-" + k), externalId =  Some(s"delete-cogniteId-$k"))
     )
     val createdItems = client.timeSeries.create(timeseries)
 

@@ -60,7 +60,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   it should "support deleting by CogniteIds" in {
     val keys = (1 to 4).map(_ => shortRandom())
     val events = keys.map(k=>
-      EventCreate(description = Some("scala-sdk-delete-cogniteId-" + k), externalId =  Some(s"delete-cogniteId-$k")),
+      EventCreate(description = Some("scala-sdk-delete-cogniteId-" + k), externalId =  Some(s"delete-cogniteId-$k"))
     )
     val createdItems = client.events.create(events)
 
