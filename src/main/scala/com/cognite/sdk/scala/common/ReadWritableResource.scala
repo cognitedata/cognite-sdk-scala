@@ -36,20 +36,6 @@ object DeleteByIds {
       _ => ()
     )
 
-  def deleteByIdsWithIgnoreUnknownIds[F[_]](
-      requestSession: RequestSession[F],
-      baseUrl: Uri,
-      ids: Seq[Long],
-      ignoreUnknownIds: Boolean
-  ): F[Unit] =
-    // TODO: group deletes by max deletion request size
-    //       or assert that length of `ids` is less than max deletion request size
-    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
-      ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId.apply), ignoreUnknownIds),
-      uri"$baseUrl/delete",
-      _ => ()
-    )
-
   def deleteByCogniteIdsWithIgnoreUnknownIds[F[_]](
       requestSession: RequestSession[F],
       baseUrl: Uri,
@@ -80,20 +66,6 @@ trait DeleteByExternalIdsWithIgnoreUnknownIds[F[_]] extends DeleteByExternalIds[
 object DeleteByExternalIds {
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
-
-  def deleteByExternalIdsWithIgnoreUnknownIds[F[_]](
-      requestSession: RequestSession[F],
-      baseUrl: Uri,
-      externalIds: Seq[String],
-      ignoreUnknownIds: Boolean
-  ): F[Unit] =
-    // TODO: group deletes by max deletion request size
-    //       or assert that length of `ids` is less than max deletion request size
-    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
-      ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId.apply), ignoreUnknownIds),
-      uri"$baseUrl/delete",
-      _ => ()
-    )
 
   def deleteByExternalIds[F[_]](
       requestSession: RequestSession[F],

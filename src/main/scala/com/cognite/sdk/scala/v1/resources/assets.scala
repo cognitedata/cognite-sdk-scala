@@ -77,7 +77,12 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   override def deleteByIds(ids: Seq[Long]): F[Unit] = deleteByIds(ids, false)
 
   override def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean): F[Unit] =
-    DeleteByIds.deleteByIdsWithIgnoreUnknownIds(requestSession, baseUrl, ids, ignoreUnknownIds)
+    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+      requestSession,
+      baseUrl,
+      ids.map(CogniteInternalId.apply),
+      ignoreUnknownIds
+    )
 
   def deleteByIds(
       ids: Seq[Long],
@@ -98,10 +103,10 @@ class Assets[F[_]](val requestSession: RequestSession[F])
     deleteByExternalIds(externalIds, false)
 
   override def deleteByExternalIds(externalIds: Seq[String], ignoreUnknownIds: Boolean): F[Unit] =
-    DeleteByExternalIds.deleteByExternalIdsWithIgnoreUnknownIds(
+    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
-      externalIds,
+      externalIds.map(CogniteExternalId.apply),
       ignoreUnknownIds
     )
 

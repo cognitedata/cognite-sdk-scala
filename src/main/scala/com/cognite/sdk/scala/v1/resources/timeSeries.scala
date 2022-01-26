@@ -76,7 +76,12 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
   override def deleteByIds(ids: Seq[Long]): F[Unit] = deleteByIds(ids, false)
 
   override def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean = false): F[Unit] =
-    DeleteByIds.deleteByIdsWithIgnoreUnknownIds(requestSession, baseUrl, ids, ignoreUnknownIds)
+    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+      requestSession,
+      baseUrl,
+      ids.map(CogniteInternalId.apply),
+      ignoreUnknownIds
+    )
 
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     deleteByExternalIds(externalIds, false)
@@ -85,10 +90,10 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
       externalIds: Seq[String],
       ignoreUnknownIds: Boolean = false
   ): F[Unit] =
-    DeleteByExternalIds.deleteByExternalIdsWithIgnoreUnknownIds(
+    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
-      externalIds,
+      externalIds.map(CogniteExternalId.apply),
       ignoreUnknownIds
     )
 
