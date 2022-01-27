@@ -16,8 +16,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
     with Create[Asset, AssetCreate, F]
     with RetrieveByIdsWithIgnoreUnknownIds[Asset, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Asset, F]
-    with DeleteByIdsWithIgnoreUnknownIds[F, Long]
-    with DeleteByExternalIdsWithIgnoreUnknownIds[F]
+    with DeleteByCogniteIds[F]
     with PartitionedFilter[Asset, AssetsFilter, F]
     with Search[Asset, AssetsQuery, F]
     with UpdateById[Asset, AssetUpdate, F]
@@ -77,7 +76,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   override def deleteByIds(ids: Seq[Long]): F[Unit] = deleteByIds(ids, false)
 
   override def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean): F[Unit] =
-    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
       ids.map(CogniteInternalId.apply),
@@ -103,7 +102,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
     deleteByExternalIds(externalIds, false)
 
   override def deleteByExternalIds(externalIds: Seq[String], ignoreUnknownIds: Boolean): F[Unit] =
-    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
       externalIds.map(CogniteExternalId.apply),
@@ -125,8 +124,8 @@ class Assets[F[_]](val requestSession: RequestSession[F])
       _ => ()
     )
 
-  def deleteByCogniteIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean): F[Unit] =
-    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+  override def deleteWithIgnoreUnknownIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean): F[Unit] =
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
       ids,

@@ -101,28 +101,60 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     )
   }
 
-  it should "support deleting by CogniteIds" in {
+  private def createAssets(externalIdPrefix:String) = {
     val keys = (1 to 4).map(_ => shortRandom())
     val assets = keys.map(k=>
-      AssetCreate(name = "scala-sdk-delete-cogniteId-" + k, externalId =  Some(s"delete-cogniteId-$k"))
+      AssetCreate(name = "scala-sdk-delete-cogniteId-" + k, externalId =  Some(s"$externalIdPrefix-$k"))
     )
     val createdItems = client.assets.create(assets)
 
     retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"delete-cogniteId-"))).compile.toList,
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$externalIdPrefix-"))).compile.toList,
       r => r should have size 4
     )
+    createdItems
+  }
 
-    val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(assets.size/2)
+  it should "support deleting by CogniteIds" in {
+    val createdItems = createAssets("delete-cogniteId")
+
+    val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(createdItems.size/2)
     val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
     val externalIds: Seq[CogniteId] = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
 
     val cogniteIds = (internalIds ++ externalIds)
 
-    client.assets.deleteByCogniteIds(cogniteIds, true)
+    client.assets.deleteWithIgnoreUnknownIds(cogniteIds, true)
 
+    //make sure that assets are deletes
     retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"delete-cogniteId-"))).compile.toList,
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"delete-cogniteId"))).compile.toList,
+      r => r should have size 0
+    )
+  }
+
+  it should "raise a conflict error if input of delete contains internalIdand externalId that represent the same row" in {
+    val createdItems = createAssets("delete-cogniteId")
+
+    val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(createdItems.size/2)
+    val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
+    val externalIds: Seq[CogniteId] = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
+
+    val conflictInternalIdId:Seq[CogniteId] = Seq(CogniteInternalId.apply(deleteByExternalIds.head.id))
+    an[CdpApiException] shouldBe thrownBy {
+      client.assets.deleteWithIgnoreUnknownIds(externalIds ++ conflictInternalIdId, true)
+    }
+
+    val conflictExternalId:Seq[CogniteId] = Seq(CogniteExternalId.apply(deleteByInternalIds.last.externalId.get))
+    an[CdpApiException] shouldBe thrownBy {
+      client.assets.deleteWithIgnoreUnknownIds(internalIds ++ conflictExternalId, true)
+    }
+
+    client.assets.deleteWithIgnoreUnknownIds(internalIds ++ externalIds, true)
+
+    //make sure that assets are deletes
+    retryWithExpectedResult[Seq[Asset]](
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"delete-cogniteId"))).compile.toList,
       r => r should have size 0
     )
   }

@@ -198,28 +198,59 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     idsThatDoNotExist
   )
 
-  it should "support deleting by CogniteIds" in {
+  private def createTimeSeries(externalIdPrefix: String) = {
     val keys = (1 to 4).map(_ => shortRandom())
     val timeseries = keys.map(k=>
-      TimeSeriesCreate(name = Some("scala-sdk-delete-cogniteId-" + k), externalId =  Some(s"delete-cogniteId-$k"))
+      TimeSeriesCreate(name = Some("scala-sdk-delete-cogniteId-" + k), externalId =  Some(s"$externalIdPrefix-$k"))
     )
     val createdItems = client.timeSeries.create(timeseries)
 
     retryWithExpectedResult[Seq[TimeSeries]](
-      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(s"delete-cogniteId-"))).compile.toList,
+      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(s"$externalIdPrefix-"))).compile.toList,
       r => r should have size 4
     )
+    createdItems
+  }
 
-    val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(timeseries.size/2)
+  it should "support deleting by CogniteIds" in {
+    val createdItems = createTimeSeries("delete-cogniteId")
+
+    val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(createdItems.size/2)
     val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
     val externalIds: Seq[CogniteId]  = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
 
     val cogniteIds = (internalIds ++ externalIds)
 
-    client.timeSeries.deleteByCogniteIds(cogniteIds, true)
+    client.timeSeries.deleteWithIgnoreUnknownIds(cogniteIds, true)
 
     retryWithExpectedResult[Seq[TimeSeries]](
-      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(s"delete-cogniteId-"))).compile.toList,
+      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some("delete-cogniteId"))).compile.toList,
+      r => r should have size 0
+    )
+  }
+
+  it should "raise a conflict error if input of delete contains internalId and externalId that represent the same row" in {
+    val createdItems = createTimeSeries("delete-cogniteId")
+
+    val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(createdItems.size/2)
+    val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
+    val externalIds: Seq[CogniteId] = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
+
+    val conflictInternalIdId:Seq[CogniteId] = Seq(CogniteInternalId.apply(deleteByExternalIds.head.id))
+    an[CdpApiException] shouldBe thrownBy {
+      client.timeSeries.deleteWithIgnoreUnknownIds(externalIds ++ conflictInternalIdId, true)
+    }
+
+    val conflictExternalId:Seq[CogniteId] = Seq(CogniteExternalId.apply(deleteByInternalIds.last.externalId.get))
+    an[CdpApiException] shouldBe thrownBy {
+      client.timeSeries.deleteWithIgnoreUnknownIds(internalIds ++ conflictExternalId, true)
+    }
+
+    client.timeSeries.deleteWithIgnoreUnknownIds(internalIds ++ externalIds, true)
+
+    //make sure that timeSeries are deletes
+    retryWithExpectedResult[Seq[TimeSeries]](
+      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(s"delete-cogniteId"))).compile.toList,
       r => r should have size 0
     )
   }

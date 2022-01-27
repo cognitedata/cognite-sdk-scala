@@ -15,8 +15,7 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     with RetrieveByIdsWithIgnoreUnknownIds[TimeSeries, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[TimeSeries, F]
     with Create[TimeSeries, TimeSeriesCreate, F]
-    with DeleteByIdsWithIgnoreUnknownIds[F, Long]
-    with DeleteByExternalIdsWithIgnoreUnknownIds[F]
+    with DeleteByCogniteIds[F]
     with PartitionedFilter[TimeSeries, TimeSeriesFilter, F]
     with Search[TimeSeries, TimeSeriesQuery, F]
     with UpdateById[TimeSeries, TimeSeriesUpdate, F]
@@ -76,7 +75,7 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
   override def deleteByIds(ids: Seq[Long]): F[Unit] = deleteByIds(ids, false)
 
   override def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean = false): F[Unit] =
-    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
       ids.map(CogniteInternalId.apply),
@@ -90,15 +89,15 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
       externalIds: Seq[String],
       ignoreUnknownIds: Boolean = false
   ): F[Unit] =
-    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
       externalIds.map(CogniteExternalId.apply),
       ignoreUnknownIds
     )
 
-  def deleteByCogniteIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean): F[Unit] =
-    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+  override def deleteWithIgnoreUnknownIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean): F[Unit] =
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
       ids,

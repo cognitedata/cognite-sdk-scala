@@ -35,19 +35,6 @@ object DeleteByIds {
       uri"$baseUrl/delete",
       _ => ()
     )
-
-  def deleteByCogniteIdsWithIgnoreUnknownIds[F[_]](
-      requestSession: RequestSession[F],
-      baseUrl: Uri,
-      ids: Seq[CogniteId],
-      ignoreUnknownIds: Boolean
-  ): F[Unit] =
-    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
-      ItemsWithIgnoreUnknownIds(ids, ignoreUnknownIds),
-      uri"$baseUrl/delete",
-      _ => ()
-    )
-
 }
 
 trait DeleteByExternalIds[F[_]] {
@@ -76,6 +63,26 @@ object DeleteByExternalIds {
     //       or assert that length of `ids` is less than max deletion request size
     requestSession.post[Unit, Unit, Items[CogniteExternalId]](
       Items(externalIds.map(CogniteExternalId.apply)),
+      uri"$baseUrl/delete",
+      _ => ()
+    )
+}
+
+trait DeleteByCogniteIds[F[_]]
+    extends DeleteByIdsWithIgnoreUnknownIds[F, Long]
+    with DeleteByExternalIdsWithIgnoreUnknownIds[F] {
+  def deleteWithIgnoreUnknownIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean = false): F[Unit]
+}
+
+object DeleteByCogniteIds {
+  def deleteWithIgnoreUnknownIds[F[_]](
+      requestSession: RequestSession[F],
+      baseUrl: Uri,
+      ids: Seq[CogniteId],
+      ignoreUnknownIds: Boolean
+  ): F[Unit] =
+    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
+      ItemsWithIgnoreUnknownIds(ids, ignoreUnknownIds),
       uri"$baseUrl/delete",
       _ => ()
     )

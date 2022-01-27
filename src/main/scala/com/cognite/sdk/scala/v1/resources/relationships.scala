@@ -56,7 +56,7 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
       externalIds: Seq[String],
       ignoreUnknownIds: Boolean = false
   ): F[Unit] =
-    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
       externalIds.map(CogniteExternalId.apply),

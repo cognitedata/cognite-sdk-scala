@@ -15,8 +15,7 @@ class Events[F[_]](val requestSession: RequestSession[F])
     with RetrieveByIdsWithIgnoreUnknownIds[Event, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Event, F]
     with Create[Event, EventCreate, F]
-    with DeleteByIdsWithIgnoreUnknownIds[F, Long]
-    with DeleteByExternalIdsWithIgnoreUnknownIds[F]
+    with DeleteByCogniteIds[F]
     with PartitionedFilter[Event, EventsFilter, F]
     with Search[Event, EventsQuery, F]
     with UpdateById[Event, EventUpdate, F]
@@ -72,7 +71,7 @@ class Events[F[_]](val requestSession: RequestSession[F])
   override def deleteByIds(ids: Seq[Long]): F[Unit] = deleteByIds(ids, false)
 
   override def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean = false): F[Unit] =
-    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
       ids.map(CogniteInternalId.apply),
@@ -86,15 +85,15 @@ class Events[F[_]](val requestSession: RequestSession[F])
       externalIds: Seq[String],
       ignoreUnknownIds: Boolean = false
   ): F[Unit] =
-    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
       externalIds.map(CogniteExternalId.apply),
       ignoreUnknownIds
     )
 
-  def deleteByCogniteIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean): F[Unit] =
-    DeleteByIds.deleteByCogniteIdsWithIgnoreUnknownIds(
+  override def deleteWithIgnoreUnknownIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean): F[Unit] =
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
       ids,
