@@ -145,7 +145,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       client.assets.deleteWithIgnoreUnknownIds(externalIds ++ conflictInternalIdId, true)
     }
 
-    val conflictExternalId:Seq[CogniteId] = Seq(CogniteExternalId.apply(deleteByInternalIds.last.externalId.get))
+    val conflictExternalId:Seq[CogniteId] = Seq(CogniteExternalId.apply(deleteByInternalIds.last.externalId.getOrElse("")))
     an[CdpApiException] shouldBe thrownBy {
       client.assets.deleteWithIgnoreUnknownIds(internalIds ++ conflictExternalId, true)
     }

@@ -99,7 +99,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       client.events.deleteWithIgnoreUnknownIds(externalIds ++ conflictInternalIdId, true)
     }
 
-    val conflictExternalId:Seq[CogniteId] = Seq(CogniteExternalId.apply(deleteByInternalIds.last.externalId.get))
+    val conflictExternalId:Seq[CogniteId] = Seq(CogniteExternalId.apply(deleteByInternalIds.last.externalId.getOrElse("")))
     an[CdpApiException] shouldBe thrownBy {
       client.events.deleteWithIgnoreUnknownIds(internalIds ++ conflictExternalId, true)
     }
