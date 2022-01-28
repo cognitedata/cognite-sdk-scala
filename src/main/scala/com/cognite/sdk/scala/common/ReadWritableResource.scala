@@ -71,7 +71,18 @@ object DeleteByExternalIds {
 trait DeleteByCogniteIds[F[_]]
     extends DeleteByIdsWithIgnoreUnknownIds[F, Long]
     with DeleteByExternalIdsWithIgnoreUnknownIds[F] {
-  def deleteWithIgnoreUnknownIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean = false): F[Unit]
+  def delete(ids: Seq[CogniteId], ignoreUnknownIds: Boolean = false): F[Unit]
+
+  def deleteByIds(ids: Seq[Long]): F[Unit] = delete(ids.map(CogniteInternalId(_)), false)
+
+  def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean = false): F[Unit] =
+    delete(ids.map(CogniteInternalId(_)), ignoreUnknownIds)
+
+  def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
+    delete(externalIds.map(CogniteExternalId(_)), false)
+
+  def deleteByExternalIds(externalIds: Seq[String], ignoreUnknownIds: Boolean = false): F[Unit] =
+    delete(externalIds.map(CogniteExternalId(_)), ignoreUnknownIds)
 }
 
 object DeleteByCogniteIds {

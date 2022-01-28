@@ -124,7 +124,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     val cogniteIds = (internalIds ++ externalIds)
 
-    client.assets.deleteWithIgnoreUnknownIds(cogniteIds, true)
+    client.assets.delete(cogniteIds, true)
 
     //make sure that assets are deletes
     retryWithExpectedResult[Seq[Asset]](
@@ -142,15 +142,15 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     val conflictInternalIdId:Seq[CogniteId] = Seq(CogniteInternalId.apply(deleteByExternalIds.head.id))
     an[CdpApiException] shouldBe thrownBy {
-      client.assets.deleteWithIgnoreUnknownIds(externalIds ++ conflictInternalIdId, true)
+      client.assets.delete(externalIds ++ conflictInternalIdId, true)
     }
 
     val conflictExternalId:Seq[CogniteId] = Seq(CogniteExternalId.apply(deleteByInternalIds.last.externalId.getOrElse("")))
     an[CdpApiException] shouldBe thrownBy {
-      client.assets.deleteWithIgnoreUnknownIds(internalIds ++ conflictExternalId, true)
+      client.assets.delete(internalIds ++ conflictExternalId, true)
     }
 
-    client.assets.deleteWithIgnoreUnknownIds(internalIds ++ externalIds, true)
+    client.assets.delete(internalIds ++ externalIds, true)
 
     //make sure that assets are deletes
     retryWithExpectedResult[Seq[Asset]](

@@ -221,7 +221,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
     val cogniteIds = (internalIds ++ externalIds)
 
-    client.timeSeries.deleteWithIgnoreUnknownIds(cogniteIds, true)
+    client.timeSeries.delete(cogniteIds, true)
 
     retryWithExpectedResult[Seq[TimeSeries]](
       client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some("delete-cogniteId"))).compile.toList,
@@ -238,15 +238,15 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
     val conflictInternalIdId:Seq[CogniteId] = Seq(CogniteInternalId.apply(deleteByExternalIds.head.id))
     an[CdpApiException] shouldBe thrownBy {
-      client.timeSeries.deleteWithIgnoreUnknownIds(externalIds ++ conflictInternalIdId, true)
+      client.timeSeries.delete(externalIds ++ conflictInternalIdId, true)
     }
 
     val conflictExternalId:Seq[CogniteId] = Seq(CogniteExternalId.apply(deleteByInternalIds.last.externalId.getOrElse("")))
     an[CdpApiException] shouldBe thrownBy {
-      client.timeSeries.deleteWithIgnoreUnknownIds(internalIds ++ conflictExternalId, true)
+      client.timeSeries.delete(internalIds ++ conflictExternalId, true)
     }
 
-    client.timeSeries.deleteWithIgnoreUnknownIds(internalIds ++ externalIds, true)
+    client.timeSeries.delete(internalIds ++ externalIds, true)
 
     //make sure that timeSeries are deletes
     retryWithExpectedResult[Seq[TimeSeries]](
