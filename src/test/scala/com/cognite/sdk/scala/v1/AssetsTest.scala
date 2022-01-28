@@ -71,7 +71,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       r => r should have size 3
     )
 
-    client.assets.deleteByExternalIds(Seq(s"$key-recursive-root"), true, true)
+    client.assets.deleteRecursive(Seq(CogniteExternalId(s"$key-recursive-root")), true, true)
 
     retryWithExpectedResult[Seq[Asset]](
       client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
@@ -93,7 +93,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       r => r should have size 3
     )
 
-    client.assets.deleteByIds(Seq(createdItems(0).id), true, true)
+    client.assets.deleteRecursive(Seq(CogniteInternalId(createdItems(0).id)), true, true)
 
     retryWithExpectedResult[Seq[Asset]](
       client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,

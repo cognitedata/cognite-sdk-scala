@@ -73,29 +73,26 @@ class Assets[F[_]](val requestSession: RequestSession[F])
       items
     )
 
+  @deprecated("Please use deleteRecursive instead", "1.5.22")
   def deleteByIds(
       ids: Seq[Long],
       recursive: Boolean,
       ignoreUnknownIds: Boolean
   ): F[Unit] =
-    requestSession.post[Unit, Unit, ItemsWithRecursiveAndIgnoreUnknownIds](
-      ItemsWithRecursiveAndIgnoreUnknownIds(
-        ids.map(CogniteInternalId.apply),
-        recursive,
-        ignoreUnknownIds
-      ),
-      uri"$baseUrl/delete",
-      _ => ()
-    )
+    deleteRecursive(ids.map(CogniteInternalId.apply), recursive, ignoreUnknownIds)
 
+  @deprecated("Please use deleteRecursive instead", "1.5.22")
   def deleteByExternalIds(
       externalIds: Seq[String],
       recursive: Boolean,
       ignoreUnknownIds: Boolean
   ): F[Unit] =
+    deleteRecursive(externalIds.map(CogniteExternalId.apply), recursive, ignoreUnknownIds)
+
+  def deleteRecursive(ids: Seq[CogniteId], recursive: Boolean, ignoreUnknownIds: Boolean): F[Unit] =
     requestSession.post[Unit, Unit, ItemsWithRecursiveAndIgnoreUnknownIds](
       ItemsWithRecursiveAndIgnoreUnknownIds(
-        externalIds.map(CogniteExternalId.apply),
+        ids,
         recursive,
         ignoreUnknownIds
       ),
