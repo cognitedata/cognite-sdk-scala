@@ -16,8 +16,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
     with Create[Asset, AssetCreate, F]
     with RetrieveByIdsWithIgnoreUnknownIds[Asset, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[Asset, F]
-    with DeleteByIdsWithIgnoreUnknownIds[F, Long]
-    with DeleteByExternalIdsWithIgnoreUnknownIds[F]
+    with DeleteByCogniteIds[F]
     with PartitionedFilter[Asset, AssetsFilter, F]
     with Search[Asset, AssetsQuery, F]
     with UpdateById[Asset, AssetUpdate, F]
@@ -74,50 +73,39 @@ class Assets[F[_]](val requestSession: RequestSession[F])
       items
     )
 
-  override def deleteByIds(ids: Seq[Long]): F[Unit] = deleteByIds(ids, false)
-
-  override def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean): F[Unit] =
-    DeleteByIds.deleteByIdsWithIgnoreUnknownIds(requestSession, baseUrl, ids, ignoreUnknownIds)
-
+  @deprecated("Please use deleteRecursive instead", "1.5.22")
   def deleteByIds(
       ids: Seq[Long],
       recursive: Boolean,
       ignoreUnknownIds: Boolean
   ): F[Unit] =
-    requestSession.post[Unit, Unit, ItemsWithRecursiveAndIgnoreUnknownIds](
-      ItemsWithRecursiveAndIgnoreUnknownIds(
-        ids.map(CogniteInternalId.apply),
-        recursive,
-        ignoreUnknownIds
-      ),
-      uri"$baseUrl/delete",
-      _ => ()
-    )
+    deleteRecursive(ids.map(CogniteInternalId.apply), recursive, ignoreUnknownIds)
 
-  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
-    deleteByExternalIds(externalIds, false)
-
-  override def deleteByExternalIds(externalIds: Seq[String], ignoreUnknownIds: Boolean): F[Unit] =
-    DeleteByExternalIds.deleteByExternalIdsWithIgnoreUnknownIds(
-      requestSession,
-      baseUrl,
-      externalIds,
-      ignoreUnknownIds
-    )
-
+  @deprecated("Please use deleteRecursive instead", "1.5.22")
   def deleteByExternalIds(
       externalIds: Seq[String],
       recursive: Boolean,
       ignoreUnknownIds: Boolean
   ): F[Unit] =
+    deleteRecursive(externalIds.map(CogniteExternalId.apply), recursive, ignoreUnknownIds)
+
+  def deleteRecursive(ids: Seq[CogniteId], recursive: Boolean, ignoreUnknownIds: Boolean): F[Unit] =
     requestSession.post[Unit, Unit, ItemsWithRecursiveAndIgnoreUnknownIds](
       ItemsWithRecursiveAndIgnoreUnknownIds(
-        externalIds.map(CogniteExternalId.apply),
+        ids,
         recursive,
         ignoreUnknownIds
       ),
       uri"$baseUrl/delete",
       _ => ()
+    )
+
+  override def delete(ids: Seq[CogniteId], ignoreUnknownIds: Boolean = false): F[Unit] =
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
     )
 
   def filter(
