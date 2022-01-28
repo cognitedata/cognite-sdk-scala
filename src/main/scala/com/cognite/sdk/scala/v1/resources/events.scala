@@ -68,31 +68,7 @@ class Events[F[_]](val requestSession: RequestSession[F])
   override def updateByExternalId(items: Map[String, EventUpdate]): F[Seq[Event]] =
     UpdateByExternalId.updateByExternalId[F, Event, EventUpdate](requestSession, baseUrl, items)
 
-  override def deleteByIds(ids: Seq[Long]): F[Unit] = deleteByIds(ids, false)
-
-  override def deleteByIds(ids: Seq[Long], ignoreUnknownIds: Boolean = false): F[Unit] =
-    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
-      requestSession,
-      baseUrl,
-      ids.map(CogniteInternalId.apply),
-      ignoreUnknownIds
-    )
-
-  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
-    deleteByExternalIds(externalIds, false)
-
-  override def deleteByExternalIds(
-      externalIds: Seq[String],
-      ignoreUnknownIds: Boolean = false
-  ): F[Unit] =
-    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
-      requestSession,
-      baseUrl,
-      externalIds.map(CogniteExternalId.apply),
-      ignoreUnknownIds
-    )
-
-  override def deleteWithIgnoreUnknownIds(ids: Seq[CogniteId], ignoreUnknownIds: Boolean): F[Unit] =
+  override def delete(ids: Seq[CogniteId], ignoreUnknownIds: Boolean = false): F[Unit] =
     DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
       requestSession,
       baseUrl,
