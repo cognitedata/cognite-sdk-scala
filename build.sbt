@@ -7,7 +7,7 @@ val scala212 = "2.12.15"
 val supportedScalaVersions = List(scala212, scala213, scala3)
 
 // This is used only for tests.
-val jettyTestVersion = "9.4.44.v20210927"
+val jettyTestVersion = "9.4.45.v20220203"
 
 val sttpVersion = "3.3.15"
 val circeVersion: Option[(Long, Long)] => String = {
