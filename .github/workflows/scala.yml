@@ -2,14 +2,14 @@ name: Scala CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, 2.x ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, 2.x ]
 
 jobs:
   compile_scala_212:
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/master'
+    if: github.ref != 'refs/heads/master' && github.ref != 'refs/heads/2.x'
 
     timeout-minutes: 20
 
