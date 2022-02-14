@@ -8,7 +8,7 @@ final case class Session(
     `type`: String,
     status: String,
     nonce: String,
-    clientId: String
+    clientId: Option[String]
 )
 
 final case class SessionCreateWithToken(
