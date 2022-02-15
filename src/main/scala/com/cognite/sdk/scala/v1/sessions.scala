@@ -5,10 +5,10 @@ package com.cognite.sdk.scala.v1
 
 final case class Session(
     id: Long,
-    `type`: String,
+    `type`: Option[String],
     status: String,
     nonce: String,
-    clientId: String
+    clientId: Option[String] = None // Is not provided when creating with token exchange flow
 )
 
 final case class SessionCreateWithToken(
@@ -26,7 +26,7 @@ final case class SessionList(
     status: String,
     creationTime: Long,
     expirationTime: Long,
-    clientId: String
+    clientId: Option[String] = None // Is not provided when creating with token exchange flow
 )
 
 final case class BindSessionRequest(
