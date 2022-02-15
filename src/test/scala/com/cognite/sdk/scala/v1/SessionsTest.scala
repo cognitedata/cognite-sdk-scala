@@ -177,7 +177,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         "TOKEN_EXCHANGE",
         "CANCELLED",
         Instant.now().minusSeconds(120).toEpochMilli,
-        Instant.now().minusSeconds(60).toEpochMilli,
+        Instant.now().minusSeconds(60).toEpochMilli
       )
     )
     val responseForSessionList = SttpBackendStub.synchronous
