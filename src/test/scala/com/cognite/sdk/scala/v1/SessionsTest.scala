@@ -170,15 +170,14 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         "READY",
         Instant.now().toEpochMilli,
         Instant.now().plusSeconds(60).toEpochMilli,
-        "clientId"
+        Some("clientId")
       ),
       SessionList(
         2,
-        "CLIENT_CREDENTIALS",
+        "TOKEN_EXCHANGE",
         "CANCELLED",
         Instant.now().minusSeconds(120).toEpochMilli,
         Instant.now().minusSeconds(60).toEpochMilli,
-        "clientId"
       )
     )
     val responseForSessionList = SttpBackendStub.synchronous
