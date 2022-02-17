@@ -15,7 +15,9 @@ import io.circe.{Decoder, Encoder}
 class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Monad[F])
     extends WithRequestSession[F]
     with BaseUrl {
+
   import SequenceRows._
+
   override val baseUrl = uri"${requestSession.baseUrl}/sequences/data"
 
   implicit val errorOrItemsSequenceRowsResponseDecoder
@@ -25,40 +27,56 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Mona
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
 
   def insertById(id: Long, columns: Seq[String], rows: Seq[SequenceRow]): F[Unit] =
-    requestSession
-      .post[Unit, Unit, Items[SequenceRowsInsertById]](
-        Items(Seq(SequenceRowsInsertById(id, columns, rows))),
-        baseUrl,
-        _ => ()
-      )
+    insert(CogniteInternalId(id), columns, rows)
 
   def insertByExternalId(
       externalId: String,
       columns: Seq[String],
       rows: Seq[SequenceRow]
   ): F[Unit] =
-    requestSession
-      .post[Unit, Unit, Items[SequenceRowsInsertByExternalId]](
-        Items(Seq(SequenceRowsInsertByExternalId(externalId, columns, rows))),
-        baseUrl,
-        _ => ()
-      )
+    insert(CogniteExternalId(externalId), columns, rows)
+
+  def insert(cogniteId: CogniteId, columns: Seq[String], rows: Seq[SequenceRow]): F[Unit] =
+    cogniteId match {
+      case id: CogniteInternalId =>
+        requestSession
+          .post[Unit, Unit, Items[SequenceRowsInsertById]](
+            Items(Seq(SequenceRowsInsertById(id.id, columns, rows))),
+            baseUrl,
+            _ => ()
+          )
+      case id: CogniteExternalId =>
+        requestSession
+          .post[Unit, Unit, Items[SequenceRowsInsertByExternalId]](
+            Items(Seq(SequenceRowsInsertByExternalId(id.externalId, columns, rows))),
+            baseUrl,
+            _ => ()
+          )
+    }
 
   def deleteById(id: Long, rows: Seq[Long]): F[Unit] =
-    requestSession
-      .post[Unit, Unit, Items[SequenceRowsDeleteById]](
-        Items(Seq(SequenceRowsDeleteById(id, rows))),
-        uri"$baseUrl/delete",
-        _ => ()
-      )
+    delete(CogniteInternalId(id), rows)
 
   def deleteByExternalId(externalId: String, rows: Seq[Long]): F[Unit] =
-    requestSession
-      .post[Unit, Unit, Items[SequenceRowsDeleteByExternalId]](
-        Items(Seq(SequenceRowsDeleteByExternalId(externalId, rows))),
-        uri"$baseUrl/delete",
-        _ => ()
-      )
+    delete(CogniteExternalId(externalId), rows)
+
+  def delete(cogniteId: CogniteId, rows: Seq[Long]): F[Unit] =
+    cogniteId match {
+      case id: CogniteInternalId =>
+        requestSession
+          .post[Unit, Unit, Items[SequenceRowsDeleteById]](
+            Items(Seq(SequenceRowsDeleteById(id.id, rows))),
+            uri"$baseUrl/delete",
+            _ => ()
+          )
+      case id: CogniteExternalId =>
+        requestSession
+          .post[Unit, Unit, Items[SequenceRowsDeleteByExternalId]](
+            Items(Seq(SequenceRowsDeleteByExternalId(id.externalId, rows))),
+            uri"$baseUrl/delete",
+            _ => ()
+          )
+    }
 
   private def sendQuery(query: SequenceRowsQuery, batchSize: Int) =
     requestSession
@@ -126,10 +144,7 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Mona
       columns: Option[Seq[String]] = None,
       batchSize: Int = Constants.rowsBatchSize
   ): F[(Seq[SequenceColumnSignature], fs2.Stream[F, SequenceRow])] =
-    queryColumnsAndStream(
-      SequenceRowsQueryById(id, inclusiveStart, exclusiveEnd, limit, None, columns),
-      batchSize
-    )
+    query(CogniteInternalId(id), inclusiveStart, exclusiveEnd, limit, columns, batchSize)
 
   def queryByExternalId(
       externalId: String,
@@ -139,17 +154,35 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Mona
       columns: Option[Seq[String]] = None,
       batchSize: Int = Constants.rowsBatchSize
   ): F[(Seq[SequenceColumnSignature], fs2.Stream[F, SequenceRow])] =
-    queryColumnsAndStream(
-      SequenceRowsQueryByExternalId(
-        externalId,
-        inclusiveStart,
-        exclusiveEnd,
-        limit,
-        None,
-        columns
-      ),
-      batchSize
-    )
+    query(CogniteExternalId(externalId), inclusiveStart, exclusiveEnd, limit, columns, batchSize)
+
+  def query(
+      cogniteId: CogniteId,
+      inclusiveStart: Option[Long],
+      exclusiveEnd: Option[Long],
+      limit: Option[Int] = None,
+      columns: Option[Seq[String]] = None,
+      batchSize: Int = Constants.rowsBatchSize
+  ): F[(Seq[SequenceColumnSignature], fs2.Stream[F, SequenceRow])] =
+    cogniteId match {
+      case id: CogniteInternalId =>
+        queryColumnsAndStream(
+          SequenceRowsQueryById(id.id, inclusiveStart, exclusiveEnd, limit, None, columns),
+          batchSize
+        )
+      case id: CogniteExternalId =>
+        queryColumnsAndStream(
+          SequenceRowsQueryByExternalId(
+            id.externalId,
+            inclusiveStart,
+            exclusiveEnd,
+            limit,
+            None,
+            columns
+          ),
+          batchSize
+        )
+    }
 }
 
 object SequenceRows {
@@ -166,6 +199,7 @@ object SequenceRows {
     deriveEncoder
   implicit val sequenceRowsInsertByExternalIdItemsEncoder
       : Encoder[Items[SequenceRowsInsertByExternalId]] = deriveEncoder
+
   implicit val sequenceRowsDeleteByIdEncoder: Encoder[SequenceRowsDeleteById] = deriveEncoder
   implicit val sequenceRowsDeleteByIdItemsEncoder: Encoder[Items[SequenceRowsDeleteById]] =
     deriveEncoder
