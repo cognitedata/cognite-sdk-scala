@@ -200,9 +200,8 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       numPartitions: Int,
       limitPerPartition: Option[Int]
   )(implicit F: Applicative[F]): F[Seq[Stream[F, RawRow]]] =
-    getPartitionCursors(filter, numPartitions).map {
-      cursors =>
-        cursors.map(filterOnePartition(filter, _, limitPerPartition))
+    getPartitionCursors(filter, numPartitions).map { cursors =>
+      cursors.map(filterOnePartition(filter, _, limitPerPartition))
     }
 
   def filterToParams(filter: RawRowFilter): Map[String, String] =
