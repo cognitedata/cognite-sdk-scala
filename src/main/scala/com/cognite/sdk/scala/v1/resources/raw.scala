@@ -174,33 +174,36 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       Constants.rowsBatchSize
     )
 
+  def getPartitionCursors(
+      filter: RawRowFilter,
+      numPartitions: Int
+  ): F[Seq[String]] = {
+    val cursorsUriWithParams = cursorsUri
+      .addParam("numberOfCursors", numPartitions.toString)
+      .addParams(lastUpdatedTimeFilterToParams(filter))
+    requestSession
+      .get[Seq[String], Items[String]](
+        cursorsUriWithParams,
+        value => value.items
+      )
+  }
+
+  def filterOnePartition(
+      filter: RawRowFilter,
+      partitionCursor: String,
+      limit: Option[Int] = None
+  ): Stream[F, RawRow] =
+    filterWithNextCursor(filter, Some(partitionCursor), limit, None)
+
   override def filterPartitionsF(
       filter: RawRowFilter,
       numPartitions: Int,
       limitPerPartition: Option[Int]
-  )(implicit F: Applicative[F]): F[Seq[Stream[F, RawRow]]] = {
-    val cursorsUriWithParams = cursorsUri
-      .addParam("numberOfCursors", numPartitions.toString)
-      .addParams(lastUpdatedTimeFilterToParams(filter))
-
-    for {
-      cursors <- requestSession
-        .get[Items[String], Items[String]](
-          cursorsUriWithParams,
-          value => value
-        )
-      streams = cursors.items.map(cursor =>
-        Readable
-          .pullFromCursor(
-            Some(cursor),
-            limitPerPartition,
-            None,
-            filterWithCursor(filter, _, _, _)
-          )
-          .stream
-      )
-    } yield streams
-  }
+  )(implicit F: Applicative[F]): F[Seq[Stream[F, RawRow]]] =
+    getPartitionCursors(filter, numPartitions).map {
+      cursors =>
+        cursors.map(filterOnePartition(filter, _, limitPerPartition))
+    }
 
   def filterToParams(filter: RawRowFilter): Map[String, String] =
     Map(
