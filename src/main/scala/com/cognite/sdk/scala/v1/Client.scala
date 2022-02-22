@@ -38,7 +38,8 @@ final case class RequestSession[F[_]: Monad](
     baseUrl: Uri,
     baseSttpBackend: SttpBackend[F, _],
     auth: AuthProvider[F],
-    clientTag: Option[String] = None
+    clientTag: Option[String] = None,
+    cdfVersion: Option[String] = None
 ) {
   val sttpBackend: SttpBackend[F, _] = new AuthSttpBackend(baseSttpBackend, auth)
 
@@ -57,6 +58,10 @@ final case class RequestSession[F[_]: Monad](
       case Some(tag) => baseRequest.header("x-cdp-clienttag", tag)
       case None => baseRequest
     }
+    cdfVersion match {
+      case Some(ver) => baseRequest.header("cdf-version", ver)
+      case None => baseRequest
+    }
   }
 
   def get[R, T](
@@ -69,6 +74,21 @@ final case class RequestSession[F[_]: Monad](
       .contentType(contentType)
       .header("accept", accept)
       .get(uri)
+      .response(parseResponse(uri, mapResult))
+      .send(sttpBackend)
+      .map(_.body)
+
+  def postEmptyBody[R, T](
+      uri: Uri,
+      mapResult: T => R,
+      contentType: String = "application/json",
+      accept: String = "application/json"
+  )(implicit decoder: Decoder[T]): F[R] =
+    sttpRequest
+      .contentType(contentType)
+      .header("accept", accept)
+      .header("cdf-version", "alpha")
+      .post(uri)
       .response(parseResponse(uri, mapResult))
       .send(sttpBackend)
       .map(_.body)
@@ -112,7 +132,8 @@ class GenericClient[F[_]](
     baseUrl: String,
     authProvider: AuthProvider[F],
     apiVersion: Option[String],
-    clientTag: Option[String]
+    clientTag: Option[String],
+    cdfVersion: Option[String]
 )(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Any]) {
   def this(
       applicationName: String,
@@ -120,9 +141,18 @@ class GenericClient[F[_]](
       baseUrl: String = GenericClient.defaultBaseUrl,
       auth: Auth = Auth.defaultAuth,
       apiVersion: Option[String] = None,
-      clientTag: Option[String] = None
+      clientTag: Option[String] = None,
+      cdfVersion: Option[String] = None
   )(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Any]) =
-    this(applicationName, projectName, baseUrl, AuthProvider[F](auth), apiVersion, clientTag)
+    this(
+      applicationName,
+      projectName,
+      baseUrl,
+      AuthProvider[F](auth),
+      apiVersion,
+      clientTag,
+      cdfVersion
+    )
 
   import GenericClient._
 
@@ -134,7 +164,8 @@ class GenericClient[F[_]](
       uri"$uri/api/${apiVersion.getOrElse("v1")}/projects/$projectName",
       sttpBackend,
       authProvider,
-      clientTag
+      clientTag,
+      cdfVersion
     )
   lazy val login =
     new Login[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
@@ -170,6 +201,8 @@ class GenericClient[F[_]](
   lazy val functionSchedules = new FunctionSchedules[F](requestSession)
 
   lazy val sessions = new Sessions[F](requestSession)
+  lazy val dataModels = new DataModels[F](requestSession)
+  lazy val dataModelMappings = new DataModelMappings[F](requestSession)
 
   def project: F[Project] =
     requestSession.get[Project, Project](
@@ -228,16 +261,18 @@ object GenericClient {
       auth: Auth,
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
-      clientTag: Option[String] = None
+      clientTag: Option[String] = None,
+      cdfVersion: Option[String] = None
   )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
-    forAuthProvider(applicationName, AuthProvider(auth), baseUrl, apiVersion, clientTag)
+    forAuthProvider(applicationName, AuthProvider(auth), baseUrl, apiVersion, clientTag, cdfVersion)
 
   def forAuthProvider[F[_]: Monad](
       applicationName: String,
       authProvider: AuthProvider[F],
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
-      clientTag: Option[String] = None
+      clientTag: Option[String] = None,
+      cdfVersion: Option[String] = None
   )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] = {
     val login = new Login[F](
       RequestSession(applicationName, parseBaseUrlOrThrow(baseUrl), sttpBackend, authProvider)
@@ -256,7 +291,8 @@ object GenericClient {
           baseUrl,
           authProvider,
           apiVersion,
-          clientTag
+          clientTag,
+          cdfVersion
         )(
           implicitly,
           sttpBackend
