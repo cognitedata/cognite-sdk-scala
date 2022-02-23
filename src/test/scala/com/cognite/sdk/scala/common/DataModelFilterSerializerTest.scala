@@ -20,6 +20,14 @@ import io.circe.syntax._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.JavaSerializable",
+    "org.wartremover.warts.Serializable",
+    "org.wartremover.warts.NonUnitStatements",
+    "org.wartremover.warts.Product"
+  )
+)
 class DataModelFilterSerializerTest extends AnyWordSpec with Matchers {
 
   import com.cognite.sdk.scala.v1.resources.DataModelInstances._

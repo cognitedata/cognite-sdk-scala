@@ -19,6 +19,13 @@ import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.OptionPartial",
+    "org.wartremover.warts.PublicInference",
+    "org.wartremover.warts.NonUnitStatements"
+  )
+)
 class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
 
   val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
