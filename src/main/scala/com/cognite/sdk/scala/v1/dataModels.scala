@@ -3,7 +3,6 @@
 
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common._
 import io.circe.Json
 
 final case class DataModelProperty(
@@ -23,8 +22,6 @@ final case class DataModel(
     indexes: Option[Seq[DataModelPropertyIndex]] = None
 )
 
-//final case class DataModelGet(name: String)
-
 final case class DataModelMapping(
     externalId: Option[String] = None,
     properties: Option[Map[String, DataModelProperty]] = None
@@ -39,15 +36,33 @@ final case class DataModelInstance(
 sealed trait DataModelInstanceFilter
 
 sealed trait DMIBoolFilter extends DataModelInstanceFilter
-case class DMIAndFilter(and: Json) extends DMIBoolFilter
-case class DMIOrFilter(or: Json) extends DMIBoolFilter
-case class DMINotFilter(not: Json) extends DMIBoolFilter
+case class DMIAndFilter(and: Seq[DataModelInstanceFilter]) extends DMIBoolFilter
+case class DMIOrFilter(or: Seq[DataModelInstanceFilter]) extends DMIBoolFilter
+case class DMINotFilter(not: DataModelInstanceFilter) extends DMIBoolFilter
 
 sealed trait DMILeafFilter extends DataModelInstanceFilter
+case class DMIEqualsFilter(property: Seq[String], value: Json) extends DMILeafFilter
 case class DMIInFilter(property: Seq[String], values: Seq[Json]) extends DMILeafFilter
+case class DMIRangeFilter(
+    property: Seq[String],
+    gte: Option[Json] = None,
+    gt: Option[Json] = None,
+    lte: Option[Json] = None,
+    lt: Option[Json] = None
+) extends DMILeafFilter {
+  require(
+    !(gte.isDefined && gt.isDefined) && // can't have both upper bound in the same time
+      !(lte.isDefined && lt.isDefined) && // can't have both lower bound in the same time
+      (gte.isDefined || gt.isDefined || lte.isDefined || lt.isDefined) // at least oue bound must be defined
+  )
+}
+case class DMIPrefixFilter(property: Seq[String], value: Json) extends DMILeafFilter
+case class DMIExistsFilter(property: Seq[String]) extends DMILeafFilter
+case class DMIContainsAnyFilter(property: Seq[String], values: Seq[Json]) extends DMILeafFilter
+case class DMIContainsAllFilter(property: Seq[String], values: Seq[Json]) extends DMILeafFilter
 
 final case class DataModelInstanceQuery(
-    model: String,
+    modelExternalId: String,
     filter: Option[DataModelInstanceFilter] = None,
     sort: Option[Seq[String]] = None,
     limit: Option[Int] = None,
@@ -55,8 +70,7 @@ final case class DataModelInstanceQuery(
 )
 
 final case class DataModelInstanceQueryResponse(
-    model: Option[String] = None,
-    externalId: Option[String] = None,
-    properties: Option[Map[String, String]] = None,
-    nextCursor: Option[String] = None
-) extends ResponseWithCursor
+    modelExternalId: String,
+    externalId: String,
+    properties: Option[Map[String, Json]] = None
+)

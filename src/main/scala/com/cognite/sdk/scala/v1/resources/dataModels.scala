@@ -55,9 +55,4 @@ object DataModels {
   implicit val dataModelDecoder: Decoder[DataModel] = deriveDecoder[DataModel]
   implicit val dataModelItemsDecoder: Decoder[Items[DataModel]] = deriveDecoder[Items[DataModel]]
 
-  /*implicit val dataModelInstanceQueryResponseItemsWithCursorDecoder
-      : Decoder[ItemsWithCursor[DataModelInstanceQueryResponse]] =
-    deriveDecoder[ItemsWithCursor[DataModelInstanceQueryResponse]]
-  implicit val dataModelInstanceQueryItemsEncoder: Encoder[Items[DataModelInstanceQuery]] =
-    deriveEncoder[Items[DataModelInstanceQuery]] */
 }
