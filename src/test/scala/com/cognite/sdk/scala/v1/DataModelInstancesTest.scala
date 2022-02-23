@@ -46,7 +46,6 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
     OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).get
 
   val oidcTokenAuth = authProvider.getAuth.unsafeRunSync()
-  println(s" oidcTokenAuth= ${oidcTokenAuth}")
 
   val bluefieldClient = new GenericClient[IO](
     "scala-sdk-test",
@@ -155,7 +154,6 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
     val outputNoFilter = bluefieldClient.dataModelInstances
       .query(inputNoFilterQuery)
       .unsafeRunSync()
-    println(s"outputNoFilter = ${outputNoFilter}")
     outputNoFilter.items.toList.size shouldBe 3
   }
 
@@ -241,7 +239,6 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
       .items
       .toList
 
-    println(s"outputQueryNot = ${outputQueryNot}")
     outputQueryNot.size shouldBe 1
     outputQueryNot.map(_.properties).toSet shouldBe Set(dataModelInstanceToCreate1.properties)
   }
