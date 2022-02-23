@@ -34,7 +34,8 @@ class DataModelInstances[F[_]](val requestSession: RequestSession[F])
       inputQuery: DataModelInstanceQuery
   ): F[ItemsWithCursor[DataModelInstanceQueryResponse]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
-    println(s"Coucou JsonQuery is  = ${inputQuery.asJson}")
+    // VH TODO remove this println
+    println(s"Coucou JsonQuery is  = ${inputQuery.asJson.toString()}")
     requestSession.post[ItemsWithCursor[DataModelInstanceQueryResponse], ItemsWithCursor[
       DataModelInstanceQueryResponse
     ], DataModelInstanceQuery](
