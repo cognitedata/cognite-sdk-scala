@@ -47,8 +47,6 @@ class DataModelsTest extends SdkTestSpec with RetryWhile {
 
   val oidcTokenAuth = authProvider.getAuth.unsafeRunSync()
 
-  println(s"VH Coucou oidcTokenAuth = ${oidcTokenAuth}")
-
   val blueFieldClient = new GenericClient[IO](
     "scala-sdk-test",
     "extractor-bluefield-testing",
@@ -86,7 +84,9 @@ class DataModelsTest extends SdkTestSpec with RetryWhile {
 
     // VH TODO remove the code below and use real test above when create endpoints doesn't return 500 anymore
     /*val expectedBody = StringBody(
-      s"""{"items":[{"externalId":"${dataModel.externalId}","properties":{"name":{"type":"text","nullable":true},"description":{"type":"text","nullable":true}}}]}""".stripMargin,
+      s"""{"items":[{"externalId":"${dataModel.externalId}",
+      "properties":{"name":{"type":"text","nullable":true},
+      "description":{"type":"text","nullable":true}}}]}""".stripMargin,
       "utf-8",
       MediaType.ApplicationJson
     )

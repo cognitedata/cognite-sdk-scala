@@ -113,16 +113,16 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
 
     // VH TODO remove this once 500 hitting rate is stable
     /*val expectedBody = StringBody(
-      s"""{"items":[{"modelExternalId":"${dataModelInstanceToCreate.externalId}","properties":{"name":{"type":"text","nullable":true},"description":{"type":"text","nullable":true}}}]}""".stripMargin,
+      s"""{"items":[{"modelExternalId":"${dataModelInstanceToCreate.externalId}",
+      "properties":{"name":{"type":"text","nullable":true},
+      "description":{"type":"text","nullable":true}}}]}""".stripMargin,
       "utf-8",
       MediaType.ApplicationJson
     )
-    println(s" expectedBody= ${expectedBody}")
 
     val expectedResponse = Seq(dataModelInstanceToCreate)
     val responseForDataModelCreated = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
-        println(s"body is = ${r.body}")
         r.method === Method.POST && r.uri.path.endsWith(
           List("instances", "ingest")
         )
