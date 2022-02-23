@@ -3,23 +3,23 @@
 
 package com.cognite.sdk.scala.v1
 
-//import cats.Id
-import cats.effect.{ContextShift, IO, Timer}
 import cats.effect.laws.util.TestContext
+import cats.effect.{ContextShift, IO, Timer}
 import com.cognite.sdk.scala.common.{Items, OAuth2, RetryWhile, SdkTestSpec}
-import sttp.client3.SttpBackend
+import io.circe.Json
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
-import sttp.client3._
+import sttp.client3.{SttpBackend, _}
+
+//import cats.Id
 //import sttp.client3.testing.SttpBackendStub
 //import sttp.model.{Header, MediaType, Method, StatusCode}
 
-import java.util.UUID
 import java.util.concurrent.Executors
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 
-class DataModelsTest extends SdkTestSpec with RetryWhile {
+class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
 
   val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
   val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
@@ -47,9 +47,7 @@ class DataModelsTest extends SdkTestSpec with RetryWhile {
 
   val oidcTokenAuth = authProvider.getAuth.unsafeRunSync()
 
-  println(s"VH Coucou oidcTokenAuth = ${oidcTokenAuth}")
-
-  val blueFieldClient = new GenericClient[IO](
+  val bluefieldClient = new GenericClient[IO](
     "scala-sdk-test",
     "extractor-bluefield-testing",
     "https://bluefield.cognitedata.com",
@@ -59,43 +57,43 @@ class DataModelsTest extends SdkTestSpec with RetryWhile {
     Some("alpha")
   )
 
-  "DataModels" should "create data models definitions" in {
-    val uuid = UUID.randomUUID.toString
-    val dataPropName = DataModelProperty("text", Some(true))
-    val dataPropDescription = DataModelProperty("text", Some(true))
-    // val dataPropIndex = DataModelPropertyIndex(Some("name_descr"), Some(Seq("name", "description")))
-
-    val dataModel = DataModel(
-      s"Equipment-${uuid.substring(0, 8)}",
-      Some(
-        Map(
-          "name" -> dataPropName,
-          "description" -> dataPropDescription
+  "DataModelInstances" should "insert data models instances" in {
+    val dataModelInstanceToCreate =
+      DataModelInstance(
+        Some("Equipment-85696cfa"),
+        Some("equipment_44"),
+        Some(
+          Map(
+            "name" -> Json.fromString("EQ0001"),
+            "col_bool" -> Json.fromBoolean(true),
+            "col_float" -> Json.fromDoubleOrNull(1.64)
+          )
         )
-      ),
-      None, // Some(Seq("Asset", "Pump")),
-      None // Some(Seq(dataPropIndex))
-    )
+      )
 
-    val dataModels =
-      blueFieldClient.dataModels
-        .createItems(Items[DataModel](Seq(dataModel)))
-        .unsafeRunSync()
-        .toList
-    dataModels.contains(dataModel) shouldBe true
+    val dataModelInstances = bluefieldClient.dataModelInstances
+      .createItems(Items[DataModelInstance](Seq(dataModelInstanceToCreate)))
+      .unsafeRunSync()
+      .toList
 
-    // VH TODO remove the code below and use real test above when create endpoints doesn't return 500 anymore
+    println(s"dataModelInstances = ${dataModelInstances}")
+    dataModelInstances.nonEmpty shouldBe true
+
+    // VH TODO remove this once 500 hitting rate is stable
     /*val expectedBody = StringBody(
-      s"""{"items":[{"externalId":"${dataModel.externalId}","properties":{"name":{"type":"text","nullable":true},"description":{"type":"text","nullable":true}}}]}""".stripMargin,
+      s"""{"items":[{"modelExternalId":"${dataModelInstanceToCreate.externalId}","properties":{"name":{"type":"text","nullable":true},"description":{"type":"text","nullable":true}}}]}""".stripMargin,
       "utf-8",
       MediaType.ApplicationJson
     )
-    val expectedResponse = Seq(dataModel)
+    println(s" expectedBody= ${expectedBody}")
+
+    val expectedResponse = Seq(dataModelInstanceToCreate)
     val responseForDataModelCreated = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
+        println(s"body is = ${r.body}")
         r.method === Method.POST && r.uri.path.endsWith(
-          List("definitions", "apply")
-        ) && (r.body.equals(expectedBody))
+          List("instances", "ingest")
+        )
       }
       .thenRespond(
         Response(
@@ -113,19 +111,12 @@ class DataModelsTest extends SdkTestSpec with RetryWhile {
       cdfVersion = Some("alpha")
     )(implicitly, responseForDataModelCreated)
 
-    val resCreate = client.dataModels.createItems(
-      Items[DataModel](Seq(dataModel))
+    val resCreate = client.dataModelInstances.createItems(
+      Items[DataModelInstance](Seq(dataModelInstanceToCreate))
     )
     resCreate shouldBe expectedResponse*/
   }
 
-  it should "delete data models definitions" in {
-    // TODO once delete endpoint is deployed
-  }
-
-  it should "list all data models definitions" in {
-    val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
-    dataModels.nonEmpty shouldBe true
-  }
+  it should "query data models instances" in {}
 
 }

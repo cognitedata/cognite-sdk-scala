@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common._
+import io.circe.Json
 
 final case class DataModelProperty(
     `type`: String,
@@ -22,26 +23,32 @@ final case class DataModel(
     indexes: Option[Seq[DataModelPropertyIndex]] = None
 )
 
-final case class DataModelGet(name: String)
+//final case class DataModelGet(name: String)
 
 final case class DataModelMapping(
     externalId: Option[String] = None,
     properties: Option[Map[String, DataModelProperty]] = None
 )
 
-final case class DataModelInstanceCreate(
-    model: Option[String] = None,
+final case class DataModelInstance(
+    modelExternalId: Option[String] = None,
     externalId: Option[String] = None,
-    properties: Option[Map[String, String]] =
-      None // TODO Recheck if need to adapt for number and bool
+    properties: Option[Map[String, Json]] = None
 )
 
-/*sealed trait DSLFilter
-case class DSLBoolFilter()*/
+sealed trait DataModelInstanceFilter
+
+sealed trait DMIBoolFilter extends DataModelInstanceFilter
+case class DMIAndFilter(and: Json) extends DMIBoolFilter
+case class DMIOrFilter(or: Json) extends DMIBoolFilter
+case class DMINotFilter(not: Json) extends DMIBoolFilter
+
+sealed trait DMILeafFilter extends DataModelInstanceFilter
+case class DMIInFilter(property: Seq[String], values: Seq[Json]) extends DMILeafFilter
 
 final case class DataModelInstanceQuery(
     model: String,
-    filter: Option[Map[String, String]] = None, // TODO
+    filter: Option[DataModelInstanceFilter] = None,
     sort: Option[Seq[String]] = None,
     limit: Option[Int] = None,
     cursor: Option[String] = None
@@ -50,6 +57,6 @@ final case class DataModelInstanceQuery(
 final case class DataModelInstanceQueryResponse(
     model: Option[String] = None,
     externalId: Option[String] = None,
-    properties: Option[Map[String, DataModelProperty]] = None,
+    properties: Option[Map[String, String]] = None,
     nextCursor: Option[String] = None
 ) extends ResponseWithCursor

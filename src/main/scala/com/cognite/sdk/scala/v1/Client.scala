@@ -54,13 +54,12 @@ final case class RequestSession[F[_]: Monad](
       .header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}")
       .header("x-cdp-app", applicationName)
       .readTimeout(90.seconds)
-    clientTag match {
-      case Some(tag) => baseRequest.header("x-cdp-clienttag", tag)
-      case None => baseRequest
-    }
-    cdfVersion match {
-      case Some(ver) => baseRequest.header("cdf-version", ver)
-      case None => baseRequest
+    (clientTag, cdfVersion) match {
+      case (Some(tag), Some(ver)) =>
+        baseRequest.header("x-cdp-clienttag", tag).header("cdf-version", ver)
+      case (Some(tag), None) => baseRequest.header("x-cdp-clienttag", tag)
+      case (None, Some(ver)) => baseRequest.header("cdf-version", ver)
+      case (None, None) => baseRequest
     }
   }
 
@@ -126,6 +125,7 @@ final case class RequestSession[F[_]: Monad](
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
+// scalastyle:off parameter.number
 class GenericClient[F[_]](
     applicationName: String,
     val projectName: String,
@@ -153,6 +153,7 @@ class GenericClient[F[_]](
       clientTag,
       cdfVersion
     )
+  // scalastyle:on parameter.number
 
   import GenericClient._
 
@@ -203,6 +204,7 @@ class GenericClient[F[_]](
   lazy val sessions = new Sessions[F](requestSession)
   lazy val dataModels = new DataModels[F](requestSession)
   lazy val dataModelMappings = new DataModelMappings[F](requestSession)
+  lazy val dataModelInstances = new DataModelInstances[F](requestSession)
 
   def project: F[Project] =
     requestSession.get[Project, Project](
