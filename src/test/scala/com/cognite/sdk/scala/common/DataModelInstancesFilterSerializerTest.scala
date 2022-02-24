@@ -28,7 +28,7 @@ import org.scalatest.wordspec.AnyWordSpec
     "org.wartremover.warts.Product"
   )
 )
-class DataModelFilterSerializerTest extends AnyWordSpec with Matchers {
+class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
 
   import com.cognite.sdk.scala.v1.resources.DataModelInstances._
 

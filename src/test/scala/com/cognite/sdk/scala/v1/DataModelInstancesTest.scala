@@ -3,21 +3,14 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.effect.laws.util.TestContext
-import cats.effect.{ContextShift, IO, Timer}
-import com.cognite.sdk.scala.common.{Items, OAuth2, RetryWhile, SdkTestSpec}
+import com.cognite.sdk.scala.common.{CdpApiException, Items, RetryWhile}
 import io.circe.Json
-import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
-import sttp.client3.{SttpBackend, _}
 
 //import cats.Id
 //import sttp.client3.testing.SttpBackendStub
 //import sttp.model.{Header, MediaType, Method, StatusCode}
 
-import java.util.concurrent.Executors
 import scala.collection.immutable.Seq
-import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.DurationInt
 
 @SuppressWarnings(
   Array(
@@ -26,43 +19,7 @@ import scala.concurrent.duration.DurationInt
     "org.wartremover.warts.NonUnitStatements"
   )
 )
-class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
-
-  val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
-  val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
-  val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
-
-  val credentials = OAuth2.ClientCredentials(
-    tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
-    clientId = clientId,
-    clientSecret = clientSecret,
-    scopes = List("https://bluefield.cognitedata.com/.default"),
-    cdfProjectName = "extractor-bluefield-testing"
-  )
-
-  implicit val testContext: TestContext = TestContext()
-  implicit val cs: ContextShift[IO] =
-    IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4)))
-  implicit val timer: Timer[IO] = testContext.timer[IO]
-
-  // Override sttpBackend because this doesn't work with the testing backend
-  implicit val sttpBackendAuth: SttpBackend[IO, Any] =
-    AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
-
-  val authProvider: OAuth2.ClientCredentialsProvider[IO] =
-    OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).get
-
-  val oidcTokenAuth = authProvider.getAuth.unsafeRunSync()
-
-  val bluefieldClient = new GenericClient[IO](
-    "scala-sdk-test",
-    "extractor-bluefield-testing",
-    "https://bluefield.cognitedata.com",
-    authProvider,
-    None,
-    None,
-    Some("alpha")
-  )
+class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
 
   val dataModelInstanceToCreate1 =
     DataModelInstance(
@@ -106,7 +63,7 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
     Seq(dataModelInstanceToCreate1, dataModelInstanceToCreate2, dataModelInstanceToCreate3)
 
   "Insert data model instances" should "work with multiple input" in {
-    val dataModelInstances = bluefieldClient.dataModelInstances
+    val dataModelInstances = blueFieldClient.dataModelInstances
       .createItems(
         Items[DataModelInstance](
           toCreates
@@ -156,9 +113,32 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
     resCreate shouldBe expectedResponse*/
   }
 
+  it should "fail if input data type is not correct" in {
+    val invalidInput = DataModelInstance(
+      Some("Equipment-85696cfa"),
+      Some("equipment_45"),
+      Some(
+        Map(
+          "col_float" -> Json.fromString("abc")
+        )
+      )
+    )
+    val exception = the[CdpApiException] thrownBy blueFieldClient.dataModelInstances
+      .createItems(
+        Items[DataModelInstance](
+          Seq(invalidInput)
+        )
+      )
+      .unsafeRunSync()
+
+    // TODO change this when ingest api return better error detail
+    exception.message.contains("Internal server error. Please report this error to") shouldBe true
+
+  }
+
   "Query data model instances" should "work with empty filter" in {
     val inputNoFilterQuery = DataModelInstanceQuery("Equipment-85696cfa")
-    val outputNoFilter = bluefieldClient.dataModelInstances
+    val outputNoFilter = blueFieldClient.dataModelInstances
       .query(inputNoFilterQuery)
       .unsafeRunSync()
     outputNoFilter.items.toList.size shouldBe 3
@@ -177,7 +157,7 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
         )
       )
     )
-    val outputQueryAnd = bluefieldClient.dataModelInstances
+    val outputQueryAnd = blueFieldClient.dataModelInstances
       .query(inputQueryAnd)
       .unsafeRunSync()
       .items
@@ -197,7 +177,7 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
         )
       )
     )
-    val outputQueryAndEmpty = bluefieldClient.dataModelInstances
+    val outputQueryAndEmpty = blueFieldClient.dataModelInstances
       .query(inputQueryAnd2)
       .unsafeRunSync()
       .items
@@ -218,7 +198,7 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
         )
       )
     )
-    val outputQueryOr = bluefieldClient.dataModelInstances
+    val outputQueryOr = blueFieldClient.dataModelInstances
       .query(inputQueryOr)
       .unsafeRunSync()
       .items
@@ -240,7 +220,7 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
         )
       )
     )
-    val outputQueryNot = bluefieldClient.dataModelInstances
+    val outputQueryNot = blueFieldClient.dataModelInstances
       .query(inputQueryNot)
       .unsafeRunSync()
       .items
@@ -257,7 +237,7 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
         DMIPrefixFilter(Seq("name"), Json.fromString("EQ000"))
       )
     )
-    val outputQueryPrefix = bluefieldClient.dataModelInstances
+    val outputQueryPrefix = blueFieldClient.dataModelInstances
       .query(inputQueryPrefix)
       .unsafeRunSync()
       .items
@@ -277,7 +257,7 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
         DMIRangeFilter(Seq("col_float"), gte = Some(Json.fromFloatOrNull(1.64f)))
       )
     )
-    val outputQueryRange = bluefieldClient.dataModelInstances
+    val outputQueryRange = blueFieldClient.dataModelInstances
       .query(inputQueryRange)
       .unsafeRunSync()
       .items
@@ -287,5 +267,146 @@ class DataModelInstancesTest extends SdkTestSpec with RetryWhile {
       dataModelInstanceToCreate2.properties,
       dataModelInstanceToCreate3.properties
     )
+  }
+
+  it should "work with EXISTS filter" in {
+    val inputQueryExists = DataModelInstanceQuery(
+      "Equipment-85696cfa",
+      Some(
+        DMIExistsFilter(Seq("col_bool"))
+      )
+    )
+    val outputQueryExists = blueFieldClient.dataModelInstances
+      .query(inputQueryExists)
+      .unsafeRunSync()
+      .items
+      .toList
+
+    outputQueryExists.map(_.properties).toSet shouldBe Set(
+      dataModelInstanceToCreate2,
+      dataModelInstanceToCreate3
+    ).map(_.properties)
+  }
+
+  // Not yet supported
+  ignore should "work with CONTAINS ANY filter" in {
+    val inputQueryContainsAny = DataModelInstanceQuery(
+      "Equipment-85696cfa",
+      Some(
+        DMIContainsAnyFilter(
+          Seq("col_float"),
+          Seq(Json.fromDoubleOrNull(0), Json.fromFloatOrNull(3.5f))
+        )
+      )
+    )
+    val outputQueryContainsAny = blueFieldClient.dataModelInstances
+      .query(inputQueryContainsAny)
+      .unsafeRunSync()
+      .items
+      .toList
+
+    outputQueryContainsAny.map(_.properties).toSet shouldBe Set(
+      dataModelInstanceToCreate1,
+      dataModelInstanceToCreate3
+    ).map(_.properties)
+  }
+
+  // Not yet supported
+  ignore should "work with CONTAINS ALL filter" in {
+    val inputQueryContainsAll = DataModelInstanceQuery(
+      "Equipment-85696cfa",
+      Some(
+        DMIContainsAllFilter(
+          Seq("col_float", "name"),
+          Seq(Json.fromDoubleOrNull(0), Json.fromString("EQ0001"))
+        )
+      )
+    )
+    val outputQueryContainsAll = blueFieldClient.dataModelInstances
+      .query(inputQueryContainsAll)
+      .unsafeRunSync()
+      .items
+      .toList
+
+    outputQueryContainsAll.map(_.properties).toSet shouldBe Set(
+      dataModelInstanceToCreate1
+    ).map(_.properties)
+  }
+
+  // Not yet supported
+  ignore should "work with sort" in {
+    val inputQueryExists = DataModelInstanceQuery(
+      "Equipment-85696cfa",
+      Some(
+        DMIExistsFilter(Seq("col_float"))
+      ),
+      Some(Seq("col_float:desc"))
+    )
+    val outputQueryExists = blueFieldClient.dataModelInstances
+      .query(inputQueryExists)
+      .unsafeRunSync()
+      .items
+      .toList
+
+    outputQueryExists.map(_.properties) shouldBe Seq(
+      dataModelInstanceToCreate3,
+      dataModelInstanceToCreate2,
+      dataModelInstanceToCreate1
+    ).map(_.properties)
+  }
+
+  it should "work with limit" in {
+    val inputQueryOr = DataModelInstanceQuery(
+      "Equipment-85696cfa",
+      Some(
+        DMIOrFilter(
+          Seq(
+            DMIEqualsFilter(Seq("name"), Json.fromString("EQ0011")),
+            DMIEqualsFilter(Seq("col_bool"), Json.fromBoolean(true))
+          )
+        )
+      ),
+      None,
+      Some(1)
+    )
+    val outputQueryOr = blueFieldClient.dataModelInstances
+      .query(inputQueryOr)
+      .unsafeRunSync()
+      .items
+      .toList
+
+    outputQueryOr.size shouldBe 1
+    outputQueryOr
+      .map(_.properties)
+      .toSet
+      .subsetOf(
+        Set(
+          dataModelInstanceToCreate2,
+          dataModelInstanceToCreate3
+        ).map(_.properties)
+      ) shouldBe true
+  }
+
+  "Delete data model instances" should "work with multiple externalIds" in {
+    val toDeletes = toCreates.flatMap(_.externalId)
+
+    blueFieldClient.dataModelInstances
+      .deleteByExternalIds(toDeletes)
+      .unsafeRunSync()
+
+    // make sure that data is deleted
+    val inputNoFilterQuery = DataModelInstanceQuery("Equipment-85696cfa")
+    val outputNoFilter = blueFieldClient.dataModelInstances
+      .query(inputNoFilterQuery)
+      .unsafeRunSync()
+      .items
+      .toList
+    outputNoFilter.isEmpty shouldBe true
+  }
+
+  it should "ignore unknown externalId" in {
+    noException should be thrownBy blueFieldClient.dataModelInstances
+      .deleteByExternalIds(Seq("toto"))
+      .unsafeRunSync()
   }
 }

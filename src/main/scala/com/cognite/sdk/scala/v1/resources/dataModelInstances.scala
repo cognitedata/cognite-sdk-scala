@@ -13,6 +13,7 @@ import sttp.client3.circe._
 
 class DataModelInstances[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
+    with DeleteByExternalIds[F]
     with BaseUrl {
 
   import DataModelInstances._
@@ -42,6 +43,9 @@ class DataModelInstances[F[_]](val requestSession: RequestSession[F])
       value => value
     )
   }
+
+  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
+    DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
 }
 
 object DataModelInstances {
