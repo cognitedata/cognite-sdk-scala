@@ -14,13 +14,13 @@ class DataModels[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
   import DataModels._
-  override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage"
+  override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/definitions"
 
   def createItems(items: Items[DataModel]): F[Seq[DataModel]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession.post[Seq[DataModel], Items[DataModel], Items[DataModel]](
       items,
-      uri"$baseUrl/definitions/apply",
+      uri"$baseUrl/apply",
       value => value.items
     )
   }
@@ -28,13 +28,13 @@ class DataModels[F[_]](val requestSession: RequestSession[F])
   def deleteItems(externalIds: Seq[String], ignoreUnknownIds: Boolean): F[Unit] =
     requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
       ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId(_)), ignoreUnknownIds),
-      uri"$baseUrl/definitions/delete",
+      uri"$baseUrl/delete",
       _ => ()
     )
 
   def list(): F[Seq[DataModel]] =
     requestSession.postEmptyBody[Seq[DataModel], Items[DataModel]](
-      uri"$baseUrl/definitions/list",
+      uri"$baseUrl/list",
       value => value.items
     )
 

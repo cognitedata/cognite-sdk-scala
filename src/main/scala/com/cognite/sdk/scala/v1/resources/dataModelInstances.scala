@@ -46,6 +46,18 @@ class DataModelInstances[F[_]](val requestSession: RequestSession[F])
 
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
+
+  def retrieveByExternalIds(
+      externalIds: Seq[DataModelInstanceByExternalId],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[DataModelInstanceQueryResponse]] =
+    requestSession.post[Seq[DataModelInstanceQueryResponse], Items[
+      DataModelInstanceQueryResponse
+    ], ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]](
+      ItemsWithIgnoreUnknownIds(externalIds, ignoreUnknownIds),
+      uri"$baseUrl/byids",
+      value => value.items
+    )
 }
 
 object DataModelInstances {
@@ -103,5 +115,16 @@ object DataModelInstances {
   implicit val dataModelInstanceQueryResponseItemsWithCursorDecoder
       : Decoder[ItemsWithCursor[DataModelInstanceQueryResponse]] =
     deriveDecoder[ItemsWithCursor[DataModelInstanceQueryResponse]]
+
+  implicit val dataModelInstanceByExternalIdEncoder: Encoder[DataModelInstanceByExternalId] =
+    deriveEncoder[DataModelInstanceByExternalId]
+
+  implicit val dmiByExternalIdItemsWithIgnoreUnknownIdsEncoder
+      : Encoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]] =
+    deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
+
+  implicit val dataModelInstanceQueryResponseItemsDecoder
+      : Decoder[Items[DataModelInstanceQueryResponse]] =
+    deriveDecoder[Items[DataModelInstanceQueryResponse]]
 
 }

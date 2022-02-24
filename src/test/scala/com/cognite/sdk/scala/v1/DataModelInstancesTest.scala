@@ -386,6 +386,46 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
       ) shouldBe true
   }
 
+  // Not yet supported
+  "List data model instances" should "work with multiple externalIds" ignore {
+    val toGets = toCreates.map { d =>
+      DataModelInstanceByExternalId(
+        d.externalId.getOrElse(""),
+        d.modelExternalId.getOrElse("")
+      )
+    }
+    val outputList = blueFieldClient.dataModelInstances
+      .retrieveByExternalIds(toGets, false)
+      .unsafeRunSync()
+      .toList
+    outputList.size shouldBe 3
+    outputList.map(_.properties).toSet shouldBe toCreates.map(_.properties).toSet
+  }
+
+  // Not yet supported
+  ignore should "raise an exception if input has invalid externalId and ignoreUnknownIds is false" in {
+    the[CdpApiException] thrownBy blueFieldClient.dataModelInstances
+      .retrieveByExternalIds(
+        Seq(DataModelInstanceByExternalId("Equipment-85696cfa", "toto")),
+        false
+      )
+      .unsafeRunSync()
+      .toList
+  }
+
+  // Not yet supported
+  ignore should "ignore if input has invalid externalId and ignoreUnknownIds is true" in {
+    val res = blueFieldClient.dataModelInstances
+      .retrieveByExternalIds(
+        Seq(DataModelInstanceByExternalId("Equipment-85696cfa", "toto")),
+        true
+      )
+      .unsafeRunSync()
+      .toList
+
+    res.isEmpty shouldBe true
+  }
+
   "Delete data model instances" should "work with multiple externalIds" in {
     val toDeletes = toCreates.flatMap(_.externalId)
 

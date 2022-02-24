@@ -11,6 +11,11 @@ import com.cognite.sdk.scala.common.{Items, RetryWhile}
 import java.util.UUID
 import scala.collection.immutable.Seq
 
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.NonUnitStatements"
+  )
+)
 class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   "DataModels" should "create data models definitions" in {
@@ -75,13 +80,37 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     resCreate shouldBe expectedResponse*/
   }
 
-  it should "delete data models definitions" in {
-    // TODO once delete endpoint is deployed
-  }
-
   it should "list all data models definitions" in {
     val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
     dataModels.nonEmpty shouldBe true
+  }
+
+  ignore should "delete data models definitions" in {
+    val uuid = UUID.randomUUID.toString
+    val dataPropName = DataModelProperty("text", Some(true))
+    val dataPropDescription = DataModelProperty("text", Some(true))
+
+    val newDataModel = DataModel(
+      s"Equipment-${uuid.substring(0, 8)}",
+      Some(
+        Map(
+          "name" -> dataPropName,
+          "description" -> dataPropDescription
+        )
+      )
+    )
+
+    val outputCrates =
+      blueFieldClient.dataModels
+        .createItems(Items[DataModel](Seq(newDataModel)))
+        .unsafeRunSync()
+        .toList
+    outputCrates.contains(newDataModel) shouldBe true
+
+    blueFieldClient.dataModels.deleteItems(Seq(newDataModel.externalId), true).unsafeRunSync()
+
+    val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
+    dataModels.contains(newDataModel) shouldBe false
   }
 
 }
