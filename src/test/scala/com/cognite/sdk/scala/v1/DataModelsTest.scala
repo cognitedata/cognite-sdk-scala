@@ -11,12 +11,6 @@ import com.cognite.sdk.scala.common.{Items, RetryWhile}
 import java.util.UUID
 import scala.collection.immutable.Seq
 
-@SuppressWarnings(
-  Array(
-    "org.wartremover.warts.OptionPartial",
-    "org.wartremover.warts.PublicInference"
-  )
-)
 class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   "DataModels" should "create data models definitions" in {

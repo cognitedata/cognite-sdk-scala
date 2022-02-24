@@ -7,12 +7,6 @@ import com.cognite.sdk.scala.common.RetryWhile
 
 import scala.collection.immutable.Seq
 
-@SuppressWarnings(
-  Array(
-    "org.wartremover.warts.OptionPartial",
-    "org.wartremover.warts.PublicInference"
-  )
-)
 class DataModelMappingsTest extends CommonDataModelTestHelper with RetryWhile {
 
   "DataModelMappings" should "list all data models mappings" in {

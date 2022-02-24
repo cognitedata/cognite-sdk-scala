@@ -12,13 +12,6 @@ import io.circe.Json
 
 import scala.collection.immutable.Seq
 
-@SuppressWarnings(
-  Array(
-    "org.wartremover.warts.OptionPartial",
-    "org.wartremover.warts.PublicInference",
-    "org.wartremover.warts.NonUnitStatements"
-  )
-)
 class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
 
   val dataModelInstanceToCreate1 =
