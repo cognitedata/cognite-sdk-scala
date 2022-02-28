@@ -2,14 +2,14 @@ name: Scala CI
 
 on:
   push:
-    branches: [ master, 2.x ]
+    branches: [ master ]
   pull_request:
-    branches: [ master, 2.x ]
+    branches: [ master ]
 
 jobs:
   compile_scala_212:
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/master' && github.ref != 'refs/heads/2.x'
+    if: github.ref != 'refs/heads/master'
 
     timeout-minutes: 20
 
@@ -45,7 +45,7 @@ jobs:
 
   compile_scala_213:
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/master' && github.ref != 'refs/heads/2.x'
+    if: github.ref != 'refs/heads/master'
 
     timeout-minutes: 20
 
@@ -81,7 +81,7 @@ jobs:
 
   compile_scala_3:
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/master' && github.ref != 'refs/heads/2.x'
+    if: github.ref != 'refs/heads/master'
 
     timeout-minutes: 20
 
@@ -166,7 +166,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/2.x'
+    if: github.ref == 'refs/heads/master'
 
     steps:
       - uses: actions/checkout@v2
