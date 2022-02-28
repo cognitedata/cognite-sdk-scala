@@ -8,7 +8,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.zip.GZIPInputStream
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.IO
 import sttp.client3._
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
@@ -20,7 +20,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.{BeforeAndAfter, OptionValues}
 import org.scalatest.EitherValues.convertEitherToValuable
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import cats.effect.unsafe.implicits.global
+
 import scala.io.Source
 
 class EchoServlet extends HttpServlet {
@@ -36,9 +37,6 @@ class EchoServlet extends HttpServlet {
 
 @SuppressWarnings(Array("org.wartremover.warts.GlobalExecutionContext", "org.wartremover.warts.NonUnitStatements"))
 class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAfter {
-  implicit val cs: ContextShift[IO] = IO.contextShift(global)
-  implicit val timer: Timer[IO] = IO.timer(global)
-
   val port: Int = 50000 + (java.lang.Math.random() * 1000).toInt
 
   val server: Server = new Server(port)

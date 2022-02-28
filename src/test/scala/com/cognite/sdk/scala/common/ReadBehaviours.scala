@@ -74,11 +74,13 @@ trait ReadBehaviours extends Matchers with OptionValues { this: AnyFlatSpec =>
       first2Length should be(2)
       val allLength = readable.list(Some(3)).compile.toList.length
       allLength should be(3)
-      val unlimitedLength = readable.list().map(_ => 1).compile.toList.length
+      // Limit to 50k as we have a silly number of items for some resource types in our test project.
+      val unlimitedLength = readable.list().take(50000).map(_ => 1).compile.toList.length
       val partitionsLength = readable
         .listPartitions(40)
         .fold(fs2.Stream.empty)(_ ++ _)
         .map(_ => 1)
+        .take(50000)
         .compile
         .toList
         .length

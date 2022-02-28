@@ -1,8 +1,8 @@
 package com.cognite.sdk.scala.common
 
-import java.util.concurrent.Executors
 import cats.effect._
-import cats.effect.laws.util.TestContext
+import cats.effect.implicits.commutativeApplicativeForParallelF
+import cats.effect.unsafe.implicits._
 import cats.implicits.catsStdInstancesForList
 import cats.syntax.parallel._
 import com.cognite.sdk.scala.v1._
@@ -17,7 +17,6 @@ import sttp.model.{Header, Method, StatusCode}
 import sttp.monad.MonadError
 
 import scala.collection.immutable.Seq
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.Var"))
@@ -25,11 +24,6 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
   val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
   val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
-
-  implicit val testContext: TestContext = TestContext()
-  implicit val cs: ContextShift[IO] =
-    IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4)))
-  implicit val timer: Timer[IO] = testContext.timer[IO]
 
   // Override sttpBackend because this doesn't work with the testing backend
   implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
@@ -147,8 +141,8 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
     val io: IO[Unit] = for {
       authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials, refreshSecondsBeforeTTL = 1)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 1)
-      _ <- IO(testContext.tick(1.seconds))
+      _ <- IO { numTokenRequests shouldBe 1 }
+      _ <- IO.sleep(1.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- IO(numTokenRequests shouldBe 2)
     } yield ()

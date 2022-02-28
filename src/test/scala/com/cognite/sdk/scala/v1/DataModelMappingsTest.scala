@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.v1
 
+import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.{Items, RetryWhile, SdkException}
 
 import java.util.UUID

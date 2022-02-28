@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.v1
 
+import cats.effect.unsafe.implicits.global
 //import cats.Id
 import com.cognite.sdk.scala.common.{Items, RetryWhile}
 //import sttp.client3.testing.SttpBackendStub

@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1
 
-import cats.effect.{ContextShift, IO, Timer}
-import cats.effect.laws.util.TestContext
+import cats.effect.unsafe.implicits.global
+import cats.effect.IO
 import com.cognite.sdk.scala.common.OAuth2
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -9,8 +9,6 @@ import sttp.client3._
 import sttp.client3.SttpBackend
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
-import java.util.concurrent.Executors
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 
 @SuppressWarnings(
@@ -31,11 +29,6 @@ trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
     scopes = List("https://bluefield.cognitedata.com/.default"),
     cdfProjectName = "extractor-bluefield-testing"
   )
-
-  implicit val testContext: TestContext = TestContext()
-  implicit val cs: ContextShift[IO] =
-    IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4)))
-  implicit val timer: Timer[IO] = testContext.timer[IO]
 
   // Override sttpBackend because this doesn't work with the testing backend
   implicit val sttpBackendAuth: SttpBackend[IO, Any] =
