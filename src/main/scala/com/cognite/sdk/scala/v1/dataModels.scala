@@ -22,14 +22,21 @@ final case class DataModel(
     indexes: Option[Seq[DataModelPropertyIndex]] = None
 )
 
-final case class DataModelMapping(
-    externalId: Option[String] = None,
-    properties: Option[Map[String, DataModelProperty]] = None
+final case class DataModelListInput(includeInheritedProperties: Boolean)
+
+final case class DataModelGetByExternalIdsInput[A](
+    items: Seq[A],
+    includeInheritedProperties: Boolean,
+    ignoreUnknownIds: Boolean
 )
 
-final case class DataModelInstance(
-    modelExternalId: Option[String] = None,
+/*final case class DataModelMapping(
     externalId: Option[String] = None,
+    properties: Option[Map[String, DataModelProperty]] = None
+)*/
+
+final case class DataModelInstance(
+    modelExternalId: String,
     properties: Option[Map[String, Json]] = None
 )
 
@@ -73,7 +80,6 @@ final case class DataModelInstanceQuery(
 
 final case class DataModelInstanceQueryResponse(
     modelExternalId: String,
-    externalId: String,
     properties: Option[Map[String, Json]] = None
 )
 

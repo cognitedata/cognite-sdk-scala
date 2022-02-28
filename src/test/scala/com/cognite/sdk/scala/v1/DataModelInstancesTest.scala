@@ -5,6 +5,9 @@ package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.{CdpApiException, Items, RetryWhile}
 import io.circe.Json
+import org.scalatest.BeforeAndAfterAll
+
+import java.util.UUID
 
 //import cats.Id
 //import sttp.client3.testing.SttpBackendStub
@@ -18,48 +21,84 @@ import scala.collection.immutable.Seq
     "org.wartremover.warts.NonUnitStatements"
   )
 )
-class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
+class DataModelInstancesTest
+    extends CommonDataModelTestHelper
+    with RetryWhile
+    with BeforeAndAfterAll {
+  val uuid = UUID.randomUUID.toString
+  val dataPropString = DataModelProperty("text", Some(true))
+  val dataPropBool = DataModelProperty("boolean", Some(true))
+  val dataPropFloat =
+    DataModelProperty("float64", Some(true)) // VH TODO change this to false to test
+
+  val dataModel = DataModel(
+    s"Equipment-${uuid.substring(0, 8)}",
+    Some(
+      Map(
+        "prop_string" -> dataPropString,
+        "prop_bool" -> dataPropBool,
+        "prop_float" -> dataPropFloat
+      )
+    )
+  )
 
   val dataModelInstanceToCreate1 =
     DataModelInstance(
-      Some("Equipment-85696cfa"),
-      Some("equipment_43"),
+      dataModel.externalId,
       Some(
         Map(
-          "name" -> Json.fromString("EQ0001"),
-          "col_float" -> Json.fromDoubleOrNull(0)
+          "externalId" -> Json.fromString("equipment_43"),
+          "prop_string" -> Json.fromString("EQ0001"),
+          "prop_float" -> Json.fromDoubleOrNull(0)
         )
       )
     )
 
   val dataModelInstanceToCreate2 =
     DataModelInstance(
-      Some("Equipment-85696cfa"),
-      Some("equipment_44"),
+      dataModel.externalId,
       Some(
         Map(
-          "name" -> Json.fromString("EQ0002"),
-          "col_bool" -> Json.fromBoolean(true),
-          "col_float" -> Json.fromDoubleOrNull(1.64)
+          "externalId" -> Json.fromString("equipment_44"),
+          "prop_string" -> Json.fromString("EQ0002"),
+          "prop_bool" -> Json.fromBoolean(true),
+          "prop_float" -> Json.fromDoubleOrNull(1.64)
         )
       )
     )
 
   val dataModelInstanceToCreate3 =
     DataModelInstance(
-      Some("Equipment-85696cfa"),
-      Some("equipment_45"),
+      dataModel.externalId,
       Some(
         Map(
-          "name" -> Json.fromString("EQ0011"),
-          "col_bool" -> Json.fromBoolean(false),
-          "col_float" -> Json.fromDoubleOrNull(3.5)
+          "externalId" -> Json.fromString("equipment_45"),
+          "prop_string" -> Json.fromString("EQ0011"),
+          "prop_bool" -> Json.fromBoolean(false),
+          "prop_float" -> Json.fromDoubleOrNull(3.5)
         )
       )
     )
 
   val toCreates =
     Seq(dataModelInstanceToCreate1, dataModelInstanceToCreate2, dataModelInstanceToCreate3)
+
+  override def beforeAll(): Unit = {
+    val dataModels =
+      blueFieldClient.dataModels
+        .createItems(Items[DataModel](Seq(dataModel)))
+        .unsafeRunSync()
+        .toList
+    dataModels.contains(dataModel) shouldBe true
+    ()
+  }
+
+  override def afterAll(): Unit = {
+    blueFieldClient.dataModels.deleteItems(Seq(dataModel.externalId)).unsafeRunSync()
+    val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
+    dataModels.contains(dataModel) shouldBe false
+    ()
+  }
 
   "Insert data model instances" should "work with multiple input" in {
     val dataModelInstances = blueFieldClient.dataModelInstances
@@ -77,7 +116,7 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
     // VH TODO remove this once 500 hitting rate is stable
     /*val expectedBody = StringBody(
       s"""{"items":[{"modelExternalId":"${dataModelInstanceToCreate.externalId}",
-      "properties":{"name":{"type":"text","nullable":true},
+      "properties":{"prop_string":{"type":"text","nullable":true},
       "description":{"type":"text","nullable":true}}}]}""".stripMargin,
       "utf-8",
       MediaType.ApplicationJson
@@ -114,11 +153,11 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
 
   it should "fail if input data type is not correct" in {
     val invalidInput = DataModelInstance(
-      Some("Equipment-85696cfa"),
-      Some("equipment_45"),
+      dataModel.externalId,
       Some(
         Map(
-          "col_float" -> Json.fromString("abc")
+          "externalId" -> Json.fromString("equipment_47"),
+          "prop_float" -> Json.fromString("abc")
         )
       )
     )
@@ -135,23 +174,64 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
 
   }
 
-  "Query data model instances" should "work with empty filter" in {
-    val inputNoFilterQuery = DataModelInstanceQuery("Equipment-85696cfa")
+  private def insertDMIBeforeQuery() = {
+    val dataModelInstances = blueFieldClient.dataModelInstances
+      .createItems(
+        Items[DataModelInstance](
+          toCreates
+        )
+      )
+      .unsafeRunSync()
+      .toList
+    dataModelInstances.size shouldBe 3
+    dataModelInstances
+  }
+
+  private def deleteDMIAfterQuery() = {
+    val toDeletes =
+      toCreates.flatMap(_.properties).flatMap(_.get("externalId").map(_.asString.getOrElse("")))
+    blueFieldClient.dataModelInstances
+      .deleteByExternalIds(toDeletes)
+      .unsafeRunSync()
+
+    // make sure that data is deleted
+    val inputNoFilterQuery = DataModelInstanceQuery(dataModel.externalId)
+    val outputNoFilter = blueFieldClient.dataModelInstances
+      .query(inputNoFilterQuery)
+      .unsafeRunSync()
+      .items
+      .toList
+    outputNoFilter.isEmpty shouldBe true
+  }
+
+  private def initAndCleanUpDataForQuery(testCode: Seq[DataModelInstance] => Any): Unit =
+    try {
+      val dataModelInstances: Seq[DataModelInstance] = insertDMIBeforeQuery()
+      val _ = testCode(dataModelInstances)
+    } catch {
+      case t: Throwable => throw t
+    } finally {
+      deleteDMIAfterQuery()
+      ()
+    }
+
+  "Query data model instances" should "work with empty filter" in initAndCleanUpDataForQuery { _ =>
+    val inputNoFilterQuery = DataModelInstanceQuery(dataModel.externalId)
     val outputNoFilter = blueFieldClient.dataModelInstances
       .query(inputNoFilterQuery)
       .unsafeRunSync()
     outputNoFilter.items.toList.size shouldBe 3
   }
 
-  it should "work with AND filter" in {
+  it should "work with AND filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryAnd = DataModelInstanceQuery(
-      "Equipment-85696cfa",
+      dataModel.externalId,
       Some(
         DMIAndFilter(
           Seq(
-            DMIEqualsFilter(Seq("name"), Json.fromString("EQ0002")),
-            DMIEqualsFilter(Seq("col_bool"), Json.fromBoolean(true)),
-            DMIEqualsFilter(Seq("col_float"), Json.fromFloatOrNull(1.64f))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ0002")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), Json.fromBoolean(true)),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_float"), Json.fromFloatOrNull(1.64f))
           )
         )
       )
@@ -166,12 +246,12 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
     outputQueryAnd.map(_.properties).toSet shouldBe Set(dataModelInstanceToCreate2.properties)
 
     val inputQueryAnd2 = DataModelInstanceQuery(
-      "Equipment-85696cfa",
+      dataModel.externalId,
       Some(
         DMIAndFilter(
           Seq(
-            DMIEqualsFilter(Seq("name"), Json.fromString("EQ0001")),
-            DMIEqualsFilter(Seq("col_bool"), Json.fromBoolean(true))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ0001")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), Json.fromBoolean(true))
           )
         )
       )
@@ -185,14 +265,14 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
     outputQueryAndEmpty.isEmpty shouldBe true
   }
 
-  it should "work with OR filter" in {
+  it should "work with OR filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryOr = DataModelInstanceQuery(
-      "Equipment-85696cfa",
+      dataModel.externalId,
       Some(
         DMIOrFilter(
           Seq(
-            DMIEqualsFilter(Seq("name"), Json.fromString("EQ0011")),
-            DMIEqualsFilter(Seq("col_bool"), Json.fromBoolean(true))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ0011")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), Json.fromBoolean(true))
           )
         )
       )
@@ -210,12 +290,15 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
     )
   }
 
-  it should "work with NOT filter" in {
+  it should "work with NOT filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryNot = DataModelInstanceQuery(
-      "Equipment-85696cfa",
+      dataModel.externalId,
       Some(
         DMINotFilter(
-          DMIInFilter(Seq("name"), Seq(Json.fromString("EQ0002"), Json.fromString("EQ0011")))
+          DMIInFilter(
+            Seq(dataModel.externalId, "prop_string"),
+            Seq(Json.fromString("EQ0002"), Json.fromString("EQ0011"))
+          )
         )
       )
     )
@@ -229,11 +312,11 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
     outputQueryNot.map(_.properties).toSet shouldBe Set(dataModelInstanceToCreate1.properties)
   }
 
-  it should "work with PREFIX filter" in {
+  it should "work with PREFIX filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryPrefix = DataModelInstanceQuery(
-      "Equipment-85696cfa",
+      dataModel.externalId,
       Some(
-        DMIPrefixFilter(Seq("name"), Json.fromString("EQ000"))
+        DMIPrefixFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ000"))
       )
     )
     val outputQueryPrefix = blueFieldClient.dataModelInstances
@@ -249,11 +332,14 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
     )
   }
 
-  it should "work with RANGE filter" in {
+  it should "work with RANGE filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryRange = DataModelInstanceQuery(
-      "Equipment-85696cfa",
+      dataModel.externalId,
       Some(
-        DMIRangeFilter(Seq("col_float"), gte = Some(Json.fromFloatOrNull(1.64f)))
+        DMIRangeFilter(
+          Seq(dataModel.externalId, "prop_float"),
+          gte = Some(Json.fromFloatOrNull(1.64f))
+        )
       )
     )
     val outputQueryRange = blueFieldClient.dataModelInstances
@@ -268,11 +354,11 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
     )
   }
 
-  it should "work with EXISTS filter" in {
+  it should "work with EXISTS filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryExists = DataModelInstanceQuery(
-      "Equipment-85696cfa",
+      dataModel.externalId,
       Some(
-        DMIExistsFilter(Seq("col_bool"))
+        DMIExistsFilter(Seq(dataModel.externalId, "prop_bool"))
       )
     )
     val outputQueryExists = blueFieldClient.dataModelInstances
@@ -288,12 +374,12 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   // Not yet supported
-  ignore should "work with CONTAINS ANY filter" in {
+  ignore should "work with CONTAINS ANY filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryContainsAny = DataModelInstanceQuery(
-      "Equipment-85696cfa",
+      dataModel.externalId,
       Some(
         DMIContainsAnyFilter(
-          Seq("col_float"),
+          Seq(dataModel.externalId, "prop_float"),
           Seq(Json.fromDoubleOrNull(0), Json.fromFloatOrNull(3.5f))
         )
       )
@@ -311,12 +397,12 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   // Not yet supported
-  ignore should "work with CONTAINS ALL filter" in {
+  ignore should "work with CONTAINS ALL filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryContainsAll = DataModelInstanceQuery(
-      "Equipment-85696cfa",
+      dataModel.externalId,
       Some(
         DMIContainsAllFilter(
-          Seq("col_float", "name"),
+          Seq(dataModel.externalId, "prop_float", "prop_string"),
           Seq(Json.fromDoubleOrNull(0), Json.fromString("EQ0001"))
         )
       )
@@ -333,13 +419,13 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   // Not yet supported
-  ignore should "work with sort" in {
+  ignore should "work with sort" in initAndCleanUpDataForQuery { _ =>
     val inputQueryExists = DataModelInstanceQuery(
-      "Equipment-85696cfa",
+      dataModel.externalId,
       Some(
-        DMIExistsFilter(Seq("col_float"))
+        DMIExistsFilter(Seq(dataModel.externalId, "prop_float"))
       ),
-      Some(Seq("col_float:desc"))
+      Some(Seq(dataModel.externalId, "col_float:desc"))
     )
     val outputQueryExists = blueFieldClient.dataModelInstances
       .query(inputQueryExists)
@@ -354,14 +440,14 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
     ).map(_.properties)
   }
 
-  it should "work with limit" in {
+  it should "work with limit" in initAndCleanUpDataForQuery { _ =>
     val inputQueryOr = DataModelInstanceQuery(
-      "Equipment-85696cfa",
+      dataModel.externalId,
       Some(
         DMIOrFilter(
           Seq(
-            DMIEqualsFilter(Seq("name"), Json.fromString("EQ0011")),
-            DMIEqualsFilter(Seq("col_bool"), Json.fromBoolean(true))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ0011")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), Json.fromBoolean(true))
           )
         )
       ),
@@ -390,8 +476,8 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
   "List data model instances" should "work with multiple externalIds" ignore {
     val toGets = toCreates.map { d =>
       DataModelInstanceByExternalId(
-        d.externalId.getOrElse(""),
-        d.modelExternalId.getOrElse("")
+        d.properties.flatMap(_.get("externalId")).flatMap(_.asString).getOrElse(""),
+        d.modelExternalId
       )
     }
     val outputList = blueFieldClient.dataModelInstances
@@ -406,7 +492,7 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
   ignore should "raise an exception if input has invalid externalId and ignoreUnknownIds is false" in {
     the[CdpApiException] thrownBy blueFieldClient.dataModelInstances
       .retrieveByExternalIds(
-        Seq(DataModelInstanceByExternalId("Equipment-85696cfa", "toto")),
+        Seq(DataModelInstanceByExternalId(dataModel.externalId, "toto")),
         false
       )
       .unsafeRunSync()
@@ -417,7 +503,7 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
   ignore should "ignore if input has invalid externalId and ignoreUnknownIds is true" in {
     val res = blueFieldClient.dataModelInstances
       .retrieveByExternalIds(
-        Seq(DataModelInstanceByExternalId("Equipment-85696cfa", "toto")),
+        Seq(DataModelInstanceByExternalId(dataModel.externalId, "toto")),
         true
       )
       .unsafeRunSync()
@@ -427,14 +513,15 @@ class DataModelInstancesTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   "Delete data model instances" should "work with multiple externalIds" in {
-    val toDeletes = toCreates.flatMap(_.externalId)
+    val toDeletes =
+      toCreates.flatMap(_.properties).flatMap(_.get("externalId").map(_.asString.getOrElse("")))
 
     blueFieldClient.dataModelInstances
       .deleteByExternalIds(toDeletes)
       .unsafeRunSync()
 
     // make sure that data is deleted
-    val inputNoFilterQuery = DataModelInstanceQuery("Equipment-85696cfa")
+    val inputNoFilterQuery = DataModelInstanceQuery(dataModel.externalId)
     val outputNoFilter = blueFieldClient.dataModelInstances
       .query(inputNoFilterQuery)
       .unsafeRunSync()

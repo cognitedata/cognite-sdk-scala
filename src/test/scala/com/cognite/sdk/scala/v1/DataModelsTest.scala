@@ -13,29 +13,34 @@ import scala.collection.immutable.Seq
 
 @SuppressWarnings(
   Array(
+    "org.wartremover.warts.PublicInference",
     "org.wartremover.warts.NonUnitStatements"
   )
 )
 class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
+  val uuid = UUID.randomUUID.toString
+  val dataPropName = DataModelProperty("text", Some(true))
+  val dataPropDescription = DataModelProperty("text", Some(true))
+  // val dataPropIndex = DataModelPropertyIndex(Some("name_descr"), Some(Seq("name", "description")))
+
+  val dataModel = DataModel(
+    s"Equipment-${uuid.substring(0, 8)}",
+    Some(
+      Map(
+        "name" -> dataPropName,
+        "description" -> dataPropDescription
+      )
+    ),
+    None, // Some(Seq("Asset", "Pump")),
+    None // Some(Seq(dataPropIndex))
+  )
+
+  val expectedDataModelOutput = dataModel.copy(properties =
+    dataModel.properties.map(x => x ++ Map("externalId" -> DataModelProperty("text", Some(false))))
+  )
+
   "DataModels" should "create data models definitions" in {
-    val uuid = UUID.randomUUID.toString
-    val dataPropName = DataModelProperty("text", Some(true))
-    val dataPropDescription = DataModelProperty("text", Some(true))
-    // val dataPropIndex = DataModelPropertyIndex(Some("name_descr"), Some(Seq("name", "description")))
-
-    val dataModel = DataModel(
-      s"Equipment-${uuid.substring(0, 8)}",
-      Some(
-        Map(
-          "name" -> dataPropName,
-          "description" -> dataPropDescription
-        )
-      ),
-      None, // Some(Seq("Asset", "Pump")),
-      None // Some(Seq(dataPropIndex))
-    )
-
     val dataModels =
       blueFieldClient.dataModels
         .createItems(Items[DataModel](Seq(dataModel)))
@@ -81,36 +86,15 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   it should "list all data models definitions" in {
-    val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
+    val dataModels = blueFieldClient.dataModels.list(true).unsafeRunSync().toList
     dataModels.nonEmpty shouldBe true
+    dataModels.contains(expectedDataModelOutput) shouldBe true
   }
 
-  ignore should "delete data models definitions" in {
-    val uuid = UUID.randomUUID.toString
-    val dataPropName = DataModelProperty("text", Some(true))
-    val dataPropDescription = DataModelProperty("text", Some(true))
-
-    val newDataModel = DataModel(
-      s"Equipment-${uuid.substring(0, 8)}",
-      Some(
-        Map(
-          "name" -> dataPropName,
-          "description" -> dataPropDescription
-        )
-      )
-    )
-
-    val outputCrates =
-      blueFieldClient.dataModels
-        .createItems(Items[DataModel](Seq(newDataModel)))
-        .unsafeRunSync()
-        .toList
-    outputCrates.contains(newDataModel) shouldBe true
-
-    blueFieldClient.dataModels.deleteItems(Seq(newDataModel.externalId), true).unsafeRunSync()
+  it should "delete data models definitions" in {
+    blueFieldClient.dataModels.deleteItems(Seq(dataModel.externalId)).unsafeRunSync()
 
     val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
-    dataModels.contains(newDataModel) shouldBe false
+    dataModels.contains(expectedDataModelOutput) shouldBe false
   }
-
 }

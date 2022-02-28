@@ -25,15 +25,16 @@ class DataModels[F[_]](val requestSession: RequestSession[F])
     )
   }
 
-  def deleteItems(externalIds: Seq[String], ignoreUnknownIds: Boolean): F[Unit] =
-    requestSession.post[Unit, Unit, ItemsWithIgnoreUnknownIds[CogniteId]](
-      ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId(_)), ignoreUnknownIds),
+  def deleteItems(externalIds: Seq[String]): F[Unit] =
+    requestSession.post[Unit, Unit, Items[CogniteId]](
+      Items(externalIds.map(CogniteExternalId(_))),
       uri"$baseUrl/delete",
       _ => ()
     )
 
-  def list(): F[Seq[DataModel]] =
-    requestSession.postEmptyBody[Seq[DataModel], Items[DataModel]](
+  def list(includeInheritedProperties: Boolean = false): F[Seq[DataModel]] =
+    requestSession.post[Seq[DataModel], Items[DataModel], DataModelListInput](
+      DataModelListInput(includeInheritedProperties),
       uri"$baseUrl/list",
       value => value.items
     )
@@ -47,6 +48,8 @@ object DataModels {
     deriveEncoder[DataModelProperty]
   implicit val dataModelEncoder: Encoder[DataModel] = deriveEncoder[DataModel]
   implicit val dataModelItemsEncoder: Encoder[Items[DataModel]] = deriveEncoder[Items[DataModel]]
+  implicit val dataModelListInputEncoder: Encoder[DataModelListInput] =
+    deriveEncoder[DataModelListInput]
 
   implicit val dataModelPropertyIndexDecoder: Decoder[DataModelPropertyIndex] =
     deriveDecoder[DataModelPropertyIndex]

@@ -44,6 +44,32 @@ class DataModelInstances[F[_]](val requestSession: RequestSession[F])
     )
   }
 
+  /*private def queryColumnsAndStream(
+      query: DataModelInstanceQuery,
+      batchSize: Int
+  ): F[fs2.Stream[F, DataModelInstanceQueryResponse]] =
+    sendQuery(query, batchSize)
+
+  private def sendQuery(
+      query: DataModelInstanceQuery,
+      batchSize: Int
+  ): F[ItemsWithCursor[DataModelInstanceQueryResponse]] =
+    requestSession
+      .post[ItemsWithCursor[DataModelInstanceQueryResponse], ItemsWithCursor[
+        DataModelInstanceQueryResponse
+      ], DataModelInstanceQuery](
+        query.copy(
+          cursor = query.cursor,
+          limit = Some(math.min(batchSize, query.limit.getOrElse(batchSize)))
+        ),
+        uri"$baseUrl/list",
+        v => v
+      )
+
+  def queryStream(
+      inputQuery: DataModelInstanceQuery
+  ): fs2.Stream[F, DataModelInstanceQueryResponse] = {}*/
+
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
 

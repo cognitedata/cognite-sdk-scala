@@ -5,38 +5,45 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import io.circe.generic.semiauto.deriveDecoder
-import io.circe.Decoder
+import io.circe.Encoder
+import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
+import sttp.client3.circe._
 
 class DataModelMappings[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
-    with RetrieveByExternalIdsWithIgnoreUnknownIds[DataModelMapping, F]
     with BaseUrl {
   import DataModelMappings._
-  override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/mappings"
-
-  def list(): F[Seq[DataModelMapping]] =
-    requestSession.postEmptyBody[Seq[DataModelMapping], Items[DataModelMapping]](
-      uri"$baseUrl/list",
-      value => value.items
-    )
+  import DataModels.dataModelItemsDecoder
+  override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/definitions"
 
   def retrieveByExternalIds(
       externalIds: Seq[String],
-      ignoreUnknownIds: Boolean
-  ): F[Seq[DataModelMapping]] =
-    RetrieveByExternalIdsWithIgnoreUnknownIds.retrieveByExternalIds(
-      requestSession,
-      uri"$baseUrl",
-      externalIds,
-      ignoreUnknownIds
-    )
+      includeInheritedProperties: Boolean = false,
+      ignoreUnknownIds: Boolean = false
+  ): F[Seq[DataModel]] =
+    requestSession
+      .post[Seq[DataModel], Items[DataModel], DataModelGetByExternalIdsInput[
+        CogniteId
+      ]](
+        DataModelGetByExternalIdsInput(
+          externalIds.map(CogniteExternalId(_)),
+          includeInheritedProperties,
+          ignoreUnknownIds
+        ),
+        uri"$baseUrl/byids",
+        value => value.items
+      )
 }
 
 object DataModelMappings {
-  import DataModels.dataModelPropertyDecoder
-  implicit val dataModelMappingDecoder: Decoder[DataModelMapping] = deriveDecoder[DataModelMapping]
-  implicit val dataModelMappingItemsDecoder: Decoder[Items[DataModelMapping]] =
-    deriveDecoder[Items[DataModelMapping]]
+
+  implicit val dataModelGetByCogniteIdIdsEncoder
+      : Encoder[DataModelGetByExternalIdsInput[CogniteId]] =
+    deriveEncoder[DataModelGetByExternalIdsInput[CogniteId]]
+
+  implicit val dataModelGetByExternalIdsEncoder
+      : Encoder[DataModelGetByExternalIdsInput[CogniteExternalId]] =
+    deriveEncoder[DataModelGetByExternalIdsInput[CogniteExternalId]]
+
 }
