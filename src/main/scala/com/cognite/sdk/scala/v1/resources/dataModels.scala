@@ -39,6 +39,24 @@ class DataModels[F[_]](val requestSession: RequestSession[F])
       value => value.items
     )
 
+  def retrieveByExternalIds(
+      externalIds: Seq[String],
+      includeInheritedProperties: Boolean = false,
+      ignoreUnknownIds: Boolean = false
+  ): F[Seq[DataModel]] =
+    requestSession
+      .post[Seq[DataModel], Items[DataModel], DataModelGetByExternalIdsInput[
+        CogniteId
+      ]](
+        DataModelGetByExternalIdsInput(
+          externalIds.map(CogniteExternalId(_)),
+          includeInheritedProperties,
+          ignoreUnknownIds
+        ),
+        uri"$baseUrl/byids",
+        value => value.items
+      )
+
 }
 
 object DataModels {
@@ -57,5 +75,13 @@ object DataModels {
     deriveDecoder[DataModelProperty]
   implicit val dataModelDecoder: Decoder[DataModel] = deriveDecoder[DataModel]
   implicit val dataModelItemsDecoder: Decoder[Items[DataModel]] = deriveDecoder[Items[DataModel]]
+
+  implicit val dataModelGetByCogniteIdIdsEncoder
+      : Encoder[DataModelGetByExternalIdsInput[CogniteId]] =
+    deriveEncoder[DataModelGetByExternalIdsInput[CogniteId]]
+
+  implicit val dataModelGetByExternalIdsEncoder
+      : Encoder[DataModelGetByExternalIdsInput[CogniteExternalId]] =
+    deriveEncoder[DataModelGetByExternalIdsInput[CogniteExternalId]]
 
 }

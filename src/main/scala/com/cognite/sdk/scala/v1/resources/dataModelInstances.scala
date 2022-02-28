@@ -5,6 +5,7 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import fs2.Stream
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, Json, Printer}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -44,31 +45,29 @@ class DataModelInstances[F[_]](val requestSession: RequestSession[F])
     )
   }
 
-  /*private def queryColumnsAndStream(
-      query: DataModelInstanceQuery,
-      batchSize: Int
-  ): F[fs2.Stream[F, DataModelInstanceQueryResponse]] =
-    sendQuery(query, batchSize)
+  private[sdk] def queryWithCursor(
+      inputQuery: DataModelInstanceQuery,
+      cursor: Option[String],
+      limit: Option[Int],
+      partition: Option[Partition] = None
+  ): F[ItemsWithCursor[DataModelInstanceQueryResponse]] = {
+    val _ = partition // little hack for compilation error parameter value  is never used
+    query(inputQuery.copy(cursor = cursor, limit = limit))
+  }
 
-  private def sendQuery(
-      query: DataModelInstanceQuery,
-      batchSize: Int
-  ): F[ItemsWithCursor[DataModelInstanceQueryResponse]] =
-    requestSession
-      .post[ItemsWithCursor[DataModelInstanceQueryResponse], ItemsWithCursor[
-        DataModelInstanceQueryResponse
-      ], DataModelInstanceQuery](
-        query.copy(
-          cursor = query.cursor,
-          limit = Some(math.min(batchSize, query.limit.getOrElse(batchSize)))
-        ),
-        uri"$baseUrl/list",
-        v => v
-      )
+  private[sdk] def queryWithNextCursor(
+      inputQuery: DataModelInstanceQuery,
+      cursor: Option[String],
+      limit: Option[Int]
+  ): Stream[F, DataModelInstanceQueryResponse] =
+    Readable
+      .pullFromCursor(cursor, limit, None, queryWithCursor(inputQuery, _, _, _))
+      .stream
 
   def queryStream(
-      inputQuery: DataModelInstanceQuery
-  ): fs2.Stream[F, DataModelInstanceQueryResponse] = {}*/
+      inputQuery: DataModelInstanceQuery,
+      limit: Option[Int]
+  ): fs2.Stream[F, DataModelInstanceQueryResponse] = queryWithNextCursor(inputQuery, None, limit)
 
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)

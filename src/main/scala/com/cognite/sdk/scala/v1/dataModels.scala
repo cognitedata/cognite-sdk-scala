@@ -7,7 +7,8 @@ import io.circe.Json
 
 final case class DataModelProperty(
     `type`: String,
-    nullable: Option[Boolean] = Some(true)
+    nullable: Boolean = true,
+    targetModelExternalId: Option[String] = None
 )
 
 final case class DataModelPropertyIndex(
@@ -29,11 +30,6 @@ final case class DataModelGetByExternalIdsInput[A](
     includeInheritedProperties: Boolean,
     ignoreUnknownIds: Boolean
 )
-
-/*final case class DataModelMapping(
-    externalId: Option[String] = None,
-    properties: Option[Map[String, DataModelProperty]] = None
-)*/
 
 final case class DataModelInstance(
     modelExternalId: String,

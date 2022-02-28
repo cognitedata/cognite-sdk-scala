@@ -6,7 +6,7 @@ package com.cognite.sdk.scala.v1
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.{CdpApiException, Items, RetryWhile}
 import io.circe.Json
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.util.UUID
 
@@ -27,10 +27,9 @@ class DataModelInstancesTest
     with RetryWhile
     with BeforeAndAfterAll {
   val uuid = UUID.randomUUID.toString
-  val dataPropString = DataModelProperty("text", Some(true))
-  val dataPropBool = DataModelProperty("boolean", Some(true))
-  val dataPropFloat =
-    DataModelProperty("float64", Some(true)) // VH TODO change this to false to test
+  val dataPropString = DataModelProperty("text", true)
+  val dataPropBool = DataModelProperty("boolean", true)
+  val dataPropFloat = DataModelProperty("float64", false)
 
   val dataModel = DataModel(
     s"Equipment-${uuid.substring(0, 8)}",
@@ -87,17 +86,21 @@ class DataModelInstancesTest
   override def beforeAll(): Unit = {
     val dataModels =
       blueFieldClient.dataModels
-        .createItems(Items[DataModel](Seq(dataModel)))
+        .createItems(Items[DataModel](Seq(dataModel, dataModelArray)))
         .unsafeRunSync()
         .toList
     dataModels.contains(dataModel) shouldBe true
+    dataModels.contains(dataModelArray) shouldBe true
     ()
   }
 
   override def afterAll(): Unit = {
-    blueFieldClient.dataModels.deleteItems(Seq(dataModel.externalId)).unsafeRunSync()
+    blueFieldClient.dataModels
+      .deleteItems(Seq(dataModel.externalId, dataModelArray.externalId))
+      .unsafeRunSync()
     val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
     dataModels.contains(dataModel) shouldBe false
+    dataModels.contains(dataModelArray) shouldBe false
     ()
   }
 
@@ -207,7 +210,7 @@ class DataModelInstancesTest
 
   private def initAndCleanUpDataForQuery(testCode: Seq[DataModelInstance] => Any): Unit =
     try {
-      val dataModelInstances: Seq[DataModelInstance] = insertDMIBeforeQuery()
+      val dataModelInstances = insertDMIBeforeQuery()
       val _ = testCode(dataModelInstances)
     } catch {
       case t: Throwable => throw t
@@ -374,49 +377,227 @@ class DataModelInstancesTest
     ).map(_.properties)
   }
 
-  // Not yet supported
-  ignore should "work with CONTAINS ANY filter" in initAndCleanUpDataForQuery { _ =>
-    val inputQueryContainsAny = DataModelInstanceQuery(
-      dataModel.externalId,
-      Some(
-        DMIContainsAnyFilter(
-          Seq(dataModel.externalId, "prop_float"),
-          Seq(Json.fromDoubleOrNull(0), Json.fromFloatOrNull(3.5f))
+  val dataPropArrayString = DataModelProperty("text[]", true)
+  // val dataPropArrayFloat = DataModelProperty("float[]", false) //float[] is not supported yet
+  val dataPropArrayInt = DataModelProperty("int[]", true)
+
+  val dataModelArray = DataModel(
+    s"Equipment-${UUID.randomUUID.toString.substring(0, 8)}",
+    Some(
+      Map(
+        "array_string" -> dataPropArrayString,
+        // "array_float" -> dataPropArrayFloat, //float[] is not supported yet
+        "array_int" -> dataPropArrayInt
+      )
+    )
+  )
+
+  val dmiArrayToCreate1 = DataModelInstance(
+    dataModelArray.externalId,
+    Some(
+      Map(
+        "externalId" -> Json.fromString("equipment_42"),
+        "array_string" -> Json.fromValues(
+          Seq(
+            Json.fromString("E101"),
+            Json.fromString("E102"),
+            Json.fromString("E103")
+          )
+        ),
+        /*"array_float" -> Json.fromValues(
+          Seq(
+            Json.fromFloatOrNull(1.01f),
+            Json.fromFloatOrNull(1.02f)
+          )
+        ),*/ // float[] is not supported yet
+        "array_int" -> Json.fromValues(
+          Seq(
+            Json.fromInt(1),
+            Json.fromInt(12),
+            Json.fromInt(13)
+          )
         )
       )
     )
-    val outputQueryContainsAny = blueFieldClient.dataModelInstances
-      .query(inputQueryContainsAny)
-      .unsafeRunSync()
-      .items
-      .toList
+  )
+  val dmiArrayToCreate2 = DataModelInstance(
+    dataModelArray.externalId,
+    Some(
+      Map(
+        "externalId" -> Json.fromString("equipment_43"),
+        "array_string" -> Json.fromValues(
+          Seq(
+            Json.fromString("E201"),
+            Json.fromString("E202")
+          )
+        )
+        /*"array_float" -> Json.fromValues(
+          Seq(
+            Json.fromFloatOrNull(2.02f),
+            Json.fromFloatOrNull(2.04f)
+          )
+        )*/ // float[] is not supported yet
+      )
+    )
+  )
+  val dmiArrayToCreate3 = DataModelInstance(
+    dataModelArray.externalId,
+    Some(
+      Map(
+        "externalId" -> Json.fromString("equipment_44"),
+        /*"array_float" -> Json.fromValues(
+          Seq(
+            Json.fromFloatOrNull(3.01f),
+            Json.fromFloatOrNull(3.02f)
+          )
+        ),*/ // float[] is not supported yet
+        "array_int" -> Json.fromValues(
+          Seq(
+            Json.fromInt(3),
+            Json.fromInt(12),
+            Json.fromInt(13)
+          )
+        )
+      )
+    )
+  )
 
-    outputQueryContainsAny.map(_.properties).toSet shouldBe Set(
-      dataModelInstanceToCreate1,
-      dataModelInstanceToCreate3
-    ).map(_.properties)
+  val dmiArrayToCreates =
+    Seq(dmiArrayToCreate1, dmiArrayToCreate2, dmiArrayToCreate3)
+
+  private def insertDMIArrayBeforeQuery() = {
+    val dataModelInstances = blueFieldClient.dataModelInstances
+      .createItems(
+        Items[DataModelInstance](
+          dmiArrayToCreates
+        )
+      )
+      .unsafeRunSync()
+      .toList
+    dataModelInstances.size shouldBe 3
+    dataModelInstances
   }
 
-  // Not yet supported
-  ignore should "work with CONTAINS ALL filter" in initAndCleanUpDataForQuery { _ =>
-    val inputQueryContainsAll = DataModelInstanceQuery(
-      dataModel.externalId,
+  private def deleteDMIArrayAfterQuery() = {
+    val toDeletes =
+      dmiArrayToCreates
+        .flatMap(_.properties)
+        .flatMap(_.get("externalId").map(_.asString.getOrElse("")))
+    blueFieldClient.dataModelInstances
+      .deleteByExternalIds(toDeletes)
+      .unsafeRunSync()
+
+    // make sure that data is deleted
+    val inputNoFilterQuery = DataModelInstanceQuery(dataModelArray.externalId)
+    val outputNoFilter = blueFieldClient.dataModelInstances
+      .query(inputNoFilterQuery)
+      .unsafeRunSync()
+      .items
+      .toList
+    outputNoFilter.isEmpty shouldBe true
+  }
+
+  private def initAndCleanUpArrayDataForQuery(testCode: Seq[DataModelInstance] => Any): Unit =
+    try {
+      val dataModelInstances = insertDMIArrayBeforeQuery()
+      val _ = testCode(dataModelInstances)
+    } catch {
+      case t: Throwable => throw t
+    } finally {
+      deleteDMIArrayAfterQuery()
+      ()
+    }
+
+  it should "work with CONTAINS ANY filter" in initAndCleanUpArrayDataForQuery { _ =>
+    val inputQueryContainsAnyString = DataModelInstanceQuery(
+      dataModelArray.externalId,
       Some(
-        DMIContainsAllFilter(
-          Seq(dataModel.externalId, "prop_float", "prop_string"),
-          Seq(Json.fromDoubleOrNull(0), Json.fromString("EQ0001"))
+        DMIContainsAnyFilter(
+          Seq(dataModelArray.externalId, "array_string"),
+          Seq(
+            Json.fromString("E201"),
+            Json.fromString("E103")
+          )
         )
       )
     )
-    val outputQueryContainsAll = blueFieldClient.dataModelInstances
-      .query(inputQueryContainsAll)
+    val outputQueryContainsAnyString = blueFieldClient.dataModelInstances
+      .query(inputQueryContainsAnyString)
       .unsafeRunSync()
       .items
       .toList
 
-    outputQueryContainsAll.map(_.properties).toSet shouldBe Set(
-      dataModelInstanceToCreate1
+    outputQueryContainsAnyString.map(_.properties).toSet shouldBe Set(
+      dmiArrayToCreate1,
+      dmiArrayToCreate2
     ).map(_.properties)
+
+  /*val inputQueryContainsAnyInt = DataModelInstanceQuery(
+      dataModelArray.externalId,
+      Some(
+        DMIContainsAnyFilter(
+          Seq(dataModelArray.externalId, "array_int"),
+          Seq(Json.fromInt(13))
+        )
+      )
+    )
+    val outputQueryContainsAnyInt = blueFieldClient.dataModelInstances
+      .query(inputQueryContainsAnyInt)
+      .unsafeRunSync()
+      .items
+      .toList
+
+    outputQueryContainsAnyInt.map(_.properties).toSet shouldBe Set(
+      dmiArrayToCreate1,
+      dmiArrayToCreate3
+    ).map(_.properties)*/
+
+  // VH TODO test float[]
+  }
+
+  it should "work with CONTAINS ALL filter" in initAndCleanUpArrayDataForQuery { _ =>
+    val inputQueryContainsAllString = DataModelInstanceQuery(
+      dataModelArray.externalId,
+      Some(
+        DMIContainsAnyFilter(
+          Seq(dataModelArray.externalId, "array_string"),
+          Seq(
+            Json.fromString("E201"),
+            Json.fromString("E202")
+          )
+        )
+      )
+    )
+    val outputQueryContainsAllString = blueFieldClient.dataModelInstances
+      .query(inputQueryContainsAllString)
+      .unsafeRunSync()
+      .items
+      .toList
+
+    outputQueryContainsAllString.map(_.properties).toSet shouldBe Set(dmiArrayToCreate2.properties)
+
+  /*val inputQueryContainsAllInt = DataModelInstanceQuery(
+      dataModelArray.externalId,
+      Some(
+        DMIContainsAnyFilter(
+          Seq(dataModelArray.externalId, "array_int"),
+          Seq(
+            Json.fromInt(12),
+            Json.fromInt(13)
+          )
+        )
+      )
+    )
+    val outputQueryContainsAllInt = blueFieldClient.dataModelInstances
+      .query(inputQueryContainsAllInt)
+      .unsafeRunSync()
+      .items
+      .toList
+
+    outputQueryContainsAllInt.map(_.properties).toSet shouldBe Set(
+      dmiArrayToCreate1,
+      dmiArrayToCreate3
+    ).map(_.properties)*/
   }
 
   // Not yet supported
@@ -471,6 +652,45 @@ class DataModelInstancesTest
           dataModelInstanceToCreate3
         ).map(_.properties)
       ) shouldBe true
+  }
+
+  it should "work with cursor and stream" in initAndCleanUpDataForQuery { _ =>
+    val inputQueryPrefix = DataModelInstanceQuery(
+      dataModel.externalId,
+      Some(
+        DMIPrefixFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ00"))
+      )
+    )
+
+    def checkOutputProp(output: Seq[DataModelInstanceQueryResponse]): Assertion =
+      output
+        .map(_.properties)
+        .toSet
+        .subsetOf(toCreates.map(_.properties).toSet) shouldBe true
+
+    val outputLimit1 = blueFieldClient.dataModelInstances
+      .queryStream(inputQueryPrefix, Some(1))
+      .compile
+      .toList
+      .unsafeRunSync()
+    outputLimit1.size shouldBe 1
+    checkOutputProp(outputLimit1)
+
+    val outputLimit2 = blueFieldClient.dataModelInstances
+      .queryStream(inputQueryPrefix, Some(2))
+      .compile
+      .toList
+      .unsafeRunSync()
+    outputLimit2.size shouldBe 2
+    checkOutputProp(outputLimit2)
+
+    val outputLimit3 = blueFieldClient.dataModelInstances
+      .queryStream(inputQueryPrefix, Some(3))
+      .compile
+      .toList
+      .unsafeRunSync()
+    outputLimit3.size shouldBe 3
+    checkOutputProp(outputLimit3)
   }
 
   // Not yet supported
