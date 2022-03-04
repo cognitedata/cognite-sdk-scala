@@ -173,9 +173,8 @@ class DataModelInstancesTest
       )
       .unsafeRunSync()
 
-    // TODO change this when ingest api return better error detail
-    exception.message.contains("Internal server error. Please report this error to") shouldBe true
-
+    exception.message.contains("invalid input") shouldBe true
+    exception.message.contains("abc") shouldBe true
   }
 
   private def insertDMIBeforeQuery() = {
