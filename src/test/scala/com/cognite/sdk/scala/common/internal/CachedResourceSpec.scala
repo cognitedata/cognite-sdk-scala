@@ -321,7 +321,7 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
   final override protected def toFuture(
       fa: IO[Assertion]
   )(implicit pos: Position): Future[Assertion] = {
-    val maxTestDuration = 5.seconds
+    val maxTestDuration = 15.seconds
     val test = fa
       .timeoutTo(
         maxTestDuration,
