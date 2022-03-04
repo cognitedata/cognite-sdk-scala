@@ -7,6 +7,8 @@ import java.time.Instant
 import fs2._
 import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetNull, SetValue, WritableBehaviors}
 
+import scala.util.control.NonFatal
+
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.TraversableOps", "org.wartremover.warts.Null"))
 class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
@@ -56,61 +58,77 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     idsThatDoNotExist
   )
 
-  private def createEvents(externalIdsPrefix:String) = {
-    val keys = (1 to 4).map(_ => shortRandom())
-    val events = keys.map(k=>
-      EventCreate(description = Some("scala-sdk-delete-cogniteId-" + k), externalId =  Some(s"$externalIdsPrefix-$k"))
-    )
+  private def createEvents(externalIdsPrefix: String) = {
+    val events = (1 until 5).map { k =>
+      val externalId = Some(s"$externalIdsPrefix-${k.toString}")
+      EventCreate(description = externalId, externalId = externalId)
+    }
     val createdItems = client.events.create(events)
 
     retryWithExpectedResult[Seq[Event]](
-      client.events.filter(EventsFilter(externalIdPrefix = Some(s"$externalIdsPrefix"))).compile.toList,
+      client.events.filter(EventsFilter(externalIdPrefix = Some(externalIdsPrefix))).compile.toList,
       r => r should have size 4
     )
     createdItems
   }
 
   it should "support deleting by CogniteIds" in {
-    val createdItems = createEvents("delete-cogniteId")
+    val prefix = s"delete-cogniteId-${shortRandom()}"
+    val createdEvents = createEvents(prefix)
+    try {
+      val (deleteByInternalIds, deleteByExternalIds) = createdEvents.splitAt(createdEvents.size/2)
+      val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
+      val externalIds: Seq[CogniteId] = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
 
-    val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(createdItems.size/2)
-    val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
-    val externalIds: Seq[CogniteId] = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
+      val cogniteIds = (internalIds ++ externalIds)
 
-    val cogniteIds = (internalIds ++ externalIds)
+      client.events.delete(cogniteIds, true)
 
-    client.events.delete(cogniteIds, true)
-
-    retryWithExpectedResult[Seq[Event]](
-      client.events.filter(EventsFilter(externalIdPrefix = Some(s"delete-cogniteId"))).compile.toList,
-      r => r should have size 0
-    )
+      retryWithExpectedResult[Seq[Event]](
+        client.events.filter(EventsFilter(externalIdPrefix = Some(prefix))).compile.toList,
+        r => r should have size 0
+      )
+    } finally {
+      try {
+        client.events.delete(createdEvents.map(event => CogniteInternalId(event.id)))
+      } catch {
+        case NonFatal(_) => // ignore
+      }
+    }
   }
 
   it should "raise a conflict error if input of delete contains internalId and externalId that represent the same row" in {
-    val createdItems = createEvents("delete-cogniteId")
+    val prefix = s"delete-conflict-${shortRandom()}"
+    val createdEvents = createEvents(prefix)
+    try {
+      val (deleteByInternalIds, deleteByExternalIds) = createdEvents.splitAt(createdEvents.size/2)
+      val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
+      val externalIds: Seq[CogniteId] = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
 
-    val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(createdItems.size/2)
-    val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
-    val externalIds: Seq[CogniteId] = deleteByExternalIds.flatMap(_.externalId).map(CogniteExternalId.apply)
+      val conflictInternalIdId:Seq[CogniteId] = Seq(CogniteInternalId.apply(deleteByExternalIds.head.id))
+      an[CdpApiException] shouldBe thrownBy {
+        client.events.delete(externalIds ++ conflictInternalIdId, true)
+      }
 
-    val conflictInternalIdId:Seq[CogniteId] = Seq(CogniteInternalId.apply(deleteByExternalIds.head.id))
-    an[CdpApiException] shouldBe thrownBy {
-      client.events.delete(externalIds ++ conflictInternalIdId, true)
+      val conflictExternalId:Seq[CogniteId] = Seq(CogniteExternalId.apply(deleteByInternalIds.last.externalId.getOrElse("")))
+      an[CdpApiException] shouldBe thrownBy {
+        client.events.delete(internalIds ++ conflictExternalId, true)
+      }
+
+      client.events.delete(internalIds ++ externalIds, true)
+
+      //make sure that events are deletes
+      retryWithExpectedResult[Seq[Event]](
+        client.events.filter(EventsFilter(externalIdPrefix = Some(prefix))).compile.toList,
+        r => r should have size 0
+      )
+    } finally {
+      try {
+        client.events.delete(createdEvents.map(event => CogniteInternalId(event.id)))
+      } catch {
+        case NonFatal(_) => // ignore
+      }
     }
-
-    val conflictExternalId:Seq[CogniteId] = Seq(CogniteExternalId.apply(deleteByInternalIds.last.externalId.getOrElse("")))
-    an[CdpApiException] shouldBe thrownBy {
-      client.events.delete(internalIds ++ conflictExternalId, true)
-    }
-
-    client.events.delete(internalIds ++ externalIds, true)
-
-    //make sure that events are deletes
-    retryWithExpectedResult[Seq[Event]](
-      client.events.filter(EventsFilter(externalIdPrefix = Some("delete-cogniteId"))).compile.toList,
-      r => r should have size 0
-    )
   }
 
   private val eventsToCreate = Seq(
@@ -192,15 +210,23 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   )
 
   it should "support updating by id" in {
-    val createEvents = client.events.createFromRead(
+    val createdItems = client.events.createFromRead(
       Seq(Event(description = Some("description-1")), Event(description = Some("description-2"))))
-    import com.cognite.sdk.scala.common.SetValue
-    val updatedEvents = client.events.updateById(
-      Map(createEvents.head.id -> EventUpdate(description = Some(SetValue("description-1-1"))),
-        createEvents.tail.head.id -> EventUpdate(description = Some(SetValue("description-2-1")))))
-    assert(updatedEvents.zip(createEvents).forall {
-      case (updated, read) => updated.description.value === s"${read.description.value}-1" })
-    assert(updatedEvents.zip(createEvents).forall { case (updated, read) => updated.id === read.id })
+    try {
+      import com.cognite.sdk.scala.common.SetValue
+      val updatedEvents = client.events.updateById(
+        Map(createdItems.head.id -> EventUpdate(description = Some(SetValue("description-1-1"))),
+          createdItems.tail.head.id -> EventUpdate(description = Some(SetValue("description-2-1")))))
+      assert(updatedEvents.zip(createdItems).forall {
+        case (updated, read) => updated.description.value === s"${read.description.value}-1" })
+      assert(updatedEvents.zip(createdItems).forall { case (updated, read) => updated.id === read.id })
+    } finally {
+      try {
+        client.events.delete(createdItems.map(event => CogniteInternalId(event.id)))
+      } catch {
+        case NonFatal(_) => // ignore
+      }
+    }
   }
 
   it should "support filter" in {
