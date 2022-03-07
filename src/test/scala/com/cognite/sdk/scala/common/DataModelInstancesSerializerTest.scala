@@ -3,13 +3,7 @@
 
 package com.cognite.sdk.scala.common
 
-import com.cognite.sdk.scala.v1.{
-  ArrayProperty,
-  BooleanProperty,
-  NumberProperty,
-  PropertyType,
-  StringProperty
-}
+import com.cognite.sdk.scala.v1.{ArrayProperty, BooleanProperty, NumberProperty, PropertyType, StringProperty}
 import io.circe.generic.semiauto.deriveDecoder
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -43,15 +37,15 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
       Decoder.decodeString.map(StringProperty).widen,
       Decoder
         .decodeArray[Boolean]
-        .map(x => ArrayProperty[BooleanProperty](x.map(BooleanProperty)))
+        .map(x => ArrayProperty[BooleanProperty](x.toVector.map(BooleanProperty)))
         .widen,
       Decoder
         .decodeArray[Double]
-        .map(x => ArrayProperty[NumberProperty](x.map(NumberProperty)))
+        .map(x => ArrayProperty[NumberProperty](x.toVector.map(NumberProperty)))
         .widen,
       Decoder
         .decodeArray[String]
-        .map(x => ArrayProperty[StringProperty](x.map(StringProperty)))
+        .map(x => ArrayProperty[StringProperty](x.toVector.map(StringProperty)))
         .widen
     ).reduceLeft(_ or _)
 
@@ -71,16 +65,6 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
 
         val Right(dmiResponse) = res
 
-        dmiResponse.properties.map { prop =>
-          prop.foreach { case (k, v) =>
-            println(s" k = ${k} =>")
-            v match {
-              case arr: ArrayProperty[_] => arr.values.foreach(x => println(s"${x}, "))
-              case x => println(x)
-            }
-          }
-        }
-
         dmiResponse shouldBe DMIResponse(
           "tada",
           Some(
@@ -89,13 +73,13 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
               "prop_number" -> NumberProperty(23.0),
               "prop_string" -> StringProperty("toto"),
               "arr_bool" -> ArrayProperty[BooleanProperty](
-                Array(BooleanProperty(true), BooleanProperty(false), BooleanProperty(true))
+                Vector(true,false,true).map(BooleanProperty)
               ),
               "arr_number" -> ArrayProperty[NumberProperty](
-                Array(NumberProperty(1.2), NumberProperty(2), NumberProperty(4.654))
+                Vector(1.2, 2, 4.654).map(NumberProperty)
               ),
               "arr_string" -> ArrayProperty[StringProperty](
-                Array(StringProperty("tata"), StringProperty("titi"))
+                Vector("tata", "titi").map(StringProperty)
               )
             )
           )

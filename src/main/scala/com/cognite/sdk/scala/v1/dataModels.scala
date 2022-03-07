@@ -80,7 +80,7 @@ final case class BooleanProperty(value: Boolean) extends PropertyTypePrimitive
 final case class NumberProperty(value: Double) extends PropertyTypePrimitive
 final case class StringProperty(value: String) extends PropertyTypePrimitive
 
-final case class ArrayProperty[A <: PropertyTypePrimitive](values: Array[A]) extends PropertyType
+final case class ArrayProperty[A <: PropertyTypePrimitive](values: Vector[A]) extends PropertyType
 
 final case class DataModelInstance(
     modelExternalId: String,
