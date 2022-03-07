@@ -31,11 +31,6 @@ final case class DataModelGetByExternalIdsInput[A](
     ignoreUnknownIds: Boolean
 )
 
-final case class DataModelInstance(
-    modelExternalId: String,
-    properties: Option[Map[String, Json]] = None
-)
-
 sealed trait DataModelInstanceFilter
 
 sealed trait DMIBoolFilter extends DataModelInstanceFilter
@@ -72,6 +67,24 @@ final case class DataModelInstanceQuery(
     sort: Option[Seq[String]] = None,
     limit: Option[Int] = None,
     cursor: Option[String] = None
+)
+
+sealed trait PropertyType
+
+sealed trait PropertyTypePrimitive extends PropertyType
+final case class BooleanProperty(value: Boolean) extends PropertyTypePrimitive
+/*object BooleanProperty {
+  def fromJson(json: Json): Option[BooleanProperty] =
+    json.asBoolean.map(BooleanProperty(_))
+}*/
+final case class NumberProperty(value: Double) extends PropertyTypePrimitive
+final case class StringProperty(value: String) extends PropertyTypePrimitive
+
+final case class ArrayProperty[A <: PropertyTypePrimitive](values: Array[A]) extends PropertyType
+
+final case class DataModelInstance(
+    modelExternalId: String,
+    properties: Option[Map[String, Json]] = None
 )
 
 final case class DataModelInstanceQueryResponse(
