@@ -32,22 +32,22 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
 
   implicit val decodeProp: Decoder[PropertyType] =
     List[Decoder[PropertyType]](
-      Decoder.decodeBoolean.map(BooleanProperty).widen,
-      Decoder.decodeDouble.map(NumberProperty).widen,
-      Decoder.decodeString.map(StringProperty).widen,
+      Decoder.decodeBoolean.map(BooleanProperty(_)).widen,
+      Decoder.decodeDouble.map(NumberProperty(_)).widen,
+      Decoder.decodeString.map(StringProperty(_)).widen,
       Decoder
         .decodeArray[Boolean]
-        .map(x => ArrayProperty[BooleanProperty](x.toVector.map(BooleanProperty)))
+        .map(x => ArrayProperty[BooleanProperty](x.toVector.map(BooleanProperty(_))))
         .widen,
       Decoder
         .decodeArray[Double]
-        .map(x => ArrayProperty[NumberProperty](x.toVector.map(NumberProperty)))
+        .map(x => ArrayProperty[NumberProperty](x.toVector.map(NumberProperty(_))))
         .widen,
       Decoder
         .decodeArray[String]
-        .map(x => ArrayProperty[StringProperty](x.toVector.map(StringProperty)))
+        .map(x => ArrayProperty[StringProperty](x.toVector.map(StringProperty(_))))
         .widen
-    ).reduceLeftOption(_ or _).getOrElse(Decoder.decodeString.map(StringProperty).widen)
+    ).reduceLeftOption(_ or _).getOrElse(Decoder.decodeString.map(StringProperty(_)).widen)
 
   "DataModelInstancesSerializer" when {
     "decode PropertyType" should {
@@ -73,13 +73,13 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
               "prop_number" -> NumberProperty(23.0),
               "prop_string" -> StringProperty("toto"),
               "arr_bool" -> ArrayProperty[BooleanProperty](
-                Vector(true,false,true).map(BooleanProperty)
+                Vector(true,false,true).map(BooleanProperty(_))
               ),
               "arr_number" -> ArrayProperty[NumberProperty](
-                Vector(1.2, 2, 4.654).map(NumberProperty)
+                Vector(1.2, 2, 4.654).map(NumberProperty(_))
               ),
               "arr_string" -> ArrayProperty[StringProperty](
-                Vector("tata", "titi").map(StringProperty)
+                Vector("tata", "titi").map(StringProperty(_))
               )
             )
           )
