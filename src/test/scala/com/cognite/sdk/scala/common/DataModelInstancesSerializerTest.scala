@@ -30,7 +30,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
   implicit val dmiResponseDecoder: Decoder[DMIResponse] =
     deriveDecoder[DMIResponse]
 
-  implicit val decodeEvent: Decoder[PropertyType] =
+  implicit val decodeProp: Decoder[PropertyType] =
     List[Decoder[PropertyType]](
       Decoder.decodeBoolean.map(BooleanProperty).widen,
       Decoder.decodeDouble.map(NumberProperty).widen,
@@ -47,7 +47,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
         .decodeArray[String]
         .map(x => ArrayProperty[StringProperty](x.toVector.map(StringProperty)))
         .widen
-    ).reduceLeft(_ or _)
+    ).reduceLeftOption(_ or _).getOrElse(Decoder.decodeString.map(StringProperty).widen)
 
   "DataModelInstancesSerializer" when {
     "decode PropertyType" should {
