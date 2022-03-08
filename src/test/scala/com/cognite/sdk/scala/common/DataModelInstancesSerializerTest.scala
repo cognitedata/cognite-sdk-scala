@@ -59,7 +59,8 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
                                       |    "prop_string": "toto",
                                       |    "arr_bool": [true, false, true],
                                       |    "arr_number": [1.2, 2, 4.654],
-                                      |    "arr_string": ["tata","titi"]
+                                      |    "arr_string": ["tata","titi"],
+                                      |    "arr_empty": []
                                       |} }""".stripMargin)
         res.isRight shouldBe true
 
@@ -80,6 +81,9 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
               ),
               "arr_string" -> ArrayProperty[StringProperty](
                 Vector("tata", "titi").map(StringProperty(_))
+              ),
+              "arr_empty" -> ArrayProperty(
+                Vector()
               )
             )
           )
