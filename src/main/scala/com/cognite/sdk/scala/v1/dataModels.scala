@@ -69,19 +69,6 @@ final case class DataModelInstanceQuery(
     cursor: Option[String] = None
 )
 
-sealed trait PropertyType
-
-sealed trait PropertyTypePrimitive extends PropertyType
-final case class BooleanProperty(value: Boolean) extends PropertyTypePrimitive
-/*object BooleanProperty {
-  def fromJson(json: Json): Option[BooleanProperty] =
-    json.asBoolean.map(BooleanProperty(_))
-}*/
-final case class NumberProperty(value: Double) extends PropertyTypePrimitive
-final case class StringProperty(value: String) extends PropertyTypePrimitive
-
-final case class ArrayProperty[A <: PropertyTypePrimitive](values: Vector[A]) extends PropertyType
-
 final case class DataModelInstance(
     modelExternalId: String,
     properties: Option[Map[String, Json]] = None
@@ -89,7 +76,7 @@ final case class DataModelInstance(
 
 final case class DataModelInstanceQueryResponse(
     modelExternalId: String,
-    properties: Option[Map[String, Json]] = None
+    properties: Option[Map[String, PropertyType]] = None
 )
 
 final case class DataModelInstanceByExternalId(

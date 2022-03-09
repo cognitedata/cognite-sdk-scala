@@ -19,7 +19,10 @@ import scala.collection.immutable.Seq
 @SuppressWarnings(
   Array(
     "org.wartremover.warts.PublicInference",
-    "org.wartremover.warts.NonUnitStatements"
+    "org.wartremover.warts.NonUnitStatements",
+    "org.wartremover.warts.JavaSerializable",
+    "org.wartremover.warts.Product",
+    "org.wartremover.warts.Serializable"
   )
 )
 class DataModelInstancesTest
@@ -643,15 +646,25 @@ class DataModelInstancesTest
       .toList
 
     outputQueryOr.size shouldBe 1
+    val expected: Set[Option[Map[String, PropertyType]]] = Set(
+      dataModelInstanceToCreate2,
+      dataModelInstanceToCreate3
+    ).map(_.properties)
+      .map(_.map(_.map { case (k, v) =>
+        val value = if (v.isString) {
+          StringProperty(v.asString.getOrElse(""))
+        } else if (v.isBoolean) {
+          BooleanProperty(v.asBoolean.getOrElse(false))
+        } else if (v.isNumber) {
+          Float64Property(v.asNumber.map(x => x.toDouble).getOrElse(0.0))
+        } else { ArrayProperty[StringProperty](Vector()) }
+        (k, value)
+      }))
+
     outputQueryOr
       .map(_.properties)
       .toSet
-      .subsetOf(
-        Set(
-          dataModelInstanceToCreate2,
-          dataModelInstanceToCreate3
-        ).map(_.properties)
-      ) shouldBe true
+      .subsetOf(expected) shouldBe true
   }
 
   it should "work with cursor and stream" in initAndCleanUpDataForQuery { _ =>
@@ -666,7 +679,23 @@ class DataModelInstancesTest
       output
         .map(_.properties)
         .toSet
-        .subsetOf(toCreates.map(_.properties).toSet) shouldBe true
+        .subsetOf(
+          toCreates
+            .map(_.properties)
+            .map(_.map(_.map { case (k, v) =>
+              val value = if (v.isString) {
+                StringProperty(v.asString.getOrElse(""))
+              } else if (v.isBoolean) {
+                BooleanProperty(v.asBoolean.getOrElse(false))
+              } else if (v.isNumber) {
+                Float64Property(v.asNumber.map(x => x.toDouble).getOrElse(0.0))
+              } else {
+                ArrayProperty[StringProperty](Vector())
+              }
+              (k, value)
+            }))
+            .toSet
+        ) shouldBe true
 
     val outputLimit1 = blueFieldClient.dataModelInstances
       .queryStream(inputQueryPrefix, Some(1))

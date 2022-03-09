@@ -152,4 +152,25 @@ object DataModelInstances {
       : Decoder[Items[DataModelInstanceQueryResponse]] =
     deriveDecoder[Items[DataModelInstanceQueryResponse]]
 
+  import cats.syntax.functor._
+  import io.circe.Decoder
+
+  implicit val decodeProp: Decoder[PropertyType] =
+    List[Decoder[PropertyType]](
+      Decoder.decodeBoolean.map(BooleanProperty(_)).widen,
+      Decoder.decodeDouble.map(Float64Property(_)).widen,
+      Decoder.decodeString.map(StringProperty(_)).widen,
+      Decoder
+        .decodeArray[Boolean]
+        .map(x => ArrayProperty[BooleanProperty](x.toVector.map(BooleanProperty(_))))
+        .widen,
+      Decoder
+        .decodeArray[Double]
+        .map(x => ArrayProperty[Float64Property](x.toVector.map(Float64Property(_))))
+        .widen,
+      Decoder
+        .decodeArray[String]
+        .map(x => ArrayProperty[StringProperty](x.toVector.map(StringProperty(_))))
+        .widen
+    ).reduceLeftOption(_ or _).getOrElse(Decoder.decodeString.map(StringProperty(_)).widen)
 }
