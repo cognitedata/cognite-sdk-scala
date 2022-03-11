@@ -32,7 +32,7 @@ class DataModelInstancesTest
   val uuid = UUID.randomUUID.toString
   val dataPropString = DataModelProperty("text", true)
   val dataPropBool = DataModelProperty("boolean", true)
-  val dataPropFloat = DataModelProperty("float64", false)
+  val dataPropFloat = DataModelProperty("float32", false)
 
   val dataModel = DataModel(
     s"Equipment-${uuid.substring(0, 8)}",
@@ -50,9 +50,9 @@ class DataModelInstancesTest
       dataModel.externalId,
       Some(
         Map(
-          "externalId" -> Json.fromString("equipment_43"),
-          "prop_string" -> Json.fromString("EQ0001"),
-          "prop_float" -> Json.fromDoubleOrNull(0)
+          "externalId" -> StringProperty("equipment_43"),
+          "prop_string" -> StringProperty("EQ0001"),
+          "prop_float" -> Float32Property(0.1f)
         )
       )
     )
@@ -62,10 +62,10 @@ class DataModelInstancesTest
       dataModel.externalId,
       Some(
         Map(
-          "externalId" -> Json.fromString("equipment_44"),
-          "prop_string" -> Json.fromString("EQ0002"),
-          "prop_bool" -> Json.fromBoolean(true),
-          "prop_float" -> Json.fromDoubleOrNull(1.64)
+          "externalId" -> StringProperty("equipment_44"),
+          "prop_string" -> StringProperty("EQ0002"),
+          "prop_bool" -> BooleanProperty(true),
+          "prop_float" -> Float32Property(1.64f)
         )
       )
     )
@@ -75,16 +75,104 @@ class DataModelInstancesTest
       dataModel.externalId,
       Some(
         Map(
-          "externalId" -> Json.fromString("equipment_45"),
-          "prop_string" -> Json.fromString("EQ0011"),
-          "prop_bool" -> Json.fromBoolean(false),
-          "prop_float" -> Json.fromDoubleOrNull(3.5)
+          "externalId" -> StringProperty("equipment_45"),
+          "prop_string" -> StringProperty("EQ0011"),
+          "prop_bool" -> BooleanProperty(false),
+          "prop_float" -> Float32Property(3.5f)
         )
       )
     )
 
   val toCreates =
     Seq(dataModelInstanceToCreate1, dataModelInstanceToCreate2, dataModelInstanceToCreate3)
+
+  val dataPropArrayString = DataModelProperty("text[]", true)
+  // val dataPropArrayFloat = DataModelProperty("float[]", false) //float[] is not supported yet
+  val dataPropArrayInt = DataModelProperty("int[]", true)
+
+  val dataModelArray = DataModel(
+    s"Equipment-${UUID.randomUUID.toString.substring(0, 8)}",
+    Some(
+      Map(
+        "array_string" -> dataPropArrayString,
+        // "array_float" -> dataPropArrayFloat, //float[] is not supported yet
+        "array_int" -> dataPropArrayInt
+      )
+    )
+  )
+
+  val dmiArrayToCreate1 = DataModelInstance(
+    dataModelArray.externalId,
+    Some(
+      Map(
+        "externalId" -> StringProperty("equipment_42"),
+        "array_string" -> ArrayProperty[StringProperty](
+          Vector(
+            StringProperty("E101"),
+            StringProperty("E102"),
+            StringProperty("E103")
+          )
+        ),
+        /*"array_float" -> Json.fromValues(
+          Seq(
+            Json.fromFloatOrNull(1.01f),
+            Json.fromFloatOrNull(1.02f)
+          )
+        ),*/ // float[] is not supported yet
+        "array_int" -> ArrayProperty[Int32Property](
+          Vector(
+            Int32Property(1),
+            Int32Property(12),
+            Int32Property(13)
+          )
+        )
+      )
+    )
+  )
+  val dmiArrayToCreate2 = DataModelInstance(
+    dataModelArray.externalId,
+    Some(
+      Map(
+        "externalId" -> StringProperty("equipment_43"),
+        "array_string" -> ArrayProperty(
+          Vector(
+            StringProperty("E201"),
+            StringProperty("E202")
+          )
+        )
+        /*"array_float" -> Json.fromValues(
+          Seq(
+            Json.fromFloatOrNull(2.02f),
+            Json.fromFloatOrNull(2.04f)
+          )
+        )*/ // float[] is not supported yet
+      )
+    )
+  )
+  val dmiArrayToCreate3 = DataModelInstance(
+    dataModelArray.externalId,
+    Some(
+      Map(
+        "externalId" -> StringProperty("equipment_44"),
+        /*"array_float" -> Json.fromValues(
+          Seq(
+            Json.fromFloatOrNull(3.01f),
+            Json.fromFloatOrNull(3.02f)
+          )
+        ),*/ // float[] is not supported yet
+        "array_int" -> ArrayProperty(
+          Vector(
+            Int32Property(3),
+            Int32Property(12),
+            Int32Property(13)
+          )
+        )
+      )
+    )
+  )
+
+  val dmiArrayToCreates =
+    Seq(dmiArrayToCreate1, dmiArrayToCreate2, dmiArrayToCreate3)
 
   override def beforeAll(): Unit = {
     val dataModels =
@@ -97,15 +185,14 @@ class DataModelInstancesTest
     ()
   }
 
-  override def afterAll(): Unit = {
+  override def afterAll(): Unit =
     blueFieldClient.dataModels
       .deleteItems(Seq(dataModel.externalId, dataModelArray.externalId))
       .unsafeRunSync()
-    val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
-    dataModels.contains(dataModel) shouldBe false
-    dataModels.contains(dataModelArray) shouldBe false
-    ()
-  }
+  val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
+  dataModels.contains(dataModel) shouldBe false
+  dataModels.contains(dataModelArray) shouldBe false
+  ()
 
   "Insert data model instances" should "work with multiple input" in {
     val dataModelInstances = blueFieldClient.dataModelInstances
@@ -163,8 +250,8 @@ class DataModelInstancesTest
       dataModel.externalId,
       Some(
         Map(
-          "externalId" -> Json.fromString("equipment_47"),
-          "prop_float" -> Json.fromString("abc")
+          "externalId" -> StringProperty("equipment_47"),
+          "prop_float" -> StringProperty("abc")
         )
       )
     )
@@ -176,9 +263,8 @@ class DataModelInstancesTest
       )
       .unsafeRunSync()
 
-    // TODO change this when ingest api return better error detail
-    exception.message.contains("Internal server error. Please report this error to") shouldBe true
-
+    exception.message.contains("invalid input") shouldBe true
+    exception.message.contains("abc") shouldBe true
   }
 
   private def insertDMIBeforeQuery() = {
@@ -194,7 +280,7 @@ class DataModelInstancesTest
     dataModelInstances
   }
 
-  private def deleteDMIAfterQuery() = {
+  /*private def deleteDMIAfterQuery() = {
     val toDeletes =
       toCreates.flatMap(_.properties).flatMap(_.get("externalId").map(_.asString.getOrElse("")))
     blueFieldClient.dataModelInstances
@@ -209,7 +295,7 @@ class DataModelInstancesTest
       .items
       .toList
     outputNoFilter.isEmpty shouldBe true
-  }
+  }*/
 
   private def initAndCleanUpDataForQuery(testCode: Seq[DataModelInstance] => Any): Unit =
     try {
@@ -217,17 +303,25 @@ class DataModelInstancesTest
       val _ = testCode(dataModelInstances)
     } catch {
       case t: Throwable => throw t
-    } finally {
-      deleteDMIAfterQuery()
+    } finally
+      // deleteDMIAfterQuery()
       ()
-    }
 
   "Query data model instances" should "work with empty filter" in initAndCleanUpDataForQuery { _ =>
-    val inputNoFilterQuery = DataModelInstanceQuery(dataModel.externalId)
+    val inputNoFilterQuery = DataModelInstanceQuery(
+      dataModel.externalId,
+      Some(
+        DMIAndFilter(
+          Seq(
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ0001"))
+          )
+        )
+      )
+    )
     val outputNoFilter = blueFieldClient.dataModelInstances
       .query(inputNoFilterQuery)
       .unsafeRunSync()
-    outputNoFilter.items.toList.size shouldBe 3
+    outputNoFilter.items.toList.size shouldBe 1
   }
 
   it should "work with AND filter" in initAndCleanUpDataForQuery { _ =>
@@ -250,7 +344,9 @@ class DataModelInstancesTest
       .toList
 
     outputQueryAnd.size shouldBe 1
-    outputQueryAnd.map(_.properties).toSet shouldBe Set(dataModelInstanceToCreate2.properties)
+    outputQueryAnd.map(_.properties).toSet shouldBe Set(
+      dataModelInstanceToCreate2.properties.map(_.filterKeys(_ != "externalId"))
+    )
 
     val inputQueryAnd2 = DataModelInstanceQuery(
       dataModel.externalId,
@@ -294,7 +390,7 @@ class DataModelInstancesTest
     outputQueryOr.map(_.properties).toSet shouldBe Set(
       dataModelInstanceToCreate2.properties,
       dataModelInstanceToCreate3.properties
-    )
+    ).map(_.map(_.filterKeys(_ != "externalId")))
   }
 
   it should "work with NOT filter" in initAndCleanUpDataForQuery { _ =>
@@ -316,7 +412,9 @@ class DataModelInstancesTest
       .toList
 
     outputQueryNot.size shouldBe 1
-    outputQueryNot.map(_.properties).toSet shouldBe Set(dataModelInstanceToCreate1.properties)
+    outputQueryNot.map(_.properties).toSet shouldBe Set(dataModelInstanceToCreate1.properties).map(
+      _.map(_.filterKeys(_ != "externalId"))
+    )
   }
 
   it should "work with PREFIX filter" in initAndCleanUpDataForQuery { _ =>
@@ -336,7 +434,7 @@ class DataModelInstancesTest
     outputQueryPrefix.map(_.properties).toSet shouldBe Set(
       dataModelInstanceToCreate1.properties,
       dataModelInstanceToCreate2.properties
-    )
+    ).map(_.map(_.filterKeys(_ != "externalId")))
   }
 
   it should "work with RANGE filter" in initAndCleanUpDataForQuery { _ =>
@@ -358,7 +456,7 @@ class DataModelInstancesTest
     outputQueryRange.map(_.properties).toSet shouldBe Set(
       dataModelInstanceToCreate2.properties,
       dataModelInstanceToCreate3.properties
-    )
+    ).map(_.map(_.filterKeys(_ != "externalId")))
   }
 
   it should "work with EXISTS filter" in initAndCleanUpDataForQuery { _ =>
@@ -377,96 +475,8 @@ class DataModelInstancesTest
     outputQueryExists.map(_.properties).toSet shouldBe Set(
       dataModelInstanceToCreate2,
       dataModelInstanceToCreate3
-    ).map(_.properties)
+    ).map(_.properties).map(_.map(_.filterKeys(_ != "externalId")))
   }
-
-  val dataPropArrayString = DataModelProperty("text[]", true)
-  // val dataPropArrayFloat = DataModelProperty("float[]", false) //float[] is not supported yet
-  val dataPropArrayInt = DataModelProperty("int[]", true)
-
-  val dataModelArray = DataModel(
-    s"Equipment-${UUID.randomUUID.toString.substring(0, 8)}",
-    Some(
-      Map(
-        "array_string" -> dataPropArrayString,
-        // "array_float" -> dataPropArrayFloat, //float[] is not supported yet
-        "array_int" -> dataPropArrayInt
-      )
-    )
-  )
-
-  val dmiArrayToCreate1 = DataModelInstance(
-    dataModelArray.externalId,
-    Some(
-      Map(
-        "externalId" -> Json.fromString("equipment_42"),
-        "array_string" -> Json.fromValues(
-          Seq(
-            Json.fromString("E101"),
-            Json.fromString("E102"),
-            Json.fromString("E103")
-          )
-        ),
-        /*"array_float" -> Json.fromValues(
-          Seq(
-            Json.fromFloatOrNull(1.01f),
-            Json.fromFloatOrNull(1.02f)
-          )
-        ),*/ // float[] is not supported yet
-        "array_int" -> Json.fromValues(
-          Seq(
-            Json.fromInt(1),
-            Json.fromInt(12),
-            Json.fromInt(13)
-          )
-        )
-      )
-    )
-  )
-  val dmiArrayToCreate2 = DataModelInstance(
-    dataModelArray.externalId,
-    Some(
-      Map(
-        "externalId" -> Json.fromString("equipment_43"),
-        "array_string" -> Json.fromValues(
-          Seq(
-            Json.fromString("E201"),
-            Json.fromString("E202")
-          )
-        )
-        /*"array_float" -> Json.fromValues(
-          Seq(
-            Json.fromFloatOrNull(2.02f),
-            Json.fromFloatOrNull(2.04f)
-          )
-        )*/ // float[] is not supported yet
-      )
-    )
-  )
-  val dmiArrayToCreate3 = DataModelInstance(
-    dataModelArray.externalId,
-    Some(
-      Map(
-        "externalId" -> Json.fromString("equipment_44"),
-        /*"array_float" -> Json.fromValues(
-          Seq(
-            Json.fromFloatOrNull(3.01f),
-            Json.fromFloatOrNull(3.02f)
-          )
-        ),*/ // float[] is not supported yet
-        "array_int" -> Json.fromValues(
-          Seq(
-            Json.fromInt(3),
-            Json.fromInt(12),
-            Json.fromInt(13)
-          )
-        )
-      )
-    )
-  )
-
-  val dmiArrayToCreates =
-    Seq(dmiArrayToCreate1, dmiArrayToCreate2, dmiArrayToCreate3)
 
   private def insertDMIArrayBeforeQuery() = {
     val dataModelInstances = blueFieldClient.dataModelInstances
@@ -485,7 +495,10 @@ class DataModelInstancesTest
     val toDeletes =
       dmiArrayToCreates
         .flatMap(_.properties)
-        .flatMap(_.get("externalId").map(_.asString.getOrElse("")))
+        .flatMap(_.get("externalId"))
+        .collect { case StringProperty(id) =>
+          id
+        }
     blueFieldClient.dataModelInstances
       .deleteByExternalIds(toDeletes)
       .unsafeRunSync()
@@ -533,7 +546,7 @@ class DataModelInstancesTest
     outputQueryContainsAnyString.map(_.properties).toSet shouldBe Set(
       dmiArrayToCreate1,
       dmiArrayToCreate2
-    ).map(_.properties)
+    ).map(_.properties).map(_.map(_.filterKeys(_ != "externalId")))
 
   /*val inputQueryContainsAnyInt = DataModelInstanceQuery(
       dataModelArray.externalId,
@@ -578,6 +591,7 @@ class DataModelInstancesTest
       .toList
 
     outputQueryContainsAllString.map(_.properties).toSet shouldBe Set(dmiArrayToCreate2.properties)
+      .map(_.map(_.filterKeys(_ != "externalId")))
 
   /*val inputQueryContainsAllInt = DataModelInstanceQuery(
       dataModelArray.externalId,
@@ -649,17 +663,7 @@ class DataModelInstancesTest
     val expected: Set[Option[Map[String, PropertyType]]] = Set(
       dataModelInstanceToCreate2,
       dataModelInstanceToCreate3
-    ).map(_.properties)
-      .map(_.map(_.map { case (k, v) =>
-        val value = if (v.isString) {
-          StringProperty(v.asString.getOrElse(""))
-        } else if (v.isBoolean) {
-          BooleanProperty(v.asBoolean.getOrElse(false))
-        } else if (v.isNumber) {
-          Float64Property(v.asNumber.map(x => x.toDouble).getOrElse(0.0))
-        } else { ArrayProperty[StringProperty](Vector()) }
-        (k, value)
-      }))
+    ).map(_.properties).map(_.map(_.filterKeys(_ != "externalId")))
 
     outputQueryOr
       .map(_.properties)
@@ -682,18 +686,7 @@ class DataModelInstancesTest
         .subsetOf(
           toCreates
             .map(_.properties)
-            .map(_.map(_.map { case (k, v) =>
-              val value = if (v.isString) {
-                StringProperty(v.asString.getOrElse(""))
-              } else if (v.isBoolean) {
-                BooleanProperty(v.asBoolean.getOrElse(false))
-              } else if (v.isNumber) {
-                Float64Property(v.asNumber.map(x => x.toDouble).getOrElse(0.0))
-              } else {
-                ArrayProperty[StringProperty](Vector())
-              }
-              (k, value)
-            }))
+            .map(_.map(_.filterKeys(_ != "externalId")))
             .toSet
         ) shouldBe true
 
@@ -726,7 +719,12 @@ class DataModelInstancesTest
   "List data model instances" should "work with multiple externalIds" ignore {
     val toGets = toCreates.map { d =>
       DataModelInstanceByExternalId(
-        d.properties.flatMap(_.get("externalId")).flatMap(_.asString).getOrElse(""),
+        d.properties
+          .flatMap(_.get("externalId"))
+          .collect { case StringProperty(id) =>
+            id
+          }
+          .getOrElse(""),
         d.modelExternalId
       )
     }
@@ -764,7 +762,15 @@ class DataModelInstancesTest
 
   "Delete data model instances" should "work with multiple externalIds" in {
     val toDeletes =
-      toCreates.flatMap(_.properties).flatMap(_.get("externalId").map(_.asString.getOrElse("")))
+      toCreates
+        .flatMap(_.properties)
+        .map(
+          _.get("externalId")
+            .collect { case StringProperty(id) =>
+              id
+            }
+            .getOrElse("")
+        )
 
     blueFieldClient.dataModelInstances
       .deleteByExternalIds(toDeletes)

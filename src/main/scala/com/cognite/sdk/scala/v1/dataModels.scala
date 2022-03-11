@@ -71,7 +71,7 @@ final case class DataModelInstanceQuery(
 
 final case class DataModelInstance(
     modelExternalId: String,
-    properties: Option[Map[String, Json]] = None
+    properties: Option[Map[String, PropertyType]] = None
 )
 
 final case class DataModelInstanceQueryResponse(
