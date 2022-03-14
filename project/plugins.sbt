@@ -6,9 +6,7 @@ addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.6")
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.9.3")
 addSbtPlugin("au.com.onegeek" %% "sbt-dotenv" % "2.1.233")
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.16")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.18")
 
-// Warning: These must be synced with
-// https://github.com/cognitedata/cdp-spark-datasource/blob/master/project/protoc.sbt
-addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.6") // See warning above
-libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.8"
+addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.6")
+libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.10"

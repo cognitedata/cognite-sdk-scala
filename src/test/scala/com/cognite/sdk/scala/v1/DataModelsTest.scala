@@ -102,7 +102,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
         .createItems(Items[DataModel](Seq(dataModel1, dataModel2)))
         .unsafeRunSync()
         .toList
-    (outputCreates.size >= 2) shouldBe true
+    outputCreates.size should be >= 2
     outputCreates
   }
 

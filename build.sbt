@@ -9,9 +9,9 @@ val supportedScalaVersions = List(scala212, scala213, scala3)
 // This is used only for tests.
 val jettyTestVersion = "9.4.45.v20220203"
 
-val sttpVersion = "3.4.1"
+val sttpVersion = "3.5.1"
 val circeVersion = "0.14.1"
-val catsEffectVersion = "3.3.5"
+val catsEffectVersion = "3.3.7"
 val fs2Version = "3.2.5"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
@@ -21,7 +21,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.0.3",
+  version := "2.0.5-SNAPSHOT",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -96,7 +96,7 @@ lazy val core = (project in file("."))
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
-      "org.typelevel" %% "cats-effect-kernel-testkit" % catsEffectVersion % Test,
+      "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
       "com.google.protobuf" % "protobuf-java" % "3.19.4"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
@@ -122,7 +122,7 @@ lazy val core = (project in file("."))
   )
 
 val scalaTestDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.10" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.11" % "test"
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
