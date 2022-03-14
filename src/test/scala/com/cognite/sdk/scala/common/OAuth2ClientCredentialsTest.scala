@@ -1,8 +1,8 @@
 package com.cognite.sdk.scala.common
 
-import java.util.concurrent.Executors
 import cats.effect._
-import cats.effect.laws.util.TestContext
+import cats.effect.implicits.commutativeApplicativeForParallelF
+import cats.effect.unsafe.implicits._
 import cats.implicits.catsStdInstancesForList
 import cats.syntax.parallel._
 import com.cognite.sdk.scala.v1._
@@ -17,7 +17,6 @@ import sttp.model.{Header, Method, StatusCode}
 import sttp.monad.MonadError
 
 import scala.collection.immutable.Seq
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.Var"))
@@ -25,11 +24,6 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
   val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
   val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
-
-  implicit val testContext: TestContext = TestContext()
-  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4)))
-  implicit val timer: Timer[IO] = testContext.timer[IO]
-
 
   // Override sttpBackend because this doesn't work with the testing backend
   implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
@@ -44,7 +38,8 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       cdfProjectName = "extractor-bluefield-testing"
     )
 
-    val authProvider = OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value
+    val authProvider =
+      OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value
 
     val client = new GenericClient(
       applicationName = "CogniteScalaSDK-OAuth-Test",
@@ -52,7 +47,8 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       baseUrl = "https://bluefield.cognitedata.com",
       authProvider = authProvider,
       apiVersion = None,
-      clientTag = None
+      clientTag = None,
+      cdfVersion = None
     )
 
 //    Reenable this when login.status for tokens is fixed
@@ -74,7 +70,8 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       audience = Some("https://twindata.io/cdf/T101014843")
     )
 
-    val authProvider = OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value
+    val authProvider =
+      OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value
 
     val client = new GenericClient(
       applicationName = "CogniteScalaSDK-OAuth-Test",
@@ -82,14 +79,14 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       baseUrl = "https://api.cognitedata.com",
       authProvider = authProvider,
       apiVersion = None,
-      clientTag = None
+      clientTag = None,
+      cdfVersion = None
     )
 
     noException shouldBe thrownBy {
       client.rawDatabases.list().compile.toVector.unsafeRunTimed(10.seconds).value
     }
   }
-
 
   it should "throw a valid error when authenticating with bad credentials" in {
     val credentials = OAuth2.ClientCredentials(
@@ -101,7 +98,12 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
     )
 
     an[SdkException] shouldBe thrownBy {
-      OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value.getAuth.unsafeRunSync()
+      OAuth2
+        .ClientCredentialsProvider[IO](credentials)
+        .unsafeRunTimed(1.second)
+        .value
+        .getAuth
+        .unsafeRunSync()
     }
   }
 
@@ -110,17 +112,23 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
 
     var numTokenRequests = 0
 
-    implicit val mockSttpBackend: SttpBackendStub[IO, Any] = SttpBackendStub(implicitly[MonadError[IO]])
-      .whenRequestMatches(req => req.method === Method.POST && req.uri.path === Seq("token"))
-      .thenRespondF {
-        for {
-          _ <- IO { numTokenRequests += 1 }
-          body = Json.obj(
-            "access_token" -> Json.fromString("foo"),
-            "expires_in" -> Json.fromString("2")
+    implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
+      SttpBackendStub(implicitly[MonadError[IO]])
+        .whenRequestMatches(req => req.method === Method.POST && req.uri.path === Seq("token"))
+        .thenRespondF {
+          for {
+            _ <- IO(numTokenRequests += 1)
+            body = Json.obj(
+              "access_token" -> Json.fromString("foo"),
+              "expires_in" -> Json.fromString("2")
+            )
+          } yield Response(
+            body.noSpaces,
+            StatusCode.Ok,
+            "OK",
+            Seq(Header("content-type", "application/json"))
           )
-        } yield Response(body.noSpaces, StatusCode.Ok, "OK", Seq(Header("content-type", "application/json")))
-      }
+        }
 
     val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"http://whatever.com/token",
@@ -134,9 +142,9 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials, refreshSecondsBeforeTTL = 1)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- IO { numTokenRequests shouldBe 1 }
-      _ <- IO { testContext.tick(1.seconds) }
+      _ <- IO.sleep(1.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO { numTokenRequests shouldBe 2 }
+      _ <- IO(numTokenRequests shouldBe 2)
     } yield ()
 
     io.unsafeRunTimed(10.seconds).value

@@ -3,25 +3,19 @@
 
 package com.cognite.sdk.scala.common
 
-import cats.effect.laws.util.TestContext
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.IO
 import com.cognite.sdk.scala.v1.RequestSession
 import org.scalatest.OptionValues
 import sttp.client3._
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
-import java.util.concurrent.Executors
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import cats.effect.unsafe.implicits.global
 
 class TokenTest extends SdkTestSpec with OptionValues {
   val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
   val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
-
-  implicit val testContext: TestContext = TestContext()
-  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4)))
-  implicit val timer: Timer[IO] = testContext.timer[IO]
 
   implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
 

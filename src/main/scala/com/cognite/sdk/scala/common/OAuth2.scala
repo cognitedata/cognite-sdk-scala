@@ -1,9 +1,8 @@
 package com.cognite.sdk.scala.common
 
-import java.util.concurrent.TimeUnit
 import cats.Monad
 import cats.syntax.all._
-import cats.effect.{Clock, Concurrent}
+import cats.effect.{Async, Clock}
 import com.cognite.sdk.scala.common.internal.{CachedResource, ConcurrentCachedObject}
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.{RefreshSessionRequest, SessionTokenResponse}
@@ -39,8 +38,8 @@ object OAuth2 {
       implicit F: Monad[F],
       clock: Clock[F]
   ): F[Auth] = for {
-    now <- clock.monotonic(TimeUnit.SECONDS)
-    _ <- cache.invalidateIfNeeded(_.expiresAt <= now)
+    now <- clock.monotonic
+    _ <- cache.invalidateIfNeeded(_.expiresAt <= now.toSeconds)
     auth <- cache.run(state => F.pure(OidcTokenAuth(state.token, state.cdfProjectName)))
   } yield auth
 
@@ -68,7 +67,7 @@ object OAuth2 {
         credentials: ClientCredentials,
         refreshSecondsBeforeTTL: Long = 30
     )(
-        implicit F: Concurrent[F],
+        implicit F: Async[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[ClientCredentialsProvider[F]] = {
@@ -104,15 +103,15 @@ object OAuth2 {
                     )
                   )
                 case DeserializationException(_, error) =>
-                  F.raiseError[ClientCredentialsResponse](
+                  F.raiseError(
                     new SdkException(
                       s"Failed to parse response from IdP: ${error.getMessage}"
                     )
                   )
               }
           }
-          acquiredAt <- clock.monotonic(TimeUnit.SECONDS)
-          expiresAt = acquiredAt + payload.expires_in - refreshSecondsBeforeTTL
+          acquiredAt <- clock.monotonic
+          expiresAt = acquiredAt.toSeconds + payload.expires_in - refreshSecondsBeforeTTL
         } yield TokenState(payload.access_token, expiresAt, credentials.cdfProjectName)
       }
 
@@ -123,7 +122,7 @@ object OAuth2 {
 
   object SessionProvider {
     def apply[F[_]](session: Session, refreshSecondsBeforeTTL: Long = 30)(
-        implicit F: Concurrent[F],
+        implicit F: Async[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[SessionProvider[F]] = {
@@ -141,8 +140,8 @@ object OAuth2 {
             )
             .send(sttpBackend)
             .map(_.body)
-          acquiredAt <- clock.monotonic(TimeUnit.SECONDS)
-          expiresAt = acquiredAt + payload.expiresIn - refreshSecondsBeforeTTL
+          acquiredAt <- clock.monotonic
+          expiresAt = acquiredAt.toSeconds + payload.expiresIn - refreshSecondsBeforeTTL
         } yield TokenState(payload.accessToken, expiresAt, session.cdfProjectName)
       }
 

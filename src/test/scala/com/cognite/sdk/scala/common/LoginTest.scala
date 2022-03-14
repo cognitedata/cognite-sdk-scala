@@ -4,7 +4,6 @@
 package com.cognite.sdk.scala.common
 
 import cats.Id
-import cats.catsInstancesForId
 import com.cognite.sdk.scala.v1.RequestSession
 import sttp.client3._
 
