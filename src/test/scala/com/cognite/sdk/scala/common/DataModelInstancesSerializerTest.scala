@@ -6,34 +6,29 @@ package com.cognite.sdk.scala.common
 import com.cognite.sdk.scala.v1.{
   ArrayProperty,
   BooleanProperty,
+  DataModelInstanceCreate,
+  DataModelInstanceQueryResponse,
   DataModelProperty,
   Float32Property,
   Float64Property,
   Int32Property,
   Int64Property,
   PropertyType,
-  PropertyTypePrimitive,
   StringProperty
 }
 import io.circe
 import io.circe.CursorOp.DownField
-import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json}
+import io.circe.{Decoder, DecodingFailure, HCursor}
 import io.circe.parser.decode
 import io.circe.syntax._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-
-final case class DataModelInstanceDynamic(
-    modelExternalId: String,
-    properties: Option[Map[String, PropertyType]] = None
-)
 
 @SuppressWarnings(
   Array(
     "org.wartremover.warts.JavaSerializable",
     "org.wartremover.warts.Serializable",
     "org.wartremover.warts.NonUnitStatements",
-    "org.wartremover.warts.PublicInference",
     "org.wartremover.warts.Product"
   )
 )
@@ -52,111 +47,22 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
     "arr_empty_nullable" -> DataModelProperty("float64[]")
   )
 
-  implicit val decodeDataModelInstanceDynamic: Decoder[DataModelInstanceDynamic] =
-    new Decoder[DataModelInstanceDynamic] {
-      def apply(c: HCursor): Decoder.Result[DataModelInstanceDynamic] =
+  import com.cognite.sdk.scala.v1.resources.DataModelInstances._
+
+  implicit val propertyTypeDecoder: Decoder[Map[String, PropertyType]] =
+    createDynamicPropertyDecoder(props)
+
+  implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
+    new Decoder[DataModelInstanceQueryResponse] {
+      def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] =
         for {
           modelExternalId <- c.downField("modelExternalId").as[String]
           properties <- c.downField("properties").as[Option[Map[String, PropertyType]]]
-        } yield DataModelInstanceDynamic(modelExternalId, properties)
+        } yield DataModelInstanceQueryResponse(modelExternalId, properties)
     }
-
-  // scalastyle:off cyclomatic.complexity
-  private def decodeBaseOnType(c: HCursor, propName: String, propType: String) =
-    propType match {
-      case "boolean" => c.downField(propName).as[Boolean]
-      case "int" | "int32" => c.downField(propName).as[Int]
-      case "bigint" | "int64" => c.downField(propName).as[Long]
-      case "float32" => c.downField(propName).as[Float]
-      case "float64" => c.downField(propName).as[Double]
-      case "text" => c.downField(propName).as[String]
-      case "boolean[]" => c.downField(propName).as[Vector[Boolean]]
-      case "int[]" | "int32[]" => c.downField(propName).as[Vector[Int]]
-      case "bigint[]" | "int64[]" => c.downField(propName).as[Vector[Long]]
-      case "float32[]" => c.downField(propName).as[Vector[Float]]
-      case "float64[]" => c.downField(propName).as[Vector[Double]]
-      case "text[]" => c.downField(propName).as[Vector[String]]
-    }
-  // scalastyle:on cyclomatic.complexity
-
-  private def decodeArrayFromTypeOfFirstElement(c: Vector[_], propName: String) =
-    c.headOption match {
-      case Some(_: Boolean) =>
-        propName -> ArrayProperty[BooleanProperty](
-          c.map(_.asInstanceOf[Boolean]).map(BooleanProperty(_))
-        )
-      case Some(_: Int) =>
-        propName -> ArrayProperty[Int32Property](
-          c.map(_.asInstanceOf[Int]).map(Int32Property(_))
-        )
-      case Some(_: Long) =>
-        propName -> ArrayProperty[Int64Property](
-          c.map(_.asInstanceOf[Long]).map(Int64Property(_))
-        )
-      case Some(_: Float) =>
-        propName -> ArrayProperty[Float32Property](
-          c.map(_.asInstanceOf[Float]).map(Float32Property(_))
-        )
-      case Some(_: Double) =>
-        propName -> ArrayProperty[Float64Property](
-          c.map(_.asInstanceOf[Double]).map(Float64Property(_))
-        )
-      case Some(_: String) =>
-        propName -> ArrayProperty[StringProperty](
-          c.map(_.asInstanceOf[String]).map(StringProperty(_))
-        )
-      case _ => propName -> ArrayProperty(Vector())
-    }
-
-  private def filterOutNullableProps(
-      res: Iterable[Either[DecodingFailure, (String, PropertyType)]]
-  ): Iterable[Either[DecodingFailure, (String, PropertyType)]] =
-    res
-      .filter {
-        case Right(_) => true
-        case Left(DecodingFailure("Attempt to decode value on failed cursor", downfields)) =>
-          val nullableProps = downfields
-            .filter(_.isInstanceOf[DownField])
-            .map(_.asInstanceOf[DownField])
-            .map(_.k)
-            .filter(_ !== "properties")
-            .toSet
-          !nullableProps.subsetOf(props.filter(_._2.nullable).keySet)
-        case _ => true
-      }
-
-  // scalastyle:off cyclomatic.complexity
-  implicit val decodeVinDecodeDetails: Decoder[Map[String, PropertyType]] =
-    new Decoder[Map[String, PropertyType]] {
-      def apply(c: HCursor): Decoder.Result[Map[String, PropertyType]] = {
-        val res = props.map { case (prop, dmp) =>
-          for {
-            value <- decodeBaseOnType(c, prop, dmp.`type`)
-          } yield value match {
-            case b: Boolean => prop -> BooleanProperty(b)
-            case i: Int => prop -> Int32Property(i)
-            case l: Long => prop -> Int64Property(l)
-            case f: Float => prop -> Float32Property(f)
-            case d: Double => prop -> Float64Property(d)
-            case s: String => prop -> StringProperty(s)
-            case v: Vector[_] =>
-              decodeArrayFromTypeOfFirstElement(v, prop)
-            case invalidValue =>
-              throw new Exception(
-                s"${invalidValue.toString} does not match any property type to decode"
-              )
-          }
-        }
-        filterOutNullableProps(res).find(_.isLeft) match {
-          case Some(Left(x)) => Left(x)
-          case _ => Right(res.collect { case Right(value) => value }.toMap)
-        }
-      }
-    }
-  // scalastyle:on cyclomatic.complexity
 
   private def checkErrorDecodingOnField(
-      res: Either[circe.Error, DataModelInstanceDynamic],
+      res: Either[circe.Error, DataModelInstanceQueryResponse],
       propName: String,
       propType: String
   ) = {
@@ -176,7 +82,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
   "DataModelInstancesSerializer" when {
     "decode PropertyType" should {
       "work for primitive and array" in {
-        val res = decode[DataModelInstanceDynamic]("""{
+        val res = decode[DataModelInstanceQueryResponse]("""{
                                       |"modelExternalId" : "tada",
                                       |"properties" : {
                                       |    "prop_bool" : true,
@@ -194,7 +100,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
 
         val Right(dmiResponse) = res
 
-        dmiResponse shouldBe DataModelInstanceDynamic(
+        dmiResponse shouldBe DataModelInstanceQueryResponse(
           "tada",
           Some(
             Map(
@@ -223,7 +129,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
         )
       }
       "work for nullable property" in {
-        val res = decode[DataModelInstanceDynamic]("""{
+        val res = decode[DataModelInstanceQueryResponse]("""{
                                         |"modelExternalId" : "tada",
                                         |"properties" : {
                                         |    "prop_float64": 23.0,
@@ -235,7 +141,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
         res.isRight shouldBe true
 
         val Right(dmiResponse) = res
-        dmiResponse shouldBe DataModelInstanceDynamic(
+        dmiResponse shouldBe DataModelInstanceQueryResponse(
           "tada",
           Some(
             Map(
@@ -254,8 +160,8 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
       }
 
       "not work for primitive if given value does not match property type" in {
-        val res: Either[circe.Error, DataModelInstanceDynamic] =
-          decode[DataModelInstanceDynamic]("""{
+        val res: Either[circe.Error, DataModelInstanceQueryResponse] =
+          decode[DataModelInstanceQueryResponse]("""{
                                         |"modelExternalId" : "tada",
                                         |"properties" : {
                                         |    "prop_bool" : "true",
@@ -269,7 +175,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
         checkErrorDecodingOnField(res, "prop_bool", "Boolean")
       }
       "not work for array if it contains Boolean and String" in {
-        val res = decode[DataModelInstanceDynamic]("""{
+        val res = decode[DataModelInstanceQueryResponse]("""{
                                         |"modelExternalId" : "tada",
                                         |"properties" : {
                                         |    "prop_bool" : true,
@@ -282,7 +188,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
         checkErrorDecodingOnField(res, "arr_bool", "Boolean")
       }
       "not work for array if it contains Double and String" in {
-        val res = decode[DataModelInstanceDynamic]("""{
+        val res = decode[DataModelInstanceQueryResponse]("""{
                                         |"modelExternalId" : "tada",
                                         |"properties" : {
                                         |    "prop_bool" : true,
@@ -295,7 +201,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
         checkErrorDecodingOnField(res, "arr_float64", "Double")
       }
       "not work for array if it contains Double and Boolean" in {
-        val res = decode[DataModelInstanceDynamic]("""{
+        val res = decode[DataModelInstanceQueryResponse]("""{
                                         |"modelExternalId" : "tada",
                                         |"properties" : {
                                         |    "prop_bool" : true,
@@ -309,41 +215,10 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
       }
     }
     "encode PropertyType" should {
-      implicit val dmiPropPrimitiveEncoder: Encoder[PropertyTypePrimitive] = {
-        case b: BooleanProperty => b.value.asJson
-        case i: Int32Property => i.value.asJson
-        case l: Int64Property => l.value.asJson
-        case f: Float32Property => f.value.asJson
-        case d: Float64Property => d.value.asJson
-        case s: StringProperty => s.value.asJson
-      }
-
-      implicit val dmiPropEncoder: Encoder[PropertyType] = {
-        case b: PropertyTypePrimitive => b.asJson
-        case v: ArrayProperty[_] =>
-          val toto = v.values.map {
-            case b: PropertyTypePrimitive => b.asJson
-            case invalidValue =>
-              throw new Exception(
-                s"${invalidValue.toString} does not match any property type to encode"
-              )
-          }
-          Json.fromValues(toto)
-      }
-
-      implicit val dmiDynamicEncoder: Encoder[DataModelInstanceDynamic] =
-        new Encoder[DataModelInstanceDynamic] {
-          final def apply(dmi: DataModelInstanceDynamic): Json = Json.obj(
-            ("modelExternalId", Json.fromString(dmi.modelExternalId)),
-            (
-              "properties",
-              dmi.properties.asJson
-            )
-          )
-        }
+      import com.cognite.sdk.scala.v1.resources.DataModelInstances.dataModelInstanceEncoder
 
       "work for primitive" in {
-        val res = DataModelInstanceDynamic(
+        val res = DataModelInstanceCreate(
           "model_primitive",
           Some(
             Map(
@@ -369,7 +244,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
                                          |}""".stripMargin
       }
       "work for array" in {
-        val res = DataModelInstanceDynamic(
+        val res = DataModelInstanceCreate(
           "model_array",
           Some(
             Map(
@@ -434,7 +309,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
                                          |}""".stripMargin
       }
       "work for mixing both primitive and array" in {
-        val res = DataModelInstanceDynamic(
+        val res = DataModelInstanceCreate(
           "model_mixing",
           Some(
             Map(

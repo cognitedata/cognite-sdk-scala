@@ -31,6 +31,11 @@ final case class DataModelGetByExternalIdsInput[A](
     ignoreUnknownIds: Boolean
 )
 
+final case class DataModelInstanceCreate(
+    modelExternalId: String,
+    properties: Option[Map[String, PropertyType]] = None
+)
+
 sealed trait DataModelInstanceFilter
 
 sealed trait DMIBoolFilter extends DataModelInstanceFilter
@@ -67,11 +72,6 @@ final case class DataModelInstanceQuery(
     sort: Option[Seq[String]] = None,
     limit: Option[Int] = None,
     cursor: Option[String] = None
-)
-
-final case class DataModelInstance(
-    modelExternalId: String,
-    properties: Option[Map[String, PropertyType]] = None
 )
 
 final case class DataModelInstanceQueryResponse(

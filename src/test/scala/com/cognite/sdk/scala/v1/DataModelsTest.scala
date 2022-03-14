@@ -49,42 +49,6 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
         .unsafeRunSync()
         .toList
     dataModels.contains(dataModel) shouldBe true
-
-    // VH TODO remove the code below and use real test above when create endpoints doesn't return 500 anymore
-    /*val expectedBody = StringBody(
-      s"""{"items":[{"externalId":"${dataModel.externalId}",
-      "properties":{"name":{"type":"text","nullable":true},
-      "description":{"type":"text","nullable":true}}}]}""".stripMargin,
-      "utf-8",
-      MediaType.ApplicationJson
-    )
-    val expectedResponse = Seq(dataModel)
-    val responseForDataModelCreated = SttpBackendStub.synchronous
-      .whenRequestMatches { r =>
-        r.method === Method.POST && r.uri.path.endsWith(
-          List("definitions", "apply")
-        ) && (r.body.equals(expectedBody))
-      }
-      .thenRespond(
-        Response(
-          expectedResponse,
-          StatusCode.Ok,
-          "OK",
-          Seq(Header("content-type", "application/json; charset=utf-8"))
-        )
-      )
-
-    val client = new GenericClient[Id](
-      applicationName = "CogniteScalaSDK-OAuth-Test",
-      projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token"),
-      cdfVersion = Some("alpha")
-    )(implicitly, responseForDataModelCreated)
-
-    val resCreate = client.dataModels.createItems(
-      Items[DataModel](Seq(dataModel))
-    )
-    resCreate shouldBe expectedResponse*/
   }
 
   it should "list all data models definitions" in {

@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
+import cats.implicits.catsSyntaxEq
 import com.cognite.sdk.scala.common.{CdpApiException, Items, RetryWhile}
 import io.circe.Json
 import org.scalatest.{Assertion, BeforeAndAfterAll}
@@ -46,7 +47,7 @@ class DataModelInstancesTest
   )
 
   val dataModelInstanceToCreate1 =
-    DataModelInstance(
+    DataModelInstanceCreate(
       dataModel.externalId,
       Some(
         Map(
@@ -58,7 +59,7 @@ class DataModelInstancesTest
     )
 
   val dataModelInstanceToCreate2 =
-    DataModelInstance(
+    DataModelInstanceCreate(
       dataModel.externalId,
       Some(
         Map(
@@ -71,7 +72,7 @@ class DataModelInstancesTest
     )
 
   val dataModelInstanceToCreate3 =
-    DataModelInstance(
+    DataModelInstanceCreate(
       dataModel.externalId,
       Some(
         Map(
@@ -101,7 +102,7 @@ class DataModelInstancesTest
     )
   )
 
-  val dmiArrayToCreate1 = DataModelInstance(
+  val dmiArrayToCreate1 = DataModelInstanceCreate(
     dataModelArray.externalId,
     Some(
       Map(
@@ -129,7 +130,7 @@ class DataModelInstancesTest
       )
     )
   )
-  val dmiArrayToCreate2 = DataModelInstance(
+  val dmiArrayToCreate2 = DataModelInstanceCreate(
     dataModelArray.externalId,
     Some(
       Map(
@@ -149,7 +150,7 @@ class DataModelInstancesTest
       )
     )
   )
-  val dmiArrayToCreate3 = DataModelInstance(
+  val dmiArrayToCreate3 = DataModelInstanceCreate(
     dataModelArray.externalId,
     Some(
       Map(
@@ -185,19 +186,21 @@ class DataModelInstancesTest
     ()
   }
 
-  override def afterAll(): Unit =
+  override def afterAll(): Unit = {
     blueFieldClient.dataModels
       .deleteItems(Seq(dataModel.externalId, dataModelArray.externalId))
       .unsafeRunSync()
-  val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
-  dataModels.contains(dataModel) shouldBe false
-  dataModels.contains(dataModelArray) shouldBe false
-  ()
+
+    val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
+    dataModels.contains(dataModel) shouldBe false
+    dataModels.contains(dataModelArray) shouldBe false
+    ()
+  }
 
   "Insert data model instances" should "work with multiple input" in {
     val dataModelInstances = blueFieldClient.dataModelInstances
       .createItems(
-        Items[DataModelInstance](
+        Items[DataModelInstanceCreate](
           toCreates
         )
       )
@@ -206,47 +209,10 @@ class DataModelInstancesTest
 
     dataModelInstances.size shouldBe 3
     dataModelInstances.map(_.properties).toSet shouldBe toCreates.map(_.properties).toSet
-
-    // VH TODO remove this once 500 hitting rate is stable
-    /*val expectedBody = StringBody(
-      s"""{"items":[{"modelExternalId":"${dataModelInstanceToCreate.externalId}",
-      "properties":{"prop_string":{"type":"text","nullable":true},
-      "description":{"type":"text","nullable":true}}}]}""".stripMargin,
-      "utf-8",
-      MediaType.ApplicationJson
-    )
-
-    val expectedResponse = Seq(dataModelInstanceToCreate)
-    val responseForDataModelCreated = SttpBackendStub.synchronous
-      .whenRequestMatches { r =>
-        r.method === Method.POST && r.uri.path.endsWith(
-          List("instances", "ingest")
-        )
-      }
-      .thenRespond(
-        Response(
-          expectedResponse,
-          StatusCode.Ok,
-          "OK",
-          Seq(Header("content-type", "application/json; charset=utf-8"))
-        )
-      )
-
-    val client = new GenericClient[Id](
-      applicationName = "CogniteScalaSDK-OAuth-Test",
-      projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token"),
-      cdfVersion = Some("alpha")
-    )(implicitly, responseForDataModelCreated)
-
-    val resCreate = client.dataModelInstances.createItems(
-      Items[DataModelInstance](Seq(dataModelInstanceToCreate))
-    )
-    resCreate shouldBe expectedResponse*/
   }
 
   it should "fail if input data type is not correct" in {
-    val invalidInput = DataModelInstance(
+    val invalidInput = DataModelInstanceCreate(
       dataModel.externalId,
       Some(
         Map(
@@ -257,7 +223,7 @@ class DataModelInstancesTest
     )
     val exception = the[CdpApiException] thrownBy blueFieldClient.dataModelInstances
       .createItems(
-        Items[DataModelInstance](
+        Items[DataModelInstanceCreate](
           Seq(invalidInput)
         )
       )
@@ -270,7 +236,7 @@ class DataModelInstancesTest
   private def insertDMIBeforeQuery() = {
     val dataModelInstances = blueFieldClient.dataModelInstances
       .createItems(
-        Items[DataModelInstance](
+        Items[DataModelInstanceCreate](
           toCreates
         )
       )
@@ -280,9 +246,13 @@ class DataModelInstancesTest
     dataModelInstances
   }
 
-  /*private def deleteDMIAfterQuery() = {
+  private def deleteDMIAfterQuery() = {
     val toDeletes =
-      toCreates.flatMap(_.properties).flatMap(_.get("externalId").map(_.asString.getOrElse("")))
+      toCreates
+        .flatMap(_.properties)
+        .flatMap(_.get("externalId").collect { case StringProperty(id) =>
+          id
+        })
     blueFieldClient.dataModelInstances
       .deleteByExternalIds(toDeletes)
       .unsafeRunSync()
@@ -295,17 +265,23 @@ class DataModelInstancesTest
       .items
       .toList
     outputNoFilter.isEmpty shouldBe true
-  }*/
+  }
 
-  private def initAndCleanUpDataForQuery(testCode: Seq[DataModelInstance] => Any): Unit =
+  private def initAndCleanUpDataForQuery(testCode: Seq[DataModelInstanceCreate] => Any): Unit =
     try {
       val dataModelInstances = insertDMIBeforeQuery()
       val _ = testCode(dataModelInstances)
     } catch {
       case t: Throwable => throw t
-    } finally
-      // deleteDMIAfterQuery()
+    } finally {
+      deleteDMIAfterQuery()
       ()
+    }
+
+  private def fromCreatedToExpectedProps(instances: Set[DataModelInstanceCreate]) =
+    instances.map(_.properties.map(_.filter { case (k, _) =>
+      k.neqv("externalId")
+    }))
 
   "Query data model instances" should "work with empty filter" in initAndCleanUpDataForQuery { _ =>
     val inputNoFilterQuery = DataModelInstanceQuery(
@@ -344,8 +320,9 @@ class DataModelInstancesTest
       .toList
 
     outputQueryAnd.size shouldBe 1
-    outputQueryAnd.map(_.properties).toSet shouldBe Set(
-      dataModelInstanceToCreate2.properties.map(_.filterKeys(_ != "externalId"))
+
+    outputQueryAnd.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+      Set(dataModelInstanceToCreate2)
     )
 
     val inputQueryAnd2 = DataModelInstanceQuery(
@@ -387,10 +364,9 @@ class DataModelInstancesTest
       .toList
 
     outputQueryOr.size shouldBe 2
-    outputQueryOr.map(_.properties).toSet shouldBe Set(
-      dataModelInstanceToCreate2.properties,
-      dataModelInstanceToCreate3.properties
-    ).map(_.map(_.filterKeys(_ != "externalId")))
+    outputQueryOr.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+      Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3)
+    )
   }
 
   it should "work with NOT filter" in initAndCleanUpDataForQuery { _ =>
@@ -412,8 +388,8 @@ class DataModelInstancesTest
       .toList
 
     outputQueryNot.size shouldBe 1
-    outputQueryNot.map(_.properties).toSet shouldBe Set(dataModelInstanceToCreate1.properties).map(
-      _.map(_.filterKeys(_ != "externalId"))
+    outputQueryNot.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+      Set(dataModelInstanceToCreate1)
     )
   }
 
@@ -431,10 +407,9 @@ class DataModelInstancesTest
       .toList
 
     outputQueryPrefix.size shouldBe 2
-    outputQueryPrefix.map(_.properties).toSet shouldBe Set(
-      dataModelInstanceToCreate1.properties,
-      dataModelInstanceToCreate2.properties
-    ).map(_.map(_.filterKeys(_ != "externalId")))
+    outputQueryPrefix.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+      Set(dataModelInstanceToCreate1, dataModelInstanceToCreate2)
+    )
   }
 
   it should "work with RANGE filter" in initAndCleanUpDataForQuery { _ =>
@@ -453,10 +428,9 @@ class DataModelInstancesTest
       .items
       .toList
 
-    outputQueryRange.map(_.properties).toSet shouldBe Set(
-      dataModelInstanceToCreate2.properties,
-      dataModelInstanceToCreate3.properties
-    ).map(_.map(_.filterKeys(_ != "externalId")))
+    outputQueryRange.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+      Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3)
+    )
   }
 
   it should "work with EXISTS filter" in initAndCleanUpDataForQuery { _ =>
@@ -472,16 +446,15 @@ class DataModelInstancesTest
       .items
       .toList
 
-    outputQueryExists.map(_.properties).toSet shouldBe Set(
-      dataModelInstanceToCreate2,
-      dataModelInstanceToCreate3
-    ).map(_.properties).map(_.map(_.filterKeys(_ != "externalId")))
+    outputQueryExists.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+      Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3)
+    )
   }
 
   private def insertDMIArrayBeforeQuery() = {
     val dataModelInstances = blueFieldClient.dataModelInstances
       .createItems(
-        Items[DataModelInstance](
+        Items[DataModelInstanceCreate](
           dmiArrayToCreates
         )
       )
@@ -513,7 +486,7 @@ class DataModelInstancesTest
     outputNoFilter.isEmpty shouldBe true
   }
 
-  private def initAndCleanUpArrayDataForQuery(testCode: Seq[DataModelInstance] => Any): Unit =
+  private def initAndCleanUpArrayDataForQuery(testCode: Seq[DataModelInstanceCreate] => Any): Unit =
     try {
       val dataModelInstances = insertDMIArrayBeforeQuery()
       val _ = testCode(dataModelInstances)
@@ -543,10 +516,9 @@ class DataModelInstancesTest
       .items
       .toList
 
-    outputQueryContainsAnyString.map(_.properties).toSet shouldBe Set(
-      dmiArrayToCreate1,
-      dmiArrayToCreate2
-    ).map(_.properties).map(_.map(_.filterKeys(_ != "externalId")))
+    outputQueryContainsAnyString.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+      Set(dmiArrayToCreate1, dmiArrayToCreate2)
+    )
 
   /*val inputQueryContainsAnyInt = DataModelInstanceQuery(
       dataModelArray.externalId,
@@ -590,8 +562,9 @@ class DataModelInstancesTest
       .items
       .toList
 
-    outputQueryContainsAllString.map(_.properties).toSet shouldBe Set(dmiArrayToCreate2.properties)
-      .map(_.map(_.filterKeys(_ != "externalId")))
+    outputQueryContainsAllString.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+      Set(dmiArrayToCreate2)
+    )
 
   /*val inputQueryContainsAllInt = DataModelInstanceQuery(
       dataModelArray.externalId,
@@ -660,10 +633,8 @@ class DataModelInstancesTest
       .toList
 
     outputQueryOr.size shouldBe 1
-    val expected: Set[Option[Map[String, PropertyType]]] = Set(
-      dataModelInstanceToCreate2,
-      dataModelInstanceToCreate3
-    ).map(_.properties).map(_.map(_.filterKeys(_ != "externalId")))
+    val expected: Set[Option[Map[String, PropertyType]]] =
+      fromCreatedToExpectedProps(Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3))
 
     outputQueryOr
       .map(_.properties)
@@ -679,16 +650,15 @@ class DataModelInstancesTest
       )
     )
 
-    def checkOutputProp(output: Seq[DataModelInstanceQueryResponse]): Assertion =
+    def checkOutputProp(output: Seq[DataModelInstanceQueryResponse]): Assertion = {
+      val expected = fromCreatedToExpectedProps(toCreates.toSet)
       output
         .map(_.properties)
         .toSet
         .subsetOf(
-          toCreates
-            .map(_.properties)
-            .map(_.map(_.filterKeys(_ != "externalId")))
-            .toSet
+          expected
         ) shouldBe true
+    }
 
     val outputLimit1 = blueFieldClient.dataModelInstances
       .queryStream(inputQueryPrefix, Some(1))
