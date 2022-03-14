@@ -178,6 +178,8 @@ class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], 
   override def retrieveById(id: Long): F[ThreeDRevision] =
     requestSession.get[ThreeDRevision, ThreeDRevision](uri"$baseUrl/$id", value => value)
 
+  // toSeq is redundant on Scala 2.13, not Scala 2.12.
+  @SuppressWarnings(Array("org.wartremover.warts.RedundantConversions"))
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDRevision]] =
     ids.toList.traverse(retrieveById).map(_.toSeq)
 
