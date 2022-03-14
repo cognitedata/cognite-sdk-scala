@@ -9,11 +9,14 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import fs2.Stream
 import io.circe.CursorOp.DownField
+import io.circe.Decoder.Result
 import io.circe.syntax._
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json, Printer}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
+
+import scala.collection.immutable
 
 class DataModelInstances[F[_]](
     val requestSession: RequestSession[F],
@@ -62,7 +65,7 @@ class DataModelInstances[F[_]](
           .map(x => ArrayProperty[StringProperty](x.toVector.map(StringProperty(_))))
           .widen
       ).reduceLeftOption(_ or _).getOrElse(Decoder.decodeString.map(StringProperty(_)).widen)
-    implicit val _: Decoder[DataModelInstance] =
+    implicit val dataModelInstanceDecoder: Decoder[DataModelInstance] =
       new Decoder[DataModelInstance] {
         def apply(c: HCursor): Decoder.Result[DataModelInstance] =
           for {
@@ -71,7 +74,12 @@ class DataModelInstances[F[_]](
           } yield DataModelInstance(modelExternalId, properties)
       }
     implicit val dataModelInstanceItemsDecoder: Decoder[Items[DataModelInstance]] =
-      deriveDecoder[Items[DataModelInstance]]
+      new Decoder[Items[DataModelInstance]] {
+        def apply(c: HCursor): Decoder.Result[Items[DataModelInstance]] =
+          for {
+            items <- c.downField("items").as[Seq[DataModelInstance]]
+          } yield Items(items)
+      }
     requestSession.post[Seq[DataModelInstance], Items[DataModelInstance], Items[
       DataModelInstance
     ]](
@@ -93,7 +101,7 @@ class DataModelInstances[F[_]](
       implicit val dynamicPropertyTypeDecoder: Decoder[Map[String, PropertyType]] =
         createDynamicPropertyDecoder(props)
 
-      implicit val _: Decoder[DataModelInstanceQueryResponse] =
+      implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
         new Decoder[DataModelInstanceQueryResponse] {
           def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] =
             for {
@@ -102,9 +110,14 @@ class DataModelInstances[F[_]](
             } yield DataModelInstanceQueryResponse(modelExternalId, properties)
         }
 
-      implicit val dataModelInstanceQueryResponseItemsWithCursorDecoder
-          : Decoder[ItemsWithCursor[DataModelInstanceQueryResponse]] =
-        deriveDecoder[ItemsWithCursor[DataModelInstanceQueryResponse]]
+      implicit val dataModelInstanceQueryResponseItemsWithCursorDecoder: Decoder[ItemsWithCursor[DataModelInstanceQueryResponse]] =
+        new Decoder[ItemsWithCursor[DataModelInstanceQueryResponse]] {
+          def apply(c: HCursor): Decoder.Result[ItemsWithCursor[DataModelInstanceQueryResponse]] =
+            for {
+              items <- c.downField("items").as[Seq[DataModelInstanceQueryResponse]]
+              cursor <- c.downField("cursor").as[Option[String]]
+            } yield ItemsWithCursor(items, cursor)
+        }
 
       requestSession.post[ItemsWithCursor[DataModelInstanceQueryResponse], ItemsWithCursor[
         DataModelInstanceQueryResponse
@@ -155,7 +168,7 @@ class DataModelInstances[F[_]](
       implicit val dynamicPropertyTypeDecoder: Decoder[Map[String, PropertyType]] =
         createDynamicPropertyDecoder(props)
 
-      implicit val _: Decoder[DataModelInstanceQueryResponse] =
+      implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
         new Decoder[DataModelInstanceQueryResponse] {
           def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] =
             for {
@@ -165,8 +178,12 @@ class DataModelInstances[F[_]](
         }
 
       implicit val dataModelInstanceQueryResponseItemsDecoder
-          : Decoder[Items[DataModelInstanceQueryResponse]] =
-        deriveDecoder[Items[DataModelInstanceQueryResponse]]
+          : Decoder[Items[DataModelInstanceQueryResponse]] = new Decoder[Items[DataModelInstanceQueryResponse]] {
+        override def apply(c: HCursor): Result[Items[DataModelInstanceQueryResponse]] =
+          for {
+            items <- c.downField("items").as[Seq[DataModelInstanceQueryResponse]]
+          } yield Items(items)
+      }
 
       requestSession.post[Seq[DataModelInstanceQueryResponse], Items[
         DataModelInstanceQueryResponse
@@ -285,7 +302,7 @@ object DataModelInstances {
     }
   // scalastyle:on cyclomatic.complexity
 
-  private def decodeArrayFromTypeOfFirstElement(c: Vector[_], propName: String) =
+  private def decodeArrayFromTypeOfFirstElement(c: Vector[_], propName: String): (String, ArrayProperty[PropertyTypePrimitive]) =
     c.headOption match {
       case Some(_: Boolean) =>
         propName -> ArrayProperty[BooleanProperty](
@@ -325,7 +342,7 @@ object DataModelInstances {
           .filter(_.isInstanceOf[DownField])
           .map(_.asInstanceOf[DownField])
           .map(_.k)
-          .filter(x => x != "properties" && x != "items")
+          .filter(x => !x.eqv("properties") && !x.eqv("items"))
           .toSet
         !nullableProps.subsetOf(props.filter(_._2.nullable).keySet)
       case _ => true
@@ -337,7 +354,7 @@ object DataModelInstances {
   ): Decoder[Map[String, PropertyType]] =
     new Decoder[Map[String, PropertyType]] {
       def apply(c: HCursor): Decoder.Result[Map[String, PropertyType]] = {
-        val res = props.map { case (prop, dmp) =>
+        val res: immutable.Iterable[Either[DecodingFailure, (String, PropertyType)]] = props.map { case (prop, dmp) =>
           for {
             value <- decodeBaseOnType(c, prop, dmp.`type`)
           } yield value match {

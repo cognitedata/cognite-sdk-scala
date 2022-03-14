@@ -13,4 +13,4 @@ final case class Float32Property(value: Float) extends PropertyTypePrimitive
 final case class Float64Property(value: Double) extends PropertyTypePrimitive
 final case class StringProperty(value: String) extends PropertyTypePrimitive
 
-final case class ArrayProperty[A <: PropertyTypePrimitive](values: Vector[A]) extends PropertyType
+final case class ArrayProperty[+A <: PropertyTypePrimitive](values: Vector[A]) extends PropertyType

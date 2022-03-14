@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
+import cats.implicits.catsSyntaxEq
 import com.cognite.sdk.scala.common.{CdpApiException, Items, RetryWhile}
 import io.circe.Json
 import org.scalatest.{Assertion, BeforeAndAfterAll}
@@ -345,7 +346,7 @@ class DataModelInstancesTest
 
     outputQueryAnd.size shouldBe 1
     outputQueryAnd.map(_.properties).toSet shouldBe Set(
-      dataModelInstanceToCreate2.properties.map(_.filterKeys(_ != "externalId"))
+      dataModelInstanceToCreate2.properties.map(_.filterKeys(!_.eqv("externalId")))
     )
 
     val inputQueryAnd2 = DataModelInstanceQuery(
@@ -390,7 +391,7 @@ class DataModelInstancesTest
     outputQueryOr.map(_.properties).toSet shouldBe Set(
       dataModelInstanceToCreate2.properties,
       dataModelInstanceToCreate3.properties
-    ).map(_.map(_.filterKeys(_ != "externalId")))
+    ).map(_.map(_.filterKeys(!_.eqv("externalId"))))
   }
 
   it should "work with NOT filter" in initAndCleanUpDataForQuery { _ =>
@@ -413,7 +414,7 @@ class DataModelInstancesTest
 
     outputQueryNot.size shouldBe 1
     outputQueryNot.map(_.properties).toSet shouldBe Set(dataModelInstanceToCreate1.properties).map(
-      _.map(_.filterKeys(_ != "externalId"))
+      _.map(_.filterKeys(!_.eqv("externalId")))
     )
   }
 
@@ -434,7 +435,7 @@ class DataModelInstancesTest
     outputQueryPrefix.map(_.properties).toSet shouldBe Set(
       dataModelInstanceToCreate1.properties,
       dataModelInstanceToCreate2.properties
-    ).map(_.map(_.filterKeys(_ != "externalId")))
+    ).map(_.map(_.filterKeys(!_.eqv("externalId"))))
   }
 
   it should "work with RANGE filter" in initAndCleanUpDataForQuery { _ =>
@@ -456,7 +457,7 @@ class DataModelInstancesTest
     outputQueryRange.map(_.properties).toSet shouldBe Set(
       dataModelInstanceToCreate2.properties,
       dataModelInstanceToCreate3.properties
-    ).map(_.map(_.filterKeys(_ != "externalId")))
+    ).map(_.map(_.filterKeys(!_.eqv("externalId"))))
   }
 
   it should "work with EXISTS filter" in initAndCleanUpDataForQuery { _ =>
@@ -475,7 +476,7 @@ class DataModelInstancesTest
     outputQueryExists.map(_.properties).toSet shouldBe Set(
       dataModelInstanceToCreate2,
       dataModelInstanceToCreate3
-    ).map(_.properties).map(_.map(_.filterKeys(_ != "externalId")))
+    ).map(_.properties).map(_.map(_.filterKeys(!_.eqv("externalId"))))
   }
 
   private def insertDMIArrayBeforeQuery() = {
@@ -546,7 +547,7 @@ class DataModelInstancesTest
     outputQueryContainsAnyString.map(_.properties).toSet shouldBe Set(
       dmiArrayToCreate1,
       dmiArrayToCreate2
-    ).map(_.properties).map(_.map(_.filterKeys(_ != "externalId")))
+    ).map(_.properties).map(_.map(_.filterKeys(!_.eqv("externalId"))))
 
   /*val inputQueryContainsAnyInt = DataModelInstanceQuery(
       dataModelArray.externalId,
@@ -591,7 +592,7 @@ class DataModelInstancesTest
       .toList
 
     outputQueryContainsAllString.map(_.properties).toSet shouldBe Set(dmiArrayToCreate2.properties)
-      .map(_.map(_.filterKeys(_ != "externalId")))
+      .map(_.map(_.filterKeys(!_.eqv("externalId"))))
 
   /*val inputQueryContainsAllInt = DataModelInstanceQuery(
       dataModelArray.externalId,
@@ -663,7 +664,7 @@ class DataModelInstancesTest
     val expected: Set[Option[Map[String, PropertyType]]] = Set(
       dataModelInstanceToCreate2,
       dataModelInstanceToCreate3
-    ).map(_.properties).map(_.map(_.filterKeys(_ != "externalId")))
+    ).map(_.properties).map(_.map(_.filterKeys(!_.eqv("externalId")).toMap))
 
     outputQueryOr
       .map(_.properties)
@@ -686,7 +687,7 @@ class DataModelInstancesTest
         .subsetOf(
           toCreates
             .map(_.properties)
-            .map(_.map(_.filterKeys(_ != "externalId")))
+            .map(_.map(_.filterKeys(!_.eqv("externalId")).toMap))
             .toSet
         ) shouldBe true
 
