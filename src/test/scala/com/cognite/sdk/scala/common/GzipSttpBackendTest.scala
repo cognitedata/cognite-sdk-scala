@@ -11,7 +11,7 @@ import java.util.zip.GZIPInputStream
 import cats.effect.{ContextShift, IO, Timer}
 import sttp.client3._
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
