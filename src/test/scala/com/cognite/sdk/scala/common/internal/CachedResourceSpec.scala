@@ -6,6 +6,8 @@
 
 package com.cognite.sdk.scala.common.internal
 
+import cats.effect.kernel.Outcome
+import cats.effect.testkit.TestControl
 import fs2.Stream
 import org.scalactic.source.Position
 import org.scalatest._
@@ -321,7 +323,7 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
   final override protected def toFuture(
       fa: IO[Assertion]
   )(implicit pos: Position): Future[Assertion] = {
-    val maxTestDuration = 15.seconds
+    val maxTestDuration = 1.minute
     val test = fa
       .timeoutTo(
         maxTestDuration,
@@ -331,22 +333,28 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
           )
         )
       )
-      .unsafeToFuture() // Begin eager test execution async
 
-    // Resolve `IO` concurrency inside `test` by advancing the clock
-    IO.sleep(maxTestDuration).unsafeRunSync()
-    IO.sleep(1.seconds).unsafeRunSync() // Definitely past our `timeoutTo`
-
-    if (test.isCompleted) {
-      test // Now that `ctx` has no remaining `IO` to run, return the (completed) `Future[Assertion]`
-    } else {
-      // timeoutTo wasn't enough, maybe we deadlocked `uncancelable` IO?.
-      // `Future` has no ability to cancel, so hopefully it gets GC'd
-      throw new IllegalStateException(
-        s"""Test probably deadlocked.
-           | pos=${pos.toString}""".stripMargin
-      )
-    }
+    TestControl.execute(test).flatMap { control =>
+      for {
+        _ <- control.tickAll
+        result <- control.results
+      } yield result match {
+        case Some(value) => value match {
+          case Outcome.Succeeded(assertion) => assertion
+          case Outcome.Errored(e) => throw e
+          case Outcome.Canceled() =>
+            throw new IllegalStateException(
+              s"""Test canceled, probably deadlocked.
+                 | pos=${pos.toString}""".stripMargin
+            )
+        }
+        case None =>
+          throw new IllegalStateException(
+            s"""Test still not finished, probably deadlocked.
+               | pos=${pos.toString}""".stripMargin
+          )
+      }
+    }.unsafeToFuture()
   }
 
 }

@@ -96,7 +96,7 @@ lazy val core = (project in file("."))
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
-      "org.typelevel" %% "cats-effect-kernel-testkit" % catsEffectVersion % Test,
+      "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
       "com.google.protobuf" % "protobuf-java" % "3.19.4"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
