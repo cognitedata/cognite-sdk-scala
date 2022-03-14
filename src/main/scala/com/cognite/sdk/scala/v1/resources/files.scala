@@ -160,9 +160,9 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
           request
             .get(
               uri"${files.items
-                .map(_.downloadUrl)
-                .headOption
-                .getOrElse(throw SdkException(s"File download of ${item.toString} did not return download url"))}"
+                  .map(_.downloadUrl)
+                  .headOption
+                  .getOrElse(throw SdkException(s"File download of ${item.toString} did not return download url"))}"
             )
             .response(asByteArray)
         }
