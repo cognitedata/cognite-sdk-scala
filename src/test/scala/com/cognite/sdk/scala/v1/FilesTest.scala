@@ -15,6 +15,7 @@ import org.scalatest.matchers.should.Matchers
   "org.wartremover.warts.NonUnitStatements",
   "org.wartremover.warts.TraversableOps",
   "org.wartremover.warts.Var",
+  "org.wartremover.warts.ThreadSleep",
   "org.wartremover.warts.While"))
 class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with Matchers with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
