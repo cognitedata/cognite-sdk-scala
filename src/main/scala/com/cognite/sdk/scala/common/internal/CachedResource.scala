@@ -4,9 +4,8 @@
 
 package com.cognite.sdk.scala.common.internal
 
-import cats.effect.concurrent.{Deferred, Ref}
 import cats.effect.implicits._
-import cats.effect.{Bracket, Concurrent, ExitCase, Sync}
+import cats.effect.{Async, Deferred, MonadCancel, Outcome, Ref}
 import cats.implicits._
 
 import scala.util.control.NonFatal
@@ -38,11 +37,11 @@ object CachedResource {
       shouldInvalidate: PartialFunction[Throwable, Boolean] = { case NonFatal(_) =>
         true
       }
-  )(implicit F: Bracket[F, Throwable]): F[A] =
+  )(implicit F: MonadCancel[F, Throwable]): F[A] =
     cr.run(f).guaranteeCase {
-      case ExitCase.Completed | ExitCase.Canceled =>
+      case Outcome.Succeeded(_) | Outcome.Canceled() =>
         F.unit
-      case ExitCase.Error(e) =>
+      case Outcome.Errored(e) =>
         val willInvalidate = shouldInvalidate.lift(e).getOrElse(false)
         F.whenA(willInvalidate)(cr.invalidate)
     }
@@ -56,15 +55,15 @@ object CachedResource {
         true
       }
   )(
-      implicit F: Bracket[F, Throwable]
+      implicit F: MonadCancel[F, Throwable]
   ): Runner[F, R] = new Runner[F, R] {
     override def run[B](f: R => F[B]): F[B] =
       for {
         _ <- cr.invalidateIfNeeded(shouldRefresh)
         b <- cr.run(f).guaranteeCase {
-          case ExitCase.Completed | ExitCase.Canceled =>
+          case Outcome.Succeeded(_) | Outcome.Canceled() =>
             F.unit
-          case ExitCase.Error(e) =>
+          case Outcome.Errored(e) =>
             val willInvalidate = shouldInvalidate.lift(e).getOrElse(false)
             F.whenA(willInvalidate)(cr.invalidate)
         }
@@ -78,14 +77,13 @@ object CachedResource {
 }
 
 object ConcurrentCachedObject {
-
-  def apply[F[_]: Concurrent, R](acquire: F[R]): F[CachedResource[F, R]] =
-    Sync[F].delay(new ConcurrentCachedObject[F, R](acquire))
+  def apply[F[_]: Async, R](acquire: F[R]): F[CachedResource[F, R]] =
+    Async[F].delay(new ConcurrentCachedObject[F, R](acquire))
 }
 
 // private ctor because of Ref.unsafe in class body, `new` needs `F.delay` around it
 class ConcurrentCachedObject[F[_], R] private (acquire: F[R])(
-    implicit F: Concurrent[F]
+    implicit F: Async[F]
 ) extends CachedResource[F, R] {
 
   /** Resource state */
@@ -125,7 +123,7 @@ class ConcurrentCachedObject[F[_], R] private (acquire: F[R])(
   private def runAcquire(gate: Gate): F[Unit] =
     acquire
       .flatMap { r =>
-        (cache.set(Ready(r)) *> gate.complete(())).uncancelable
+        (cache.set(Ready(r)) *> gate.complete(()).void).uncancelable
       }
       .onError { case NonFatal(_) =>
         // On allocation error, reset the cache and notify anyone that started waiting while we were in `Allocating`
@@ -133,7 +131,7 @@ class ConcurrentCachedObject[F[_], R] private (acquire: F[R])(
       }
 
   private def setEmpty(gate: Gate): F[Unit] =
-    (cache.set(Empty) >> gate.complete(())).uncancelable
+    (cache.set(Empty) >> gate.complete(()).void).uncancelable
 
   // Using `unsafe` just so that I can have RState be an inner type, to avoid useless type parameters on RState
   private val cache = Ref.unsafe[F, RState](Empty)

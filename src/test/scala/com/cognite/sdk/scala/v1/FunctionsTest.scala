@@ -3,7 +3,6 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.catsInstancesForId
 import io.circe.Json
 import org.scalatest.Inspectors._
 import io.circe.JsonObject

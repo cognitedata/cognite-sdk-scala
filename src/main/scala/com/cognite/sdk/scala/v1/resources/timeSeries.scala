@@ -8,6 +8,7 @@ import com.cognite.sdk.scala.v1._
 import sttp.client3._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
+import sttp.client3.circe._
 
 class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -99,6 +100,15 @@ class TimeSeriesResource[F[_]](val requestSession: RequestSession[F])
 
   override def search(searchQuery: TimeSeriesQuery): F[Seq[TimeSeries]] =
     Search.search(requestSession, baseUrl, searchQuery)
+
+  def syntheticQuery(items: Items[SyntheticTimeSeriesQuery]): F[Seq[SyntheticTimeSeriesResponse]] =
+    requestSession.post[Seq[SyntheticTimeSeriesResponse], Items[SyntheticTimeSeriesResponse], Items[
+      SyntheticTimeSeriesQuery
+    ]](
+      items,
+      uri"$baseUrl/synthetic/query",
+      value => value.items
+    )
 }
 
 object TimeSeriesResource {
@@ -121,4 +131,15 @@ object TimeSeriesResource {
     deriveEncoder[TimeSeriesFilter]
   implicit val assetsFilterRequestEncoder: Encoder[FilterRequest[TimeSeriesFilter]] =
     deriveEncoder[FilterRequest[TimeSeriesFilter]]
+
+  import DataPointsResource.dataPointDecoder // Do not delete, required for syntheticTimeSeriesResponseDecoder
+  implicit val syntheticTimeSeriesQueryEncoder: Encoder[SyntheticTimeSeriesQuery] =
+    deriveEncoder[SyntheticTimeSeriesQuery]
+  implicit val itemsSyntheticTimeSeriesQueryEncoder: Encoder[Items[SyntheticTimeSeriesQuery]] =
+    deriveEncoder[Items[SyntheticTimeSeriesQuery]]
+  implicit val syntheticTimeSeriesResponseDecoder: Decoder[SyntheticTimeSeriesResponse] =
+    deriveDecoder[SyntheticTimeSeriesResponse]
+  implicit val itemsSyntheticTimeSeriesResponseDecoder
+      : Decoder[Items[SyntheticTimeSeriesResponse]] =
+    deriveDecoder[Items[SyntheticTimeSeriesResponse]]
 }

@@ -17,7 +17,7 @@ import scala.collection.immutable.Seq
 )
 class SessionsTest extends SdkTestSpec with ReadBehaviours {
   "Sessions" should "create a new session with credential flow" in {
-    val expectedResponse = Seq(Session(0, "CLIENT_CREDENTIALS", "READY", "nonce", "clientId"))
+    val expectedResponse = Seq(Session(0, Some("CLIENT_CREDENTIALS"), "READY", "nonce", Some("clientId")))
     val responseForSessionCreated = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
@@ -50,7 +50,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
   }
 
   it should "create a new session with token exchange flow" in {
-    val expectedResponse = Seq(Session(0, "TOKEN_EXCHANGE", "READY", "nonce", "clientId"))
+    val expectedResponse = Seq(Session(0, Some("TOKEN_EXCHANGE"), "READY", "nonce", None))
     val responseForSessionCreated = SttpBackendStub.synchronous
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
@@ -170,15 +170,14 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         "READY",
         Instant.now().toEpochMilli,
         Instant.now().plusSeconds(60).toEpochMilli,
-        "clientId"
+        Some("clientId")
       ),
       SessionList(
         2,
-        "CLIENT_CREDENTIALS",
+        "TOKEN_EXCHANGE",
         "CANCELLED",
         Instant.now().minusSeconds(120).toEpochMilli,
-        Instant.now().minusSeconds(60).toEpochMilli,
-        "clientId"
+        Instant.now().minusSeconds(60).toEpochMilli
       )
     )
     val responseForSessionList = SttpBackendStub.synchronous

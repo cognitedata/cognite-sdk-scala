@@ -113,7 +113,7 @@ jobs:
 
       - name: Compile
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++3.0.1 Test/compile
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++3.1.1 Test/compile
 
   test:
     runs-on: ubuntu-latest

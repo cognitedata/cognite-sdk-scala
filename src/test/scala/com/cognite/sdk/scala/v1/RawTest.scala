@@ -4,7 +4,6 @@
 package com.cognite.sdk.scala.v1
 
 import cats.syntax.either._
-import cats.catsInstancesForId
 import com.cognite.sdk.scala.common.{Items, ReadBehaviours, SdkTestSpec, WritableBehaviors}
 import fs2.Stream
 import io.circe.syntax._
@@ -178,5 +177,22 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
           .toList
           .length === 2
       )
+  }
+
+  it should "get partition cursor" in withDatabaseTables {
+    (database, tables) =>
+      val rows = client
+        .rawRows(database, tables.head)
+
+      rows.create(
+        Seq(
+          RawRow("123", Map("a" -> "3".asJson, "abc" -> "foo".asJson)),
+          RawRow("abc", Map("a" -> "0".asJson, "abc" -> Map("cde" -> 1).asJson))
+        )
+      )
+
+      val pCursors = rows.getPartitionCursors(RawRowFilter(), 15)
+      pCursors.size shouldBe 15
+
   }
 }
