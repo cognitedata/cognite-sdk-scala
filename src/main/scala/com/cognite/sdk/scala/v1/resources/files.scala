@@ -40,6 +40,8 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
         value => value
       )
 
+  // toSeq is redundant on Scala 2.13, not Scala 2.12.
+  @SuppressWarnings(Array("org.wartremover.warts.RedundantConversions"))
   override def createItems(items: Items[FileCreate]): F[Seq[File]] =
     items.items.toList.traverse(createOne).map(_.toSeq)
 

@@ -12,6 +12,7 @@ import scala.annotation.tailrec
 
 trait RetryWhile {
   @tailrec
+  @SuppressWarnings(Array("org.wartremover.warts.ThreadSleep"))
   final def retryWithExpectedResult[A](
       action: => A,
       assertion: A => Assertion,
