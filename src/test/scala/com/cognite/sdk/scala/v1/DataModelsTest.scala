@@ -88,14 +88,6 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     Some(Seq(dataModel1.externalId))
   )
 
-  private val dataModels = Seq(dataModel1, dataModel2)
-
-  val expectedDataModelsOutputWithProps = dataModels.map { dm =>
-    dm.copy(properties =
-      dm.properties.map(x => x ++ Map("externalId" -> DataModelProperty("text", false)))
-    )
-  }
-
   private def insertDataModels() = {
     val outputCreates =
       blueFieldClient.dataModels
@@ -103,6 +95,10 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
         .unsafeRunSync()
         .toList
     outputCreates.size should be >= 2
+    retryWithExpectedResult[Seq[DataModel]](
+      blueFieldClient.dataModels.list().unsafeRunSync().toList.toSeq,
+      dm => dm.contains(dataModel1) && dm.contains(dataModel2) shouldBe true
+    )
     outputCreates
   }
 
@@ -111,8 +107,10 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
       .deleteItems(Seq(dataModel1.externalId, dataModel2.externalId))
       .unsafeRunSync()
 
-    val outputList = blueFieldClient.dataModels.list(true).unsafeRunSync().toList
-    expectedDataModelsOutputWithProps.foreach(dm => outputList.contains(dm) shouldBe false)
+    retryWithExpectedResult[Seq[DataModel]](
+      blueFieldClient.dataModels.list().unsafeRunSync().toList.toSeq,
+      dm => dm.contains(dataModel1) && dm.contains(dataModel2) shouldBe false
+    )
   }
 
   private def initAndCleanUpData(testCode: Seq[DataModel] => Any): Unit =
@@ -139,7 +137,12 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
           .toList
       outputGetByIds.size shouldBe 2
     // VH TOTO Fix this when the api is updated
-    // outputGetByIds.toSet shouldBe expectedDataModelsOutputWithProps.toSet
+    /*val expectedDataModelsOutputWithProps = Seq(dataModel1, dataModel2).map { dm =>
+        dm.copy(properties =
+          dm.properties.map(x => x ++ Map("externalId" -> DataModelProperty("text", false)))
+        )
+      }
+      outputGetByIds.toSet shouldBe expectedDataModelsOutputWithProps.toSet*/
   }
 
   // VH TOTO Fix this when the api is updated

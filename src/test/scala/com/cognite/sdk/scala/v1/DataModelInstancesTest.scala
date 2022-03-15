@@ -175,13 +175,14 @@ class DataModelInstancesTest
     Seq(dmiArrayToCreate1, dmiArrayToCreate2, dmiArrayToCreate3)
 
   override def beforeAll(): Unit = {
-    val dataModels =
-      blueFieldClient.dataModels
-        .createItems(Items[DataModel](Seq(dataModel, dataModelArray)))
-        .unsafeRunSync()
-        .toList
-    dataModels.contains(dataModel) shouldBe true
-    dataModels.contains(dataModelArray) shouldBe true
+    blueFieldClient.dataModels
+      .createItems(Items[DataModel](Seq(dataModel, dataModelArray)))
+      .unsafeRunSync()
+
+    retryWithExpectedResult[scala.Seq[DataModel]](
+      blueFieldClient.dataModels.list().unsafeRunSync(),
+      dm => dm.contains(dataModel) && dm.contains(dataModelArray) shouldBe true
+    )
     ()
   }
 
@@ -190,9 +191,10 @@ class DataModelInstancesTest
       .deleteItems(Seq(dataModel.externalId, dataModelArray.externalId))
       .unsafeRunSync()
 
-    val dataModels = blueFieldClient.dataModels.list().unsafeRunSync().toList
-    dataModels.contains(dataModel) shouldBe false
-    dataModels.contains(dataModelArray) shouldBe false
+    retryWithExpectedResult[scala.Seq[DataModel]](
+      blueFieldClient.dataModels.list().unsafeRunSync(),
+      dm => dm.contains(dataModel) && dm.contains(dataModelArray) shouldBe false
+    )
     ()
   }
 

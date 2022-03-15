@@ -235,13 +235,13 @@ object DataModelInstances {
       case "int" | "int32" => c.downField(propName).as[Int]
       case "bigint" | "int64" => c.downField(propName).as[Long]
       case "float32" => c.downField(propName).as[Float]
-      case "float64" => c.downField(propName).as[Double]
+      case "float64" | "numeric" => c.downField(propName).as[Double]
       case "text" => c.downField(propName).as[String]
       case "boolean[]" => c.downField(propName).as[Vector[Boolean]]
       case "int[]" | "int32[]" => c.downField(propName).as[Vector[Int]]
       case "bigint[]" | "int64[]" => c.downField(propName).as[Vector[Long]]
       case "float32[]" => c.downField(propName).as[Vector[Float]]
-      case "float64[]" => c.downField(propName).as[Vector[Double]]
+      case "float64[]" | "numeric[]" => c.downField(propName).as[Vector[Double]]
       case "text[]" => c.downField(propName).as[Vector[String]]
       case invalidType =>
         throw new Exception(
