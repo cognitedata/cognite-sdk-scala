@@ -88,6 +88,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     Some(Seq(dataModel1.externalId))
   )
 
+  // toSeq is redundant on Scala 2.13, not Scala 2.12.
+  @SuppressWarnings(Array("org.wartremover.warts.RedundantConversions"))
   private def insertDataModels() = {
     val outputCreates =
       blueFieldClient.dataModels
@@ -95,6 +97,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
         .unsafeRunSync()
         .toList
     outputCreates.size should be >= 2
+
     retryWithExpectedResult[Seq[DataModel]](
       blueFieldClient.dataModels.list().unsafeRunSync().toList.toSeq,
       dm => dm.contains(dataModel1) && dm.contains(dataModel2) shouldBe true
@@ -102,6 +105,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     outputCreates
   }
 
+  // toSeq is redundant on Scala 2.13, not Scala 2.12.
+  @SuppressWarnings(Array("org.wartremover.warts.RedundantConversions"))
   private def deleteDataModels() = {
     blueFieldClient.dataModels
       .deleteItems(Seq(dataModel1.externalId, dataModel2.externalId))
