@@ -88,8 +88,6 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     Some(Seq(dataModel1.externalId))
   )
 
-  // toSeq is redundant on Scala 2.13, not Scala 2.12.
-  @SuppressWarnings(Array("org.wartremover.warts.RedundantConversions"))
   private def insertDataModels() = {
     val outputCreates =
       blueFieldClient.dataModels
@@ -98,22 +96,20 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
         .toList
     outputCreates.size should be >= 2
 
-    retryWithExpectedResult[Seq[DataModel]](
-      blueFieldClient.dataModels.list().unsafeRunSync().toList.toSeq,
+    retryWithExpectedResult[scala.collection.Seq[DataModel]](
+      blueFieldClient.dataModels.list().unsafeRunSync(),
       dm => dm.contains(dataModel1) && dm.contains(dataModel2) shouldBe true
     )
     outputCreates
   }
 
-  // toSeq is redundant on Scala 2.13, not Scala 2.12.
-  @SuppressWarnings(Array("org.wartremover.warts.RedundantConversions"))
   private def deleteDataModels() = {
     blueFieldClient.dataModels
       .deleteItems(Seq(dataModel1.externalId, dataModel2.externalId))
       .unsafeRunSync()
 
-    retryWithExpectedResult[Seq[DataModel]](
-      blueFieldClient.dataModels.list().unsafeRunSync().toList.toSeq,
+    retryWithExpectedResult[scala.collection.Seq[DataModel]](
+      blueFieldClient.dataModels.list().unsafeRunSync(),
       dm => dm.contains(dataModel1) && dm.contains(dataModel2) shouldBe false
     )
   }
@@ -141,7 +137,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
           .unsafeRunSync()
           .toList
       outputGetByIds.size shouldBe 2
-    // VH TOTO Fix this when the api is updated
+    // VH TODO Fix this when the api is updated
     /*val expectedDataModelsOutputWithProps = Seq(dataModel1, dataModel2).map { dm =>
         dm.copy(properties =
           dm.properties.map(x => x ++ Map("externalId" -> DataModelProperty("text", false)))
@@ -150,7 +146,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
       outputGetByIds.toSet shouldBe expectedDataModelsOutputWithProps.toSet*/
   }
 
-  // VH TOTO Fix this when the api is updated
+  // VH TODO Fix this when the api is updated
   ignore should "work with include inherited properties" in initAndCleanUpData { _ =>
     val expectedDataModel1 =
       dataModel1.copy(properties =
