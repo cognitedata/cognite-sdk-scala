@@ -6,7 +6,6 @@ package com.cognite.sdk.scala.v1
 import cats.effect.unsafe.implicits.global
 import cats.implicits.catsSyntaxEq
 import com.cognite.sdk.scala.common.{CdpApiException, Items, RetryWhile}
-import io.circe.Json
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.util.UUID
@@ -114,10 +113,10 @@ class DataModelInstancesTest
             StringProperty("E103")
           )
         ),
-        /*"array_float" -> Json.fromValues(
-          Seq(
-            Json.fromFloatOrNull(1.01f),
-            Json.fromFloatOrNull(1.02f)
+        /*"array_float" -> ArrayProperty[Float32Property](
+          Vector(
+            Float32Property(1.01f),
+            Float32Property(1.02f)
           )
         ),*/ // float[] is not supported yet
         "array_int" -> ArrayProperty[Int32Property](
@@ -141,10 +140,10 @@ class DataModelInstancesTest
             StringProperty("E202")
           )
         )
-        /*"array_float" -> Json.fromValues(
-          Seq(
-            Json.fromFloatOrNull(2.02f),
-            Json.fromFloatOrNull(2.04f)
+        /*"array_float" -> ArrayProperty(
+          Vector(
+            Float32Property(2.02f),
+            Float32Property(2.04f)
           )
         )*/ // float[] is not supported yet
       )
@@ -155,10 +154,10 @@ class DataModelInstancesTest
     Some(
       Map(
         "externalId" -> StringProperty("equipment_44"),
-        /*"array_float" -> Json.fromValues(
-          Seq(
-            Json.fromFloatOrNull(3.01f),
-            Json.fromFloatOrNull(3.02f)
+        /*"array_float" -> ArrayProperty(
+          Vector(
+            Float32Property(3.01f),
+            Float32Property(3.02f)
           )
         ),*/ // float[] is not supported yet
         "array_int" -> ArrayProperty(
@@ -289,7 +288,7 @@ class DataModelInstancesTest
       Some(
         DMIAndFilter(
           Seq(
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ0001"))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ0001"))
           )
         )
       )
@@ -306,9 +305,9 @@ class DataModelInstancesTest
       Some(
         DMIAndFilter(
           Seq(
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ0002")),
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), Json.fromBoolean(true)),
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_float"), Json.fromFloatOrNull(1.64f))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ0002")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), BooleanProperty(true)),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_float"), Float32Property(1.64f))
           )
         )
       )
@@ -330,8 +329,8 @@ class DataModelInstancesTest
       Some(
         DMIAndFilter(
           Seq(
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ0001")),
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), Json.fromBoolean(true))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ0001")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), BooleanProperty(true))
           )
         )
       )
@@ -351,8 +350,8 @@ class DataModelInstancesTest
       Some(
         DMIOrFilter(
           Seq(
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ0011")),
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), Json.fromBoolean(true))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ0011")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), BooleanProperty(true))
           )
         )
       )
@@ -376,7 +375,7 @@ class DataModelInstancesTest
         DMINotFilter(
           DMIInFilter(
             Seq(dataModel.externalId, "prop_string"),
-            Seq(Json.fromString("EQ0002"), Json.fromString("EQ0011"))
+            Seq(StringProperty("EQ0002"), StringProperty("EQ0011"))
           )
         )
       )
@@ -397,7 +396,7 @@ class DataModelInstancesTest
     val inputQueryPrefix = DataModelInstanceQuery(
       dataModel.externalId,
       Some(
-        DMIPrefixFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ000"))
+        DMIPrefixFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ000"))
       )
     )
     val outputQueryPrefix = blueFieldClient.dataModelInstances
@@ -418,7 +417,7 @@ class DataModelInstancesTest
       Some(
         DMIRangeFilter(
           Seq(dataModel.externalId, "prop_float"),
-          gte = Some(Json.fromFloatOrNull(1.64f))
+          gte = Some(Float32Property(1.64f))
         )
       )
     )
@@ -504,8 +503,8 @@ class DataModelInstancesTest
         DMIContainsAnyFilter(
           Seq(dataModelArray.externalId, "array_string"),
           Seq(
-            Json.fromString("E201"),
-            Json.fromString("E103")
+            StringProperty("E201"),
+            StringProperty("E103")
           )
         )
       )
@@ -525,7 +524,7 @@ class DataModelInstancesTest
       Some(
         DMIContainsAnyFilter(
           Seq(dataModelArray.externalId, "array_int"),
-          Seq(Json.fromInt(13))
+          Seq(Int32Property(13))
         )
       )
     )
@@ -550,8 +549,8 @@ class DataModelInstancesTest
         DMIContainsAnyFilter(
           Seq(dataModelArray.externalId, "array_string"),
           Seq(
-            Json.fromString("E201"),
-            Json.fromString("E202")
+            StringProperty("E201"),
+            StringProperty("E202")
           )
         )
       )
@@ -572,8 +571,8 @@ class DataModelInstancesTest
         DMIContainsAnyFilter(
           Seq(dataModelArray.externalId, "array_int"),
           Seq(
-            Json.fromInt(12),
-            Json.fromInt(13)
+            Int32Property(12),
+            Int32Property(13)
           )
         )
       )
@@ -618,8 +617,8 @@ class DataModelInstancesTest
       Some(
         DMIOrFilter(
           Seq(
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ0011")),
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), Json.fromBoolean(true))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ0011")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), BooleanProperty(true))
           )
         )
       ),
@@ -646,7 +645,7 @@ class DataModelInstancesTest
     val inputQueryPrefix = DataModelInstanceQuery(
       dataModel.externalId,
       Some(
-        DMIPrefixFilter(Seq(dataModel.externalId, "prop_string"), Json.fromString("EQ00"))
+        DMIPrefixFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ00"))
       )
     )
 
