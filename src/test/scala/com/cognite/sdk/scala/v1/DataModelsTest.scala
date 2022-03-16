@@ -49,42 +49,6 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
         .unsafeRunSync()
         .toList
     dataModels.contains(dataModel) shouldBe true
-
-    // VH TODO remove the code below and use real test above when create endpoints doesn't return 500 anymore
-    /*val expectedBody = StringBody(
-      s"""{"items":[{"externalId":"${dataModel.externalId}",
-      "properties":{"name":{"type":"text","nullable":true},
-      "description":{"type":"text","nullable":true}}}]}""".stripMargin,
-      "utf-8",
-      MediaType.ApplicationJson
-    )
-    val expectedResponse = Seq(dataModel)
-    val responseForDataModelCreated = SttpBackendStub.synchronous
-      .whenRequestMatches { r =>
-        r.method === Method.POST && r.uri.path.endsWith(
-          List("definitions", "apply")
-        ) && (r.body.equals(expectedBody))
-      }
-      .thenRespond(
-        Response(
-          expectedResponse,
-          StatusCode.Ok,
-          "OK",
-          Seq(Header("content-type", "application/json; charset=utf-8"))
-        )
-      )
-
-    val client = new GenericClient[Id](
-      applicationName = "CogniteScalaSDK-OAuth-Test",
-      projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token"),
-      cdfVersion = Some("alpha")
-    )(implicitly, responseForDataModelCreated)
-
-    val resCreate = client.dataModels.createItems(
-      Items[DataModel](Seq(dataModel))
-    )
-    resCreate shouldBe expectedResponse*/
   }
 
   it should "list all data models definitions" in {
@@ -124,14 +88,6 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     Some(Seq(dataModel1.externalId))
   )
 
-  private val dataModels = Seq(dataModel1, dataModel2)
-
-  val expectedDataModelsOutputWithProps = dataModels.map { dm =>
-    dm.copy(properties =
-      dm.properties.map(x => x ++ Map("externalId" -> DataModelProperty("text", false)))
-    )
-  }
-
   private def insertDataModels() = {
     val outputCreates =
       blueFieldClient.dataModels
@@ -139,6 +95,11 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
         .unsafeRunSync()
         .toList
     outputCreates.size should be >= 2
+
+    retryWithExpectedResult[scala.collection.Seq[DataModel]](
+      blueFieldClient.dataModels.list().unsafeRunSync(),
+      dm => dm.contains(dataModel1) && dm.contains(dataModel2) shouldBe true
+    )
     outputCreates
   }
 
@@ -147,8 +108,10 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
       .deleteItems(Seq(dataModel1.externalId, dataModel2.externalId))
       .unsafeRunSync()
 
-    val outputList = blueFieldClient.dataModels.list(true).unsafeRunSync().toList
-    expectedDataModelsOutputWithProps.foreach(dm => outputList.contains(dm) shouldBe false)
+    retryWithExpectedResult[scala.collection.Seq[DataModel]](
+      blueFieldClient.dataModels.list().unsafeRunSync(),
+      dm => dm.contains(dataModel1) && dm.contains(dataModel2) shouldBe false
+    )
   }
 
   private def initAndCleanUpData(testCode: Seq[DataModel] => Any): Unit =
@@ -174,11 +137,16 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
           .unsafeRunSync()
           .toList
       outputGetByIds.size shouldBe 2
-    // VH TOTO Fix this when the api is updated
-    // outputGetByIds.toSet shouldBe expectedDataModelsOutputWithProps.toSet
+    // VH TODO Fix this when the api is updated
+    /*val expectedDataModelsOutputWithProps = Seq(dataModel1, dataModel2).map { dm =>
+        dm.copy(properties =
+          dm.properties.map(x => x ++ Map("externalId" -> DataModelProperty("text", false)))
+        )
+      }
+      outputGetByIds.toSet shouldBe expectedDataModelsOutputWithProps.toSet*/
   }
 
-  // VH TOTO Fix this when the api is updated
+  // VH TODO Fix this when the api is updated
   ignore should "work with include inherited properties" in initAndCleanUpData { _ =>
     val expectedDataModel1 =
       dataModel1.copy(properties =

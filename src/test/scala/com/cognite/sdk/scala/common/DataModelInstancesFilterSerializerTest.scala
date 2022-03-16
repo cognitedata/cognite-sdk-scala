@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1.{
+  BooleanProperty,
   DMIAndFilter,
   DMIContainsAllFilter,
   DMIContainsAnyFilter,
@@ -13,9 +14,13 @@ import com.cognite.sdk.scala.v1.{
   DMINotFilter,
   DMIOrFilter,
   DMIPrefixFilter,
-  DMIRangeFilter
+  DMIRangeFilter,
+  Float32Property,
+  Float64Property,
+  Int32Property,
+  Int64Property,
+  StringProperty
 }
-import io.circe.Json
 import io.circe.syntax._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -35,7 +40,7 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
   "DataModelFilterSerializer" when {
     "encode LeafFilter" should {
       "work for equals filter" in {
-        val equalInt = DMIEqualsFilter(Seq("name", "tag"), Json.fromInt(1)).asJson
+        val equalInt = DMIEqualsFilter(Seq("name", "tag"), Int32Property(1)).asJson
         equalInt.toString() shouldBe """{
                                        |  "property" : [
                                        |    "name",
@@ -44,7 +49,7 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
                                        |  "value" : 1
                                        |}""".stripMargin
 
-        val equalString = DMIEqualsFilter(Seq("name", "tag"), Json.fromString("abcdef")).asJson
+        val equalString = DMIEqualsFilter(Seq("name", "tag"), StringProperty("abcdef")).asJson
         equalString.toString() shouldBe """{
                                           |  "property" : [
                                           |    "name",
@@ -53,7 +58,7 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
                                           |  "value" : "abcdef"
                                           |}""".stripMargin
 
-        val equalBool = DMIEqualsFilter(Seq("name", "tag"), Json.fromBoolean(false)).asJson
+        val equalBool = DMIEqualsFilter(Seq("name", "tag"), BooleanProperty(false)).asJson
         equalBool.toString() shouldBe """{
                                         |  "property" : [
                                         |    "name",
@@ -66,10 +71,10 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
         val in = DMIInFilter(
           Seq("name", "tag"),
           Seq(
-            Json.fromInt(1),
-            Json.fromString("abcdef"),
-            Json.fromBoolean(false),
-            Json.fromFloatOrNull(2.64f)
+            Int64Property(1),
+            StringProperty("abcdef"),
+            BooleanProperty(false),
+            Float32Property(2.64f)
           )
         ).asJson
         in.toString() shouldBe """{
@@ -93,21 +98,21 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
 
         the[IllegalArgumentException] thrownBy DMIRangeFilter(
           Seq("name", "tag"),
-          gte = Some(Json.fromInt(1)),
-          gt = Some(Json.fromInt(2))
+          gte = Some(Int32Property(1)),
+          gt = Some(Int32Property(2))
         )
 
         the[IllegalArgumentException] thrownBy DMIRangeFilter(
           Seq("name", "tag"),
-          lte = Some(Json.fromString("abc")),
-          lt = Some(Json.fromString("def"))
+          lte = Some(StringProperty("abc")),
+          lt = Some(StringProperty("def"))
         )
 
         val range =
           DMIRangeFilter(
             Seq("name", "tag"),
-            gte = Some(Json.fromInt(1)),
-            lt = Some(Json.fromInt(2))
+            gte = Some(Int32Property(1)),
+            lt = Some(Int32Property(2))
           ).asJson
 
         range.toString() shouldBe """{
@@ -121,7 +126,7 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
 
       }
       "work for prefix filter" in {
-        val prefix = DMIPrefixFilter(Seq("name", "tag"), Json.fromString("abc")).asJson
+        val prefix = DMIPrefixFilter(Seq("name", "tag"), StringProperty("abc")).asJson
         prefix.toString() shouldBe """{
                                  |  "property" : [
                                  |    "name",
@@ -145,8 +150,8 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
         val containsAny = DMIContainsAnyFilter(
           Seq("name", "tag"),
           Seq(
-            Json.fromString("abcdef"),
-            Json.fromFloatOrNull(2.64f)
+            StringProperty("abcdef"),
+            Float32Property(2.64f)
           )
         ).asJson
         containsAny.toString() shouldBe """{
@@ -164,8 +169,8 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
         val containsAll = DMIContainsAllFilter(
           Seq("name", "tag"),
           Seq(
-            Json.fromInt(1),
-            Json.fromBoolean(true)
+            Int32Property(1),
+            BooleanProperty(true)
           )
         ).asJson
         containsAll.toString() shouldBe """{
@@ -183,14 +188,14 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
 
     "encode BoolFilter" should {
       "work for and filter" in {
-        val equalInt = DMIEqualsFilter(Seq("name", "tag"), Json.fromInt(1))
+        val equalInt = DMIEqualsFilter(Seq("name", "tag"), Int32Property(1))
         val in = DMIInFilter(
           Seq("name", "tag"),
           Seq(
-            Json.fromInt(1),
-            Json.fromString("abcdef"),
-            Json.fromBoolean(false),
-            Json.fromFloatOrNull(2.64f)
+            Int32Property(1),
+            StringProperty("abcdef"),
+            BooleanProperty(false),
+            Float64Property(2.64)
           )
         )
 
@@ -227,10 +232,10 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
         val range =
           DMIRangeFilter(
             Seq("name", "tag"),
-            gte = Some(Json.fromInt(1)),
-            lt = Some(Json.fromInt(2))
+            gte = Some(Int32Property(1)),
+            lt = Some(Int32Property(2))
           )
-        val prefix = DMIPrefixFilter(Seq("name", "tag"), Json.fromString("abc"))
+        val prefix = DMIPrefixFilter(Seq("name", "tag"), StringProperty("abc"))
         val exists = DMIExistsFilter(Seq("name", "tag"))
 
         val or = DMIOrFilter(Seq(range, prefix, exists)).asJson
@@ -270,8 +275,8 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
         val containsAny = DMIContainsAnyFilter(
           Seq("name", "tag"),
           Seq(
-            Json.fromString("abcdef"),
-            Json.fromFloatOrNull(2.64f)
+            StringProperty("abcdef"),
+            Float32Property(2.64f)
           )
         )
 
@@ -296,21 +301,21 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
 
     "encode a mix filter" should {
       "work for complex case" in {
-        val equalInt = DMIEqualsFilter(Seq("name", "tag"), Json.fromInt(1))
+        val equalInt = DMIEqualsFilter(Seq("name", "tag"), Int64Property(1))
         val in = DMIInFilter(
           Seq("name", "tag"),
           Seq(
-            Json.fromInt(1),
-            Json.fromString("abcdef"),
-            Json.fromBoolean(false),
-            Json.fromFloatOrNull(2.64f)
+            Int64Property(1),
+            StringProperty("abcdef"),
+            BooleanProperty(false),
+            Float32Property(2.64f)
           )
         )
         val containsAny = DMIContainsAnyFilter(
           Seq("name", "tag"),
           Seq(
-            Json.fromString("abcdef"),
-            Json.fromFloatOrNull(2.64f)
+            StringProperty("abcdef"),
+            Float32Property(2.64f)
           )
         )
         val orEqual = DMIOrFilter(Seq(equalInt))
