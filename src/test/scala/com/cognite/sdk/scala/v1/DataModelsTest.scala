@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.SdkException
+import com.cognite.sdk.scala.common.CdpApiException
 //import cats.Id
 import com.cognite.sdk.scala.common.{Items, RetryWhile}
 //import sttp.client3.testing.SttpBackendStub
@@ -174,23 +174,25 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   it should "work with ignore unknown externalIds" in initAndCleanUpData { _ =>
+    val unknownId = "toto"
     val outputIgnoreUnknownIds =
       blueFieldClient.dataModels
         .retrieveByExternalIds(
-          Seq("toto"),
+          Seq(unknownId),
           ignoreUnknownIds = true
         )
         .unsafeRunSync()
         .toList
     outputIgnoreUnknownIds.isEmpty shouldBe true
 
-    an[SdkException] should be thrownBy {
+    val error = the[CdpApiException] thrownBy {
       blueFieldClient.dataModels
         .retrieveByExternalIds(
-          Seq("toto"),
+          Seq(unknownId),
           ignoreUnknownIds = false
         )
         .unsafeRunSync()
     }
+    error.message shouldBe s"ids not found: $unknownId"
   }
 }

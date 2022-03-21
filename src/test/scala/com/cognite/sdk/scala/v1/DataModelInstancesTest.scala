@@ -4,7 +4,6 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
-import cats.implicits.catsSyntaxEq
 import com.cognite.sdk.scala.common.{CdpApiException, Items, RetryWhile}
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 
@@ -280,9 +279,7 @@ class DataModelInstancesTest
     }
 
   private def fromCreatedToExpectedProps(instances: Set[DataModelInstanceCreate]) =
-    instances.map(_.properties.map(_.filter { case (k, _) =>
-      k.neqv("externalId")
-    }))
+    instances.map(_.properties)
 
   "Query data model instances" should "work with empty filter" in initAndCleanUpDataForQuery { _ =>
     val inputNoFilterQuery = DataModelInstanceQuery(
