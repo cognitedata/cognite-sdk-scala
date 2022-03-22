@@ -46,7 +46,7 @@ class DataModelInstances[F[_]](
   )(implicit F: Async[F]): F[ItemsWithCursor[DataModelInstanceQueryResponse]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
-    dataModels.retrieveByExternalIds(Seq(inputQuery.modelExternalId)).flatMap { dm =>
+    dataModels.retrieveByExternalIds(Seq(inputQuery.modelExternalId), true).flatMap { dm =>
       val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
 
       implicit val dynamicPropertyTypeDecoder: Decoder[Map[String, PropertyType]] =
@@ -114,37 +114,39 @@ class DataModelInstances[F[_]](
       externalIds: Seq[DataModelInstanceByExternalId],
       ignoreUnknownIds: Boolean
   )(implicit F: Async[F]): F[Seq[DataModelInstanceQueryResponse]] =
-    dataModels.retrieveByExternalIds(externalIds.map(_.modelExternalId).distinct).flatMap { dm =>
-      val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
+    dataModels.retrieveByExternalIds(externalIds.map(_.modelExternalId).distinct, true).flatMap {
+      dm =>
+        val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
 
-      implicit val dynamicPropertyTypeDecoder: Decoder[Map[String, PropertyType]] =
-        createDynamicPropertyDecoder(props)
+        implicit val dynamicPropertyTypeDecoder: Decoder[Map[String, PropertyType]] =
+          createDynamicPropertyDecoder(props)
 
-      implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
-        new Decoder[DataModelInstanceQueryResponse] {
-          def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] =
-            for {
-              modelExternalId <- c.downField("modelExternalId").as[String]
-              properties <- c.downField("properties").as[Option[Map[String, PropertyType]]]
-            } yield DataModelInstanceQueryResponse(modelExternalId, properties)
-        }
+        implicit val dataModelInstanceQueryResponseDecoder
+            : Decoder[DataModelInstanceQueryResponse] =
+          new Decoder[DataModelInstanceQueryResponse] {
+            def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] =
+              for {
+                modelExternalId <- c.downField("modelExternalId").as[String]
+                properties <- c.downField("properties").as[Option[Map[String, PropertyType]]]
+              } yield DataModelInstanceQueryResponse(modelExternalId, properties)
+          }
 
-      implicit val dataModelInstanceQueryResponseItemsDecoder
-          : Decoder[Items[DataModelInstanceQueryResponse]] =
-        new Decoder[Items[DataModelInstanceQueryResponse]] {
-          override def apply(c: HCursor): Result[Items[DataModelInstanceQueryResponse]] =
-            for {
-              items <- c.downField("items").as[Seq[DataModelInstanceQueryResponse]]
-            } yield Items(items)
-        }
+        implicit val dataModelInstanceQueryResponseItemsDecoder
+            : Decoder[Items[DataModelInstanceQueryResponse]] =
+          new Decoder[Items[DataModelInstanceQueryResponse]] {
+            override def apply(c: HCursor): Result[Items[DataModelInstanceQueryResponse]] =
+              for {
+                items <- c.downField("items").as[Seq[DataModelInstanceQueryResponse]]
+              } yield Items(items)
+          }
 
-      requestSession.post[Seq[DataModelInstanceQueryResponse], Items[
-        DataModelInstanceQueryResponse
-      ], ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]](
-        ItemsWithIgnoreUnknownIds(externalIds, ignoreUnknownIds),
-        uri"$baseUrl/byids",
-        value => value.items
-      )
+        requestSession.post[Seq[DataModelInstanceQueryResponse], Items[
+          DataModelInstanceQueryResponse
+        ], ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]](
+          ItemsWithIgnoreUnknownIds(externalIds, ignoreUnknownIds),
+          uri"$baseUrl/byids",
+          value => value.items
+        )
     }
 }
 
