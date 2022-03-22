@@ -9,10 +9,6 @@ import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.util.UUID
 
-//import cats.Id
-//import sttp.client3.testing.SttpBackendStub
-//import sttp.model.{Header, MediaType, Method, StatusCode}
-
 import scala.collection.immutable.Seq
 
 @SuppressWarnings(
@@ -29,9 +25,10 @@ class DataModelInstancesTest
     with RetryWhile
     with BeforeAndAfterAll {
   val uuid = UUID.randomUUID.toString
-  val dataPropString = DataModelProperty("text", true)
-  val dataPropBool = DataModelProperty("boolean", true)
-  val dataPropFloat = DataModelProperty("float32", false)
+  val dataPropString = DataModelProperty(PropertyName.text)
+  val dataPropBool = DataModelProperty(PropertyName.boolean)
+  val dataPropFloat = DataModelProperty(PropertyName.float32, nullable = false)
+  val dataPropDirectRelation = DataModelProperty(PropertyName.directRelation)
 
   val dataModel = DataModel(
     s"Equipment-${uuid.substring(0, 8)}",
@@ -39,7 +36,8 @@ class DataModelInstancesTest
       Map(
         "prop_string" -> dataPropString,
         "prop_bool" -> dataPropBool,
-        "prop_float" -> dataPropFloat
+        "prop_float" -> dataPropFloat,
+        "prop_direct_relation" -> dataPropDirectRelation
       )
     )
   )
@@ -51,7 +49,8 @@ class DataModelInstancesTest
         Map(
           "externalId" -> StringProperty("equipment_43"),
           "prop_string" -> StringProperty("EQ0001"),
-          "prop_float" -> Float32Property(0.1f)
+          "prop_float" -> Float32Property(0.1f),
+          "prop_direct_relation" -> DirectRelationProperty("Asset")
         )
       )
     )
@@ -85,9 +84,9 @@ class DataModelInstancesTest
   val toCreates =
     Seq(dataModelInstanceToCreate1, dataModelInstanceToCreate2, dataModelInstanceToCreate3)
 
-  val dataPropArrayString = DataModelProperty("text[]", true)
-  // val dataPropArrayFloat = DataModelProperty("float[]", false) //float[] is not supported yet
-  val dataPropArrayInt = DataModelProperty("int[]", true)
+  val dataPropArrayString = DataModelProperty(PropertyName.arrayText, true)
+  // val dataPropArrayFloat = DataModelProperty(PropertyName.arrayFloat32, false) //float[] is not supported yet
+  val dataPropArrayInt = DataModelProperty(PropertyName.arrayInt, true)
 
   val dataModelArray = DataModel(
     s"Equipment-${UUID.randomUUID.toString.substring(0, 8)}",
@@ -199,16 +198,12 @@ class DataModelInstancesTest
 
   "Insert data model instances" should "work with multiple input" in {
     val dataModelInstances = blueFieldClient.dataModelInstances
-      .createItems(
-        Items[DataModelInstanceCreate](
-          toCreates
-        )
-      )
+      .createItems(Items[DataModelInstanceCreate](toCreates))
       .unsafeRunSync()
       .toList
 
     dataModelInstances.size shouldBe 3
-    dataModelInstances.map(_.properties).toSet shouldBe toCreates.map(_.properties).toSet
+    dataModelInstances.map(_.modelExternalId).toSet shouldBe toCreates.map(_.modelExternalId).toSet
   }
 
   it should "fail if input data type is not correct" in {

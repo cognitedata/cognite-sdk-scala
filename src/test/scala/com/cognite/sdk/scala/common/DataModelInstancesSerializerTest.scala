@@ -9,10 +9,12 @@ import com.cognite.sdk.scala.v1.{
   DataModelInstanceCreate,
   DataModelInstanceQueryResponse,
   DataModelProperty,
+  DirectRelationProperty,
   Float32Property,
   Float64Property,
   Int32Property,
   Int64Property,
+  PropertyName,
   PropertyType,
   StringProperty
 }
@@ -35,16 +37,17 @@ import org.scalatest.wordspec.AnyWordSpec
 class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
 
   val props: Map[String, DataModelProperty] = Map(
-    "prop_bool" -> DataModelProperty("boolean"),
-    "prop_float64" -> DataModelProperty("float64", false),
-    "prop_string" -> DataModelProperty("text", false),
-    "arr_bool" -> DataModelProperty("boolean[]", false),
-    "arr_float64" -> DataModelProperty("float64[]", false),
-    "arr_int32" -> DataModelProperty("int32[]"),
-    "arr_int64" -> DataModelProperty("int64[]"),
-    "arr_string" -> DataModelProperty("text[]"),
-    "arr_empty" -> DataModelProperty("text[]", false),
-    "arr_empty_nullable" -> DataModelProperty("float64[]")
+    "prop_bool" -> DataModelProperty(PropertyName.boolean),
+    "prop_float64" -> DataModelProperty(PropertyName.float64, false),
+    "prop_string" -> DataModelProperty(PropertyName.text, false),
+    "prop_direct_relation" -> DataModelProperty(PropertyName.directRelation),
+    "arr_bool" -> DataModelProperty(PropertyName.arrayBoolean, false),
+    "arr_float64" -> DataModelProperty(PropertyName.arrayFloat64, false),
+    "arr_int32" -> DataModelProperty(PropertyName.arrayInt32),
+    "arr_int64" -> DataModelProperty(PropertyName.arrayInt64),
+    "arr_string" -> DataModelProperty(PropertyName.arrayText),
+    "arr_empty" -> DataModelProperty(PropertyName.arrayText, false),
+    "arr_empty_nullable" -> DataModelProperty(PropertyName.arrayFloat64)
   )
 
   import com.cognite.sdk.scala.v1.resources.DataModelInstances._
@@ -88,6 +91,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
                                       |    "prop_bool" : true,
                                       |    "prop_float64": 23.0,
                                       |    "prop_string": "toto",
+                                      |    "prop_direct_relation": "Asset",
                                       |    "arr_bool": [true, false, true],
                                       |    "arr_float64": [1.2, 2, 4.654],
                                       |    "arr_int32": [3, 1, 2147483646],
@@ -107,6 +111,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
               "prop_bool" -> BooleanProperty(true),
               "prop_float64" -> Float64Property(23.0),
               "prop_string" -> StringProperty("toto"),
+              "prop_direct_relation" -> DirectRelationProperty("Asset"),
               "arr_bool" -> ArrayProperty[BooleanProperty](
                 Vector(true, false, true).map(BooleanProperty(_))
               ),
@@ -134,6 +139,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
                                         |"properties" : {
                                         |    "prop_float64": 23.0,
                                         |    "prop_string": "toto",
+                                        |    "prop_direct_relation": "Asset",
                                         |    "arr_bool": [true, false, true],
                                         |    "arr_float64": [1.2, 2, 4.654],
                                         |    "arr_empty": []
@@ -147,6 +153,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
             Map(
               "prop_float64" -> Float64Property(23.0),
               "prop_string" -> StringProperty("toto"),
+              "prop_direct_relation" -> DirectRelationProperty("Asset"),
               "arr_bool" -> ArrayProperty[BooleanProperty](
                 Vector(true, false, true).map(BooleanProperty(_))
               ),
@@ -227,21 +234,40 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
               "prop_int64" -> Int64Property(9223372036854775L),
               "prop_float32" -> Float32Property(23.0f),
               "prop_float64" -> Float64Property(23.0),
-              "prop_string" -> StringProperty("toto")
+              "prop_string" -> StringProperty("toto"),
+              "prop_direct_relation" -> DirectRelationProperty("Asset")
             )
           )
-        )
-        res.asJson.toString() shouldBe """{
-                                         |  "modelExternalId" : "model_primitive",
-                                         |  "properties" : {
-                                         |    "prop_float64" : 23.0,
-                                         |    "prop_float32" : 23.0,
-                                         |    "prop_int32" : 123,
-                                         |    "prop_string" : "toto",
-                                         |    "prop_int64" : 9223372036854775,
-                                         |    "prop_bool" : true
-                                         |  }
-                                         |}""".stripMargin
+        ).asJson.toString()
+
+        val expectedJson1 = """{
+                              |  "modelExternalId" : "model_primitive",
+                              |  "properties" : {
+                              |    "prop_float64" : 23.0,
+                              |    "prop_int32" : 123,
+                              |    "prop_string" : "toto",
+                              |    "prop_int64" : 9223372036854775,
+                              |    "prop_bool" : true,
+                              |    "prop_float32" : 23.0,
+                              |    "prop_direct_relation" : "Asset"
+                              |  }
+                              |}""".stripMargin
+
+        // Same content but order of properties in scala 2.12 is different than 2.13 and 3 ¯\_(ツ)_/¯
+        val expectedJson2 = """{
+                              |  "modelExternalId" : "model_primitive",
+                              |  "properties" : {
+                              |    "prop_float64" : 23.0,
+                              |    "prop_float32" : 23.0,
+                              |    "prop_direct_relation" : "Asset",
+                              |    "prop_int32" : 123,
+                              |    "prop_string" : "toto",
+                              |    "prop_int64" : 9223372036854775,
+                              |    "prop_bool" : true
+                              |  }
+                              |}""".stripMargin
+
+        res === expectedJson1 || res === expectedJson2 shouldBe true
       }
       "work for array" in {
         val res = DataModelInstanceCreate(

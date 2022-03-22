@@ -5,10 +5,7 @@ package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.CdpApiException
-//import cats.Id
 import com.cognite.sdk.scala.common.{Items, RetryWhile}
-//import sttp.client3.testing.SttpBackendStub
-//import sttp.model.{Header, MediaType, Method, StatusCode}
 
 import java.util.UUID
 import scala.collection.immutable.Seq
@@ -22,8 +19,9 @@ import scala.collection.immutable.Seq
 class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   val uuid = UUID.randomUUID.toString
-  val dataPropName = DataModelProperty("text", true)
-  val dataPropDescription = DataModelProperty("text", true)
+  val dataPropName = DataModelProperty(PropertyName.text, false)
+  val dataPropDescription = DataModelProperty(PropertyName.text)
+  val dataPropDirectRelation = DataModelProperty(PropertyName.directRelation)
   // val dataPropIndex = DataModelPropertyIndex(Some("name_descr"), Some(Seq("name", "description")))
 
   val dataModel = DataModel(
@@ -31,7 +29,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     Some(
       Map(
         "name" -> dataPropName,
-        "description" -> dataPropDescription
+        "description" -> dataPropDescription,
+        "parentExternalId" -> dataPropDirectRelation
       )
     ),
     None, // Some(Seq("Asset", "Pump")),
@@ -39,7 +38,9 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
   )
 
   val expectedDataModelOutput = dataModel.copy(properties =
-    dataModel.properties.map(x => x ++ Map("externalId" -> DataModelProperty("text", false)))
+    dataModel.properties.map(x =>
+      x ++ Map("externalId" -> DataModelProperty(PropertyName.text, false))
+    )
   )
 
   "DataModels" should "create data models definitions" in {
@@ -74,8 +75,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     )
   )
 
-  private val dataPropBool = DataModelProperty("boolean", true)
-  private val dataPropFloat = DataModelProperty("float64", true)
+  private val dataPropBool = DataModelProperty(PropertyName.boolean, true)
+  private val dataPropFloat = DataModelProperty(PropertyName.float64, true)
 
   private val dataModel2 = DataModel(
     s"Equipment-${UUID.randomUUID.toString.substring(0, 8)}",
@@ -137,26 +138,25 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
           .unsafeRunSync()
           .toList
       outputGetByIds.size shouldBe 2
-    // VH TODO Fix this when the api is updated
-    /*val expectedDataModelsOutputWithProps = Seq(dataModel1, dataModel2).map { dm =>
-        dm.copy(properties =
-          dm.properties.map(x => x ++ Map("externalId" -> DataModelProperty("text", false)))
-        )
-      }
-      outputGetByIds.toSet shouldBe expectedDataModelsOutputWithProps.toSet*/
+      val expectedDataModelsOutputWithProps = Seq(dataModel1, dataModel2)
+      outputGetByIds.toSet shouldBe expectedDataModelsOutputWithProps.toSet
   }
 
-  // VH TODO Fix this when the api is updated
+  // VH TODO Fix this when the api is updated as it does not return "extends" field yet
   ignore should "work with include inherited properties" in initAndCleanUpData { _ =>
     val expectedDataModel1 =
       dataModel1.copy(properties =
-        dataModel1.properties.map(x => x ++ Map("externalId" -> DataModelProperty("text", false)))
+        dataModel1.properties.map(x =>
+          x ++ Map("externalId" -> DataModelProperty(PropertyName.text, false))
+        )
       )
 
     val expectedDataModel2 =
       dataModel2.copy(properties =
         dataModel2.properties.map(x =>
-          x ++ Map("externalId" -> DataModelProperty("text", false)) ++ dataModel1.properties
+          x ++ Map(
+            "externalId" -> DataModelProperty(PropertyName.text, false)
+          ) ++ dataModel1.properties
             .getOrElse(Map())
         )
       )
