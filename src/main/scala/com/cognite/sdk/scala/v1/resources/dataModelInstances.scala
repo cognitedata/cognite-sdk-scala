@@ -16,6 +16,7 @@ import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
 
+import java.time.{LocalDate, ZonedDateTime}
 import scala.collection.immutable
 
 class DataModelInstances[F[_]](
@@ -240,8 +241,10 @@ object DataModelInstances {
       case PropertyName.bigint | PropertyName.int64 => c.downField(propName).as[Long]
       case PropertyName.float32 => c.downField(propName).as[Float]
       case PropertyName.float64 | PropertyName.numeric => c.downField(propName).as[Double]
-      case PropertyName.text | PropertyName.directRelation | PropertyName.timestamp |
-          PropertyName.date | PropertyName.geometry | PropertyName.geography =>
+      case PropertyName.timestamp => c.downField(propName).as[ZonedDateTime]
+      case PropertyName.date => c.downField(propName).as[LocalDate]
+      case PropertyName.text | PropertyName.directRelation | PropertyName.geometry |
+          PropertyName.geography =>
         c.downField(propName).as[String]
       case PropertyName.arrayBoolean => c.downField(propName).as[Vector[Boolean]]
       case PropertyName.arrayInt | PropertyName.arrayInt32 => c.downField(propName).as[Vector[Int]]
@@ -324,11 +327,11 @@ object DataModelInstances {
               case l: Long => prop -> Int64Property(l)
               case f: Float => prop -> Float32Property(f)
               case d: Double => prop -> Float64Property(d)
+              case ts: ZonedDateTime => prop -> TimeStampProperty(ts)
+              case dt: LocalDate => prop -> DateProperty(dt)
               case s: String =>
                 dmp.`type` match {
                   case PropertyName.directRelation => prop -> DirectRelationProperty(s)
-                  case PropertyName.timestamp => prop -> TimeStampProperty(s)
-                  case PropertyName.date => prop -> DateProperty(s)
                   case PropertyName.geometry => prop -> GeographyProperty(s)
                   case PropertyName.geography => prop -> GeographyProperty(s)
                   case _ => prop -> StringProperty(s)

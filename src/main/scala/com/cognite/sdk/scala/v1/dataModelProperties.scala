@@ -3,6 +3,8 @@
 
 package com.cognite.sdk.scala.v1
 
+import java.time.{LocalDate, ZonedDateTime}
+
 sealed trait PropertyType
 
 sealed trait PropertyTypePrimitive extends PropertyType
@@ -15,10 +17,11 @@ final case class StringProperty(value: String) extends PropertyTypePrimitive
 
 final case class ArrayProperty[+A <: PropertyTypePrimitive](values: Vector[A]) extends PropertyType
 
+final case class TimeStampProperty(value: ZonedDateTime) extends PropertyType
+final case class DateProperty(value: LocalDate) extends PropertyType
+
 // These types below are treated as string for now
 final case class DirectRelationProperty(value: String) extends PropertyType
-final case class TimeStampProperty(value: String) extends PropertyType
-final case class DateProperty(value: String) extends PropertyType
 final case class GeometryProperty(value: String) extends PropertyType
 final case class GeographyProperty(value: String) extends PropertyType
 
@@ -32,6 +35,8 @@ object PropertyName {
   val float64 = "float64"
   val numeric = "numeric"
   val text = "text"
+  val timestamp = "timestamp"
+  val date = "date"
 
   val arrayText = "text[]"
   val arrayBoolean = "boolean[]"
@@ -45,8 +50,6 @@ object PropertyName {
 
   // These types below are treated as string for now
   val directRelation = "direct_relation"
-  val timestamp = "timestamp"
-  val date = "date"
   val geometry = "geometry"
   val geography = "geography"
 }

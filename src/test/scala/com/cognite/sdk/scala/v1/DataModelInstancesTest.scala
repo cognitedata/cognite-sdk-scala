@@ -7,8 +7,8 @@ import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.{CdpApiException, Items, RetryWhile}
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 
+import java.time.LocalDate
 import java.util.UUID
-
 import scala.collection.immutable.Seq
 
 @SuppressWarnings(
@@ -29,6 +29,7 @@ class DataModelInstancesTest
   val dataPropBool = DataModelProperty(PropertyName.boolean)
   val dataPropFloat = DataModelProperty(PropertyName.float32, nullable = false)
   val dataPropDirectRelation = DataModelProperty(PropertyName.directRelation)
+  val dataPropDate = DataModelProperty(PropertyName.date)
 
   val dataModel = DataModel(
     s"Equipment-${uuid.substring(0, 8)}",
@@ -37,7 +38,8 @@ class DataModelInstancesTest
         "prop_string" -> dataPropString,
         "prop_bool" -> dataPropBool,
         "prop_float" -> dataPropFloat,
-        "prop_direct_relation" -> dataPropDirectRelation
+        "prop_direct_relation" -> dataPropDirectRelation,
+        "prop_date" -> dataPropDate
       )
     )
   )
@@ -50,7 +52,8 @@ class DataModelInstancesTest
           "externalId" -> StringProperty("equipment_43"),
           "prop_string" -> StringProperty("EQ0001"),
           "prop_float" -> Float32Property(0.1f),
-          "prop_direct_relation" -> DirectRelationProperty("Asset")
+          "prop_direct_relation" -> DirectRelationProperty("Asset"),
+          "prop_date" -> DateProperty(LocalDate.of(2022, 3, 22))
         )
       )
     )
