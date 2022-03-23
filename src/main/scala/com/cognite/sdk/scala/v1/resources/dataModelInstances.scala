@@ -236,24 +236,24 @@ object DataModelInstances {
   // scalastyle:off cyclomatic.complexity
   private def decodeBaseOnType(c: HCursor, propName: String, propType: String) =
     propType match {
-      case PropertyName.boolean => c.downField(propName).as[Boolean]
-      case PropertyName.int | PropertyName.int32 => c.downField(propName).as[Int]
-      case PropertyName.bigint | PropertyName.int64 => c.downField(propName).as[Long]
-      case PropertyName.float32 => c.downField(propName).as[Float]
-      case PropertyName.float64 | PropertyName.numeric => c.downField(propName).as[Double]
-      case PropertyName.timestamp => c.downField(propName).as[ZonedDateTime]
-      case PropertyName.date => c.downField(propName).as[LocalDate]
-      case PropertyName.text | PropertyName.directRelation | PropertyName.geometry |
-          PropertyName.geography =>
+      case PropertyName.Boolean => c.downField(propName).as[Boolean]
+      case PropertyName.Int | PropertyName.Int32 => c.downField(propName).as[Int]
+      case PropertyName.Bigint | PropertyName.Int64 => c.downField(propName).as[Long]
+      case PropertyName.Float32 => c.downField(propName).as[Float]
+      case PropertyName.Float64 | PropertyName.Numeric => c.downField(propName).as[Double]
+      case PropertyName.Timestamp => c.downField(propName).as[ZonedDateTime]
+      case PropertyName.Date => c.downField(propName).as[LocalDate]
+      case PropertyName.Text | PropertyName.DirectRelation | PropertyName.Geometry |
+          PropertyName.Geography =>
         c.downField(propName).as[String]
-      case PropertyName.arrayBoolean => c.downField(propName).as[Vector[Boolean]]
-      case PropertyName.arrayInt | PropertyName.arrayInt32 => c.downField(propName).as[Vector[Int]]
-      case PropertyName.arrayBigint | PropertyName.arrayInt64 =>
+      case PropertyName.ArrayBoolean => c.downField(propName).as[Vector[Boolean]]
+      case PropertyName.ArrayInt | PropertyName.ArrayInt32 => c.downField(propName).as[Vector[Int]]
+      case PropertyName.ArrayBigint | PropertyName.ArrayInt64 =>
         c.downField(propName).as[Vector[Long]]
-      case PropertyName.arrayFloat32 => c.downField(propName).as[Vector[Float]]
-      case PropertyName.arrayFloat64 | PropertyName.arrayNumeric =>
+      case PropertyName.ArrayFloat32 => c.downField(propName).as[Vector[Float]]
+      case PropertyName.ArrayFloat64 | PropertyName.ArrayNumeric =>
         c.downField(propName).as[Vector[Double]]
-      case PropertyName.arrayText => c.downField(propName).as[Vector[String]]
+      case PropertyName.ArrayText => c.downField(propName).as[Vector[String]]
       case invalidType =>
         throw new Exception(
           s"${invalidType} does not match any property type to decode"
@@ -331,9 +331,9 @@ object DataModelInstances {
               case dt: LocalDate => prop -> DateProperty(dt)
               case s: String =>
                 dmp.`type` match {
-                  case PropertyName.directRelation => prop -> DirectRelationProperty(s)
-                  case PropertyName.geometry => prop -> GeographyProperty(s)
-                  case PropertyName.geography => prop -> GeographyProperty(s)
+                  case PropertyName.DirectRelation => prop -> DirectRelationProperty(s)
+                  case PropertyName.Geometry => prop -> GeographyProperty(s)
+                  case PropertyName.Geography => prop -> GeographyProperty(s)
                   case _ => prop -> StringProperty(s)
                 }
               case v: Vector[_] =>

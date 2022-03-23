@@ -19,9 +19,9 @@ import scala.collection.immutable.Seq
 class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   val uuid = UUID.randomUUID.toString
-  val dataPropName = DataModelProperty(PropertyName.text, false)
-  val dataPropDescription = DataModelProperty(PropertyName.text)
-  val dataPropDirectRelation = DataModelProperty(PropertyName.directRelation)
+  val dataPropName = DataModelProperty(PropertyName.Text, false)
+  val dataPropDescription = DataModelProperty(PropertyName.Text)
+  val dataPropDirectRelation = DataModelProperty(PropertyName.DirectRelation)
   // val dataPropIndex = DataModelPropertyIndex(Some("name_descr"), Some(Seq("name", "description")))
 
   val dataModel = DataModel(
@@ -39,7 +39,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   val expectedDataModelOutput = dataModel.copy(properties =
     dataModel.properties.map(x =>
-      x ++ Map("externalId" -> DataModelProperty(PropertyName.text, false))
+      x ++ Map("externalId" -> DataModelProperty(PropertyName.Text, false))
     )
   )
 
@@ -75,8 +75,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     )
   )
 
-  private val dataPropBool = DataModelProperty(PropertyName.boolean, true)
-  private val dataPropFloat = DataModelProperty(PropertyName.float64, true)
+  private val dataPropBool = DataModelProperty(PropertyName.Boolean, true)
+  private val dataPropFloat = DataModelProperty(PropertyName.Float64, true)
 
   private val dataModel2 = DataModel(
     s"Equipment-${UUID.randomUUID.toString.substring(0, 8)}",
@@ -147,7 +147,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     val expectedDataModel1 =
       dataModel1.copy(properties =
         dataModel1.properties.map(x =>
-          x ++ Map("externalId" -> DataModelProperty(PropertyName.text, false))
+          x ++ Map("externalId" -> DataModelProperty(PropertyName.Text, false))
         )
       )
 
@@ -155,7 +155,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
       dataModel2.copy(properties =
         dataModel2.properties.map(x =>
           x ++ Map(
-            "externalId" -> DataModelProperty(PropertyName.text, false)
+            "externalId" -> DataModelProperty(PropertyName.Text, false)
           ) ++ dataModel1.properties
             .getOrElse(Map())
         )

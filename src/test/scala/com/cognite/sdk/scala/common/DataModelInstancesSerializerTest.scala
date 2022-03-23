@@ -41,19 +41,19 @@ import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
 
   val props: Map[String, DataModelProperty] = Map(
-    "prop_bool" -> DataModelProperty(PropertyName.boolean),
-    "prop_float64" -> DataModelProperty(PropertyName.float64, false),
-    "prop_string" -> DataModelProperty(PropertyName.text, false),
-    "prop_direct_relation" -> DataModelProperty(PropertyName.directRelation),
-    "prop_date" -> DataModelProperty(PropertyName.date),
-    "prop_timestamp" -> DataModelProperty(PropertyName.timestamp),
-    "arr_bool" -> DataModelProperty(PropertyName.arrayBoolean, false),
-    "arr_float64" -> DataModelProperty(PropertyName.arrayFloat64, false),
-    "arr_int32" -> DataModelProperty(PropertyName.arrayInt32),
-    "arr_int64" -> DataModelProperty(PropertyName.arrayInt64),
-    "arr_string" -> DataModelProperty(PropertyName.arrayText),
-    "arr_empty" -> DataModelProperty(PropertyName.arrayText, false),
-    "arr_empty_nullable" -> DataModelProperty(PropertyName.arrayFloat64)
+    "prop_bool" -> DataModelProperty(PropertyName.Boolean),
+    "prop_float64" -> DataModelProperty(PropertyName.Float64, false),
+    "prop_string" -> DataModelProperty(PropertyName.Text, false),
+    "prop_direct_relation" -> DataModelProperty(PropertyName.DirectRelation),
+    "prop_date" -> DataModelProperty(PropertyName.Date),
+    "prop_timestamp" -> DataModelProperty(PropertyName.Timestamp),
+    "arr_bool" -> DataModelProperty(PropertyName.ArrayBoolean, false),
+    "arr_float64" -> DataModelProperty(PropertyName.ArrayFloat64, false),
+    "arr_int32" -> DataModelProperty(PropertyName.ArrayInt32),
+    "arr_int64" -> DataModelProperty(PropertyName.ArrayInt64),
+    "arr_string" -> DataModelProperty(PropertyName.ArrayText),
+    "arr_empty" -> DataModelProperty(PropertyName.ArrayText, false),
+    "arr_empty_nullable" -> DataModelProperty(PropertyName.ArrayFloat64)
   )
 
   import com.cognite.sdk.scala.v1.resources.DataModelInstances._

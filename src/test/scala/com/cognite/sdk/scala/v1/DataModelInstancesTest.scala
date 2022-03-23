@@ -25,11 +25,11 @@ class DataModelInstancesTest
     with RetryWhile
     with BeforeAndAfterAll {
   val uuid = UUID.randomUUID.toString
-  val dataPropString = DataModelProperty(PropertyName.text)
-  val dataPropBool = DataModelProperty(PropertyName.boolean)
-  val dataPropFloat = DataModelProperty(PropertyName.float32, nullable = false)
-  val dataPropDirectRelation = DataModelProperty(PropertyName.directRelation)
-  val dataPropDate = DataModelProperty(PropertyName.date)
+  val dataPropString = DataModelProperty(PropertyName.Text)
+  val dataPropBool = DataModelProperty(PropertyName.Boolean)
+  val dataPropFloat = DataModelProperty(PropertyName.Float32, nullable = false)
+  val dataPropDirectRelation = DataModelProperty(PropertyName.DirectRelation)
+  val dataPropDate = DataModelProperty(PropertyName.Date)
 
   val dataModel = DataModel(
     s"Equipment-${uuid.substring(0, 8)}",
@@ -87,9 +87,9 @@ class DataModelInstancesTest
   val toCreates =
     Seq(dataModelInstanceToCreate1, dataModelInstanceToCreate2, dataModelInstanceToCreate3)
 
-  val dataPropArrayString = DataModelProperty(PropertyName.arrayText, true)
+  val dataPropArrayString = DataModelProperty(PropertyName.ArrayText, true)
   // val dataPropArrayFloat = DataModelProperty(PropertyName.arrayFloat32, false) //float[] is not supported yet
-  val dataPropArrayInt = DataModelProperty(PropertyName.arrayInt, true)
+  val dataPropArrayInt = DataModelProperty(PropertyName.ArrayInt, true)
 
   val dataModelArray = DataModel(
     s"Equipment-${UUID.randomUUID.toString.substring(0, 8)}",
