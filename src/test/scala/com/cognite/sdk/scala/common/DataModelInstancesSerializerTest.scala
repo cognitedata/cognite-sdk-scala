@@ -9,12 +9,16 @@ import com.cognite.sdk.scala.v1.{
   DataModelInstanceCreate,
   DataModelInstanceQueryResponse,
   DataModelProperty,
+  DateProperty,
+  DirectRelationProperty,
   Float32Property,
   Float64Property,
   Int32Property,
   Int64Property,
+  PropertyName,
   PropertyType,
-  StringProperty
+  StringProperty,
+  TimeStampProperty
 }
 import io.circe
 import io.circe.CursorOp.DownField
@@ -23,6 +27,8 @@ import io.circe.parser.decode
 import io.circe.syntax._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+
+import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 
 @SuppressWarnings(
   Array(
@@ -35,16 +41,19 @@ import org.scalatest.wordspec.AnyWordSpec
 class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
 
   val props: Map[String, DataModelProperty] = Map(
-    "prop_bool" -> DataModelProperty("boolean"),
-    "prop_float64" -> DataModelProperty("float64", false),
-    "prop_string" -> DataModelProperty("text", false),
-    "arr_bool" -> DataModelProperty("boolean[]", false),
-    "arr_float64" -> DataModelProperty("float64[]", false),
-    "arr_int32" -> DataModelProperty("int32[]"),
-    "arr_int64" -> DataModelProperty("int64[]"),
-    "arr_string" -> DataModelProperty("text[]"),
-    "arr_empty" -> DataModelProperty("text[]", false),
-    "arr_empty_nullable" -> DataModelProperty("float64[]")
+    "prop_bool" -> DataModelProperty(PropertyName.Boolean),
+    "prop_float64" -> DataModelProperty(PropertyName.Float64, false),
+    "prop_string" -> DataModelProperty(PropertyName.Text, false),
+    "prop_direct_relation" -> DataModelProperty(PropertyName.DirectRelation),
+    "prop_date" -> DataModelProperty(PropertyName.Date),
+    "prop_timestamp" -> DataModelProperty(PropertyName.Timestamp),
+    "arr_bool" -> DataModelProperty(PropertyName.ArrayBoolean, false),
+    "arr_float64" -> DataModelProperty(PropertyName.ArrayFloat64, false),
+    "arr_int32" -> DataModelProperty(PropertyName.ArrayInt32),
+    "arr_int64" -> DataModelProperty(PropertyName.ArrayInt64),
+    "arr_string" -> DataModelProperty(PropertyName.ArrayText),
+    "arr_empty" -> DataModelProperty(PropertyName.ArrayText, false),
+    "arr_empty_nullable" -> DataModelProperty(PropertyName.ArrayFloat64)
   )
 
   import com.cognite.sdk.scala.v1.resources.DataModelInstances._
@@ -69,7 +78,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
     res.isLeft shouldBe true
     val Left(decodingFailure) = res
     val error = DecodingFailure.unapply(decodingFailure)
-    error.map(_._1) shouldBe Some(propType)
+    error.map(_._1).getOrElse("").contains(propType) shouldBe true
     val downFields = error
       .map(_._2)
       .getOrElse(List.empty[DownField])
@@ -88,6 +97,9 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
                                       |    "prop_bool" : true,
                                       |    "prop_float64": 23.0,
                                       |    "prop_string": "toto",
+                                      |    "prop_direct_relation": "Asset",
+                                      |    "prop_date": "2022-03-22",
+                                      |    "prop_timestamp": "2022-03-22T12:34:56.789+01:00",
                                       |    "arr_bool": [true, false, true],
                                       |    "arr_float64": [1.2, 2, 4.654],
                                       |    "arr_int32": [3, 1, 2147483646],
@@ -107,6 +119,11 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
               "prop_bool" -> BooleanProperty(true),
               "prop_float64" -> Float64Property(23.0),
               "prop_string" -> StringProperty("toto"),
+              "prop_direct_relation" -> DirectRelationProperty("Asset"),
+              "prop_date" -> DateProperty(LocalDate.of(2022, 3, 22)),
+              "prop_timestamp" -> TimeStampProperty(
+                ZonedDateTime.of(2022, 3, 22, 12, 34, 56, 789000000, ZoneOffset.of("+01:00"))
+              ),
               "arr_bool" -> ArrayProperty[BooleanProperty](
                 Vector(true, false, true).map(BooleanProperty(_))
               ),
@@ -134,6 +151,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
                                         |"properties" : {
                                         |    "prop_float64": 23.0,
                                         |    "prop_string": "toto",
+                                        |    "prop_direct_relation": "Asset",
                                         |    "arr_bool": [true, false, true],
                                         |    "arr_float64": [1.2, 2, 4.654],
                                         |    "arr_empty": []
@@ -147,6 +165,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
             Map(
               "prop_float64" -> Float64Property(23.0),
               "prop_string" -> StringProperty("toto"),
+              "prop_direct_relation" -> DirectRelationProperty("Asset"),
               "arr_bool" -> ArrayProperty[BooleanProperty](
                 Vector(true, false, true).map(BooleanProperty(_))
               ),
@@ -213,6 +232,32 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
                                         |} }""".stripMargin)
         checkErrorDecodingOnField(res, "arr_float64", "Double")
       }
+      "not work for property date if the string it not well formatted" in {
+        val res = decode[DataModelInstanceQueryResponse]("""{
+                                                           |"modelExternalId" : "tada",
+                                                           |"properties" : {
+                                                           |    "prop_float64": 23.0,
+                                                           |    "prop_string": "toto",
+                                                           |    "prop_date": "2022-02",
+                                                           |    "arr_bool": [true, false, true],
+                                                           |    "arr_float64": [1.2, 2, 4.654],
+                                                           |    "arr_empty": []
+                                                           |} }""".stripMargin)
+        checkErrorDecodingOnField(res, "prop_date", "LocalDate")
+      }
+      "not work for property timestamp if the string it not well formatted" in {
+        val res = decode[DataModelInstanceQueryResponse]("""{
+                                                           |"modelExternalId" : "tada",
+                                                           |"properties" : {
+                                                           |    "prop_float64": 23.0,
+                                                           |    "prop_string": "toto",
+                                                           |    "prop_timestamp": "2022-02-03",
+                                                           |    "arr_bool": [true, false, true],
+                                                           |    "arr_float64": [1.2, 2, 4.654],
+                                                           |    "arr_empty": []
+                                                           |} }""".stripMargin)
+        checkErrorDecodingOnField(res, "prop_timestamp", "ZonedDateTime")
+      }
     }
     "encode PropertyType" should {
       import com.cognite.sdk.scala.v1.resources.DataModelInstances.dataModelInstanceEncoder
@@ -227,21 +272,48 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
               "prop_int64" -> Int64Property(9223372036854775L),
               "prop_float32" -> Float32Property(23.0f),
               "prop_float64" -> Float64Property(23.0),
-              "prop_string" -> StringProperty("toto")
+              "prop_string" -> StringProperty("toto"),
+              "prop_direct_relation" -> DirectRelationProperty("Asset"),
+              "prop_date" -> DateProperty(LocalDate.of(2022, 3, 22)),
+              "prop_timestamp" -> TimeStampProperty(
+                ZonedDateTime.of(2022, 3, 22, 12, 34, 56, 789000000, ZoneOffset.of("+01:00"))
+              )
             )
           )
-        )
-        res.asJson.toString() shouldBe """{
-                                         |  "modelExternalId" : "model_primitive",
-                                         |  "properties" : {
-                                         |    "prop_float64" : 23.0,
-                                         |    "prop_float32" : 23.0,
-                                         |    "prop_int32" : 123,
-                                         |    "prop_string" : "toto",
-                                         |    "prop_int64" : 9223372036854775,
-                                         |    "prop_bool" : true
-                                         |  }
-                                         |}""".stripMargin
+        ).asJson.toString()
+
+        val expectedJson1 = """{
+                              |  "modelExternalId" : "model_primitive",
+                              |  "properties" : {
+                              |    "prop_float64" : 23.0,
+                              |    "prop_int32" : 123,
+                              |    "prop_string" : "toto",
+                              |    "prop_timestamp" : "2022-03-22T12:34:56.789+01:00",
+                              |    "prop_date" : "2022-03-22",
+                              |    "prop_int64" : 9223372036854775,
+                              |    "prop_bool" : true,
+                              |    "prop_float32" : 23.0,
+                              |    "prop_direct_relation" : "Asset"
+                              |  }
+                              |}""".stripMargin
+
+        // Same content but order of properties in scala 2.12 is different than 2.13 and 3 ¯\_(ツ)_/¯
+        val expectedJson2 = """{
+                              |  "modelExternalId" : "model_primitive",
+                              |  "properties" : {
+                              |    "prop_float64" : 23.0,
+                              |    "prop_float32" : 23.0,
+                              |    "prop_direct_relation" : "Asset",
+                              |    "prop_int32" : 123,
+                              |    "prop_string" : "toto",
+                              |    "prop_timestamp" : "2022-03-22T12:34:56.789+01:00",
+                              |    "prop_date" : "2022-03-22",
+                              |    "prop_int64" : 9223372036854775,
+                              |    "prop_bool" : true
+                              |  }
+                              |}""".stripMargin
+
+        res === expectedJson1 || res === expectedJson2 shouldBe true
       }
       "work for array" in {
         val res = DataModelInstanceCreate(

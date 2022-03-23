@@ -16,6 +16,7 @@ import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
 
+import java.time.{LocalDate, ZonedDateTime}
 import scala.collection.immutable
 
 class DataModelInstances[F[_]](
@@ -79,7 +80,6 @@ class DataModelInstances[F[_]](
         value => value
       )
     }
-
   }
 
   private[sdk] def queryWithCursor(
@@ -151,7 +151,6 @@ class DataModelInstances[F[_]](
 }
 
 object DataModelInstances {
-
   implicit val propPrimitiveEncoder: Encoder[PropertyTypePrimitive] = {
     case b: BooleanProperty => b.value.asJson
     case i: Int32Property => i.value.asJson
@@ -162,8 +161,12 @@ object DataModelInstances {
   }
 
   implicit val propEncoder: Encoder[PropertyType] = {
-    case p: PropertyTypePrimitive =>
-      propPrimitiveEncoder(p)
+    case p: PropertyTypePrimitive => propPrimitiveEncoder(p)
+    case dr: DirectRelationProperty => dr.value.asJson
+    case ts: TimeStampProperty => ts.value.asJson
+    case d: DateProperty => d.value.asJson
+    case gm: GeometryProperty => gm.value.asJson
+    case gg: GeographyProperty => gg.value.asJson
     case v: ArrayProperty[_] =>
       val jsonValues = v.values.map { case p: PropertyTypePrimitive =>
         propPrimitiveEncoder(p)
@@ -233,18 +236,24 @@ object DataModelInstances {
   // scalastyle:off cyclomatic.complexity
   private def decodeBaseOnType(c: HCursor, propName: String, propType: String) =
     propType match {
-      case "boolean" => c.downField(propName).as[Boolean]
-      case "int" | "int32" => c.downField(propName).as[Int]
-      case "bigint" | "int64" => c.downField(propName).as[Long]
-      case "float32" => c.downField(propName).as[Float]
-      case "float64" | "numeric" => c.downField(propName).as[Double]
-      case "text" => c.downField(propName).as[String]
-      case "boolean[]" => c.downField(propName).as[Vector[Boolean]]
-      case "int[]" | "int32[]" => c.downField(propName).as[Vector[Int]]
-      case "bigint[]" | "int64[]" => c.downField(propName).as[Vector[Long]]
-      case "float32[]" => c.downField(propName).as[Vector[Float]]
-      case "float64[]" | "numeric[]" => c.downField(propName).as[Vector[Double]]
-      case "text[]" => c.downField(propName).as[Vector[String]]
+      case PropertyName.Boolean => c.downField(propName).as[Boolean]
+      case PropertyName.Int | PropertyName.Int32 => c.downField(propName).as[Int]
+      case PropertyName.Bigint | PropertyName.Int64 => c.downField(propName).as[Long]
+      case PropertyName.Float32 => c.downField(propName).as[Float]
+      case PropertyName.Float64 | PropertyName.Numeric => c.downField(propName).as[Double]
+      case PropertyName.Timestamp => c.downField(propName).as[ZonedDateTime]
+      case PropertyName.Date => c.downField(propName).as[LocalDate]
+      case PropertyName.Text | PropertyName.DirectRelation | PropertyName.Geometry |
+          PropertyName.Geography =>
+        c.downField(propName).as[String]
+      case PropertyName.ArrayBoolean => c.downField(propName).as[Vector[Boolean]]
+      case PropertyName.ArrayInt | PropertyName.ArrayInt32 => c.downField(propName).as[Vector[Int]]
+      case PropertyName.ArrayBigint | PropertyName.ArrayInt64 =>
+        c.downField(propName).as[Vector[Long]]
+      case PropertyName.ArrayFloat32 => c.downField(propName).as[Vector[Float]]
+      case PropertyName.ArrayFloat64 | PropertyName.ArrayNumeric =>
+        c.downField(propName).as[Vector[Double]]
+      case PropertyName.ArrayText => c.downField(propName).as[Vector[String]]
       case invalidType =>
         throw new Exception(
           s"${invalidType} does not match any property type to decode"
@@ -318,7 +327,15 @@ object DataModelInstances {
               case l: Long => prop -> Int64Property(l)
               case f: Float => prop -> Float32Property(f)
               case d: Double => prop -> Float64Property(d)
-              case s: String => prop -> StringProperty(s)
+              case ts: ZonedDateTime => prop -> TimeStampProperty(ts)
+              case dt: LocalDate => prop -> DateProperty(dt)
+              case s: String =>
+                dmp.`type` match {
+                  case PropertyName.DirectRelation => prop -> DirectRelationProperty(s)
+                  case PropertyName.Geometry => prop -> GeographyProperty(s)
+                  case PropertyName.Geography => prop -> GeographyProperty(s)
+                  case _ => prop -> StringProperty(s)
+                }
               case v: Vector[_] =>
                 decodeArrayFromTypeOfFirstElement(v, prop)
               case _: Any | null => // scalastyle:ignore null
