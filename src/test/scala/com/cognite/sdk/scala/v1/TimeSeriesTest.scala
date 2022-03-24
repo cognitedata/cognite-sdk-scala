@@ -3,6 +3,8 @@
 
 package com.cognite.sdk.scala.v1
 
+import cats.Id
+
 import java.time.Instant
 import com.cognite.sdk.scala.common._
 import fs2.Stream
@@ -391,5 +393,14 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     } finally {
       client.timeSeries.deleteByIds(created.map(_.id))
     }
+  }
+
+  it should "support reading synthetic queries" in {
+    val query = SyntheticTimeSeriesQuery("5 + TS{id=54577852743225}",
+      Instant.ofEpochMilli(0),
+      Instant.ofEpochMilli(1646906518178L),
+      1000)
+    val syntheticQuery: Id[Seq[SyntheticTimeSeriesResponse]] = client.timeSeries.syntheticQuery(Items(Seq(query)))
+    syntheticQuery.head.datapoints.length should be(1000)
   }
 }

@@ -114,3 +114,15 @@ final case class TimeSeriesQuery(
     search: Option[TimeSeriesSearch] = None,
     limit: Int = 100
 ) extends SearchQuery[TimeSeriesSearchFilter, TimeSeriesSearch]
+
+final case class SyntheticTimeSeriesQuery(
+    expression: String,
+    start: Instant,
+    end: Instant,
+    limit: Int
+)
+
+final case class SyntheticTimeSeriesResponse(
+    isString: Boolean,
+    datapoints: Seq[DataPoint]
+)
