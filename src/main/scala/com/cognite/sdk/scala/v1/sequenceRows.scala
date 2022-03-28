@@ -33,10 +33,10 @@ object SequenceRowsInsert {
       rows: Seq[SequenceRow]
   ): SequenceRowsInsert =
     cogniteId match {
-      case id: CogniteInternalId =>
-        SequenceRowsInsert(id.id, columns, rows)
-      case id: CogniteExternalId =>
-        SequenceRowsInsert(id.externalId, columns, rows)
+      case CogniteInternalId(id) =>
+        SequenceRowsInsert(id, columns, rows)
+      case CogniteExternalId(externalId) =>
+        SequenceRowsInsert(externalId, columns, rows)
     }
 }
 
@@ -55,10 +55,10 @@ object SequenceRowsDelete {
       rows: Seq[Long]
   ): SequenceRowsDelete =
     cogniteId match {
-      case id: CogniteInternalId =>
-        SequenceRowsDelete(id.id, rows)
-      case id: CogniteExternalId =>
-        SequenceRowsDelete(id.externalId, rows)
+      case CogniteInternalId(id) =>
+        SequenceRowsDelete(id, rows)
+      case CogniteExternalId(externalId) =>
+        SequenceRowsDelete(externalId, rows)
     }
 }
 
@@ -109,10 +109,10 @@ object SequenceRowsQuery {
       columns: Option[Seq[String]]
   ): SequenceRowsQuery =
     cogniteId match {
-      case id: CogniteInternalId =>
-        SequenceRowsQuery(id.id, start, end, limit, cursor, columns)
-      case id: CogniteExternalId =>
-        SequenceRowsQuery(id.externalId, start, end, limit, cursor, columns)
+      case CogniteInternalId(id) =>
+        SequenceRowsQuery(id, start, end, limit, cursor, columns)
+      case CogniteExternalId(externalId) =>
+        SequenceRowsQuery(externalId, start, end, limit, cursor, columns)
     }
 }
 

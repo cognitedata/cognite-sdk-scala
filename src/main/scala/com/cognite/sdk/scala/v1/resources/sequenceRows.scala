@@ -15,9 +15,7 @@ import io.circe.{Decoder, Encoder}
 class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Monad[F])
     extends WithRequestSession[F]
     with BaseUrl {
-
   import SequenceRows._
-
   override val baseUrl = uri"${requestSession.baseUrl}/sequences/data"
 
   implicit val errorOrItemsSequenceRowsResponseDecoder
