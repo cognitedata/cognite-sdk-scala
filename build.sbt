@@ -11,7 +11,7 @@ val jettyTestVersion = "9.4.45.v20220203"
 
 val sttpVersion = "3.5.1"
 val circeVersion = "0.14.1"
-val catsEffectVersion = "3.3.8"
+val catsEffectVersion = "3.3.9"
 val fs2Version = "3.2.5"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
@@ -21,7 +21,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.0.7",
+  version := "2.0.8-SNAPSHOT",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
