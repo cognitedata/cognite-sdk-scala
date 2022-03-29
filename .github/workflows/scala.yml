@@ -149,9 +149,12 @@ jobs:
     - name: Run tests
       env:
         TEST_API_KEY: ${{ secrets.playgroundApiKey }}
+        TEST_PROJECT_NAME_BLUEFIELD: extractor-bluefield-testing
+        TEST_BASE_URL_BLUEFIELD: https://bluefield.cognitedata.com
         TEST_AAD_TENANT_BLUEFIELD: "b86328db-09aa-4f0e-9a03-0136f604d20a"
         TEST_CLIENT_ID_BLUEFIELD: ${{ secrets.BLUEFIELD_CLIENT_ID }}
         TEST_CLIENT_SECRET_BLUEFIELD: ${{ secrets.BLUEFIELD_CLIENT_SECRET }}
+        TEST_SCOPES_BLUEFIELD: https://bluefield.cognitedata.com/.default
         AIZE_CLIENT_ID: ${{ secrets.AIZE_CLIENT_ID }}
         AIZE_CLIENT_SECRET: ${{ secrets.AIZE_CLIENT_SECRET }}
       # run: sbt test

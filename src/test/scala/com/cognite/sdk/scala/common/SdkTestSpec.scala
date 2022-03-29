@@ -49,29 +49,33 @@ class LoggingSttpBackend[F[_], +P](delegate: SttpBackend[F, P]) extends SttpBack
 abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
   implicit val authSttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
   // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
-  lazy val client: GenericClient[Id] = GenericClient.forAuth[Id](
-    "scala-sdk-test", auth)
-
-  lazy val projectName: String = client.login.status().project
+  lazy val client: GenericClient[Id] = GenericClient[Id](
+    "scala-sdk-test",
+    projectName,
+    baseUrl,
+    auth
+  )
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
-
+  lazy val projectName: String = sys.env("TEST_PROJECT_NAME_BLUEFIELD")
+  private lazy val baseUrl: String = sys.env("TEST_BASE_URL_BLUEFIELD")
   private lazy val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
   private lazy val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
   private lazy val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
+  private lazy val scopes: List[String] = sys.env("TEST_SCOPES_BLUEFIELD").split(";").toList
 
   private lazy val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
       clientId = clientId,
       clientSecret = clientSecret,
-      scopes = List("https://bluefield.cognitedata.com/.default"),
-      cdfProjectName = "extractor-bluefield-testing"
+      scopes = scopes,
+      cdfProjectName = projectName
     )
 
   private lazy val authProvider =
       OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value
 
-  implicit lazy val auth: Auth = authProvider.getAuth.unsafeRunSync()
+  lazy val auth: Auth = authProvider.getAuth.unsafeRunSync()
 
   lazy val dataSetResource = new DataSets(client.requestSession)
 
