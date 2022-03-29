@@ -25,37 +25,33 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Mona
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
 
   def insertById(id: Long, columns: Seq[String], rows: Seq[SequenceRow]): F[Unit] =
-    requestSession
-      .post[Unit, Unit, Items[SequenceRowsInsertById]](
-        Items(Seq(SequenceRowsInsertById(id, columns, rows))),
-        baseUrl,
-        _ => ()
-      )
+    insert(CogniteInternalId(id), columns, rows)
 
   def insertByExternalId(
       externalId: String,
       columns: Seq[String],
       rows: Seq[SequenceRow]
   ): F[Unit] =
+    insert(CogniteExternalId(externalId), columns, rows)
+
+  def insert(cogniteId: CogniteId, columns: Seq[String], rows: Seq[SequenceRow]): F[Unit] =
     requestSession
-      .post[Unit, Unit, Items[SequenceRowsInsertByExternalId]](
-        Items(Seq(SequenceRowsInsertByExternalId(externalId, columns, rows))),
+      .post[Unit, Unit, Items[SequenceRowsInsert]](
+        Items(Seq(SequenceRowsInsert(cogniteId, columns, rows))),
         baseUrl,
         _ => ()
       )
 
   def deleteById(id: Long, rows: Seq[Long]): F[Unit] =
-    requestSession
-      .post[Unit, Unit, Items[SequenceRowsDeleteById]](
-        Items(Seq(SequenceRowsDeleteById(id, rows))),
-        uri"$baseUrl/delete",
-        _ => ()
-      )
+    delete(CogniteInternalId(id), rows)
 
   def deleteByExternalId(externalId: String, rows: Seq[Long]): F[Unit] =
+    delete(CogniteExternalId(externalId), rows)
+
+  def delete(cogniteId: CogniteId, rows: Seq[Long]): F[Unit] =
     requestSession
-      .post[Unit, Unit, Items[SequenceRowsDeleteByExternalId]](
-        Items(Seq(SequenceRowsDeleteByExternalId(externalId, rows))),
+      .post[Unit, Unit, Items[SequenceRowsDelete]](
+        Items(Seq(SequenceRowsDelete(cogniteId, rows))),
         uri"$baseUrl/delete",
         _ => ()
       )
@@ -126,10 +122,7 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Mona
       columns: Option[Seq[String]] = None,
       batchSize: Int = Constants.rowsBatchSize
   ): F[(Seq[SequenceColumnSignature], fs2.Stream[F, SequenceRow])] =
-    queryColumnsAndStream(
-      SequenceRowsQueryById(id, inclusiveStart, exclusiveEnd, limit, None, columns),
-      batchSize
-    )
+    query(CogniteInternalId(id), inclusiveStart, exclusiveEnd, limit, columns, batchSize)
 
   def queryByExternalId(
       externalId: String,
@@ -139,17 +132,21 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Mona
       columns: Option[Seq[String]] = None,
       batchSize: Int = Constants.rowsBatchSize
   ): F[(Seq[SequenceColumnSignature], fs2.Stream[F, SequenceRow])] =
+    query(CogniteExternalId(externalId), inclusiveStart, exclusiveEnd, limit, columns, batchSize)
+
+  def query(
+      cogniteId: CogniteId,
+      inclusiveStart: Option[Long],
+      exclusiveEnd: Option[Long],
+      limit: Option[Int] = None,
+      columns: Option[Seq[String]] = None,
+      batchSize: Int = Constants.rowsBatchSize
+  ): F[(Seq[SequenceColumnSignature], fs2.Stream[F, SequenceRow])] =
     queryColumnsAndStream(
-      SequenceRowsQueryByExternalId(
-        externalId,
-        inclusiveStart,
-        exclusiveEnd,
-        limit,
-        None,
-        columns
-      ),
+      SequenceRowsQuery(cogniteId, inclusiveStart, exclusiveEnd, limit, None, columns),
       batchSize
     )
+
 }
 
 object SequenceRows {
@@ -159,35 +156,21 @@ object SequenceRows {
   implicit val sequenceColumnIdDecoder: Decoder[SequenceColumnSignature] = deriveDecoder
   implicit val sequenceRowEncoder: Encoder[SequenceRow] = deriveEncoder
   implicit val sequenceRowDecoder: Decoder[SequenceRow] = deriveDecoder
-  implicit val sequenceRowsInsertByIdEncoder: Encoder[SequenceRowsInsertById] = deriveEncoder
-  implicit val sequenceRowsInsertByIdItemsEncoder: Encoder[Items[SequenceRowsInsertById]] =
-    deriveEncoder
-  implicit val sequenceRowsInsertByExternalIdEncoder: Encoder[SequenceRowsInsertByExternalId] =
-    deriveEncoder
-  implicit val sequenceRowsInsertByExternalIdItemsEncoder
-      : Encoder[Items[SequenceRowsInsertByExternalId]] = deriveEncoder
-  implicit val sequenceRowsDeleteByIdEncoder: Encoder[SequenceRowsDeleteById] = deriveEncoder
-  implicit val sequenceRowsDeleteByIdItemsEncoder: Encoder[Items[SequenceRowsDeleteById]] =
-    deriveEncoder
-  implicit val sequenceRowsDeleteByExternalIdEncoder: Encoder[SequenceRowsDeleteByExternalId] =
-    deriveEncoder
-  implicit val sequenceRowsDeleteByExternalIdItemsEncoder
-      : Encoder[Items[SequenceRowsDeleteByExternalId]] = deriveEncoder
 
-  implicit val sequenceRowsQueryByIdEncoder: Encoder[SequenceRowsQueryById] = deriveEncoder
-  implicit val sequenceRowsQueryByIdItemsEncoder: Encoder[Items[SequenceRowsQueryById]] =
+  implicit val sequenceRowsInsertEncoder: Encoder[SequenceRowsInsert] = deriveEncoder
+  implicit val sequenceRowsInsertItemsEncoder: Encoder[Items[SequenceRowsInsert]] = deriveEncoder
+
+  implicit val sequenceRowsDeleteEncoder: Encoder[SequenceRowsDelete] = deriveEncoder
+  implicit val sequenceRowsDeleteItemsEncoder: Encoder[Items[SequenceRowsDelete]] = deriveEncoder
+
+  implicit val sequenceRowsQueryByCogniteIdEncoder: Encoder[SequenceRowsQuery] =
     deriveEncoder
-  implicit val sequenceRowsQueryByExternalIdEncoder: Encoder[SequenceRowsQueryByExternalId] =
+  implicit val sequenceRowsQueryByCogniteIdItemsEncoder: Encoder[Items[SequenceRowsQuery]] =
     deriveEncoder
-  implicit val sequenceRowsQueryByExternalIdItemsEncoder
-      : Encoder[Items[SequenceRowsQueryByExternalId]] = deriveEncoder
+
   @SuppressWarnings(
     Array("org.wartremover.warts.Product", "org.wartremover.warts.Serializable")
   )
   implicit val sequenceRowsResponseDecoder: Decoder[SequenceRowsResponse] = deriveDecoder
 
-  implicit val sequenceRowsQueryEncoder: Encoder[SequenceRowsQuery] = {
-    case q: SequenceRowsQueryById => sequenceRowsQueryByIdEncoder(q)
-    case q: SequenceRowsQueryByExternalId => sequenceRowsQueryByExternalIdEncoder(q)
-  }
 }

@@ -44,7 +44,7 @@ class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with Retry
   private val minRow = testRows.map(_.rowNumber).min
   private val maxRow = testRows.map(_.rowNumber).max
 
-  it should "be possible to insert, update, and delete sequence rows" in withSequence { sequence =>
+  it should "be possible to insert, update, and delete sequence rows using internalId" in withSequence { sequence =>
     client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.externalId.getOrElse(
       throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows)
     val rows = retryWithExpectedResult[Seq[SequenceRow]](
@@ -97,6 +97,36 @@ class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with Retry
     client.sequenceRows.deleteByExternalId(externalId, rows.map(_.rowNumber))
     retryWithExpectedResult[Seq[SequenceRow]](
       client.sequenceRows.queryByExternalId(externalId, Some(minRow), Some(maxRow + 1))._2.compile.toList,
+      r => r shouldBe empty
+    )
+  }
+
+  it should "be possible to insert and delete sequence rows using cogniteId" in withSequence { sequence =>
+    val externalId = sequence.externalId.value
+    client.sequenceRows.insert(CogniteExternalId(externalId), sequence.columns.map(_.externalId.getOrElse(
+      throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows)
+    val rows = retryWithExpectedResult[Seq[SequenceRow]](
+      client.sequenceRows.query(CogniteExternalId(externalId), None, None)._2.compile.toList,
+      r => r should contain theSameElementsAs testRows
+    )
+
+    client.sequenceRows.delete(CogniteExternalId(externalId), rows.map(_.rowNumber))
+    retryWithExpectedResult[Seq[SequenceRow]](
+      client.sequenceRows.query(CogniteExternalId(externalId), Some(minRow), Some(maxRow + 1))._2.compile.toList,
+      r => r shouldBe empty
+    )
+
+    val internalId = sequence.id
+    client.sequenceRows.insert(CogniteInternalId(internalId), sequence.columns.map(_.externalId.getOrElse(
+      throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows)
+    val rows2 = retryWithExpectedResult[Seq[SequenceRow]](
+      client.sequenceRows.query(CogniteInternalId(internalId), None, None)._2.compile.toList,
+      r => r should contain theSameElementsAs testRows
+    )
+
+    client.sequenceRows.delete(CogniteInternalId(internalId), rows2.map(_.rowNumber))
+    retryWithExpectedResult[Seq[SequenceRow]](
+      client.sequenceRows.query(CogniteInternalId(internalId), Some(minRow), Some(maxRow + 1))._2.compile.toList,
       r => r shouldBe empty
     )
   }
