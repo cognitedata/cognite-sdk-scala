@@ -18,9 +18,9 @@ import scala.concurrent.duration.DurationInt
   )
 )
 trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
-  val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
-  val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
-  val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
+  val tenant: String = sys.env("TEST_AAD_TENANT")
+  val clientId: String = sys.env("TEST_CLIENT_ID")
+  val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
 
   val credentials = OAuth2.ClientCredentials(
     tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
