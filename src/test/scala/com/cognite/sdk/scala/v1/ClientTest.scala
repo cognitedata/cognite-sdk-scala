@@ -140,7 +140,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     )(
       implicitly,
       new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
-    ).login.status().unsafeRunSync() shouldBe 'loggedIn
+    ).login.status().unsafeRunSync().loggedIn shouldBe true
   }
 
   it should "throw an exception if the authentication is invalid and project is not specified" in {
