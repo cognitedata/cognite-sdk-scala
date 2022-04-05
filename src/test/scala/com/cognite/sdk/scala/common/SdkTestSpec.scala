@@ -58,7 +58,7 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
   lazy val projectName: String = sys.env("TEST_PROJECT_NAME")
-  private lazy val baseUrl: String = sys.env("TEST_BASE_URL")
+  lazy val baseUrl: String = sys.env("TEST_BASE_URL")
   private lazy val tenant: String = sys.env("TEST_AAD_TENANT")
   private lazy val clientId: String = sys.env("TEST_CLIENT_ID")
   private lazy val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
