@@ -86,3 +86,13 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
     })
   }
 }
+
+abstract class ApiKeysTestSpec extends SdkTestSpec {
+  private val apiKey = Option(System.getenv("TEST_API_KEY"))
+                  .getOrElse(throw new RuntimeException("TEST_API_KEY not set"))
+  override lazy val auth: Auth = ApiKeyAuth(apiKey)
+
+  override lazy val client = GenericClient.forAuth[Id](
+    "scala-sdk-test", auth)
+}
+
