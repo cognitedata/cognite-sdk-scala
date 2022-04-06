@@ -21,9 +21,9 @@ import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.Var"))
 class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionValues {
-  val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
-  val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
-  val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
+  val tenant: String = sys.env("TEST_AAD_TENANT")
+  val clientId: String = sys.env("TEST_CLIENT_ID")
+  val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
 
   // Override sttpBackend because this doesn't work with the testing backend
   implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()

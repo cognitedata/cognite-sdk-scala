@@ -13,9 +13,9 @@ import scala.concurrent.duration._
 import cats.effect.unsafe.implicits.global
 
 class TokenTest extends SdkTestSpec with OptionValues {
-  val tenant: String = sys.env("TEST_AAD_TENANT_BLUEFIELD")
-  val clientId: String = sys.env("TEST_CLIENT_ID_BLUEFIELD")
-  val clientSecret: String = sys.env("TEST_CLIENT_SECRET_BLUEFIELD")
+  val tenant: String = sys.env("TEST_AAD_TENANT")
+  val clientId: String = sys.env("TEST_CLIENT_ID")
+  val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
 
   implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
 

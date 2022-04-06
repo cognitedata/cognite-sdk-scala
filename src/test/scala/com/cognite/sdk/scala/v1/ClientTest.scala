@@ -48,7 +48,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
       StatusCode.Ok, "", Seq(Header("x-request-id", "test-request-header")))
     SttpBackendStub(implicitly[MonadAsyncError[IO]])
       .whenAnyRequest
-      .thenRespondCyclicResponses(loginStatusResponse, errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse
+      .thenRespondCyclicResponses(errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse
       )
   }
   private val loginStatusResponseWithApiKeyId = Response(
@@ -65,7 +65,11 @@ class ClientTest extends SdkTestSpec with OptionValues {
          |""".stripMargin, StatusCode.Ok, "OK",
       Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
 
-  "Client" should "fetch the project using login/status if necessary" in {
+  "Client" should "fetch the project using login/status if using api key" in {
+    val apiKey = Option(System.getenv("TEST_API_KEY"))
+                  .getOrElse(throw new RuntimeException("TEST_API_KEY not set"))
+    val auth: Auth = ApiKeyAuth(apiKey)
+
     noException should be thrownBy GenericClient.forAuth[Id](
       "scala-sdk-test", auth)(
       implicitly,
@@ -128,10 +132,15 @@ class ClientTest extends SdkTestSpec with OptionValues {
   }
 
   it should "support async IO clients" in {
-    GenericClient.forAuth[IO]("scala-sdk-test", auth)(
+    GenericClient[IO](
+      "scala-sdk-test",
+      projectName,
+      baseUrl,
+      auth
+    )(
       implicitly,
       new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
-    ).unsafeRunSync().projectName should not be empty
+    ).login.status().unsafeRunSync().loggedIn shouldBe true
   }
 
   it should "throw an exception if the authentication is invalid and project is not specified" in {
@@ -181,29 +190,44 @@ class ClientTest extends SdkTestSpec with OptionValues {
 
   it should "retry certain failed requests" in {
     assertThrows[CdpApiException] {
-      GenericClient.forAuth[IO]("scala-sdk-test", auth)(
+      GenericClient[IO](
+        "scala-sdk-test",
+        projectName,
+        baseUrl,
+        auth
+      )(
         implicitly,
         makeTestingBackend()
-      ).unsafeRunSync().threeDModels.list().compile.toList.unsafeRunSync()
+      ).threeDModels.list().compile.toList.unsafeRunSync()
     }
 
-    val _ = GenericClient.forAuth[IO]("scala-sdk-test", auth)(
+    noException should be thrownBy GenericClient[IO](
+        "scala-sdk-test",
+        projectName,
+        baseUrl,
+        auth
+      )(
       implicitly,
       new RetryingBackend[IO, Any](
         makeTestingBackend(),
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
-    ).unsafeRunSync().threeDModels.list().compile.toList.unsafeRunSync()
+    ).threeDModels.list().compile.toList.unsafeRunSync()
 
     assertThrows[CdpApiException] {
-      GenericClient.forAuth[IO]("scala-sdk-test", auth)(
+      GenericClient[IO](
+        "scala-sdk-test",
+        projectName,
+        baseUrl,
+        auth
+      )(
         implicitly,
         new RetryingBackend[IO, Any](
           makeTestingBackend(),
           maxRetries = 4,
           initialRetryDelay = 1.millis,
           maxRetryDelay = 2.millis)
-      ).unsafeRunSync().threeDModels.list().compile.toList.unsafeRunSync()
+      ).threeDModels.list().compile.toList.unsafeRunSync()
     }
   }
 

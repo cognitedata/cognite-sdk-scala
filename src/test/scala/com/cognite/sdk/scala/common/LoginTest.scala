@@ -9,11 +9,11 @@ import sttp.client3._
 
 import scala.concurrent.duration._
 
-class LoginTest extends SdkTestSpec {
+class LoginTest extends ApiKeysTestSpec {
   implicit val backend: SttpBackend[Id, Any] = HttpURLConnectionBackend(
     options = SttpBackendOptions.connectionTimeout(90.seconds)
   )
-  it should "read login status" in {
+  it should "read login status with api keys" in {
     val login =
       new Login(RequestSession[Id]("scala-sdk-test", uri"https://api.cognitedata.com", backend, AuthProvider[Id](auth)))
     val status = login.status()
