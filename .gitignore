@@ -6,7 +6,7 @@ target/
 .attach*
 .bloop/
 .metals/
-**/metals.sbt
+project/metals.sbt
 .env
 .vscode/
 /.bsp/
