@@ -261,6 +261,7 @@ object DataModelInstances {
     }
   // scalastyle:on cyclomatic.complexity
 
+  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
   private def decodeArrayFromTypeOfFirstElement(
       c: Vector[_],
       propName: String
@@ -293,6 +294,9 @@ object DataModelInstances {
       case _ => propName -> ArrayProperty(Vector())
     }
 
+  @SuppressWarnings(
+    Array("org.wartremover.warts.AsInstanceOf", "org.wartremover.warts.IsInstanceOf")
+  )
   private def filterOutNullableProps(
       res: Iterable[Either[DecodingFailure, (String, PropertyType)]],
       props: Map[String, DataModelProperty]
