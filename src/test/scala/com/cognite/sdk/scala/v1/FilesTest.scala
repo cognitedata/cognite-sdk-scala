@@ -11,12 +11,16 @@ import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile
 import fs2.Stream
 import org.scalatest.matchers.should.Matchers
 
-@SuppressWarnings(Array(
-  "org.wartremover.warts.NonUnitStatements",
-  "org.wartremover.warts.TraversableOps",
-  "org.wartremover.warts.Var",
-  "org.wartremover.warts.ThreadSleep",
-  "org.wartremover.warts.While"))
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.NonUnitStatements",
+    "org.wartremover.warts.TraversableOps",
+    "org.wartremover.warts.Var",
+    "org.wartremover.warts.ThreadSleep",
+    "org.wartremover.warts.While",
+    "org.wartremover.warts.IterableOps"
+  )
+)
 class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with Matchers with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")

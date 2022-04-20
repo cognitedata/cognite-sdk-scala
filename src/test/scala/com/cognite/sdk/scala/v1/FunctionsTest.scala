@@ -8,7 +8,13 @@ import org.scalatest.Inspectors._
 import io.circe.JsonObject
 import com.cognite.sdk.scala.common._
 
-@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements"))
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.TraversableOps",
+    "org.wartremover.warts.NonUnitStatements",
+    "org.wartremover.warts.IterableOps"
+  )
+)
 class FunctionsTest extends SdkTestSpec with ReadBehaviours {
   override lazy val client: GenericClient[cats.Id] = GenericClient.forAuth[cats.Id](
     "playground", auth, apiVersion = Some("playground"))(implicitly, sttpBackend)

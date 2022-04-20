@@ -8,7 +8,13 @@ import java.util.UUID
 
 import com.cognite.sdk.scala.common.{CdpApiException, DataPointsResourceBehaviors, SdkTestSpec}
 
-@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements"))
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.TraversableOps",
+    "org.wartremover.warts.NonUnitStatements",
+    "org.wartremover.warts.IterableOps"
+  )
+)
 class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
   private val delta = 0.00000001
 

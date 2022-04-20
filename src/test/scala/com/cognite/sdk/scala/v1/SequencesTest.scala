@@ -8,7 +8,14 @@ import java.time.Instant
 import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common.{ReadBehaviours, RetryWhile, SdkTestSpec, SetNull, SetValue, WritableBehaviors}
 
-@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Null"))
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.TraversableOps",
+    "org.wartremover.warts.NonUnitStatements",
+    "org.wartremover.warts.Null",
+    "org.wartremover.warts.IterableOps"
+  )
+)
 class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("sequence-5PNii0w", "sequence-6VhKQqt")
