@@ -9,7 +9,14 @@ import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile
 
 import scala.util.control.NonFatal
 
-@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.TraversableOps", "org.wartremover.warts.Null"))
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.NonUnitStatements",
+    "org.wartremover.warts.TraversableOps",
+    "org.wartremover.warts.Null",
+    "org.wartremover.warts.IterableOps"
+  )
+)
 class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")

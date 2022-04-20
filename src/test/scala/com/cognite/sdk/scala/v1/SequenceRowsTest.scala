@@ -8,7 +8,7 @@ import com.cognite.sdk.scala.common._
 import io.circe.syntax._
 import org.scalatest.{OptionValues, ParallelTestExecution}
 
-@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements"))
+@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.IterableOps"))
 class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with RetryWhile with OptionValues {
   def withSequence(testCode: Sequence => Any): Unit = {
     val externalId = shortRandom()

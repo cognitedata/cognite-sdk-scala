@@ -9,7 +9,13 @@ import fs2.Stream
 import io.circe.syntax._
 import org.scalatest.OptionValues
 
-@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements"))
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.TraversableOps",
+    "org.wartremover.warts.NonUnitStatements",
+    "org.wartremover.warts.IterableOps"
+  )
+)
 class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with OptionValues {
   private val idsThatDoNotExist = Seq("nodatabase", "randomdatabase")
 

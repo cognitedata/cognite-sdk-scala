@@ -7,7 +7,13 @@ import java.time.Instant
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.common.SetValue
 
-@SuppressWarnings(Array("org.wartremover.warts.Null", "org.wartremover.warts.TraversableOps"))
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.Null",
+    "org.wartremover.warts.TraversableOps",
+    "org.wartremover.warts.IterableOps"
+  )
+)
 class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")

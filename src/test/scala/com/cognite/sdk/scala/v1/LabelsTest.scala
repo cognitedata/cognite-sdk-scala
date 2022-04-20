@@ -4,7 +4,13 @@
 package com.cognite.sdk.scala.v1
 import com.cognite.sdk.scala.common.{ReadBehaviours, RetryWhile, SdkTestSpec, WritableBehaviors}
 
-@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements"))
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.TraversableOps",
+    "org.wartremover.warts.NonUnitStatements",
+    "org.wartremover.warts.IterableOps"
+  )
+)
 class LabelsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
