@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.v1.resources
 
-import com.cognite.sdk.scala.common.{Constants, _}
+import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.cognite.v1.timeseries.proto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -146,7 +146,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
   ): F[Seq[DataPointsByIdResponse]] =
     query(ids.map(CogniteInternalId(_)), inclusiveStart, exclusiveEnd, limit, ignoreUnknownIds)
 
-  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
+  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def queryOne(
       id: CogniteId,
       inclusiveStart: Instant,
@@ -180,7 +180,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     )
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
+  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def queryByExternalId(
       externalId: String,
       inclusiveStart: Instant,
@@ -291,7 +291,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
         accept = "application/protobuf"
       )
 
-  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
+  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def queryStringsById(
       id: Long,
       inclusiveStart: Instant,
@@ -305,7 +305,7 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       (r: Seq[StringDataPointsByIdResponse]) => r.head
     )
 
-  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
+  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def queryStringsByExternalId(
       externalId: String,
       inclusiveStart: Instant,

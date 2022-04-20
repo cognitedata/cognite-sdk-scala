@@ -34,7 +34,7 @@ object CogniteId {
     List[Decoder[CogniteId]](
       Decoder[CogniteInternalId].widen,
       Decoder[CogniteExternalId].widen
-    ).reduceLeft(_ or _)
+    ).reduceLeftOption(_ or _).getOrElse(Decoder[CogniteExternalId].widen)
 }
 
 // min and max need to be optional, since one of them can be provided alone.

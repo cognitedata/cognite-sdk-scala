@@ -10,7 +10,7 @@ import sttp.capabilities.Effect
 import sttp.client3.{Request, Response, SttpBackend, SttpClientException}
 import sttp.monad.MonadError
 
-import scala.concurrent.duration.{FiniteDuration, _}
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.TimeoutException
 import scala.util.Random
 
