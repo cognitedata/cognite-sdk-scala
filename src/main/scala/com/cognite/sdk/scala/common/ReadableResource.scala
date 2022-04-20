@@ -136,7 +136,7 @@ object Readable {
 
 trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByIds(ids: Seq[Long]): F[Seq[R]]
-  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
+  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def retrieveById(id: Long): F[R] =
     // The API returns an error causing an exception to be thrown if the item isn't found,
     // so .head is safe here.
@@ -176,7 +176,7 @@ object RetrieveByIdsWithIgnoreUnknownIds {
 
 trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[R]]
-  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
+  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def retrieveByExternalId(externalId: String): F[R] =
     // The API returns an error causing an exception to be thrown if the item isn't found,
     // so .head is safe here.
