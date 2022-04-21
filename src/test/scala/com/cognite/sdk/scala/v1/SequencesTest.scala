@@ -13,7 +13,8 @@ import com.cognite.sdk.scala.common.{ReadBehaviours, RetryWhile, SdkTestSpec, Se
     "org.wartremover.warts.TraversableOps",
     "org.wartremover.warts.NonUnitStatements",
     "org.wartremover.warts.Null",
-    "org.wartremover.warts.IterableOps"
+    "org.wartremover.warts.IterableOps",
+    "org.wartremover.warts.SizeIs"
   )
 )
 class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {

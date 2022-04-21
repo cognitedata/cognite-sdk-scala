@@ -14,7 +14,8 @@ import fs2.Stream
     "org.wartremover.warts.TraversableOps",
     "org.wartremover.warts.NonUnitStatements",
     "org.wartremover.warts.Null",
-    "org.wartremover.warts.IterableOps"
+    "org.wartremover.warts.IterableOps",
+    "org.wartremover.warts.SizeIs"
   )
 )
 class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {

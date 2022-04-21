@@ -8,7 +8,7 @@ import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.SizeIs"))
 trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =>
   // scalastyle:off
   def writable[R <: ToCreate[W] with WithId[PrimitiveId], W, PrimitiveId](

@@ -34,7 +34,7 @@ class FilterTest extends SdkTestSpec with OptionValues {
     finalLimit should be(100)
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Null", "org.wartremover.warts.Var"))
+  @SuppressWarnings(Array("org.wartremover.warts.Null", "org.wartremover.warts.Var", "org.wartremover.warts.AsInstanceOf"))
   def filterWithCursor(batchSize: Int, limit: Option[Int])(test: Int => Any): Any = {
     var hijackedRequest: FilterRequest[DummyFilter] = null // scalastyle:ignore
     val requestHijacker = SttpBackendStub.synchronous.whenAnyRequest.thenRespondF(req => {
