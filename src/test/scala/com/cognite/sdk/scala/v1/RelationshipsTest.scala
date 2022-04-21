@@ -6,6 +6,10 @@ import com.cognite.sdk.scala.common._
 
 import java.time.temporal.ChronoUnit
 import java.time.Instant
+
+@SuppressWarnings(
+  Array("org.wartremover.warts.SizeIs")
+)
 class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 

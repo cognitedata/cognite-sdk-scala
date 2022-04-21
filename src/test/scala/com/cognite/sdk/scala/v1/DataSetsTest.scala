@@ -11,7 +11,8 @@ import com.cognite.sdk.scala.common.SetValue
   Array(
     "org.wartremover.warts.Null",
     "org.wartremover.warts.TraversableOps",
-    "org.wartremover.warts.IterableOps"
+    "org.wartremover.warts.IterableOps",
+    "org.wartremover.warts.SizeIs"
   )
 )
 class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors {

@@ -35,7 +35,9 @@ import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
     "org.wartremover.warts.JavaSerializable",
     "org.wartremover.warts.Serializable",
     "org.wartremover.warts.NonUnitStatements",
-    "org.wartremover.warts.Product"
+    "org.wartremover.warts.Product",
+    "org.wartremover.warts.AsInstanceOf",
+    "org.wartremover.warts.IsInstanceOf"
   )
 )
 class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {

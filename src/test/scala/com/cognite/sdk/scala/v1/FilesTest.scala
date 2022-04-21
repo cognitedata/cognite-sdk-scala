@@ -18,7 +18,8 @@ import org.scalatest.matchers.should.Matchers
     "org.wartremover.warts.Var",
     "org.wartremover.warts.ThreadSleep",
     "org.wartremover.warts.While",
-    "org.wartremover.warts.IterableOps"
+    "org.wartremover.warts.IterableOps",
+    "org.wartremover.warts.SizeIs"
   )
 )
 class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with Matchers with RetryWhile {
