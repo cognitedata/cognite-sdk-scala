@@ -5,9 +5,10 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 import java.util.UUID
-
 import com.cognite.sdk.scala.common._
 import fs2.Stream
+
+import scala.util.control.NonFatal
 
 @SuppressWarnings(
   Array(
@@ -72,19 +73,26 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         AssetCreate(name = "child", externalId = Some(s"$key-recursive-child"), parentExternalId = Some(s"$key-recursive-root")),
         AssetCreate(name = "grandchild", externalId = Some(s"$key-recursive-grandchild"), parentExternalId = Some(s"$key-recursive-child"))
     )
-    client.assets.create(assetTree)
+    val createdAssets = client.assets.create(assetTree)
+    try {
+      retryWithExpectedResult[Seq[Asset]](
+        client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
+        r => r should have size 3
+      )
 
-    retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
-      r => r should have size 3
-    )
+      client.assets.deleteRecursive(Seq(CogniteExternalId(s"$key-recursive-root")), true, true)
 
-    client.assets.deleteRecursive(Seq(CogniteExternalId(s"$key-recursive-root")), true, true)
-
-    retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
-      r => r should have size 0
-    )
+      retryWithExpectedResult[Seq[Asset]](
+        client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
+        r => r should have size 0
+      )
+    } finally {
+      try {
+        client.assets.delete(createdAssets.map(event => CogniteInternalId(event.id)), ignoreUnknownIds = true)
+      } catch {
+        case NonFatal(_) => // ignore
+      }
+    }
   }
 
   it should "support deleting entire asset subtrees recursively by id" in {
@@ -94,37 +102,44 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       AssetCreate(name = "child", externalId = Some(s"$key-recursive-child"), parentExternalId = Some(s"$key-recursive-root")),
       AssetCreate(name = "grandchild", externalId = Some(s"$key-recursive-grandchild"), parentExternalId = Some(s"$key-recursive-child"))
     )
-    val createdItems = client.assets.create(assetTree)
+    val createdAssets = client.assets.create(assetTree)
 
-    retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
-      r => r should have size 3
-    )
+    try {
+      retryWithExpectedResult[Seq[Asset]](
+        client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
+        r => r should have size 3
+      )
 
-    client.assets.deleteRecursive(Seq(CogniteInternalId(createdItems(0).id)), true, true)
+      client.assets.deleteRecursive(Seq(CogniteInternalId(createdAssets(0).id)), true, true)
 
-    retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
-      r => r should have size 0
-    )
+      retryWithExpectedResult[Seq[Asset]](
+        client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList,
+        r => r should have size 0
+      )
+    } finally {
+      try {
+        client.assets.delete(createdAssets.map(event => CogniteInternalId(event.id)), ignoreUnknownIds = true)
+      } catch {
+        case NonFatal(_) => // ignore
+      }
+    }
   }
 
-  private def createAssets(externalIdPrefix:String) = {
+  private def createAssets(externalIdPrefix: String) = {
     val keys = (1 to 4).map(_ => shortRandom())
-    val assets = keys.map(k=>
-      AssetCreate(name = "scala-sdk-delete-cogniteId-" + k, externalId =  Some(s"$externalIdPrefix-$k"))
-    )
+    val assets = keys.map(k => AssetCreate(name = k, externalId =  Some(s"$externalIdPrefix-$k")))
     val createdItems = client.assets.create(assets)
 
     retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$externalIdPrefix-"))).compile.toList,
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$externalIdPrefix"))).compile.toList,
       r => r should have size 4
     )
     createdItems
   }
 
   it should "support deleting by CogniteIds" in {
-    val createdItems = createAssets("delete-cogniteId")
+    val externalIdPrefix = s"delete-${shortRandom()}"
+    val createdItems = createAssets(externalIdPrefix)
 
     val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(createdItems.size/2)
     val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
@@ -136,7 +151,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     //make sure that assets are deletes
     retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"delete-cogniteId"))).compile.toList,
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(externalIdPrefix))).compile.toList,
       r => r should have size 0
     )
   }
