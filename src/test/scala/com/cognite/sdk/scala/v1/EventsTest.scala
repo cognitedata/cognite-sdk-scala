@@ -98,7 +98,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       )
     } finally {
       try {
-        client.events.delete(createdEvents.map(event => CogniteInternalId(event.id)))
+        client.events.delete(createdEvents.map(event => CogniteInternalId(event.id)), ignoreUnknownIds = true)
       } catch {
         case NonFatal(_) => // ignore
       }
@@ -132,7 +132,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       )
     } finally {
       try {
-        client.events.delete(createdEvents.map(event => CogniteInternalId(event.id)))
+        client.events.delete(createdEvents.map(event => CogniteInternalId(event.id)), ignoreUnknownIds = true)
       } catch {
         case NonFatal(_) => // ignore
       }
@@ -230,7 +230,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       assert(updatedEvents.zip(createdItems).forall { case (updated, read) => updated.id === read.id })
     } finally {
       try {
-        client.events.delete(createdItems.map(event => CogniteInternalId(event.id)))
+        client.events.delete(createdItems.map(event => CogniteInternalId(event.id)), ignoreUnknownIds = true)
       } catch {
         case NonFatal(_) => // ignore
       }
