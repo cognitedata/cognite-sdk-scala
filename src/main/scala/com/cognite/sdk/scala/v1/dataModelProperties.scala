@@ -25,31 +25,39 @@ final case class DirectRelationProperty(value: String) extends PropertyType
 final case class GeometryProperty(value: String) extends PropertyType
 final case class GeographyProperty(value: String) extends PropertyType
 
-object PropertyName {
-  val Boolean = "boolean"
-  val Int32 = "int32"
-  val Int64 = "int64"
-  val Int = "int"
-  val Bigint = "bigint"
-  val Float32 = "float32"
-  val Float64 = "float64"
-  val Numeric = "numeric"
-  val Text = "text"
-  val Timestamp = "timestamp"
-  val Date = "date"
-
-  val ArrayText = "text[]"
-  val ArrayBoolean = "boolean[]"
-  val ArrayInt32 = "int32[]"
-  val ArrayInt64 = "int64[]"
-  val ArrayInt = "int[]"
-  val ArrayBigint = "bigint[]"
-  val ArrayFloat32 = "float32[]"
-  val ArrayFloat64 = "float64[]"
-  val ArrayNumeric = "numeric[]"
+object PropertyType extends Enumeration {
+  val Boolean = Value("boolean")
+  val Int = Value("int")
+  val Bigint = Value("bigint")
+  val Float32 = Value("float32")
+  val Float64 = Value("float64")
+  val Numeric = Value("numeric")
+  val Text = Value("text")
+  val Json = Value("json")
+  val Timestamp = Value("timestamp")
+  val Date = Value("date")
 
   // These types below are treated as string for now
-  val DirectRelation = "direct_relation"
-  val Geometry = "geometry"
-  val Geography = "geography"
+  val DirectRelation = Value("direct_relation")
+  val Geometry = Value("geometry")
+  val Geography = Value("geography")
+
+  Array
+
+  object Array {
+    val Boolean = Value("boolean[]")
+    val Int = Value("int[]")
+    val Bigint = Value("bigint[]")
+    val Float32 = Value("float32[]")
+    val Float64 = Value("float64[]")
+    val Numeric = Value("numeric[]")
+    val Text = Value("text[]")
+    val Json = Value("json[]")
+    val Timestamp = Value("timestamp[]")
+    val Date = Value("date[]")
+
+    val Geometry = Value("geometry[]")
+    val Geography = Value("geography[]")
+  }
+
 }

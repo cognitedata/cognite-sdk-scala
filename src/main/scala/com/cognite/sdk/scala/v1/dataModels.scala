@@ -3,31 +3,103 @@
 
 package com.cognite.sdk.scala.v1
 
-final case class DataModelProperty(
-    `type`: String,
-    nullable: Boolean = true,
-    targetModelExternalId: Option[String] = None
+final case class SpacedItems[A](spaceExternalId: String, items: Seq[A])
+
+final case class DataModelIdentifier(
+    space: Option[String],
+    model: String
 )
 
-final case class DataModelPropertyIndex(
-    indexName: Option[String] = None,
-    fields: Option[Seq[String]] = None
+object DataModelIdentifier {
+  def apply(model: String): DataModelIdentifier =
+    DataModelIdentifier(None, model)
+  def apply(space: String, model: String): DataModelIdentifier =
+    DataModelIdentifier(Some(space), model)
+}
+
+final case class DataModelProperty(
+    `type`: PropertyType.Value,
+    nullable: Boolean = true,
+    targetModel: Option[DataModelIdentifier] = None
+)
+
+final case class ContstrainedProperty(property: String)
+
+final case class UniquenessConstraint(
+    uniqueProperties: Seq[ContstrainedProperty]
+)
+
+final case class DataModelConstraints(
+    uniqueness: Option[Map[String, UniquenessConstraint]] = None
+)
+
+final case class BTreeIndex(
+    properties: Seq[String]
+)
+
+final case class DataModelIndexes(
+    btreeIndex: Option[Map[String, BTreeIndex]] = None
 )
 
 final case class DataModel(
     externalId: String,
     properties: Option[Map[String, DataModelProperty]] = None,
-    `extends`: Option[Seq[String]] = None,
-    indexes: Option[Seq[DataModelPropertyIndex]] = None
+    `extends`: Option[Seq[DataModelIdentifier]] = None,
+    indexes: Option[DataModelIndexes] = None,
+    constraints: Option[DataModelConstraints] = None,
+    instanceType: DataModelInstanceType = DataModelInstanceType.Node
+) {
+  private[v1] def toDTO: DataModelDTO =
+    DataModelDTO(
+      externalId,
+      properties,
+      `extends`,
+      indexes,
+      constraints,
+      allowEdge = instanceType == DataModelInstanceType.Edge,
+      allowNode = instanceType == DataModelInstanceType.Node
+    )
+}
+
+object DataModel {
+  private[v1] def fromDTO(dto: DataModelDTO): DataModel = {
+    val instanceType =
+      (dto.allowEdge, dto.allowNode) match {
+        case (true, false) => DataModelInstanceType.Edge
+        case (false, true) => DataModelInstanceType.Node
+        case _ =>
+          throw new IllegalArgumentException("Exactly one of allowNode and allowEdge must be true")
+      }
+
+    DataModel(
+      dto.externalId,
+      dto.properties,
+      dto.`extends`,
+      dto.indexes,
+      dto.constraints,
+      instanceType
+    )
+  }
+}
+
+private final case class DataModelDTO(
+    externalId: String,
+    properties: Option[Map[String, DataModelProperty]] = None,
+    `extends`: Option[Seq[DataModelIdentifier]] = None,
+    indexes: Option[DataModelIndexes] = None,
+    constraints: Option[DataModelConstraints] = None,
+    allowEdge: Boolean = false,
+    allowNode: Boolean = true
 )
 
-final case class DataModelListInput(includeInheritedProperties: Boolean)
+sealed abstract class DataModelInstanceType
 
-final case class DataModelGetByExternalIdsInput[A](
-    items: Seq[A],
-    includeInheritedProperties: Boolean,
-    ignoreUnknownIds: Boolean
-)
+object DataModelInstanceType {
+  case object Node extends DataModelInstanceType
+  case object Edge extends DataModelInstanceType
+}
+
+final case class DataModelListInput(spaceExternalId: String)
 
 final case class DataModelInstanceCreate(
     modelExternalId: String,
