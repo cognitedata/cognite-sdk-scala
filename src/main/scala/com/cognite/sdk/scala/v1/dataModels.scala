@@ -18,7 +18,7 @@ object DataModelIdentifier {
 }
 
 final case class DataModelProperty(
-    `type`: PropertyType.Value,
+    `type`: PropertyType,
     nullable: Boolean = true,
     targetModel: Option[DataModelIdentifier] = None
 )

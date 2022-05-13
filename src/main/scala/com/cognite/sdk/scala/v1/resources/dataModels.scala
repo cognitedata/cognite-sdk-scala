@@ -59,7 +59,7 @@ object DataModels {
   implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =
     Encoder
       .encodeIterable[String, Seq]
-      .contramap((dmi: DataModelIdentifier) =>
+      .contramap[DataModelIdentifier](dmi =>
         dmi match {
           case DataModelIdentifier(Some(space), model) =>
             Seq(space, model)
@@ -70,8 +70,8 @@ object DataModels {
 
   implicit val bTreeIndexEncoder: Encoder[BTreeIndex] =
     deriveEncoder[BTreeIndex]
-  implicit val dataModelPropertyTypeEncoder: Encoder[PropertyType.Value] =
-    Encoder.encodeEnumeration(PropertyType)
+  implicit val dataModelPropertyTypeEncoder: Encoder[PropertyType] =
+    Encoder.encodeString.contramap[PropertyType](_.code)
   implicit val dataModelPropertyIndexesEncoder: Encoder[DataModelIndexes] =
     deriveEncoder[DataModelIndexes]
   implicit val dataModelPropertyEncoder: Encoder[DataModelProperty] =
@@ -83,7 +83,7 @@ object DataModels {
   implicit val dataModelConstraintsEncoder: Encoder[DataModelConstraints] =
     deriveEncoder[DataModelConstraints]
   implicit val dataModelEncoder: Encoder[DataModel] =
-    deriveEncoder[DataModelDTO].contramap((dm: DataModel) => dm.toDTO)
+    deriveEncoder[DataModelDTO].contramap[DataModel](_.toDTO)
   implicit val dataModelItemsEncoder: Encoder[SpacedItems[DataModel]] =
     deriveEncoder[SpacedItems[DataModel]]
   implicit val cogniteIdSpacedItemsEncoder: Encoder[SpacedItems[CogniteId]] =
@@ -94,7 +94,7 @@ object DataModels {
   implicit val dataModelIdentifierDecoder: Decoder[DataModelIdentifier] =
     Decoder
       .decodeIterable[String, List]
-      .map((ids: List[String]) =>
+      .map(ids =>
         ids match {
           case modelExternalId :: Nil =>
             DataModelIdentifier(modelExternalId)
@@ -108,8 +108,14 @@ object DataModels {
       )
   implicit val bTreeIndexDecoder: Decoder[BTreeIndex] =
     deriveDecoder[BTreeIndex]
-  implicit val dataModelPropertyTypeDecoder: Decoder[PropertyType.Value] =
-    Decoder.decodeEnumeration(PropertyType)
+  implicit val dataModelPropertyTypeDecoder: Decoder[PropertyType] =
+    Decoder.decodeString.map(
+      PropertyType
+        .fromCode(_)
+        .getOrElse(
+          throw new IllegalArgumentException("Invalid type specified")
+        )
+    )
   implicit val dataModelPropertyIndexesDecoder: Decoder[DataModelIndexes] =
     deriveDecoder[DataModelIndexes]
   implicit val dataModelPropertyDecoder: Decoder[DataModelProperty] =
@@ -121,6 +127,7 @@ object DataModels {
   implicit val dataModelConstraintsDecoder: Decoder[DataModelConstraints] =
     deriveDecoder[DataModelConstraints]
   implicit val dataModelDecoder: Decoder[DataModel] =
-    deriveDecoder[DataModelDTO].map((dto: DataModelDTO) => DataModel.fromDTO(dto))
-  implicit val dataModelItemsDecoder: Decoder[Items[DataModel]] = deriveDecoder[Items[DataModel]]
+    deriveDecoder[DataModelDTO].map(DataModel.fromDTO(_))
+  implicit val dataModelItemsDecoder: Decoder[Items[DataModel]] =
+    deriveDecoder[Items[DataModel]]
 }
