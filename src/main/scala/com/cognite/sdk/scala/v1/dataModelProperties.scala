@@ -4,12 +4,14 @@
 package com.cognite.sdk.scala.v1
 
 sealed abstract class PropertyType {
+
+  @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
   def code: String =
     toString.replaceAll("(.)([A-Z])", "$1_$2").toLowerCase
 }
 
 object PropertyType {
-  val values = Seq(
+  val values: Seq[PropertyType] = Seq[PropertyType](
     Boolean,
     Int,
     Bigint,
@@ -54,7 +56,7 @@ object PropertyType {
   }
 
   object Array {
-    val values = Seq(
+    val values: Seq[PropertyType] = Seq[PropertyType](
       Boolean,
       Int,
       Bigint,

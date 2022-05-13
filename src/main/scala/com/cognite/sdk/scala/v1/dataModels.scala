@@ -49,6 +49,10 @@ final case class DataModel(
     constraints: Option[DataModelConstraints] = None,
     instanceType: DataModelInstanceType = DataModelInstanceType.Node
 ) {
+  private val (_allowEdge, _allowNode) = instanceType match {
+    case DataModelInstanceType.Edge => (true, false)
+    case DataModelInstanceType.Node => (false, true)
+  }
   private[v1] def toDTO: DataModelDTO =
     DataModelDTO(
       externalId,
@@ -56,14 +60,14 @@ final case class DataModel(
       `extends`,
       indexes,
       constraints,
-      allowEdge = instanceType == DataModelInstanceType.Edge,
-      allowNode = instanceType == DataModelInstanceType.Node
+      _allowEdge,
+      _allowNode
     )
 }
 
 object DataModel {
   private[v1] def fromDTO(dto: DataModelDTO): DataModel = {
-    val instanceType =
+    val instanceType: DataModelInstanceType =
       (dto.allowEdge, dto.allowNode) match {
         case (true, false) => DataModelInstanceType.Edge
         case (false, true) => DataModelInstanceType.Node

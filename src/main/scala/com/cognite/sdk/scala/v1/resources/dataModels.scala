@@ -102,7 +102,7 @@ object DataModels {
             DataModelIdentifier(spaceExternalId, modelExternalId)
           case _ =>
             throw new SdkException(
-              s"Unable to decode DataModelIdentifier, expected array length 1 or 2, actual length ${ids.length}."
+              s"Unable to decode DataModelIdentifier, expected array length 1 or 2, actual length ${ids.length.toString}."
             )
         }
       )

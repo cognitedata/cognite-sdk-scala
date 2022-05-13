@@ -104,7 +104,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
   )
 
   private def insertDataModels() = {
-    
+
     val outputCreates =
     // TODO: enable transient datamodel tests when fdm team enables delete
     /*
