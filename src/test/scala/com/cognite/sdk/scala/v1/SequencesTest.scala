@@ -181,16 +181,18 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
     Some(client.sequences),
     sequencesToCreate,
     Seq(
+      // Column updates: modify the existing column
       SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-1-1")),
         columns = Some(SequenceColumnsUpdate(
           modify = Some(Seq(SequenceColumnModifyUpdate(
-            externalId = sequencesToCreate.head.columns.head.externalId.get,
+            externalId = sequencesToCreate.head.columns.head.externalId.getOrElse(""),
             update = SequenceColumnModify(name = Some(SetValue("you-are-string!!!")),
             metadata = Some(SetValue(Map("test1" -> "0")))))))))),
+      // Column updates: add a new column and remove the existing column
       SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-2-1")), dataSetId = Some(SetValue(testDataSet.id)),
         columns = Some(SequenceColumnsUpdate(add = Some(Seq(SequenceColumnCreate(name = Some("new-column-new-starts"),
-          externalId = s"${sequencesToCreate(2).columns.head.externalId.get}-2"))),
-          remove = Some(Seq(CogniteExternalId(sequencesToCreate(2).columns.head.externalId.get)))))),
+          externalId = s"${sequencesToCreate(2).columns.head.externalId.getOrElse("")}-2"))),
+          remove = Some(Seq(CogniteExternalId(sequencesToCreate(2).columns.head.externalId.getOrElse(""))))))),
       SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-3-1")), dataSetId = Some(SetNull()))
     ),
     (readSequences: Seq[Sequence], updatedSequences: Seq[Sequence]) => {
@@ -204,7 +206,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
 
       updatedSequences(1).columns.length shouldBe 1
       updatedSequences(1).columns.head.name shouldBe Some("new-column-new-starts")
-      updatedSequences(1).columns.head.externalId shouldBe Some(s"${sequencesToCreate(2).columns.head.externalId.get}-2")
+      updatedSequences(1).columns.head.externalId shouldBe sequencesToCreate(2).columns.head.externalId.map(ext => s"$ext-2")
 
       val dataSets = updatedSequences.map(_.dataSetId)
       assert(List(None, Some(testDataSet.id), None) === dataSets)
