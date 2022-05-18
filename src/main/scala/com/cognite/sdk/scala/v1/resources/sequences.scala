@@ -88,6 +88,12 @@ object SequencesResource {
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
   implicit val sequenceColumnDecoder: Decoder[SequenceColumn] = deriveDecoder
   implicit val sequenceDecoder: Decoder[Sequence] = deriveDecoder[Sequence]
+  implicit val sequenceColumnModifyEncoder: Encoder[SequenceColumnModify] =
+    deriveEncoder[SequenceColumnModify]
+  implicit val sequenceColumnModifyUpdateEncoder: Encoder[SequenceColumnModifyUpdate] =
+    deriveEncoder[SequenceColumnModifyUpdate]
+  implicit val sequenceColumnsUpdateEncoder: Encoder[SequenceColumnsUpdate] =
+    deriveEncoder[SequenceColumnsUpdate]
   implicit val sequenceUpdateEncoder: Encoder[SequenceUpdate] = deriveEncoder[SequenceUpdate]
   implicit val sequenceItemsWithCursorDecoder: Decoder[ItemsWithCursor[Sequence]] =
     deriveDecoder[ItemsWithCursor[Sequence]]
