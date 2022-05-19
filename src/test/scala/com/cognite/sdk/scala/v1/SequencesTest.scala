@@ -181,8 +181,18 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
     Some(client.sequences),
     sequencesToCreate,
     Seq(
-      SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-1-1"))),
-      SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-2-1")), dataSetId = Some(SetValue(testDataSet.id))),
+      // Column updates: modify the existing column
+      SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-1-1")),
+        columns = Some(SequenceColumnsUpdate(
+          modify = Some(Seq(SequenceColumnModifyUpdate(
+            externalId = sequencesToCreate.head.columns.head.externalId.getOrElse(""),
+            update = SequenceColumnModify(name = Some(SetValue("you-are-string!!!")),
+            metadata = Some(SetValue(Map("test1" -> "0")))))))))),
+      // Column updates: add a new column and remove the existing column
+      SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-2-1")), dataSetId = Some(SetValue(testDataSet.id)),
+        columns = Some(SequenceColumnsUpdate(add = Some(Seq(SequenceColumnCreate(name = Some("new-column-new-starts"),
+          externalId = s"${sequencesToCreate(2).columns.head.externalId.getOrElse("")}-2"))),
+          remove = Some(Seq(CogniteExternalId(sequencesToCreate(2).columns.head.externalId.getOrElse(""))))))),
       SequenceUpdate(name = Some(SetValue("scala-sdk-write-example-3-1")), dataSetId = Some(SetNull()))
     ),
     (readSequences: Seq[Sequence], updatedSequences: Seq[Sequence]) => {
@@ -190,6 +200,17 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
       assert(updatedSequences.zip(readSequences).forall { case (updated, read) =>
         updated.name.value === s"${read.name.value}-1"
       })
+
+      val firstSequenceFirstColumn = updatedSequences.headOption.map(_.columns.head)
+      firstSequenceFirstColumn.flatMap(_.metadata) shouldBe Some(Map("test1" -> "0"))
+      firstSequenceFirstColumn.flatMap(_.name) shouldBe Some("you-are-string!!!")
+
+      val secondSequence = updatedSequences.lift(1).map(_.columns)
+      secondSequence.map(_.size) shouldBe Some(1)
+      val secondSequenceFirstColumn = secondSequence.map(_.head)
+      secondSequenceFirstColumn.flatMap(_.name) shouldBe Some("new-column-new-starts")
+      secondSequenceFirstColumn.flatMap(_.externalId) shouldBe sequencesToCreate.lift(2).flatMap(_.columns.head.externalId.map(ext => s"$ext-2"))
+
       val dataSets = updatedSequences.map(_.dataSetId)
       assert(List(None, Some(testDataSet.id), None) === dataSets)
       ()
