@@ -201,12 +201,15 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
         updated.name.value === s"${read.name.value}-1"
       })
 
-      updatedSequences.head.columns.head.metadata shouldBe Some(Map("test1" -> "0"))
-      updatedSequences.head.columns.head.name shouldBe Some("you-are-string!!!")
+      val firstSequenceFirstColumn = updatedSequences.headOption.map(_.columns.head)
+      firstSequenceFirstColumn.flatMap(_.metadata) shouldBe Some(Map("test1" -> "0"))
+      firstSequenceFirstColumn.flatMap(_.name) shouldBe Some("you-are-string!!!")
 
-      updatedSequences(1).columns.length shouldBe 1
-      updatedSequences(1).columns.head.name shouldBe Some("new-column-new-starts")
-      updatedSequences(1).columns.head.externalId shouldBe sequencesToCreate(2).columns.head.externalId.map(ext => s"$ext-2")
+      val secondSequence = updatedSequences.lift(1).map(_.columns)
+      secondSequence.map(_.size) shouldBe Some(1)
+      val secondSequenceFirstColumn = secondSequence.map(_.head)
+      secondSequenceFirstColumn.flatMap(_.name) shouldBe Some("new-column-new-starts")
+      secondSequenceFirstColumn.flatMap(_.externalId) shouldBe sequencesToCreate.lift(2).flatMap(_.columns.head.externalId.map(ext => s"$ext-2"))
 
       val dataSets = updatedSequences.map(_.dataSetId)
       assert(List(None, Some(testDataSet.id), None) === dataSets)
