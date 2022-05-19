@@ -49,13 +49,12 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
     "prop_direct_relation" -> DataModelPropertyDeffinition(PropertyType.DirectRelation),
     "prop_date" -> DataModelPropertyDeffinition(PropertyType.Date),
     "prop_timestamp" -> DataModelPropertyDeffinition(PropertyType.Timestamp),
-    "arr_bool" -> DataModelPropertyDeffinition(PropertyType.ArrayBoolean, false),
-    "arr_float64" -> DataModelPropertyDeffinition(PropertyType.ArrayFloat64, false),
-    "arr_int32" -> DataModelPropertyDeffinition(PropertyType.ArrayInt32),
-    "arr_int64" -> DataModelPropertyDeffinition(PropertyType.ArrayInt64),
-    "arr_string" -> DataModelPropertyDeffinition(PropertyType.ArrayText),
-    "arr_empty" -> DataModelPropertyDeffinition(PropertyType.ArrayText, false),
-    "arr_empty_nullable" -> DataModelPropertyDeffinition(PropertyType.ArrayFloat64)
+    "arr_bool" -> DataModelPropertyDeffinition(PropertyType.Array.Boolean, false),
+    "arr_float64" -> DataModelPropertyDeffinition(PropertyType.Array.Float64, false),
+    "arr_int32" -> DataModelPropertyDeffinition(PropertyType.Array.Int),
+    "arr_string" -> DataModelPropertyDeffinition(PropertyType.Array.Text),
+    "arr_empty" -> DataModelPropertyDeffinition(PropertyType.Array.Text, false),
+    "arr_empty_nullable" -> DataModelPropertyDeffinition(PropertyType.Array.Float64)
   )
 
   import com.cognite.sdk.scala.v1.resources.DataModelInstances._

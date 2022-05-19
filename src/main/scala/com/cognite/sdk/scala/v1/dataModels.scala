@@ -3,81 +3,104 @@
 
 package com.cognite.sdk.scala.v1
 
-final case class DataModelPropertyDeffinition(
-    `type`: String,
-    nullable: Boolean = true,
-    targetModelExternalId: Option[String] = None
+final case class SpacedItems[A](spaceExternalId: String, items: Seq[A])
+
+final case class DataModelIdentifier(
+    space: Option[String],
+    model: String
 )
 
-final case class DataModelPropertyIndex(
-    indexName: Option[String] = None,
-    fields: Option[Seq[String]] = None
+object DataModelIdentifier {
+  def apply(model: String): DataModelIdentifier =
+    DataModelIdentifier(None, model)
+  def apply(space: String, model: String): DataModelIdentifier =
+    DataModelIdentifier(Some(space), model)
+}
+
+final case class DataModelPropertyDeffinition(
+    `type`: PropertyType,
+    nullable: Boolean = true,
+    targetModel: Option[DataModelIdentifier] = None
+)
+
+final case class ContstrainedProperty(property: String)
+
+final case class UniquenessConstraint(
+    uniqueProperties: Seq[ContstrainedProperty]
+)
+
+final case class DataModelConstraints(
+    uniqueness: Option[Map[String, UniquenessConstraint]] = None
+)
+
+final case class BTreeIndex(
+    properties: Seq[String]
+)
+
+final case class DataModelIndexes(
+    btreeIndex: Option[Map[String, BTreeIndex]] = None
 )
 
 final case class DataModel(
     externalId: String,
     properties: Option[Map[String, DataModelPropertyDeffinition]] = None,
-    `extends`: Option[Seq[String]] = None,
-    indexes: Option[Seq[DataModelPropertyIndex]] = None
-)
-
-final case class DataModelListInput(includeInheritedProperties: Boolean)
-
-final case class DataModelGetByExternalIdsInput[A](
-    items: Seq[A],
-    includeInheritedProperties: Boolean,
-    ignoreUnknownIds: Boolean
-)
-
-final case class DataModelInstanceCreate(
-    modelExternalId: String,
-    properties: Option[Map[String, DataModelProperty]] = None
-)
-
-sealed trait DataModelInstanceFilter
-
-sealed trait DMIBoolFilter extends DataModelInstanceFilter
-final case class DMIAndFilter(and: Seq[DataModelInstanceFilter]) extends DMIBoolFilter
-final case class DMIOrFilter(or: Seq[DataModelInstanceFilter]) extends DMIBoolFilter
-final case class DMINotFilter(not: DataModelInstanceFilter) extends DMIBoolFilter
-
-sealed trait DMILeafFilter extends DataModelInstanceFilter
-final case class DMIEqualsFilter(property: Seq[String], value: DataModelProperty) extends DMILeafFilter
-final case class DMIInFilter(property: Seq[String], values: Seq[DataModelProperty]) extends DMILeafFilter
-final case class DMIRangeFilter(
-    property: Seq[String],
-    gte: Option[DataModelProperty] = None,
-    gt: Option[DataModelProperty] = None,
-    lte: Option[DataModelProperty] = None,
-    lt: Option[DataModelProperty] = None
-) extends DMILeafFilter {
-  require(
-    !(gte.isDefined && gt.isDefined) && // can't have both upper bound in the same time
-      !(lte.isDefined && lt.isDefined) && // can't have both lower bound in the same time
-      (gte.isDefined || gt.isDefined || lte.isDefined || lt.isDefined) // at least one bound must be defined
-  )
+    `extends`: Option[Seq[DataModelIdentifier]] = None,
+    indexes: Option[DataModelIndexes] = None,
+    constraints: Option[DataModelConstraints] = None,
+    instanceType: DataModelInstanceType = DataModelInstanceType.Node
+) {
+  private val (_allowEdge, _allowNode) = instanceType match {
+    case DataModelInstanceType.Edge => (true, false)
+    case DataModelInstanceType.Node => (false, true)
+  }
+  private[v1] def toDTO: DataModelDTO =
+    DataModelDTO(
+      externalId,
+      properties,
+      `extends`,
+      indexes,
+      constraints,
+      _allowEdge,
+      _allowNode
+    )
 }
-final case class DMIPrefixFilter(property: Seq[String], value: DataModelProperty) extends DMILeafFilter
-final case class DMIExistsFilter(property: Seq[String]) extends DMILeafFilter
-final case class DMIContainsAnyFilter(property: Seq[String], values: Seq[DataModelProperty])
-    extends DMILeafFilter
-final case class DMIContainsAllFilter(property: Seq[String], values: Seq[DataModelProperty])
-    extends DMILeafFilter
 
-final case class DataModelInstanceQuery(
-    modelExternalId: String,
-    filter: Option[DataModelInstanceFilter] = None,
-    sort: Option[Seq[String]] = None,
-    limit: Option[Int] = None,
-    cursor: Option[String] = None
-)
+object DataModel {
+  private[v1] def fromDTO(dto: DataModelDTO): DataModel = {
+    val instanceType: DataModelInstanceType =
+      (dto.allowEdge, dto.allowNode) match {
+        case (true, false) => DataModelInstanceType.Edge
+        case (false, true) => DataModelInstanceType.Node
+        case _ =>
+          throw new IllegalArgumentException("Exactly one of allowNode and allowEdge must be true")
+      }
 
-final case class DataModelInstanceQueryResponse(
-    modelExternalId: String,
-    properties: Option[Map[String, DataModelProperty]] = None
-)
+    DataModel(
+      dto.externalId,
+      dto.properties,
+      dto.`extends`,
+      dto.indexes,
+      dto.constraints,
+      instanceType
+    )
+  }
+}
 
-final case class DataModelInstanceByExternalId(
+private final case class DataModelDTO(
     externalId: String,
-    modelExternalId: String
+    properties: Option[Map[String, DataModelPropertyDeffinition]] = None,
+    `extends`: Option[Seq[DataModelIdentifier]] = None,
+    indexes: Option[DataModelIndexes] = None,
+    constraints: Option[DataModelConstraints] = None,
+    allowEdge: Boolean = false,
+    allowNode: Boolean = true
 )
+
+sealed abstract class DataModelInstanceType
+
+object DataModelInstanceType {
+  case object Node extends DataModelInstanceType
+  case object Edge extends DataModelInstanceType
+}
+
+final case class DataModelListInput(spaceExternalId: String)

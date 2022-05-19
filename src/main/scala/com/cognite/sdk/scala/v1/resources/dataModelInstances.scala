@@ -47,7 +47,7 @@ class DataModelInstances[F[_]](
   )(implicit F: Async[F]): F[ItemsWithCursor[DataModelInstanceQueryResponse]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
-    dataModels.retrieveByExternalIds(Seq(inputQuery.modelExternalId), true).flatMap { dm =>
+    dataModels.retrieveByExternalIds(Seq(inputQuery.model.model), inputQuery.model.space.getOrElse("")).flatMap { dm =>
       val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
 
       implicit val dynamicPropertyTypeDecoder: Decoder[Map[String, DataModelProperty]] =
@@ -111,10 +111,11 @@ class DataModelInstances[F[_]](
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
 
   def retrieveByExternalIds(
+      model: DataModelIdentifier,
       externalIds: Seq[DataModelInstanceByExternalId],
       ignoreUnknownIds: Boolean
   )(implicit F: Async[F]): F[Seq[DataModelInstanceQueryResponse]] =
-    dataModels.retrieveByExternalIds(externalIds.map(_.modelExternalId).distinct, true).flatMap {
+    dataModels.retrieveByExternalIds(Seq(model.model),model.space.getOrElse("")).flatMap {
       dm =>
         val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
 
@@ -223,6 +224,9 @@ object DataModelInstances {
       }
   }
 
+  implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =
+    DataModels.dataModelIdentifierEncoder
+
   implicit val dataModelInstanceQueryEncoder: Encoder[DataModelInstanceQuery] =
     deriveEncoder[DataModelInstanceQuery]
 
@@ -234,11 +238,11 @@ object DataModelInstances {
     deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
 
   // scalastyle:off cyclomatic.complexity
-  private def decodeBaseOnType(c: HCursor, propName: String, propType: String) =
+  private def decodeBaseOnType(c: HCursor, propName: String, propType: PropertyType) =
     propType match {
       case PropertyType.Boolean => c.downField(propName).as[Boolean]
-      case PropertyType.Int | PropertyType.Int32 => c.downField(propName).as[Int]
-      case PropertyType.Bigint | PropertyType.Int64 => c.downField(propName).as[Long]
+      case PropertyType.Int => c.downField(propName).as[Int]
+      case PropertyType.Bigint => c.downField(propName).as[Long]
       case PropertyType.Float32 => c.downField(propName).as[Float]
       case PropertyType.Float64 | PropertyType.Numeric => c.downField(propName).as[Double]
       case PropertyType.Timestamp => c.downField(propName).as[ZonedDateTime]
@@ -246,14 +250,14 @@ object DataModelInstances {
       case PropertyType.Text | PropertyType.DirectRelation | PropertyType.Geometry |
           PropertyType.Geography =>
         c.downField(propName).as[String]
-      case PropertyType.ArrayBoolean => c.downField(propName).as[Vector[Boolean]]
-      case PropertyType.ArrayInt | PropertyType.ArrayInt32 => c.downField(propName).as[Vector[Int]]
-      case PropertyType.ArrayBigint | PropertyType.ArrayInt64 =>
+      case PropertyType.Array.Boolean => c.downField(propName).as[Vector[Boolean]]
+      case PropertyType.Array.Int => c.downField(propName).as[Vector[Int]]
+      case PropertyType.Array.Bigint =>
         c.downField(propName).as[Vector[Long]]
-      case PropertyType.ArrayFloat32 => c.downField(propName).as[Vector[Float]]
-      case PropertyType.ArrayFloat64 | PropertyType.ArrayNumeric =>
+      case PropertyType.Array.Float32 => c.downField(propName).as[Vector[Float]]
+      case PropertyType.Array.Float64 | PropertyType.Array.Numeric =>
         c.downField(propName).as[Vector[Double]]
-      case PropertyType.ArrayText => c.downField(propName).as[Vector[String]]
+      case PropertyType.Array.Text => c.downField(propName).as[Vector[String]]
       case invalidType =>
         throw new Exception(
           s"${invalidType} does not match any property type to decode"
