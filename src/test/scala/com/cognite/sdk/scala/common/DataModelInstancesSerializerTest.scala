@@ -8,15 +8,15 @@ import com.cognite.sdk.scala.v1.{
   BooleanProperty,
   DataModelInstanceCreate,
   DataModelInstanceQueryResponse,
-  DataModelProperty,
+  DataModelPropertyDeffinition,
   DateProperty,
   DirectRelationProperty,
   Float32Property,
   Float64Property,
   Int32Property,
   Int64Property,
-  PropertyName,
   PropertyType,
+  DataModelProperty,
   StringProperty,
   TimeStampProperty
 }
@@ -42,25 +42,25 @@ import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 )
 class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
 
-  val props: Map[String, DataModelProperty] = Map(
-    "prop_bool" -> DataModelProperty(PropertyName.Boolean),
-    "prop_float64" -> DataModelProperty(PropertyName.Float64, false),
-    "prop_string" -> DataModelProperty(PropertyName.Text, false),
-    "prop_direct_relation" -> DataModelProperty(PropertyName.DirectRelation),
-    "prop_date" -> DataModelProperty(PropertyName.Date),
-    "prop_timestamp" -> DataModelProperty(PropertyName.Timestamp),
-    "arr_bool" -> DataModelProperty(PropertyName.ArrayBoolean, false),
-    "arr_float64" -> DataModelProperty(PropertyName.ArrayFloat64, false),
-    "arr_int32" -> DataModelProperty(PropertyName.ArrayInt32),
-    "arr_int64" -> DataModelProperty(PropertyName.ArrayInt64),
-    "arr_string" -> DataModelProperty(PropertyName.ArrayText),
-    "arr_empty" -> DataModelProperty(PropertyName.ArrayText, false),
-    "arr_empty_nullable" -> DataModelProperty(PropertyName.ArrayFloat64)
+  val props: Map[String, DataModelPropertyDeffinition] = Map(
+    "prop_bool" -> DataModelPropertyDeffinition(PropertyType.Boolean),
+    "prop_float64" -> DataModelPropertyDeffinition(PropertyType.Float64, false),
+    "prop_string" -> DataModelPropertyDeffinition(PropertyType.Text, false),
+    "prop_direct_relation" -> DataModelPropertyDeffinition(PropertyType.DirectRelation),
+    "prop_date" -> DataModelPropertyDeffinition(PropertyType.Date),
+    "prop_timestamp" -> DataModelPropertyDeffinition(PropertyType.Timestamp),
+    "arr_bool" -> DataModelPropertyDeffinition(PropertyType.ArrayBoolean, false),
+    "arr_float64" -> DataModelPropertyDeffinition(PropertyType.ArrayFloat64, false),
+    "arr_int32" -> DataModelPropertyDeffinition(PropertyType.ArrayInt32),
+    "arr_int64" -> DataModelPropertyDeffinition(PropertyType.ArrayInt64),
+    "arr_string" -> DataModelPropertyDeffinition(PropertyType.ArrayText),
+    "arr_empty" -> DataModelPropertyDeffinition(PropertyType.ArrayText, false),
+    "arr_empty_nullable" -> DataModelPropertyDeffinition(PropertyType.ArrayFloat64)
   )
 
   import com.cognite.sdk.scala.v1.resources.DataModelInstances._
 
-  implicit val propertyTypeDecoder: Decoder[Map[String, PropertyType]] =
+  implicit val propertyTypeDecoder: Decoder[Map[String, DataModelProperty]] =
     createDynamicPropertyDecoder(props)
 
   implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
@@ -68,7 +68,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
       def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] =
         for {
           modelExternalId <- c.downField("modelExternalId").as[String]
-          properties <- c.downField("properties").as[Option[Map[String, PropertyType]]]
+          properties <- c.downField("properties").as[Option[Map[String, DataModelProperty]]]
         } yield DataModelInstanceQueryResponse(modelExternalId, properties)
     }
 

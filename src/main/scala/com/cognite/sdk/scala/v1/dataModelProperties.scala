@@ -5,27 +5,27 @@ package com.cognite.sdk.scala.v1
 
 import java.time.{LocalDate, ZonedDateTime}
 
-sealed trait PropertyType
+sealed trait DataModelProperty
 
-sealed trait PropertyTypePrimitive extends PropertyType
-final case class BooleanProperty(value: Boolean) extends PropertyTypePrimitive
-final case class Int32Property(value: Int) extends PropertyTypePrimitive
-final case class Int64Property(value: Long) extends PropertyTypePrimitive
-final case class Float32Property(value: Float) extends PropertyTypePrimitive
-final case class Float64Property(value: Double) extends PropertyTypePrimitive
-final case class StringProperty(value: String) extends PropertyTypePrimitive
+sealed trait DataModelPropertyPrimitive extends DataModelProperty
+final case class BooleanProperty(value: Boolean) extends DataModelPropertyPrimitive
+final case class Int32Property(value: Int) extends DataModelPropertyPrimitive
+final case class Int64Property(value: Long) extends DataModelPropertyPrimitive
+final case class Float32Property(value: Float) extends DataModelPropertyPrimitive
+final case class Float64Property(value: Double) extends DataModelPropertyPrimitive
+final case class StringProperty(value: String) extends DataModelPropertyPrimitive
 
-final case class ArrayProperty[+A <: PropertyTypePrimitive](values: Vector[A]) extends PropertyType
+final case class ArrayProperty[+A <: DataModelPropertyPrimitive](values: Vector[A]) extends DataModelProperty
 
-final case class TimeStampProperty(value: ZonedDateTime) extends PropertyType
-final case class DateProperty(value: LocalDate) extends PropertyType
+final case class TimeStampProperty(value: ZonedDateTime) extends DataModelProperty
+final case class DateProperty(value: LocalDate) extends DataModelProperty
 
 // These types below are treated as string for now
-final case class DirectRelationProperty(value: String) extends PropertyType
-final case class GeometryProperty(value: String) extends PropertyType
-final case class GeographyProperty(value: String) extends PropertyType
+final case class DirectRelationProperty(value: String) extends DataModelProperty
+final case class GeometryProperty(value: String) extends DataModelProperty
+final case class GeographyProperty(value: String) extends DataModelProperty
 
-object PropertyName {
+object PropertyType {
   val Boolean = "boolean"
   val Int32 = "int32"
   val Int64 = "int64"

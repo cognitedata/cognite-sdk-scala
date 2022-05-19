@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.v1
 
-final case class DataModelProperty(
+final case class DataModelPropertyDeffinition(
     `type`: String,
     nullable: Boolean = true,
     targetModelExternalId: Option[String] = None
@@ -16,7 +16,7 @@ final case class DataModelPropertyIndex(
 
 final case class DataModel(
     externalId: String,
-    properties: Option[Map[String, DataModelProperty]] = None,
+    properties: Option[Map[String, DataModelPropertyDeffinition]] = None,
     `extends`: Option[Seq[String]] = None,
     indexes: Option[Seq[DataModelPropertyIndex]] = None
 )
@@ -31,7 +31,7 @@ final case class DataModelGetByExternalIdsInput[A](
 
 final case class DataModelInstanceCreate(
     modelExternalId: String,
-    properties: Option[Map[String, PropertyType]] = None
+    properties: Option[Map[String, DataModelProperty]] = None
 )
 
 sealed trait DataModelInstanceFilter
@@ -42,14 +42,14 @@ final case class DMIOrFilter(or: Seq[DataModelInstanceFilter]) extends DMIBoolFi
 final case class DMINotFilter(not: DataModelInstanceFilter) extends DMIBoolFilter
 
 sealed trait DMILeafFilter extends DataModelInstanceFilter
-final case class DMIEqualsFilter(property: Seq[String], value: PropertyType) extends DMILeafFilter
-final case class DMIInFilter(property: Seq[String], values: Seq[PropertyType]) extends DMILeafFilter
+final case class DMIEqualsFilter(property: Seq[String], value: DataModelProperty) extends DMILeafFilter
+final case class DMIInFilter(property: Seq[String], values: Seq[DataModelProperty]) extends DMILeafFilter
 final case class DMIRangeFilter(
     property: Seq[String],
-    gte: Option[PropertyType] = None,
-    gt: Option[PropertyType] = None,
-    lte: Option[PropertyType] = None,
-    lt: Option[PropertyType] = None
+    gte: Option[DataModelProperty] = None,
+    gt: Option[DataModelProperty] = None,
+    lte: Option[DataModelProperty] = None,
+    lt: Option[DataModelProperty] = None
 ) extends DMILeafFilter {
   require(
     !(gte.isDefined && gt.isDefined) && // can't have both upper bound in the same time
@@ -57,11 +57,11 @@ final case class DMIRangeFilter(
       (gte.isDefined || gt.isDefined || lte.isDefined || lt.isDefined) // at least one bound must be defined
   )
 }
-final case class DMIPrefixFilter(property: Seq[String], value: PropertyType) extends DMILeafFilter
+final case class DMIPrefixFilter(property: Seq[String], value: DataModelProperty) extends DMILeafFilter
 final case class DMIExistsFilter(property: Seq[String]) extends DMILeafFilter
-final case class DMIContainsAnyFilter(property: Seq[String], values: Seq[PropertyType])
+final case class DMIContainsAnyFilter(property: Seq[String], values: Seq[DataModelProperty])
     extends DMILeafFilter
-final case class DMIContainsAllFilter(property: Seq[String], values: Seq[PropertyType])
+final case class DMIContainsAllFilter(property: Seq[String], values: Seq[DataModelProperty])
     extends DMILeafFilter
 
 final case class DataModelInstanceQuery(
@@ -74,7 +74,7 @@ final case class DataModelInstanceQuery(
 
 final case class DataModelInstanceQueryResponse(
     modelExternalId: String,
-    properties: Option[Map[String, PropertyType]] = None
+    properties: Option[Map[String, DataModelProperty]] = None
 )
 
 final case class DataModelInstanceByExternalId(

@@ -62,8 +62,8 @@ class DataModels[F[_]](val requestSession: RequestSession[F])
 object DataModels {
   implicit val dataModelPropertyIndexEncoder: Encoder[DataModelPropertyIndex] =
     deriveEncoder[DataModelPropertyIndex]
-  implicit val dataModelPropertyEncoder: Encoder[DataModelProperty] =
-    deriveEncoder[DataModelProperty]
+  implicit val dataModelPropertyEncoder: Encoder[DataModelPropertyDeffinition] =
+    deriveEncoder[DataModelPropertyDeffinition]
   implicit val dataModelEncoder: Encoder[DataModel] = deriveEncoder[DataModel]
   implicit val dataModelItemsEncoder: Encoder[Items[DataModel]] = deriveEncoder[Items[DataModel]]
   implicit val dataModelListInputEncoder: Encoder[DataModelListInput] =
@@ -71,8 +71,8 @@ object DataModels {
 
   implicit val dataModelPropertyIndexDecoder: Decoder[DataModelPropertyIndex] =
     deriveDecoder[DataModelPropertyIndex]
-  implicit val dataModelPropertyDecoder: Decoder[DataModelProperty] =
-    deriveDecoder[DataModelProperty]
+  implicit val dataModelPropertyDecoder: Decoder[DataModelPropertyDeffinition] =
+    deriveDecoder[DataModelPropertyDeffinition]
   implicit val dataModelDecoder: Decoder[DataModel] = deriveDecoder[DataModel]
   implicit val dataModelItemsDecoder: Decoder[Items[DataModel]] = deriveDecoder[Items[DataModel]]
 
