@@ -83,13 +83,12 @@ object DataModels {
             init.hcursor
               .downField("uniqueProperties")
               .values
-              .get
-              .map(v => Json.fromFields(Seq("property" -> v)))
-              .toVector
+              .map(_.map(v => Json.fromFields(Seq("property" -> v))))
+              .getOrElse(throw new Exception("uniqueProperties is required"))
           )
         )
         .top
-        .get
+        .getOrElse(throw new Exception("uniqueProperties is required"))
     )
   implicit val dataModelConstraintsEncoder: Encoder[DataModelConstraints] =
     deriveEncoder[DataModelConstraints]
@@ -98,12 +97,17 @@ object DataModels {
   implicit val dataModelEncoder: Encoder[DataModel] =
     deriveEncoder[DataModel].mapJson(init =>
       init
-        .deepMerge(init.hcursor.downField("instanceType").focus.get)
+        .deepMerge(
+          init.hcursor
+            .downField("instanceType")
+            .focus
+            .getOrElse(throw new Exception("instanceType is required"))
+        )
         .hcursor
         .downField("instanceType")
         .delete
         .top
-        .get
+        .getOrElse(throw new Exception("instanceType is required"))
     )
   implicit val dataModelItemsEncoder: Encoder[SpacedItems[DataModel]] =
     deriveEncoder[SpacedItems[DataModel]]
@@ -148,8 +152,13 @@ object DataModels {
             init
               .downField("uniqueProperties")
               .values
-              .get
-              .map(v => v.hcursor.downField("property").focus.get)
+              .getOrElse(throw new Exception("uniqueProperties is required"))
+              .map(v =>
+                v.hcursor
+                  .downField("property")
+                  .focus
+                  .getOrElse(throw new Exception("property is required"))
+              )
               .toVector
           )
         )
@@ -161,11 +170,20 @@ object DataModels {
   implicit val dataModelDecoder: Decoder[DataModel] =
     deriveDecoder[DataModel].prepare { init =>
       val instanceType: Json =
-        dataModelInstanceTypeEncoder(init.as[DataModelInstanceType].right.get)
+        dataModelInstanceTypeEncoder(
+          init
+            .as[DataModelInstanceType]
+            .fold(
+              _ => throw new Exception("allowNode and allowEdge are required"),
+              t => t
+            )
+        )
 
       init.withFocus(json =>
         Json.fromJsonObject(
-          json.asObject.get.+:("instanceType" -> instanceType)
+          json.asObject
+            .getOrElse(throw new Exception("invalid json object"))
+            .+:("instanceType" -> instanceType)
         )
       )
     }

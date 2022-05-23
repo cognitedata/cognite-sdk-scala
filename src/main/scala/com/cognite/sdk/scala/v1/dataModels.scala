@@ -44,8 +44,8 @@ final case class DataModel(
 final case class DataModelInstanceType(allowNode: Boolean, allowEdge: Boolean)
 
 object DataModelInstanceType {
-  var node: DataModelInstanceType = DataModelInstanceType(true, false)
-  var edge: DataModelInstanceType = DataModelInstanceType(false, true)
+  val node: DataModelInstanceType = DataModelInstanceType(true, false)
+  val edge: DataModelInstanceType = DataModelInstanceType(false, true)
 }
 
 final case class DataModelListInput(spaceExternalId: String)
