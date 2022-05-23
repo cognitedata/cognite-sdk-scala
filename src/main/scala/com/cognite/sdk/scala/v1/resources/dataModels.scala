@@ -60,11 +60,11 @@ object DataModels {
     Encoder
       .encodeIterable[String, Seq]
       .contramap[DataModelIdentifier] {
-          case DataModelIdentifier(Some(space), model) =>
-            Seq(space, model)
-          case DataModelIdentifier(_, model) =>
-            Seq(model)
-        }
+        case DataModelIdentifier(Some(space), model) =>
+          Seq(space, model)
+        case DataModelIdentifier(_, model) =>
+          Seq(model)
+      }
 
   implicit val bTreeIndexEncoder: Encoder[BTreeIndex] =
     deriveEncoder[BTreeIndex]
@@ -76,12 +76,20 @@ object DataModels {
     deriveEncoder[DataModelProperty]
   implicit val uniquenessConstraintEncoder: Encoder[UniquenessConstraint] =
     deriveEncoder[UniquenessConstraint].mapJson(init =>
-      init.hcursor.downField("uniqueProperties").set(
-        Json.fromValues(init.hcursor.downField("uniqueProperties").values.get.map(
-          v => Json.fromFields(Seq("property" -> v))
-          ).toVector
+      init.hcursor
+        .downField("uniqueProperties")
+        .set(
+          Json.fromValues(
+            init.hcursor
+              .downField("uniqueProperties")
+              .values
+              .get
+              .map(v => Json.fromFields(Seq("property" -> v)))
+              .toVector
+          )
         )
-      ).top.get
+        .top
+        .get
     )
   implicit val dataModelConstraintsEncoder: Encoder[DataModelConstraints] =
     deriveEncoder[DataModelConstraints]
@@ -89,9 +97,14 @@ object DataModels {
     deriveEncoder[DataModelInstanceType]
   implicit val dataModelEncoder: Encoder[DataModel] =
     deriveEncoder[DataModel].mapJson(init =>
-      init.deepMerge(init.hcursor.downField("instanceType").focus.get)
-                      .hcursor.downField("instanceType").delete.top.get
-      )
+      init
+        .deepMerge(init.hcursor.downField("instanceType").focus.get)
+        .hcursor
+        .downField("instanceType")
+        .delete
+        .top
+        .get
+    )
   implicit val dataModelItemsEncoder: Encoder[SpacedItems[DataModel]] =
     deriveEncoder[SpacedItems[DataModel]]
   implicit val cogniteIdSpacedItemsEncoder: Encoder[SpacedItems[CogniteId]] =
@@ -100,7 +113,8 @@ object DataModels {
     deriveEncoder[DataModelListInput]
 
   implicit val dataModelIdentifierDecoder: Decoder[DataModelIdentifier] =
-    Decoder.decodeIterable[String, List]
+    Decoder
+      .decodeIterable[String, List]
       .map {
         case modelExternalId :: Nil =>
           DataModelIdentifier(None, modelExternalId)
@@ -126,29 +140,35 @@ object DataModels {
   implicit val dataModelPropertyDecoder: Decoder[DataModelProperty] =
     deriveDecoder[DataModelProperty]
   implicit val uniquenessConstraintDecoder: Decoder[UniquenessConstraint] =
-    deriveDecoder[UniquenessConstraint].prepare( init =>
-      init.downField("uniqueProperties").set(
-        Json.fromValues(init.downField("uniqueProperties").values.get.map(
-          v => v.hcursor.downField("property").focus.get
-          ).toVector
+    deriveDecoder[UniquenessConstraint].prepare(init =>
+      init
+        .downField("uniqueProperties")
+        .set(
+          Json.fromValues(
+            init
+              .downField("uniqueProperties")
+              .values
+              .get
+              .map(v => v.hcursor.downField("property").focus.get)
+              .toVector
+          )
         )
-      )
     )
   implicit val dataModelConstraintsDecoder: Decoder[DataModelConstraints] =
     deriveDecoder[DataModelConstraints]
   implicit val dataModelInstanceTypeDecoder: Decoder[DataModelInstanceType] =
     deriveDecoder[DataModelInstanceType]
   implicit val dataModelDecoder: Decoder[DataModel] =
-    deriveDecoder[DataModel].prepare(init => {
-      val instanceType: Json = dataModelInstanceTypeEncoder(
-        init.as[DataModelInstanceType].right.get)      
+    deriveDecoder[DataModel].prepare { init =>
+      val instanceType: Json =
+        dataModelInstanceTypeEncoder(init.as[DataModelInstanceType].right.get)
 
-      init.withFocus( json => 
+      init.withFocus(json =>
         Json.fromJsonObject(
-          json.asObject.get.+:
-            ("instanceType" -> instanceType)
-        ))
-    })
+          json.asObject.get.+:("instanceType" -> instanceType)
+        )
+      )
+    }
   implicit val dataModelItemsDecoder: Decoder[Items[DataModel]] =
     deriveDecoder[Items[DataModel]]
 }
