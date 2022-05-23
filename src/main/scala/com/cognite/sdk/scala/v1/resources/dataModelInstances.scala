@@ -7,12 +7,12 @@ import cats.syntax.all._
 import cats.effect.Async
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.cognite.sdk.scala.v1.DataModelProperty._
 import fs2.Stream
 import io.circe.CursorOp.DownField
-import io.circe.Decoder.Result
 import io.circe.syntax._
-import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json, Printer}
-import io.circe.generic.semiauto.deriveEncoder
+import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json, KeyEncoder, Printer}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import sttp.client3._
 import sttp.client3.circe._
 
@@ -28,53 +28,44 @@ class DataModelInstances[F[_]](
 
   import DataModelInstances._
 
-  override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/instances"
+  override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/nodes"
 
-  def createItems(items: Items[DataModelInstanceCreate]): F[Seq[DataModelInstanceCreate]] = {
+  def createItems(spaceExternalId: String, model: DataModelIdentifier, overwrite: Boolean = false, items: Seq[DataModelInstance])(implicit F: Async[F]): F[Seq[DataModelInstance]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
-    import DataModelCreate._
-    requestSession.post[Seq[DataModelInstanceCreate], Items[DataModelInstanceCreate], Items[
-      DataModelInstanceCreate
-    ]](
-      items,
-      uri"$baseUrl/ingest",
-      value => value.items
-    )
+    dataModels.retrieveByExternalIds(Seq(model.model), model.space.getOrElse("")).flatMap { dm =>
+      val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
+
+      implicit val _: Decoder[DataModelInstance] =
+        createDynamicPropertyDecoder(props)
+
+      implicit val dataModelInstanceItemsDecoder: Decoder[Items[DataModelInstance]] =
+        deriveDecoder[Items[DataModelInstance]]
+
+      requestSession.post[Seq[DataModelInstance], Items[DataModelInstance], DataModelInstanceCreate](
+        DataModelInstanceCreate(spaceExternalId, model, overwrite, items),
+        uri"$baseUrl",
+        value => value.items
+      )
+    }
   }
 
   def query(
       inputQuery: DataModelInstanceQuery
-  )(implicit F: Async[F]): F[ItemsWithCursor[DataModelInstanceQueryResponse]] = {
+  )(implicit F: Async[F]): F[DataModelInstanceQueryResponse] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
     dataModels.retrieveByExternalIds(Seq(inputQuery.model.model), inputQuery.model.space.getOrElse("")).flatMap { dm =>
       val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
 
-      implicit val dynamicPropertyTypeDecoder: Decoder[Map[String, DataModelProperty]] =
+      implicit val _: Decoder[DataModelInstance] =
         createDynamicPropertyDecoder(props)
 
       implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
-        new Decoder[DataModelInstanceQueryResponse] {
-          def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] =
-            for {
-              modelExternalId <- c.downField("modelExternalId").as[String]
-              properties <- c.downField("properties").as[Option[Map[String, DataModelProperty]]]
-            } yield DataModelInstanceQueryResponse(modelExternalId, properties)
-        }
+        deriveDecoder[DataModelInstanceQueryResponse]
 
-      implicit val dataModelInstanceQueryResponseItemsWithCursorDecoder
-          : Decoder[ItemsWithCursor[DataModelInstanceQueryResponse]] =
-        new Decoder[ItemsWithCursor[DataModelInstanceQueryResponse]] {
-          def apply(c: HCursor): Decoder.Result[ItemsWithCursor[DataModelInstanceQueryResponse]] =
-            for {
-              items <- c.downField("items").as[Seq[DataModelInstanceQueryResponse]]
-              cursor <- c.downField("cursor").as[Option[String]]
-            } yield ItemsWithCursor(items, cursor)
-        }
-
-      requestSession.post[ItemsWithCursor[DataModelInstanceQueryResponse], ItemsWithCursor[
-        DataModelInstanceQueryResponse
-      ], DataModelInstanceQuery](
+      requestSession.post[DataModelInstanceQueryResponse, 
+        DataModelInstanceQueryResponse, 
+        DataModelInstanceQuery](
         inputQuery,
         uri"$baseUrl/list",
         value => value
@@ -87,16 +78,17 @@ class DataModelInstances[F[_]](
       cursor: Option[String],
       limit: Option[Int],
       partition: Option[Partition] = None
-  )(implicit F: Async[F]): F[ItemsWithCursor[DataModelInstanceQueryResponse]] = {
+  )(implicit F: Async[F]): F[ItemsWithCursor[DataModelInstance]] = {
     val _ = partition // little hack for compilation error parameter value  is never used
-    query(inputQuery.copy(cursor = cursor, limit = limit))
+    query(inputQuery.copy(cursor = cursor, limit = limit)).flatMap(response =>
+      F.pure(ItemsWithCursor(response.items, response.cursor)))
   }
 
   private[sdk] def queryWithNextCursor(
       inputQuery: DataModelInstanceQuery,
       cursor: Option[String],
       limit: Option[Int]
-  )(implicit F: Async[F]): Stream[F, DataModelInstanceQueryResponse] =
+  )(implicit F: Async[F]): Stream[F, DataModelInstance] =
     Readable
       .pullFromCursor(cursor, limit, None, queryWithCursor(inputQuery, _, _, _))
       .stream
@@ -104,7 +96,7 @@ class DataModelInstances[F[_]](
   def queryStream(
       inputQuery: DataModelInstanceQuery,
       limit: Option[Int]
-  )(implicit F: Async[F]): fs2.Stream[F, DataModelInstanceQueryResponse] =
+  )(implicit F: Async[F]): fs2.Stream[F, DataModelInstance] =
     queryWithNextCursor(inputQuery, None, limit)
 
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
@@ -112,79 +104,65 @@ class DataModelInstances[F[_]](
 
   def retrieveByExternalIds(
       model: DataModelIdentifier,
-      externalIds: Seq[DataModelInstanceByExternalId],
-      ignoreUnknownIds: Boolean
-  )(implicit F: Async[F]): F[Seq[DataModelInstanceQueryResponse]] =
+      externalIds: Seq[String]
+  )(implicit F: Async[F]): F[DataModelInstanceQueryResponse] =
     dataModels.retrieveByExternalIds(Seq(model.model),model.space.getOrElse("")).flatMap {
       dm =>
         val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
 
-        implicit val dynamicPropertyTypeDecoder: Decoder[Map[String, DataModelProperty]] =
+        implicit val _: Decoder[DataModelInstance] =
           createDynamicPropertyDecoder(props)
 
-        implicit val dataModelInstanceQueryResponseDecoder
-            : Decoder[DataModelInstanceQueryResponse] =
-          new Decoder[DataModelInstanceQueryResponse] {
-            def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] =
-              for {
-                modelExternalId <- c.downField("modelExternalId").as[String]
-                properties <- c.downField("properties").as[Option[Map[String, DataModelProperty]]]
-              } yield DataModelInstanceQueryResponse(modelExternalId, properties)
-          }
+        implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
+          deriveDecoder[DataModelInstanceQueryResponse]
 
-        implicit val dataModelInstanceQueryResponseItemsDecoder
-            : Decoder[Items[DataModelInstanceQueryResponse]] =
-          new Decoder[Items[DataModelInstanceQueryResponse]] {
-            override def apply(c: HCursor): Result[Items[DataModelInstanceQueryResponse]] =
-              for {
-                items <- c.downField("items").as[Seq[DataModelInstanceQueryResponse]]
-              } yield Items(items)
-          }
-
-        requestSession.post[Seq[DataModelInstanceQueryResponse], Items[
-          DataModelInstanceQueryResponse
-        ], ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]](
-          ItemsWithIgnoreUnknownIds(externalIds, ignoreUnknownIds),
+        requestSession.post[DataModelInstanceQueryResponse, 
+          DataModelInstanceQueryResponse, DataModelInstanceByExternalId](
+          DataModelInstanceByExternalId(externalIds, model),
           uri"$baseUrl/byids",
-          value => value.items
+          value => value
         )
     }
 }
 
 object DataModelInstances {
+
+  implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDeffinition] =
+        DataModels.dataModelPropertyDeffinitionDecoder
+
   implicit val propPrimitiveEncoder: Encoder[DataModelPropertyPrimitive] = {
     case b: BooleanProperty => b.value.asJson
-    case i: Int32Property => i.value.asJson
-    case l: Int64Property => l.value.asJson
+    case i: IntProperty => i.value.asJson
+    case bi: BigIntProperty => bi.value.asJson
     case f: Float32Property => f.value.asJson
     case d: Float64Property => d.value.asJson
-    case s: StringProperty => s.value.asJson
+    case bd: NumericProperty => bd.value.asJson
+    case s: TextProperty => s.value.asJson
+    case j: JsonProperty => j.value.asJson
+    case ts: TimeStampProperty => ts.value.asJson
+    case d: DateProperty => d.value.asJson
+    case gm: GeometryProperty => gm.value.asJson
+    case gg: GeographyProperty => gg.value.asJson
   }
 
   implicit val propEncoder: Encoder[DataModelProperty] = {
     case p: DataModelPropertyPrimitive => propPrimitiveEncoder(p)
     case dr: DirectRelationProperty => dr.value.asJson
-    case ts: TimeStampProperty => ts.value.asJson
-    case d: DateProperty => d.value.asJson
-    case gm: GeometryProperty => gm.value.asJson
-    case gg: GeographyProperty => gg.value.asJson
     case v: ArrayProperty[_] =>
-      val jsonValues = v.values.map { case p: DataModelPropertyPrimitive =>
-        propPrimitiveEncoder(p)
+      val jsonValues = v.values.map { 
+        propPrimitiveEncoder(_)
       }
       Json.fromValues(jsonValues)
   }
 
-  implicit val dataModelInstanceEncoder: Encoder[DataModelInstanceCreate] =
-    new Encoder[DataModelInstanceCreate] {
-      final def apply(dmi: DataModelInstanceCreate): Json = Json.obj(
-        ("modelExternalId", Json.fromString(dmi.modelExternalId)),
-        (
-          "properties",
-          dmi.properties.asJson
-        )
-      )
-    }
+  implicit val dataModelInstanceEncoder: Encoder[DataModelInstance] =
+    Encoder.encodeMap(KeyEncoder.encodeKeyString, propEncoder).contramap[DataModelInstance](dmi => dmi.properties)
+
+  implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =
+    DataModels.dataModelIdentifierEncoder
+
+  implicit val dataModelInstanceCreateEncoder: Encoder[DataModelInstanceCreate] =
+    deriveEncoder[DataModelInstanceCreate]
 
   implicit val dataModelInstanceItemsEncoder: Encoder[Items[DataModelInstanceCreate]] =
     deriveEncoder[Items[DataModelInstanceCreate]]
@@ -224,9 +202,6 @@ object DataModelInstances {
       }
   }
 
-  implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =
-    DataModels.dataModelIdentifierEncoder
-
   implicit val dataModelInstanceQueryEncoder: Encoder[DataModelInstanceQuery] =
     deriveEncoder[DataModelInstanceQuery]
 
@@ -238,64 +213,69 @@ object DataModelInstances {
     deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
 
   // scalastyle:off cyclomatic.complexity
-  private def decodeBaseOnType(c: HCursor, propName: String, propType: PropertyType) =
+  private def decodeBaseOnType(c: HCursor, propName: String, propType: PropertyType):
+    Either[DecodingFailure, DataModelProperty] =
     propType match {
-      case PropertyType.Boolean => c.downField(propName).as[Boolean]
-      case PropertyType.Int => c.downField(propName).as[Int]
-      case PropertyType.Bigint => c.downField(propName).as[Long]
-      case PropertyType.Float32 => c.downField(propName).as[Float]
-      case PropertyType.Float64 | PropertyType.Numeric => c.downField(propName).as[Double]
-      case PropertyType.Timestamp => c.downField(propName).as[ZonedDateTime]
-      case PropertyType.Date => c.downField(propName).as[LocalDate]
-      case PropertyType.Text | PropertyType.DirectRelation | PropertyType.Geometry |
-          PropertyType.Geography =>
-        c.downField(propName).as[String]
-      case PropertyType.Array.Boolean => c.downField(propName).as[Vector[Boolean]]
-      case PropertyType.Array.Int => c.downField(propName).as[Vector[Int]]
-      case PropertyType.Array.Bigint =>
-        c.downField(propName).as[Vector[Long]]
-      case PropertyType.Array.Float32 => c.downField(propName).as[Vector[Float]]
-      case PropertyType.Array.Float64 | PropertyType.Array.Numeric =>
-        c.downField(propName).as[Vector[Double]]
-      case PropertyType.Array.Text => c.downField(propName).as[Vector[String]]
+      case PropertyType.Boolean => c.downField(propName).as[Boolean].map(BooleanProperty(_))
+      case PropertyType.Int => c.downField(propName).as[Int].map(IntProperty(_))
+      case PropertyType.Bigint => c.downField(propName).as[BigInt].map(BigIntProperty(_))
+      case PropertyType.Float32 => c.downField(propName).as[Float].map(Float32Property(_))
+      case PropertyType.Float64 => c.downField(propName).as[Double].map(Float64Property(_))
+      case PropertyType.Numeric => c.downField(propName).as[BigDecimal].map(NumericProperty(_))
+      case PropertyType.Timestamp => c.downField(propName).as[ZonedDateTime].map(TimeStampProperty(_))
+      case PropertyType.Date => c.downField(propName).as[LocalDate].map(DateProperty(_))
+      case PropertyType.Text => c.downField(propName).as[String].map(TextProperty(_))
+      case PropertyType.DirectRelation => c.downField(propName).as[String].map(DirectRelationProperty(_))
+      case PropertyType.Geometry => c.downField(propName).as[String].map(GeometryProperty(_))
+      case PropertyType.Geography => c.downField(propName).as[String].map(GeographyProperty(_))
+      case PropertyType.Array.Boolean => c.downField(propName).as[Seq[Boolean]]
+                                                          .map(arr => ArrayProperty(
+                                                                arr.map(BooleanProperty(_))
+                                                                .toSeq))
+      case PropertyType.Array.Int => c.downField(propName).as[Seq[Int]]
+                                                          .map(arr => ArrayProperty(
+                                                                arr.map(IntProperty(_))
+                                                                .toSeq))
+      case PropertyType.Array.Bigint => c.downField(propName).as[Seq[BigInt]]
+                                                          .map(arr => ArrayProperty(
+                                                                arr.map(BigIntProperty(_))
+                                                                .toSeq))
+      case PropertyType.Array.Float32 => c.downField(propName).as[Seq[Float]]
+                                                          .map(arr => ArrayProperty(
+                                                                arr.map(Float32Property(_))
+                                                                .toSeq))
+      case PropertyType.Array.Float64 => c.downField(propName).as[Seq[Double]]
+                                                          .map(arr => ArrayProperty(
+                                                                arr.map(Float64Property(_))
+                                                                .toSeq))
+      case PropertyType.Array.Numeric => c.downField(propName).as[Seq[BigDecimal]]
+                                                          .map(arr => ArrayProperty(
+                                                                arr.map(NumericProperty(_))
+                                                                .toSeq))
+      case PropertyType.Array.Timestamp => c.downField(propName).as[Seq[ZonedDateTime]] 
+                                                          .map(arr => ArrayProperty(
+                                                                arr.map(TimeStampProperty(_))
+                                                                .toSeq))
+      case PropertyType.Array.Date => c.downField(propName).as[Seq[LocalDate]]
+                                                          .map(arr => ArrayProperty(
+                                                                arr.map(DateProperty(_))
+                                                                .toSeq))
+      case PropertyType.Array.Text => c.downField(propName).as[Seq[String]]
+                                                          .map(arr => ArrayProperty(
+                                                                arr.map(TextProperty(_))
+                                                                .toSeq))
+      case PropertyType.Array.Geometry => c.downField(propName).as[Seq[String]]
+                                                          .map(arr => ArrayProperty(
+                                                                arr.map(GeometryProperty(_))
+                                                                .toSeq))
+      case PropertyType.Array.Geography  => c.downField(propName).as[Seq[String]]
+                                                          .map(arr => ArrayProperty(
+                                                                arr.map(GeographyProperty(_))
+                                                                .toSeq))
       case invalidType =>
         throw new Exception(
           s"${invalidType} does not match any property type to decode"
         )
-    }
-  // scalastyle:on cyclomatic.complexity
-
-  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
-  private def decodeArrayFromTypeOfFirstElement(
-      c: Vector[_],
-      propName: String
-  ): (String, ArrayProperty[DataModelPropertyPrimitive]) =
-    c.headOption match {
-      case Some(_: Boolean) =>
-        propName -> ArrayProperty[BooleanProperty](
-          c.map(_.asInstanceOf[Boolean]).map(BooleanProperty(_))
-        )
-      case Some(_: Int) =>
-        propName -> ArrayProperty[Int32Property](
-          c.map(_.asInstanceOf[Int]).map(Int32Property(_))
-        )
-      case Some(_: Long) =>
-        propName -> ArrayProperty[Int64Property](
-          c.map(_.asInstanceOf[Long]).map(Int64Property(_))
-        )
-      case Some(_: Float) =>
-        propName -> ArrayProperty[Float32Property](
-          c.map(_.asInstanceOf[Float]).map(Float32Property(_))
-        )
-      case Some(_: Double) =>
-        propName -> ArrayProperty[Float64Property](
-          c.map(_.asInstanceOf[Double]).map(Float64Property(_))
-        )
-      case Some(_: String) =>
-        propName -> ArrayProperty[StringProperty](
-          c.map(_.asInstanceOf[String]).map(StringProperty(_))
-        )
-      case _ => propName -> ArrayProperty(Vector())
     }
 
   @SuppressWarnings(
@@ -322,31 +302,16 @@ object DataModelInstances {
   // scalastyle:off cyclomatic.complexity
   def createDynamicPropertyDecoder(
       props: Map[String, DataModelPropertyDeffinition]
-  ): Decoder[Map[String, DataModelProperty]] =
-    new Decoder[Map[String, DataModelProperty]] {
-      def apply(c: HCursor): Decoder.Result[Map[String, DataModelProperty]] = {
+  ): Decoder[DataModelInstance] =
+    new Decoder[DataModelInstance] {
+      def apply(c: HCursor): Decoder.Result[DataModelInstance] = {
         val res: immutable.Iterable[Either[DecodingFailure, (String, DataModelProperty)]] = props.map {
           case (prop, dmp) =>
             for {
               value <- decodeBaseOnType(c, prop, dmp.`type`)
             } yield value match {
-              case b: Boolean => prop -> BooleanProperty(b)
-              case i: Int => prop -> Int32Property(i)
-              case l: Long => prop -> Int64Property(l)
-              case f: Float => prop -> Float32Property(f)
-              case d: Double => prop -> Float64Property(d)
-              case ts: ZonedDateTime => prop -> TimeStampProperty(ts)
-              case dt: LocalDate => prop -> DateProperty(dt)
-              case s: String =>
-                dmp.`type` match {
-                  case PropertyType.DirectRelation => prop -> DirectRelationProperty(s)
-                  case PropertyType.Geometry => prop -> GeographyProperty(s)
-                  case PropertyType.Geography => prop -> GeographyProperty(s)
-                  case _ => prop -> StringProperty(s)
-                }
-              case v: Vector[_] =>
-                decodeArrayFromTypeOfFirstElement(v, prop)
-              case _: Any | null => // scalastyle:ignore null
+              case p: DataModelProperty => prop -> p
+              case _ => // scalastyle:ignore null
                 // scala 2 complains match may not be exhaustive with Any while scala 3 complains it's unreachable unless null
                 throw new Exception(
                   s"Invalid value when decoding DataModelProperty"
@@ -355,61 +320,9 @@ object DataModelInstances {
         }
         filterOutNullableProps(res, props).find(_.isLeft) match {
           case Some(Left(x)) => Left(x)
-          case _ => Right(res.collect { case Right(value) => value }.toMap)
+          case _ => Right(new DataModelInstance(res.collect { case Right(value) => value }.toMap))
         }
       }
     }
-  // scalastyle:on cyclomatic.complexity
 
-}
-
-object DataModelCreate {
-  implicit val decodeProp: Decoder[DataModelProperty] =
-    List[Decoder[DataModelProperty]](
-      Decoder.decodeBoolean.map(BooleanProperty(_)).widen,
-      Decoder.decodeInt.map(Int32Property(_)).widen,
-      Decoder.decodeLong.map(Int64Property(_)).widen,
-      Decoder.decodeFloat.map(Float32Property(_)).widen,
-      Decoder.decodeDouble.map(Float64Property(_)).widen,
-      Decoder.decodeString.map(StringProperty(_)).widen,
-      Decoder
-        .decodeArray[Boolean]
-        .map(x => ArrayProperty[BooleanProperty](x.toVector.map(BooleanProperty(_))))
-        .widen,
-      Decoder
-        .decodeArray[Int]
-        .map(x => ArrayProperty[Int32Property](x.toVector.map(Int32Property(_))))
-        .widen,
-      Decoder
-        .decodeArray[Long]
-        .map(x => ArrayProperty[Int64Property](x.toVector.map(Int64Property(_))))
-        .widen,
-      Decoder
-        .decodeArray[Float]
-        .map(x => ArrayProperty[Float32Property](x.toVector.map(Float32Property(_))))
-        .widen,
-      Decoder
-        .decodeArray[Double]
-        .map(x => ArrayProperty[Float64Property](x.toVector.map(Float64Property(_))))
-        .widen,
-      Decoder
-        .decodeArray[String]
-        .map(x => ArrayProperty[StringProperty](x.toVector.map(StringProperty(_))))
-        .widen
-    ).reduceLeftOption(_ or _).getOrElse(Decoder.decodeString.map(StringProperty(_)).widen)
-  implicit val dataModelInstanceDecoder: Decoder[DataModelInstanceCreate] =
-    new Decoder[DataModelInstanceCreate] {
-      def apply(c: HCursor): Decoder.Result[DataModelInstanceCreate] =
-        for {
-          modelExternalId <- c.downField("modelExternalId").as[String]
-          properties <- c.downField("properties").as[Option[Map[String, DataModelProperty]]]
-        } yield DataModelInstanceCreate(modelExternalId, properties)
-    }
-  implicit val dataModelInstanceItemsDecoder: Decoder[Items[DataModelInstanceCreate]] =
-    new Decoder[Items[DataModelInstanceCreate]] {
-      def apply(c: HCursor): Decoder.Result[Items[DataModelInstanceCreate]] =
-        for {
-          items <- c.downField("items").as[Seq[DataModelInstanceCreate]]
-        } yield Items(items)
-    }
 }

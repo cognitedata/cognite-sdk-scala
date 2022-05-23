@@ -5,26 +5,29 @@ package com.cognite.sdk.scala.v1
 
 import java.time.{LocalDate, ZonedDateTime}
 
-sealed trait DataModelProperty
+sealed abstract class DataModelProperty
 
-sealed trait DataModelPropertyPrimitive extends DataModelProperty
-final case class BooleanProperty(value: Boolean) extends DataModelPropertyPrimitive
-final case class Int32Property(value: Int) extends DataModelPropertyPrimitive
-final case class Int64Property(value: Long) extends DataModelPropertyPrimitive
-final case class Float32Property(value: Float) extends DataModelPropertyPrimitive
-final case class Float64Property(value: Double) extends DataModelPropertyPrimitive
-final case class StringProperty(value: String) extends DataModelPropertyPrimitive
+object DataModelProperty {
+  sealed abstract class DataModelPropertyPrimitive extends DataModelProperty
+  
 
-final case class ArrayProperty[+A <: DataModelPropertyPrimitive](values: Vector[A]) extends DataModelProperty
+  final case class BooleanProperty(value: Boolean) extends DataModelPropertyPrimitive
+  final case class IntProperty(value: Int) extends DataModelPropertyPrimitive
+  final case class BigIntProperty(value: BigInt) extends DataModelPropertyPrimitive
+  final case class Float32Property(value: Float) extends DataModelPropertyPrimitive
+  final case class Float64Property(value: Double) extends DataModelPropertyPrimitive
+  final case class NumericProperty(value: BigDecimal) extends DataModelPropertyPrimitive
+  final case class TextProperty(value: String) extends DataModelPropertyPrimitive
+  final case class JsonProperty(value: String) extends DataModelPropertyPrimitive
+  final case class TimeStampProperty(value: ZonedDateTime) extends DataModelPropertyPrimitive
+  final case class DateProperty(value: LocalDate) extends DataModelPropertyPrimitive
+  // These types below are treated as string for now
+  final case class GeometryProperty(value: String) extends DataModelPropertyPrimitive
+  final case class GeographyProperty(value: String) extends DataModelPropertyPrimitive
+  final case class DirectRelationProperty(value: String) extends DataModelProperty
 
-final case class TimeStampProperty(value: ZonedDateTime) extends DataModelProperty
-final case class DateProperty(value: LocalDate) extends DataModelProperty
-
-// These types below are treated as string for now
-final case class DirectRelationProperty(value: String) extends DataModelProperty
-final case class GeometryProperty(value: String) extends DataModelProperty
-final case class GeographyProperty(value: String) extends DataModelProperty
-
+  final case class ArrayProperty[+A <: DataModelPropertyPrimitive](values: Seq[A]) extends DataModelProperty
+}
 sealed abstract class PropertyType {
 
   @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
@@ -44,9 +47,9 @@ object PropertyType {
     Json,
     Timestamp,
     Date,
-    DirectRelation,
     Geometry,
-    Geography
+    Geography,
+    DirectRelation
   ) ++
     Array.values
 
@@ -66,11 +69,9 @@ object PropertyType {
   case object Json extends PropertyType
   case object Timestamp extends PropertyType
   case object Date extends PropertyType
-
-  // These types below are treated as string for now
-  case object DirectRelation extends PropertyType
   case object Geometry extends PropertyType
   case object Geography extends PropertyType
+  case object DirectRelation extends PropertyType
 
   sealed abstract class Array(val `type`: PropertyType) extends PropertyType {
     override def code: String =
@@ -103,7 +104,6 @@ object PropertyType {
     case object Json extends Array(PropertyType.Json)
     case object Timestamp extends Array(PropertyType.Timestamp)
     case object Date extends Array(PropertyType.Date)
-
     case object Geometry extends Array(PropertyType.Geometry)
     case object Geography extends Array(PropertyType.Geography)
   }

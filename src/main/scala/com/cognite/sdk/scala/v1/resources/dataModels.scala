@@ -74,7 +74,7 @@ object DataModels {
     Encoder.encodeString.contramap[PropertyType](_.code)
   implicit val dataModelPropertyIndexesEncoder: Encoder[DataModelIndexes] =
     deriveEncoder[DataModelIndexes]
-  implicit val dataModelPropertyEncoder: Encoder[DataModelPropertyDeffinition] =
+  implicit val dataModelPropertyDeffinitionEncoder: Encoder[DataModelPropertyDeffinition] =
     deriveEncoder[DataModelPropertyDeffinition]
   implicit val contstrainedPropertyEncoder: Encoder[ContstrainedProperty] =
     deriveEncoder[ContstrainedProperty]
@@ -118,7 +118,7 @@ object DataModels {
     )
   implicit val dataModelPropertyIndexesDecoder: Decoder[DataModelIndexes] =
     deriveDecoder[DataModelIndexes]
-  implicit val dataModelPropertyDecoder: Decoder[DataModelPropertyDeffinition] =
+  implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDeffinition] =
     deriveDecoder[DataModelPropertyDeffinition]
   implicit val contstrainedPropertyDecoder: Decoder[ContstrainedProperty] =
     deriveDecoder[ContstrainedProperty]

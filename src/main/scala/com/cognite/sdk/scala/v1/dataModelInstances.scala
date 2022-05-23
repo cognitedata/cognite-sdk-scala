@@ -1,8 +1,47 @@
 package com.cognite.sdk.scala.v1
 
+import com.cognite.sdk.scala.v1.DataModelProperty._
+
+sealed class DataModelInstance(val properties: Map[String, DataModelProperty])
+{
+    val externalId: String = properties("externalId") match {
+        case TextProperty(externalId) => externalId
+        case invalidType => throw new Exception(
+          s"externalId should be a TextProperty, it is ${invalidType} instead"
+        )
+    }
+}
+
+object Node
+{
+    def Apply(
+        externalId: String,
+        `type`: Option[String] = None,
+        name: Option[String] = None,
+        description: Option[String] = None,
+        properties: Option[Map[String, DataModelProperty]] = None
+    ): DataModelInstance = {
+        val allProps = properties.getOrElse(Map.empty[String,DataModelProperty]) ++
+        Seq[(String, Option[DataModelProperty])](
+            "externalId" -> Some(TextProperty(externalId)),
+            "type" -> `type`.map(TextProperty(_)),
+            "name" -> name.map(TextProperty(_)),
+            "description" -> description.map(TextProperty(_))
+        ).filter( kv => kv match {
+            case (_,v) => v.isDefined
+        }).map(kv => kv match {
+            case (k,v) => (k, v.get)
+        }).toMap
+
+        new DataModelInstance(allProps)
+    }
+}
+
 final case class DataModelInstanceCreate(
-    modelExternalId: String,
-    properties: Option[Map[String, DataModelProperty]] = None
+    spaceExternalId: String,
+    model: DataModelIdentifier,
+    overwrite: Boolean = false,
+    items: Seq[DataModelInstance]
 )
 
 sealed trait DataModelInstanceFilter
@@ -44,11 +83,12 @@ final case class DataModelInstanceQuery(
 )
 
 final case class DataModelInstanceQueryResponse(
-    modelExternalId: String,
-    properties: Option[Map[String, DataModelProperty]] = None
+    items: Seq[DataModelInstance],
+    modelProperties: Option[Map[String, DataModelPropertyDeffinition]] = None,
+    cursor: Option[String] = None
 )
 
 final case class DataModelInstanceByExternalId(
-    externalId: String,
-    modelExternalId: String
+    items: Seq[String],
+    model: DataModelIdentifier
 )
