@@ -94,7 +94,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
         "prop_float" -> dataPropFloat
       )
     ),
-    Some(Seq(DataModelIdentifier(space, dataModel1.externalId)))
+    Some(Seq(DataModelIdentifier(Some(space), dataModel1.externalId)))
   )
 
   val expectedDataModel2Output = dataModel2.copy(properties =

@@ -6,7 +6,7 @@ package com.cognite.sdk.scala.v1.resources
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, Printer}
+import io.circe.{Decoder, Encoder, Json, Printer}
 import sttp.client3._
 import sttp.client3.circe._
 
@@ -59,14 +59,12 @@ object DataModels {
   implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =
     Encoder
       .encodeIterable[String, Seq]
-      .contramap[DataModelIdentifier](dmi =>
-        dmi match {
-          case DataModelIdentifier(Some(space), model) =>
-            Seq(space, model)
-          case DataModelIdentifier(_, model) =>
-            Seq(model)
-        }
-      )
+      .contramap[DataModelIdentifier] {
+        case DataModelIdentifier(Some(space), model) =>
+          Seq(space, model)
+        case DataModelIdentifier(_, model) =>
+          Seq(model)
+      }
 
   implicit val bTreeIndexEncoder: Encoder[BTreeIndex] =
     deriveEncoder[BTreeIndex]
@@ -76,14 +74,41 @@ object DataModels {
     deriveEncoder[DataModelIndexes]
   implicit val dataModelPropertyDeffinitionEncoder: Encoder[DataModelPropertyDeffinition] =
     deriveEncoder[DataModelPropertyDeffinition]
-  implicit val contstrainedPropertyEncoder: Encoder[ContstrainedProperty] =
-    deriveEncoder[ContstrainedProperty]
   implicit val uniquenessConstraintEncoder: Encoder[UniquenessConstraint] =
-    deriveEncoder[UniquenessConstraint]
+    deriveEncoder[UniquenessConstraint].mapJson(init =>
+      init.hcursor
+        .downField("uniqueProperties")
+        .set(
+          Json.fromValues(
+            init.hcursor
+              .downField("uniqueProperties")
+              .values
+              .map(_.map(v => Json.fromFields(Seq("property" -> v))))
+              .getOrElse(throw new Exception("uniqueProperties is required"))
+          )
+        )
+        .top
+        .getOrElse(throw new Exception("uniqueProperties is required"))
+    )
   implicit val dataModelConstraintsEncoder: Encoder[DataModelConstraints] =
     deriveEncoder[DataModelConstraints]
+  implicit val dataModelInstanceTypeEncoder: Encoder[DataModelInstanceType] =
+    deriveEncoder[DataModelInstanceType]
   implicit val dataModelEncoder: Encoder[DataModel] =
-    deriveEncoder[DataModelDTO].contramap[DataModel](_.toDTO)
+    deriveEncoder[DataModel].mapJson(init =>
+      init
+        .deepMerge(
+          init.hcursor
+            .downField("instanceType")
+            .focus
+            .getOrElse(throw new Exception("instanceType is required"))
+        )
+        .hcursor
+        .downField("instanceType")
+        .delete
+        .top
+        .getOrElse(throw new Exception("instanceType is required"))
+    )
   implicit val dataModelItemsEncoder: Encoder[SpacedItems[DataModel]] =
     deriveEncoder[SpacedItems[DataModel]]
   implicit val cogniteIdSpacedItemsEncoder: Encoder[SpacedItems[CogniteId]] =
@@ -94,18 +119,16 @@ object DataModels {
   implicit val dataModelIdentifierDecoder: Decoder[DataModelIdentifier] =
     Decoder
       .decodeIterable[String, List]
-      .map(ids =>
-        ids match {
-          case modelExternalId :: Nil =>
-            DataModelIdentifier(modelExternalId)
-          case spaceExternalId :: modelExternalId :: Nil =>
-            DataModelIdentifier(spaceExternalId, modelExternalId)
-          case _ =>
-            throw new SdkException(
-              s"Unable to decode DataModelIdentifier, expected array length 1 or 2, actual length ${ids.length.toString}."
-            )
-        }
-      )
+      .map {
+        case modelExternalId :: Nil =>
+          DataModelIdentifier(None, modelExternalId)
+        case spaceExternalId :: modelExternalId :: Nil =>
+          DataModelIdentifier(Some(spaceExternalId), modelExternalId)
+        case list =>
+          throw new SdkException(
+            s"Unable to decode DataModelIdentifier, expected array length 1 or 2, actual length ${list.length.toString}."
+          )
+      }
   implicit val bTreeIndexDecoder: Decoder[BTreeIndex] =
     deriveDecoder[BTreeIndex]
   implicit val dataModelPropertyTypeDecoder: Decoder[PropertyType] =
@@ -120,14 +143,50 @@ object DataModels {
     deriveDecoder[DataModelIndexes]
   implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDeffinition] =
     deriveDecoder[DataModelPropertyDeffinition]
-  implicit val contstrainedPropertyDecoder: Decoder[ContstrainedProperty] =
-    deriveDecoder[ContstrainedProperty]
   implicit val uniquenessConstraintDecoder: Decoder[UniquenessConstraint] =
-    deriveDecoder[UniquenessConstraint]
+    deriveDecoder[UniquenessConstraint].prepare(init =>
+      init
+        .downField("uniqueProperties")
+        .set(
+          Json.fromValues(
+            init
+              .downField("uniqueProperties")
+              .values
+              .getOrElse(throw new Exception("uniqueProperties is required"))
+              .map(v =>
+                v.hcursor
+                  .downField("property")
+                  .focus
+                  .getOrElse(throw new Exception("property is required"))
+              )
+              .toVector
+          )
+        )
+    )
   implicit val dataModelConstraintsDecoder: Decoder[DataModelConstraints] =
     deriveDecoder[DataModelConstraints]
+  implicit val dataModelInstanceTypeDecoder: Decoder[DataModelInstanceType] =
+    deriveDecoder[DataModelInstanceType]
   implicit val dataModelDecoder: Decoder[DataModel] =
-    deriveDecoder[DataModelDTO].map(DataModel.fromDTO(_))
+    deriveDecoder[DataModel].prepare { init =>
+      val instanceType: Json =
+        dataModelInstanceTypeEncoder(
+          init
+            .as[DataModelInstanceType]
+            .fold(
+              _ => throw new Exception("allowNode and allowEdge are required"),
+              t => t
+            )
+        )
+
+      init.withFocus(json =>
+        Json.fromJsonObject(
+          json.asObject
+            .getOrElse(throw new Exception("invalid json object"))
+            .+:("instanceType" -> instanceType)
+        )
+      )
+    }
   implicit val dataModelItemsDecoder: Decoder[Items[DataModel]] =
     deriveDecoder[Items[DataModel]]
 }
