@@ -28,11 +28,11 @@ object PropertyType {
   ) ++
     Array.values
 
-  private val _valuesMap: Map[String, PropertyType] =
+  private val valuesMap: Map[String, PropertyType] =
     values.map(t => t.code -> t).toMap
 
   def fromCode(code: String): Option[PropertyType] =
-    _valuesMap.get(code)
+    valuesMap.get(code)
 
   case object Boolean extends PropertyType
   case object Int extends PropertyType
