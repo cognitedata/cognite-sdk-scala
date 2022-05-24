@@ -2,39 +2,37 @@ package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.v1.DataModelProperty._
 
-sealed class DataModelInstance(val properties: Map[String, DataModelProperty])
-{
-    val externalId: String = properties("externalId") match {
-        case TextProperty(externalId) => externalId
-        case invalidType => throw new Exception(
-          s"externalId should be a TextProperty, it is ${invalidType} instead"
-        )
-    }
+sealed class DataModelInstance(val properties: Map[String, DataModelProperty]) {
+  val externalId: String = properties.get("externalId") match {
+    case Some(TextProperty(externalId)) => externalId
+    case Some(invalidType) =>
+      throw new Exception(s"externalId should be a TextProperty, it is ${invalidType.toString} instead" )
+    case None =>
+      throw new Exception("externalId is required")
+  }
 }
 
-object Node
-{
-    def Apply(
-        externalId: String,
-        `type`: Option[String] = None,
-        name: Option[String] = None,
-        description: Option[String] = None,
-        properties: Option[Map[String, DataModelProperty]] = None
-    ): DataModelInstance = {
-        val allProps = properties.getOrElse(Map.empty[String,DataModelProperty]) ++
-        Seq[(String, Option[DataModelProperty])](
-            "externalId" -> Some(TextProperty(externalId)),
-            "type" -> `type`.map(TextProperty(_)),
-            "name" -> name.map(TextProperty(_)),
-            "description" -> description.map(TextProperty(_))
-        ).filter( kv => kv match {
-            case (_,v) => v.isDefined
-        }).map(kv => kv match {
-            case (k,v) => (k, v.get)
-        }).toMap
+object Node {
+  def Apply(
+      externalId: String,
+      `type`: Option[String] = None,
+      name: Option[String] = None,
+      description: Option[String] = None,
+      properties: Option[Map[String, DataModelProperty]] = None
+  ): DataModelInstance = {
 
-        new DataModelInstance(allProps)
-    }
+    val allProps = properties.getOrElse(Map.empty[String, DataModelProperty]) ++
+      Seq[(String, Option[DataModelProperty])](
+        "externalId" -> Some(TextProperty(externalId)),
+        "type" -> `type`.map(TextProperty(_)),
+        "name" -> name.map(TextProperty(_)),
+        "description" -> description.map(TextProperty(_))
+      ).map { 
+        case (k,v) => v.map(k->_)
+      }.flatten.toMap
+
+    new DataModelInstance(allProps)
+  }
 }
 
 final case class DataModelInstanceCreate(
@@ -52,8 +50,10 @@ final case class DMIOrFilter(or: Seq[DataModelInstanceFilter]) extends DMIBoolFi
 final case class DMINotFilter(not: DataModelInstanceFilter) extends DMIBoolFilter
 
 sealed trait DMILeafFilter extends DataModelInstanceFilter
-final case class DMIEqualsFilter(property: Seq[String], value: DataModelProperty) extends DMILeafFilter
-final case class DMIInFilter(property: Seq[String], values: Seq[DataModelProperty]) extends DMILeafFilter
+final case class DMIEqualsFilter(property: Seq[String], value: DataModelProperty)
+    extends DMILeafFilter
+final case class DMIInFilter(property: Seq[String], values: Seq[DataModelProperty])
+    extends DMILeafFilter
 final case class DMIRangeFilter(
     property: Seq[String],
     gte: Option[DataModelProperty] = None,
@@ -67,7 +67,8 @@ final case class DMIRangeFilter(
       (gte.isDefined || gt.isDefined || lte.isDefined || lt.isDefined) // at least one bound must be defined
   )
 }
-final case class DMIPrefixFilter(property: Seq[String], value: DataModelProperty) extends DMILeafFilter
+final case class DMIPrefixFilter(property: Seq[String], value: DataModelProperty)
+    extends DMILeafFilter
 final case class DMIExistsFilter(property: Seq[String]) extends DMILeafFilter
 final case class DMIContainsAnyFilter(property: Seq[String], values: Seq[DataModelProperty])
     extends DMILeafFilter
@@ -85,7 +86,7 @@ final case class DataModelInstanceQuery(
 final case class DataModelInstanceQueryResponse(
     items: Seq[DataModelInstance],
     modelProperties: Option[Map[String, DataModelPropertyDeffinition]] = None,
-    cursor: Option[String] = None
+    nextCursor: Option[String] = None
 )
 
 final case class DataModelInstanceByExternalId(

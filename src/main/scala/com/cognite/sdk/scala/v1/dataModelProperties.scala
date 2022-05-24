@@ -9,7 +9,6 @@ sealed abstract class DataModelProperty
 
 object DataModelProperty {
   sealed abstract class DataModelPropertyPrimitive extends DataModelProperty
-  
 
   final case class BooleanProperty(value: Boolean) extends DataModelPropertyPrimitive
   final case class IntProperty(value: Int) extends DataModelPropertyPrimitive
@@ -26,7 +25,8 @@ object DataModelProperty {
   final case class GeographyProperty(value: String) extends DataModelPropertyPrimitive
   final case class DirectRelationProperty(value: String) extends DataModelProperty
 
-  final case class ArrayProperty[+A <: DataModelPropertyPrimitive](values: Seq[A]) extends DataModelProperty
+  final case class ArrayProperty[+A <: DataModelPropertyPrimitive](values: Seq[A])
+      extends DataModelProperty
 }
 sealed abstract class PropertyType {
 
