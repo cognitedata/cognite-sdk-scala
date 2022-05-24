@@ -38,14 +38,14 @@ final case class DataModel(
     `extends`: Option[Seq[DataModelIdentifier]] = None,
     indexes: Option[DataModelIndexes] = None,
     constraints: Option[DataModelConstraints] = None,
-    instanceType: DataModelInstanceType = DataModelInstanceType.node
+    instanceType: DataModelInstanceType = DataModelInstanceType.Node
 )
 
-final case class DataModelInstanceType(allowNode: Boolean, allowEdge: Boolean)
+sealed abstract class DataModelInstanceType
 
 object DataModelInstanceType {
-  val node: DataModelInstanceType = DataModelInstanceType(true, false)
-  val edge: DataModelInstanceType = DataModelInstanceType(false, true)
+  case object Node extends DataModelInstanceType
+  case object Edge extends DataModelInstanceType
 }
 
 final case class DataModelListInput(spaceExternalId: String)

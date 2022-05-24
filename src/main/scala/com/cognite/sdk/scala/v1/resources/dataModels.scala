@@ -6,7 +6,7 @@ package com.cognite.sdk.scala.v1.resources
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, Json, Printer}
+import io.circe.{Decoder, Encoder, HCursor, Json, Printer}
 import sttp.client3._
 import sttp.client3.circe._
 
@@ -75,40 +75,45 @@ object DataModels {
   implicit val dataModelPropertyDeffinitionEncoder: Encoder[DataModelPropertyDeffinition] =
     deriveEncoder[DataModelPropertyDeffinition]
   implicit val uniquenessConstraintEncoder: Encoder[UniquenessConstraint] =
-    deriveEncoder[UniquenessConstraint].mapJson(init =>
-      init.hcursor
-        .downField("uniqueProperties")
-        .set(
-          Json.fromValues(
-            init.hcursor
-              .downField("uniqueProperties")
-              .values
-              .map(_.map(v => Json.fromFields(Seq("property" -> v))))
-              .getOrElse(throw new Exception("uniqueProperties is required"))
+    new Encoder[UniquenessConstraint] {
+      final def apply(uc: UniquenessConstraint): Json =
+        Json.fromFields(
+          Seq(
+            "uniqueProperties" -> Json.fromValues(
+              uc.uniqueProperties.map(p => Json.fromFields(Seq("property" -> Json.fromString(p))))
+            )
           )
         )
-        .top
-        .getOrElse(throw new Exception("uniqueProperties is required"))
-    )
+    }
   implicit val dataModelConstraintsEncoder: Encoder[DataModelConstraints] =
     deriveEncoder[DataModelConstraints]
   implicit val dataModelInstanceTypeEncoder: Encoder[DataModelInstanceType] =
     deriveEncoder[DataModelInstanceType]
+
+  // Derived encoder is used for everything but instanceType. instanceType is replaced by
+  //   allowEdge and allowNode before returning.
+  val derivedDataModelEncoder: Encoder[DataModel] =
+    deriveEncoder[DataModel]
   implicit val dataModelEncoder: Encoder[DataModel] =
-    deriveEncoder[DataModel].mapJson(init =>
-      init
-        .deepMerge(
-          init.hcursor
-            .downField("instanceType")
-            .focus
-            .getOrElse(throw new Exception("instanceType is required"))
-        )
-        .hcursor
-        .downField("instanceType")
-        .delete
-        .top
-        .getOrElse(throw new Exception("instanceType is required"))
-    )
+    new Encoder[DataModel] {
+      final def apply(dm: DataModel): Json = {
+        val (allowNode, allowEdge) = dm.instanceType match {
+          case DataModelInstanceType.Edge => (false, true)
+          case DataModelInstanceType.Node => (true, false)
+        }
+        derivedDataModelEncoder(dm)
+          .mapObject(
+            { "allowEdge" -> Json.fromBoolean(allowEdge) } +: {
+              "allowNode" -> Json.fromBoolean(allowNode)
+            } +:
+              _.filterKeys {
+                case "instanceType" => false
+                case _ => true
+              }
+          )
+      }
+    }
+
   implicit val dataModelItemsEncoder: Encoder[SpacedItems[DataModel]] =
     deriveEncoder[SpacedItems[DataModel]]
   implicit val cogniteIdSpacedItemsEncoder: Encoder[SpacedItems[CogniteId]] =
@@ -144,49 +149,39 @@ object DataModels {
   implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDeffinition] =
     deriveDecoder[DataModelPropertyDeffinition]
   implicit val uniquenessConstraintDecoder: Decoder[UniquenessConstraint] =
-    deriveDecoder[UniquenessConstraint].prepare(init =>
-      init
-        .downField("uniqueProperties")
-        .set(
-          Json.fromValues(
-            init
-              .downField("uniqueProperties")
-              .values
-              .getOrElse(throw new Exception("uniqueProperties is required"))
-              .map(v =>
-                v.hcursor
-                  .downField("property")
-                  .focus
-                  .getOrElse(throw new Exception("property is required"))
-              )
-              .toVector
-          )
-        )
-    )
+    new Decoder[UniquenessConstraint] {
+      final def apply(c: HCursor): Decoder.Result[UniquenessConstraint] =
+        for {
+          properties <- c.downField("uniqueProperties").as[Seq[Map[String, String]]]
+        } yield new UniquenessConstraint(properties.map(_("property")))
+    }
   implicit val dataModelConstraintsDecoder: Decoder[DataModelConstraints] =
     deriveDecoder[DataModelConstraints]
   implicit val dataModelInstanceTypeDecoder: Decoder[DataModelInstanceType] =
     deriveDecoder[DataModelInstanceType]
+
+  // Gets the instanceType from allowNode and allowEdge, encodes it in a way the derived
+  //   decoder will understand, and adds it to the json before parsing
   implicit val dataModelDecoder: Decoder[DataModel] =
     deriveDecoder[DataModel].prepare { init =>
-      val instanceType: Json =
-        dataModelInstanceTypeEncoder(
-          init
-            .as[DataModelInstanceType]
-            .fold(
-              _ => throw new Exception("allowNode and allowEdge are required"),
-              t => t
+      val allowNode = init.downField("allowNode").as[Boolean]
+      val allowEdge = init.downField("allowEdge").as[Boolean]
+      val instanceType: DataModelInstanceType = (allowNode, allowEdge) match {
+        case (Right(true), Right(false) | Left(_)) => DataModelInstanceType.Node
+        case (Right(false) | Left(_), Right(true)) => DataModelInstanceType.Edge
+        case _ => throw new Exception("Exactly one of allowNode and allowEdge must be true")
+      }
+      init.withFocus(
+        _.deepMerge(
+          Json.fromFields(
+            Seq(
+              "instanceType" -> dataModelInstanceTypeEncoder(instanceType)
             )
-        )
-
-      init.withFocus(json =>
-        Json.fromJsonObject(
-          json.asObject
-            .getOrElse(throw new Exception("invalid json object"))
-            .+:("instanceType" -> instanceType)
+          )
         )
       )
     }
+
   implicit val dataModelItemsDecoder: Decoder[Items[DataModel]] =
     deriveDecoder[Items[DataModel]]
 }
