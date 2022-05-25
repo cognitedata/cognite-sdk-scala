@@ -8,6 +8,8 @@ import com.cognite.sdk.scala.common.RetryWhile
 
 import java.util.UUID
 import scala.collection.immutable.Seq
+import com.cognite.sdk.scala.v1.DataModelType.Edge
+import com.cognite.sdk.scala.v1.DataModelType.Node
 
 @SuppressWarnings(
   Array(
@@ -65,6 +67,34 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
     val dataModels = blueFieldClient.dataModels.list(space).unsafeRunSync().toList
     dataModels.contains(expectedDataModelOutput) shouldBe false
+  }
+
+  private def variousDatamodels(testCode: DataModel => Any): Unit =
+    for (dataModel <- Seq(
+      DataModel("testNode", dataModelType = DataModelType.Node),
+      DataModel("testEdge", dataModelType = DataModelType.Edge)
+    )){
+      testCode(dataModel)
+    }
+
+  "dataModelEncoder" should "add allowNode and allowEdge and remove dataModelType" in variousDatamodels{ dataModel =>
+    import resources.DataModels._
+    val json = dataModelEncoder(dataModel)
+
+    val (allowNode, allowEdge) = dataModel.dataModelType match {
+      case Edge => (false, true)
+      case Node => (true, false)
+    }
+
+    json.asObject.flatMap(_("allowNode")).flatMap(_.asBoolean) shouldBe Some(allowNode)
+    json.asObject.flatMap(_("allowEdge")).flatMap(_.asBoolean) shouldBe Some(allowEdge)
+    json.asObject.flatMap(_("dataModelType")) shouldBe None
+  }
+
+  "dataModelDecoder" should "add back dataModelType" in variousDatamodels{ dataModel =>
+    import resources.DataModels._
+
+    dataModelDecoder(dataModelEncoder(dataModel).hcursor).toOption shouldBe Some(dataModel)
   }
 
   private val space = "test-space"
