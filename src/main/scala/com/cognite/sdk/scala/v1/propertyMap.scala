@@ -46,6 +46,8 @@ final case class DataModelInstanceCreate(
 
 sealed trait DataModelInstanceFilter
 
+case object EmptyFilter extends DataModelInstanceFilter
+
 sealed trait DMIBoolFilter extends DataModelInstanceFilter
 final case class DMIAndFilter(and: Seq[DataModelInstanceFilter]) extends DMIBoolFilter
 final case class DMIOrFilter(or: Seq[DataModelInstanceFilter]) extends DMIBoolFilter
@@ -76,7 +78,7 @@ final case class DMIContainsAllFilter(property: Seq[String], values: Seq[AnyProp
 
 final case class DataModelInstanceQuery(
     model: DataModelIdentifier,
-    filter: Option[DataModelInstanceFilter] = None,
+    filter: DataModelInstanceFilter = EmptyFilter,
     sort: Option[Seq[String]] = None,
     limit: Option[Int] = None,
     cursor: Option[String] = None
@@ -89,6 +91,6 @@ final case class DataModelInstanceQueryResponse(
 )
 
 final case class DataModelInstanceByExternalId(
-    items: Seq[String],
+    items: Seq[CogniteExternalId],
     model: DataModelIdentifier
 )

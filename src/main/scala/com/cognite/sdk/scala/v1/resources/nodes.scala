@@ -20,7 +20,7 @@ import java.time.{LocalDate, ZonedDateTime}
 
 import scala.collection.immutable
 
-class DataModelInstances[F[_]](
+class Nodes[F[_]](
     val requestSession: RequestSession[F],
     dataModels: DataModels[F]
 ) extends WithRequestSession[F]
@@ -35,7 +35,7 @@ class DataModelInstances[F[_]](
       spaceExternalId: String,
       model: DataModelIdentifier,
       overwrite: Boolean = false,
-      items: Seq[PropertyMap]
+      items: Seq[Node]
   )(implicit F: Async[F]): F[Seq[PropertyMap]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
     dataModels.retrieveByExternalIds(Seq(model.model), model.space.getOrElse("")).flatMap { dm =>
@@ -144,7 +144,7 @@ class DataModelInstances[F[_]](
         DataModelInstanceQueryResponse,
         DataModelInstanceByExternalId
       ](
-        DataModelInstanceByExternalId(externalIds, model),
+        DataModelInstanceByExternalId(externalIds.map(CogniteExternalId(_)), model),
         uri"$baseUrl/byids",
         value => value
       )
@@ -223,6 +223,8 @@ object DataModelInstances {
     deriveEncoder[DMIContainsAllFilter]
 
   implicit val dmiFilterEncoder: Encoder[DataModelInstanceFilter] = {
+    case EmptyFilter=>
+      Json.fromFields(Seq.empty)
     case b: DMIBoolFilter =>
       b match {
         case f: DMIAndFilter => f.asJson

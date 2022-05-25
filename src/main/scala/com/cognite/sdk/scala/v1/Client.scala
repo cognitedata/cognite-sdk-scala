@@ -203,7 +203,7 @@ class GenericClient[F[_]](
 
   lazy val sessions = new Sessions[F](requestSession)
   lazy val dataModels = new DataModels[F](requestSession)
-  lazy val dataModelInstances = new DataModelInstances[F](requestSession, dataModels)
+  lazy val nodes = new Nodes[F](requestSession, dataModels)
 
   def project: F[Project] =
     requestSession.get[Project, Project](

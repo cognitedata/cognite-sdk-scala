@@ -7,6 +7,7 @@ import com.cognite.sdk.scala.v1._
 import io.circe.syntax._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import io.circe.parser._
 
 @SuppressWarnings(
   Array(
@@ -21,6 +22,14 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
   import com.cognite.sdk.scala.v1.resources.DataModelInstances._
 
   "DataModelFilterSerializer" when {
+    "encode EmptyFilter" should {
+      "return an empty object"in {
+        val empty:DataModelInstanceFilter = EmptyFilter
+        empty.asJson.toString() shouldBe """{
+                                       |  
+                                       |}""".stripMargin
+      }
+    }
     "encode LeafFilter" should {
       "work for equals filter" in {
         val equalInt = DMIEqualsFilter(Seq("name", "tag"), PropertyType.Int.Property(1)).asJson
@@ -60,7 +69,7 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
             PropertyType.Float32.Property(2.64f)
           )
         ).asJson
-        in.toString() shouldBe """{
+        Some(in) shouldBe parse("""{
                                  |  "property" : [
                                  |    "name",
                                  |    "tag"
@@ -71,7 +80,7 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
                                  |    false,
                                  |    2.64
                                  |  ]
-                                 |}""".stripMargin
+                                 |}""".stripMargin).toOption
 
       }
       "work for range filter" in {
