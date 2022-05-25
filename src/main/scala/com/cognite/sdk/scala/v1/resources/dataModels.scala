@@ -90,19 +90,19 @@ object DataModels {
     }
   implicit val dataModelConstraintsEncoder: Encoder[DataModelConstraints] =
     deriveEncoder[DataModelConstraints]
-  implicit val dataModelInstanceTypeEncoder: Encoder[DataModelInstanceType] =
-    deriveEncoder[DataModelInstanceType]
+  implicit val dataModelTypeEncoder: Encoder[DataModelType] =
+    deriveEncoder[DataModelType]
 
-  // Derived encoder is used for everything but instanceType. instanceType is replaced by
+  // Derived encoder is used for everything but dataModelType. dataModelType is replaced by
   //   allowEdge and allowNode before returning.
   val derivedDataModelEncoder: Encoder[DataModel] =
     deriveEncoder[DataModel]
   implicit val dataModelEncoder: Encoder[DataModel] =
     new Encoder[DataModel] {
       final def apply(dm: DataModel): Json = {
-        val (allowNode, allowEdge) = dm.instanceType match {
-          case DataModelInstanceType.Edge => (false, true)
-          case DataModelInstanceType.Node => (true, false)
+        val (allowNode, allowEdge) = dm.dataModelType match {
+          case DataModelType.Edge => (false, true)
+          case DataModelType.Node => (true, false)
         }
         derivedDataModelEncoder(dm)
           .mapObject(
@@ -110,7 +110,7 @@ object DataModels {
               "allowNode" -> Json.fromBoolean(allowNode)
             } +:
               _.filterKeys {
-                case "instanceType" => false
+                case "dataModelType" => false
                 case _ => true
               }
           )
@@ -161,25 +161,25 @@ object DataModels {
     }
   implicit val dataModelConstraintsDecoder: Decoder[DataModelConstraints] =
     deriveDecoder[DataModelConstraints]
-  implicit val dataModelInstanceTypeDecoder: Decoder[DataModelInstanceType] =
-    deriveDecoder[DataModelInstanceType]
+  implicit val dataModelTypeDecoder: Decoder[DataModelType] =
+    deriveDecoder[DataModelType]
 
-  // Gets the instanceType from allowNode and allowEdge, encodes it in a way the derived
+  // Gets the dataModelType from allowNode and allowEdge, encodes it in a way the derived
   //   decoder will understand, and adds it to the json before parsing
   implicit val dataModelDecoder: Decoder[DataModel] =
     deriveDecoder[DataModel].prepare { init =>
       val allowNode = init.downField("allowNode").as[Boolean]
       val allowEdge = init.downField("allowEdge").as[Boolean]
-      val instanceType: DataModelInstanceType = (allowNode, allowEdge) match {
-        case (Right(true), Right(false) | Left(_)) => DataModelInstanceType.Node
-        case (Right(false) | Left(_), Right(true)) => DataModelInstanceType.Edge
+      val dataModelType: DataModelType = (allowNode, allowEdge) match {
+        case (Right(true), Right(false) | Left(_)) => DataModelType.Node
+        case (Right(false) | Left(_), Right(true)) => DataModelType.Edge
         case _ => throw new Exception("Exactly one of allowNode and allowEdge must be true")
       }
       init.withFocus(
         _.deepMerge(
           Json.fromFields(
             Seq(
-              "instanceType" -> dataModelInstanceTypeEncoder(instanceType)
+              "dataModelType" -> dataModelTypeEncoder(dataModelType)
             )
           )
         )
