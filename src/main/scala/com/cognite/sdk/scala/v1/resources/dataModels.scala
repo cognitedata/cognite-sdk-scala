@@ -5,7 +5,7 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.cognite.sdk.scala.v1.DataModelProperties._
+import PropertyType.AnyPropertyType
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, HCursor, Json, Printer}
 import sttp.client3._

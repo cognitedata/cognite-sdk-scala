@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.v1.DataModelProperties._
+import PropertyType.AnyProperty
 
 sealed class DataModelInstance(val properties: Map[String, AnyProperty]) {
   val externalId: String = properties.get("externalId") match {

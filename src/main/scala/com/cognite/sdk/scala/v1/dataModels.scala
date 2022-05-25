@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 package com.cognite.sdk.scala.v1
-import DataModelProperties._
+import PropertyType.AnyPropertyType
 
 final case class SpacedItems[A](spaceExternalId: String, items: Seq[A])
 

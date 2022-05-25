@@ -7,7 +7,7 @@ import cats.syntax.all._
 import cats.effect.Async
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.cognite.sdk.scala.v1.DataModelProperties._
+import PropertyType.AnyProperty
 import fs2.Stream
 import io.circe.CursorOp.DownField
 import io.circe.syntax._
