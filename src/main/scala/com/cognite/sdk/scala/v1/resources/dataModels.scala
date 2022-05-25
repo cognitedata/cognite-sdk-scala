@@ -5,6 +5,7 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.cognite.sdk.scala.v1.DataModelProperties._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, HCursor, Json, Printer}
 import sttp.client3._
@@ -68,12 +69,14 @@ object DataModels {
 
   implicit val bTreeIndexEncoder: Encoder[BTreeIndex] =
     deriveEncoder[BTreeIndex]
-  implicit val dataModelPropertyTypeEncoder: Encoder[PropertyType] =
-    Encoder.encodeString.contramap[PropertyType](_.code)
+  implicit val dataModelPropertyTypeEncoder: Encoder[AnyPropertyType] =
+    Encoder.encodeString.contramap[AnyPropertyType](_.code)
   implicit val dataModelPropertyIndexesEncoder: Encoder[DataModelIndexes] =
     deriveEncoder[DataModelIndexes]
   implicit val dataModelPropertyDeffinitionEncoder: Encoder[DataModelPropertyDeffinition] =
-    deriveEncoder[DataModelPropertyDeffinition]
+    Encoder.forProduct3[DataModelPropertyDeffinition, AnyPropertyType, Boolean, Option[
+      DataModelIdentifier
+    ]]("type", "nullable", "targetModel")(pd => (pd.`type`, pd.nullable, pd.targetModel))
   implicit val uniquenessConstraintEncoder: Encoder[UniquenessConstraint] =
     new Encoder[UniquenessConstraint] {
       final def apply(uc: UniquenessConstraint): Json =
@@ -136,7 +139,7 @@ object DataModels {
       }
   implicit val bTreeIndexDecoder: Decoder[BTreeIndex] =
     deriveDecoder[BTreeIndex]
-  implicit val dataModelPropertyTypeDecoder: Decoder[PropertyType] =
+  implicit val dataModelPropertyTypeDecoder: Decoder[AnyPropertyType] =
     Decoder.decodeString.map(
       PropertyType
         .fromCode(_)
@@ -147,7 +150,8 @@ object DataModels {
   implicit val dataModelPropertyIndexesDecoder: Decoder[DataModelIndexes] =
     deriveDecoder[DataModelIndexes]
   implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDeffinition] =
-    deriveDecoder[DataModelPropertyDeffinition]
+    Decoder.forProduct3("type", "nullable", "targetModel")(DataModelPropertyDeffinition.apply)
+
   implicit val uniquenessConstraintDecoder: Decoder[UniquenessConstraint] =
     new Decoder[UniquenessConstraint] {
       final def apply(c: HCursor): Decoder.Result[UniquenessConstraint] =

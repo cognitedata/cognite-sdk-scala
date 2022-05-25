@@ -7,16 +7,17 @@ import cats.syntax.all._
 import cats.effect.Async
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.cognite.sdk.scala.v1.DataModelProperty._
+import com.cognite.sdk.scala.v1.DataModelProperties._
 import fs2.Stream
 import io.circe.CursorOp.DownField
 import io.circe.syntax._
-import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json, KeyEncoder, Printer}
+import io.circe.{ACursor, Decoder, DecodingFailure, Encoder, HCursor, Json, KeyEncoder, Printer}
 import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
 
 import java.time.{LocalDate, ZonedDateTime}
+
 import scala.collection.immutable
 
 class DataModelInstances[F[_]](
@@ -155,29 +156,34 @@ object DataModelInstances {
   implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDeffinition] =
     DataModels.dataModelPropertyDeffinitionDecoder
 
-  implicit val propPrimitiveEncoder: Encoder[DataModelPropertyPrimitive] = {
-    case b: BooleanProperty => b.value.asJson
-    case i: IntProperty => i.value.asJson
-    case bi: BigIntProperty => bi.value.asJson
-    case f: Float32Property => f.value.asJson
-    case d: Float64Property => d.value.asJson
-    case bd: NumericProperty => bd.value.asJson
-    case s: TextProperty => s.value.asJson
-    case j: JsonProperty => j.value.asJson
-    case ts: TimeStampProperty => ts.value.asJson
-    case d: DateProperty => d.value.asJson
-    case gm: GeometryProperty => gm.value.asJson
-    case gg: GeographyProperty => gg.value.asJson
-  }
-
-  implicit val propEncoder: Encoder[DataModelProperty] = {
-    case p: DataModelPropertyPrimitive => propPrimitiveEncoder(p)
-    case dr: DirectRelationProperty => dr.value.asJson
-    case v: ArrayProperty[_] =>
-      val jsonValues = v.values.map {
-        propPrimitiveEncoder(_)
-      }
-      Json.fromValues(jsonValues)
+  // scalastyle:off cyclomatic.complexity
+  implicit val propEncoder: Encoder[AnyProperty] = {
+    case b: PropertyType.Boolean.Property => b.value.asJson
+    case i: PropertyType.Int.Property => i.value.asJson
+    case bi: PropertyType.Bigint.Property => bi.value.asJson
+    case f: PropertyType.Float32.Property => f.value.asJson
+    case d: PropertyType.Float64.Property => d.value.asJson
+    case bd: PropertyType.Numeric.Property => bd.value.asJson
+    case s: PropertyType.Text.Property => s.value.asJson
+    case j: PropertyType.Json.Property => j.value.asJson
+    case ts: PropertyType.Timestamp.Property => ts.value.asJson
+    case d: PropertyType.Date.Property => d.value.asJson
+    case gm: PropertyType.Geometry.Property => gm.value.asJson
+    case gg: PropertyType.Geography.Property => gg.value.asJson
+    case dr: PropertyType.DirectRelation.Property => dr.value.asJson
+    case b: PropertyType.Array.Boolean.Property => b.value.asJson
+    case i: PropertyType.Array.Int.Property => i.value.asJson
+    case bi: PropertyType.Array.Bigint.Property => bi.value.asJson
+    case f: PropertyType.Array.Float32.Property => f.value.asJson
+    case d: PropertyType.Array.Float64.Property => d.value.asJson
+    case bd: PropertyType.Array.Numeric.Property => bd.value.asJson
+    case s: PropertyType.Array.Text.Property => s.value.asJson
+    case j: PropertyType.Array.Json.Property => j.value.asJson
+    case ts: PropertyType.Array.Timestamp.Property => ts.value.asJson
+    case d: PropertyType.Array.Date.Property => d.value.asJson
+    case gm: PropertyType.Array.Geometry.Property => gm.value.asJson
+    case gg: PropertyType.Array.Geography.Property => gg.value.asJson
+    case _ => throw new Exception("unknown property type")
   }
 
   implicit val dataModelInstanceEncoder: Encoder[DataModelInstance] =
@@ -198,12 +204,18 @@ object DataModelInstances {
   implicit val dmiOrFilterEncoder: Encoder[DMIOrFilter] = deriveEncoder[DMIOrFilter]
   implicit val dmiNotFilterEncoder: Encoder[DMINotFilter] = deriveEncoder[DMINotFilter]
 
-  implicit val dmiEqualsFilterEncoder: Encoder[DMIEqualsFilter] = deriveEncoder[DMIEqualsFilter]
+  implicit val dmiEqualsFilterEncoder: Encoder[DMIEqualsFilter] =
+    Encoder.forProduct2[DMIEqualsFilter, Seq[String], AnyProperty]("property", "value")(dmiEqF =>
+      (dmiEqF.property, dmiEqF.value)
+    )
   implicit val dmiInFilterEncoder: Encoder[DMIInFilter] = deriveEncoder[DMIInFilter]
   implicit val dmiRangeFilterEncoder: Encoder[DMIRangeFilter] =
     deriveEncoder[DMIRangeFilter].mapJson(_.dropNullValues) // VH TODO make this common
 
-  implicit val dmiPrefixFilterEncoder: Encoder[DMIPrefixFilter] = deriveEncoder[DMIPrefixFilter]
+  implicit val dmiPrefixFilterEncoder: Encoder[DMIPrefixFilter] =
+    Encoder.forProduct2[DMIPrefixFilter, Seq[String], AnyProperty]("property", "value")(dmiPxF =>
+      (dmiPxF.property, dmiPxF.value)
+    )
   implicit val dmiExistsFilterEncoder: Encoder[DMIExistsFilter] = deriveEncoder[DMIExistsFilter]
   implicit val dmiContainsAnyFilterEncoder: Encoder[DMIContainsAnyFilter] =
     deriveEncoder[DMIContainsAnyFilter]
@@ -239,85 +251,49 @@ object DataModelInstances {
       : Encoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]] =
     deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
 
-  // scalastyle:off cyclomatic.complexity
-  private def decodeBaseOnType(
+  private def decodeBaseOnType[TV](
       c: HCursor,
       propName: String,
-      propType: PropertyType
-  ): Either[DecodingFailure, DataModelProperty] =
-    propType match {
-      case PropertyType.Boolean => c.downField(propName).as[Boolean].map(BooleanProperty(_))
-      case PropertyType.Int => c.downField(propName).as[Int].map(IntProperty(_))
-      case PropertyType.Bigint => c.downField(propName).as[BigInt].map(BigIntProperty(_))
-      case PropertyType.Float32 => c.downField(propName).as[Float].map(Float32Property(_))
-      case PropertyType.Float64 => c.downField(propName).as[Double].map(Float64Property(_))
-      case PropertyType.Numeric => c.downField(propName).as[BigDecimal].map(NumericProperty(_))
-      case PropertyType.Timestamp =>
-        c.downField(propName).as[ZonedDateTime].map(TimeStampProperty(_))
-      case PropertyType.Date => c.downField(propName).as[LocalDate].map(DateProperty(_))
-      case PropertyType.Text => c.downField(propName).as[String].map(TextProperty(_))
-      case PropertyType.Json => c.downField(propName).as[String].map(JsonProperty(_))
-      case PropertyType.DirectRelation =>
-        c.downField(propName).as[String].map(DirectRelationProperty(_))
-      case PropertyType.Geometry => c.downField(propName).as[String].map(GeometryProperty(_))
-      case PropertyType.Geography => c.downField(propName).as[String].map(GeographyProperty(_))
-      case PropertyType.Array.Boolean =>
-        c.downField(propName)
-          .as[Seq[Boolean]]
-          .map(arr => ArrayProperty(arr.map(BooleanProperty(_))))
-      case PropertyType.Array.Int =>
-        c.downField(propName)
-          .as[Seq[Int]]
-          .map(arr => ArrayProperty(arr.map(IntProperty(_))))
-      case PropertyType.Array.Bigint =>
-        c.downField(propName)
-          .as[Seq[BigInt]]
-          .map(arr => ArrayProperty(arr.map(BigIntProperty(_))))
-      case PropertyType.Array.Float32 =>
-        c.downField(propName)
-          .as[Seq[Float]]
-          .map(arr => ArrayProperty(arr.map(Float32Property(_))))
-      case PropertyType.Array.Float64 =>
-        c.downField(propName)
-          .as[Seq[Double]]
-          .map(arr => ArrayProperty(arr.map(Float64Property(_))))
-      case PropertyType.Array.Numeric =>
-        c.downField(propName)
-          .as[Seq[BigDecimal]]
-          .map(arr => ArrayProperty(arr.map(NumericProperty(_))))
-      case PropertyType.Array.Timestamp =>
-        c.downField(propName)
-          .as[Seq[ZonedDateTime]]
-          .map(arr => ArrayProperty(arr.map(TimeStampProperty(_))))
-      case PropertyType.Array.Date =>
-        c.downField(propName)
-          .as[Seq[LocalDate]]
-          .map(arr => ArrayProperty(arr.map(DateProperty(_))))
-      case PropertyType.Array.Text =>
-        c.downField(propName)
-          .as[Seq[String]]
-          .map(arr => ArrayProperty(arr.map(TextProperty(_))))
-      case PropertyType.Array.Json =>
-        c.downField(propName)
-          .as[Seq[String]]
-          .map(arr => ArrayProperty(arr.map(JsonProperty(_))))
-      case PropertyType.Array.Geometry =>
-        c.downField(propName)
-          .as[Seq[String]]
-          .map(arr => ArrayProperty(arr.map(GeometryProperty(_))))
-      case PropertyType.Array.Geography =>
-        c.downField(propName)
-          .as[Seq[String]]
-          .map(arr => ArrayProperty(arr.map(GeographyProperty(_))))
-    }
+      t: PropertyType[TV]
+  ): Either[DecodingFailure, DataModelProperty[TV]] = {
+
+    // scalastyle:off cyclomatic.complexity
+    def decode(c: ACursor): Decoder.Result[TV] =
+      t match {
+        case PropertyType.Boolean => c.as[Boolean]
+        case PropertyType.Int => c.as[Int]
+        case PropertyType.Bigint => c.as[BigInt]
+        case PropertyType.Float32 => c.as[Float]
+        case PropertyType.Float64 => c.as[Double]
+        case PropertyType.Numeric => c.as[BigDecimal]
+        case PropertyType.Timestamp => c.as[ZonedDateTime]
+        case PropertyType.Date => c.as[LocalDate]
+        case PropertyType.Text | PropertyType.Json | PropertyType.DirectRelation |
+            PropertyType.Geometry | PropertyType.Geography =>
+          c.as[String]
+        case PropertyType.Array.Boolean => c.as[Seq[Boolean]]
+        case PropertyType.Array.Int => c.as[Seq[Int]]
+        case PropertyType.Array.Bigint => c.as[Seq[BigInt]]
+        case PropertyType.Array.Float32 => c.as[Seq[Float]]
+        case PropertyType.Array.Float64 => c.as[Seq[Double]]
+        case PropertyType.Array.Numeric => c.as[Seq[BigDecimal]]
+        case PropertyType.Array.Timestamp => c.as[Seq[ZonedDateTime]]
+        case PropertyType.Array.Date => c.as[Seq[LocalDate]]
+        case PropertyType.Array.Text | PropertyType.Array.Json | PropertyType.Array.Geometry |
+            PropertyType.Array.Geography =>
+          c.as[Seq[String]]
+      }
+
+    decode(c.downField(propName)).map(v => t.Property(v))
+  }
 
   @SuppressWarnings(
     Array("org.wartremover.warts.AsInstanceOf", "org.wartremover.warts.IsInstanceOf")
   )
   private def filterOutNullableProps(
-      res: Iterable[Either[DecodingFailure, (String, DataModelProperty)]],
+      res: Iterable[Either[DecodingFailure, (String, AnyProperty)]],
       props: Map[String, DataModelPropertyDeffinition]
-  ): Iterable[Either[DecodingFailure, (String, DataModelProperty)]] =
+  ): Iterable[Either[DecodingFailure, (String, AnyProperty)]] =
     res.filter {
       case Right(_) => true
       case Left(DecodingFailure("Attempt to decode value on failed cursor", downfields)) =>
@@ -338,7 +314,7 @@ object DataModelInstances {
   ): Decoder[DataModelInstance] =
     new Decoder[DataModelInstance] {
       def apply(c: HCursor): Decoder.Result[DataModelInstance] = {
-        val res: immutable.Iterable[Either[DecodingFailure, (String, DataModelProperty)]] =
+        val res: immutable.Iterable[Either[DecodingFailure, (String, AnyProperty)]] =
           props.map { case (prop, dmp) =>
             for {
               value <- decodeBaseOnType(c, prop, dmp.`type`)

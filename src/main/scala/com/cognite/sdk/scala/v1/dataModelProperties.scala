@@ -5,81 +5,28 @@ package com.cognite.sdk.scala.v1
 
 import java.time.{LocalDate, ZonedDateTime}
 
-sealed abstract class DataModelProperty
+object DataModelProperties {
 
-object DataModelProperty {
-  sealed abstract class DataModelPropertyPrimitive extends DataModelProperty
+  sealed abstract class DataModelProperty[TV](val value: TV)
 
-  final case class BooleanProperty(value: Boolean) extends DataModelPropertyPrimitive
-  final case class IntProperty(value: Int) extends DataModelPropertyPrimitive
-  final case class BigIntProperty(value: BigInt) extends DataModelPropertyPrimitive
-  final case class Float32Property(value: Float) extends DataModelPropertyPrimitive
-  final case class Float64Property(value: Double) extends DataModelPropertyPrimitive
-  final case class NumericProperty(value: BigDecimal) extends DataModelPropertyPrimitive
-  final case class TextProperty(value: String) extends DataModelPropertyPrimitive
-  final case class JsonProperty(value: String) extends DataModelPropertyPrimitive
-  final case class TimeStampProperty(value: ZonedDateTime) extends DataModelPropertyPrimitive
-  final case class DateProperty(value: LocalDate) extends DataModelPropertyPrimitive
-  // These types below are treated as string for now
-  final case class GeometryProperty(value: String) extends DataModelPropertyPrimitive
-  final case class GeographyProperty(value: String) extends DataModelPropertyPrimitive
-  final case class DirectRelationProperty(value: String) extends DataModelProperty
+  sealed abstract class PropertyType[TV] {
+    sealed case class Property(override val value: TV) extends DataModelProperty(value)
 
-  final case class ArrayProperty[+A <: DataModelPropertyPrimitive](values: Seq[A])
-      extends DataModelProperty
-}
-sealed abstract class PropertyType {
-
-  @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
-  def code: String =
-    toString.replaceAll("(.)([A-Z])", "$1_$2").toLowerCase
-}
-
-object PropertyType {
-  val values: Seq[PropertyType] = Seq[PropertyType](
-    Boolean,
-    Int,
-    Bigint,
-    Float32,
-    Float64,
-    Numeric,
-    Text,
-    Json,
-    Timestamp,
-    Date,
-    Geometry,
-    Geography,
-    DirectRelation
-  ) ++
-    Array.values
-
-  private val valuesMap: Map[String, PropertyType] =
-    values.map(t => t.code -> t).toMap
-
-  def fromCode(code: String): Option[PropertyType] =
-    valuesMap.get(code)
-
-  case object Boolean extends PropertyType
-  case object Int extends PropertyType
-  case object Bigint extends PropertyType
-  case object Float32 extends PropertyType
-  case object Float64 extends PropertyType
-  case object Numeric extends PropertyType
-  case object Text extends PropertyType
-  case object Json extends PropertyType
-  case object Timestamp extends PropertyType
-  case object Date extends PropertyType
-  case object Geometry extends PropertyType
-  case object Geography extends PropertyType
-  case object DirectRelation extends PropertyType
-
-  sealed abstract class Array(val `type`: PropertyType) extends PropertyType {
-    override def code: String =
-      `type`.code + "[]"
+    @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
+    def code: String =
+      toString.replaceAll("(.)([A-Z])", "$1_$2").toLowerCase
   }
 
-  object Array {
-    val values: Seq[PropertyType] = Seq[PropertyType](
+  sealed abstract class PrimitivePropertyType[TV] extends PropertyType[TV]
+
+  sealed abstract class ArrayPropertyType[TV, TP <: PrimitivePropertyType[TV]](private val t: TP)
+      extends PropertyType[Seq[TV]] {
+    override def code: String =
+      t.code + "[]"
+  }
+
+  object PropertyType {
+    val values: Seq[AnyPropertyType] = Seq[AnyPropertyType](
       Boolean,
       Int,
       Bigint,
@@ -91,20 +38,74 @@ object PropertyType {
       Timestamp,
       Date,
       Geometry,
-      Geography
-    )
+      Geography,
+      DirectRelation
+    ) ++
+      Array.values
 
-    case object Boolean extends Array(PropertyType.Boolean)
-    case object Int extends Array(PropertyType.Int)
-    case object Bigint extends Array(PropertyType.Bigint)
-    case object Float32 extends Array(PropertyType.Float32)
-    case object Float64 extends Array(PropertyType.Float64)
-    case object Numeric extends Array(PropertyType.Numeric)
-    case object Text extends Array(PropertyType.Text)
-    case object Json extends Array(PropertyType.Json)
-    case object Timestamp extends Array(PropertyType.Timestamp)
-    case object Date extends Array(PropertyType.Date)
-    case object Geometry extends Array(PropertyType.Geometry)
-    case object Geography extends Array(PropertyType.Geography)
+    private val valuesMap: Map[String, AnyPropertyType] =
+      values.map(t => t.code -> t).toMap
+
+    def fromCode(code: String): Option[AnyPropertyType] =
+      valuesMap.get(code)
+
+    case object Boolean extends PrimitivePropertyType[scala.Boolean]
+    case object Int extends PrimitivePropertyType[scala.Int]
+    case object Bigint extends PrimitivePropertyType[scala.BigInt]
+    case object Float32 extends PrimitivePropertyType[scala.Float]
+    case object Float64 extends PrimitivePropertyType[scala.Double]
+    case object Numeric extends PrimitivePropertyType[scala.BigDecimal]
+    case object Text extends PrimitivePropertyType[String]
+    case object Json extends PrimitivePropertyType[String]
+    case object Timestamp extends PrimitivePropertyType[ZonedDateTime]
+    case object Date extends PrimitivePropertyType[LocalDate]
+    case object Geometry extends PrimitivePropertyType[String]
+    case object Geography extends PrimitivePropertyType[String]
+    case object DirectRelation extends PropertyType[String]
+
+    object Array {
+      val values: Seq[AnyPropertyType] = Seq[AnyPropertyType](
+        Boolean,
+        Int,
+        Bigint,
+        Float32,
+        Float64,
+        Numeric,
+        Text,
+        Json,
+        Timestamp,
+        Date,
+        Geometry,
+        Geography
+      )
+      case object Boolean
+          extends ArrayPropertyType[scala.Boolean, PropertyType.Boolean.type](PropertyType.Boolean)
+      case object Int extends ArrayPropertyType[scala.Int, PropertyType.Int.type](PropertyType.Int)
+      case object Bigint
+          extends ArrayPropertyType[scala.BigInt, PropertyType.Bigint.type](PropertyType.Bigint)
+      case object Float32
+          extends ArrayPropertyType[scala.Float, PropertyType.Float32.type](PropertyType.Float32)
+      case object Float64
+          extends ArrayPropertyType[scala.Double, PropertyType.Float64.type](PropertyType.Float64)
+      case object Numeric
+          extends ArrayPropertyType[scala.BigDecimal, PropertyType.Numeric.type](
+            PropertyType.Numeric
+          )
+      case object Text extends ArrayPropertyType[String, PropertyType.Text.type](PropertyType.Text)
+      case object Json extends ArrayPropertyType[String, PropertyType.Json.type](PropertyType.Json)
+      case object Timestamp
+          extends ArrayPropertyType[ZonedDateTime, PropertyType.Timestamp.type](
+            PropertyType.Timestamp
+          )
+      case object Date
+          extends ArrayPropertyType[LocalDate, PropertyType.Date.type](PropertyType.Date)
+      case object Geometry
+          extends ArrayPropertyType[String, PropertyType.Geometry.type](PropertyType.Geometry)
+      case object Geography
+          extends ArrayPropertyType[String, PropertyType.Geography.type](PropertyType.Geography)
+    }
   }
+
+  type AnyPropertyType = PropertyType[_]
+  type AnyProperty = DataModelProperty[_]
 }

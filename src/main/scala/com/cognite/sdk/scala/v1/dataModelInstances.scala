@@ -1,12 +1,14 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.v1.DataModelProperty._
+import com.cognite.sdk.scala.v1.DataModelProperties._
 
-sealed class DataModelInstance(val properties: Map[String, DataModelProperty]) {
+sealed class DataModelInstance(val properties: Map[String, AnyProperty]) {
   val externalId: String = properties.get("externalId") match {
-    case Some(TextProperty(externalId)) => externalId
+    case Some(PropertyType.Text.Property(externalId)) => externalId
     case Some(invalidType) =>
-      throw new Exception(s"externalId should be a TextProperty, it is ${invalidType.toString} instead" )
+      throw new Exception(
+        s"externalId should be a TextProperty, it is ${invalidType.toString} instead"
+      )
     case None =>
       throw new Exception("externalId is required")
   }
@@ -18,18 +20,21 @@ object Node {
       `type`: Option[String] = None,
       name: Option[String] = None,
       description: Option[String] = None,
-      properties: Option[Map[String, DataModelProperty]] = None
+      properties: Option[Map[String, AnyProperty]] = None
   ): DataModelInstance = {
 
-    val allProps = properties.getOrElse(Map.empty[String, DataModelProperty]) ++
-      Seq[(String, Option[DataModelProperty])](
-        "externalId" -> Some(TextProperty(externalId)),
-        "type" -> `type`.map(TextProperty(_)),
-        "name" -> name.map(TextProperty(_)),
-        "description" -> description.map(TextProperty(_))
-      ).map { 
-        case (k,v) => v.map(k->_)
-      }.flatten.toMap
+    val propsToAdd: Seq[Option[(String, AnyProperty)]] =
+      Seq[(String, Option[DataModelProperty[_]])](
+        "externalId" -> Some(PropertyType.Text.Property(externalId)),
+        "type" -> `type`.map(PropertyType.Text.Property(_)),
+        "name" -> name.map(PropertyType.Text.Property(_)),
+        "description" -> description.map(PropertyType.Text.Property(_))
+      ).map { case (k, v) =>
+        v.map(k -> _)
+      }
+
+    val allProps = properties.getOrElse(Map.empty[String, AnyProperty]) ++
+      propsToAdd.flatten.toMap
 
     new DataModelInstance(allProps)
   }
@@ -50,16 +55,14 @@ final case class DMIOrFilter(or: Seq[DataModelInstanceFilter]) extends DMIBoolFi
 final case class DMINotFilter(not: DataModelInstanceFilter) extends DMIBoolFilter
 
 sealed trait DMILeafFilter extends DataModelInstanceFilter
-final case class DMIEqualsFilter(property: Seq[String], value: DataModelProperty)
-    extends DMILeafFilter
-final case class DMIInFilter(property: Seq[String], values: Seq[DataModelProperty])
-    extends DMILeafFilter
+final case class DMIEqualsFilter(property: Seq[String], value: AnyProperty) extends DMILeafFilter
+final case class DMIInFilter(property: Seq[String], values: Seq[AnyProperty]) extends DMILeafFilter
 final case class DMIRangeFilter(
     property: Seq[String],
-    gte: Option[DataModelProperty] = None,
-    gt: Option[DataModelProperty] = None,
-    lte: Option[DataModelProperty] = None,
-    lt: Option[DataModelProperty] = None
+    gte: Option[AnyProperty] = None,
+    gt: Option[AnyProperty] = None,
+    lte: Option[AnyProperty] = None,
+    lt: Option[AnyProperty] = None
 ) extends DMILeafFilter {
   require(
     !(gte.isDefined && gt.isDefined) && // can't have both upper bound in the same time
@@ -67,12 +70,11 @@ final case class DMIRangeFilter(
       (gte.isDefined || gt.isDefined || lte.isDefined || lt.isDefined) // at least one bound must be defined
   )
 }
-final case class DMIPrefixFilter(property: Seq[String], value: DataModelProperty)
-    extends DMILeafFilter
+final case class DMIPrefixFilter(property: Seq[String], value: AnyProperty) extends DMILeafFilter
 final case class DMIExistsFilter(property: Seq[String]) extends DMILeafFilter
-final case class DMIContainsAnyFilter(property: Seq[String], values: Seq[DataModelProperty])
+final case class DMIContainsAnyFilter(property: Seq[String], values: Seq[AnyProperty])
     extends DMILeafFilter
-final case class DMIContainsAllFilter(property: Seq[String], values: Seq[DataModelProperty])
+final case class DMIContainsAllFilter(property: Seq[String], values: Seq[AnyProperty])
     extends DMILeafFilter
 
 final case class DataModelInstanceQuery(

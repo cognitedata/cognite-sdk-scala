@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 package com.cognite.sdk.scala.v1
+import DataModelProperties._
 
 final case class SpacedItems[A](spaceExternalId: String, items: Seq[A])
 
@@ -11,7 +12,7 @@ final case class DataModelIdentifier(
 )
 
 final case class DataModelPropertyDeffinition(
-    `type`: PropertyType,
+    `type`: AnyPropertyType,
     nullable: Boolean = true,
     targetModel: Option[DataModelIdentifier] = None
 )
