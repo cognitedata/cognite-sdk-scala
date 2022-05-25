@@ -8,8 +8,6 @@ import com.cognite.sdk.scala.common.RetryWhile
 
 import java.util.UUID
 import scala.collection.immutable.Seq
-import com.cognite.sdk.scala.v1.DataModelType.Edge
-import com.cognite.sdk.scala.v1.DataModelType.Node
 
 @SuppressWarnings(
   Array(
@@ -82,8 +80,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     val json = dataModelEncoder(dataModel)
 
     val (allowNode, allowEdge) = dataModel.dataModelType match {
-      case Edge => (false, true)
-      case Node => (true, false)
+      case DataModelType.Edge => (false, true)
+      case DataModelType.Node => (true, false)
     }
 
     json.asObject.flatMap(_("allowNode")).flatMap(_.asBoolean) shouldBe Some(allowNode)

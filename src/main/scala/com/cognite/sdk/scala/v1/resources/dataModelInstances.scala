@@ -35,22 +35,22 @@ class DataModelInstances[F[_]](
       spaceExternalId: String,
       model: DataModelIdentifier,
       overwrite: Boolean = false,
-      items: Seq[DataModelInstance]
-  )(implicit F: Async[F]): F[Seq[DataModelInstance]] = {
+      items: Seq[PropertyMap]
+  )(implicit F: Async[F]): F[Seq[PropertyMap]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
     dataModels.retrieveByExternalIds(Seq(model.model), model.space.getOrElse("")).flatMap { dm =>
       val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
 
-      implicit val dataModelInstanceDecoder: Decoder[DataModelInstance] =
+      implicit val dataModelInstanceDecoder: Decoder[PropertyMap] =
         createDynamicPropertyDecoder(props)
 
       // for some reason scala complains dataModelInstanceDecoder doesn't seem to be used when
       //   derivedDecoder is used bellow, so an explicit decoder is defined instead
-      implicit val dataModelInstanceItemsDecoder: Decoder[Items[DataModelInstance]] =
-        Decoder.forProduct1("items")(Items.apply[DataModelInstance])
+      implicit val dataModelInstanceItemsDecoder: Decoder[Items[PropertyMap]] =
+        Decoder.forProduct1("items")(Items.apply[PropertyMap])
 
       requestSession
-        .post[Seq[DataModelInstance], Items[DataModelInstance], DataModelInstanceCreate](
+        .post[Seq[PropertyMap], Items[PropertyMap], DataModelInstanceCreate](
           DataModelInstanceCreate(spaceExternalId, model, overwrite, items),
           uri"$baseUrl",
           value => value.items
@@ -68,11 +68,11 @@ class DataModelInstances[F[_]](
       .flatMap { dm =>
         val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
 
-        implicit val dataModelInstanceDecoder: Decoder[DataModelInstance] =
+        implicit val dataModelInstanceDecoder: Decoder[PropertyMap] =
           createDynamicPropertyDecoder(props)
 
-        implicit val dataModelInstanceSeqDecoder: Decoder[Seq[DataModelInstance]] =
-          Decoder.decodeIterable[DataModelInstance, Seq]
+        implicit val dataModelInstanceSeqDecoder: Decoder[Seq[PropertyMap]] =
+          Decoder.decodeIterable[PropertyMap, Seq]
 
         implicit val dataModelInstanceQueryResponseDecoder
             : Decoder[DataModelInstanceQueryResponse] =
@@ -97,7 +97,7 @@ class DataModelInstances[F[_]](
       cursor: Option[String],
       limit: Option[Int],
       @annotation.nowarn partition: Option[Partition] = None
-  )(implicit F: Async[F]): F[ItemsWithCursor[DataModelInstance]] =
+  )(implicit F: Async[F]): F[ItemsWithCursor[PropertyMap]] =
     query(inputQuery.copy(cursor = cursor, limit = limit)).map {
       case DataModelInstanceQueryResponse(items, _, cursor) =>
         ItemsWithCursor(items, cursor)
@@ -107,7 +107,7 @@ class DataModelInstances[F[_]](
       inputQuery: DataModelInstanceQuery,
       cursor: Option[String],
       limit: Option[Int]
-  )(implicit F: Async[F]): Stream[F, DataModelInstance] =
+  )(implicit F: Async[F]): Stream[F, PropertyMap] =
     Readable
       .pullFromCursor(cursor, limit, None, queryWithCursor(inputQuery, _, _, _))
       .stream
@@ -115,7 +115,7 @@ class DataModelInstances[F[_]](
   def queryStream(
       inputQuery: DataModelInstanceQuery,
       limit: Option[Int]
-  )(implicit F: Async[F]): fs2.Stream[F, DataModelInstance] =
+  )(implicit F: Async[F]): fs2.Stream[F, PropertyMap] =
     queryWithNextCursor(inputQuery, None, limit)
 
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
@@ -128,11 +128,11 @@ class DataModelInstances[F[_]](
     dataModels.retrieveByExternalIds(Seq(model.model), model.space.getOrElse("")).flatMap { dm =>
       val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
 
-      implicit val dataModelInstanceDecoder: Decoder[DataModelInstance] =
+      implicit val dataModelInstanceDecoder: Decoder[PropertyMap] =
         createDynamicPropertyDecoder(props)
 
-      implicit val dataModelInstanceSeqDecoder: Decoder[Seq[DataModelInstance]] =
-        Decoder.decodeIterable[DataModelInstance, Seq]
+      implicit val dataModelInstanceSeqDecoder: Decoder[Seq[PropertyMap]] =
+        Decoder.decodeIterable[PropertyMap, Seq]
 
       implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
         Decoder.forProduct3("items", "modelProperties", "nextCursor")(
@@ -186,10 +186,10 @@ object DataModelInstances {
     case _ => throw new Exception("unknown property type")
   }
 
-  implicit val dataModelInstanceEncoder: Encoder[DataModelInstance] =
+  implicit val dataModelInstanceEncoder: Encoder[PropertyMap] =
     Encoder
       .encodeMap(KeyEncoder.encodeKeyString, propEncoder)
-      .contramap[DataModelInstance](dmi => dmi.properties)
+      .contramap[PropertyMap](dmi => dmi.allProperties)
 
   implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =
     DataModels.dataModelIdentifierEncoder
@@ -252,13 +252,12 @@ object DataModelInstances {
     deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
 
   private def decodeBaseOnType[TV](
-      c: HCursor,
-      propName: String,
+      c: ACursor,
       t: PropertyType[TV]
   ): Either[DecodingFailure, DataModelProperty[TV]] = {
 
     // scalastyle:off cyclomatic.complexity
-    def decode(c: ACursor): Decoder.Result[TV] =
+    def decode: Decoder.Result[TV] =
       t match {
         case PropertyType.Boolean => c.as[Boolean]
         case PropertyType.Int => c.as[Int]
@@ -284,7 +283,7 @@ object DataModelInstances {
           c.as[Seq[String]]
       }
 
-    decode(c.downField(propName)).map(v => t.Property(v))
+    decode.map(v => t.Property(v))
   }
 
   @SuppressWarnings(
@@ -311,18 +310,18 @@ object DataModelInstances {
   // scalastyle:off cyclomatic.complexity
   def createDynamicPropertyDecoder(
       props: Map[String, DataModelPropertyDeffinition]
-  ): Decoder[DataModelInstance] =
-    new Decoder[DataModelInstance] {
-      def apply(c: HCursor): Decoder.Result[DataModelInstance] = {
+  ): Decoder[PropertyMap] =
+    new Decoder[PropertyMap] {
+      def apply(c: HCursor): Decoder.Result[PropertyMap] = {
         val res: immutable.Iterable[Either[DecodingFailure, (String, AnyProperty)]] =
           props.map { case (prop, dmp) =>
             for {
-              value <- decodeBaseOnType(c, prop, dmp.`type`)
+              value <- decodeBaseOnType(c.downField(prop), dmp.`type`)
             } yield prop -> value
           }
         filterOutNullableProps(res, props).find(_.isLeft) match {
           case Some(Left(x)) => Left(x)
-          case _ => Right(new DataModelInstance(res.collect { case Right(value) => value }.toMap))
+          case _ => Right(new PropertyMap(res.collect { case Right(value) => value }.toMap))
         }
       }
     }

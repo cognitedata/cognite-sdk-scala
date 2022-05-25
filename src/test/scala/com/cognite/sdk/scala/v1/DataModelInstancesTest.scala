@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.{CdpApiException, Items, RetryWhile}
+import com.cognite.sdk.scala.common.{CdpApiException, RetryWhile}
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.time.LocalDate
@@ -45,41 +45,37 @@ class DataModelInstancesTest
   )
 
   val dataModelInstanceToCreate1 =
-    DataModelInstanceCreate(
-      dataModel.externalId,
-      Some(
+    Node("equipment_43",
+      properties = Some(
         Map(
-          "externalId" -> StringProperty("equipment_43"),
-          "prop_string" -> StringProperty("EQ0001"),
-          "prop_float" -> Float32Property(0.1f),
-          "prop_direct_relation" -> DirectRelationProperty("Asset"),
-          "prop_date" -> DateProperty(LocalDate.of(2022, 3, 22))
+          "prop_string" -> PropertyType.Text.Property("EQ0001"),
+          "prop_float" -> PropertyType.Float32.Property(0.1f),
+          "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+          "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
         )
       )
     )
 
   val dataModelInstanceToCreate2 =
-    DataModelInstanceCreate(
-      dataModel.externalId,
-      Some(
+    Node(
+      "equipment_44",
+      properties = Some(
         Map(
-          "externalId" -> StringProperty("equipment_44"),
-          "prop_string" -> StringProperty("EQ0002"),
-          "prop_bool" -> BooleanProperty(true),
-          "prop_float" -> Float32Property(1.64f)
+          "prop_string" -> PropertyType.Text.Property("EQ0002"),
+          "prop_bool" -> PropertyType.Boolean.Property(true),
+          "prop_float" -> PropertyType.Float32.Property(1.64f)
         )
       )
     )
 
   val dataModelInstanceToCreate3 =
-    DataModelInstanceCreate(
-      dataModel.externalId,
-      Some(
+    Node(
+      "equipment_45",
+      properties = Some(
         Map(
-          "externalId" -> StringProperty("equipment_45"),
-          "prop_string" -> StringProperty("EQ0011"),
-          "prop_bool" -> BooleanProperty(false),
-          "prop_float" -> Float32Property(3.5f)
+          "prop_string" -> PropertyType.Text.Property("EQ0011"),
+          "prop_bool" -> PropertyType.Boolean.Property(false),
+          "prop_float" -> PropertyType.Float32.Property(3.5f)
         )
       )
     )
@@ -102,71 +98,45 @@ class DataModelInstancesTest
     )
   )
 
-  val dmiArrayToCreate1 = DataModelInstanceCreate(
-    dataModelArray.externalId,
-    Some(
+  val dmiArrayToCreate1 = Node(
+    "equipment_42",
+    properties = Some(
       Map(
-        "externalId" -> StringProperty("equipment_42"),
-        "array_string" -> ArrayProperty[StringProperty](
-          Vector(
-            StringProperty("E101"),
-            StringProperty("E102"),
-            StringProperty("E103")
+        "array_string" -> PropertyType.Array.Text.Property(
+            Vector("E101","E102","E103")
+          ),
+        "array_float" -> PropertyType.Array.Float32.Property(
+            Vector(1.01f,1.02f)
+          ),
+        "array_int" -> PropertyType.Array.Int.Property(
+          Vector(1,12,13)
           )
+        )
+      )
+    )
+
+  val dmiArrayToCreate2 = Node(
+    "equipment_43",
+    properties = Some(
+      Map(
+        "array_string" -> PropertyType.Array.Text.Property(
+          Vector("E201","E202")
         ),
-        /*"array_float" -> ArrayProperty[Float32Property](
-          Vector(
-            Float32Property(1.01f),
-            Float32Property(1.02f)
-          )
-        ),*/ // float[] is not supported yet
-        "array_int" -> ArrayProperty[Int32Property](
-          Vector(
-            Int32Property(1),
-            Int32Property(12),
-            Int32Property(13)
-          )
+        "array_float" -> PropertyType.Array.Float32.Property(
+          Vector(2.02f, 2.04f)
         )
       )
     )
   )
-  val dmiArrayToCreate2 = DataModelInstanceCreate(
-    dataModelArray.externalId,
-    Some(
+  val dmiArrayToCreate3 = Node(
+    "equipment_44",
+    properties = Some(
       Map(
-        "externalId" -> StringProperty("equipment_43"),
-        "array_string" -> ArrayProperty(
-          Vector(
-            StringProperty("E201"),
-            StringProperty("E202")
-          )
-        )
-        /*"array_float" -> ArrayProperty(
-          Vector(
-            Float32Property(2.02f),
-            Float32Property(2.04f)
-          )
-        )*/ // float[] is not supported yet
-      )
-    )
-  )
-  val dmiArrayToCreate3 = DataModelInstanceCreate(
-    dataModelArray.externalId,
-    Some(
-      Map(
-        "externalId" -> StringProperty("equipment_44"),
-        /*"array_float" -> ArrayProperty(
-          Vector(
-            Float32Property(3.01f),
-            Float32Property(3.02f)
-          )
-        ),*/ // float[] is not supported yet
-        "array_int" -> ArrayProperty(
-          Vector(
-            Int32Property(3),
-            Int32Property(12),
-            Int32Property(13)
-          )
+        "array_float" -> PropertyType.Array.Float32.Property(
+          Vector(3.01f,3.02f)
+        ),
+        "array_int" -> PropertyType.Array.Int.Property(
+          Vector(3,12,13)
         )
       )
     )
@@ -203,30 +173,25 @@ class DataModelInstancesTest
 
   "Insert data model instances" should "work with multiple input" in {
     val dataModelInstances = blueFieldClient.dataModelInstances
-      .createItems(Items[DataModelInstanceCreate](toCreates))
+      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = toCreates)
       .unsafeRunSync()
       .toList
 
     dataModelInstances.size shouldBe 3
-    dataModelInstances.map(_.modelExternalId).toSet shouldBe toCreates.map(_.modelExternalId).toSet
+    dataModelInstances.map(_.externalId).toSet shouldBe toCreates.map(_.externalId).toSet
   }
 
   it should "fail if input data type is not correct" in {
-    val invalidInput = DataModelInstanceCreate(
-      dataModel.externalId,
-      Some(
+    val invalidInput = Node(
+      "equipment_47",
+      properties = Some(
         Map(
-          "externalId" -> StringProperty("equipment_47"),
-          "prop_float" -> StringProperty("abc")
+          "prop_float" -> PropertyType.Text.Property("abc")
         )
       )
     )
     val exception = the[CdpApiException] thrownBy blueFieldClient.dataModelInstances
-      .createItems(
-        Items[DataModelInstanceCreate](
-          Seq(invalidInput)
-        )
-      )
+      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(invalidInput))
       .unsafeRunSync()
 
     exception.message.contains("invalid input") shouldBe true
@@ -235,11 +200,7 @@ class DataModelInstancesTest
 
   private def insertDMIBeforeQuery() = {
     val dataModelInstances = blueFieldClient.dataModelInstances
-      .createItems(
-        Items[DataModelInstanceCreate](
-          toCreates
-        )
-      )
+      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = toCreates)
       .unsafeRunSync()
       .toList
     dataModelInstances.size shouldBe 3
@@ -248,17 +209,13 @@ class DataModelInstancesTest
 
   private def deleteDMIAfterQuery() = {
     val toDeletes =
-      toCreates
-        .flatMap(_.properties)
-        .flatMap(_.get("externalId").collect { case StringProperty(id) =>
-          id
-        })
+      toCreates.map(_.externalId)
     blueFieldClient.dataModelInstances
       .deleteByExternalIds(toDeletes)
       .unsafeRunSync()
 
     // make sure that data is deleted
-    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(space,dataModel.externalId))
+    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModel.externalId))
     val outputNoFilter = blueFieldClient.dataModelInstances
       .query(inputNoFilterQuery)
       .unsafeRunSync()
@@ -267,7 +224,7 @@ class DataModelInstancesTest
     outputNoFilter.isEmpty shouldBe true
   }
 
-  private def initAndCleanUpDataForQuery(testCode: Seq[DataModelInstanceCreate] => Any): Unit =
+  private def initAndCleanUpDataForQuery(testCode: Seq[PropertyMap] => Any): Unit =
     try {
       val dataModelInstances = insertDMIBeforeQuery()
       val _ = testCode(dataModelInstances)
@@ -278,16 +235,16 @@ class DataModelInstancesTest
       ()
     }
 
-  private def fromCreatedToExpectedProps(instances: Set[DataModelInstanceCreate]) =
-    instances.map(_.properties)
+  private def fromCreatedToExpectedProps(instances: Set[PropertyMap]) =
+    instances.map(_.allProperties)
 
   "Query data model instances" should "work with empty filter" in initAndCleanUpDataForQuery { _ =>
     val inputNoFilterQuery = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModel.externalId),
+      DataModelIdentifier(Some(space),dataModel.externalId),
       Some(
         DMIAndFilter(
           Seq(
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ0001"))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0001"))
           )
         )
       )
@@ -300,13 +257,13 @@ class DataModelInstancesTest
 
   it should "work with AND filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryAnd = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModel.externalId),
+      DataModelIdentifier(Some(space),dataModel.externalId),
       Some(
         DMIAndFilter(
           Seq(
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ0002")),
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), BooleanProperty(true)),
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_float"), Float32Property(1.64f))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0002")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true)),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_float"), PropertyType.Float32.Property(1.64f))
           )
         )
       )
@@ -319,17 +276,17 @@ class DataModelInstancesTest
 
     outputQueryAnd.size shouldBe 1
 
-    outputQueryAnd.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryAnd.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(dataModelInstanceToCreate2)
     )
 
     val inputQueryAnd2 = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModel.externalId),
+      DataModelIdentifier(Some(space),dataModel.externalId),
       Some(
         DMIAndFilter(
           Seq(
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ0001")),
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), BooleanProperty(true))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0001")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true))
           )
         )
       )
@@ -345,12 +302,12 @@ class DataModelInstancesTest
 
   it should "work with OR filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryOr = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModel.externalId),
+      DataModelIdentifier(Some(space),dataModel.externalId),
       Some(
         DMIOrFilter(
           Seq(
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ0011")),
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), BooleanProperty(true))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0011")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true))
           )
         )
       )
@@ -362,19 +319,19 @@ class DataModelInstancesTest
       .toList
 
     outputQueryOr.size shouldBe 2
-    outputQueryOr.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryOr.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3)
     )
   }
 
   it should "work with NOT filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryNot = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModel.externalId),
+      DataModelIdentifier(Some(space),dataModel.externalId),
       Some(
         DMINotFilter(
           DMIInFilter(
             Seq(dataModel.externalId, "prop_string"),
-            Seq(StringProperty("EQ0002"), StringProperty("EQ0011"))
+            Seq(PropertyType.Text.Property("EQ0002"), PropertyType.Text.Property("EQ0011"))
           )
         )
       )
@@ -386,16 +343,16 @@ class DataModelInstancesTest
       .toList
 
     outputQueryNot.size shouldBe 1
-    outputQueryNot.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryNot.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(dataModelInstanceToCreate1)
     )
   }
 
   it should "work with PREFIX filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryPrefix = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModel.externalId),
+      DataModelIdentifier(Some(space),dataModel.externalId),
       Some(
-        DMIPrefixFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ000"))
+        DMIPrefixFilter(Seq(dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ000"))
       )
     )
     val outputQueryPrefix = blueFieldClient.dataModelInstances
@@ -405,18 +362,18 @@ class DataModelInstancesTest
       .toList
 
     outputQueryPrefix.size shouldBe 2
-    outputQueryPrefix.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryPrefix.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(dataModelInstanceToCreate1, dataModelInstanceToCreate2)
     )
   }
 
   it should "work with RANGE filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryRange = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModel.externalId),
+      DataModelIdentifier(Some(space),dataModel.externalId),
       Some(
         DMIRangeFilter(
           Seq(dataModel.externalId, "prop_float"),
-          gte = Some(Float32Property(1.64f))
+          gte = Some(PropertyType.Float32.Property(1.64f))
         )
       )
     )
@@ -426,14 +383,14 @@ class DataModelInstancesTest
       .items
       .toList
 
-    outputQueryRange.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryRange.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3)
     )
   }
 
   it should "work with EXISTS filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryExists = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModel.externalId),
+      DataModelIdentifier(Some(space),dataModel.externalId),
       Some(
         DMIExistsFilter(Seq(dataModel.externalId, "prop_bool"))
       )
@@ -444,18 +401,14 @@ class DataModelInstancesTest
       .items
       .toList
 
-    outputQueryExists.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryExists.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3)
     )
   }
 
   private def insertDMIArrayBeforeQuery() = {
     val dataModelInstances = blueFieldClient.dataModelInstances
-      .createItems(
-        Items[DataModelInstanceCreate](
-          dmiArrayToCreates
-        )
-      )
+      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = dmiArrayToCreates)
       .unsafeRunSync()
       .toList
     dataModelInstances.size shouldBe 3
@@ -467,7 +420,7 @@ class DataModelInstancesTest
       dmiArrayToCreates
         .flatMap(_.properties)
         .flatMap(_.get("externalId"))
-        .collect { case StringProperty(id) =>
+        .collect { case PropertyType.Text.Property(id) =>
           id
         }
     blueFieldClient.dataModelInstances
@@ -475,7 +428,7 @@ class DataModelInstancesTest
       .unsafeRunSync()
 
     // make sure that data is deleted
-    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(space,dataModelArray.externalId))
+    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModelArray.externalId))
     val outputNoFilter = blueFieldClient.dataModelInstances
       .query(inputNoFilterQuery)
       .unsafeRunSync()
@@ -484,7 +437,7 @@ class DataModelInstancesTest
     outputNoFilter.isEmpty shouldBe true
   }
 
-  private def initAndCleanUpArrayDataForQuery(testCode: Seq[DataModelInstanceCreate] => Any): Unit =
+  private def initAndCleanUpArrayDataForQuery(testCode: Seq[PropertyMap] => Any): Unit =
     try {
       val dataModelInstances = insertDMIArrayBeforeQuery()
       val _ = testCode(dataModelInstances)
@@ -497,13 +450,13 @@ class DataModelInstancesTest
 
   it should "work with CONTAINS ANY filter" in initAndCleanUpArrayDataForQuery { _ =>
     val inputQueryContainsAnyString = DataModelInstanceQuery(
-      DataModelIdentifier(space, dataModelArray.externalId),
+      DataModelIdentifier(Some(space), dataModelArray.externalId),
       Some(
         DMIContainsAnyFilter(
           Seq(dataModelArray.externalId, "array_string"),
           Seq(
-            StringProperty("E201"),
-            StringProperty("E103")
+            PropertyType.Text.Property("E201"),
+            PropertyType.Text.Property("E103")
           )
         )
       )
@@ -514,7 +467,7 @@ class DataModelInstancesTest
       .items
       .toList
 
-    outputQueryContainsAnyString.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryContainsAnyString.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(dmiArrayToCreate1, dmiArrayToCreate2)
     )
 
@@ -543,13 +496,13 @@ class DataModelInstancesTest
 
   it should "work with CONTAINS ALL filter" in initAndCleanUpArrayDataForQuery { _ =>
     val inputQueryContainsAllString = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModelArray.externalId),
+      DataModelIdentifier(Some(space),dataModelArray.externalId),
       Some(
         DMIContainsAnyFilter(
           Seq(dataModelArray.externalId, "array_string"),
           Seq(
-            StringProperty("E201"),
-            StringProperty("E202")
+            PropertyType.Text.Property("E201"),
+            PropertyType.Text.Property("E202")
           )
         )
       )
@@ -560,7 +513,7 @@ class DataModelInstancesTest
       .items
       .toList
 
-    outputQueryContainsAllString.map(_.properties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryContainsAllString.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(dmiArrayToCreate2)
     )
 
@@ -591,7 +544,7 @@ class DataModelInstancesTest
   // Not yet supported
   ignore should "work with sort" in initAndCleanUpDataForQuery { _ =>
     val inputQueryExists = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModel.externalId),
+      DataModelIdentifier(Some(space),dataModel.externalId),
       Some(
         DMIExistsFilter(Seq(dataModel.externalId, "prop_float"))
       ),
@@ -603,7 +556,7 @@ class DataModelInstancesTest
       .items
       .toList
 
-    outputQueryExists.map(_.properties) shouldBe Seq(
+    outputQueryExists.map(_.allProperties) shouldBe Seq(
       dataModelInstanceToCreate3,
       dataModelInstanceToCreate2,
       dataModelInstanceToCreate1
@@ -612,12 +565,12 @@ class DataModelInstancesTest
 
   it should "work with limit" in initAndCleanUpDataForQuery { _ =>
     val inputQueryOr = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModel.externalId),
+      DataModelIdentifier(Some(space),dataModel.externalId),
       Some(
         DMIOrFilter(
           Seq(
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ0011")),
-            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), BooleanProperty(true))
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0011")),
+            DMIEqualsFilter(Seq(dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true))
           )
         )
       ),
@@ -631,27 +584,27 @@ class DataModelInstancesTest
       .toList
 
     outputQueryOr.size shouldBe 1
-    val expected: Set[Option[Map[String, DataModelProperty]]] =
+    val expected: Set[Map[String, PropertyType.AnyProperty]] =
       fromCreatedToExpectedProps(Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3))
 
     outputQueryOr
-      .map(_.properties)
+      .map(_.allProperties)
       .toSet
       .subsetOf(expected) shouldBe true
   }
 
   it should "work with cursor and stream" in initAndCleanUpDataForQuery { _ =>
     val inputQueryPrefix = DataModelInstanceQuery(
-      DataModelIdentifier(space,dataModel.externalId),
+      DataModelIdentifier(Some(space),dataModel.externalId),
       Some(
-        DMIPrefixFilter(Seq(dataModel.externalId, "prop_string"), StringProperty("EQ00"))
+        DMIPrefixFilter(Seq(dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ00"))
       )
     )
 
-    def checkOutputProp(output: Seq[DataModelInstanceQueryResponse]): Assertion = {
+    def checkOutputProp(output: Seq[PropertyMap]): Assertion = {
       val expected = fromCreatedToExpectedProps(toCreates.toSet)
       output
-        .map(_.properties)
+        .map(_.allProperties)
         .toSet
         .subsetOf(
           expected
@@ -685,69 +638,34 @@ class DataModelInstancesTest
 
   // Not yet supported
   "List data model instances" should "work with multiple externalIds" ignore {
-    val toGets = toCreates.map { d =>
-      DataModelInstanceByExternalId(
-        d.properties
-          .flatMap(_.get("externalId"))
-          .collect { case StringProperty(id) =>
-            id
-          }
-          .getOrElse(""),
-        d.modelExternalId
-      )
-    }
     val outputList = blueFieldClient.dataModelInstances
-      .retrieveByExternalIds(DataModelIdentifier(space, dataModel.externalId),toGets, false)
+      .retrieveByExternalIds(DataModelIdentifier(Some(space), dataModel.externalId), toCreates.map(_.externalId))
       .unsafeRunSync()
+      .items
       .toList
     outputList.size shouldBe 3
-    outputList.map(_.properties).toSet shouldBe toCreates.map(_.properties).toSet
+    outputList.map(_.allProperties).toSet shouldBe toCreates.map(_.properties).toSet
   }
 
   // Not yet supported
-  ignore should "raise an exception if input has invalid externalId and ignoreUnknownIds is false" in {
+  ignore should "raise an exception if input has invalid externalId" in {
     the[CdpApiException] thrownBy blueFieldClient.dataModelInstances
-      .retrieveByExternalIds(
-        DataModelIdentifier(space, dataModel.externalId),
-        Seq(DataModelInstanceByExternalId(dataModel.externalId, "toto")),
-        false
-      )
+      .retrieveByExternalIds(DataModelIdentifier(Some(space), dataModel.externalId), Seq("toto"))
       .unsafeRunSync()
+      .items
       .toList
-  }
-
-  // Not yet supported
-  ignore should "ignore if input has invalid externalId and ignoreUnknownIds is true" in {
-    val res = blueFieldClient.dataModelInstances
-      .retrieveByExternalIds(
-        DataModelIdentifier(space, dataModel.externalId),
-        Seq(DataModelInstanceByExternalId(dataModel.externalId, "toto")),
-        true
-      )
-      .unsafeRunSync()
-      .toList
-
-    res.isEmpty shouldBe true
   }
 
   "Delete data model instances" should "work with multiple externalIds" in {
     val toDeletes =
-      toCreates
-        .flatMap(_.properties)
-        .map(
-          _.get("externalId")
-            .collect { case StringProperty(id) =>
-              id
-            }
-            .getOrElse("")
-        )
+      toCreates.map(_.externalId)
 
     blueFieldClient.dataModelInstances
       .deleteByExternalIds(toDeletes)
       .unsafeRunSync()
 
     // make sure that data is deleted
-    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(space, dataModel.externalId))
+    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModel.externalId))
     val outputNoFilter = blueFieldClient.dataModelInstances
       .query(inputNoFilterQuery)
       .unsafeRunSync()

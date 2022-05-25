@@ -2,8 +2,8 @@ package com.cognite.sdk.scala.v1
 
 import PropertyType.AnyProperty
 
-sealed class DataModelInstance(val properties: Map[String, AnyProperty]) {
-  val externalId: String = properties.get("externalId") match {
+sealed class PropertyMap(val allProperties: Map[String, AnyProperty]) {
+  val externalId: String = allProperties.get("externalId") match {
     case Some(PropertyType.Text.Property(externalId)) => externalId
     case Some(invalidType) =>
       throw new Exception(
@@ -14,16 +14,15 @@ sealed class DataModelInstance(val properties: Map[String, AnyProperty]) {
   }
 }
 
-object Node {
-  def Apply(
-      externalId: String,
+final case class Node(
+      override val externalId: String,
       `type`: Option[String] = None,
       name: Option[String] = None,
       description: Option[String] = None,
       properties: Option[Map[String, AnyProperty]] = None
-  ): DataModelInstance = {
-
-    val propsToAdd: Seq[Option[(String, AnyProperty)]] =
+  ) extends PropertyMap(
+    {
+      val propsToAdd: Seq[Option[(String, AnyProperty)]] =
       Seq[(String, Option[DataModelProperty[_]])](
         "externalId" -> Some(PropertyType.Text.Property(externalId)),
         "type" -> `type`.map(PropertyType.Text.Property(_)),
@@ -33,18 +32,16 @@ object Node {
         v.map(k -> _)
       }
 
-    val allProps = properties.getOrElse(Map.empty[String, AnyProperty]) ++
+      properties.getOrElse(Map.empty[String, AnyProperty]) ++
       propsToAdd.flatten.toMap
-
-    new DataModelInstance(allProps)
-  }
-}
+    }
+  )
 
 final case class DataModelInstanceCreate(
     spaceExternalId: String,
     model: DataModelIdentifier,
     overwrite: Boolean = false,
-    items: Seq[DataModelInstance]
+    items: Seq[PropertyMap]
 )
 
 sealed trait DataModelInstanceFilter
@@ -86,7 +83,7 @@ final case class DataModelInstanceQuery(
 )
 
 final case class DataModelInstanceQueryResponse(
-    items: Seq[DataModelInstance],
+    items: Seq[PropertyMap],
     modelProperties: Option[Map[String, DataModelPropertyDeffinition]] = None,
     nextCursor: Option[String] = None
 )
