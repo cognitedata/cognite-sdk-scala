@@ -14,17 +14,18 @@ import io.circe.parser._
     "org.wartremover.warts.JavaSerializable",
     "org.wartremover.warts.Serializable",
     "org.wartremover.warts.NonUnitStatements",
-    "org.wartremover.warts.Product"
+    "org.wartremover.warts.Product",
+    "org.wartremover.warts.AnyVal"
   )
 )
-class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
+class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matchers {
 
-  import com.cognite.sdk.scala.v1.resources.DataModelInstances._
+  import com.cognite.sdk.scala.v1.resources.Nodes._
 
   "DataModelFilterSerializer" when {
     "encode EmptyFilter" should {
       "return an empty object"in {
-        val empty:DataModelInstanceFilter = EmptyFilter
+        val empty:DomainSpecificLanguageFilter = EmptyFilter
         empty.asJson.toString() shouldBe """{
                                        |  
                                        |}""".stripMargin
@@ -157,6 +158,7 @@ class DataModelInstancesFilterSerializerTest extends AnyWordSpec with Matchers {
                                  |  ]
                                  |}""".stripMargin
       }
+
       "work for containsAll filter" in {
         val containsAll = DMIContainsAllFilter(
           Seq("name", "tag"),

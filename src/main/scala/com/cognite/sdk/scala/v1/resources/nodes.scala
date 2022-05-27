@@ -27,7 +27,7 @@ class Nodes[F[_]](
     with DeleteByExternalIds[F]
     with BaseUrl {
 
-  import DataModelInstances._
+  import Nodes._
 
   override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/nodes"
 
@@ -50,8 +50,8 @@ class Nodes[F[_]](
         Decoder.forProduct1("items")(Items.apply[PropertyMap])
 
       requestSession
-        .post[Seq[PropertyMap], Items[PropertyMap], DataModelInstanceCreate](
-          DataModelInstanceCreate(spaceExternalId, model, overwrite, items),
+        .post[Seq[PropertyMap], Items[PropertyMap], DataModelNodeCreate](
+          DataModelNodeCreate(spaceExternalId, model, overwrite, items),
           uri"$baseUrl",
           value => value.items
         )
@@ -68,10 +68,10 @@ class Nodes[F[_]](
       .flatMap { dm =>
         val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
 
-        implicit val dataModelInstanceDecoder: Decoder[PropertyMap] =
+        implicit val dataModelNodeDecoder: Decoder[PropertyMap] =
           createDynamicPropertyDecoder(props)
 
-        implicit val dataModelInstanceSeqDecoder: Decoder[Seq[PropertyMap]] =
+        implicit val dataModelNodeSeqDecoder: Decoder[Seq[PropertyMap]] =
           Decoder.decodeIterable[PropertyMap, Seq]
 
         implicit val dataModelInstanceQueryResponseDecoder
@@ -131,10 +131,10 @@ class Nodes[F[_]](
       implicit val dataModelInstanceDecoder: Decoder[PropertyMap] =
         createDynamicPropertyDecoder(props)
 
-      implicit val dataModelInstanceSeqDecoder: Decoder[Seq[PropertyMap]] =
+      implicit val dataModelNodeSeqDecoder: Decoder[Seq[PropertyMap]] =
         Decoder.decodeIterable[PropertyMap, Seq]
 
-      implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
+      implicit val dataModelNodeQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
         Decoder.forProduct3("items", "modelProperties", "nextCursor")(
           DataModelInstanceQueryResponse.apply
         )
@@ -151,7 +151,7 @@ class Nodes[F[_]](
     }
 }
 
-object DataModelInstances {
+object Nodes {
 
   implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDefinition] =
     DataModels.dataModelPropertyDeffinitionDecoder
@@ -186,7 +186,7 @@ object DataModelInstances {
     case _ => throw new Exception("unknown property type")
   }
 
-  implicit val dataModelInstanceEncoder: Encoder[PropertyMap] =
+  implicit val dataModelPropertyMapEncoder: Encoder[PropertyMap] =
     Encoder
       .encodeMap(KeyEncoder.encodeKeyString, propEncoder)
       .contramap[PropertyMap](dmi => dmi.allProperties)
@@ -194,11 +194,11 @@ object DataModelInstances {
   implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =
     DataModels.dataModelIdentifierEncoder
 
-  implicit val dataModelInstanceCreateEncoder: Encoder[DataModelInstanceCreate] =
-    deriveEncoder[DataModelInstanceCreate]
+  implicit val dataModelNodeCreateEncoder: Encoder[DataModelNodeCreate] =
+    deriveEncoder[DataModelNodeCreate]
 
-  implicit val dataModelInstanceItemsEncoder: Encoder[Items[DataModelInstanceCreate]] =
-    deriveEncoder[Items[DataModelInstanceCreate]]
+  implicit val dataModelNodeItemsEncoder: Encoder[Items[DataModelNodeCreate]] =
+    deriveEncoder[Items[DataModelNodeCreate]]
 
   implicit val dmiAndFilterEncoder: Encoder[DMIAndFilter] = deriveEncoder[DMIAndFilter]
   implicit val dmiOrFilterEncoder: Encoder[DMIOrFilter] = deriveEncoder[DMIOrFilter]
@@ -222,7 +222,7 @@ object DataModelInstances {
   implicit val dmiContainsAllFilterEncoder: Encoder[DMIContainsAllFilter] =
     deriveEncoder[DMIContainsAllFilter]
 
-  implicit val dmiFilterEncoder: Encoder[DataModelInstanceFilter] = {
+  implicit val dmiFilterEncoder: Encoder[DomainSpecificLanguageFilter] = {
     case EmptyFilter =>
       Json.fromFields(Seq.empty)
     case b: DMIBoolFilter =>

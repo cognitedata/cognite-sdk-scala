@@ -37,23 +37,23 @@ final case class Node(
       }
     )
 
-final case class DataModelInstanceCreate(
+final case class DataModelNodeCreate(
     spaceExternalId: String,
     model: DataModelIdentifier,
     overwrite: Boolean = false,
     items: Seq[PropertyMap]
 )
 
-sealed trait DataModelInstanceFilter
+sealed trait DomainSpecificLanguageFilter
 
-case object EmptyFilter extends DataModelInstanceFilter
+case object EmptyFilter extends DomainSpecificLanguageFilter
 
-sealed trait DMIBoolFilter extends DataModelInstanceFilter
-final case class DMIAndFilter(and: Seq[DataModelInstanceFilter]) extends DMIBoolFilter
-final case class DMIOrFilter(or: Seq[DataModelInstanceFilter]) extends DMIBoolFilter
-final case class DMINotFilter(not: DataModelInstanceFilter) extends DMIBoolFilter
+sealed trait DMIBoolFilter extends DomainSpecificLanguageFilter
+final case class DMIAndFilter(and: Seq[DomainSpecificLanguageFilter]) extends DMIBoolFilter
+final case class DMIOrFilter(or: Seq[DomainSpecificLanguageFilter]) extends DMIBoolFilter
+final case class DMINotFilter(not: DomainSpecificLanguageFilter) extends DMIBoolFilter
 
-sealed trait DMILeafFilter extends DataModelInstanceFilter
+sealed trait DMILeafFilter extends DomainSpecificLanguageFilter
 final case class DMIEqualsFilter(property: Seq[String], value: AnyProperty) extends DMILeafFilter
 final case class DMIInFilter(property: Seq[String], values: Seq[AnyProperty]) extends DMILeafFilter
 final case class DMIRangeFilter(
@@ -78,7 +78,7 @@ final case class DMIContainsAllFilter(property: Seq[String], values: Seq[AnyProp
 
 final case class DataModelInstanceQuery(
     model: DataModelIdentifier,
-    filter: DataModelInstanceFilter = EmptyFilter,
+    filter: DomainSpecificLanguageFilter = EmptyFilter,
     sort: Option[Seq[String]] = None,
     limit: Option[Int] = None,
     cursor: Option[String] = None

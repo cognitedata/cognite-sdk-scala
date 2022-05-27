@@ -24,7 +24,7 @@ import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
     "org.wartremover.warts.IsInstanceOf"
   )
 )
-class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
+class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
 
   val props: Map[String, DataModelPropertyDefinition] = Map(
     "prop_bool" -> DataModelPropertyDefinition(PropertyType.Boolean),
@@ -41,7 +41,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
     "arr_empty_nullable" -> DataModelPropertyDefinition(PropertyType.Array.Float64)
   )
 
-  import com.cognite.sdk.scala.v1.resources.DataModelInstances._
+  import com.cognite.sdk.scala.v1.resources.Nodes._
 
   implicit val propertyTypeDecoder: Decoder[PropertyMap] =
     createDynamicPropertyDecoder(props)
@@ -74,7 +74,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
     downFields.contains(propName) shouldBe true
   }
 
-  "DataModelInstancesSerializer" when {
+  "DataModelPropertiesSerializer" when {
     "decode PropertyType" should {
       "work for primitive and array" in {
         val res = decode[PropertyMap]("""{
@@ -96,7 +96,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
 
         val Right(dmiResponse) = res
 
-        dmiResponse.allProperties.toSet shouldBe 
+        dmiResponse.allProperties.toSet shouldBe
           Set(
             "prop_bool" -> PropertyType.Boolean.Property(true),
             "prop_float64" -> PropertyType.Float64.Property(23.0),
@@ -137,7 +137,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
         res.isRight shouldBe true
 
         val Right(dmiResponse) = res
-        dmiResponse.allProperties.toSet shouldBe 
+        dmiResponse.allProperties.toSet shouldBe
           Set(
             "prop_float64" -> PropertyType.Float64.Property(23.0),
             "prop_string" -> PropertyType.Text.Property("toto"),
@@ -234,7 +234,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
       }
     }
     "encode PropertyType" should {
-      import com.cognite.sdk.scala.v1.resources.DataModelInstances.dataModelInstanceEncoder
+      import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyMapEncoder
 
       "work for primitive" in {
         val pm:PropertyMap = Node(

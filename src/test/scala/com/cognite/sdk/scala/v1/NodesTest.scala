@@ -17,7 +17,8 @@ import scala.collection.immutable.Seq
     "org.wartremover.warts.NonUnitStatements",
     "org.wartremover.warts.JavaSerializable",
     "org.wartremover.warts.Product",
-    "org.wartremover.warts.Serializable"
+    "org.wartremover.warts.Serializable",
+    "org.wartremover.warts.AnyVal"
   )
 )
 class NodesTest
@@ -44,7 +45,7 @@ class NodesTest
     )
   )
 
-  val dataModelInstanceToCreate1 =
+  val dataModelNodeToCreate1 =
     Node("equipment_43",
       properties = Some(
         Map(
@@ -56,7 +57,7 @@ class NodesTest
       )
     )
 
-  val dataModelInstanceToCreate2 =
+  val dataModelNodeCreate2 =
     Node(
       "equipment_44",
       properties = Some(
@@ -68,7 +69,7 @@ class NodesTest
       )
     )
 
-  val dataModelInstanceToCreate3 =
+  val dataModelNodeToCreate3 =
     Node(
       "equipment_45",
       properties = Some(
@@ -81,7 +82,7 @@ class NodesTest
     )
 
   val toCreates =
-    Seq(dataModelInstanceToCreate1, dataModelInstanceToCreate2, dataModelInstanceToCreate3)
+    Seq(dataModelNodeToCreate1, dataModelNodeCreate2, dataModelNodeToCreate3)
 
   val dataPropArrayString = DataModelPropertyDefinition(PropertyType.Array.Text, true)
   val dataPropArrayFloat = DataModelPropertyDefinition(PropertyType.Array.Float32, true)
@@ -92,7 +93,7 @@ class NodesTest
     Some(
       Map(
         "array_string" -> dataPropArrayString,
-        "array_float" -> dataPropArrayFloat, 
+        "array_float" -> dataPropArrayFloat,
         "array_int" -> dataPropArrayInt
       )
     )
@@ -272,7 +273,7 @@ class NodesTest
     outputQueryAnd.size shouldBe 1
 
     outputQueryAnd.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
-      Set(dataModelInstanceToCreate2)
+      Set(dataModelNodeCreate2)
     )
 
     val inputQueryAnd2 = DataModelInstanceQuery(
@@ -311,7 +312,7 @@ class NodesTest
 
     outputQueryOr.size shouldBe 2
     outputQueryOr.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
-      Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3)
+      Set(dataModelNodeCreate2, dataModelNodeToCreate3)
     )
   }
 
@@ -333,7 +334,7 @@ class NodesTest
 
     outputQueryNot.size shouldBe 1
     outputQueryNot.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
-      Set(dataModelInstanceToCreate1)
+      Set(dataModelNodeToCreate1)
     )
   }
 
@@ -350,7 +351,7 @@ class NodesTest
 
     outputQueryPrefix.size shouldBe 2
     outputQueryPrefix.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
-      Set(dataModelInstanceToCreate1, dataModelInstanceToCreate2)
+      Set(dataModelNodeToCreate1, dataModelNodeCreate2)
     )
   }
 
@@ -369,7 +370,7 @@ class NodesTest
       .toList
 
     outputQueryRange.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
-      Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3)
+      Set(dataModelNodeCreate2, dataModelNodeToCreate3)
     )
   }
 
@@ -385,7 +386,7 @@ class NodesTest
       .toList
 
     outputQueryExists.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
-      Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3)
+      Set(dataModelNodeCreate2, dataModelNodeToCreate3)
     )
   }
 
@@ -529,9 +530,9 @@ class NodesTest
       .toList
 
     outputQueryExists.map(_.allProperties) shouldBe Seq(
-      dataModelInstanceToCreate3,
-      dataModelInstanceToCreate2,
-      dataModelInstanceToCreate1
+      dataModelNodeToCreate3,
+      dataModelNodeCreate2,
+      dataModelNodeToCreate1
     ).map(_.properties)
   }
 
@@ -555,7 +556,7 @@ class NodesTest
 
     outputQueryOr.size shouldBe 1
     val expected: Set[Map[String, PropertyType.AnyProperty]] =
-      fromCreatedToExpectedProps(Set(dataModelInstanceToCreate2, dataModelInstanceToCreate3))
+      fromCreatedToExpectedProps(Set(dataModelNodeCreate2, dataModelNodeToCreate3))
 
     outputQueryOr
       .map(_.allProperties)
