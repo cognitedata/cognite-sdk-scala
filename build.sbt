@@ -7,7 +7,7 @@ val scala212 = "2.12.15"
 val supportedScalaVersions = List(scala212, scala213, scala3)
 
 // This is used only for tests.
-val jettyTestVersion = "9.4.45.v20220203"
+val jettyTestVersion = "9.4.46.v20220331"
 
 val sttpVersion = "3.5.2"
 val circeVersion = "0.14.1"
@@ -21,7 +21,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.0.9-SNAPSHOT",
+  version := "2.0.9",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -122,7 +122,7 @@ lazy val core = (project in file("."))
   )
 
 val scalaTestDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.11" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.12" % "test"
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,

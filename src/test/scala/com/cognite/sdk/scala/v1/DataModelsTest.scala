@@ -8,6 +8,8 @@ import com.cognite.sdk.scala.common.RetryWhile
 
 import java.util.UUID
 import scala.collection.immutable.Seq
+import com.cognite.sdk.scala.v1.DataModelType.Edge
+import com.cognite.sdk.scala.v1.DataModelType.Node
 
 @SuppressWarnings(
   Array(
@@ -18,9 +20,9 @@ import scala.collection.immutable.Seq
 class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   val uuid = UUID.randomUUID.toString
-  val requiredTextProperty = DataModelPropertyDeffinition(PropertyType.Text, false)
-  val dataPropDescription = DataModelPropertyDeffinition(PropertyType.Text)
-  val dataPropDirectRelation = DataModelPropertyDeffinition(PropertyType.DirectRelation)
+  val requiredTextProperty = DataModelProperty(PropertyType.Text, false)
+  val dataPropDescription = DataModelProperty(PropertyType.Text)
+  val dataPropDirectRelation = DataModelProperty(PropertyType.DirectRelation)
   // val dataPropIndex = DataModelPropertyIndex(Some("name_descr"), Some(Seq("name", "description")))
 
   val dataModel = DataModel(
@@ -36,7 +38,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   val expectedDataModelOutput = dataModel.copy(properties =
     dataModel.properties.map(x =>
-      x ++ Map("externalId" -> DataModelPropertyDeffinition(PropertyType.Text, false))
+      x ++ Map("externalId" -> DataModelProperty(PropertyType.Text, false))
     )
   )
 
@@ -80,8 +82,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     val json = dataModelEncoder(dataModel)
 
     val (allowNode, allowEdge) = dataModel.dataModelType match {
-      case DataModelType.Edge => (false, true)
-      case DataModelType.Node => (true, false)
+      case Edge => (false, true)
+      case Node => (true, false)
     }
 
     json.asObject.flatMap(_("allowNode")).flatMap(_.asBoolean) shouldBe Some(allowNode)
@@ -109,8 +111,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     )
   )
 
-  private val dataPropBool = DataModelPropertyDeffinition(PropertyType.Boolean, true)
-  private val dataPropFloat = DataModelPropertyDeffinition(PropertyType.Float64, true)
+  private val dataPropBool = DataModelProperty(PropertyType.Boolean, true)
+  private val dataPropFloat = DataModelProperty(PropertyType.Float64, true)
 
   private val dataModel2 = DataModel(
     // TODO: enable transient datamodel tests when fdm team enables delete

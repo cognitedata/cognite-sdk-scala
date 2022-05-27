@@ -8,6 +8,7 @@ import java.time.Instant
 import cats.data.NonEmptyList
 import com.cognite.sdk.scala.common.{
   NonNullableSetter,
+  SdkException,
   SearchQuery,
   Setter,
   ToCreate,
@@ -48,6 +49,13 @@ final case class SequenceColumn(
       valueType,
       metadata
     )
+
+  def toModify: SequenceColumnModify = SequenceColumnModify(
+    description = Setter.fromOption(description),
+    externalId = NonNullableSetter.fromOption(externalId),
+    name = Setter.fromOption(name),
+    metadata = NonNullableSetter.fromOption(metadata)
+  )
 }
 
 final case class SequenceColumnCreate(
@@ -88,6 +96,20 @@ final case class Sequence(
       dataSetId
     )
 
+  private def getColumnsUpdate = SequenceColumnsUpdate(modify =
+    Some(
+      columns
+        .map(col =>
+          SequenceColumnModifyUpdate(
+            externalId = col.externalId
+              .getOrElse(throw SdkException(s"Sequence columns must have an externalId")),
+            update = col.toModify
+          )
+        )
+        .toList
+    )
+  )
+
   override def toUpdate: SequenceUpdate =
     SequenceUpdate(
       Setter.fromOption(name),
@@ -95,6 +117,7 @@ final case class Sequence(
       Setter.fromOption(assetId),
       Setter.fromOption(externalId),
       NonNullableSetter.fromOption(metadata),
+      Some(getColumnsUpdate),
       Setter.fromOption(dataSetId)
     )
 }
@@ -109,12 +132,31 @@ final case class SequenceCreate(
     dataSetId: Option[Long] = None
 ) extends WithExternalId
 
+final case class SequenceColumnModify(
+    description: Option[Setter[String]] = None,
+    externalId: Option[NonNullableSetter[String]] = None,
+    name: Option[Setter[String]] = None,
+    metadata: Option[NonNullableSetter[Map[String, String]]] = None
+)
+
+final case class SequenceColumnModifyUpdate(
+    externalId: String,
+    update: SequenceColumnModify
+)
+
+final case class SequenceColumnsUpdate(
+    modify: Option[Seq[SequenceColumnModifyUpdate]] = None,
+    add: Option[Seq[SequenceColumnCreate]] = None,
+    remove: Option[Seq[CogniteExternalId]] = None
+)
+
 final case class SequenceUpdate(
     name: Option[Setter[String]] = None,
     description: Option[Setter[String]] = None,
     assetId: Option[Setter[Long]] = None,
     externalId: Option[Setter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
+    columns: Option[SequenceColumnsUpdate] = None,
     dataSetId: Option[Setter[Long]] = None
 ) extends WithSetExternalId
 

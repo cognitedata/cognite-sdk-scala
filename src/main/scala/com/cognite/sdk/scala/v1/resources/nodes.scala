@@ -223,7 +223,7 @@ object DataModelInstances {
     deriveEncoder[DMIContainsAllFilter]
 
   implicit val dmiFilterEncoder: Encoder[DataModelInstanceFilter] = {
-    case EmptyFilter=>
+    case EmptyFilter =>
       Json.fromFields(Seq.empty)
     case b: DMIBoolFilter =>
       b match {

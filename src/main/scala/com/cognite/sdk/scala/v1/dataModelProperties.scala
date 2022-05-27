@@ -17,13 +17,14 @@ sealed abstract class PropertyType[TV] {
 
 sealed abstract class PrimitivePropertyType[TV] extends PropertyType[TV]
 
-sealed abstract class ArrayPropertyType[TV, TP <: PrimitivePropertyType[TV]](private val t: TP) extends PropertyType[Seq[TV]] {
+sealed abstract class ArrayPropertyType[TV, TP <: PrimitivePropertyType[TV]](private val t: TP)
+    extends PropertyType[Seq[TV]] {
   override def code: String =
     t.code + "[]"
 }
 
 object PropertyType {
-  
+
   type AnyPropertyType = PropertyType[_]
   type AnyProperty = DataModelProperty[_]
 
@@ -98,8 +99,7 @@ object PropertyType {
         extends ArrayPropertyType[ZonedDateTime, PropertyType.Timestamp.type](
           PropertyType.Timestamp
         )
-    case object Date
-        extends ArrayPropertyType[LocalDate, PropertyType.Date.type](PropertyType.Date)
+    case object Date extends ArrayPropertyType[LocalDate, PropertyType.Date.type](PropertyType.Date)
     case object Geometry
         extends ArrayPropertyType[String, PropertyType.Geometry.type](PropertyType.Geometry)
     case object Geography

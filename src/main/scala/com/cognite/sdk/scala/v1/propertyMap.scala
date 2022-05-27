@@ -15,27 +15,27 @@ sealed class PropertyMap(val allProperties: Map[String, AnyProperty]) {
 }
 
 final case class Node(
-      override val externalId: String,
-      `type`: Option[String] = None,
-      name: Option[String] = None,
-      description: Option[String] = None,
-      properties: Option[Map[String, AnyProperty]] = None
-  ) extends PropertyMap(
-    {
-      val propsToAdd: Seq[Option[(String, AnyProperty)]] =
-      Seq[(String, Option[DataModelProperty[_]])](
-        "externalId" -> Some(PropertyType.Text.Property(externalId)),
-        "type" -> `type`.map(PropertyType.Text.Property(_)),
-        "name" -> name.map(PropertyType.Text.Property(_)),
-        "description" -> description.map(PropertyType.Text.Property(_))
-      ).map { case (k, v) =>
-        v.map(k -> _)
-      }
+    override val externalId: String,
+    `type`: Option[String] = None,
+    name: Option[String] = None,
+    description: Option[String] = None,
+    properties: Option[Map[String, AnyProperty]] = None
+) extends PropertyMap(
+      {
+        val propsToAdd: Seq[Option[(String, AnyProperty)]] =
+          Seq[(String, Option[DataModelProperty[_]])](
+            "externalId" -> Some(PropertyType.Text.Property(externalId)),
+            "type" -> `type`.map(PropertyType.Text.Property(_)),
+            "name" -> name.map(PropertyType.Text.Property(_)),
+            "description" -> description.map(PropertyType.Text.Property(_))
+          ).map { case (k, v) =>
+            v.map(k -> _)
+          }
 
-      properties.getOrElse(Map.empty[String, AnyProperty]) ++
-      propsToAdd.flatten.toMap
-    }
-  )
+        properties.getOrElse(Map.empty[String, AnyProperty]) ++
+          propsToAdd.flatten.toMap
+      }
+    )
 
 final case class DataModelInstanceCreate(
     spaceExternalId: String,
