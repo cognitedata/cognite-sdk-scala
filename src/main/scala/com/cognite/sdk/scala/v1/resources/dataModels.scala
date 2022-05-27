@@ -101,8 +101,8 @@ object DataModels {
     new Encoder[DataModel] {
       final def apply(dm: DataModel): Json = {
         val (allowNode, allowEdge) = dm.dataModelType match {
-          case DataModelType.Edge => (false, true)
-          case DataModelType.Node => (true, false)
+          case DataModelType.EdgeType => (false, true)
+          case DataModelType.NodeType => (true, false)
         }
         derivedDataModelEncoder(dm)
           .mapObject(
@@ -170,8 +170,8 @@ object DataModels {
       val allowNode = init.downField("allowNode").as[Boolean]
       val allowEdge = init.downField("allowEdge").as[Boolean]
       val dataModelType: DataModelType = (allowNode, allowEdge) match {
-        case (Right(true), Right(false) | Left(_)) => DataModelType.Node
-        case (Right(false) | Left(_), Right(true)) => DataModelType.Edge
+        case (Right(true), Right(false) | Left(_)) => DataModelType.NodeType
+        case (Right(false) | Left(_), Right(true)) => DataModelType.EdgeType
         case _ => throw new Exception("Exactly one of allowNode and allowEdge must be true")
       }
       init.withFocus(

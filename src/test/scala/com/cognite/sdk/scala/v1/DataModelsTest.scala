@@ -8,8 +8,8 @@ import com.cognite.sdk.scala.common.RetryWhile
 
 import java.util.UUID
 import scala.collection.immutable.Seq
-import com.cognite.sdk.scala.v1.DataModelType.Edge
-import com.cognite.sdk.scala.v1.DataModelType.Node
+import com.cognite.sdk.scala.v1.DataModelType.EdgeType
+import com.cognite.sdk.scala.v1.DataModelType.NodeType
 
 @SuppressWarnings(
   Array(
@@ -20,9 +20,9 @@ import com.cognite.sdk.scala.v1.DataModelType.Node
 class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   val uuid = UUID.randomUUID.toString
-  val requiredTextProperty = DataModelProperty(PropertyType.Text, false)
-  val dataPropDescription = DataModelProperty(PropertyType.Text)
-  val dataPropDirectRelation = DataModelProperty(PropertyType.DirectRelation)
+  val requiredTextProperty = DataModelPropertyDeffinition(PropertyType.Text, false)
+  val dataPropDescription = DataModelPropertyDeffinition(PropertyType.Text)
+  val dataPropDirectRelation = DataModelPropertyDeffinition(PropertyType.DirectRelation)
   // val dataPropIndex = DataModelPropertyIndex(Some("name_descr"), Some(Seq("name", "description")))
 
   val dataModel = DataModel(
@@ -38,7 +38,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   val expectedDataModelOutput = dataModel.copy(properties =
     dataModel.properties.map(x =>
-      x ++ Map("externalId" -> DataModelProperty(PropertyType.Text, false))
+      x ++ Map("externalId" -> DataModelPropertyDeffinition(PropertyType.Text, false))
     )
   )
 
@@ -71,8 +71,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   private def variousDatamodels(testCode: DataModel => Any): Unit =
     for (dataModel <- Seq(
-      DataModel("testNode", dataModelType = DataModelType.Node),
-      DataModel("testEdge", dataModelType = DataModelType.Edge)
+      DataModel("testNode", dataModelType = DataModelType.NodeType),
+      DataModel("testEdge", dataModelType = DataModelType.EdgeType)
     )){
       testCode(dataModel)
     }
@@ -82,8 +82,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     val json = dataModelEncoder(dataModel)
 
     val (allowNode, allowEdge) = dataModel.dataModelType match {
-      case Edge => (false, true)
-      case Node => (true, false)
+      case EdgeType => (false, true)
+      case NodeType => (true, false)
     }
 
     json.asObject.flatMap(_("allowNode")).flatMap(_.asBoolean) shouldBe Some(allowNode)
@@ -111,8 +111,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     )
   )
 
-  private val dataPropBool = DataModelProperty(PropertyType.Boolean, true)
-  private val dataPropFloat = DataModelProperty(PropertyType.Float64, true)
+  private val dataPropBool = DataModelPropertyDeffinition(PropertyType.Boolean, true)
+  private val dataPropFloat = DataModelPropertyDeffinition(PropertyType.Float64, true)
 
   private val dataModel2 = DataModel(
     // TODO: enable transient datamodel tests when fdm team enables delete
