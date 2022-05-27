@@ -6,7 +6,7 @@ package com.cognite.sdk.scala.v1.resources
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, Printer}
+import io.circe.{Decoder, Encoder, HCursor, Json, Printer}
 import sttp.client3._
 import sttp.client3.circe._
 
@@ -14,44 +14,40 @@ class DataModels[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
   import DataModels._
-  override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/definitions"
+  override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/models"
 
-  def createItems(items: Items[DataModel]): F[Seq[DataModel]] = {
+  def createItems(items: Seq[DataModel], spaceExternalId: String): F[Seq[DataModel]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
-    requestSession.post[Seq[DataModel], Items[DataModel], Items[DataModel]](
-      items,
-      uri"$baseUrl/apply",
+    requestSession.post[Seq[DataModel], Items[DataModel], SpacedItems[DataModel]](
+      SpacedItems(spaceExternalId, items),
+      uri"$baseUrl",
       value => value.items
     )
   }
 
-  def deleteItems(externalIds: Seq[String]): F[Unit] =
-    requestSession.post[Unit, Unit, Items[CogniteId]](
-      Items(externalIds.map(CogniteExternalId(_))),
+  def deleteItems(externalIds: Seq[String], spaceExternalId: String): F[Unit] =
+    requestSession.post[Unit, Unit, SpacedItems[CogniteId]](
+      SpacedItems(spaceExternalId, externalIds.map(CogniteExternalId(_))),
       uri"$baseUrl/delete",
       _ => ()
     )
 
-  def list(includeInheritedProperties: Boolean = false): F[Seq[DataModel]] =
+  def list(spaceExternalId: String): F[Seq[DataModel]] =
     requestSession.post[Seq[DataModel], Items[DataModel], DataModelListInput](
-      DataModelListInput(includeInheritedProperties),
+      DataModelListInput(spaceExternalId),
       uri"$baseUrl/list",
       value => value.items
     )
 
   def retrieveByExternalIds(
       externalIds: Seq[String],
-      includeInheritedProperties: Boolean = false,
-      ignoreUnknownIds: Boolean = false
+      spaceExternalId: String
   ): F[Seq[DataModel]] =
     requestSession
-      .post[Seq[DataModel], Items[DataModel], DataModelGetByExternalIdsInput[
-        CogniteId
-      ]](
-        DataModelGetByExternalIdsInput(
-          externalIds.map(CogniteExternalId(_)),
-          includeInheritedProperties,
-          ignoreUnknownIds
+      .post[Seq[DataModel], Items[DataModel], SpacedItems[CogniteId]](
+        SpacedItems(
+          spaceExternalId,
+          externalIds.map(CogniteExternalId(_))
         ),
         uri"$baseUrl/byids",
         value => value.items
@@ -60,28 +56,132 @@ class DataModels[F[_]](val requestSession: RequestSession[F])
 }
 
 object DataModels {
-  implicit val dataModelPropertyIndexEncoder: Encoder[DataModelPropertyIndex] =
-    deriveEncoder[DataModelPropertyIndex]
+  implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =
+    Encoder
+      .encodeIterable[String, Seq]
+      .contramap[DataModelIdentifier] {
+        case DataModelIdentifier(Some(space), model) =>
+          Seq(space, model)
+        case DataModelIdentifier(_, model) =>
+          Seq(model)
+      }
+
+  implicit val bTreeIndexEncoder: Encoder[BTreeIndex] =
+    deriveEncoder[BTreeIndex]
+  implicit val dataModelPropertyTypeEncoder: Encoder[PropertyType] =
+    Encoder.encodeString.contramap[PropertyType](_.code)
+  implicit val dataModelPropertyIndexesEncoder: Encoder[DataModelIndexes] =
+    deriveEncoder[DataModelIndexes]
   implicit val dataModelPropertyEncoder: Encoder[DataModelProperty] =
     deriveEncoder[DataModelProperty]
-  implicit val dataModelEncoder: Encoder[DataModel] = deriveEncoder[DataModel]
-  implicit val dataModelItemsEncoder: Encoder[Items[DataModel]] = deriveEncoder[Items[DataModel]]
+  implicit val uniquenessConstraintEncoder: Encoder[UniquenessConstraint] =
+    new Encoder[UniquenessConstraint] {
+      final def apply(uc: UniquenessConstraint): Json =
+        Json.fromFields(
+          Seq(
+            "uniqueProperties" -> Json.fromValues(
+              uc.uniqueProperties.map(p => Json.fromFields(Seq("property" -> Json.fromString(p))))
+            )
+          )
+        )
+    }
+  implicit val dataModelConstraintsEncoder: Encoder[DataModelConstraints] =
+    deriveEncoder[DataModelConstraints]
+  implicit val dataModelTypeEncoder: Encoder[DataModelType] =
+    deriveEncoder[DataModelType]
+
+  // Derived encoder is used for everything but dataModelType. dataModelType is replaced by
+  //   allowEdge and allowNode before returning.
+  val derivedDataModelEncoder: Encoder[DataModel] =
+    deriveEncoder[DataModel]
+  implicit val dataModelEncoder: Encoder[DataModel] =
+    new Encoder[DataModel] {
+      final def apply(dm: DataModel): Json = {
+        val (allowNode, allowEdge) = dm.dataModelType match {
+          case DataModelType.Edge => (false, true)
+          case DataModelType.Node => (true, false)
+        }
+        derivedDataModelEncoder(dm)
+          .mapObject(
+            { "allowEdge" -> Json.fromBoolean(allowEdge) } +: {
+              "allowNode" -> Json.fromBoolean(allowNode)
+            } +:
+              _.filterKeys {
+                case "dataModelType" => false
+                case _ => true
+              }
+          )
+      }
+    }
+
+  implicit val dataModelItemsEncoder: Encoder[SpacedItems[DataModel]] =
+    deriveEncoder[SpacedItems[DataModel]]
+  implicit val cogniteIdSpacedItemsEncoder: Encoder[SpacedItems[CogniteId]] =
+    deriveEncoder[SpacedItems[CogniteId]]
   implicit val dataModelListInputEncoder: Encoder[DataModelListInput] =
     deriveEncoder[DataModelListInput]
 
-  implicit val dataModelPropertyIndexDecoder: Decoder[DataModelPropertyIndex] =
-    deriveDecoder[DataModelPropertyIndex]
+  implicit val dataModelIdentifierDecoder: Decoder[DataModelIdentifier] =
+    Decoder
+      .decodeIterable[String, List]
+      .map {
+        case modelExternalId :: Nil =>
+          DataModelIdentifier(None, modelExternalId)
+        case spaceExternalId :: modelExternalId :: Nil =>
+          DataModelIdentifier(Some(spaceExternalId), modelExternalId)
+        case list =>
+          throw new SdkException(
+            s"Unable to decode DataModelIdentifier, expected array length 1 or 2, actual length ${list.length.toString}."
+          )
+      }
+  implicit val bTreeIndexDecoder: Decoder[BTreeIndex] =
+    deriveDecoder[BTreeIndex]
+  implicit val dataModelPropertyTypeDecoder: Decoder[PropertyType] =
+    Decoder.decodeString.map(
+      PropertyType
+        .fromCode(_)
+        .getOrElse(
+          throw new IllegalArgumentException("Invalid type specified")
+        )
+    )
+  implicit val dataModelPropertyIndexesDecoder: Decoder[DataModelIndexes] =
+    deriveDecoder[DataModelIndexes]
   implicit val dataModelPropertyDecoder: Decoder[DataModelProperty] =
     deriveDecoder[DataModelProperty]
-  implicit val dataModelDecoder: Decoder[DataModel] = deriveDecoder[DataModel]
-  implicit val dataModelItemsDecoder: Decoder[Items[DataModel]] = deriveDecoder[Items[DataModel]]
+  implicit val uniquenessConstraintDecoder: Decoder[UniquenessConstraint] =
+    new Decoder[UniquenessConstraint] {
+      final def apply(c: HCursor): Decoder.Result[UniquenessConstraint] =
+        for {
+          properties <- c.downField("uniqueProperties").as[Seq[Map[String, String]]]
+        } yield new UniquenessConstraint(properties.map(_("property")))
+    }
+  implicit val dataModelConstraintsDecoder: Decoder[DataModelConstraints] =
+    deriveDecoder[DataModelConstraints]
+  implicit val dataModelTypeDecoder: Decoder[DataModelType] =
+    deriveDecoder[DataModelType]
 
-  implicit val dataModelGetByCogniteIdIdsEncoder
-      : Encoder[DataModelGetByExternalIdsInput[CogniteId]] =
-    deriveEncoder[DataModelGetByExternalIdsInput[CogniteId]]
+  // Gets the dataModelType from allowNode and allowEdge, encodes it in a way the derived
+  //   decoder will understand, and adds it to the json before parsing
+  implicit val dataModelDecoder: Decoder[DataModel] =
+    deriveDecoder[DataModel].prepare { init =>
+      val allowNode = init.downField("allowNode").as[Boolean]
+      val allowEdge = init.downField("allowEdge").as[Boolean]
+      val dataModelType: DataModelType = (allowNode, allowEdge) match {
+        case (Right(true), Right(false) | Left(_)) => DataModelType.Node
+        case (Right(false) | Left(_), Right(true)) => DataModelType.Edge
+        case _ => throw new Exception("Exactly one of allowNode and allowEdge must be true")
+      }
+      init.withFocus(
+        _.deepMerge(
+          Json.fromFields(
+            Seq(
+              "dataModelType" -> dataModelTypeEncoder(dataModelType)
+            )
+          )
+        )
+      )
+    }
 
-  implicit val dataModelGetByExternalIdsEncoder
-      : Encoder[DataModelGetByExternalIdsInput[CogniteExternalId]] =
-    deriveEncoder[DataModelGetByExternalIdsInput[CogniteExternalId]]
-
+  implicit val dataModelItemsDecoder: Decoder[Items[DataModel]] =
+    deriveDecoder[Items[DataModel]]
 }
