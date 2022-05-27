@@ -157,7 +157,7 @@ class NodesTest
       blueFieldClient.dataModels.list(space).unsafeRunSync(),
       dm => {
         val dmSet = dm.map(m => m.externalId)
-        dmSet.contains(dataModel.externalId) && 
+        dmSet.contains(dataModel.externalId) &&
           dmSet.contains(dataModelArray.externalId) shouldBe true
       }
     )
