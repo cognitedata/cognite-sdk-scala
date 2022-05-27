@@ -25,11 +25,11 @@ class NodesTest
     with RetryWhile
     with BeforeAndAfterAll {
   val uuid = UUID.randomUUID.toString
-  val dataPropString = DataModelPropertyDeffinition(PropertyType.Text)
-  val dataPropBool = DataModelPropertyDeffinition(PropertyType.Boolean)
-  val dataPropFloat = DataModelPropertyDeffinition(PropertyType.Float32, nullable = false)
-  val dataPropDirectRelation = DataModelPropertyDeffinition(PropertyType.DirectRelation)
-  val dataPropDate = DataModelPropertyDeffinition(PropertyType.Date)
+  val dataPropString = DataModelPropertyDefinition(PropertyType.Text)
+  val dataPropBool = DataModelPropertyDefinition(PropertyType.Boolean)
+  val dataPropFloat = DataModelPropertyDefinition(PropertyType.Float32, nullable = false)
+  val dataPropDirectRelation = DataModelPropertyDefinition(PropertyType.DirectRelation)
+  val dataPropDate = DataModelPropertyDefinition(PropertyType.Date)
 
   val dataModel = DataModel(
     s"Equipment-instances",
@@ -83,9 +83,9 @@ class NodesTest
   val toCreates =
     Seq(dataModelInstanceToCreate1, dataModelInstanceToCreate2, dataModelInstanceToCreate3)
 
-  val dataPropArrayString = DataModelPropertyDeffinition(PropertyType.Array.Text, true)
-  val dataPropArrayFloat = DataModelPropertyDeffinition(PropertyType.Array.Float32, true) 
-  val dataPropArrayInt = DataModelPropertyDeffinition(PropertyType.Array.Int, true)
+  val dataPropArrayString = DataModelPropertyDefinition(PropertyType.Array.Text, true)
+  val dataPropArrayFloat = DataModelPropertyDefinition(PropertyType.Array.Float32, true)
+  val dataPropArrayInt = DataModelPropertyDefinition(PropertyType.Array.Int, true)
 
   val dataModelArray = DataModel(
     s"Equipment-arry",

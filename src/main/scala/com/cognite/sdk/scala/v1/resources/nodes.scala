@@ -153,7 +153,7 @@ class Nodes[F[_]](
 
 object DataModelInstances {
 
-  implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDeffinition] =
+  implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDefinition] =
     DataModels.dataModelPropertyDeffinitionDecoder
 
   // scalastyle:off cyclomatic.complexity
@@ -293,7 +293,7 @@ object DataModelInstances {
   )
   private def filterOutNullableProps(
       res: Iterable[Either[DecodingFailure, (String, AnyProperty)]],
-      props: Map[String, DataModelPropertyDeffinition]
+      props: Map[String, DataModelPropertyDefinition]
   ): Iterable[Either[DecodingFailure, (String, AnyProperty)]] =
     res.filter {
       case Right(_) => true
@@ -311,7 +311,7 @@ object DataModelInstances {
   @SuppressWarnings(Array("org.wartremover.warts.Null"))
   // scalastyle:off cyclomatic.complexity
   def createDynamicPropertyDecoder(
-      props: Map[String, DataModelPropertyDeffinition]
+      props: Map[String, DataModelPropertyDefinition]
   ): Decoder[PropertyMap] =
     new Decoder[PropertyMap] {
       def apply(c: HCursor): Decoder.Result[PropertyMap] = {

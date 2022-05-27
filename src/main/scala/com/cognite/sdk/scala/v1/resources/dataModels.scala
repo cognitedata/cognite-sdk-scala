@@ -73,8 +73,8 @@ object DataModels {
     Encoder.encodeString.contramap[AnyPropertyType](_.code)
   implicit val dataModelPropertyIndexesEncoder: Encoder[DataModelIndexes] =
     deriveEncoder[DataModelIndexes]
-  implicit val dataModelPropertyDeffinitionEncoder: Encoder[DataModelPropertyDeffinition] =
-    Encoder.forProduct3[DataModelPropertyDeffinition, AnyPropertyType, Boolean, Option[
+  implicit val dataModelPropertyDeffinitionEncoder: Encoder[DataModelPropertyDefinition] =
+    Encoder.forProduct3[DataModelPropertyDefinition, AnyPropertyType, Boolean, Option[
       DataModelIdentifier
     ]]("type", "nullable", "targetModel")(pd => (pd.`type`, pd.nullable, pd.targetModel))
   implicit val uniquenessConstraintEncoder: Encoder[UniquenessConstraint] =
@@ -149,8 +149,8 @@ object DataModels {
     )
   implicit val dataModelPropertyIndexesDecoder: Decoder[DataModelIndexes] =
     deriveDecoder[DataModelIndexes]
-  implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDeffinition] =
-    Decoder.forProduct3("type", "nullable", "targetModel")(DataModelPropertyDeffinition.apply)
+  implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDefinition] =
+    Decoder.forProduct3("type", "nullable", "targetModel")(DataModelPropertyDefinition.apply)
   implicit val uniquenessConstraintDecoder: Decoder[UniquenessConstraint] =
     new Decoder[UniquenessConstraint] {
       final def apply(c: HCursor): Decoder.Result[UniquenessConstraint] =

@@ -26,19 +26,19 @@ import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 )
 class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
 
-  val props: Map[String, DataModelPropertyDeffinition] = Map(
-    "prop_bool" -> DataModelPropertyDeffinition(PropertyType.Boolean),
-    "prop_float64" -> DataModelPropertyDeffinition(PropertyType.Float64, false),
-    "prop_string" -> DataModelPropertyDeffinition(PropertyType.Text, false),
-    "prop_direct_relation" -> DataModelPropertyDeffinition(PropertyType.DirectRelation),
-    "prop_date" -> DataModelPropertyDeffinition(PropertyType.Date),
-    "prop_timestamp" -> DataModelPropertyDeffinition(PropertyType.Timestamp),
-    "arr_bool" -> DataModelPropertyDeffinition(PropertyType.Array.Boolean, false),
-    "arr_float64" -> DataModelPropertyDeffinition(PropertyType.Array.Float64, false),
-    "arr_int32" -> DataModelPropertyDeffinition(PropertyType.Array.Int),
-    "arr_string" -> DataModelPropertyDeffinition(PropertyType.Array.Text),
-    "arr_empty" -> DataModelPropertyDeffinition(PropertyType.Array.Text, false),
-    "arr_empty_nullable" -> DataModelPropertyDeffinition(PropertyType.Array.Float64)
+  val props: Map[String, DataModelPropertyDefinition] = Map(
+    "prop_bool" -> DataModelPropertyDefinition(PropertyType.Boolean),
+    "prop_float64" -> DataModelPropertyDefinition(PropertyType.Float64, false),
+    "prop_string" -> DataModelPropertyDefinition(PropertyType.Text, false),
+    "prop_direct_relation" -> DataModelPropertyDefinition(PropertyType.DirectRelation),
+    "prop_date" -> DataModelPropertyDefinition(PropertyType.Date),
+    "prop_timestamp" -> DataModelPropertyDefinition(PropertyType.Timestamp),
+    "arr_bool" -> DataModelPropertyDefinition(PropertyType.Array.Boolean, false),
+    "arr_float64" -> DataModelPropertyDefinition(PropertyType.Array.Float64, false),
+    "arr_int32" -> DataModelPropertyDefinition(PropertyType.Array.Int),
+    "arr_string" -> DataModelPropertyDefinition(PropertyType.Array.Text),
+    "arr_empty" -> DataModelPropertyDefinition(PropertyType.Array.Text, false),
+    "arr_empty_nullable" -> DataModelPropertyDefinition(PropertyType.Array.Float64)
   )
 
   import com.cognite.sdk.scala.v1.resources.DataModelInstances._
@@ -51,7 +51,7 @@ class DataModelInstancesSerializerTest extends AnyWordSpec with Matchers {
       def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] =
         for {
           items <- c.downField("items").as[Seq[PropertyMap]]
-          modelProperties <- c.downField("modelProperties").as[Option[Map[String, DataModelPropertyDeffinition]]]
+          modelProperties <- c.downField("modelProperties").as[Option[Map[String, DataModelPropertyDefinition]]]
           nextCursor <- c.downField("nextCursor").as[Option[String]]
         } yield DataModelInstanceQueryResponse(items, modelProperties, nextCursor)
     }

@@ -12,7 +12,7 @@ final case class DataModelIdentifier(
     model: String
 )
 
-final case class DataModelPropertyDeffinition(
+final case class DataModelPropertyDefinition(
     `type`: AnyPropertyType,
     nullable: Boolean = true,
     targetModel: Option[DataModelIdentifier] = None
@@ -36,7 +36,7 @@ final case class DataModelIndexes(
 
 final case class DataModel(
     externalId: String,
-    properties: Option[Map[String, DataModelPropertyDeffinition]] = None,
+    properties: Option[Map[String, DataModelPropertyDefinition]] = None,
     `extends`: Option[Seq[DataModelIdentifier]] = None,
     indexes: Option[DataModelIndexes] = None,
     constraints: Option[DataModelConstraints] = None,

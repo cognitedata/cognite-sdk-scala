@@ -86,7 +86,7 @@ final case class DataModelInstanceQuery(
 
 final case class DataModelInstanceQueryResponse(
     items: Seq[PropertyMap],
-    modelProperties: Option[Map[String, DataModelPropertyDeffinition]] = None,
+    modelProperties: Option[Map[String, DataModelPropertyDefinition]] = None,
     nextCursor: Option[String] = None
 )
 

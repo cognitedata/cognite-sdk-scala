@@ -20,9 +20,9 @@ import com.cognite.sdk.scala.v1.DataModelType.NodeType
 class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   val uuid = UUID.randomUUID.toString
-  val requiredTextProperty = DataModelPropertyDeffinition(PropertyType.Text, false)
-  val dataPropDescription = DataModelPropertyDeffinition(PropertyType.Text)
-  val dataPropDirectRelation = DataModelPropertyDeffinition(PropertyType.DirectRelation)
+  val requiredTextProperty = DataModelPropertyDefinition(PropertyType.Text, false)
+  val dataPropDescription = DataModelPropertyDefinition(PropertyType.Text)
+  val dataPropDirectRelation = DataModelPropertyDefinition(PropertyType.DirectRelation)
   // val dataPropIndex = DataModelPropertyIndex(Some("name_descr"), Some(Seq("name", "description")))
 
   val dataModel = DataModel(
@@ -38,7 +38,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   val expectedDataModelOutput = dataModel.copy(properties =
     dataModel.properties.map(x =>
-      x ++ Map("externalId" -> DataModelPropertyDeffinition(PropertyType.Text, false))
+      x ++ Map("externalId" -> DataModelPropertyDefinition(PropertyType.Text, false))
     )
   )
 
@@ -111,8 +111,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     )
   )
 
-  private val dataPropBool = DataModelPropertyDeffinition(PropertyType.Boolean, true)
-  private val dataPropFloat = DataModelPropertyDeffinition(PropertyType.Float64, true)
+  private val dataPropBool = DataModelPropertyDefinition(PropertyType.Boolean, true)
+  private val dataPropFloat = DataModelPropertyDefinition(PropertyType.Float64, true)
 
   private val dataModel2 = DataModel(
     // TODO: enable transient datamodel tests when fdm team enables delete
