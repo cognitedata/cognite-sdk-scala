@@ -145,7 +145,7 @@ class NodesTest
 
   val dmiArrayToCreates =
     Seq(dmiArrayToCreate1, dmiArrayToCreate2, dmiArrayToCreate3)
-  
+
   private val space = "test-space"
 
   override def beforeAll(): Unit = {

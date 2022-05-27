@@ -27,7 +27,7 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
       "return an empty object"in {
         val empty:DomainSpecificLanguageFilter = EmptyFilter
         empty.asJson.toString() shouldBe """{
-                                       |  
+                                       |
                                        |}""".stripMargin
       }
     }

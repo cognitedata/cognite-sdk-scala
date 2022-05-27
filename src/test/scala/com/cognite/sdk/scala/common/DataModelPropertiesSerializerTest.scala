@@ -255,7 +255,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
             )
           )
         )
-        
+
         val res = pm.asJson.toString()
 
         val expectedJson1 = """{
