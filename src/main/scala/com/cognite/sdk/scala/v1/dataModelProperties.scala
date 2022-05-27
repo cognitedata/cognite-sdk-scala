@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.{LocalDate, ZonedDateTime}
+// scalastyle:off number.of.types
 
 sealed abstract class DataModelProperty[TV](val value: TV)
 
@@ -106,3 +107,4 @@ object PropertyType {
         extends ArrayPropertyType[String, PropertyType.Geography.type](PropertyType.Geography)
   }
 }
+// scalastyle:on number.of.types
