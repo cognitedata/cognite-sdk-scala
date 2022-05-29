@@ -6,12 +6,11 @@ package com.cognite.sdk.scala.common
 import com.cognite.sdk.scala.v1._
 import io.circe
 import io.circe.CursorOp.DownField
-import io.circe.{Decoder, DecodingFailure, HCursor}
+import io.circe.{Decoder, DecodingFailure, HCursor, Json}
 import io.circe.parser.decode
 import io.circe.syntax._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-
 import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 
 @SuppressWarnings(
@@ -127,6 +126,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
       }
       "work for nullable property" in {
         val res = decode[PropertyMap]("""{
+                                        |    "externalId": "test",
                                         |    "prop_float64": 23.0,
                                         |    "prop_string": "toto",
                                         |    "prop_direct_relation": "Asset",
@@ -139,6 +139,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
         val Right(dmiResponse) = res
         dmiResponse.allProperties.toSet shouldBe
           Set(
+            "externalId" -> "test",
             "prop_float64" -> PropertyType.Float64.Property(23.0),
             "prop_string" -> PropertyType.Text.Property("toto"),
             "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
@@ -250,46 +251,29 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
               "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
               "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22)),
               "prop_timestamp" -> PropertyType.Timestamp.Property(
-                ZonedDateTime.of(2022, 3, 22, 12, 34, 56, 789000000, ZoneOffset.of("+01:00"))
+                ZonedDateTime.of(2022, 3, 22, 12, 34, 56,
+                  789000000, ZoneOffset.of("+01:00"))
               )
             )
           )
         )
 
-        val res = pm.asJson.toString()
+        val res = pm.asJson.spaces2SortKeys
 
-        val expectedJson1 = """{
-                              |  "modelExternalId" : "model_primitive",
-                              |  "properties" : {
-                              |    "prop_float64" : 23.0,
-                              |    "prop_int32" : 123,
-                              |    "prop_string" : "toto",
-                              |    "prop_timestamp" : "2022-03-22T12:34:56.789+01:00",
-                              |    "prop_date" : "2022-03-22",
-                              |    "prop_int64" : 9223372036854775,
-                              |    "prop_bool" : true,
-                              |    "prop_float32" : 23.0,
-                              |    "prop_direct_relation" : "Asset"
-                              |  }
-                              |}""".stripMargin
+        val expectedJsonObj = Json.obj(
+          ("externalId", Json.fromString("model_primitive")),
+          ("prop_float64", Json.fromDoubleOrNull(23.0)),
+          ("prop_float32", Json.fromDoubleOrNull(23.0)),
+          ("prop_direct_relation", Json.fromString("Asset")),
+          ("prop_int32", Json.fromInt(123)),
+          ("prop_string", Json.fromString("toto")),
+          ("prop_timestamp", Json.fromString("2022-03-22T12:34:56.789+01:00")),
+          ("prop_date", Json.fromString("2022-03-22")),
+          ("prop_int64", Json.fromBigInt(9223372036854775L)),
+          ("prop_bool", Json.fromBoolean(true))
+        ).spaces2SortKeys
 
-        // Same content but order of properties in scala 2.12 is different than 2.13 and 3 ¯\_(ツ)_/¯
-        val expectedJson2 = """{
-                              |  "modelExternalId" : "model_primitive",
-                              |  "properties" : {
-                              |    "prop_float64" : 23.0,
-                              |    "prop_float32" : 23.0,
-                              |    "prop_direct_relation" : "Asset",
-                              |    "prop_int32" : 123,
-                              |    "prop_string" : "toto",
-                              |    "prop_timestamp" : "2022-03-22T12:34:56.789+01:00",
-                              |    "prop_date" : "2022-03-22",
-                              |    "prop_int64" : 9223372036854775,
-                              |    "prop_bool" : true
-                              |  }
-                              |}""".stripMargin
-
-        res === expectedJson1 || res === expectedJson2 shouldBe true
+        res shouldBe expectedJsonObj
       }
       "work for array" in {
         val pm: PropertyMap = Node(
@@ -319,43 +303,25 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           )
         )
 
-        pm.asJson.toString() shouldBe """{
-                                         |  "modelExternalId" : "model_array",
-                                         |  "properties" : {
-                                         |    "arr_empty" : [
-                                         |    ],
-                                         |    "arr_int64" : [
-                                         |      2147483650,
-                                         |      0,
-                                         |      9223372036854775,
-                                         |      1
-                                         |    ],
-                                         |    "arr_string" : [
-                                         |      "tata",
-                                         |      "titi"
-                                         |    ],
-                                         |    "arr_int32" : [
-                                         |      3,
-                                         |      1,
-                                         |      2147483646
-                                         |    ],
-                                         |    "arr_float32" : [
-                                         |      2.3,
-                                         |      6.35,
-                                         |      7.48
-                                         |    ],
-                                         |    "arr_bool" : [
-                                         |      true,
-                                         |      false,
-                                         |      true
-                                         |    ],
-                                         |    "arr_float64" : [
-                                         |      1.2,
-                                         |      2.0,
-                                         |      4.654
-                                         |    ]
-                                         |  }
-                                         |}""".stripMargin
+        pm.asJson.spaces2SortKeys shouldBe Json.obj(
+          ("externalId", Json.fromString("model_array")),
+          ("arr_bool", Json.fromValues(List(Json.fromBoolean(true),
+            Json.fromBoolean(false),
+            Json.fromBoolean(true)))),
+          ("arr_float32", Json.fromValues(List(Json.fromFloatOrNull(2.3f),
+            Json.fromFloatOrNull(6.35f),
+            Json.fromFloatOrNull(7.48f)))),
+          ("arr_float64", Json.fromValues(List(Json.fromDoubleOrNull(1.2),
+            Json.fromDoubleOrNull(2.0),
+            Json.fromDoubleOrNull(4.654)))),
+          ("arr_int32", Json.fromValues(List(Json.fromInt(3),
+            Json.fromInt(1),
+            Json.fromInt(2147483646)))),
+          ("arr_int64", Json.fromValues(List(Json.fromBigInt(2147483650L),
+            Json.fromBigInt(0), Json.fromBigInt(9223372036854775L), Json.fromBigInt(1)))),
+          ("arr_string", Json.fromValues(List(Json.fromString("tata"), Json.fromString("titi")))),
+          ("arr_empty", Json.fromValues(List()))
+        ).spaces2SortKeys
       }
       "work for mixing both primitive and array" in {
         val res: PropertyMap = Node(
@@ -384,41 +350,25 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
             )
           )
         )
-        res.asJson.toString() shouldBe """{
-                                         |  "modelExternalId" : "model_mixing",
-                                         |  "properties" : {
-                                         |    "prop_float64" : 23.0,
-                                         |    "arr_empty" : [
-                                         |    ],
-                                         |    "arr_int64" : [
-                                         |      2147483650,
-                                         |      0,
-                                         |      9223372036854775,
-                                         |      1
-                                         |    ],
-                                         |    "arr_string" : [
-                                         |      "tata",
-                                         |      "titi"
-                                         |    ],
-                                         |    "arr_int32" : [
-                                         |      3,
-                                         |      1,
-                                         |      2147483646
-                                         |    ],
-                                         |    "prop_string" : "toto",
-                                         |    "arr_bool" : [
-                                         |      true,
-                                         |      false,
-                                         |      true
-                                         |    ],
-                                         |    "prop_bool" : true,
-                                         |    "arr_float64" : [
-                                         |      1.2,
-                                         |      2.0,
-                                         |      4.654
-                                         |    ]
-                                         |  }
-                                         |}""".stripMargin
+        res.asJson.spaces2SortKeys shouldBe Json.obj(
+          ("externalId", Json.fromString("model_mixing")),
+          ("prop_bool", Json.fromBoolean(true)),
+          ("prop_float64", Json.fromDoubleOrNull(23.0)),
+          ("prop_string", Json.fromString("toto")),
+          ("arr_bool", Json.fromValues(List(Json.fromBoolean(true),
+            Json.fromBoolean(false),
+            Json.fromBoolean(true)))),
+          ("arr_float64", Json.fromValues(List(Json.fromDoubleOrNull(1.2),
+            Json.fromDoubleOrNull(2.0),
+            Json.fromDoubleOrNull(4.654)))),
+          ("arr_int32", Json.fromValues(List(Json.fromInt(3),
+            Json.fromInt(1),
+            Json.fromInt(2147483646)))),
+          ("arr_int64", Json.fromValues(List(Json.fromBigInt(2147483650L),
+            Json.fromBigInt(0), Json.fromBigInt(9223372036854775L), Json.fromBigInt(1)))),
+          ("arr_string", Json.fromValues(List(Json.fromString("tata"), Json.fromString("titi")))),
+          ("arr_empty", Json.fromValues(List()))
+        ).spaces2SortKeys
       }
     }
   }
