@@ -138,16 +138,15 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   private def insertDataModels = {
 
-    val outputCreates =
     // TODO: enable transient datamodel tests when fdm team enables delete
 
-     /*
-        blueFieldClient.dataModels
-        .createItems(Seq(dataModel1, dataModel2), space)
-        .unsafeRunSync()
-        .toList */
+    //        val outputCreates = blueFieldClient.dataModels
+    //        .createItems(Seq(dataModel1, dataModel2), space)
+    //        .unsafeRunSync()
+    //        .toList
 
-      Seq(dataModel1, expectedDataModel2Output)
+    val outputCreates = Seq(dataModel1, expectedDataModel2Output)
+
 
     outputCreates.size should be >= 2
     retryWithExpectedResult[scala.collection.Seq[DataModel]](
@@ -159,16 +158,16 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   private def deleteDataModels(): Unit = {
     // TODO: enable transient datamodel tests when fdm team enables delete
-    /*
-    blueFieldClient.dataModels
-      .deleteItems(Seq(dataModel1.externalId, dataModel2.externalId), space)
-      .unsafeRunSync()
 
-    retryWithExpectedResult[scala.collection.Seq[DataModel]](
-      blueFieldClient.dataModels.list(space).unsafeRunSync(),
-      dm => dm.contains(dataModel1) && dm.contains(dataModel2) shouldBe false
-    )
-    */
+    //    blueFieldClient.dataModels
+    //      .deleteItems(Seq(dataModel1.externalId, dataModel2.externalId), space)
+    //      .unsafeRunSync()
+    //
+    //    retryWithExpectedResult[scala.collection.Seq[DataModel]](
+    //      blueFieldClient.dataModels.list(space).unsafeRunSync(),
+    //      dm => dm.contains(dataModel1) && dm.contains(dataModel2) shouldBe false
+    //    )
+
     ()
   }
 
