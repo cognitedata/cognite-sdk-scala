@@ -7,6 +7,12 @@ import cats.syntax.all._
 import cats.effect.Async
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import com.cognite.sdk.scala.v1.resources.Nodes.{
+  createDynamicPropertyDecoder,
+  dataModelInstanceByExternalIdEncoder,
+  dataModelInstanceQueryEncoder,
+  dataModelNodeCreateEncoder
+}
 import fs2.Stream
 import io.circe.CursorOp.DownField
 import io.circe.syntax._
@@ -16,7 +22,6 @@ import sttp.client3._
 import sttp.client3.circe._
 
 import java.time.{LocalDate, ZonedDateTime}
-
 import scala.collection.immutable
 
 class Nodes[F[_]](
@@ -25,8 +30,6 @@ class Nodes[F[_]](
 ) extends WithRequestSession[F]
     with DeleteByExternalIds[F]
     with BaseUrl {
-
-  import Nodes._
 
   override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/nodes"
 
@@ -72,6 +75,8 @@ class Nodes[F[_]](
 
         implicit val dataModelNodeSeqDecoder: Decoder[Seq[PropertyMap]] =
           Decoder.decodeIterable[PropertyMap, Seq]
+
+        import Nodes.dataModelPropertyDefinitionDecoder
 
         implicit val dataModelInstanceQueryResponseDecoder
             : Decoder[DataModelInstanceQueryResponse] =
@@ -133,6 +138,8 @@ class Nodes[F[_]](
       implicit val dataModelNodeSeqDecoder: Decoder[Seq[PropertyMap]] =
         Decoder.decodeIterable[PropertyMap, Seq]
 
+      import Nodes.dataModelPropertyDefinitionDecoder
+
       implicit val dataModelNodeQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
         Decoder.forProduct3("items", "modelProperties", "nextCursor")(
           DataModelInstanceQueryResponse.apply
@@ -152,8 +159,8 @@ class Nodes[F[_]](
 
 object Nodes {
 
-  implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDefinition] =
-    DataModels.dataModelPropertyDeffinitionDecoder
+  implicit val dataModelPropertyDefinitionDecoder: Decoder[DataModelPropertyDefinition] =
+    DataModels.dataModelPropertyDefinitionDecoder
 
   // scalastyle:off cyclomatic.complexity
   implicit val propEncoder: Encoder[DataModelProperty[_]] = {
@@ -199,46 +206,46 @@ object Nodes {
   implicit val dataModelNodeItemsEncoder: Encoder[Items[DataModelNodeCreate]] =
     deriveEncoder[Items[DataModelNodeCreate]]
 
-  implicit val dmiAndFilterEncoder: Encoder[DMIAndFilter] = deriveEncoder[DMIAndFilter]
-  implicit val dmiOrFilterEncoder: Encoder[DMIOrFilter] = deriveEncoder[DMIOrFilter]
-  implicit val dmiNotFilterEncoder: Encoder[DMINotFilter] = deriveEncoder[DMINotFilter]
+  implicit val dmiAndFilterEncoder: Encoder[DSLAndFilter] = deriveEncoder[DSLAndFilter]
+  implicit val dmiOrFilterEncoder: Encoder[DSLOrFilter] = deriveEncoder[DSLOrFilter]
+  implicit val dmiNotFilterEncoder: Encoder[DSLNotFilter] = deriveEncoder[DSLNotFilter]
 
-  implicit val dmiEqualsFilterEncoder: Encoder[DMIEqualsFilter] =
-    Encoder.forProduct2[DMIEqualsFilter, Seq[String], DataModelProperty[_]]("property", "value")(
+  implicit val dmiEqualsFilterEncoder: Encoder[DSLEqualsFilter] =
+    Encoder.forProduct2[DSLEqualsFilter, Seq[String], DataModelProperty[_]]("property", "value")(
       dmiEqF => (dmiEqF.property, dmiEqF.value)
     )
-  implicit val dmiInFilterEncoder: Encoder[DMIInFilter] = deriveEncoder[DMIInFilter]
-  implicit val dmiRangeFilterEncoder: Encoder[DMIRangeFilter] =
-    deriveEncoder[DMIRangeFilter].mapJson(_.dropNullValues) // VH TODO make this common
+  implicit val dmiInFilterEncoder: Encoder[DSLInFilter] = deriveEncoder[DSLInFilter]
+  implicit val dmiRangeFilterEncoder: Encoder[DSLRangeFilter] =
+    deriveEncoder[DSLRangeFilter].mapJson(_.dropNullValues) // VH TODO make this common
 
-  implicit val dmiPrefixFilterEncoder: Encoder[DMIPrefixFilter] =
-    Encoder.forProduct2[DMIPrefixFilter, Seq[String], DataModelProperty[_]]("property", "value")(
+  implicit val dmiPrefixFilterEncoder: Encoder[DSLPrefixFilter] =
+    Encoder.forProduct2[DSLPrefixFilter, Seq[String], DataModelProperty[_]]("property", "value")(
       dmiPxF => (dmiPxF.property, dmiPxF.value)
     )
-  implicit val dmiExistsFilterEncoder: Encoder[DMIExistsFilter] = deriveEncoder[DMIExistsFilter]
-  implicit val dmiContainsAnyFilterEncoder: Encoder[DMIContainsAnyFilter] =
-    deriveEncoder[DMIContainsAnyFilter]
-  implicit val dmiContainsAllFilterEncoder: Encoder[DMIContainsAllFilter] =
-    deriveEncoder[DMIContainsAllFilter]
+  implicit val dmiExistsFilterEncoder: Encoder[DSLExistsFilter] = deriveEncoder[DSLExistsFilter]
+  implicit val dmiContainsAnyFilterEncoder: Encoder[DSLContainsAnyFilter] =
+    deriveEncoder[DSLContainsAnyFilter]
+  implicit val dmiContainsAllFilterEncoder: Encoder[DSLContainsAllFilter] =
+    deriveEncoder[DSLContainsAllFilter]
 
   implicit val dmiFilterEncoder: Encoder[DomainSpecificLanguageFilter] = {
     case EmptyFilter =>
       Json.fromFields(Seq.empty)
-    case b: DMIBoolFilter =>
+    case b: DSLBoolFilter =>
       b match {
-        case f: DMIAndFilter => f.asJson
-        case f: DMIOrFilter => f.asJson
-        case f: DMINotFilter => f.asJson
+        case f: DSLAndFilter => f.asJson
+        case f: DSLOrFilter => f.asJson
+        case f: DSLNotFilter => f.asJson
       }
-    case l: DMILeafFilter =>
+    case l: DSLLeafFilter =>
       l match {
-        case f: DMIInFilter => Json.obj(("in", f.asJson))
-        case f: DMIEqualsFilter => Json.obj(("equals", f.asJson))
-        case f: DMIRangeFilter => Json.obj(("range", f.asJson))
-        case f: DMIPrefixFilter => Json.obj(("prefix", f.asJson))
-        case f: DMIExistsFilter => Json.obj(("exists", f.asJson))
-        case f: DMIContainsAnyFilter => Json.obj(("containsAny", f.asJson))
-        case f: DMIContainsAllFilter => Json.obj(("containsAll", f.asJson))
+        case f: DSLInFilter => Json.obj(("in", f.asJson))
+        case f: DSLEqualsFilter => Json.obj(("equals", f.asJson))
+        case f: DSLRangeFilter => Json.obj(("range", f.asJson))
+        case f: DSLPrefixFilter => Json.obj(("prefix", f.asJson))
+        case f: DSLExistsFilter => Json.obj(("exists", f.asJson))
+        case f: DSLContainsAnyFilter => Json.obj(("containsAny", f.asJson))
+        case f: DSLContainsAllFilter => Json.obj(("containsAll", f.asJson))
       }
   }
 
@@ -279,8 +286,8 @@ object Nodes {
         case PropertyType.Array.Numeric => c.as[Seq[BigDecimal]]
         case PropertyType.Array.Timestamp => c.as[Seq[ZonedDateTime]]
         case PropertyType.Array.Date => c.as[Seq[LocalDate]]
-        case PropertyType.Array.Text | PropertyType.Array.Json |
-             PropertyType.Array.Geometry | PropertyType.Array.Geography =>
+        case PropertyType.Array.Text | PropertyType.Array.Json | PropertyType.Array.Geometry |
+            PropertyType.Array.Geography =>
           c.as[Seq[String]]
       }
 

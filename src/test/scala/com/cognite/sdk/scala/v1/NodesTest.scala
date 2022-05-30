@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.{CdpApiException, RetryWhile}
+import com.cognite.sdk.scala.common.{CdpApiException, DSLAndFilter, DSLContainsAnyFilter, DSLEqualsFilter, DSLExistsFilter, DSLInFilter, DSLNotFilter, DSLOrFilter, DSLPrefixFilter, DSLRangeFilter, RetryWhile}
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.time.LocalDate
@@ -256,11 +256,11 @@ class NodesTest
   it should "work with AND filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryAnd = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
-      DMIAndFilter(
+      DSLAndFilter(
         Seq(
-          DMIEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0002")),
-          DMIEqualsFilter(Seq(space, dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true)),
-          DMIEqualsFilter(Seq(space, dataModel.externalId, "prop_float"), PropertyType.Float32.Property(1.64f))
+          DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0002")),
+          DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true)),
+          DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_float"), PropertyType.Float32.Property(1.64f))
         )
       )
     )
@@ -278,10 +278,10 @@ class NodesTest
 
     val inputQueryAnd2 = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
-      DMIAndFilter(
+      DSLAndFilter(
         Seq(
-          DMIEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0001")),
-          DMIEqualsFilter(Seq(space, dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true))
+          DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0001")),
+          DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true))
         )
       )
     )
@@ -297,10 +297,10 @@ class NodesTest
   it should "work with OR filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryOr = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
-      DMIOrFilter(
+      DSLOrFilter(
         Seq(
-          DMIEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0011")),
-          DMIEqualsFilter(Seq(space, dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true))
+          DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0011")),
+          DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true))
         )
       )
     )
@@ -319,8 +319,8 @@ class NodesTest
   it should "work with NOT filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryNot = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
-      DMINotFilter(
-        DMIInFilter(
+      DSLNotFilter(
+        DSLInFilter(
           Seq(space, dataModel.externalId, "prop_string"),
           Seq(PropertyType.Text.Property("EQ0002"), PropertyType.Text.Property("EQ0011"))
         )
@@ -341,7 +341,7 @@ class NodesTest
   it should "work with PREFIX filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryPrefix = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
-      DMIPrefixFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ000"))
+      DSLPrefixFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ000"))
     )
     val outputQueryPrefix = blueFieldClient.nodes
       .query(inputQueryPrefix)
@@ -358,7 +358,7 @@ class NodesTest
   it should "work with RANGE filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryRange = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
-      DMIRangeFilter(
+      DSLRangeFilter(
         Seq(space, dataModel.externalId, "prop_float"),
         gte = Some(PropertyType.Float32.Property(1.64f))
       )
@@ -377,7 +377,7 @@ class NodesTest
   it should "work with EXISTS filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryExists = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
-      DMIExistsFilter(Seq(space, dataModel.externalId, "prop_bool"))
+      DSLExistsFilter(Seq(space, dataModel.externalId, "prop_bool"))
     )
     val outputQueryExists = blueFieldClient.nodes
       .query(inputQueryExists)
@@ -430,7 +430,7 @@ class NodesTest
   it should "work with CONTAINS ANY filter" in initAndCleanUpArrayDataForQuery { _ =>
     val inputQueryContainsAnyString = DataModelInstanceQuery(
       DataModelIdentifier(Some(space), dataModelArray.externalId),
-      DMIContainsAnyFilter(
+      DSLContainsAnyFilter(
         Seq(space, dataModelArray.externalId, "array_string"),
         Seq(
           PropertyType.Text.Property("E201"),
@@ -474,7 +474,7 @@ class NodesTest
   it should "work with CONTAINS ALL filter" in initAndCleanUpArrayDataForQuery { _ =>
     val inputQueryContainsAllString = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModelArray.externalId),
-      DMIContainsAnyFilter(
+      DSLContainsAnyFilter(
         Seq(space, dataModelArray.externalId, "array_string"),
         Seq(
           PropertyType.Text.Property("E201"),
@@ -520,7 +520,7 @@ class NodesTest
   ignore should "work with sort" in initAndCleanUpDataForQuery { _ =>
     val inputQueryExists = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
-      DMIExistsFilter(Seq(dataModel.externalId, "prop_float")),
+      DSLExistsFilter(Seq(dataModel.externalId, "prop_float")),
       Some(Seq(dataModel.externalId, "col_float:desc"))
     )
     val outputQueryExists = blueFieldClient.nodes
@@ -539,10 +539,10 @@ class NodesTest
   it should "work with limit" in initAndCleanUpDataForQuery { _ =>
     val inputQueryOr = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
-      DMIOrFilter(
+      DSLOrFilter(
         Seq(
-          DMIEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0011")),
-          DMIEqualsFilter(Seq(space, dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true))
+          DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0011")),
+          DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_bool"), PropertyType.Boolean.Property(true))
         )
       ),
       None,
@@ -567,7 +567,7 @@ class NodesTest
   it should "work with cursor and stream" in initAndCleanUpDataForQuery { _ =>
     val inputQueryPrefix = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
-      DMIPrefixFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ00"))
+      DSLPrefixFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ00"))
     )
 
     def checkOutputProp(output: Seq[PropertyMap]): Assertion = {
