@@ -1,8 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import PropertyType.AnyProperty
-
-sealed class PropertyMap(val allProperties: Map[String, AnyProperty]) {
+sealed class PropertyMap(val allProperties: Map[String, DataModelProperty[_]]) {
   val externalId: String = allProperties.get("externalId") match {
     case Some(PropertyType.Text.Property(externalId)) => externalId
     case Some(invalidType) =>
@@ -19,10 +17,10 @@ final case class Node(
     `type`: Option[String] = None,
     name: Option[String] = None,
     description: Option[String] = None,
-    properties: Option[Map[String, AnyProperty]] = None
+    properties: Option[Map[String, DataModelProperty[_]]] = None
 ) extends PropertyMap(
       {
-        val propsToAdd: Seq[Option[(String, AnyProperty)]] =
+        val propsToAdd: Seq[Option[(String, DataModelProperty[_])]] =
           Seq[(String, Option[DataModelProperty[_]])](
             "externalId" -> Some(PropertyType.Text.Property(externalId)),
             "type" -> `type`.map(PropertyType.Text.Property(_)),
@@ -32,7 +30,7 @@ final case class Node(
             v.map(k -> _)
           }
 
-        properties.getOrElse(Map.empty[String, AnyProperty]) ++
+        properties.getOrElse(Map.empty[String, DataModelProperty[_]]) ++
           propsToAdd.flatten.toMap
       }
     )
@@ -54,14 +52,16 @@ final case class DMIOrFilter(or: Seq[DomainSpecificLanguageFilter]) extends DMIB
 final case class DMINotFilter(not: DomainSpecificLanguageFilter) extends DMIBoolFilter
 
 sealed trait DMILeafFilter extends DomainSpecificLanguageFilter
-final case class DMIEqualsFilter(property: Seq[String], value: AnyProperty) extends DMILeafFilter
-final case class DMIInFilter(property: Seq[String], values: Seq[AnyProperty]) extends DMILeafFilter
+final case class DMIEqualsFilter(property: Seq[String], value: DataModelProperty[_])
+    extends DMILeafFilter
+final case class DMIInFilter(property: Seq[String], values: Seq[DataModelProperty[_]])
+    extends DMILeafFilter
 final case class DMIRangeFilter(
     property: Seq[String],
-    gte: Option[AnyProperty] = None,
-    gt: Option[AnyProperty] = None,
-    lte: Option[AnyProperty] = None,
-    lt: Option[AnyProperty] = None
+    gte: Option[DataModelProperty[_]] = None,
+    gt: Option[DataModelProperty[_]] = None,
+    lte: Option[DataModelProperty[_]] = None,
+    lt: Option[DataModelProperty[_]] = None
 ) extends DMILeafFilter {
   require(
     !(gte.isDefined && gt.isDefined) && // can't have both upper bound in the same time
@@ -69,11 +69,12 @@ final case class DMIRangeFilter(
       (gte.isDefined || gt.isDefined || lte.isDefined || lt.isDefined) // at least one bound must be defined
   )
 }
-final case class DMIPrefixFilter(property: Seq[String], value: AnyProperty) extends DMILeafFilter
-final case class DMIExistsFilter(property: Seq[String]) extends DMILeafFilter
-final case class DMIContainsAnyFilter(property: Seq[String], values: Seq[AnyProperty])
+final case class DMIPrefixFilter(property: Seq[String], value: DataModelProperty[_])
     extends DMILeafFilter
-final case class DMIContainsAllFilter(property: Seq[String], values: Seq[AnyProperty])
+final case class DMIExistsFilter(property: Seq[String]) extends DMILeafFilter
+final case class DMIContainsAnyFilter(property: Seq[String], values: Seq[DataModelProperty[_]])
+    extends DMILeafFilter
+final case class DMIContainsAllFilter(property: Seq[String], values: Seq[DataModelProperty[_]])
     extends DMILeafFilter
 
 final case class DataModelInstanceQuery(

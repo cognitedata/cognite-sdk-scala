@@ -26,10 +26,7 @@ sealed abstract class ArrayPropertyType[TV, TP <: PrimitivePropertyType[TV]](pri
 
 object PropertyType {
 
-  type AnyPropertyType = PropertyType[_]
-  type AnyProperty = DataModelProperty[_]
-
-  val values: Seq[AnyPropertyType] = Seq[AnyPropertyType](
+  val values: Seq[PropertyType[_]] = Seq[PropertyType[_]](
     Boolean,
     Int,
     Bigint,
@@ -46,10 +43,10 @@ object PropertyType {
   ) ++
     ArrayTypes.values
 
-  private val valuesMap: Map[String, AnyPropertyType] =
+  private val valuesMap: Map[String, PropertyType[_]] =
     values.map(t => t.code -> t).toMap
 
-  def fromCode(code: String): Option[AnyPropertyType] =
+  def fromCode(code: String): Option[PropertyType[_]] =
     valuesMap.get(code)
 
   case object Boolean extends PrimitivePropertyType[scala.Boolean]
@@ -67,7 +64,7 @@ object PropertyType {
   case object DirectRelation extends PropertyType[String]
 
   object ArrayTypes {
-    val values: Seq[AnyPropertyType] = Seq[AnyPropertyType](
+    val values: Seq[PropertyType[_]] = Seq[PropertyType[_]](
       Boolean,
       Int,
       Bigint,

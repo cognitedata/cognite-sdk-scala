@@ -555,7 +555,7 @@ class NodesTest
       .toList
 
     outputQueryOr.size shouldBe 1
-    val expected: Set[Map[String, PropertyType.AnyProperty]] =
+    val expected: Set[Map[String, DataModelProperty[_]]] =
       fromCreatedToExpectedProps(Set(dataModelNodeCreate2, dataModelNodeToCreate3))
 
     outputQueryOr

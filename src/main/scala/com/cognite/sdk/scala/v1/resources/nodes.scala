@@ -7,7 +7,6 @@ import cats.syntax.all._
 import cats.effect.Async
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import PropertyType.AnyProperty
 import fs2.Stream
 import io.circe.CursorOp.DownField
 import io.circe.syntax._
@@ -157,7 +156,7 @@ object Nodes {
     DataModels.dataModelPropertyDeffinitionDecoder
 
   // scalastyle:off cyclomatic.complexity
-  implicit val propEncoder: Encoder[AnyProperty] = {
+  implicit val propEncoder: Encoder[DataModelProperty[_]] = {
     case b: PropertyType.Boolean.Property => b.value.asJson
     case i: PropertyType.Int.Property => i.value.asJson
     case bi: PropertyType.Bigint.Property => bi.value.asJson
@@ -205,16 +204,16 @@ object Nodes {
   implicit val dmiNotFilterEncoder: Encoder[DMINotFilter] = deriveEncoder[DMINotFilter]
 
   implicit val dmiEqualsFilterEncoder: Encoder[DMIEqualsFilter] =
-    Encoder.forProduct2[DMIEqualsFilter, Seq[String], AnyProperty]("property", "value")(dmiEqF =>
-      (dmiEqF.property, dmiEqF.value)
+    Encoder.forProduct2[DMIEqualsFilter, Seq[String], DataModelProperty[_]]("property", "value")(
+      dmiEqF => (dmiEqF.property, dmiEqF.value)
     )
   implicit val dmiInFilterEncoder: Encoder[DMIInFilter] = deriveEncoder[DMIInFilter]
   implicit val dmiRangeFilterEncoder: Encoder[DMIRangeFilter] =
     deriveEncoder[DMIRangeFilter].mapJson(_.dropNullValues) // VH TODO make this common
 
   implicit val dmiPrefixFilterEncoder: Encoder[DMIPrefixFilter] =
-    Encoder.forProduct2[DMIPrefixFilter, Seq[String], AnyProperty]("property", "value")(dmiPxF =>
-      (dmiPxF.property, dmiPxF.value)
+    Encoder.forProduct2[DMIPrefixFilter, Seq[String], DataModelProperty[_]]("property", "value")(
+      dmiPxF => (dmiPxF.property, dmiPxF.value)
     )
   implicit val dmiExistsFilterEncoder: Encoder[DMIExistsFilter] = deriveEncoder[DMIExistsFilter]
   implicit val dmiContainsAnyFilterEncoder: Encoder[DMIContainsAnyFilter] =
@@ -280,8 +279,8 @@ object Nodes {
         case PropertyType.ArrayTypes.Numeric => c.as[Seq[BigDecimal]]
         case PropertyType.ArrayTypes.Timestamp => c.as[Seq[ZonedDateTime]]
         case PropertyType.ArrayTypes.Date => c.as[Seq[LocalDate]]
-        case PropertyType.ArrayTypes.Text | PropertyType.ArrayTypes.Json | PropertyType.ArrayTypes.Geometry |
-             PropertyType.ArrayTypes.Geography =>
+        case PropertyType.ArrayTypes.Text | PropertyType.ArrayTypes.Json |
+            PropertyType.ArrayTypes.Geometry | PropertyType.ArrayTypes.Geography =>
           c.as[Seq[String]]
       }
 
@@ -292,9 +291,9 @@ object Nodes {
     Array("org.wartremover.warts.AsInstanceOf", "org.wartremover.warts.IsInstanceOf")
   )
   private def filterOutNullableProps(
-      res: Iterable[Either[DecodingFailure, (String, AnyProperty)]],
+      res: Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]],
       props: Map[String, DataModelPropertyDefinition]
-  ): Iterable[Either[DecodingFailure, (String, AnyProperty)]] =
+  ): Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]] =
     res.filter {
       case Right(_) => true
       case Left(DecodingFailure("Attempt to decode value on failed cursor", downfields)) =>
@@ -315,7 +314,7 @@ object Nodes {
   ): Decoder[PropertyMap] =
     new Decoder[PropertyMap] {
       def apply(c: HCursor): Decoder.Result[PropertyMap] = {
-        val res: immutable.Iterable[Either[DecodingFailure, (String, AnyProperty)]] =
+        val res: immutable.Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]] =
           props.map { case (prop, dmp) =>
             for {
               value <- decodeBaseOnType(c.downField(prop), dmp.`type`)

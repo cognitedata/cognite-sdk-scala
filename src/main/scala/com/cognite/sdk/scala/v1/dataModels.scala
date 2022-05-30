@@ -3,8 +3,6 @@
 
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.v1.PropertyType.AnyPropertyType
-
 final case class SpacedItems[A](spaceExternalId: String, items: Seq[A])
 
 final case class DataModelIdentifier(
@@ -13,7 +11,7 @@ final case class DataModelIdentifier(
 )
 
 final case class DataModelPropertyDefinition(
-    `type`: AnyPropertyType,
+    `type`: PropertyType[_],
     nullable: Boolean = true,
     targetModel: Option[DataModelIdentifier] = None
 )

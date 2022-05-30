@@ -4,7 +4,6 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.PropertyType.AnyPropertyType
 import com.cognite.sdk.scala.v1._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, HCursor, Json, Printer}
@@ -69,12 +68,12 @@ object DataModels {
 
   implicit val bTreeIndexEncoder: Encoder[BTreeIndex] =
     deriveEncoder[BTreeIndex]
-  implicit val dataModelPropertyTypeEncoder: Encoder[AnyPropertyType] =
-    Encoder.encodeString.contramap[AnyPropertyType](_.code)
+  implicit val dataModelPropertyTypeEncoder: Encoder[PropertyType[_]] =
+    Encoder.encodeString.contramap[PropertyType[_]](_.code)
   implicit val dataModelPropertyIndexesEncoder: Encoder[DataModelIndexes] =
     deriveEncoder[DataModelIndexes]
   implicit val dataModelPropertyDeffinitionEncoder: Encoder[DataModelPropertyDefinition] =
-    Encoder.forProduct3[DataModelPropertyDefinition, AnyPropertyType, Boolean, Option[
+    Encoder.forProduct3[DataModelPropertyDefinition, PropertyType[_], Boolean, Option[
       DataModelIdentifier
     ]]("type", "nullable", "targetModel")(pd => (pd.`type`, pd.nullable, pd.targetModel))
   implicit val uniquenessConstraintEncoder: Encoder[UniquenessConstraint] =
@@ -139,7 +138,7 @@ object DataModels {
       }
   implicit val bTreeIndexDecoder: Decoder[BTreeIndex] =
     deriveDecoder[BTreeIndex]
-  implicit val dataModelPropertyTypeDecoder: Decoder[AnyPropertyType] =
+  implicit val dataModelPropertyTypeDecoder: Decoder[PropertyType[_]] =
     Decoder.decodeString.map(
       PropertyType
         .fromCode(_)
