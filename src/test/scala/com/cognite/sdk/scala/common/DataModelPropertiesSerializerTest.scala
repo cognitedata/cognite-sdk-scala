@@ -33,12 +33,12 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
     "prop_direct_relation" -> DataModelPropertyDefinition(PropertyType.DirectRelation),
     "prop_date" -> DataModelPropertyDefinition(PropertyType.Date),
     "prop_timestamp" -> DataModelPropertyDefinition(PropertyType.Timestamp),
-    "arr_bool" -> DataModelPropertyDefinition(PropertyType.ArrayTypes.Boolean, false),
-    "arr_float64" -> DataModelPropertyDefinition(PropertyType.ArrayTypes.Float64, false),
-    "arr_int32" -> DataModelPropertyDefinition(PropertyType.ArrayTypes.Int),
-    "arr_string" -> DataModelPropertyDefinition(PropertyType.ArrayTypes.Text),
-    "arr_empty" -> DataModelPropertyDefinition(PropertyType.ArrayTypes.Text, false),
-    "arr_empty_nullable" -> DataModelPropertyDefinition(PropertyType.ArrayTypes.Float64)
+    "arr_bool" -> DataModelPropertyDefinition(PropertyType.Array.Boolean, false),
+    "arr_float64" -> DataModelPropertyDefinition(PropertyType.Array.Float64, false),
+    "arr_int32" -> DataModelPropertyDefinition(PropertyType.Array.Int),
+    "arr_string" -> DataModelPropertyDefinition(PropertyType.Array.Text),
+    "arr_empty" -> DataModelPropertyDefinition(PropertyType.Array.Text, false),
+    "arr_empty_nullable" -> DataModelPropertyDefinition(PropertyType.Array.Float64)
   )
 
   import com.cognite.sdk.scala.v1.resources.Nodes._
@@ -105,20 +105,20 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           "prop_timestamp" -> PropertyType.Timestamp.Property(
             ZonedDateTime.of(2022, 3, 22, 12, 34, 56, 789000000, ZoneOffset.of("+01:00"))
           ),
-          "arr_bool" -> PropertyType.ArrayTypes.Boolean.Property(
+          "arr_bool" -> PropertyType.Array.Boolean.Property(
             List(true, false, true)
           ),
-          "arr_float64" -> PropertyType.ArrayTypes.Float64.Property(
+          "arr_float64" -> PropertyType.Array.Float64.Property(
             List(1.2, 2, 4.654)
           ),
-          "arr_int32" -> PropertyType.ArrayTypes.Int.Property(
+          "arr_int32" -> PropertyType.Array.Int.Property(
             List(3, 1, 2147483646)
           ),
-          "arr_string" -> PropertyType.ArrayTypes.Text.Property(
+          "arr_string" -> PropertyType.Array.Text.Property(
             List("tata", "titi")
           ),
-          "arr_empty" -> PropertyType.ArrayTypes.Text.Property(List()),
-          "arr_empty_nullable" -> PropertyType.ArrayTypes.Float64.Property(List())
+          "arr_empty" -> PropertyType.Array.Text.Property(List()),
+          "arr_empty_nullable" -> PropertyType.Array.Float64.Property(List())
         )
         dmiResponse.allProperties.toSet shouldBe expected
       }
@@ -140,13 +140,13 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           "prop_float64" -> PropertyType.Float64.Property(23.0),
           "prop_string" -> PropertyType.Text.Property("toto"),
           "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
-          "arr_bool" -> PropertyType.ArrayTypes.Boolean.Property(
+          "arr_bool" -> PropertyType.Array.Boolean.Property(
             List(true, false, true)
           ),
-          "arr_float64" -> PropertyType.ArrayTypes.Float64.Property(
+          "arr_float64" -> PropertyType.Array.Float64.Property(
             List(1.2, 2, 4.654)
           ),
-          "arr_empty" -> PropertyType.ArrayTypes.Text.Property(List())
+          "arr_empty" -> PropertyType.Array.Text.Property(List())
         )
 
         dmiResponse.allProperties.toSet shouldBe expected
@@ -499,25 +499,25 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           properties = Some(
             Map(
               "externalId" -> PropertyType.Text.Property("model_array"),
-              "arr_bool" -> PropertyType.ArrayTypes.Boolean.Property(
+              "arr_bool" -> PropertyType.Array.Boolean.Property(
                 Vector(true, false, true)
               ),
-              "arr_int32" -> PropertyType.ArrayTypes.Int.Property(
+              "arr_int32" -> PropertyType.Array.Int.Property(
                 Vector(3, 1, 2147483646)
               ),
-              "arr_int64" -> PropertyType.ArrayTypes.Bigint.Property(
+              "arr_int64" -> PropertyType.Array.Bigint.Property(
                 Vector(2147483650L, 0, 9223372036854775L, 1).map(BigInt(_))
               ),
-              "arr_float32" -> PropertyType.ArrayTypes.Float32.Property(
+              "arr_float32" -> PropertyType.Array.Float32.Property(
                 Vector(2.3f, 6.35f, 7.48f)
               ),
-              "arr_float64" -> PropertyType.ArrayTypes.Float64.Property(
+              "arr_float64" -> PropertyType.Array.Float64.Property(
                 Vector(1.2, 2.0, 4.654)
               ),
-              "arr_string" -> PropertyType.ArrayTypes.Text.Property(
+              "arr_string" -> PropertyType.Array.Text.Property(
                 Vector("tata", "titi")
               ),
-              "arr_empty" -> PropertyType.ArrayTypes.Int.Property(Vector.empty)
+              "arr_empty" -> PropertyType.Array.Int.Property(Vector.empty)
             )
           )
         )
@@ -551,22 +551,22 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
               "prop_bool" -> PropertyType.Boolean.Property(true),
               "prop_float64" -> PropertyType.Float64.Property(23.0),
               "prop_string" -> PropertyType.Text.Property("toto"),
-              "arr_bool" -> PropertyType.ArrayTypes.Boolean.Property(
+              "arr_bool" -> PropertyType.Array.Boolean.Property(
                 Vector(true, false, true)
               ),
-              "arr_float64" -> PropertyType.ArrayTypes.Float64.Property(
+              "arr_float64" -> PropertyType.Array.Float64.Property(
                 Vector(1.2, 2.0, 4.654)
               ),
-              "arr_int32" -> PropertyType.ArrayTypes.Int.Property(
+              "arr_int32" -> PropertyType.Array.Int.Property(
                 Vector(3, 1, 2147483646)
               ),
-              "arr_int64" -> PropertyType.ArrayTypes.Bigint.Property(
+              "arr_int64" -> PropertyType.Array.Bigint.Property(
                 Vector(2147483650L, 0, 9223372036854775L, 1).map(BigInt(_))
               ),
-              "arr_string" -> PropertyType.ArrayTypes.Text.Property(
+              "arr_string" -> PropertyType.Array.Text.Property(
                 Vector("tata", "titi")
               ),
-              "arr_empty" -> PropertyType.ArrayTypes.Text.Property(Vector.empty)
+              "arr_empty" -> PropertyType.Array.Text.Property(Vector.empty)
             )
           )
         )

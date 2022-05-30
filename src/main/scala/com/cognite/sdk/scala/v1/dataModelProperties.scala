@@ -41,7 +41,7 @@ object PropertyType {
     Geography,
     DirectRelation
   ) ++
-    ArrayTypes.values
+    Array.values
 
   private val valuesMap: Map[String, PropertyType[_]] =
     values.map(t => t.code -> t).toMap
@@ -63,7 +63,7 @@ object PropertyType {
   case object Geography extends PrimitivePropertyType[String]
   case object DirectRelation extends PropertyType[String]
 
-  object ArrayTypes {
+  object Array {
     val values: Seq[PropertyType[_]] = Seq[PropertyType[_]](
       Boolean,
       Int,

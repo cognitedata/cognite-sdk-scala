@@ -84,9 +84,9 @@ class NodesTest
   val toCreates =
     Seq(dataModelNodeToCreate1, dataModelNodeCreate2, dataModelNodeToCreate3)
 
-  val dataPropArrayString = DataModelPropertyDefinition(PropertyType.ArrayTypes.Text, true)
-  val dataPropArrayFloat = DataModelPropertyDefinition(PropertyType.ArrayTypes.Float32, true)
-  val dataPropArrayInt = DataModelPropertyDefinition(PropertyType.ArrayTypes.Int, true)
+  val dataPropArrayString = DataModelPropertyDefinition(PropertyType.Array.Text, true)
+  val dataPropArrayFloat = DataModelPropertyDefinition(PropertyType.Array.Float32, true)
+  val dataPropArrayInt = DataModelPropertyDefinition(PropertyType.Array.Int, true)
 
   val dataModelArray = DataModel(
     s"Equipment-arry",
@@ -103,13 +103,13 @@ class NodesTest
     "equipment_42",
     properties = Some(
       Map(
-        "array_string" -> PropertyType.ArrayTypes.Text.Property(
+        "array_string" -> PropertyType.Array.Text.Property(
             Vector("E101","E102","E103")
           ),
-        "array_float" -> PropertyType.ArrayTypes.Float32.Property(
+        "array_float" -> PropertyType.Array.Float32.Property(
             Vector(1.01f,1.02f)
           ),
-        "array_int" -> PropertyType.ArrayTypes.Int.Property(
+        "array_int" -> PropertyType.Array.Int.Property(
           Vector(1,12,13)
           )
         )
@@ -120,10 +120,10 @@ class NodesTest
     "equipment_43",
     properties = Some(
       Map(
-        "array_string" -> PropertyType.ArrayTypes.Text.Property(
+        "array_string" -> PropertyType.Array.Text.Property(
           Vector("E201","E202")
         ),
-        "array_float" -> PropertyType.ArrayTypes.Float32.Property(
+        "array_float" -> PropertyType.Array.Float32.Property(
           Vector(2.02f, 2.04f)
         )
       )
@@ -133,10 +133,10 @@ class NodesTest
     "equipment_44",
     properties = Some(
       Map(
-        "array_float" -> PropertyType.ArrayTypes.Float32.Property(
+        "array_float" -> PropertyType.Array.Float32.Property(
           Vector(3.01f,3.02f)
         ),
-        "array_int" -> PropertyType.ArrayTypes.Int.Property(
+        "array_int" -> PropertyType.Array.Int.Property(
           Vector(3,12,13)
         )
       )
