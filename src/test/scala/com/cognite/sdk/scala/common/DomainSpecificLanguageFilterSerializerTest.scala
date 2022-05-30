@@ -62,7 +62,7 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
         val in = DSLInFilter(
           Seq("name", "tag"),
           Seq(
-            PropertyType.Bigint.Property(BigInt("123456789123456789123456789")),
+            PropertyType.Bigint.Property(9223372036854775L),
             PropertyType.Text.Property("abcdef"),
             PropertyType.Boolean.Property(false),
             PropertyType.Float32.Property(2.64f)
@@ -74,7 +74,7 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
                                  |    "tag"
                                  |  ],
                                  |  "values" : [
-                                 |    123456789123456789123456789,
+                                 |    9223372036854775,
                                  |    "abcdef",
                                  |    false,
                                  |    2.64
@@ -293,11 +293,11 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
 
     "encode a mix filter" should {
       "work for complex case" in {
-        val equalInt = DSLEqualsFilter(Seq("name", "tag"), PropertyType.Bigint.Property(BigInt("123456789123456789123456789")))
+        val equalInt = DSLEqualsFilter(Seq("name", "tag"), PropertyType.Bigint.Property(9223372036854775L))
         val in = DSLInFilter(
           Seq("name", "tag"),
           Seq(
-            PropertyType.Bigint.Property(BigInt("123456789123456789123456789")),
+            PropertyType.Bigint.Property(9223372036854775L),
             PropertyType.Text.Property("abcdef"),
             PropertyType.Boolean.Property(false),
             PropertyType.Float32.Property(2.64f)
@@ -324,7 +324,7 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
                                   |              "name",
                                   |              "tag"
                                   |            ],
-                                  |            "value" : 123456789123456789123456789
+                                  |            "value" : 9223372036854775
                                   |          }
                                   |        }
                                   |      ]
@@ -338,7 +338,7 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
                                   |              "tag"
                                   |            ],
                                   |            "values" : [
-                                  |              123456789123456789123456789,
+                                  |              9223372036854775,
                                   |              "abcdef",
                                   |              false,
                                   |              2.64

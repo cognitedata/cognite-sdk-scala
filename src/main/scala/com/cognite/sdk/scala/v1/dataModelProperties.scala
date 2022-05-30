@@ -87,7 +87,7 @@ object PropertyType {
     case object Int extends ArrayPropertyType[scala.Int, PropertyType.Int.type](PropertyType.Int)
     case object Int32 extends ArrayPropertyType[scala.Int, PropertyType.Int.type](PropertyType.Int)
     case object Int64
-      extends ArrayPropertyType[scala.Long, PropertyType.Bigint.type](PropertyType.Bigint)
+        extends ArrayPropertyType[scala.Long, PropertyType.Bigint.type](PropertyType.Bigint)
     case object Bigint
         extends ArrayPropertyType[scala.Long, PropertyType.Bigint.type](PropertyType.Bigint)
     case object Float32

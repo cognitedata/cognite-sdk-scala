@@ -466,7 +466,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
               "externalId" -> PropertyType.Text.Property("model_primitive"),
               "prop_bool" -> PropertyType.Boolean.Property(true),
               "prop_int32" -> PropertyType.Int.Property(123),
-              "prop_int64" -> PropertyType.Bigint.Property(BigInt(9223372036854775L)),
+              "prop_int64" -> PropertyType.Bigint.Property(9223372036854775L),
               "prop_float32" -> PropertyType.Float32.Property(23.0f),
               "prop_float64" -> PropertyType.Float64.Property(23.0),
               "prop_string" -> PropertyType.Text.Property("toto"),
@@ -510,7 +510,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                 Vector(3, 1, 2147483646)
               ),
               "arr_int64" -> PropertyType.Array.Bigint.Property(
-                Vector(2147483650L, 0, 9223372036854775L, 1).map(BigInt(_))
+                Vector(2147483650L, 0, 9223372036854775L, 1)
               ),
               "arr_float32" -> PropertyType.Array.Float32.Property(
                 Vector(2.3f, 6.35f, 7.48f)
@@ -565,7 +565,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                 Vector(3, 1, 2147483646)
               ),
               "arr_int64" -> PropertyType.Array.Bigint.Property(
-                Vector(2147483650L, 0, 9223372036854775L, 1).map(BigInt(_))
+                Vector(2147483650L, 0, 9223372036854775L, 1)
               ),
               "arr_string" -> PropertyType.Array.Text.Property(
                 Vector("tata", "titi")

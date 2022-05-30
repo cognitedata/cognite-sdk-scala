@@ -56,8 +56,8 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     _ => {
       val dataModels = blueFieldClient.dataModels.list(space).unsafeRunSync().toList
       dataModels.nonEmpty shouldBe true
-      dataModels.contains(dataModel1) shouldBe true
-      dataModels.contains(expectedDataModel2Output) shouldBe true
+      dataModels.contains(expectedDataModel1ListRes) shouldBe true
+      dataModels.contains(expectedDataModel2ListRes) shouldBe true
     }
   }
 
@@ -106,7 +106,6 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     Some(
       Map(
         "name" -> requiredTextProperty,
-        "externalId" -> requiredTextProperty
       )
     )
   )
@@ -133,23 +132,27 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     )
   )
 
-  private def insertDataModels() = {
+  val expectedDataModel1ListRes = dataModel1.copy(properties = dataModel1.properties.map(_ ++ Map("externalId" -> requiredTextProperty)))
+  val expectedDataModel2ListRes = expectedDataModel2Output.copy(
+    properties = expectedDataModel2Output.properties.map(_ ++ Map("externalId" -> requiredTextProperty)))
+
+  private def insertDataModels = {
 
     val outputCreates =
     // TODO: enable transient datamodel tests when fdm team enables delete
-    /*
-      blueFieldClient.dataModels
+
+     /*
+        blueFieldClient.dataModels
         .createItems(Seq(dataModel1, dataModel2), space)
         .unsafeRunSync()
-        .toList
-    */
+        .toList */
+
       Seq(dataModel1, expectedDataModel2Output)
 
     outputCreates.size should be >= 2
-
     retryWithExpectedResult[scala.collection.Seq[DataModel]](
       blueFieldClient.dataModels.list(space).unsafeRunSync(),
-      dm => dm.contains(dataModel1) && dm.contains(expectedDataModel2Output) shouldBe true
+      dm => dm.contains(expectedDataModel1ListRes) && dm.contains(expectedDataModel2ListRes) shouldBe true
     )
     outputCreates
   }
@@ -171,7 +174,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   private def initAndCleanUpData(testCode: Seq[DataModel] => Any): Unit =
     try {
-      val dataModelInstances: Seq[DataModel] = insertDataModels()
+      val dataModelInstances: Seq[DataModel] = insertDataModels
       val _ = testCode(dataModelInstances)
     } catch {
       case t: Throwable => throw t
@@ -190,7 +193,7 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
           .unsafeRunSync()
           .toList
       outputGetByIds.size shouldBe 2
-      val expectedDataModelsOutputWithProps = Seq(dataModel1, expectedDataModel2Output)
+      val expectedDataModelsOutputWithProps = Seq(expectedDataModel1ListRes, expectedDataModel2ListRes)
       outputGetByIds.toSet shouldBe expectedDataModelsOutputWithProps.toSet
   }
 
