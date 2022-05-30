@@ -62,7 +62,11 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
   ) = {
     res.isLeft shouldBe true
     val Left(decodingFailure) = res
+    if (propName == "arr_bool" && propType == "Boolean")
+      println(decodingFailure)
     val error = DecodingFailure.unapply(decodingFailure)
+    if (propName == "arr_bool" && propType == "Boolean")
+      println(error)
     error.map(_._1).getOrElse("").contains(propType) shouldBe true
     val downFields = error
       .map(_._2)
@@ -77,6 +81,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
     "decode PropertyType" should {
       "work for primitive and array" in {
         val res = decode[PropertyMap]("""{
+                                      |    "externalId": "tata",
                                       |    "prop_bool" : true,
                                       |    "prop_float64": 23.0,
                                       |    "prop_string": "toto",
@@ -97,6 +102,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
 
         dmiResponse.allProperties.toSet shouldBe
           Set(
+            "externalId" -> PropertyType.Text.Property("tata"),
             "prop_bool" -> PropertyType.Boolean.Property(true),
             "prop_float64" -> PropertyType.Float64.Property(23.0),
             "prop_string" -> PropertyType.Text.Property("toto"),
@@ -170,66 +176,221 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
       }
       "not work for array if it contains Boolean and String" in {
         val res = decode[DataModelInstanceQueryResponse]("""{
-                                        |"modelExternalId" : "tada",
-                                        |"properties" : {
-                                        |    "prop_bool" : true,
-                                        |    "prop_float64": 23.0,
-                                        |    "prop_string": "toto",
-                                        |    "arr_bool": [true, "false", true],
-                                        |    "arr_float64": [1.2, 2, 4.654],
-                                        |    "arr_empty": []
-                                        |} }""".stripMargin)
+           |"items": [
+           |  {
+           |    "externalId": "tada",
+           |    "prop_bool" : true,
+           |    "arr_bool": [true, "false", true]
+           |  }
+           |],
+           |"modelProperties" : {
+           |    "externalId":
+           |    {
+           |      "type": "string",
+           |      "nullable": false
+           |    },
+           |    "prop_date":
+           |    {
+           |      "type": "date",
+           |      "nullable": true
+           |    },
+           |    "arr_bool":
+           |    {
+           |      "type": "boolean",
+           |      "nullable": true
+           |    }
+           |}
+           |}""".stripMargin)
         checkErrorDecodingOnField(res, "arr_bool", "Boolean")
       }
       "not work for array if it contains Double and String" in {
         val res = decode[DataModelInstanceQueryResponse]("""{
-                                        |"modelExternalId" : "tada",
-                                        |"properties" : {
-                                        |    "prop_bool" : true,
-                                        |    "prop_float64": 23.0,
-                                        |    "prop_string": "toto",
-                                        |    "arr_bool": [true, false],
-                                        |    "arr_float64": [1.2, 2.0, "abc"],
-                                        |    "arr_empty": []
-                                        |} }""".stripMargin)
+                                                               |"items": [
+                                                               |  {
+                                                               |    "externalId": "tada",
+                                                               |    "prop_bool" : true,
+                                                               |    "arr_bool": [true, false],
+                                                               |    "arr_float64": [1.2, 2.0, "abc"],
+                                                               |    "arr_empty": []
+                                                               |  }
+                                                               |],
+                                                               |"modelProperties" : {
+                                                               |    "externalId":
+                                                               |    {
+                                                               |      "type": "string",
+                                                               |      "nullable": false
+                                                               |    },
+                                                               |    "prop_date":
+                                                               |    {
+                                                               |      "type": "date",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "arr_bool":
+                                                               |    {
+                                                               |      "type": "boolean",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "arr_float64":
+                                                               |    {
+                                                               |      "type": "float64[]",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "arr_empty":
+                                                               |     {
+                                                               |      "type": "float64[]",
+                                                               |      "nullable": true
+                                                               |    }
+                                                               |} }""".stripMargin)
         checkErrorDecodingOnField(res, "arr_float64", "Double")
       }
       "not work for array if it contains Double and Boolean" in {
         val res = decode[DataModelInstanceQueryResponse]("""{
-                                        |"modelExternalId" : "tada",
-                                        |"properties" : {
-                                        |    "prop_bool" : true,
-                                        |    "prop_float64": 23.0,
-                                        |    "prop_string": "toto",
-                                        |    "arr_bool": [true, false],
-                                        |    "arr_float64": [false, 2.0, 3.6],
-                                        |    "arr_empty": []
-                                        |} }""".stripMargin)
+                                                               |"items": [
+                                                               |  {
+                                                               |    "externalId": "tada",
+                                                               |    "prop_bool" : true,
+                                                               |    "prop_float64": 23.0,
+                                                               |    "prop_string": "toto",
+                                                               |    "arr_bool": [true, false],
+                                                               |    "arr_float64": [false, 2.0, 3.6],
+                                                               |    "arr_empty": []
+                                                               |  }
+                                                               |],
+                                                               |"modelProperties" : {
+                                                               |    "externalId":
+                                                               |    {
+                                                               |      "type": "string",
+                                                               |      "nullable": false
+                                                               |    },
+                                                               |    "prop_float64":
+                                                               |    {
+                                                               |      "type": "float64",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "prop_string":
+                                                               |    {
+                                                               |      "type": "string",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "arr_bool":
+                                                               |    {
+                                                               |      "type": "boolean",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "arr_float64":
+                                                               |    {
+                                                               |      "type": "float64[]",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "arr_empty":
+                                                               |     {
+                                                               |      "type": "float64[]",
+                                                               |      "nullable": true
+                                                               |    }
+                                                               |} }""".stripMargin)
         checkErrorDecodingOnField(res, "arr_float64", "Double")
       }
       "not work for property date if the string it not well formatted" in {
         val res = decode[DataModelInstanceQueryResponse]("""{
-                                                           |"modelExternalId" : "tada",
-                                                           |"properties" : {
-                                                           |    "prop_float64": 23.0,
-                                                           |    "prop_string": "toto",
-                                                           |    "prop_date": "2022-02",
-                                                           |    "arr_bool": [true, false, true],
-                                                           |    "arr_float64": [1.2, 2, 4.654],
-                                                           |    "arr_empty": []
-                                                           |} }""".stripMargin)
+                                                               |"items": [
+                                                               |  {
+                                                               |    "externalId": "tada",
+                                                               |    "prop_float64": 23.0,
+                                                               |    "prop_string": "toto",
+                                                               |    "prop_date": "2022-02",
+                                                               |    "arr_bool": [true, false, true],
+                                                               |    "arr_float64": [1.2, 2, 4.654],
+                                                               |    "arr_empty": []
+                                                               |  }
+                                                               |],
+                                                               |"modelProperties" : {
+                                                               |    "externalId":
+                                                               |    {
+                                                               |      "type": "string",
+                                                               |      "nullable": false
+                                                               |    },
+                                                               |    "prop_float64":
+                                                               |    {
+                                                               |      "type": "float64",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "prop_string":
+                                                               |    {
+                                                               |      "type": "string",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "prop_date":
+                                                               |    {
+                                                               |      "type": "date",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "arr_bool":
+                                                               |    {
+                                                               |      "type": "boolean",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "arr_float64":
+                                                               |    {
+                                                               |      "type": "float64[]",
+                                                               |      "nullable": true
+                                                               |    },
+                                                               |    "arr_empty":
+                                                               |     {
+                                                               |      "type": "float64[]",
+                                                               |      "nullable": true
+                                                               |    }
+                                                               |} }""".stripMargin)
         checkErrorDecodingOnField(res, "prop_date", "LocalDate")
       }
       "not work for property timestamp if the string it not well formatted" in {
         val res = decode[DataModelInstanceQueryResponse]("""{
-                                                           |"modelExternalId" : "tada",
-                                                           |"properties" : {
+                                                           |"items": [
+                                                           |  {
+                                                           |    "externalId": "tada",
                                                            |    "prop_float64": 23.0,
                                                            |    "prop_string": "toto",
                                                            |    "prop_timestamp": "2022-02-03",
                                                            |    "arr_bool": [true, false, true],
                                                            |    "arr_float64": [1.2, 2, 4.654],
                                                            |    "arr_empty": []
+                                                           |  }
+                                                           |],
+                                                           |"modelProperties" : {
+                                                           |    "externalId":
+                                                           |    {
+                                                           |      "type": "string",
+                                                           |      "nullable": false
+                                                           |    },
+                                                           |    "prop_float64":
+                                                           |    {
+                                                           |      "type": "float64",
+                                                           |      "nullable": true
+                                                           |    },
+                                                           |    "prop_string":
+                                                           |    {
+                                                           |      "type": "string",
+                                                           |      "nullable": true
+                                                           |    },
+                                                           |    "prop_timestamp":
+                                                           |    {
+                                                           |      "type": "timestamp",
+                                                           |      "nullable": true
+                                                           |    },
+                                                           |    "arr_bool":
+                                                           |    {
+                                                           |      "type": "boolean",
+                                                           |      "nullable": true
+                                                           |    },
+                                                           |    "arr_float64":
+                                                           |    {
+                                                           |      "type": "float64[]",
+                                                           |      "nullable": true
+                                                           |    },
+                                                           |    "arr_empty":
+                                                           |     {
+                                                           |      "type": "float64[]",
+                                                           |      "nullable": true
+                                                           |    }
                                                            |} }""".stripMargin)
         checkErrorDecodingOnField(res, "prop_timestamp", "ZonedDateTime")
       }
