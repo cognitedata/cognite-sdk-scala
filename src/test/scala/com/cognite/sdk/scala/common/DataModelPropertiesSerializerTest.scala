@@ -62,11 +62,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
   ) = {
     res.isLeft shouldBe true
     val Left(decodingFailure) = res
-    if (propName == "arr_bool" && propType == "Boolean")
-      println(decodingFailure)
     val error = DecodingFailure.unapply(decodingFailure)
-    if (propName == "arr_bool" && propType == "Boolean")
-      println(error)
     error.map(_._1).getOrElse("").contains(propType) shouldBe true
     val downFields = error
       .map(_._2)
@@ -162,45 +158,101 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
       "not work for primitive if given value does not match property type" in {
         val res: Either[circe.Error, DataModelInstanceQueryResponse] =
           decode[DataModelInstanceQueryResponse]("""{
-                                        |"modelExternalId" : "tada",
-                                        |"properties" : {
-                                        |    "prop_bool" : "true",
-                                        |    "prop_float64": 23.0,
-                                        |    "prop_string": "toto",
-                                        |    "arr_bool": [true, false],
-                                        |    "arr_float64": [1.2, 2, 4.654],
-                                        |    "arr_empty": []
-                                        |} }""".stripMargin)
+                                                       |"items": [
+                                                       |  {
+                                                       |    "externalId": "tada",
+                                                       |    "prop_bool": "true",
+                                                       |    "prop_string" : "keke",
+                                                       |    "prop_float64": 1.3,
+                                                       |    "arr_bool": [true, true],
+                                                       |    "arr_float64": [1.2, 2.0],
+                                                       |    "arr_empty": []
+                                                       |  }
+                                                       |],
+                                                       |"modelProperties" : {
+                                                       |    "externalId":
+                                                       |    {
+                                                       |      "type": "string",
+                                                       |      "nullable": false
+                                                       |    },
+                                                       |    "prop_string":
+                                                       |    {
+                                                       |      "type": "text",
+                                                       |      "nullable": false
+                                                       |    },
+                                                       |    "prop_bool":
+                                                       |    {
+                                                       |      "type": "boolean",
+                                                       |      "nullable": true
+                                                       |    },
+                                                       |    "prop_float64":
+                                                       |    {
+                                                       |      "type": "float64",
+                                                       |      "nullable": false
+                                                       |    },
+                                                       |    "arr_bool":
+                                                       |    {
+                                                       |      "type": "boolean",
+                                                       |      "nullable": false
+                                                       |    },
+                                                       |    "arr_float64":
+                                                       |    {
+                                                       |      "type": "float64[]",
+                                                       |      "nullable": false
+                                                       |    },
+                                                       |    "arr_empty":
+                                                       |     {
+                                                       |      "type": "float64[]",
+                                                       |      "nullable": false
+                                                       |    }
+                                                       |} }""".stripMargin)
 
         checkErrorDecodingOnField(res, "prop_bool", "Boolean")
       }
       "not work for array if it contains Boolean and String" in {
         val res = decode[DataModelInstanceQueryResponse]("""{
-           |"items": [
-           |  {
-           |    "externalId": "tada",
-           |    "prop_bool" : true,
-           |    "arr_bool": [true, "false", true]
-           |  }
-           |],
-           |"modelProperties" : {
-           |    "externalId":
-           |    {
-           |      "type": "string",
-           |      "nullable": false
-           |    },
-           |    "prop_date":
-           |    {
-           |      "type": "date",
-           |      "nullable": true
-           |    },
-           |    "arr_bool":
-           |    {
-           |      "type": "boolean",
-           |      "nullable": true
-           |    }
-           |}
-           |}""".stripMargin)
+                                                               |"items": [
+                                                               |  {
+                                                               |    "externalId": "tada",
+                                                               |    "prop_string" : "keke",
+                                                               |    "prop_float64": 1.3,
+                                                               |    "arr_bool": [true, "false", true],
+                                                               |    "arr_float64": [1.2, 2.0],
+                                                               |    "arr_empty": []
+                                                               |  }
+                                                               |],
+                                                               |"modelProperties" : {
+                                                               |    "externalId":
+                                                               |    {
+                                                               |      "type": "string",
+                                                               |      "nullable": false
+                                                               |    },
+                                                               |    "prop_string":
+                                                               |    {
+                                                               |      "type": "text",
+                                                               |      "nullable": false
+                                                               |    },
+                                                               |    "prop_float64":
+                                                               |    {
+                                                               |      "type": "float64",
+                                                               |      "nullable": false
+                                                               |    },
+                                                               |    "arr_bool":
+                                                               |    {
+                                                               |      "type": "boolean",
+                                                               |      "nullable": false
+                                                               |    },
+                                                               |    "arr_float64":
+                                                               |    {
+                                                               |      "type": "float64[]",
+                                                               |      "nullable": false
+                                                               |    },
+                                                               |    "arr_empty":
+                                                               |     {
+                                                               |      "type": "float64[]",
+                                                               |      "nullable": false
+                                                               |    }
+                                                               |} }""".stripMargin)
         checkErrorDecodingOnField(res, "arr_bool", "Boolean")
       }
       "not work for array if it contains Double and String" in {
@@ -208,7 +260,8 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                                                                |"items": [
                                                                |  {
                                                                |    "externalId": "tada",
-                                                               |    "prop_bool" : true,
+                                                               |    "prop_string" : "keke",
+                                                               |    "prop_float64": 1.3,
                                                                |    "arr_bool": [true, false],
                                                                |    "arr_float64": [1.2, 2.0, "abc"],
                                                                |    "arr_empty": []
@@ -220,27 +273,33 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                                                                |      "type": "string",
                                                                |      "nullable": false
                                                                |    },
-                                                               |    "prop_date":
+                                                               |    "prop_string":
                                                                |    {
-                                                               |      "type": "date",
-                                                               |      "nullable": true
+                                                               |      "type": "text",
+                                                               |      "nullable": false
+                                                               |    },
+                                                               |    "prop_float64":
+                                                               |    {
+                                                               |      "type": "float64",
+                                                               |      "nullable": false
                                                                |    },
                                                                |    "arr_bool":
                                                                |    {
                                                                |      "type": "boolean",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    },
                                                                |    "arr_float64":
                                                                |    {
                                                                |      "type": "float64[]",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    },
                                                                |    "arr_empty":
                                                                |     {
                                                                |      "type": "float64[]",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    }
                                                                |} }""".stripMargin)
+
         checkErrorDecodingOnField(res, "arr_float64", "Double")
       }
       "not work for array if it contains Double and Boolean" in {
@@ -265,27 +324,27 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                                                                |    "prop_float64":
                                                                |    {
                                                                |      "type": "float64",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    },
                                                                |    "prop_string":
                                                                |    {
                                                                |      "type": "string",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    },
                                                                |    "arr_bool":
                                                                |    {
                                                                |      "type": "boolean",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    },
                                                                |    "arr_float64":
                                                                |    {
                                                                |      "type": "float64[]",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    },
                                                                |    "arr_empty":
                                                                |     {
                                                                |      "type": "float64[]",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    }
                                                                |} }""".stripMargin)
         checkErrorDecodingOnField(res, "arr_float64", "Double")
@@ -312,12 +371,12 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                                                                |    "prop_float64":
                                                                |    {
                                                                |      "type": "float64",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    },
                                                                |    "prop_string":
                                                                |    {
                                                                |      "type": "string",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    },
                                                                |    "prop_date":
                                                                |    {
@@ -327,17 +386,17 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                                                                |    "arr_bool":
                                                                |    {
                                                                |      "type": "boolean",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    },
                                                                |    "arr_float64":
                                                                |    {
                                                                |      "type": "float64[]",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    },
                                                                |    "arr_empty":
                                                                |     {
                                                                |      "type": "float64[]",
-                                                               |      "nullable": true
+                                                               |      "nullable": false
                                                                |    }
                                                                |} }""".stripMargin)
         checkErrorDecodingOnField(res, "prop_date", "LocalDate")
@@ -364,12 +423,12 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                                                            |    "prop_float64":
                                                            |    {
                                                            |      "type": "float64",
-                                                           |      "nullable": true
+                                                           |      "nullable": false
                                                            |    },
                                                            |    "prop_string":
                                                            |    {
                                                            |      "type": "string",
-                                                           |      "nullable": true
+                                                           |      "nullable": false
                                                            |    },
                                                            |    "prop_timestamp":
                                                            |    {
@@ -379,17 +438,17 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                                                            |    "arr_bool":
                                                            |    {
                                                            |      "type": "boolean",
-                                                           |      "nullable": true
+                                                           |      "nullable": false
                                                            |    },
                                                            |    "arr_float64":
                                                            |    {
                                                            |      "type": "float64[]",
-                                                           |      "nullable": true
+                                                           |      "nullable": false
                                                            |    },
                                                            |    "arr_empty":
                                                            |     {
                                                            |      "type": "float64[]",
-                                                           |      "nullable": true
+                                                           |      "nullable": false
                                                            |    }
                                                            |} }""".stripMargin)
         checkErrorDecodingOnField(res, "prop_timestamp", "ZonedDateTime")
