@@ -26,6 +26,7 @@ import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
 
   val props: Map[String, DataModelPropertyDefinition] = Map(
+    "externalId" -> DataModelPropertyDefinition(PropertyType.Text),
     "prop_bool" -> DataModelPropertyDefinition(PropertyType.Boolean),
     "prop_float64" -> DataModelPropertyDefinition(PropertyType.Float64, false),
     "prop_string" -> DataModelPropertyDefinition(PropertyType.Text, false),
@@ -87,7 +88,6 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                                       |    "arr_bool": [true, false, true],
                                       |    "arr_float64": [1.2, 2, 4.654],
                                       |    "arr_int32": [3, 1, 2147483646],
-                                      |    "arr_int64": ["2147483650", "0", "9223372036854775", "1"],
                                       |    "arr_string": ["tata","titi"],
                                       |    "arr_empty": [],
                                       |    "arr_empty_nullable": []
@@ -95,36 +95,32 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
         res.isRight shouldBe true
 
         val Right(dmiResponse) = res
-
-        dmiResponse.allProperties.toSet shouldBe
-          Set(
-            "externalId" -> PropertyType.Text.Property("tata"),
-            "prop_bool" -> PropertyType.Boolean.Property(true),
-            "prop_float64" -> PropertyType.Float64.Property(23.0),
-            "prop_string" -> PropertyType.Text.Property("toto"),
-            "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
-            "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22)),
-            "prop_timestamp" -> PropertyType.Timestamp.Property(
-              ZonedDateTime.of(2022, 3, 22, 12, 34, 56, 789000000, ZoneOffset.of("+01:00"))
-            ),
-            "arr_bool" -> PropertyType.Array.Boolean.Property(
-              Vector(true, false, true)
-            ),
-            "arr_float64" -> PropertyType.Array.Float64.Property(
-              Vector(1.2, 2, 4.654)
-            ),
-            "arr_int32" -> PropertyType.Array.Int.Property(
-              Vector(3, 1, 2147483646)
-            ),
-            "arr_int64" -> PropertyType.Array.Bigint.Property(
-              Vector(2147483650L, 0, 9223372036854775L, 1).map(BigInt(_))
-            ),
-            "arr_string" -> PropertyType.Array.Text.Property(
-              Vector("tata", "titi")
-            ),
-            "arr_empty" -> PropertyType.Array.Text.Property(Vector()),
-            "arr_empty_nullable" -> PropertyType.Array.Float64.Property(Vector())
-          )
+        val expected = Set(
+          "externalId" -> PropertyType.Text.Property("tata"),
+          "prop_bool" -> PropertyType.Boolean.Property(true),
+          "prop_float64" -> PropertyType.Float64.Property(23.0),
+          "prop_string" -> PropertyType.Text.Property("toto"),
+          "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+          "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22)),
+          "prop_timestamp" -> PropertyType.Timestamp.Property(
+            ZonedDateTime.of(2022, 3, 22, 12, 34, 56, 789000000, ZoneOffset.of("+01:00"))
+          ),
+          "arr_bool" -> PropertyType.Array.Boolean.Property(
+            List(true, false, true)
+          ),
+          "arr_float64" -> PropertyType.Array.Float64.Property(
+            List(1.2, 2, 4.654)
+          ),
+          "arr_int32" -> PropertyType.Array.Int.Property(
+            List(3, 1, 2147483646)
+          ),
+          "arr_string" -> PropertyType.Array.Text.Property(
+            List("tata", "titi")
+          ),
+          "arr_empty" -> PropertyType.Array.Text.Property(List()),
+          "arr_empty_nullable" -> PropertyType.Array.Float64.Property(List())
+        )
+        dmiResponse.allProperties.toSet shouldBe expected
       }
       "work for nullable property" in {
         val res = decode[PropertyMap]("""{
@@ -139,20 +135,21 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
         res.isRight shouldBe true
 
         val Right(dmiResponse) = res
-        dmiResponse.allProperties.toSet shouldBe
-          Set(
-            "externalId" -> "test",
-            "prop_float64" -> PropertyType.Float64.Property(23.0),
-            "prop_string" -> PropertyType.Text.Property("toto"),
-            "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
-            "arr_bool" -> PropertyType.Array.Boolean.Property(
-              Vector(true, false, true)
-            ),
-            "arr_float64" -> PropertyType.Array.Float64.Property(
-              Vector(1.2, 2, 4.654)
-            ),
-            "arr_empty" -> PropertyType.Array.Text.Property(Vector())
-          )
+        val expected = Set(
+          "externalId" -> PropertyType.Text.Property("test"),
+          "prop_float64" -> PropertyType.Float64.Property(23.0),
+          "prop_string" -> PropertyType.Text.Property("toto"),
+          "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+          "arr_bool" -> PropertyType.Array.Boolean.Property(
+            List(true, false, true)
+          ),
+          "arr_float64" -> PropertyType.Array.Float64.Property(
+            List(1.2, 2, 4.654)
+          ),
+          "arr_empty" -> PropertyType.Array.Text.Property(List())
+        )
+
+        dmiResponse.allProperties.toSet shouldBe expected
       }
 
       "not work for primitive if given value does not match property type" in {
@@ -462,6 +459,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           "model_primitive",
           properties = Some(
             Map(
+              "externalId" -> PropertyType.Text.Property("model_primitive"),
               "prop_bool" -> PropertyType.Boolean.Property(true),
               "prop_int32" -> PropertyType.Int.Property(123),
               "prop_int64" -> PropertyType.Bigint.Property(BigInt(9223372036854775L)),
@@ -500,6 +498,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           "model_array",
           properties = Some(
             Map(
+              "externalId" -> PropertyType.Text.Property("model_array"),
               "arr_bool" -> PropertyType.Array.Boolean.Property(
                 Vector(true, false, true)
               ),
@@ -548,6 +547,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           "model_mixing",
           properties = Some(
             Map(
+              "externalId" -> PropertyType.Text.Property("model_mixing"),
               "prop_bool" -> PropertyType.Boolean.Property(true),
               "prop_float64" -> PropertyType.Float64.Property(23.0),
               "prop_string" -> PropertyType.Text.Property("toto"),
