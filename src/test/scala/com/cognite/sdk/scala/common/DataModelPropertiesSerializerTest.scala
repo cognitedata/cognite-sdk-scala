@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1._
+import com.cognite.sdk.scala.v1.resources.Nodes.createDynamicPropertyDecoder
 import io.circe
 import io.circe.CursorOp.DownField
 import io.circe.{Decoder, DecodingFailure, HCursor, Json}
@@ -11,6 +12,7 @@ import io.circe.parser.decode
 import io.circe.syntax._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+
 import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 
 @SuppressWarnings(
@@ -41,12 +43,13 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
     "arr_empty_nullable" -> DataModelPropertyDefinition(PropertyType.Array.Float64)
   )
 
-  import com.cognite.sdk.scala.v1.resources.Nodes._
 
   implicit val propertyTypeDecoder: Decoder[PropertyMap] =
     createDynamicPropertyDecoder(props)
 
-  implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
+  implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] = {
+    import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyDefinitionDecoder
+
     new Decoder[DataModelInstanceQueryResponse] {
       def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] =
         for {
@@ -55,6 +58,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           nextCursor <- c.downField("nextCursor").as[Option[String]]
         } yield DataModelInstanceQueryResponse(items, modelProperties, nextCursor)
     }
+  }
 
   private def checkErrorDecodingOnField(
       res: Either[circe.Error, DataModelInstanceQueryResponse],

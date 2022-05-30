@@ -148,7 +148,7 @@ object DataModels {
     )
   implicit val dataModelPropertyIndexesDecoder: Decoder[DataModelIndexes] =
     deriveDecoder[DataModelIndexes]
-  implicit val dataModelPropertyDeffinitionDecoder: Decoder[DataModelPropertyDefinition] =
+  implicit val dataModelPropertyDefinitionDecoder: Decoder[DataModelPropertyDefinition] =
     Decoder.forProduct3("type", "nullable", "targetModel")(DataModelPropertyDefinition.apply)
   implicit val uniquenessConstraintDecoder: Decoder[UniquenessConstraint] =
     new Decoder[UniquenessConstraint] {
