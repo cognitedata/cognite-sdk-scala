@@ -171,18 +171,18 @@ object Nodes {
     case gm: PropertyType.Geometry.Property => gm.value.asJson
     case gg: PropertyType.Geography.Property => gg.value.asJson
     case dr: PropertyType.DirectRelation.Property => dr.value.asJson
-    case b: PropertyType.Array.Boolean.Property => b.value.asJson
-    case i: PropertyType.Array.Int.Property => i.value.asJson
-    case bi: PropertyType.Array.Bigint.Property => bi.value.asJson
-    case f: PropertyType.Array.Float32.Property => f.value.asJson
-    case d: PropertyType.Array.Float64.Property => d.value.asJson
-    case bd: PropertyType.Array.Numeric.Property => bd.value.asJson
-    case s: PropertyType.Array.Text.Property => s.value.asJson
-    case j: PropertyType.Array.Json.Property => j.value.asJson
-    case ts: PropertyType.Array.Timestamp.Property => ts.value.asJson
-    case d: PropertyType.Array.Date.Property => d.value.asJson
-    case gm: PropertyType.Array.Geometry.Property => gm.value.asJson
-    case gg: PropertyType.Array.Geography.Property => gg.value.asJson
+    case b: PropertyType.ArrayTypes.Boolean.Property => b.value.asJson
+    case i: PropertyType.ArrayTypes.Int.Property => i.value.asJson
+    case bi: PropertyType.ArrayTypes.Bigint.Property => bi.value.asJson
+    case f: PropertyType.ArrayTypes.Float32.Property => f.value.asJson
+    case d: PropertyType.ArrayTypes.Float64.Property => d.value.asJson
+    case bd: PropertyType.ArrayTypes.Numeric.Property => bd.value.asJson
+    case s: PropertyType.ArrayTypes.Text.Property => s.value.asJson
+    case j: PropertyType.ArrayTypes.Json.Property => j.value.asJson
+    case ts: PropertyType.ArrayTypes.Timestamp.Property => ts.value.asJson
+    case d: PropertyType.ArrayTypes.Date.Property => d.value.asJson
+    case gm: PropertyType.ArrayTypes.Geometry.Property => gm.value.asJson
+    case gg: PropertyType.ArrayTypes.Geography.Property => gg.value.asJson
     case _ => throw new Exception("unknown property type")
   }
 
@@ -272,16 +272,16 @@ object Nodes {
         case PropertyType.Text | PropertyType.Json | PropertyType.DirectRelation |
             PropertyType.Geometry | PropertyType.Geography =>
           c.as[String]
-        case PropertyType.Array.Boolean => c.as[Seq[Boolean]]
-        case PropertyType.Array.Int => c.as[Seq[Int]]
-        case PropertyType.Array.Bigint => c.as[Seq[BigInt]]
-        case PropertyType.Array.Float32 => c.as[Seq[Float]]
-        case PropertyType.Array.Float64 => c.as[Seq[Double]]
-        case PropertyType.Array.Numeric => c.as[Seq[BigDecimal]]
-        case PropertyType.Array.Timestamp => c.as[Seq[ZonedDateTime]]
-        case PropertyType.Array.Date => c.as[Seq[LocalDate]]
-        case PropertyType.Array.Text | PropertyType.Array.Json | PropertyType.Array.Geometry |
-            PropertyType.Array.Geography =>
+        case PropertyType.ArrayTypes.Boolean => c.as[Seq[Boolean]]
+        case PropertyType.ArrayTypes.Int => c.as[Seq[Int]]
+        case PropertyType.ArrayTypes.Bigint => c.as[Seq[BigInt]]
+        case PropertyType.ArrayTypes.Float32 => c.as[Seq[Float]]
+        case PropertyType.ArrayTypes.Float64 => c.as[Seq[Double]]
+        case PropertyType.ArrayTypes.Numeric => c.as[Seq[BigDecimal]]
+        case PropertyType.ArrayTypes.Timestamp => c.as[Seq[ZonedDateTime]]
+        case PropertyType.ArrayTypes.Date => c.as[Seq[LocalDate]]
+        case PropertyType.ArrayTypes.Text | PropertyType.ArrayTypes.Json | PropertyType.ArrayTypes.Geometry |
+             PropertyType.ArrayTypes.Geography =>
           c.as[Seq[String]]
       }
 
