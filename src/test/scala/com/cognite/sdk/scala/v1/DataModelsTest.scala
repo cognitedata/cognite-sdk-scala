@@ -36,51 +36,11 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     )
   )
 
-
-  private val space = "test-space"
-
-  private val dataModel1 = DataModel(
-    // TODO: enable transient datamodel tests when fdm team enables delete
-    // s"Equipment-${UUID.randomUUID.toString.substring(0, 8)}",
-    s"Equipment",
-    Some(
-      Map(
-        "name" -> requiredTextProperty,
-      )
-    )
-  )
-
-  private val dataPropBool = DataModelPropertyDefinition(PropertyType.Boolean, true)
-  private val dataPropFloat = DataModelPropertyDefinition(PropertyType.Float64, true)
-
-  private val dataModel2 = DataModel(
-    // TODO: enable transient datamodel tests when fdm team enables delete
-    // s"Equipment-${UUID.randomUUID.toString.substring(0, 8)}",
-    s"SpecialEquipment",
-    Some(
-      Map(
-        "prop_bool" -> dataPropBool,
-        "prop_float" -> dataPropFloat
-      )
-    ),
-    Some(Seq(DataModelIdentifier(Some(space), dataModel1.externalId)))
-  )
-
   val expectedDataModelOutput = dataModel.copy(properties =
     dataModel.properties.map(x =>
       x ++ Map("externalId" -> DataModelPropertyDefinition(PropertyType.Text, false))
     )
   )
-
-  val expectedDataModel2Output = dataModel2.copy(properties =
-    dataModel2.properties.map(x =>
-      x ++ dataModel1.properties.getOrElse(Map())
-    )
-  )
-
-  val expectedDataModel1ListRes = dataModel1.copy(properties = dataModel1.properties.map(_ ++ Map("externalId" -> requiredTextProperty)))
-  val expectedDataModel2ListRes = expectedDataModel2Output.copy(
-    properties = expectedDataModel2Output.properties.map(_ ++ Map("externalId" -> requiredTextProperty)))
 
   // TODO: enable model creation test when fdm team enables delete
   "DataModels" should "create data models definitions" ignore {
@@ -136,6 +96,45 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
     dataModelDecoder(dataModelEncoder(dataModel).hcursor).toOption shouldBe Some(dataModel)
   }
+
+  private val space = "test-space"
+
+  private val dataModel1 = DataModel(
+    // TODO: enable transient datamodel tests when fdm team enables delete
+    // s"Equipment-${UUID.randomUUID.toString.substring(0, 8)}",
+    s"Equipment",
+    Some(
+      Map(
+        "name" -> requiredTextProperty,
+      )
+    )
+  )
+
+  private val dataPropBool = DataModelPropertyDefinition(PropertyType.Boolean, true)
+  private val dataPropFloat = DataModelPropertyDefinition(PropertyType.Float64, true)
+
+  private val dataModel2 = DataModel(
+    // TODO: enable transient datamodel tests when fdm team enables delete
+    // s"Equipment-${UUID.randomUUID.toString.substring(0, 8)}",
+    s"SpecialEquipment",
+    Some(
+      Map(
+        "prop_bool" -> dataPropBool,
+        "prop_float" -> dataPropFloat
+      )
+    ),
+    Some(Seq(DataModelIdentifier(Some(space), dataModel1.externalId)))
+  )
+
+  val expectedDataModel2Output = dataModel2.copy(properties =
+    dataModel2.properties.map(x =>
+      x ++ dataModel1.properties.getOrElse(Map())
+    )
+  )
+
+  val expectedDataModel1ListRes = dataModel1.copy(properties = dataModel1.properties.map(_ ++ Map("externalId" -> requiredTextProperty)))
+  val expectedDataModel2ListRes = expectedDataModel2Output.copy(
+    properties = expectedDataModel2Output.properties.map(_ ++ Map("externalId" -> requiredTextProperty)))
 
   private def insertDataModels = {
 
