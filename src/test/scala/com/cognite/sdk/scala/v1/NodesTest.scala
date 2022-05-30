@@ -4,7 +4,19 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.{CdpApiException, DSLAndFilter, DSLContainsAnyFilter, DSLEqualsFilter, DSLExistsFilter, DSLInFilter, DSLNotFilter, DSLOrFilter, DSLPrefixFilter, DSLRangeFilter, RetryWhile}
+import com.cognite.sdk.scala.common.{
+  CdpApiException,
+  DSLAndFilter,
+  DSLContainsAnyFilter,
+  DSLEqualsFilter,
+  DSLExistsFilter,
+  DSLInFilter,
+  DSLNotFilter,
+  DSLOrFilter,
+  DSLPrefixFilter,
+  DSLRangeFilter,
+  RetryWhile
+}
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.time.LocalDate
