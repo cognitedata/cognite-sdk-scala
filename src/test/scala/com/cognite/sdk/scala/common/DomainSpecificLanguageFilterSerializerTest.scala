@@ -26,9 +26,7 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
     "encode EmptyFilter" should {
       "return an empty object"in {
         val empty:DomainSpecificLanguageFilter = EmptyFilter
-        empty.asJson.toString() shouldBe """{
-                                       |
-                                       |}""".stripMargin
+        empty.asJson.noSpaces shouldBe "{}"
       }
     }
     "encode LeafFilter" should {
@@ -76,7 +74,7 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
                                  |    "tag"
                                  |  ],
                                  |  "values" : [
-                                 |    1,
+                                 |    123456789123456789123456789,
                                  |    "abcdef",
                                  |    false,
                                  |    2.64
@@ -326,7 +324,7 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
                                   |              "name",
                                   |              "tag"
                                   |            ],
-                                  |            "value" : 1
+                                  |            "value" : 123456789123456789123456789
                                   |          }
                                   |        }
                                   |      ]
@@ -340,7 +338,7 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
                                   |              "tag"
                                   |            ],
                                   |            "values" : [
-                                  |              1,
+                                  |              123456789123456789123456789,
                                   |              "abcdef",
                                   |              false,
                                   |              2.64
