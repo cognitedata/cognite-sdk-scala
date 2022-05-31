@@ -9,28 +9,28 @@ import io.circe.syntax._
 
 // scalastyle:off number.of.types
 
-sealed abstract class DataModelProperty[TV](val value: TV)(implicit encoder: Encoder[TV]) {
+sealed abstract class DataModelProperty[V](val value: V)(implicit encoder: Encoder[V]) {
   def encode: Json = value.asJson
 }
 
-sealed abstract class PropertyType[TV](implicit decoder: Decoder[TV], encoder: Encoder[TV]) {
-  sealed case class Property(override val value: TV) extends DataModelProperty(value)
+sealed abstract class PropertyType[V](implicit decoder: Decoder[V], encoder: Encoder[V]) {
+  sealed case class Property(override val value: V) extends DataModelProperty(value)
 
   @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
   def code: String =
     toString.replaceAll("(.)([A-Z])", "$1_$2").toLowerCase
 
   def decodeProperty(c: ACursor): Decoder.Result[Property] =
-    c.as[TV].map(Property(_))
+    c.as[V].map(Property(_))
 }
 
-sealed abstract class PrimitivePropertyType[TV](implicit decoder: Decoder[TV], encoder: Encoder[TV])
-    extends PropertyType[TV]
+sealed abstract class PrimitivePropertyType[V](implicit decoder: Decoder[V], encoder: Encoder[V])
+    extends PropertyType[V]
 
-sealed abstract class ArrayPropertyType[TV, TP <: PrimitivePropertyType[TV]](private val t: TP)(
-    implicit decoder: Decoder[Seq[TV]],
-    encoder: Encoder[Seq[TV]]
-) extends PropertyType[Seq[TV]] {
+sealed abstract class ArrayPropertyType[V, P <: PrimitivePropertyType[V]](private val t: P)(
+    implicit decoder: Decoder[Seq[V]],
+    encoder: Encoder[Seq[V]]
+) extends PropertyType[Seq[V]] {
   override def code: String =
     t.code + "[]"
 }
