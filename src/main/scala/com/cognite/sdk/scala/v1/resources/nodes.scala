@@ -33,22 +33,23 @@ class Nodes[F[_]](
 
   private def createDecoderForQueryResponse(): Decoder[DataModelInstanceQueryResponse] = {
     import Nodes.dataModelPropertyDefinitionDecoder
-    
-    (c: HCursor) => 
+
+    (c: HCursor) =>
       for {
         modelProperties <- c
           .downField("modelProperties")
-          .as[Map[String, DataModelPropertyDefinition]]          
-          
+          .as[Map[String, DataModelPropertyDefinition]]
+
         seqDecoder: Decoder[Seq[PropertyMap]] =
           Decoder.decodeIterable[PropertyMap, Seq](
-            createDynamicPropertyDecoder(modelProperties), 
-            implicitly)
-          
+            createDynamicPropertyDecoder(modelProperties),
+            implicitly
+          )
+
         items <- seqDecoder.tryDecode(c.downField("items"))
         nextCursor <- c.downField("nextCursor").as[Option[String]]
       } yield DataModelInstanceQueryResponse(items, Some(modelProperties), nextCursor)
-    }
+  }
 
   def createItems(
       spaceExternalId: String,
@@ -79,7 +80,7 @@ class Nodes[F[_]](
 
   def query(
       inputQuery: DataModelInstanceQuery
-  )(implicit F: Async[F]): F[DataModelInstanceQueryResponse] = {
+  ): F[DataModelInstanceQueryResponse] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
     implicit val nodeQueryReponseDecoder: Decoder[DataModelInstanceQueryResponse] =
@@ -128,7 +129,7 @@ class Nodes[F[_]](
   def retrieveByExternalIds(
       model: DataModelIdentifier,
       externalIds: Seq[String]
-  )(implicit F: Async[F]): F[DataModelInstanceQueryResponse] = {
+  ): F[DataModelInstanceQueryResponse] = {
     implicit val nodeQueryReponseDecoder: Decoder[DataModelInstanceQueryResponse] =
       createDecoderForQueryResponse()
 

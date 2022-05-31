@@ -3,6 +3,8 @@
 
 package com.cognite.sdk.scala.common
 
+// scalastyle:off file.size.limit
+
 import com.cognite.sdk.scala.v1._
 import com.cognite.sdk.scala.v1.resources.Nodes.createDynamicPropertyDecoder
 import io.circe
