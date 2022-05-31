@@ -15,12 +15,11 @@ import com.cognite.sdk.scala.v1.resources.Nodes.{
 }
 import fs2.Stream
 import io.circe.CursorOp.DownField
-import io.circe.{ACursor, Decoder, DecodingFailure, Encoder, HCursor, KeyEncoder, Printer}
+import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, KeyEncoder, Printer}
 import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
 
-import java.time.{LocalDate, ZonedDateTime}
 import scala.collection.immutable
 
 class Nodes[F[_]](
@@ -31,6 +30,25 @@ class Nodes[F[_]](
     with BaseUrl {
 
   override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/nodes"
+
+  private def createDecoderForQueryResponse(): Decoder[DataModelInstanceQueryResponse] = {
+    import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyDefinitionDecoder
+    new Decoder[DataModelInstanceQueryResponse] {
+      def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] = {
+        val modelProperties = c
+          .downField("modelProperties")
+          .as[Option[Map[String, DataModelPropertyDefinition]]]
+        modelProperties.flatMap { props =>
+          implicit val propertyTypeDecoder: Decoder[PropertyMap] =
+            createDynamicPropertyDecoder(props.getOrElse(Map()))
+          for {
+            items <- c.downField("items").as[Seq[PropertyMap]]
+            nextCursor <- c.downField("nextCursor").as[Option[String]]
+          } yield DataModelInstanceQueryResponse(items, props, nextCursor)
+        }
+      }
+    }
+  }
 
   def createItems(
       spaceExternalId: String,
@@ -64,25 +82,8 @@ class Nodes[F[_]](
   )(implicit F: Async[F]): F[DataModelInstanceQueryResponse] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
-    implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] = {
-      import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyDefinitionDecoder
-
-      new Decoder[DataModelInstanceQueryResponse] {
-        def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] = {
-          val modelProperties = c
-            .downField("modelProperties")
-            .as[Option[Map[String, DataModelPropertyDefinition]]]
-          modelProperties.flatMap { props =>
-            implicit val propertyTypeDecoder: Decoder[PropertyMap] =
-              createDynamicPropertyDecoder(props.getOrElse(Map()))
-            for {
-              items <- c.downField("items").as[Seq[PropertyMap]]
-              nextCursor <- c.downField("nextCursor").as[Option[String]]
-            } yield DataModelInstanceQueryResponse(items, props, nextCursor)
-          }
-        }
-      }
-    }
+    implicit val nodeQueryReponseDecoder: Decoder[DataModelInstanceQueryResponse] =
+      createDecoderForQueryResponse()
 
     requestSession.post[
       DataModelInstanceQueryResponse,
@@ -93,7 +94,6 @@ class Nodes[F[_]](
       uri"$baseUrl/list",
       value => value
     )
-
   }
 
   private[sdk] def queryWithCursor(
@@ -129,25 +129,8 @@ class Nodes[F[_]](
       model: DataModelIdentifier,
       externalIds: Seq[String]
   )(implicit F: Async[F]): F[DataModelInstanceQueryResponse] = {
-    implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] = {
-      import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyDefinitionDecoder
-
-      new Decoder[DataModelInstanceQueryResponse] {
-        def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] = {
-          val modelProperties = c
-            .downField("modelProperties")
-            .as[Option[Map[String, DataModelPropertyDefinition]]]
-          modelProperties.flatMap { props =>
-            implicit val propertyTypeDecoder: Decoder[PropertyMap] =
-              createDynamicPropertyDecoder(props.getOrElse(Map()))
-            for {
-              items <- c.downField("items").as[Seq[PropertyMap]]
-              nextCursor <- c.downField("nextCursor").as[Option[String]]
-            } yield DataModelInstanceQueryResponse(items, props, nextCursor)
-          }
-        }
-      }
-    }
+    implicit val nodeQueryReponseDecoder: Decoder[DataModelInstanceQueryResponse] =
+      createDecoderForQueryResponse()
 
     requestSession.post[
       DataModelInstanceQueryResponse,
@@ -192,45 +175,6 @@ object Nodes {
       : Encoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]] =
     deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
 
-  private def decodeBaseOnType[TV](
-      c: ACursor,
-      t: PropertyType[TV]
-  ): Either[DecodingFailure, DataModelProperty[TV]] = {
-
-    // scalastyle:off cyclomatic.complexity
-    def decode: Decoder.Result[TV] =
-      t match {
-        case PropertyType.Boolean => c.as[Boolean]
-        case PropertyType.Int => c.as[Int]
-        case PropertyType.Int32 => c.as[Int]
-        case PropertyType.Int64 => c.as[Long]
-        case PropertyType.Bigint => c.as[Long]
-        case PropertyType.Float32 => c.as[Float]
-        case PropertyType.Float64 => c.as[Double]
-        case PropertyType.Numeric => c.as[BigDecimal]
-        case PropertyType.Timestamp => c.as[ZonedDateTime]
-        case PropertyType.Date => c.as[LocalDate]
-        case PropertyType.Text | PropertyType.Json | PropertyType.DirectRelation |
-            PropertyType.Geometry | PropertyType.Geography =>
-          c.as[String]
-        case PropertyType.Array.Boolean => c.as[Seq[Boolean]]
-        case PropertyType.Array.Int => c.as[Seq[Int]]
-        case PropertyType.Array.Int32 => c.as[Seq[Int]]
-        case PropertyType.Array.Int64 => c.as[Seq[Long]]
-        case PropertyType.Array.Bigint => c.as[Seq[Long]]
-        case PropertyType.Array.Float32 => c.as[Seq[Float]]
-        case PropertyType.Array.Float64 => c.as[Seq[Double]]
-        case PropertyType.Array.Numeric => c.as[Seq[BigDecimal]]
-        case PropertyType.Array.Timestamp => c.as[Seq[ZonedDateTime]]
-        case PropertyType.Array.Date => c.as[Seq[LocalDate]]
-        case PropertyType.Array.Text | PropertyType.Array.Json | PropertyType.Array.Geometry |
-            PropertyType.Array.Geography =>
-          c.as[Seq[String]]
-      }
-
-    decode.map(v => t.Property(v))
-  }
-
   @SuppressWarnings(
     Array("org.wartremover.warts.AsInstanceOf", "org.wartremover.warts.IsInstanceOf")
   )
@@ -255,20 +199,16 @@ object Nodes {
   // scalastyle:off cyclomatic.complexity
   def createDynamicPropertyDecoder(
       props: Map[String, DataModelPropertyDefinition]
-  ): Decoder[PropertyMap] =
-    new Decoder[PropertyMap] {
-      def apply(c: HCursor): Decoder.Result[PropertyMap] = {
-        val res: immutable.Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]] =
-          props.map { case (prop, dmp) =>
-            for {
-              value <- decodeBaseOnType(c.downField(prop), dmp.`type`)
-            } yield prop -> value
-          }
-        filterOutNullableProps(res, props).find(_.isLeft) match {
-          case Some(Left(x)) => Left(x)
-          case _ => Right(new PropertyMap(res.collect { case Right(value) => value }.toMap))
-        }
+  ): Decoder[PropertyMap] = (c: HCursor) => {
+    val res: immutable.Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]] =
+      props.map { case (prop, dmp) =>
+        for {
+          value <- dmp.`type`.decodeProperty(c.downField(prop))
+        } yield prop -> value
       }
+    filterOutNullableProps(res, props).find(_.isLeft) match {
+      case Some(Left(x)) => Left(x)
+      case _ => Right(new PropertyMap(res.collect { case Right(value) => value }.toMap))
     }
-
+  }
 }
