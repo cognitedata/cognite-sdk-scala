@@ -15,8 +15,7 @@ import com.cognite.sdk.scala.v1.resources.Nodes.{
 }
 import fs2.Stream
 import io.circe.CursorOp.DownField
-import io.circe.syntax._
-import io.circe.{ACursor, Decoder, DecodingFailure, Encoder, HCursor, Json, KeyEncoder, Printer}
+import io.circe.{ACursor, Decoder, DecodingFailure, Encoder, HCursor, KeyEncoder, Printer}
 import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
@@ -65,35 +64,36 @@ class Nodes[F[_]](
   )(implicit F: Async[F]): F[DataModelInstanceQueryResponse] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
-    dataModels
-      .retrieveByExternalIds(Seq(inputQuery.model.model), inputQuery.model.space.getOrElse(""))
-      .flatMap { dm =>
-        val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
+    implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] = {
+      import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyDefinitionDecoder
 
-        implicit val dataModelNodeDecoder: Decoder[PropertyMap] =
-          createDynamicPropertyDecoder(props)
-
-        implicit val dataModelNodeSeqDecoder: Decoder[Seq[PropertyMap]] =
-          Decoder.decodeIterable[PropertyMap, Seq]
-
-        import Nodes.dataModelPropertyDefinitionDecoder
-
-        implicit val dataModelInstanceQueryResponseDecoder
-            : Decoder[DataModelInstanceQueryResponse] =
-          Decoder.forProduct3("items", "modelProperties", "nextCursor")(
-            DataModelInstanceQueryResponse.apply
-          )
-
-        requestSession.post[
-          DataModelInstanceQueryResponse,
-          DataModelInstanceQueryResponse,
-          DataModelInstanceQuery
-        ](
-          inputQuery,
-          uri"$baseUrl/list",
-          value => value
-        )
+      new Decoder[DataModelInstanceQueryResponse] {
+        def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] = {
+          val modelProperties = c
+            .downField("modelProperties")
+            .as[Option[Map[String, DataModelPropertyDefinition]]]
+          modelProperties.flatMap { props =>
+            implicit val propertyTypeDecoder: Decoder[PropertyMap] =
+              createDynamicPropertyDecoder(props.getOrElse(Map()))
+            for {
+              items <- c.downField("items").as[Seq[PropertyMap]]
+              nextCursor <- c.downField("nextCursor").as[Option[String]]
+            } yield DataModelInstanceQueryResponse(items, props, nextCursor)
+          }
+        }
       }
+    }
+
+    requestSession.post[
+      DataModelInstanceQueryResponse,
+      DataModelInstanceQueryResponse,
+      DataModelInstanceQuery
+    ](
+      inputQuery,
+      uri"$baseUrl/list",
+      value => value
+    )
+
   }
 
   private[sdk] def queryWithCursor(
@@ -128,69 +128,45 @@ class Nodes[F[_]](
   def retrieveByExternalIds(
       model: DataModelIdentifier,
       externalIds: Seq[String]
-  )(implicit F: Async[F]): F[DataModelInstanceQueryResponse] =
-    dataModels.retrieveByExternalIds(Seq(model.model), model.space.getOrElse("")).flatMap { dm =>
-      val props = dm.headOption.flatMap(_.properties).getOrElse(Map())
+  )(implicit F: Async[F]): F[DataModelInstanceQueryResponse] = {
+    implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] = {
+      import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyDefinitionDecoder
 
-      implicit val dataModelInstanceDecoder: Decoder[PropertyMap] =
-        createDynamicPropertyDecoder(props)
-
-      implicit val dataModelNodeSeqDecoder: Decoder[Seq[PropertyMap]] =
-        Decoder.decodeIterable[PropertyMap, Seq]
-
-      import Nodes.dataModelPropertyDefinitionDecoder
-
-      implicit val dataModelNodeQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
-        Decoder.forProduct3("items", "modelProperties", "nextCursor")(
-          DataModelInstanceQueryResponse.apply
-        )
-
-      requestSession.post[
-        DataModelInstanceQueryResponse,
-        DataModelInstanceQueryResponse,
-        DataModelInstanceByExternalId
-      ](
-        DataModelInstanceByExternalId(externalIds.map(CogniteExternalId(_)), model),
-        uri"$baseUrl/byids",
-        value => value
-      )
+      new Decoder[DataModelInstanceQueryResponse] {
+        def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] = {
+          val modelProperties = c
+            .downField("modelProperties")
+            .as[Option[Map[String, DataModelPropertyDefinition]]]
+          modelProperties.flatMap { props =>
+            implicit val propertyTypeDecoder: Decoder[PropertyMap] =
+              createDynamicPropertyDecoder(props.getOrElse(Map()))
+            for {
+              items <- c.downField("items").as[Seq[PropertyMap]]
+              nextCursor <- c.downField("nextCursor").as[Option[String]]
+            } yield DataModelInstanceQueryResponse(items, props, nextCursor)
+          }
+        }
+      }
     }
+
+    requestSession.post[
+      DataModelInstanceQueryResponse,
+      DataModelInstanceQueryResponse,
+      DataModelInstanceByExternalId
+    ](
+      DataModelInstanceByExternalId(externalIds.map(CogniteExternalId(_)), model),
+      uri"$baseUrl/byids",
+      value => value
+    )
+  }
 }
 
 object Nodes {
 
+  import DomainSpecificLanguageFilter._
+
   implicit val dataModelPropertyDefinitionDecoder: Decoder[DataModelPropertyDefinition] =
     DataModels.dataModelPropertyDefinitionDecoder
-
-  // scalastyle:off cyclomatic.complexity
-  implicit val propEncoder: Encoder[DataModelProperty[_]] = {
-    case b: PropertyType.Boolean.Property => b.value.asJson
-    case i: PropertyType.Int.Property => i.value.asJson
-    case bi: PropertyType.Bigint.Property => bi.value.asJson
-    case f: PropertyType.Float32.Property => f.value.asJson
-    case d: PropertyType.Float64.Property => d.value.asJson
-    case bd: PropertyType.Numeric.Property => bd.value.asJson
-    case s: PropertyType.Text.Property => s.value.asJson
-    case j: PropertyType.Json.Property => j.value.asJson
-    case ts: PropertyType.Timestamp.Property => ts.value.asJson
-    case d: PropertyType.Date.Property => d.value.asJson
-    case gm: PropertyType.Geometry.Property => gm.value.asJson
-    case gg: PropertyType.Geography.Property => gg.value.asJson
-    case dr: PropertyType.DirectRelation.Property => dr.value.asJson
-    case b: PropertyType.Array.Boolean.Property => b.value.asJson
-    case i: PropertyType.Array.Int.Property => i.value.asJson
-    case bi: PropertyType.Array.Bigint.Property => bi.value.asJson
-    case f: PropertyType.Array.Float32.Property => f.value.asJson
-    case d: PropertyType.Array.Float64.Property => d.value.asJson
-    case bd: PropertyType.Array.Numeric.Property => bd.value.asJson
-    case s: PropertyType.Array.Text.Property => s.value.asJson
-    case j: PropertyType.Array.Json.Property => j.value.asJson
-    case ts: PropertyType.Array.Timestamp.Property => ts.value.asJson
-    case d: PropertyType.Array.Date.Property => d.value.asJson
-    case gm: PropertyType.Array.Geometry.Property => gm.value.asJson
-    case gg: PropertyType.Array.Geography.Property => gg.value.asJson
-    case _ => throw new Exception("unknown property type")
-  }
 
   implicit val dataModelPropertyMapEncoder: Encoder[PropertyMap] =
     Encoder
@@ -205,49 +181,6 @@ object Nodes {
 
   implicit val dataModelNodeItemsEncoder: Encoder[Items[DataModelNodeCreate]] =
     deriveEncoder[Items[DataModelNodeCreate]]
-
-  implicit val dmiAndFilterEncoder: Encoder[DSLAndFilter] = deriveEncoder[DSLAndFilter]
-  implicit val dmiOrFilterEncoder: Encoder[DSLOrFilter] = deriveEncoder[DSLOrFilter]
-  implicit val dmiNotFilterEncoder: Encoder[DSLNotFilter] = deriveEncoder[DSLNotFilter]
-
-  implicit val dmiEqualsFilterEncoder: Encoder[DSLEqualsFilter] =
-    Encoder.forProduct2[DSLEqualsFilter, Seq[String], DataModelProperty[_]]("property", "value")(
-      dmiEqF => (dmiEqF.property, dmiEqF.value)
-    )
-  implicit val dmiInFilterEncoder: Encoder[DSLInFilter] = deriveEncoder[DSLInFilter]
-  implicit val dmiRangeFilterEncoder: Encoder[DSLRangeFilter] =
-    deriveEncoder[DSLRangeFilter].mapJson(_.dropNullValues) // VH TODO make this common
-
-  implicit val dmiPrefixFilterEncoder: Encoder[DSLPrefixFilter] =
-    Encoder.forProduct2[DSLPrefixFilter, Seq[String], DataModelProperty[_]]("property", "value")(
-      dmiPxF => (dmiPxF.property, dmiPxF.value)
-    )
-  implicit val dmiExistsFilterEncoder: Encoder[DSLExistsFilter] = deriveEncoder[DSLExistsFilter]
-  implicit val dmiContainsAnyFilterEncoder: Encoder[DSLContainsAnyFilter] =
-    deriveEncoder[DSLContainsAnyFilter]
-  implicit val dmiContainsAllFilterEncoder: Encoder[DSLContainsAllFilter] =
-    deriveEncoder[DSLContainsAllFilter]
-
-  implicit val dmiFilterEncoder: Encoder[DomainSpecificLanguageFilter] = {
-    case EmptyFilter =>
-      Json.fromFields(Seq.empty)
-    case b: DSLBoolFilter =>
-      b match {
-        case f: DSLAndFilter => f.asJson
-        case f: DSLOrFilter => f.asJson
-        case f: DSLNotFilter => f.asJson
-      }
-    case l: DSLLeafFilter =>
-      l match {
-        case f: DSLInFilter => Json.obj(("in", f.asJson))
-        case f: DSLEqualsFilter => Json.obj(("equals", f.asJson))
-        case f: DSLRangeFilter => Json.obj(("range", f.asJson))
-        case f: DSLPrefixFilter => Json.obj(("prefix", f.asJson))
-        case f: DSLExistsFilter => Json.obj(("exists", f.asJson))
-        case f: DSLContainsAnyFilter => Json.obj(("containsAny", f.asJson))
-        case f: DSLContainsAllFilter => Json.obj(("containsAll", f.asJson))
-      }
-  }
 
   implicit val dataModelInstanceQueryEncoder: Encoder[DataModelInstanceQuery] =
     deriveEncoder[DataModelInstanceQuery]
