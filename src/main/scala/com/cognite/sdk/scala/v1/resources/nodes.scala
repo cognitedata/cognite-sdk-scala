@@ -16,12 +16,11 @@ import com.cognite.sdk.scala.v1.resources.Nodes.{
 import fs2.Stream
 import io.circe.CursorOp.DownField
 import io.circe.syntax._
-import io.circe.{ACursor, Decoder, DecodingFailure, Encoder, HCursor, Json, KeyEncoder, Printer}
+import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json, KeyEncoder, Printer}
 import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
 
-import java.time.{LocalDate, ZonedDateTime}
 import scala.collection.immutable
 
 class Nodes[F[_]](
@@ -162,35 +161,8 @@ object Nodes {
   implicit val dataModelPropertyDefinitionDecoder: Decoder[DataModelPropertyDefinition] =
     DataModels.dataModelPropertyDefinitionDecoder
 
-  // scalastyle:off cyclomatic.complexity
-  implicit val propEncoder: Encoder[DataModelProperty[_]] = {
-    case b: PropertyType.Boolean.Property => b.value.asJson
-    case i: PropertyType.Int.Property => i.value.asJson
-    case bi: PropertyType.Bigint.Property => bi.value.asJson
-    case f: PropertyType.Float32.Property => f.value.asJson
-    case d: PropertyType.Float64.Property => d.value.asJson
-    case bd: PropertyType.Numeric.Property => bd.value.asJson
-    case s: PropertyType.Text.Property => s.value.asJson
-    case j: PropertyType.Json.Property => j.value.asJson
-    case ts: PropertyType.Timestamp.Property => ts.value.asJson
-    case d: PropertyType.Date.Property => d.value.asJson
-    case gm: PropertyType.Geometry.Property => gm.value.asJson
-    case gg: PropertyType.Geography.Property => gg.value.asJson
-    case dr: PropertyType.DirectRelation.Property => dr.value.asJson
-    case b: PropertyType.Array.Boolean.Property => b.value.asJson
-    case i: PropertyType.Array.Int.Property => i.value.asJson
-    case bi: PropertyType.Array.Bigint.Property => bi.value.asJson
-    case f: PropertyType.Array.Float32.Property => f.value.asJson
-    case d: PropertyType.Array.Float64.Property => d.value.asJson
-    case bd: PropertyType.Array.Numeric.Property => bd.value.asJson
-    case s: PropertyType.Array.Text.Property => s.value.asJson
-    case j: PropertyType.Array.Json.Property => j.value.asJson
-    case ts: PropertyType.Array.Timestamp.Property => ts.value.asJson
-    case d: PropertyType.Array.Date.Property => d.value.asJson
-    case gm: PropertyType.Array.Geometry.Property => gm.value.asJson
-    case gg: PropertyType.Array.Geography.Property => gg.value.asJson
-    case _ => throw new Exception("unknown property type")
-  }
+  implicit val propEncoder: Encoder[DataModelProperty[_]] =
+    _.encode
 
   implicit val dataModelPropertyMapEncoder: Encoder[PropertyMap] =
     Encoder
@@ -259,45 +231,6 @@ object Nodes {
       : Encoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]] =
     deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
 
-  private def decodeBaseOnType[TV](
-      c: ACursor,
-      t: PropertyType[TV]
-  ): Either[DecodingFailure, DataModelProperty[TV]] = {
-
-    // scalastyle:off cyclomatic.complexity
-    def decode: Decoder.Result[TV] =
-      t match {
-        case PropertyType.Boolean => c.as[Boolean]
-        case PropertyType.Int => c.as[Int]
-        case PropertyType.Int32 => c.as[Int]
-        case PropertyType.Int64 => c.as[Long]
-        case PropertyType.Bigint => c.as[Long]
-        case PropertyType.Float32 => c.as[Float]
-        case PropertyType.Float64 => c.as[Double]
-        case PropertyType.Numeric => c.as[BigDecimal]
-        case PropertyType.Timestamp => c.as[ZonedDateTime]
-        case PropertyType.Date => c.as[LocalDate]
-        case PropertyType.Text | PropertyType.Json | PropertyType.DirectRelation |
-            PropertyType.Geometry | PropertyType.Geography =>
-          c.as[String]
-        case PropertyType.Array.Boolean => c.as[Seq[Boolean]]
-        case PropertyType.Array.Int => c.as[Seq[Int]]
-        case PropertyType.Array.Int32 => c.as[Seq[Int]]
-        case PropertyType.Array.Int64 => c.as[Seq[Long]]
-        case PropertyType.Array.Bigint => c.as[Seq[Long]]
-        case PropertyType.Array.Float32 => c.as[Seq[Float]]
-        case PropertyType.Array.Float64 => c.as[Seq[Double]]
-        case PropertyType.Array.Numeric => c.as[Seq[BigDecimal]]
-        case PropertyType.Array.Timestamp => c.as[Seq[ZonedDateTime]]
-        case PropertyType.Array.Date => c.as[Seq[LocalDate]]
-        case PropertyType.Array.Text | PropertyType.Array.Json | PropertyType.Array.Geometry |
-            PropertyType.Array.Geography =>
-          c.as[Seq[String]]
-      }
-
-    decode.map(v => t.Property(v))
-  }
-
   @SuppressWarnings(
     Array("org.wartremover.warts.AsInstanceOf", "org.wartremover.warts.IsInstanceOf")
   )
@@ -322,20 +255,16 @@ object Nodes {
   // scalastyle:off cyclomatic.complexity
   def createDynamicPropertyDecoder(
       props: Map[String, DataModelPropertyDefinition]
-  ): Decoder[PropertyMap] =
-    new Decoder[PropertyMap] {
-      def apply(c: HCursor): Decoder.Result[PropertyMap] = {
-        val res: immutable.Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]] =
-          props.map { case (prop, dmp) =>
-            for {
-              value <- decodeBaseOnType(c.downField(prop), dmp.`type`)
-            } yield prop -> value
-          }
-        filterOutNullableProps(res, props).find(_.isLeft) match {
-          case Some(Left(x)) => Left(x)
-          case _ => Right(new PropertyMap(res.collect { case Right(value) => value }.toMap))
-        }
+  ): Decoder[PropertyMap] = (c: HCursor) => {
+    val res: immutable.Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]] =
+      props.map { case (prop, dmp) =>
+        for {
+          value <- dmp.`type`.decodeProperty(c.downField(prop))
+        } yield prop -> value
       }
+    filterOutNullableProps(res, props).find(_.isLeft) match {
+      case Some(Left(x)) => Left(x)
+      case _ => Right(new PropertyMap(res.collect { case Right(value) => value }.toMap))
     }
-
+  }
 }

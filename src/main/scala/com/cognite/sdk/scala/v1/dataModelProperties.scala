@@ -4,22 +4,33 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.{LocalDate, ZonedDateTime}
+import io.circe.{ACursor, Decoder, Encoder, Json}
+import io.circe.syntax._
+
 // scalastyle:off number.of.types
 
-sealed abstract class DataModelProperty[TV](val value: TV)
+sealed abstract class DataModelProperty[TV](val value: TV)(implicit encoder: Encoder[TV]) {
+  def encode: Json = value.asJson
+}
 
-sealed abstract class PropertyType[TV] {
+sealed abstract class PropertyType[TV](implicit decoder: Decoder[TV], encoder: Encoder[TV]) {
   sealed case class Property(override val value: TV) extends DataModelProperty(value)
 
   @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
   def code: String =
     toString.replaceAll("(.)([A-Z])", "$1_$2").toLowerCase
+
+  def decodeProperty(c: ACursor): Decoder.Result[Property] =
+    c.as[TV].map(Property(_))
 }
 
-sealed abstract class PrimitivePropertyType[TV] extends PropertyType[TV]
+sealed abstract class PrimitivePropertyType[TV](implicit decoder: Decoder[TV], encoder: Encoder[TV])
+    extends PropertyType[TV]
 
-sealed abstract class ArrayPropertyType[TV, TP <: PrimitivePropertyType[TV]](private val t: TP)
-    extends PropertyType[Seq[TV]] {
+sealed abstract class ArrayPropertyType[TV, TP <: PrimitivePropertyType[TV]](private val t: TP)(
+    implicit decoder: Decoder[Seq[TV]],
+    encoder: Encoder[Seq[TV]]
+) extends PropertyType[Seq[TV]] {
   override def code: String =
     t.code + "[]"
 }
@@ -55,7 +66,7 @@ object PropertyType {
   case object Int extends PrimitivePropertyType[scala.Int]
   case object Int32 extends PrimitivePropertyType[scala.Int]
   case object Int64 extends PrimitivePropertyType[scala.Long]
-  case object Bigint extends PrimitivePropertyType[scala.Long]
+  case object Bigint extends PrimitivePropertyType[scala.BigInt]
   case object Float32 extends PrimitivePropertyType[scala.Float]
   case object Float64 extends PrimitivePropertyType[scala.Double]
   case object Numeric extends PrimitivePropertyType[scala.BigDecimal]
@@ -85,11 +96,12 @@ object PropertyType {
     case object Boolean
         extends ArrayPropertyType[scala.Boolean, PropertyType.Boolean.type](PropertyType.Boolean)
     case object Int extends ArrayPropertyType[scala.Int, PropertyType.Int.type](PropertyType.Int)
-    case object Int32 extends ArrayPropertyType[scala.Int, PropertyType.Int.type](PropertyType.Int)
+    case object Int32
+        extends ArrayPropertyType[scala.Int, PropertyType.Int32.type](PropertyType.Int32)
     case object Int64
-        extends ArrayPropertyType[scala.Long, PropertyType.Bigint.type](PropertyType.Bigint)
+        extends ArrayPropertyType[scala.Long, PropertyType.Int64.type](PropertyType.Int64)
     case object Bigint
-        extends ArrayPropertyType[scala.Long, PropertyType.Bigint.type](PropertyType.Bigint)
+        extends ArrayPropertyType[scala.BigInt, PropertyType.Bigint.type](PropertyType.Bigint)
     case object Float32
         extends ArrayPropertyType[scala.Float, PropertyType.Float32.type](PropertyType.Float32)
     case object Float64
