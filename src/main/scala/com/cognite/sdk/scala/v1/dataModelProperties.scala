@@ -66,7 +66,7 @@ object PropertyType {
   case object Int extends PrimitivePropertyType[scala.Int]
   case object Int32 extends PrimitivePropertyType[scala.Int]
   case object Int64 extends PrimitivePropertyType[scala.Long]
-  case object Bigint extends PrimitivePropertyType[scala.BigInt]
+  case object Bigint extends PrimitivePropertyType[scala.Long]
   case object Float32 extends PrimitivePropertyType[scala.Float]
   case object Float64 extends PrimitivePropertyType[scala.Double]
   case object Numeric extends PrimitivePropertyType[scala.BigDecimal]
@@ -101,7 +101,7 @@ object PropertyType {
     case object Int64
         extends ArrayPropertyType[scala.Long, PropertyType.Int64.type](PropertyType.Int64)
     case object Bigint
-        extends ArrayPropertyType[scala.BigInt, PropertyType.Bigint.type](PropertyType.Bigint)
+        extends ArrayPropertyType[scala.Long, PropertyType.Bigint.type](PropertyType.Bigint)
     case object Float32
         extends ArrayPropertyType[scala.Float, PropertyType.Float32.type](PropertyType.Float32)
     case object Float64
