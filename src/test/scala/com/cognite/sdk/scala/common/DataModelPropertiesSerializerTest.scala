@@ -27,36 +27,23 @@ import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 )
 class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
 
-  val props: Map[String, DataModelPropertyDefinition] = Map(
-    "externalId" -> DataModelPropertyDefinition(PropertyType.Text),
-    "prop_bool" -> DataModelPropertyDefinition(PropertyType.Boolean),
-    "prop_float64" -> DataModelPropertyDefinition(PropertyType.Float64, false),
-    "prop_string" -> DataModelPropertyDefinition(PropertyType.Text, false),
-    "prop_direct_relation" -> DataModelPropertyDefinition(PropertyType.DirectRelation),
-    "prop_date" -> DataModelPropertyDefinition(PropertyType.Date),
-    "prop_timestamp" -> DataModelPropertyDefinition(PropertyType.Timestamp),
-    "arr_bool" -> DataModelPropertyDefinition(PropertyType.Array.Boolean, false),
-    "arr_float64" -> DataModelPropertyDefinition(PropertyType.Array.Float64, false),
-    "arr_int32" -> DataModelPropertyDefinition(PropertyType.Array.Int),
-    "arr_string" -> DataModelPropertyDefinition(PropertyType.Array.Text),
-    "arr_empty" -> DataModelPropertyDefinition(PropertyType.Array.Text, false),
-    "arr_empty_nullable" -> DataModelPropertyDefinition(PropertyType.Array.Float64)
-  )
-
-
-  implicit val propertyTypeDecoder: Decoder[PropertyMap] =
-    createDynamicPropertyDecoder(props)
-
   implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] = {
     import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyDefinitionDecoder
 
     new Decoder[DataModelInstanceQueryResponse] {
-      def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] =
-        for {
-          items <- c.downField("items").as[Seq[PropertyMap]]
-          modelProperties <- c.downField("modelProperties").as[Option[Map[String, DataModelPropertyDefinition]]]
-          nextCursor <- c.downField("nextCursor").as[Option[String]]
-        } yield DataModelInstanceQueryResponse(items, modelProperties, nextCursor)
+      def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] = {
+        val modelProperties = c
+          .downField("modelProperties")
+          .as[Option[Map[String, DataModelPropertyDefinition]]]
+        modelProperties.flatMap { props =>
+          implicit val propertyTypeDecoder: Decoder[PropertyMap] =
+            createDynamicPropertyDecoder(props.getOrElse(Map()))
+          for {
+            items <- c.downField("items").as[Seq[PropertyMap]]
+            nextCursor <- c.downField("nextCursor").as[Option[String]]
+          } yield DataModelInstanceQueryResponse(items, props, nextCursor)
+        }
+      }
     }
   }
 
@@ -81,25 +68,119 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
   "DataModelPropertiesSerializer" when {
     "decode PropertyType" should {
       "work for primitive and array" in {
-        val res = decode[PropertyMap]("""{
-                                      |    "externalId": "tata",
-                                      |    "prop_bool" : true,
-                                      |    "prop_float64": 23.0,
-                                      |    "prop_string": "toto",
-                                      |    "prop_direct_relation": "Asset",
-                                      |    "prop_date": "2022-03-22",
-                                      |    "prop_timestamp": "2022-03-22T12:34:56.789+01:00",
-                                      |    "arr_bool": [true, false, true],
-                                      |    "arr_float64": [1.2, 2, 4.654],
-                                      |    "arr_int32": [3, 1, 2147483646],
-                                      |    "arr_string": ["tata","titi"],
-                                      |    "arr_empty": [],
-                                      |    "arr_empty_nullable": []
-                                      |}""".stripMargin)
+        val res = decode[DataModelInstanceQueryResponse]("""{
+                                        |    "items":
+                                        |    [
+                                        |        {
+                                        |            "externalId": "tata",
+                                        |            "prop_bool": true,
+                                        |            "prop_float64": 23.0,
+                                        |            "prop_string": "toto",
+                                        |            "prop_direct_relation": "Asset",
+                                        |            "prop_date": "2022-03-22",
+                                        |            "prop_timestamp": "2022-03-22T12:34:56.789+01:00",
+                                        |            "arr_bool":
+                                        |            [
+                                        |                true,
+                                        |                false,
+                                        |                true
+                                        |            ],
+                                        |            "arr_float64":
+                                        |            [
+                                        |                1.2,
+                                        |                2,
+                                        |                4.654
+                                        |            ],
+                                        |            "arr_int":
+                                        |            [
+                                        |                3,
+                                        |                1,
+                                        |                2147483646
+                                        |            ],
+                                        |            "arr_string":
+                                        |            [
+                                        |                "tata",
+                                        |                "titi"
+                                        |            ],
+                                        |            "arr_empty":
+                                        |            [],
+                                        |            "arr_empty_nullable":
+                                        |            []
+                                        |        }
+                                        |    ],
+                                        |    "modelProperties":
+                                        |    {
+                                        |        "externalId":
+                                        |        {
+                                        |            "type": "text",
+                                        |            "nullable": false
+                                        |        },
+                                        |        "prop_bool":
+                                        |        {
+                                        |            "type": "boolean",
+                                        |            "nullable": true
+                                        |        },
+                                        |        "prop_float64":
+                                        |        {
+                                        |            "type": "float64",
+                                        |            "nullable": false
+                                        |        },
+                                        |        "prop_string":
+                                        |        {
+                                        |            "type": "text",
+                                        |            "nullable": false
+                                        |        },
+                                        |        "prop_direct_relation":
+                                        |        {
+                                        |            "type": "direct_relation",
+                                        |            "nullable": true
+                                        |        },
+                                        |        "prop_date":
+                                        |        {
+                                        |            "type": "date",
+                                        |            "nullable": true
+                                        |        },
+                                        |        "prop_timestamp":
+                                        |        {
+                                        |            "type": "timestamp",
+                                        |            "nullable": true
+                                        |        },
+                                        |        "arr_bool":
+                                        |        {
+                                        |            "type": "boolean[]",
+                                        |            "nullable": false
+                                        |        },
+                                        |        "arr_float64":
+                                        |        {
+                                        |            "type": "float64[]",
+                                        |            "nullable": false
+                                        |        },
+                                        |        "arr_int":
+                                        |        {
+                                        |            "type": "int[]",
+                                        |            "nullable": true
+                                        |        },
+                                        |        "arr_string":
+                                        |        {
+                                        |            "type": "text[]",
+                                        |            "nullable": true
+                                        |        },
+                                        |        "arr_empty":
+                                        |        {
+                                        |            "type": "text[]",
+                                        |            "nullable": false
+                                        |        },
+                                        |        "arr_empty_nullable":
+                                        |        {
+                                        |            "type": "float64[]",
+                                        |            "nullable": true
+                                        |        }
+                                        |    }
+                                        |}""".stripMargin)
         res.isRight shouldBe true
 
         val Right(dmiResponse) = res
-        val expected = Set(
+        val expected = Map(
           "externalId" -> PropertyType.Text.Property("tata"),
           "prop_bool" -> PropertyType.Boolean.Property(true),
           "prop_float64" -> PropertyType.Float64.Property(23.0),
@@ -115,31 +196,117 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           "arr_float64" -> PropertyType.Array.Float64.Property(
             List(1.2, 2, 4.654)
           ),
-          "arr_int32" -> PropertyType.Array.Int.Property(
+          "arr_int" -> PropertyType.Array.Int.Property(
             List(3, 1, 2147483646)
           ),
           "arr_string" -> PropertyType.Array.Text.Property(
             List("tata", "titi")
           ),
-          "arr_empty" -> PropertyType.Array.Text.Property(List()),
-          "arr_empty_nullable" -> PropertyType.Array.Float64.Property(List())
+          "arr_empty" -> PropertyType.Array.Text.Property(List.empty[String]),
+          "arr_empty_nullable" -> PropertyType.Array.Float64.Property(List.empty[Double])
         )
-        dmiResponse.allProperties.toSet shouldBe expected
+        dmiResponse.items
+          .map(_.allProperties)
+          .headOption shouldBe Some(expected)
       }
       "work for nullable property" in {
-        val res = decode[PropertyMap]("""{
-                                        |    "externalId": "test",
-                                        |    "prop_float64": 23.0,
-                                        |    "prop_string": "toto",
-                                        |    "prop_direct_relation": "Asset",
-                                        |    "arr_bool": [true, false, true],
-                                        |    "arr_float64": [1.2, 2, 4.654],
-                                        |    "arr_empty": []
-                                        |}""".stripMargin)
+        val res = decode[DataModelInstanceQueryResponse]("""{
+                                                           |    "items":
+                                                           |    [
+                                                           |        {
+                                                           |            "externalId": "test",
+                                                           |            "prop_float64": 23.0,
+                                                           |            "prop_string": "toto",
+                                                           |            "prop_direct_relation": "Asset",
+                                                           |            "arr_bool":
+                                                           |            [
+                                                           |                true,
+                                                           |                false,
+                                                           |                true
+                                                           |            ],
+                                                           |            "arr_float64":
+                                                           |            [
+                                                           |                1.2,
+                                                           |                2,
+                                                           |                4.654
+                                                           |            ],
+                                                           |            "arr_empty":
+                                                           |            []
+                                                           |        }
+                                                           |    ],
+                                                           |    "modelProperties":
+                                                           |    {
+                                                           |        "externalId":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_bool":
+                                                           |        {
+                                                           |            "type": "boolean",
+                                                           |            "nullable": true
+                                                           |        },
+                                                           |        "prop_float64":
+                                                           |        {
+                                                           |            "type": "float64",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_string":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_direct_relation":
+                                                           |        {
+                                                           |            "type": "direct_relation",
+                                                           |            "nullable": true
+                                                           |        },
+                                                           |        "prop_date":
+                                                           |        {
+                                                           |            "type": "date",
+                                                           |            "nullable": true
+                                                           |        },
+                                                           |        "prop_timestamp":
+                                                           |        {
+                                                           |            "type": "timestamp",
+                                                           |            "nullable": true
+                                                           |        },
+                                                           |        "arr_bool":
+                                                           |        {
+                                                           |            "type": "boolean[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_float64":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_int":
+                                                           |        {
+                                                           |            "type": "int[]",
+                                                           |            "nullable": true
+                                                           |        },
+                                                           |        "arr_string":
+                                                           |        {
+                                                           |            "type": "text[]",
+                                                           |            "nullable": true
+                                                           |        },
+                                                           |        "arr_empty":
+                                                           |        {
+                                                           |            "type": "text[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_empty_nullable":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": true
+                                                           |        }
+                                                           |    }
+                                                           |}""".stripMargin)
         res.isRight shouldBe true
 
         val Right(dmiResponse) = res
-        val expected = Set(
+        val expected = Map(
           "externalId" -> PropertyType.Text.Property("test"),
           "prop_float64" -> PropertyType.Float64.Property(23.0),
           "prop_string" -> PropertyType.Text.Property("toto"),
@@ -153,305 +320,386 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           "arr_empty" -> PropertyType.Array.Text.Property(List())
         )
 
-        dmiResponse.allProperties.toSet shouldBe expected
+        dmiResponse.items
+          .map(_.allProperties)
+          .headOption shouldBe Some(expected)
       }
 
       "not work for primitive if given value does not match property type" in {
         val res: Either[circe.Error, DataModelInstanceQueryResponse] =
           decode[DataModelInstanceQueryResponse]("""{
-                                                       |"items": [
-                                                       |  {
-                                                       |    "externalId": "tada",
-                                                       |    "prop_bool": "true",
-                                                       |    "prop_string" : "keke",
-                                                       |    "prop_float64": 1.3,
-                                                       |    "arr_bool": [true, true],
-                                                       |    "arr_float64": [1.2, 2.0],
-                                                       |    "arr_empty": []
-                                                       |  }
-                                                       |],
-                                                       |"modelProperties" : {
-                                                       |    "externalId":
-                                                       |    {
-                                                       |      "type": "string",
-                                                       |      "nullable": false
-                                                       |    },
-                                                       |    "prop_string":
-                                                       |    {
-                                                       |      "type": "text",
-                                                       |      "nullable": false
-                                                       |    },
-                                                       |    "prop_bool":
-                                                       |    {
-                                                       |      "type": "boolean",
-                                                       |      "nullable": true
-                                                       |    },
-                                                       |    "prop_float64":
-                                                       |    {
-                                                       |      "type": "float64",
-                                                       |      "nullable": false
-                                                       |    },
-                                                       |    "arr_bool":
-                                                       |    {
-                                                       |      "type": "boolean",
-                                                       |      "nullable": false
-                                                       |    },
-                                                       |    "arr_float64":
-                                                       |    {
-                                                       |      "type": "float64[]",
-                                                       |      "nullable": false
-                                                       |    },
-                                                       |    "arr_empty":
-                                                       |     {
-                                                       |      "type": "float64[]",
-                                                       |      "nullable": false
-                                                       |    }
-                                                       |} }""".stripMargin)
+                                                   |    "items":
+                                                   |    [
+                                                   |        {
+                                                   |            "externalId": "tada",
+                                                   |            "prop_bool": "true",
+                                                   |            "prop_string": "keke",
+                                                   |            "prop_float64": 1.3,
+                                                   |            "arr_bool":
+                                                   |            [
+                                                   |                true,
+                                                   |                true
+                                                   |            ],
+                                                   |            "arr_float64":
+                                                   |            [
+                                                   |                1.2,
+                                                   |                2.0
+                                                   |            ],
+                                                   |            "arr_empty":
+                                                   |            []
+                                                   |        }
+                                                   |    ],
+                                                   |    "modelProperties":
+                                                   |    {
+                                                   |        "externalId":
+                                                   |        {
+                                                   |            "type": "text",
+                                                   |            "nullable": false
+                                                   |        },
+                                                   |        "prop_string":
+                                                   |        {
+                                                   |            "type": "text",
+                                                   |            "nullable": false
+                                                   |        },
+                                                   |        "prop_bool":
+                                                   |        {
+                                                   |            "type": "boolean",
+                                                   |            "nullable": true
+                                                   |        },
+                                                   |        "prop_float64":
+                                                   |        {
+                                                   |            "type": "float64",
+                                                   |            "nullable": false
+                                                   |        },
+                                                   |        "arr_bool":
+                                                   |        {
+                                                   |            "type": "boolean[]",
+                                                   |            "nullable": false
+                                                   |        },
+                                                   |        "arr_float64":
+                                                   |        {
+                                                   |            "type": "float64[]",
+                                                   |            "nullable": false
+                                                   |        },
+                                                   |        "arr_empty":
+                                                   |        {
+                                                   |            "type": "float64[]",
+                                                   |            "nullable": false
+                                                   |        }
+                                                   |    }
+                                                   |}""".stripMargin)
 
         checkErrorDecodingOnField(res, "prop_bool", "Boolean")
       }
       "not work for array if it contains Boolean and String" in {
         val res = decode[DataModelInstanceQueryResponse]("""{
-                                                               |"items": [
-                                                               |  {
-                                                               |    "externalId": "tada",
-                                                               |    "prop_string" : "keke",
-                                                               |    "prop_float64": 1.3,
-                                                               |    "arr_bool": [true, "false", true],
-                                                               |    "arr_float64": [1.2, 2.0],
-                                                               |    "arr_empty": []
-                                                               |  }
-                                                               |],
-                                                               |"modelProperties" : {
-                                                               |    "externalId":
-                                                               |    {
-                                                               |      "type": "string",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "prop_string":
-                                                               |    {
-                                                               |      "type": "text",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "prop_float64":
-                                                               |    {
-                                                               |      "type": "float64",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "arr_bool":
-                                                               |    {
-                                                               |      "type": "boolean",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "arr_float64":
-                                                               |    {
-                                                               |      "type": "float64[]",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "arr_empty":
-                                                               |     {
-                                                               |      "type": "float64[]",
-                                                               |      "nullable": false
-                                                               |    }
-                                                               |} }""".stripMargin)
+                                                           |    "items":
+                                                           |    [
+                                                           |        {
+                                                           |            "externalId": "tada",
+                                                           |            "prop_string": "keke",
+                                                           |            "prop_float64": 1.3,
+                                                           |            "arr_bool":
+                                                           |            [
+                                                           |                true,
+                                                           |                "false",
+                                                           |                true
+                                                           |            ],
+                                                           |            "arr_float64":
+                                                           |            [
+                                                           |                1.2,
+                                                           |                2.0
+                                                           |            ],
+                                                           |            "arr_empty":
+                                                           |            []
+                                                           |        }
+                                                           |    ],
+                                                           |    "modelProperties":
+                                                           |    {
+                                                           |        "externalId":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_string":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_float64":
+                                                           |        {
+                                                           |            "type": "float64",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_bool":
+                                                           |        {
+                                                           |            "type": "boolean",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_float64":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_empty":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": false
+                                                           |        }
+                                                           |    }
+                                                           |}""".stripMargin)
         checkErrorDecodingOnField(res, "arr_bool", "Boolean")
       }
       "not work for array if it contains Double and String" in {
         val res = decode[DataModelInstanceQueryResponse]("""{
-                                                               |"items": [
-                                                               |  {
-                                                               |    "externalId": "tada",
-                                                               |    "prop_string" : "keke",
-                                                               |    "prop_float64": 1.3,
-                                                               |    "arr_bool": [true, false],
-                                                               |    "arr_float64": [1.2, 2.0, "abc"],
-                                                               |    "arr_empty": []
-                                                               |  }
-                                                               |],
-                                                               |"modelProperties" : {
-                                                               |    "externalId":
-                                                               |    {
-                                                               |      "type": "string",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "prop_string":
-                                                               |    {
-                                                               |      "type": "text",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "prop_float64":
-                                                               |    {
-                                                               |      "type": "float64",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "arr_bool":
-                                                               |    {
-                                                               |      "type": "boolean",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "arr_float64":
-                                                               |    {
-                                                               |      "type": "float64[]",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "arr_empty":
-                                                               |     {
-                                                               |      "type": "float64[]",
-                                                               |      "nullable": false
-                                                               |    }
-                                                               |} }""".stripMargin)
+                                                           |    "items":
+                                                           |    [
+                                                           |        {
+                                                           |            "externalId": "tada",
+                                                           |            "prop_string": "keke",
+                                                           |            "prop_float64": 1.3,
+                                                           |            "arr_bool":
+                                                           |            [
+                                                           |                true,
+                                                           |                false
+                                                           |            ],
+                                                           |            "arr_float64":
+                                                           |            [
+                                                           |                1.2,
+                                                           |                2.0,
+                                                           |                "abc"
+                                                           |            ],
+                                                           |            "arr_empty":
+                                                           |            []
+                                                           |        }
+                                                           |    ],
+                                                           |    "modelProperties":
+                                                           |    {
+                                                           |        "externalId":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_string":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_float64":
+                                                           |        {
+                                                           |            "type": "float64",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_bool":
+                                                           |        {
+                                                           |            "type": "boolean[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_float64":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_empty":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": false
+                                                           |        }
+                                                           |    }
+                                                           |}""".stripMargin)
 
         checkErrorDecodingOnField(res, "arr_float64", "Double")
       }
       "not work for array if it contains Double and Boolean" in {
         val res = decode[DataModelInstanceQueryResponse]("""{
-                                                               |"items": [
-                                                               |  {
-                                                               |    "externalId": "tada",
-                                                               |    "prop_bool" : true,
-                                                               |    "prop_float64": 23.0,
-                                                               |    "prop_string": "toto",
-                                                               |    "arr_bool": [true, false],
-                                                               |    "arr_float64": [false, 2.0, 3.6],
-                                                               |    "arr_empty": []
-                                                               |  }
-                                                               |],
-                                                               |"modelProperties" : {
-                                                               |    "externalId":
-                                                               |    {
-                                                               |      "type": "string",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "prop_float64":
-                                                               |    {
-                                                               |      "type": "float64",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "prop_string":
-                                                               |    {
-                                                               |      "type": "string",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "arr_bool":
-                                                               |    {
-                                                               |      "type": "boolean",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "arr_float64":
-                                                               |    {
-                                                               |      "type": "float64[]",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "arr_empty":
-                                                               |     {
-                                                               |      "type": "float64[]",
-                                                               |      "nullable": false
-                                                               |    }
-                                                               |} }""".stripMargin)
+                                                           |    "items":
+                                                           |    [
+                                                           |        {
+                                                           |            "externalId": "tada",
+                                                           |            "prop_bool": true,
+                                                           |            "prop_float64": 23.0,
+                                                           |            "prop_string": "toto",
+                                                           |            "arr_bool":
+                                                           |            [
+                                                           |                true,
+                                                           |                false
+                                                           |            ],
+                                                           |            "arr_float64":
+                                                           |            [
+                                                           |                false,
+                                                           |                2.0,
+                                                           |                3.6
+                                                           |            ],
+                                                           |            "arr_empty":
+                                                           |            []
+                                                           |        }
+                                                           |    ],
+                                                           |    "modelProperties":
+                                                           |    {
+                                                           |        "externalId":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_float64":
+                                                           |        {
+                                                           |            "type": "float64",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_string":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_bool":
+                                                           |        {
+                                                           |            "type": "boolean[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_float64":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_empty":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": false
+                                                           |        }
+                                                           |    }
+                                                           |}""".stripMargin)
         checkErrorDecodingOnField(res, "arr_float64", "Double")
       }
       "not work for property date if the string it not well formatted" in {
         val res = decode[DataModelInstanceQueryResponse]("""{
-                                                               |"items": [
-                                                               |  {
-                                                               |    "externalId": "tada",
-                                                               |    "prop_float64": 23.0,
-                                                               |    "prop_string": "toto",
-                                                               |    "prop_date": "2022-02",
-                                                               |    "arr_bool": [true, false, true],
-                                                               |    "arr_float64": [1.2, 2, 4.654],
-                                                               |    "arr_empty": []
-                                                               |  }
-                                                               |],
-                                                               |"modelProperties" : {
-                                                               |    "externalId":
-                                                               |    {
-                                                               |      "type": "string",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "prop_float64":
-                                                               |    {
-                                                               |      "type": "float64",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "prop_string":
-                                                               |    {
-                                                               |      "type": "string",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "prop_date":
-                                                               |    {
-                                                               |      "type": "date",
-                                                               |      "nullable": true
-                                                               |    },
-                                                               |    "arr_bool":
-                                                               |    {
-                                                               |      "type": "boolean",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "arr_float64":
-                                                               |    {
-                                                               |      "type": "float64[]",
-                                                               |      "nullable": false
-                                                               |    },
-                                                               |    "arr_empty":
-                                                               |     {
-                                                               |      "type": "float64[]",
-                                                               |      "nullable": false
-                                                               |    }
-                                                               |} }""".stripMargin)
+                                                           |    "items":
+                                                           |    [
+                                                           |        {
+                                                           |            "externalId": "tada",
+                                                           |            "prop_float64": 23.0,
+                                                           |            "prop_string": "toto",
+                                                           |            "prop_date": "2022-02",
+                                                           |            "arr_bool":
+                                                           |            [
+                                                           |                true,
+                                                           |                false,
+                                                           |                true
+                                                           |            ],
+                                                           |            "arr_float64":
+                                                           |            [
+                                                           |                1.2,
+                                                           |                2,
+                                                           |                4.654
+                                                           |            ],
+                                                           |            "arr_empty":
+                                                           |            []
+                                                           |        }
+                                                           |    ],
+                                                           |    "modelProperties":
+                                                           |    {
+                                                           |        "externalId":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_float64":
+                                                           |        {
+                                                           |            "type": "float64",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_string":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_date":
+                                                           |        {
+                                                           |            "type": "date",
+                                                           |            "nullable": true
+                                                           |        },
+                                                           |        "arr_bool":
+                                                           |        {
+                                                           |            "type": "boolean[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_float64":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_empty":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": false
+                                                           |        }
+                                                           |    }
+                                                           |}""".stripMargin)
         checkErrorDecodingOnField(res, "prop_date", "LocalDate")
       }
       "not work for property timestamp if the string it not well formatted" in {
         val res = decode[DataModelInstanceQueryResponse]("""{
-                                                           |"items": [
-                                                           |  {
-                                                           |    "externalId": "tada",
-                                                           |    "prop_float64": 23.0,
-                                                           |    "prop_string": "toto",
-                                                           |    "prop_timestamp": "2022-02-03",
-                                                           |    "arr_bool": [true, false, true],
-                                                           |    "arr_float64": [1.2, 2, 4.654],
-                                                           |    "arr_empty": []
-                                                           |  }
-                                                           |],
-                                                           |"modelProperties" : {
-                                                           |    "externalId":
+                                                           |    "items":
+                                                           |    [
+                                                           |        {
+                                                           |            "externalId": "tada",
+                                                           |            "prop_float64": 23.0,
+                                                           |            "prop_string": "toto",
+                                                           |            "prop_timestamp": "2022-02-03",
+                                                           |            "arr_bool":
+                                                           |            [
+                                                           |                true,
+                                                           |                false,
+                                                           |                true
+                                                           |            ],
+                                                           |            "arr_float64":
+                                                           |            [
+                                                           |                1.2,
+                                                           |                2,
+                                                           |                4.654
+                                                           |            ],
+                                                           |            "arr_empty":
+                                                           |            []
+                                                           |        }
+                                                           |    ],
+                                                           |    "modelProperties":
                                                            |    {
-                                                           |      "type": "string",
-                                                           |      "nullable": false
-                                                           |    },
-                                                           |    "prop_float64":
-                                                           |    {
-                                                           |      "type": "float64",
-                                                           |      "nullable": false
-                                                           |    },
-                                                           |    "prop_string":
-                                                           |    {
-                                                           |      "type": "string",
-                                                           |      "nullable": false
-                                                           |    },
-                                                           |    "prop_timestamp":
-                                                           |    {
-                                                           |      "type": "timestamp",
-                                                           |      "nullable": true
-                                                           |    },
-                                                           |    "arr_bool":
-                                                           |    {
-                                                           |      "type": "boolean",
-                                                           |      "nullable": false
-                                                           |    },
-                                                           |    "arr_float64":
-                                                           |    {
-                                                           |      "type": "float64[]",
-                                                           |      "nullable": false
-                                                           |    },
-                                                           |    "arr_empty":
-                                                           |     {
-                                                           |      "type": "float64[]",
-                                                           |      "nullable": false
+                                                           |        "externalId":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_float64":
+                                                           |        {
+                                                           |            "type": "float64",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_string":
+                                                           |        {
+                                                           |            "type": "text",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "prop_timestamp":
+                                                           |        {
+                                                           |            "type": "timestamp",
+                                                           |            "nullable": true
+                                                           |        },
+                                                           |        "arr_bool":
+                                                           |        {
+                                                           |            "type": "boolean[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_float64":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": false
+                                                           |        },
+                                                           |        "arr_empty":
+                                                           |        {
+                                                           |            "type": "float64[]",
+                                                           |            "nullable": false
+                                                           |        }
                                                            |    }
-                                                           |} }""".stripMargin)
+                                                           |}""".stripMargin)
         checkErrorDecodingOnField(res, "prop_timestamp", "ZonedDateTime")
       }
     }
