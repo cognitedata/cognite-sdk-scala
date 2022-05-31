@@ -32,23 +32,23 @@ class Nodes[F[_]](
   override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/nodes"
 
   private def createDecoderForQueryResponse(): Decoder[DataModelInstanceQueryResponse] = {
-    import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyDefinitionDecoder
-    new Decoder[DataModelInstanceQueryResponse] {
-      def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] = {
-        val modelProperties = c
+    import Nodes.dataModelPropertyDefinitionDecoder
+    
+    (c: HCursor) => 
+      for {
+        modelProperties <- c
           .downField("modelProperties")
-          .as[Option[Map[String, DataModelPropertyDefinition]]]
-        modelProperties.flatMap { props =>
-          implicit val propertyTypeDecoder: Decoder[PropertyMap] =
-            createDynamicPropertyDecoder(props.getOrElse(Map()))
-          for {
-            items <- c.downField("items").as[Seq[PropertyMap]]
-            nextCursor <- c.downField("nextCursor").as[Option[String]]
-          } yield DataModelInstanceQueryResponse(items, props, nextCursor)
-        }
-      }
+          .as[Map[String, DataModelPropertyDefinition]]          
+          
+        seqDecoder: Decoder[Seq[PropertyMap]] =
+          Decoder.decodeIterable[PropertyMap, Seq](
+            createDynamicPropertyDecoder(modelProperties), 
+            implicitly)
+          
+        items <- seqDecoder.tryDecode(c.downField("items"))
+        nextCursor <- c.downField("nextCursor").as[Option[String]]
+      } yield DataModelInstanceQueryResponse(items, Some(modelProperties), nextCursor)
     }
-  }
 
   def createItems(
       spaceExternalId: String,
@@ -170,10 +170,6 @@ object Nodes {
 
   implicit val dataModelInstanceByExternalIdEncoder: Encoder[DataModelInstanceByExternalId] =
     deriveEncoder[DataModelInstanceByExternalId]
-
-  implicit val dmiByExternalIdItemsWithIgnoreUnknownIdsEncoder
-      : Encoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]] =
-    deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
 
   @SuppressWarnings(
     Array("org.wartremover.warts.AsInstanceOf", "org.wartremover.warts.IsInstanceOf")
