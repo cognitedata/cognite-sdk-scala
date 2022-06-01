@@ -7,12 +7,6 @@ import cats.syntax.all._
 import cats.effect.Async
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.cognite.sdk.scala.v1.resources.Nodes.{
-  createDynamicPropertyDecoder,
-  dataModelInstanceByExternalIdEncoder,
-  dataModelInstanceQueryEncoder,
-  dataModelNodeCreateEncoder
-}
 import fs2.Stream
 import io.circe.CursorOp.DownField
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, KeyEncoder, Printer}
@@ -28,6 +22,7 @@ class Nodes[F[_]](
 ) extends WithRequestSession[F]
     with DeleteByExternalIds[F]
     with BaseUrl {
+  import Nodes._
 
   override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/nodes"
 
