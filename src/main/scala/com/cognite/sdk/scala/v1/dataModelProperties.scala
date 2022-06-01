@@ -10,10 +10,14 @@ sealed abstract class PropertyType {
     toString.replaceAll("(.)([A-Z])", "$1_$2").toLowerCase
 }
 
+// There are a lot of property types, but it can't be helped.
+// scalastyle:off number.of.types
 object PropertyType {
   val values: Seq[PropertyType] = Seq[PropertyType](
     Boolean,
     Int,
+    Int32,
+    Int64,
     Bigint,
     Float32,
     Float64,
@@ -36,6 +40,8 @@ object PropertyType {
 
   case object Boolean extends PropertyType
   case object Int extends PropertyType
+  case object Int32 extends PropertyType
+  case object Int64 extends PropertyType
   case object Bigint extends PropertyType
   case object Float32 extends PropertyType
   case object Float64 extends PropertyType
@@ -59,6 +65,8 @@ object PropertyType {
     val values: Seq[PropertyType] = Seq[PropertyType](
       Boolean,
       Int,
+      Int32,
+      Int64,
       Bigint,
       Float32,
       Float64,
@@ -73,6 +81,8 @@ object PropertyType {
 
     case object Boolean extends Array(PropertyType.Boolean)
     case object Int extends Array(PropertyType.Int)
+    case object Int32 extends Array(PropertyType.Int32)
+    case object Int64 extends Array(PropertyType.Int64)
     case object Bigint extends Array(PropertyType.Bigint)
     case object Float32 extends Array(PropertyType.Float32)
     case object Float64 extends Array(PropertyType.Float64)
