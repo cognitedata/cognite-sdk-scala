@@ -10,8 +10,8 @@ final case class DataModelIdentifier(
     model: String
 )
 
-final case class DataModelProperty(
-    `type`: PropertyType,
+final case class DataModelPropertyDefinition(
+    `type`: PropertyType[_],
     nullable: Boolean = true,
     targetModel: Option[DataModelIdentifier] = None
 )
@@ -34,18 +34,18 @@ final case class DataModelIndexes(
 
 final case class DataModel(
     externalId: String,
-    properties: Option[Map[String, DataModelProperty]] = None,
+    properties: Option[Map[String, DataModelPropertyDefinition]] = None,
     `extends`: Option[Seq[DataModelIdentifier]] = None,
     indexes: Option[DataModelIndexes] = None,
     constraints: Option[DataModelConstraints] = None,
-    dataModelType: DataModelType = DataModelType.Node
+    dataModelType: DataModelType = DataModelType.NodeType
 )
 
 sealed abstract class DataModelType
 
 object DataModelType {
-  case object Node extends DataModelType
-  case object Edge extends DataModelType
+  case object NodeType extends DataModelType
+  case object EdgeType extends DataModelType
 }
 
 final case class DataModelListInput(spaceExternalId: String)

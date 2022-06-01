@@ -68,12 +68,14 @@ object DataModels {
 
   implicit val bTreeIndexEncoder: Encoder[BTreeIndex] =
     deriveEncoder[BTreeIndex]
-  implicit val dataModelPropertyTypeEncoder: Encoder[PropertyType] =
-    Encoder.encodeString.contramap[PropertyType](_.code)
+  implicit val dataModelPropertyTypeEncoder: Encoder[PropertyType[_]] =
+    Encoder.encodeString.contramap[PropertyType[_]](_.code)
   implicit val dataModelPropertyIndexesEncoder: Encoder[DataModelIndexes] =
     deriveEncoder[DataModelIndexes]
-  implicit val dataModelPropertyEncoder: Encoder[DataModelProperty] =
-    deriveEncoder[DataModelProperty]
+  implicit val dataModelPropertyDeffinitionEncoder: Encoder[DataModelPropertyDefinition] =
+    Encoder.forProduct3[DataModelPropertyDefinition, PropertyType[_], Boolean, Option[
+      DataModelIdentifier
+    ]]("type", "nullable", "targetModel")(pd => (pd.`type`, pd.nullable, pd.targetModel))
   implicit val uniquenessConstraintEncoder: Encoder[UniquenessConstraint] =
     new Encoder[UniquenessConstraint] {
       final def apply(uc: UniquenessConstraint): Json =
@@ -98,8 +100,8 @@ object DataModels {
     new Encoder[DataModel] {
       final def apply(dm: DataModel): Json = {
         val (allowNode, allowEdge) = dm.dataModelType match {
-          case DataModelType.Edge => (false, true)
-          case DataModelType.Node => (true, false)
+          case DataModelType.EdgeType => (false, true)
+          case DataModelType.NodeType => (true, false)
         }
         derivedDataModelEncoder(dm)
           .mapObject(
@@ -136,7 +138,7 @@ object DataModels {
       }
   implicit val bTreeIndexDecoder: Decoder[BTreeIndex] =
     deriveDecoder[BTreeIndex]
-  implicit val dataModelPropertyTypeDecoder: Decoder[PropertyType] =
+  implicit val dataModelPropertyTypeDecoder: Decoder[PropertyType[_]] =
     Decoder.decodeString.map(propertyTypeCode =>
       PropertyType
         .fromCode(propertyTypeCode)
@@ -146,8 +148,8 @@ object DataModels {
     )
   implicit val dataModelPropertyIndexesDecoder: Decoder[DataModelIndexes] =
     deriveDecoder[DataModelIndexes]
-  implicit val dataModelPropertyDecoder: Decoder[DataModelProperty] =
-    deriveDecoder[DataModelProperty]
+  implicit val dataModelPropertyDefinitionDecoder: Decoder[DataModelPropertyDefinition] =
+    Decoder.forProduct3("type", "nullable", "targetModel")(DataModelPropertyDefinition.apply)
   implicit val uniquenessConstraintDecoder: Decoder[UniquenessConstraint] =
     new Decoder[UniquenessConstraint] {
       final def apply(c: HCursor): Decoder.Result[UniquenessConstraint] =
@@ -167,8 +169,8 @@ object DataModels {
       val allowNode = init.downField("allowNode").as[Boolean]
       val allowEdge = init.downField("allowEdge").as[Boolean]
       val dataModelType: DataModelType = (allowNode, allowEdge) match {
-        case (Right(true), Right(false) | Left(_)) => DataModelType.Node
-        case (Right(false) | Left(_), Right(true)) => DataModelType.Edge
+        case (Right(true), Right(false) | Left(_)) => DataModelType.NodeType
+        case (Right(false) | Left(_), Right(true)) => DataModelType.EdgeType
         case _ => throw new Exception("Exactly one of allowNode and allowEdge must be true")
       }
       init.withFocus(
