@@ -13,7 +13,8 @@ sealed abstract class DataModelProperty[V](val value: V)(implicit encoder: Encod
   def encode: Json = value.asJson
 }
 
-sealed abstract class PropertyType[V](implicit decoder: Decoder[V], encoder: Encoder[V]) {
+sealed abstract class PropertyType[V](implicit decoder: Decoder[V], encoder: Encoder[V])
+    extends Serializable {
   sealed case class Property(override val value: V) extends DataModelProperty(value)
 
   @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
