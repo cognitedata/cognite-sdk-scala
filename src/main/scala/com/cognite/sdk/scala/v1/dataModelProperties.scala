@@ -36,6 +36,8 @@ sealed abstract class ArrayPropertyType[V, P <: PrimitivePropertyType[V]](privat
     t.code + "[]"
 }
 
+// There are a lot of property types, but it can't be helped.
+// scalastyle:off number.of.types
 object PropertyType {
 
   val values: Seq[PropertyType[_]] = Seq[PropertyType[_]](
@@ -83,6 +85,8 @@ object PropertyType {
     val values: Seq[PropertyType[_]] = Seq[PropertyType[_]](
       Boolean,
       Int,
+      Int32,
+      Int64,
       Bigint,
       Float32,
       Float64,
