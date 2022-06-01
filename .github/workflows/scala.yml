@@ -77,7 +77,7 @@ jobs:
 
       - name: Compile
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13.7 Test/compile
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13.8 Test/compile
 
   compile_scala_3:
     runs-on: ubuntu-latest
@@ -113,7 +113,7 @@ jobs:
 
       - name: Compile
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++3.1.1 Test/compile
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC ++3.1.2 Test/compile
 
   test:
     runs-on: ubuntu-latest
@@ -156,7 +156,7 @@ jobs:
         AIZE_CLIENT_SECRET: ${{ secrets.AIZE_CLIENT_SECRET }}
       # run: sbt test
       run: |
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13.7 scalastyle test:scalastyle scalafmtCheck coverage test coverageReport
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13.8 scalastyle test:scalastyle scalafmtCheck coverage test coverageReport
 
     - name: Upload test coverage report
       uses: codecov/codecov-action@v1
@@ -189,7 +189,7 @@ jobs:
 
       - name: Build JAR file
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC "set test in Test := {}" "set compile/skip := true" +package
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set test in Test := {}" "set compile/skip := true" +package
 
       - name: Publish package
         env:
