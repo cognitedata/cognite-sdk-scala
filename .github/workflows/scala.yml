@@ -189,7 +189,7 @@ jobs:
 
       - name: Build JAR file
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set test in Test := {}" "set compile/skip := true" +package
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}" "set compile/skip := true" +package
 
       - name: Publish package
         env:
