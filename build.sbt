@@ -1,7 +1,7 @@
 import wartremover.Wart
 import sbt.project
 
-val scala3 = "3.1.1"
+val scala3 = "3.1.2"
 val scala213 = "2.13.7"
 val scala212 = "2.12.15"
 val supportedScalaVersions = List(scala212, scala213, scala3)
@@ -10,8 +10,8 @@ val supportedScalaVersions = List(scala212, scala213, scala3)
 val jettyTestVersion = "9.4.46.v20220331"
 
 val sttpVersion = "3.5.2"
-val circeVersion = "0.14.2"
-val catsEffectVersion = "3.3.11"
+val circeVersion = "0.14.1"
+val catsEffectVersion = "3.3.12"
 val fs2Version = "3.2.7"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
@@ -21,7 +21,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.0.9",
+  version := "2.0.10",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -98,7 +98,7 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "3.20.1"
+      "com.google.protobuf" % "protobuf-java" % "3.21.1"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor == 13 =>
