@@ -24,8 +24,8 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
 
   "DataModelFilterSerializer" when {
     "encode EmptyFilter" should {
-      "return an empty object"in {
-        val empty:DomainSpecificLanguageFilter = EmptyFilter
+      "return an empty object" in {
+        val empty: DomainSpecificLanguageFilter = EmptyFilter
         empty.asJson.noSpaces shouldBe "{}"
       }
     }
@@ -40,7 +40,8 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
                                        |  "value" : 1
                                        |}""".stripMargin
 
-        val equalString = DSLEqualsFilter(Seq("name", "tag"), PropertyType.Text.Property("abcdef")).asJson
+        val equalString =
+          DSLEqualsFilter(Seq("name", "tag"), PropertyType.Text.Property("abcdef")).asJson
         equalString.toString() shouldBe """{
                                           |  "property" : [
                                           |    "name",
@@ -49,7 +50,8 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
                                           |  "value" : "abcdef"
                                           |}""".stripMargin
 
-        val equalBool = DSLEqualsFilter(Seq("name", "tag"), PropertyType.Boolean.Property(false)).asJson
+        val equalBool =
+          DSLEqualsFilter(Seq("name", "tag"), PropertyType.Boolean.Property(false)).asJson
         equalBool.toString() shouldBe """{
                                         |  "property" : [
                                         |    "name",
@@ -293,7 +295,8 @@ class DomainSpecificLanguageFilterSerializerTest extends AnyWordSpec with Matche
 
     "encode a mix filter" should {
       "work for complex case" in {
-        val equalInt = DSLEqualsFilter(Seq("name", "tag"), PropertyType.Bigint.Property(9223372036854775L))
+        val equalInt =
+          DSLEqualsFilter(Seq("name", "tag"), PropertyType.Bigint.Property(9223372036854775L))
         val in = DSLInFilter(
           Seq("name", "tag"),
           Seq(

@@ -9,32 +9,35 @@ import io.circe.syntax._
 
 // scalastyle:off number.of.types
 
-sealed abstract class DataModelProperty[TV](val value: TV)(implicit encoder: Encoder[TV]) {
+sealed abstract class DataModelProperty[V](val value: V)(implicit encoder: Encoder[V]) {
   def encode: Json = value.asJson
 }
 
-sealed abstract class PropertyType[TV](implicit decoder: Decoder[TV], encoder: Encoder[TV]) {
-  sealed case class Property(override val value: TV) extends DataModelProperty(value)
+sealed abstract class PropertyType[V](implicit decoder: Decoder[V], encoder: Encoder[V])
+    extends Serializable {
+  sealed case class Property(override val value: V) extends DataModelProperty(value)
 
   @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
   def code: String =
     toString.replaceAll("(.)([A-Z])", "$1_$2").toLowerCase
 
   def decodeProperty(c: ACursor): Decoder.Result[Property] =
-    c.as[TV].map(Property(_))
+    c.as[V].map(Property(_))
 }
 
-sealed abstract class PrimitivePropertyType[TV](implicit decoder: Decoder[TV], encoder: Encoder[TV])
-    extends PropertyType[TV]
+sealed abstract class PrimitivePropertyType[V](implicit decoder: Decoder[V], encoder: Encoder[V])
+    extends PropertyType[V]
 
-sealed abstract class ArrayPropertyType[TV, TP <: PrimitivePropertyType[TV]](private val t: TP)(
-    implicit decoder: Decoder[Seq[TV]],
-    encoder: Encoder[Seq[TV]]
-) extends PropertyType[Seq[TV]] {
+sealed abstract class ArrayPropertyType[V, P <: PrimitivePropertyType[V]](private val t: P)(
+    implicit decoder: Decoder[Seq[V]],
+    encoder: Encoder[Seq[V]]
+) extends PropertyType[Seq[V]] {
   override def code: String =
     t.code + "[]"
 }
 
+// There are a lot of property types, but it can't be helped.
+// scalastyle:off number.of.types
 object PropertyType {
 
   val values: Seq[PropertyType[_]] = Seq[PropertyType[_]](
@@ -66,7 +69,7 @@ object PropertyType {
   case object Int extends PrimitivePropertyType[scala.Int]
   case object Int32 extends PrimitivePropertyType[scala.Int]
   case object Int64 extends PrimitivePropertyType[scala.Long]
-  case object Bigint extends PrimitivePropertyType[scala.BigInt]
+  case object Bigint extends PrimitivePropertyType[scala.Long]
   case object Float32 extends PrimitivePropertyType[scala.Float]
   case object Float64 extends PrimitivePropertyType[scala.Double]
   case object Numeric extends PrimitivePropertyType[scala.BigDecimal]
@@ -82,6 +85,8 @@ object PropertyType {
     val values: Seq[PropertyType[_]] = Seq[PropertyType[_]](
       Boolean,
       Int,
+      Int32,
+      Int64,
       Bigint,
       Float32,
       Float64,
@@ -101,7 +106,7 @@ object PropertyType {
     case object Int64
         extends ArrayPropertyType[scala.Long, PropertyType.Int64.type](PropertyType.Int64)
     case object Bigint
-        extends ArrayPropertyType[scala.BigInt, PropertyType.Bigint.type](PropertyType.Bigint)
+        extends ArrayPropertyType[scala.Long, PropertyType.Bigint.type](PropertyType.Bigint)
     case object Float32
         extends ArrayPropertyType[scala.Float, PropertyType.Float32.type](PropertyType.Float32)
     case object Float64

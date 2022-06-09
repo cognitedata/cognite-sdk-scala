@@ -139,11 +139,11 @@ object DataModels {
   implicit val bTreeIndexDecoder: Decoder[BTreeIndex] =
     deriveDecoder[BTreeIndex]
   implicit val dataModelPropertyTypeDecoder: Decoder[PropertyType[_]] =
-    Decoder.decodeString.map(
+    Decoder.decodeString.map(propertyTypeCode =>
       PropertyType
-        .fromCode(_)
+        .fromCode(propertyTypeCode)
         .getOrElse(
-          throw new IllegalArgumentException("Invalid type specified")
+          throw new IllegalArgumentException(s"Invalid type specified: $propertyTypeCode")
         )
     )
   implicit val dataModelPropertyIndexesDecoder: Decoder[DataModelIndexes] =

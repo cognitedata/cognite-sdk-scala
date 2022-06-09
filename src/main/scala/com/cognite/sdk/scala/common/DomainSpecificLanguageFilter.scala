@@ -45,35 +45,7 @@ final case class DSLContainsAllFilter(property: Seq[String], values: Seq[DataMod
 
 object DomainSpecificLanguageFilter {
 
-  // scalastyle:off cyclomatic.complexity
-  implicit val propEncoder: Encoder[DataModelProperty[_]] = {
-    case b: PropertyType.Boolean.Property => b.value.asJson
-    case i: PropertyType.Int.Property => i.value.asJson
-    case bi: PropertyType.Bigint.Property => bi.value.asJson
-    case f: PropertyType.Float32.Property => f.value.asJson
-    case d: PropertyType.Float64.Property => d.value.asJson
-    case bd: PropertyType.Numeric.Property => bd.value.asJson
-    case s: PropertyType.Text.Property => s.value.asJson
-    case j: PropertyType.Json.Property => j.value.asJson
-    case ts: PropertyType.Timestamp.Property => ts.value.asJson
-    case d: PropertyType.Date.Property => d.value.asJson
-    case gm: PropertyType.Geometry.Property => gm.value.asJson
-    case gg: PropertyType.Geography.Property => gg.value.asJson
-    case dr: PropertyType.DirectRelation.Property => dr.value.asJson
-    case b: PropertyType.Array.Boolean.Property => b.value.asJson
-    case i: PropertyType.Array.Int.Property => i.value.asJson
-    case bi: PropertyType.Array.Bigint.Property => bi.value.asJson
-    case f: PropertyType.Array.Float32.Property => f.value.asJson
-    case d: PropertyType.Array.Float64.Property => d.value.asJson
-    case bd: PropertyType.Array.Numeric.Property => bd.value.asJson
-    case s: PropertyType.Array.Text.Property => s.value.asJson
-    case j: PropertyType.Array.Json.Property => j.value.asJson
-    case ts: PropertyType.Array.Timestamp.Property => ts.value.asJson
-    case d: PropertyType.Array.Date.Property => d.value.asJson
-    case gm: PropertyType.Array.Geometry.Property => gm.value.asJson
-    case gg: PropertyType.Array.Geography.Property => gg.value.asJson
-    case _ => throw new Exception("unknown property type")
-  }
+  implicit val propEncoder: Encoder[DataModelProperty[_]] = _.encode
 
   implicit val andFilterEncoder: Encoder[DSLAndFilter] = deriveEncoder[DSLAndFilter]
   implicit val orFilterEncoder: Encoder[DSLOrFilter] = deriveEncoder[DSLOrFilter]

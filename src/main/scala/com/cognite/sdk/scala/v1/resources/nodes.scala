@@ -7,15 +7,9 @@ import cats.syntax.all._
 import cats.effect.Async
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.cognite.sdk.scala.v1.resources.Nodes.{
-  createDynamicPropertyDecoder,
-  dataModelInstanceByExternalIdEncoder,
-  dataModelInstanceQueryEncoder,
-  dataModelNodeCreateEncoder
-}
 import fs2.Stream
 import io.circe.CursorOp.DownField
-import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, KeyEncoder, Printer}
+import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Printer}
 import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
@@ -28,26 +22,28 @@ class Nodes[F[_]](
 ) extends WithRequestSession[F]
     with DeleteByExternalIds[F]
     with BaseUrl {
+  import Nodes._
 
   override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/nodes"
 
   private def createDecoderForQueryResponse(): Decoder[DataModelInstanceQueryResponse] = {
-    import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyDefinitionDecoder
-    new Decoder[DataModelInstanceQueryResponse] {
-      def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] = {
-        val modelProperties = c
+    import DataModels.dataModelPropertyDefinitionDecoder
+
+    (c: HCursor) =>
+      for {
+        modelProperties <- c
           .downField("modelProperties")
-          .as[Option[Map[String, DataModelPropertyDefinition]]]
-        modelProperties.flatMap { props =>
-          implicit val propertyTypeDecoder: Decoder[PropertyMap] =
-            createDynamicPropertyDecoder(props.getOrElse(Map()))
-          for {
-            items <- c.downField("items").as[Seq[PropertyMap]]
-            nextCursor <- c.downField("nextCursor").as[Option[String]]
-          } yield DataModelInstanceQueryResponse(items, props, nextCursor)
-        }
-      }
-    }
+          .as[Map[String, DataModelPropertyDefinition]]
+
+        seqDecoder: Decoder[Seq[PropertyMap]] =
+          Decoder.decodeIterable[PropertyMap, Seq](
+            createDynamicPropertyDecoder(modelProperties),
+            implicitly
+          )
+
+        items <- seqDecoder.tryDecode(c.downField("items"))
+        nextCursor <- c.downField("nextCursor").as[Option[String]]
+      } yield DataModelInstanceQueryResponse(items, Some(modelProperties), nextCursor)
   }
 
   def createItems(
@@ -79,7 +75,7 @@ class Nodes[F[_]](
 
   def query(
       inputQuery: DataModelInstanceQuery
-  )(implicit F: Async[F]): F[DataModelInstanceQueryResponse] = {
+  ): F[DataModelInstanceQueryResponse] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
     implicit val nodeQueryReponseDecoder: Decoder[DataModelInstanceQueryResponse] =
@@ -128,7 +124,7 @@ class Nodes[F[_]](
   def retrieveByExternalIds(
       model: DataModelIdentifier,
       externalIds: Seq[String]
-  )(implicit F: Async[F]): F[DataModelInstanceQueryResponse] = {
+  ): F[DataModelInstanceQueryResponse] = {
     implicit val nodeQueryReponseDecoder: Decoder[DataModelInstanceQueryResponse] =
       createDecoderForQueryResponse()
 
@@ -146,16 +142,6 @@ class Nodes[F[_]](
 
 object Nodes {
 
-  import DomainSpecificLanguageFilter._
-
-  implicit val dataModelPropertyDefinitionDecoder: Decoder[DataModelPropertyDefinition] =
-    DataModels.dataModelPropertyDefinitionDecoder
-
-  implicit val dataModelPropertyMapEncoder: Encoder[PropertyMap] =
-    Encoder
-      .encodeMap(KeyEncoder.encodeKeyString, propEncoder)
-      .contramap[PropertyMap](dmi => dmi.allProperties)
-
   implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =
     DataModels.dataModelIdentifierEncoder
 
@@ -170,10 +156,6 @@ object Nodes {
 
   implicit val dataModelInstanceByExternalIdEncoder: Encoder[DataModelInstanceByExternalId] =
     deriveEncoder[DataModelInstanceByExternalId]
-
-  implicit val dmiByExternalIdItemsWithIgnoreUnknownIdsEncoder
-      : Encoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]] =
-    deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
 
   @SuppressWarnings(
     Array("org.wartremover.warts.AsInstanceOf", "org.wartremover.warts.IsInstanceOf")
