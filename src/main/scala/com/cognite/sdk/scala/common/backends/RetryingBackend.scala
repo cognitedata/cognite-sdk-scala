@@ -1,17 +1,17 @@
 // Copyright 2020 Cognite AS
 // SPDX-License-Identifier: Apache-2.0
 
-package com.cognite.sdk.scala.common
+package com.cognite.sdk.scala.common.backends
 
 import cats.effect.Temporal
-
-import java.net.ConnectException
+import com.cognite.sdk.scala.common.{CdpApiException, Constants, SdkException}
 import sttp.capabilities.Effect
 import sttp.client3.{Request, Response, SttpBackend, SttpClientException}
 import sttp.monad.MonadError
 
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import java.net.ConnectException
 import scala.concurrent.TimeoutException
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.Random
 
 class RetryingBackend[F[_], +P](

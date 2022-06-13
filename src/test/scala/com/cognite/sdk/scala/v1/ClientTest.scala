@@ -11,7 +11,9 @@ import java.util.Base64
 import cats.effect._
 import cats.effect.unsafe.implicits.global
 import cats.Id
+import cats.effect.std.Queue
 import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.common.backends.{BackpressureThrottleBackend, RateLimitingBackend, RetryingBackend}
 import org.scalatest.OptionValues
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.impl.cats.implicits.asyncMonadError
@@ -140,6 +142,40 @@ class ClientTest extends SdkTestSpec with OptionValues {
     )(
       implicitly,
       new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
+    ).login.status().unsafeRunSync().loggedIn shouldBe true
+  }
+
+  it should "support client with RateLimitingBackend" in {
+    val makeQueueOf1 = for {
+      queue <- Queue.bounded[IO, Unit](1)
+      _ <- queue.offer(())
+    } yield queue
+
+    GenericClient[IO](
+      "scala-sdk-test",
+      projectName,
+      baseUrl,
+      auth
+    )(
+      implicitly,
+      RateLimitingBackend[Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5)
+    ).login.status().unsafeRunSync().loggedIn shouldBe true
+  }
+
+  it should "support client with BackpressureThrottleBackend" in {
+    val makeQueueOf1 = for {
+      queue <- Queue.bounded[IO, Unit](1)
+      _ <- queue.offer(())
+    } yield queue
+
+    GenericClient[IO](
+      "scala-sdk-test",
+      projectName,
+      baseUrl,
+      auth
+    )(
+      implicitly,
+      new BackpressureThrottleBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), makeQueueOf1.unsafeRunSync(), 1.seconds)
     ).login.status().unsafeRunSync().loggedIn shouldBe true
   }
 
