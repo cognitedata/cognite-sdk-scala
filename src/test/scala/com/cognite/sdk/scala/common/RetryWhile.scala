@@ -16,7 +16,7 @@ trait RetryWhile {
   final def retryWithExpectedResult[A](
       action: => A,
       assertion: A => Assertion,
-      retriesRemaining: Int = 5,
+      retriesRemaining: Int = 8,
       initialDelay: FiniteDuration = Constants.DefaultInitialRetryDelay
   ): A = {
     val exponentialDelay = (Constants.DefaultMaxBackoffDelay / 2).min(initialDelay * 2)
