@@ -157,7 +157,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   }
 
   it should "raise a conflict error if input of delete contains internalIdand externalId that represent the same row" in {
-    val createdItems = createAssets("delete-cogniteId")
+    val prefix = s"delete-cogniteId-${shortRandom()}"
+    val createdItems = createAssets(prefix)
 
     val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(createdItems.size/2)
     val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
@@ -177,7 +178,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     //make sure that assets are deletes
     retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"delete-cogniteId"))).compile.toList,
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(prefix))).compile.toList,
       r => r should have size 0
     )
   }
