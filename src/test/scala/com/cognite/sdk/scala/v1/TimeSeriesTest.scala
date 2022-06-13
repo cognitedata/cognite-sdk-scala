@@ -211,7 +211,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
   private def createTimeSeries(externalIdPrefix: String) = {
     val keys = (1 to 4).map(_ => shortRandom())
     val timeseries = keys.map(k=>
-      TimeSeriesCreate(name = Some("scala-sdk-delete-cogniteId-" + k), externalId =  Some(s"$externalIdPrefix-$k"))
+      TimeSeriesCreate(name = Some("scala-sdk-delete-cogniteId-" + k), externalId = Some(s"$externalIdPrefix-$k"))
     )
     val createdItems = client.timeSeries.create(timeseries)
 
@@ -223,7 +223,8 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
   }
 
   it should "support deleting by CogniteIds" in {
-    val createdItems = createTimeSeries("delete-cogniteId")
+    val prefix = s"delete-cogniteId-${shortRandom()}"
+    val createdItems = createTimeSeries(prefix)
 
     val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(createdItems.size/2)
     val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
@@ -234,13 +235,14 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     client.timeSeries.delete(cogniteIds, true)
 
     retryWithExpectedResult[Seq[TimeSeries]](
-      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some("delete-cogniteId"))).compile.toList,
+      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(prefix))).compile.toList,
       r => r should have size 0
     )
   }
 
   it should "raise a conflict error if input of delete contains internalId and externalId that represent the same row" in {
-    val createdItems = createTimeSeries("delete-cogniteId")
+    val prefix = s"delete-cogniteId-${shortRandom()}"
+    val createdItems = createTimeSeries(prefix)
 
     val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(createdItems.size/2)
     val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
@@ -260,7 +262,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
     //make sure that timeSeries are deletes
     retryWithExpectedResult[Seq[TimeSeries]](
-      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(s"delete-cogniteId"))).compile.toList,
+      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(prefix))).compile.toList,
       r => r should have size 0
     )
   }
