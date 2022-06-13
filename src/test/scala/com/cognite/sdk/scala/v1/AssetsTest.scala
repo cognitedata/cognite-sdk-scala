@@ -348,7 +348,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       client.assets
       .filterPartitions(
         AssetsFilter(
-          rootIds = Some(Seq(CogniteInternalId(7127045760755934L)))
+          assetSubtreeIds = Some(Seq(CogniteInternalId(7127045760755934L)))
         ), 10
       )
       .fold(Stream.empty)(_ ++ _)
@@ -371,7 +371,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     retryWithExpectedResult[Seq[Asset]](
       client.assets
         .filter(AssetsFilter(
-          rootIds = Some(Seq(CogniteInternalId(7127045760755934L)))
+          assetSubtreeIds = Some(Seq(CogniteInternalId(7127045760755934L)))
         ), Some(5), Some(Seq("childCount")))
         .compile.toList,
       a => {
