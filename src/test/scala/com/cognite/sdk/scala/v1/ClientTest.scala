@@ -13,7 +13,7 @@ import cats.effect.unsafe.implicits.global
 import cats.Id
 import cats.effect.std.Queue
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.common.backends.{BackpressureThrottleBackend, RateLimitingBackend, RetryingBackend}
+import com.cognite.sdk.scala.sttp.{BackpressureThrottleBackend, RateLimitingBackend, RetryingBackend}
 import org.scalatest.OptionValues
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.impl.cats.implicits.asyncMonadError
@@ -146,11 +146,6 @@ class ClientTest extends SdkTestSpec with OptionValues {
   }
 
   it should "support client with RateLimitingBackend" in {
-    val makeQueueOf1 = for {
-      queue <- Queue.bounded[IO, Unit](1)
-      _ <- queue.offer(())
-    } yield queue
-
     GenericClient[IO](
       "scala-sdk-test",
       projectName,

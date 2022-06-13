@@ -1,7 +1,7 @@
 // Copyright 2020 Cognite AS
 // SPDX-License-Identifier: Apache-2.0
 
-package com.cognite.sdk.scala.common.backends
+package com.cognite.sdk.scala.sttp
 
 import cats.effect.Temporal
 import com.cognite.sdk.scala.common.{CdpApiException, Constants, SdkException}

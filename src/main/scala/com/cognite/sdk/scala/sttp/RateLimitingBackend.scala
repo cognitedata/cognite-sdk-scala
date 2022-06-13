@@ -1,4 +1,4 @@
-package com.cognite.sdk.scala.common.backends
+package com.cognite.sdk.scala.sttp
 
 import cats.effect.IO
 import cats.effect.kernel.MonadCancel
