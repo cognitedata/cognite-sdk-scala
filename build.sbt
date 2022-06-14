@@ -21,7 +21,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.1.0",
+  version := "2.1.1-SNAPSHOT",
   crossScalaVersions := supportedScalaVersions,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
@@ -106,6 +106,12 @@ lazy val core = (project in file("."))
           // We use JavaConverters to remain backwards compatible with Scala 2.12,
           // and to avoid a dependency on scala-collection-compat
           "-Wconf:cat=deprecation:i"
+        )
+      case Some((2, minor)) if minor == 12 =>
+        List(
+          // Scala 2.12 doesn't always handle @nowarn correctly,
+          // and doesn't seem to like @deprecated case class fields with default values.
+          "-Wconf:src=src/main/scala/com/cognite/sdk/scala/v1/resources/assets.scala&cat=deprecation:i"
         )
       case Some((3, _)) => List("-source:3.0-migration")
       case _ =>
