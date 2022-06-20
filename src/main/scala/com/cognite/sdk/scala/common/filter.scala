@@ -94,7 +94,8 @@ object Filter {
       limit: Option[Int],
       partition: Option[Partition],
       batchSize: Int,
-      aggregatedProperties: Option[Seq[String]] = None
+      aggregatedProperties: Option[Seq[String]] = None,
+      endPathFilter: String = "list"
   )(
       implicit readItemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
       filterRequestEncoder: Encoder[FilterRequest[Fi]]
@@ -111,7 +112,7 @@ object Filter {
       ).asJson
     requestSession.post[ItemsWithCursor[R], ItemsWithCursor[R], Json](
       partition.map(_ => body).getOrElse(body.mapObject(o => o.remove("partition"))),
-      uri"$baseUrl/list",
+      uri"$baseUrl/$endPathFilter",
       value => value
     )
   }
