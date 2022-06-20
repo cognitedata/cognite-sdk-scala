@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.v1
 import cats.implicits.catsSyntaxEq
 import com.cognite.sdk.scala.common.DomainSpecificLanguageFilter.propEncoder
 import com.cognite.sdk.scala.common.{DomainSpecificLanguageFilter, EmptyFilter}
+import com.cognite.sdk.scala.v1.resources.DataModels
 import io.circe.CursorOp.DownField
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, KeyEncoder}
 
@@ -108,6 +109,27 @@ final case class DataModelInstanceQueryResponse(
     modelProperties: Option[Map[String, DataModelPropertyDefinition]] = None,
     nextCursor: Option[String] = None
 )
+object DataModelInstanceQueryResponse {
+  def createDecoderForQueryResponse(): Decoder[DataModelInstanceQueryResponse] = {
+    import DataModels.dataModelPropertyDefinitionDecoder
+
+    (c: HCursor) =>
+      for {
+        modelProperties <- c
+          .downField("modelProperties")
+          .as[Map[String, DataModelPropertyDefinition]]
+
+        seqDecoder: Decoder[Seq[PropertyMap]] =
+          Decoder.decodeIterable[PropertyMap, Seq](
+            PropertyMap.createDynamicPropertyDecoder(modelProperties),
+            implicitly
+          )
+
+        items <- seqDecoder.tryDecode(c.downField("items"))
+        nextCursor <- c.downField("nextCursor").as[Option[String]]
+      } yield DataModelInstanceQueryResponse(items, Some(modelProperties), nextCursor)
+  }
+}
 
 final case class DataModelInstanceByExternalId(
     items: Seq[CogniteExternalId],

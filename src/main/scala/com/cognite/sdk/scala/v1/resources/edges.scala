@@ -10,24 +10,10 @@ import com.cognite.sdk.scala.v1.PropertyMap.createDynamicPropertyDecoder
 import com.cognite.sdk.scala.v1._
 import fs2.Stream
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, HCursor, Printer}
+import io.circe.{Decoder, Encoder, Printer}
 import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
-
-final case class EdgeQuery(
-    model: DataModelIdentifier,
-    filter: DomainSpecificLanguageFilter = EmptyFilter,
-    sort: Option[Seq[String]] = None,
-    limit: Option[Int] = None,
-    cursor: Option[String] = None
-)
-
-final case class EdgeQueryResponse(
-    items: Seq[PropertyMap],
-    modelProperties: Option[Map[String, DataModelPropertyDefinition]] = None,
-    nextCursor: Option[String] = None
-)
 
 @SuppressWarnings(
   Array(
@@ -44,26 +30,6 @@ class Edges[F[_]](
   import Edges._
 
   override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/edges"
-
-  // TODO refactor this
-  private def createDecoderForQueryResponse(): Decoder[EdgeQueryResponse] = {
-    import DataModels.dataModelPropertyDefinitionDecoder
-    new Decoder[EdgeQueryResponse] {
-      def apply(c: HCursor): Decoder.Result[EdgeQueryResponse] = {
-        val modelProperties = c
-          .downField("modelProperties")
-          .as[Option[Map[String, DataModelPropertyDefinition]]]
-        modelProperties.flatMap { props =>
-          implicit val propertyTypeDecoder: Decoder[PropertyMap] =
-            createDynamicPropertyDecoder(props.getOrElse(Map()))
-          for {
-            items <- c.downField("items").as[Seq[PropertyMap]]
-            nextCursor <- c.downField("nextCursor").as[Option[String]]
-          } yield EdgeQueryResponse(items, props, nextCursor)
-        }
-      }
-    }
-  }
 
   def createItems(
       spaceExternalId: String,
@@ -100,34 +66,35 @@ class Edges[F[_]](
     }
   }
 
-  def query(inputQuery: EdgeQuery): F[EdgeQueryResponse] = {
+  def query(inputQuery: DataModelInstanceQuery): F[DataModelInstanceQueryResponse] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
-    implicit val edgeQueryResponseDecoder: Decoder[EdgeQueryResponse] =
-      createDecoderForQueryResponse()
+    implicit val edgeQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
+      DataModelInstanceQueryResponse.createDecoderForQueryResponse()
 
-    println(s" bodyQuery = ${inputQuery.asJson}")
+//    println(s" bodyQuery = ${inputQuery.asJson}")
 
-    requestSession.post[EdgeQueryResponse, EdgeQueryResponse, EdgeQuery](
-      inputQuery,
-      uri"$baseUrl/list",
-      value => value
-    )
+    requestSession
+      .post[DataModelInstanceQueryResponse, DataModelInstanceQueryResponse, DataModelInstanceQuery](
+        inputQuery,
+        uri"$baseUrl/list",
+        value => value
+      )
   }
 
   private[sdk] def queryWithCursor(
-      inputQuery: EdgeQuery,
+      inputQuery: DataModelInstanceQuery,
       cursor: Option[String],
       limit: Option[Int],
       @annotation.nowarn partition: Option[Partition] = None
   )(implicit F: Async[F]): F[ItemsWithCursor[PropertyMap]] =
     query(inputQuery.copy(cursor = cursor, limit = limit)).map {
-      case EdgeQueryResponse(items, _, cursor) =>
+      case DataModelInstanceQueryResponse(items, _, cursor) =>
         ItemsWithCursor(items, cursor)
     }
 
   private[sdk] def queryWithNextCursor(
-      inputQuery: EdgeQuery,
+      inputQuery: DataModelInstanceQuery,
       cursor: Option[String],
       limit: Option[Int]
   )(implicit F: Async[F]): Stream[F, PropertyMap] =
@@ -136,7 +103,7 @@ class Edges[F[_]](
       .stream
 
   def queryStream(
-      inputQuery: EdgeQuery,
+      inputQuery: DataModelInstanceQuery,
       limit: Option[Int]
   )(implicit F: Async[F]): fs2.Stream[F, PropertyMap] =
     queryWithNextCursor(inputQuery, None, limit)
@@ -147,13 +114,13 @@ class Edges[F[_]](
   def retrieveByExternalIds(
       model: DataModelIdentifier,
       externalIds: Seq[String]
-  ): F[EdgeQueryResponse] = {
-    implicit val edgeQueryResponseDecoder: Decoder[EdgeQueryResponse] =
-      createDecoderForQueryResponse()
+  ): F[DataModelInstanceQueryResponse] = {
+    implicit val edgeQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
+      DataModelInstanceQueryResponse.createDecoderForQueryResponse()
 
     requestSession.post[
-      EdgeQueryResponse,
-      EdgeQueryResponse,
+      DataModelInstanceQueryResponse,
+      DataModelInstanceQueryResponse,
       DataModelInstanceByExternalId
     ](
       DataModelInstanceByExternalId(externalIds.map(CogniteExternalId(_)), model),
@@ -172,7 +139,8 @@ object Edges {
 
   implicit val edgeItemsEncoder: Encoder[Items[EdgeCreate]] = deriveEncoder[Items[EdgeCreate]]
 
-  implicit val dataModelInstanceQueryEncoder: Encoder[EdgeQuery] = deriveEncoder[EdgeQuery]
+  implicit val dataModelInstanceQueryEncoder: Encoder[DataModelInstanceQuery] =
+    deriveEncoder[DataModelInstanceQuery]
 
   implicit val dataModelInstanceByExternalIdEncoder: Encoder[DataModelInstanceByExternalId] =
     deriveEncoder[DataModelInstanceByExternalId]

@@ -6,15 +6,13 @@ package com.cognite.sdk.scala.v1.resources
 import cats.syntax.all._
 import cats.effect.Async
 import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.v1.PropertyMap.createDynamicPropertyDecoder
 import com.cognite.sdk.scala.v1._
 import fs2.Stream
-import io.circe.CursorOp.DownField
-import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Printer}
+import io.circe.{Decoder, Encoder, Printer}
 import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
-
-import scala.collection.immutable
 
 class Nodes[F[_]](
     val requestSession: RequestSession[F],
@@ -25,26 +23,6 @@ class Nodes[F[_]](
   import Nodes._
 
   override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/nodes"
-
-  private def createDecoderForQueryResponse(): Decoder[DataModelInstanceQueryResponse] = {
-    import DataModels.dataModelPropertyDefinitionDecoder
-
-    (c: HCursor) =>
-      for {
-        modelProperties <- c
-          .downField("modelProperties")
-          .as[Map[String, DataModelPropertyDefinition]]
-
-        seqDecoder: Decoder[Seq[PropertyMap]] =
-          Decoder.decodeIterable[PropertyMap, Seq](
-            createDynamicPropertyDecoder(modelProperties),
-            implicitly
-          )
-
-        items <- seqDecoder.tryDecode(c.downField("items"))
-        nextCursor <- c.downField("nextCursor").as[Option[String]]
-      } yield DataModelInstanceQueryResponse(items, Some(modelProperties), nextCursor)
-  }
 
   def createItems(
       spaceExternalId: String,
@@ -79,7 +57,7 @@ class Nodes[F[_]](
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
     implicit val nodeQueryReponseDecoder: Decoder[DataModelInstanceQueryResponse] =
-      createDecoderForQueryResponse()
+      DataModelInstanceQueryResponse.createDecoderForQueryResponse()
 
     requestSession.post[
       DataModelInstanceQueryResponse,
@@ -126,7 +104,7 @@ class Nodes[F[_]](
       externalIds: Seq[String]
   ): F[DataModelInstanceQueryResponse] = {
     implicit val nodeQueryReponseDecoder: Decoder[DataModelInstanceQueryResponse] =
-      createDecoderForQueryResponse()
+      DataModelInstanceQueryResponse.createDecoderForQueryResponse()
 
     requestSession.post[
       DataModelInstanceQueryResponse,
@@ -157,40 +135,4 @@ object Nodes {
   implicit val dataModelInstanceByExternalIdEncoder: Encoder[DataModelInstanceByExternalId] =
     deriveEncoder[DataModelInstanceByExternalId]
 
-  @SuppressWarnings(
-    Array("org.wartremover.warts.AsInstanceOf", "org.wartremover.warts.IsInstanceOf")
-  )
-  private def filterOutNullableProps(
-      res: Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]],
-      props: Map[String, DataModelPropertyDefinition]
-  ): Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]] =
-    res.filter {
-      case Right(_) => true
-      case Left(DecodingFailure("Attempt to decode value on failed cursor", downfields)) =>
-        val nullableProps = downfields
-          .filter(_.isInstanceOf[DownField])
-          .map(_.asInstanceOf[DownField])
-          .map(_.k)
-          .filter(x => x.neqv("properties") && x.neqv("items"))
-          .toSet
-        !nullableProps.subsetOf(props.filter(_._2.nullable).keySet)
-      case _ => true
-    }
-
-  @SuppressWarnings(Array("org.wartremover.warts.Null"))
-  // scalastyle:off cyclomatic.complexity
-  def createDynamicPropertyDecoder(
-      props: Map[String, DataModelPropertyDefinition]
-  ): Decoder[PropertyMap] = (c: HCursor) => {
-    val res: immutable.Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]] =
-      props.map { case (prop, dmp) =>
-        for {
-          value <- dmp.`type`.decodeProperty(c.downField(prop))
-        } yield prop -> value
-      }
-    filterOutNullableProps(res, props).find(_.isLeft) match {
-      case Some(Left(x)) => Left(x)
-      case _ => Right(new PropertyMap(res.collect { case Right(value) => value }.toMap))
-    }
-  }
 }

@@ -204,6 +204,7 @@ class GenericClient[F[_]](
   lazy val sessions = new Sessions[F](requestSession)
   lazy val dataModels = new DataModels[F](requestSession)
   lazy val nodes = new Nodes[F](requestSession, dataModels)
+  lazy val spaces = new Spaces[F](requestSession)
   lazy val edges = new Edges[F](requestSession, dataModels)
 
   def project: F[Project] =

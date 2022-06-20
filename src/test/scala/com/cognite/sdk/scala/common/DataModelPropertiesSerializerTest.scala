@@ -7,7 +7,6 @@ package com.cognite.sdk.scala.common
 
 import com.cognite.sdk.scala.v1._
 import com.cognite.sdk.scala.v1.resources.DataModels
-import com.cognite.sdk.scala.v1.resources.Nodes.createDynamicPropertyDecoder
 import io.circe
 import io.circe.CursorOp.DownField
 import io.circe.{Decoder, DecodingFailure, HCursor, Json}
@@ -40,7 +39,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           .as[Option[Map[String, DataModelPropertyDefinition]]]
         modelProperties.flatMap { props =>
           implicit val propertyTypeDecoder: Decoder[PropertyMap] =
-            createDynamicPropertyDecoder(props.getOrElse(Map()))
+            PropertyMap.createDynamicPropertyDecoder(props.getOrElse(Map()))
           for {
             items <- c.downField("items").as[Seq[PropertyMap]]
             nextCursor <- c.downField("nextCursor").as[Option[String]]

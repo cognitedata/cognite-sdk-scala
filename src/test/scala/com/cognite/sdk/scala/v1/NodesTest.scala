@@ -161,9 +161,9 @@ class NodesTest
   private val space = "test-space"
 
   override def beforeAll(): Unit = {
-    /* blueFieldClient.dataModels
+    blueFieldClient.dataModels
       .createItems(Seq(dataModel, dataModelArray), space)
-      .unsafeRunSync() */
+      .unsafeRunSync()
 
     retryWithExpectedResult[scala.Seq[DataModel]](
       blueFieldClient.dataModels.list(space).unsafeRunSync(),
