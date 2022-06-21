@@ -16,6 +16,8 @@ val fs2Version = "3.2.8"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
+ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.4"
+
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
