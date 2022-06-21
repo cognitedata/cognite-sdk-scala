@@ -60,7 +60,9 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
     }
   }
 
-  it should "authenticate with Aize using OAuth2" in {
+  // Aize is moving to Azure so we don't have to test their Idp
+  // TODO Reactivated the test if we find new credential or remove the test completely
+  ignore should "authenticate with Aize using OAuth2" in {
 
     val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"https://login.aize.io/oauth/token",
