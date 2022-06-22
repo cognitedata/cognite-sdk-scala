@@ -6,7 +6,7 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 import com.cognite.sdk.scala.common._
 
-import scala.annotation.nowarn
+//import scala.annotation.nowarn
 
 final case class Asset(
     externalId: Option[String] = None,
