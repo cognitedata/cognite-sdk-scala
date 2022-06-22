@@ -60,7 +60,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
     }
   }
 
-  it should "authenticate with Aize using OAuth2" in {
+  it should "authenticate with Aize using OAuth2" ignore {
 
     val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"https://login.aize.io/oauth/token",

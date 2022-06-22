@@ -134,5 +134,4 @@ object Nodes {
 
   implicit val dataModelInstanceByExternalIdEncoder: Encoder[DataModelInstanceByExternalId] =
     deriveEncoder[DataModelInstanceByExternalId]
-
 }

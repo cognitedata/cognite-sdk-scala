@@ -12,9 +12,11 @@ val jettyTestVersion = "9.4.46.v20220331"
 val sttpVersion = "3.5.2"
 val circeVersion = "0.14.1"
 val catsEffectVersion = "3.3.12"
-val fs2Version = "3.2.7"
+val fs2Version = "3.2.8"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
+
+ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.4"
 
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
@@ -23,6 +25,8 @@ lazy val commonSettings = Seq(
   organizationHomepage := Some(url("https://cognite.com")),
   version := "2.0.11",
   crossScalaVersions := supportedScalaVersions,
+  semanticdbEnabled := true,
+  semanticdbVersion := scalafixSemanticdb.revision,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
   homepage := Some(url("https://github.com/cognitedata/cognite-sdk-scala")),
@@ -106,6 +110,12 @@ lazy val core = (project in file("."))
           // We use JavaConverters to remain backwards compatible with Scala 2.12,
           // and to avoid a dependency on scala-collection-compat
           "-Wconf:cat=deprecation:i"
+        )
+      case Some((2, minor)) if minor == 12 =>
+        List(
+          // Scala 2.12 doesn't always handle @nowarn correctly,
+          // and doesn't seem to like @deprecated case class fields with default values.
+          "-Wconf:src=src/main/scala/com/cognite/sdk/scala/v1/resources/assets.scala&cat=deprecation:i"
         )
       case Some((3, _)) => List("-source:3.0-migration")
       case _ =>

@@ -1,20 +1,21 @@
 // Copyright 2020 Cognite AS
 // SPDX-License-Identifier: Apache-2.0
 
-package com.cognite.sdk.scala.common
+package com.cognite.sdk.scala.sttp
+
+import org.apache.commons.io.IOUtils
+import sttp.capabilities.Effect
+import sttp.client3._
+import sttp.model.{Header, HeaderNames}
+import sttp.monad.MonadError
 
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.zip.GZIPOutputStream
-import sttp.client3._
-import org.apache.commons.io.IOUtils
-import sttp.capabilities.Effect
-import sttp.model.{Header, HeaderNames}
-import sttp.monad.MonadError
 
-class GzipSttpBackend[F[_], +P](delegate: SttpBackend[F, P], val minimumSize: Int = 1000)
+class GzipBackend[F[_], +P](delegate: SttpBackend[F, P], val minimumSize: Int = 1000)
     extends SttpBackend[F, P] {
-  import GzipSttpBackend._
+  import GzipBackend._
 
   private def isGzipped(header: Header) =
     header.name.equalsIgnoreCase(HeaderNames.ContentEncoding) &&
@@ -25,7 +26,7 @@ class GzipSttpBackend[F[_], +P](delegate: SttpBackend[F, P], val minimumSize: In
     header.name.equalsIgnoreCase(HeaderNames.ContentType) &&
       header.value.toLowerCase.contains("/gzip")
 
-  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
+  @SuppressWarnings(Array("org.wartremover.warts.Equals", "scalafix:DisableSyntax.!="))
   override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] = {
     val headers = request.headers
     val newRequest = request.body match {
@@ -62,7 +63,7 @@ class GzipSttpBackend[F[_], +P](delegate: SttpBackend[F, P], val minimumSize: In
   override def responseMonad: MonadError[F] = delegate.responseMonad
 }
 
-object GzipSttpBackend {
+object GzipBackend {
   private val maximumBufferSize = 65536
 
   private[sdk] def compress(bytes: Array[Byte]): Array[Byte] = {
