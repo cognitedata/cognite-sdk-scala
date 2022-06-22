@@ -239,7 +239,8 @@ object NonNullableSetter {
     Array(
       "org.wartremover.warts.Null",
       "org.wartremover.warts.Equals",
-      "org.wartremover.warts.OptionPartial"
+      "org.wartremover.warts.OptionPartial",
+      "scalafix:DisableSyntax.!="
     )
   )
   def fromOption[T](option: Option[T]): Option[NonNullableSetter[T]] =

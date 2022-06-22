@@ -201,19 +201,22 @@ class ClientTest extends SdkTestSpec with OptionValues {
         auth
       )(new LoggingSttpBackend[Id, Any](sttpBackend)).login.status()
     }
-    assertThrows[SdkException] {
-      Client(
-        "url-test-2",
-        projectName,
-        "http://api.cognitedata.com",
-        auth
-      )(sttpBackend).login.status()
-    }
     assertThrows[UnknownHostException] {
       Client(
         "url-test-3",
         projectName,
         "thisShouldThrowAnUnknownHostException:)",
+        auth
+      )(sttpBackend).login.status()
+    }
+  }
+
+  it should "throw an SttpClientException when using plain http" in {
+    assertThrows[SttpClientException] {
+      Client(
+        "url-test-2",
+        projectName,
+        "http://api.cognitedata.com",
         auth
       )(sttpBackend).login.status()
     }

@@ -16,6 +16,8 @@ val fs2Version = "3.2.8"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
+ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.4"
+
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
@@ -23,6 +25,8 @@ lazy val commonSettings = Seq(
   organizationHomepage := Some(url("https://cognite.com")),
   version := "2.1.1-SNAPSHOT",
   crossScalaVersions := supportedScalaVersions,
+  semanticdbEnabled := true,
+  semanticdbVersion := scalafixSemanticdb.revision,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
   homepage := Some(url("https://github.com/cognitedata/cognite-sdk-scala")),
