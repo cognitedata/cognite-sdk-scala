@@ -4,10 +4,10 @@
 package com.cognite.sdk.scala
 
 import cats.Id
-import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
-import com.cognite.sdk.scala.common.GzipSttpBackend
+import com.cognite.sdk.scala.sttp.GzipBackend
+import _root_.sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 
 package object v1 {
   implicit val sttpBackend: SttpBackend[Id, Any] =
-    new GzipSttpBackend[Id, Any](HttpURLConnectionBackend())
+    new GzipBackend[Id, Any](HttpURLConnectionBackend())
 }
