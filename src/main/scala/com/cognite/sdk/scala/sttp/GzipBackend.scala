@@ -26,7 +26,7 @@ class GzipBackend[F[_], +P](delegate: SttpBackend[F, P], val minimumSize: Int = 
     header.name.equalsIgnoreCase(HeaderNames.ContentType) &&
       header.value.toLowerCase.contains("/gzip")
 
-  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
+  @SuppressWarnings(Array("org.wartremover.warts.Equals", "scalafix:DisableSyntax.!="))
   override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] = {
     val headers = request.headers
     val newRequest = request.body match {
