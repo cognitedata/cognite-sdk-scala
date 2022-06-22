@@ -9,8 +9,6 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.PropertyMap.createDynamicPropertyDecoder
 import com.cognite.sdk.scala.v1._
 import fs2.Stream
-import io.circe.syntax.EncoderOps
-//import io.circe.syntax._
 import io.circe.{Decoder, Encoder, Printer}
 import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
@@ -59,7 +57,6 @@ class Edges[F[_]](
         overwrite,
         items
       )
-      println(s" bodyQuery = ${body.asJson}")
       requestSession.post[Seq[PropertyMap], Items[PropertyMap], EdgeCreate](
         body,
         uri"$baseUrl",
@@ -73,7 +70,6 @@ class Edges[F[_]](
 
     implicit val edgeQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
       DataModelInstanceQueryResponse.createDecoderForQueryResponse()
-//    println(s" bodyQuery = ${inputQuery.asJson}")
     requestSession
       .post[DataModelInstanceQueryResponse, DataModelInstanceQueryResponse, DataModelInstanceQuery](
         inputQuery,

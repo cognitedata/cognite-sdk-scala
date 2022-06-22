@@ -5,10 +5,6 @@ package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.{CdpApiException, DSLExistsFilter, DSLInFilter, DSLNotFilter, DSLOrFilter, DSLPrefixFilter, DSLRangeFilter}
-
-//import io.circe.syntax.EncoderOps
-//import com.cognite.sdk.scala.common.CdpApiException
-
 import com.cognite.sdk.scala.common.{DSLAndFilter, DSLEqualsFilter, RetryWhile}
 import org.scalatest.BeforeAndAfterAll
 import java.time.LocalDate
@@ -60,25 +56,6 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     ),
     dataModelType = DataModelType.EdgeType
   )
-/*
-  val helperDataModel = DataModel(
-    s"myNodes",
-    Some(
-      Map(
-        "prop_string" -> dataPropString,
-      )
-    )
-  )
-
-  val helperNode =
-    Node(
-      "myNode",
-      properties = Some(
-        Map(
-          "prop_string" -> PropertyType.Text.Property("hello")
-        )
-      )
-    ) */
 
   val directRelation = DataModelPropertyDefinition(
     PropertyType.DirectRelation,
@@ -209,6 +186,8 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
 
   private val space = "test-space"
+
+  private def filterFloatProperty(m: Map[String, DataModelProperty[_]]): Map[String, DataModelProperty[_]] = m.filterKeys(p => p == "prop_float")
 
   override def beforeAll(): Unit = {
     blueFieldClient.dataModels
@@ -345,9 +324,6 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       )
       .unsafeRunSync()
       .toList
-
-    val asd = dataModelInstances.map(_.externalId).mkString(",")
-    println(s"dataModelInstances = ${asd}")
     dataModelInstances.size shouldBe 1
     dataModelInstances
   }
@@ -389,7 +365,6 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     val outputNoFilter = blueFieldClient.edges
       .query(inputNoFilterQuery)
       .unsafeRunSync()
-    println(s"outputNoFilter.items.toList = ${outputNoFilter.items.toList}")
     outputNoFilter.items.toList.size shouldBe simpleEdgesToCreates.length
   }
 
@@ -420,10 +395,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .toList
 
     outputQueryAnd.size shouldBe 1
-
-    outputQueryAnd.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
-      Set(edgeToCreate2)
-    )
+    val res: Map[String, DataModelProperty[_]] = outputQueryAnd.map(_.allProperties).toSet.head
+    val expected = fromCreatedToExpectedProps(Set(edgeToCreate2)).head
+    filterFloatProperty(res) shouldBe filterFloatProperty(expected)
 
     val inputQueryAnd2 = DataModelInstanceQuery(
       DataModelIdentifier(Some(space), dataModelEdge.externalId),
@@ -472,9 +446,11 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .toList
 
     outputQueryOr.size shouldBe 2
-    outputQueryOr.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
+    val res = outputQueryOr.map(_.allProperties).toSet.map(filterFloatProperty)
+    val resExpected = fromCreatedToExpectedProps(
       Set(edgeToCreate2, edgeToCreate3)
-    )
+    ).map(filterFloatProperty)
+   res shouldBe resExpected
   }
 
   it should "work with NOT filter" in initAndCleanUpDataForQuery { _ =>
@@ -494,9 +470,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .toList
 
     outputQueryNot.size shouldBe 1
-    outputQueryNot.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryNot.map(_.allProperties).toSet.map(filterFloatProperty) shouldBe fromCreatedToExpectedProps(
       Set(edgeToCreate1)
-    )
+    ).map(filterFloatProperty)
   }
 
   it should "work with PREFIX filter" in initAndCleanUpDataForQuery { _ =>
@@ -514,9 +490,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .toList
 
     outputQueryPrefix.size shouldBe 2
-    outputQueryPrefix.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryPrefix.map(_.allProperties).toSet.map(filterFloatProperty) shouldBe fromCreatedToExpectedProps(
       Set(edgeToCreate1, edgeToCreate2)
-    )
+    ).map(filterFloatProperty)
   }
 
   it should "work with RANGE filter" in initAndCleanUpDataForQuery { _ =>
@@ -533,9 +509,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .items
       .toList
 
-    outputQueryRange.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryRange.map(_.allProperties).toSet.map(filterFloatProperty) shouldBe fromCreatedToExpectedProps(
       Set(edgeToCreate2, edgeToCreate3)
-    )
+    ).map(filterFloatProperty)
   }
 
   it should "work with EXISTS filter" in initAndCleanUpDataForQuery { _ =>
@@ -549,11 +525,11 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .items
       .toList
 
-    outputQueryExists.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
+    outputQueryExists.map(_.allProperties).toSet.map(filterFloatProperty) shouldBe fromCreatedToExpectedProps(
       Set(edgeToCreate2, edgeToCreate3)
-    )
+    ).map(filterFloatProperty)
   }
-/*
+
   "Delete edges" should "work with multiple externalIds" in {
     val toDeletes = edgesToCreates.map(_.externalId)
 
@@ -576,5 +552,5 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .deleteByExternalIds(Seq("toto"))
       .unsafeRunSync()
   }
-*/
+
 }
