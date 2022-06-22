@@ -168,7 +168,12 @@ object Nodes {
     deriveEncoder[DataModelInstanceByExternalId]
 
   @SuppressWarnings(
-    Array("org.wartremover.warts.AsInstanceOf", "org.wartremover.warts.IsInstanceOf")
+    Array(
+      "org.wartremover.warts.AsInstanceOf",
+      "org.wartremover.warts.IsInstanceOf",
+      "scalafix:DisableSyntax.asInstanceOf",
+      "scalafix:DisableSyntax.isInstanceOf"
+    )
   )
   private def filterOutNullableProps(
       res: Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]],
