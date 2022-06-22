@@ -14,7 +14,7 @@ class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {
       missing = None,
       duplicated = None,
       missingFields = None,
-      requestId = None
+      requestId = None,
     )
 
     ex.getMessage shouldBe s"Request to https://api.cognitedata.com failed with status 404: Not Found."

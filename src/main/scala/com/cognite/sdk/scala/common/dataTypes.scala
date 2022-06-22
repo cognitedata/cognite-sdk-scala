@@ -75,6 +75,7 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
 }
 
 object CdpApiError {
+
   implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
   implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
 }
