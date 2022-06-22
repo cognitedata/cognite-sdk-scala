@@ -79,7 +79,7 @@ final case class AssetUpdate(
     labels: Option[NonNullableSetter[Seq[CogniteExternalId]]] = None
 ) extends WithSetExternalId
 
-@nowarn
+//@nowarn
 final case class AssetsFilter(
     name: Option[String] = None,
     parentIds: Option[Seq[Long]] = None,
