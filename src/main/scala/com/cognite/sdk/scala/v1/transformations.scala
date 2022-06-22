@@ -7,9 +7,8 @@ import com.cognite.sdk.scala.common.OAuth2.ClientCredentials
 
 import java.time.Instant
 import com.cognite.sdk.scala.common._
-import io.circe.{Decoder, Encoder}
+import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import sttp.client3.UriContext
 
 final case class TransformationRead(
     id: Long,
@@ -57,14 +56,18 @@ final case class TransformBlacklistInfo(
     createdTime: Instant
 )
 object TransformBlacklistInfo {
-  implicit val encoder: Encoder[TransformBlacklistInfo] = deriveEncoder[TransformBlacklistInfo]
-  implicit val decoder: Decoder[TransformBlacklistInfo] = deriveDecoder[TransformBlacklistInfo]
+  implicit val transformBlacklistInfoEncoder: Encoder[TransformBlacklistInfo] =
+    deriveEncoder[TransformBlacklistInfo]
+  implicit val transformBlacklistInfoDecoder: Decoder[TransformBlacklistInfo] =
+    deriveDecoder[TransformBlacklistInfo]
 }
 
 final case class TransformationOwner(user: String)
 object TransformationOwner {
-  implicit val ownerEncoder: Encoder[TransformationOwner] = deriveEncoder[TransformationOwner]
-  implicit val ownerDecoder: Decoder[TransformationOwner] = deriveDecoder[TransformationOwner]
+  implicit val transformationOwnerEncoder: Encoder[TransformationOwner] =
+    deriveEncoder[TransformationOwner]
+  implicit val transformationOwnerDecoder: Decoder[TransformationOwner] =
+    deriveDecoder[TransformationOwner]
 }
 
 sealed trait DestinationDataSource
@@ -94,41 +97,22 @@ final case class JobDetails(
     status: String
 )
 
-final case class FlatOidcCredentials(
-    clientId: String,
-    clientSecret: String,
-    scopes: Option[String],
-    tokenUri: String,
-    cdfProjectName: String,
-    audience: Option[String] = None
-)
-
 object FlatOidcCredentials {
-  implicit val encoder: Encoder[FlatOidcCredentials] = deriveEncoder[FlatOidcCredentials]
-  implicit val decoder: Decoder[FlatOidcCredentials] = deriveDecoder[FlatOidcCredentials]
-
-  implicit class ToClientCredentialConverter(flatCredential: FlatOidcCredentials) {
-    def toClientCredentials: ClientCredentials =
-      ClientCredentials(
-        uri"${flatCredential.tokenUri}",
-        flatCredential.clientId,
-        flatCredential.clientSecret,
-        flatCredential.scopes.toList.flatMap(_.split(" ")),
-        flatCredential.cdfProjectName,
-        flatCredential.audience
-      )
-  }
-  implicit class ToFlatCredentialConverter(credentials: ClientCredentials) {
-    def toFlatCredentials: FlatOidcCredentials =
-      FlatOidcCredentials(
-        credentials.clientId,
-        credentials.clientSecret,
-        Option(credentials.scopes).filter(_.nonEmpty).map(_.mkString(" ")),
-        credentials.tokenUri.toString(),
-        credentials.cdfProjectName,
-        credentials.audience
-      )
-  }
+  implicit val credentialEncoder: Encoder[ClientCredentials] =
+    new Encoder[ClientCredentials] {
+      final def apply(cc: ClientCredentials): Json = {
+        val scopes = Option(cc.scopes).filter(_.nonEmpty).map(_.mkString(" "))
+        Json.fromFields(
+          Seq(
+            "clientId" -> Json.fromString(cc.clientId),
+            "clientSecret" -> Json.fromString(cc.clientSecret),
+            "tokenUri" -> Json.fromString(cc.tokenUri.toString()),
+            "cdfProjectName" -> Json.fromString(cc.cdfProjectName)
+          ) ++ cc.audience.map(a => Seq("audience" -> Json.fromString(a))).getOrElse(Seq()) ++
+            scopes.map(s => Seq("scopes" -> Json.fromString(s))).getOrElse(Seq())
+        )
+      }
+    }
 }
 
 final case class TransformationCreate(
@@ -139,8 +123,8 @@ final case class TransformationCreate(
     isPublic: Option[Boolean] = None,
     sourceApiKey: Option[String] = None,
     destinationApiKey: Option[String] = None,
-    sourceOidcCredentials: Option[FlatOidcCredentials] = None,
-    destinationOidcCredentials: Option[FlatOidcCredentials] = None,
+    sourceOidcCredentials: Option[ClientCredentials] = None,
+    destinationOidcCredentials: Option[ClientCredentials] = None,
     externalId: String,
     ignoreNullFields: Boolean,
     dataSetId: Option[Long]
@@ -152,8 +136,8 @@ final case class TimeFilter(
 )
 
 object TimeFilter {
-  implicit val encoder: Encoder[TimeFilter] = deriveEncoder[TimeFilter]
-  implicit val decoder: Decoder[TimeFilter] = deriveDecoder[TimeFilter]
+  implicit val timeFilterEncoder: Encoder[TimeFilter] = deriveEncoder[TimeFilter]
+  implicit val timeFilterDecoder: Decoder[TimeFilter] = deriveDecoder[TimeFilter]
 }
 
 final case class TransformationsFilter(
@@ -170,6 +154,8 @@ final case class TransformationsFilter(
 )
 
 object TransformationsFilter {
-  implicit val encoder: Encoder[TransformationsFilter] = deriveEncoder[TransformationsFilter]
-  implicit val decoder: Decoder[TransformationsFilter] = deriveDecoder[TransformationsFilter]
+  implicit val transformationsFilterEncoder: Encoder[TransformationsFilter] =
+    deriveEncoder[TransformationsFilter]
+  implicit val transformationsFilterDecoder: Decoder[TransformationsFilter] =
+    deriveDecoder[TransformationsFilter]
 }

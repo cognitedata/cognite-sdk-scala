@@ -88,14 +88,13 @@ object Filter {
   // scalastyle:off parameter.number
   def filterWithCursor[F[_], R, Fi](
       requestSession: RequestSession[F],
-      baseUrl: Uri,
+      filterUrl: Uri,
       filter: Fi,
       cursor: Option[String],
       limit: Option[Int],
       partition: Option[Partition],
       batchSize: Int,
-      aggregatedProperties: Option[Seq[String]] = None,
-      endPathFilter: String = "list"
+      aggregatedProperties: Option[Seq[String]] = None
   )(
       implicit readItemsWithCursorDecoder: Decoder[ItemsWithCursor[R]],
       filterRequestEncoder: Encoder[FilterRequest[Fi]]
@@ -112,7 +111,7 @@ object Filter {
       ).asJson
     requestSession.post[ItemsWithCursor[R], ItemsWithCursor[R], Json](
       partition.map(_ => body).getOrElse(body.mapObject(o => o.remove("partition"))),
-      uri"$baseUrl/$endPathFilter",
+      uri"$filterUrl",
       value => value
     )
   }

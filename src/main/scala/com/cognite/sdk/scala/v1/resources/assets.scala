@@ -141,7 +141,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[Asset]] =
     Filter.filterWithCursor(
       requestSession,
-      baseUrl,
+      uri"$baseUrl/list",
       filter,
       cursor,
       limit,

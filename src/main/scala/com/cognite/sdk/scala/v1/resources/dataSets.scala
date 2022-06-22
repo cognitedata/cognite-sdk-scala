@@ -73,7 +73,7 @@ class DataSets[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[DataSet]] =
     Filter.filterWithCursor(
       requestSession,
-      baseUrl,
+      uri"$baseUrl/list",
       filter,
       cursor,
       limit,

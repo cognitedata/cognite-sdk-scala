@@ -85,7 +85,7 @@ class Events[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[Event]] =
     Filter.filterWithCursor(
       requestSession,
-      baseUrl,
+      uri"$baseUrl/list",
       filter,
       cursor,
       limit,

@@ -105,14 +105,13 @@ class Transformations[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[TransformationRead]] =
     Filter.filterWithCursor(
       requestSession,
-      baseUrl,
+      uri"$baseUrl/filter",
       filter,
       cursor,
       limit,
       partition,
       Constants.defaultBatchSize,
-      aggregatedProperties,
-      "filter"
+      aggregatedProperties
     )
 }
 
@@ -141,14 +140,16 @@ object Transformations {
   implicit val generalDataSourceEncoder: Encoder[GeneralDataSource] =
     deriveEncoder[GeneralDataSource]
   implicit val rawDataSourceEncoder: Encoder[RawDataSource] = deriveEncoder[RawDataSource]
-  implicit val seqRowDataSourceEncoder: Encoder[SequenceRowDataSource] =
+  implicit val sequenceRowDataSourceEncoder: Encoder[SequenceRowDataSource] =
     deriveEncoder[SequenceRowDataSource]
 
   implicit val destinationDataSourceEncoder: Encoder[DestinationDataSource] = Encoder.instance {
-    case g @ GeneralDataSource(_) => generalDataSourceEncoder(g)
-    case r @ RawDataSource(_, _, _) => rawDataSourceEncoder(r)
-    case sr @ SequenceRowDataSource(_, _) => seqRowDataSourceEncoder(sr)
+    case g: GeneralDataSource => generalDataSourceEncoder(g)
+    case r: RawDataSource => rawDataSourceEncoder(r)
+    case sr: SequenceRowDataSource => sequenceRowDataSourceEncoder(sr)
   }
+
+  import FlatOidcCredentials.credentialEncoder
 
   implicit val createEncoder: Encoder[TransformationCreate] = deriveEncoder[TransformationCreate]
   implicit val createItemsEncoder: Encoder[Items[TransformationCreate]] =

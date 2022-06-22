@@ -7,7 +7,6 @@ import cats.Id
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.FlatOidcCredentials._
 
 import java.time.temporal.ChronoUnit
 import java.time.Instant
@@ -18,10 +17,8 @@ import java.util.UUID
 @SuppressWarnings(
   Array(
     "org.wartremover.warts.NonUnitStatements",
-    "org.wartremover.warts.SizeIs",
     "org.wartremover.warts.AsInstanceOf",
-    "org.wartremover.warts.OptionPartial",
-    "org.wartremover.warts.StringPlusAny"
+    "org.wartremover.warts.OptionPartial"
   )
 )
 class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
@@ -52,15 +49,16 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
 
   it should "create and delete transformations" in {
     val transformationsToCreate = (0 to 3).map { i =>
+      val uniquePrefix = shortRandomUUID()
       TransformationCreate(
-        s"transformation-sdk-test-$i",
-        Some(s"select $i"),
+        s"$uniquePrefix-transformation-sdk-test",
+        Some(s"select ${i.toString}"),
         Some(GeneralDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
-        sourceOidcCredentials = Some(credentials.toFlatCredentials),
-        destinationOidcCredentials = Some(credentials.toFlatCredentials),
-        externalId = shortRandomUUID(),
+        sourceOidcCredentials = Some(credentials),
+        destinationOidcCredentials = Some(credentials),
+        externalId = s"$uniquePrefix-transformation-sdk-test",
         ignoreNullFields = true,
         dataSetId = None
       )
@@ -85,21 +83,22 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         client.transformations
           .retrieveByExternalIds(externalIds, true)
       },
-      t => t.isEmpty shouldBe true
+      t => t shouldBe empty
     )
   }
 
   it should "retrieve transformations by ids or externalIds" in {
     val transformationsToCreate = (0 to 3).map { i =>
+      val uniquePrefix = shortRandomUUID()
       TransformationCreate(
-        s"transformation-sdk-test-$i",
-        Some(s"select $i"),
+        s"$uniquePrefix-transformation-sdk-test",
+        Some(s"select ${i.toString}"),
         Some(GeneralDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
-        sourceOidcCredentials = Some(credentials.toFlatCredentials),
-        destinationOidcCredentials = Some(credentials.toFlatCredentials),
-        externalId = shortRandomUUID(),
+        sourceOidcCredentials = Some(credentials),
+        destinationOidcCredentials = Some(credentials),
+        externalId = s"$uniquePrefix-transformation-sdk-test",
         ignoreNullFields = true,
         dataSetId = None
       )
@@ -123,17 +122,17 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   it should "filter transformations" in {
-
+    val uniquePrefix = shortRandomUUID()
     val transformationsToCreate = (0 to 3).map { i =>
       TransformationCreate(
-        s"transformation-sdk-test-$i",
-        Some(s"select abc $i"),
+        s"$uniquePrefix-transformation-sdk-test-${i.toString}",
+        Some(s"select abc ${i.toString}"),
         Some(GeneralDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
-        sourceOidcCredentials = Some(credentials.toFlatCredentials),
-        destinationOidcCredentials = Some(credentials.toFlatCredentials),
-        externalId = shortRandomUUID(),
+        sourceOidcCredentials = Some(credentials),
+        destinationOidcCredentials = Some(credentials),
+        externalId = s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         ignoreNullFields = true,
         dataSetId = Some(216250735038513L)
       )
@@ -143,7 +142,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
 
     try {
       val resFilterName = client.transformations
-        .filter(TransformationsFilter(nameRegex = Some("transformation-sdk")))
+        .filter(TransformationsFilter(nameRegex = Some(s"$uniquePrefix")))
         .compile
         .toList
       resFilterName.size shouldBe transformationsToCreate.size
@@ -153,7 +152,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         .filter(TransformationsFilter(queryRegex = Some("select abc")))
         .compile
         .toList
-      resFilterQueryRegex.size >= transformationsToCreate.size shouldBe true
+      resFilterQueryRegex.size should be >= transformationsToCreate.size
       resFilterQueryRegex.map(_.query).forall(q => q.startsWith("select abc")) shouldBe true
 
       val resFilterUpsertEvents = client.transformations
@@ -162,7 +161,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         )
         .compile
         .toList
-      resFilterUpsertEvents.size >= transformationsToCreate.size shouldBe true
+      resFilterUpsertEvents.size should be >= transformationsToCreate.size
       resFilterUpsertEvents
         .map(_.destination.asInstanceOf[GeneralDataSource].`type`)
         .toSet shouldBe Set("events")
@@ -178,7 +177,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         )
         .compile
         .toList
-      resFilterCreatedTime1DayAgo.isEmpty shouldBe true
+      resFilterCreatedTime1DayAgo shouldBe empty
 
       val min3MinsAgo =
         TimeFilter(min = Some(Instant.now().minus(3, ChronoUnit.MINUTES).toEpochMilli))

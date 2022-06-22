@@ -72,7 +72,7 @@ class Relationships[F[_]](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[Relationship]] =
     Filter.filterWithCursor(
       requestSession,
-      baseUrl,
+      uri"$baseUrl/list",
       filter,
       cursor,
       limit,
