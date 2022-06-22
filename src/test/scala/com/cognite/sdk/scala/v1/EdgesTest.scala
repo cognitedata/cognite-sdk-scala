@@ -187,7 +187,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
   private val space = "test-space"
 
-  private def filterFloatProperty(m: Map[String, DataModelProperty[_]]): Map[String, DataModelProperty[_]] = m.filterKeys(p => p == "prop_float")
+  private def filterFloatProperty(m: Map[String, DataModelProperty[_]]) = m.filterKeys{p: String => p !== "prop_float"}
 
   override def beforeAll(): Unit = {
     blueFieldClient.dataModels
@@ -342,7 +342,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     val simpleToDeletes = simpleEdgesToCreates.map(_.externalId)
     blueFieldClient.edges.deleteByExternalIds(simpleToDeletes).unsafeRunSync()
 
-    blueFieldClient.edges.deleteByExternalId(simpleEdgesToCreates.head.externalId).unsafeRunSync()
+    blueFieldClient.edges.deleteByExternalIds(simpleEdgesToCreates.map(_.externalId)).unsafeRunSync()
 
     // make sure that data is deleted
     val inputNoFilterQuery = DataModelInstanceQuery(
@@ -411,9 +411,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .toList
 
     outputQueryAnd.size shouldBe 1
-    val res: Map[String, DataModelProperty[_]] = outputQueryAnd.map(_.allProperties).toSet.head
-    val expected = fromCreatedToExpectedProps(Set(edgeToCreate2)).head
-    filterFloatProperty(res) shouldBe filterFloatProperty(expected)
+    val res = outputQueryAnd.map(_.allProperties).toSet.headOption.map(filterFloatProperty)
+    val expected = fromCreatedToExpectedProps(Set(edgeToCreate2)).headOption.map(filterFloatProperty)
+    res shouldBe expected
 
     val inputQueryAnd2 = DataModelInstanceQuery(
       DataModelIdentifier(Some(space), dataModelEdge.externalId),
