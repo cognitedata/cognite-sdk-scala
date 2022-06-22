@@ -58,7 +58,8 @@ final case class CdpApiErrorPayload(
     message: String,
     missing: Option[Seq[JsonObject]],
     duplicated: Option[Seq[JsonObject]],
-    missingFields: Option[Seq[String]]
+    missingFields: Option[Seq[String]],
+    extra: Option[Extra]
 )
 
 final case class CdpApiError(error: CdpApiErrorPayload) {
@@ -70,16 +71,21 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
       error.missing,
       error.duplicated,
       error.missingFields,
-      requestId
+      requestId,
+      error.extra
     )
 }
 
 object CdpApiError {
+  implicit val errorExtraDecoder: Decoder[Extra] = deriveDecoder
 
   implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
   implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
 }
 
+final case class Extra(
+    hint: Option[String] = None
+)
 final case class CdpApiException(
     url: Uri,
     code: Int,
@@ -87,17 +93,20 @@ final case class CdpApiException(
     missing: Option[Seq[JsonObject]],
     duplicated: Option[Seq[JsonObject]],
     missingFields: Option[Seq[String]],
-    requestId: Option[String]
+    requestId: Option[String],
+    extra: Option[Extra] = None
 ) extends Throwable({
       import CdpApiException._
       val maybeId = requestId.map(id => s"with id $id ").getOrElse("")
+      val maybeHint = extra.flatMap(e => e.hint.map(h => s" Hint: $h")).getOrElse("")
+
       val details = Seq(
         missingFields.map(fields => s" Missing fields: [${fields.mkString(", ")}]."),
         duplicated.map(describeErrorList("Duplicated")),
         missing.map(describeErrorList("Missing"))
       ).flatMap(_.toList).mkString
 
-      s"Request ${maybeId}to ${url.toString} failed with status ${code.toString}: $message.$details"
+      s"Request ${maybeId}to ${url.toString} failed with status ${code.toString}: $message.$details$maybeHint"
     })
 
 object CdpApiException {
