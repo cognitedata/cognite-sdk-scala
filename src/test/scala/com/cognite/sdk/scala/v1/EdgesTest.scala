@@ -197,9 +197,6 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     blueFieldClient.nodes.createItems(space, DataModelIdentifier(Some(space), dataModelNode.externalId), items = nodeToCreates)
       .unsafeRunSync()
 
-    blueFieldClient.edges.createItems(space, DataModelIdentifier(Some(space), dataModelEdge.externalId), items = edgesToCreates)
-      .unsafeRunSync()
-
     retryWithExpectedResult[scala.Seq[DataModel]](
       blueFieldClient.dataModels.list(space).unsafeRunSync(),
       dm => {
@@ -316,7 +313,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     }
 
   private def insertEdgesBeforeQuery() = {
-    val dataModelInstances = blueFieldClient.edges
+    val simpleModelInstances = blueFieldClient.edges
       .createItems(
         space,
         DataModelIdentifier(Some(space), simpleModelEdge.externalId),
@@ -324,13 +321,28 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       )
       .unsafeRunSync()
       .toList
-    dataModelInstances.size shouldBe 1
-    dataModelInstances
+
+    val dataModelInstances = blueFieldClient.edges
+      .createItems(
+        space,
+        DataModelIdentifier(Some(space), dataModelEdge.externalId),
+        items = edgesToCreates
+      )
+      .unsafeRunSync()
+      .toList
+
+    simpleModelInstances.size shouldBe 1
+    dataModelInstances.size shouldBe 3
+    dataModelInstances ++ simpleModelInstances
   }
 
   private def deleteEdgesAfterQuery() = {
-    /*val toDeletes = edgesToCreates.map(_.externalId)
+    val toDeletes = edgesToCreates.map(_.externalId)
     blueFieldClient.edges.deleteByExternalIds(toDeletes).unsafeRunSync()
+    val simpleToDeletes = simpleEdgesToCreates.map(_.externalId)
+    blueFieldClient.edges.deleteByExternalIds(simpleToDeletes).unsafeRunSync()
+
+    blueFieldClient.edges.deleteByExternalId(simpleEdgesToCreates.head.externalId).unsafeRunSync()
 
     // make sure that data is deleted
     val inputNoFilterQuery = DataModelInstanceQuery(
@@ -341,7 +353,11 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .unsafeRunSync()
       .items
       .toList
-    outputNoFilter.isEmpty shouldBe true*/
+
+    val simpleEdgeOut = blueFieldClient.edges.retrieveByExternalIds(      DataModelIdentifier(Some(space), simpleModelEdge.externalId)
+      , simpleToDeletes).unsafeRunSync().items.toList
+    simpleEdgeOut.isEmpty shouldBe true
+    outputNoFilter.isEmpty shouldBe true
   }
 
   private def initAndCleanUpDataForQuery(testCode: Seq[PropertyMap] => Any): Unit =
