@@ -68,18 +68,12 @@ object PropertyMap {
 
 final case class Node(
     override val externalId: String,
-    `type`: Option[String] = None,
-    name: Option[String] = None,
-    description: Option[String] = None,
     properties: Option[Map[String, DataModelProperty[_]]] = None
 ) extends PropertyMap(
       {
         val propsToAdd: Seq[Option[(String, DataModelProperty[_])]] =
           Seq[(String, Option[DataModelProperty[_]])](
-            "externalId" -> Some(PropertyType.Text.Property(externalId)),
-            "type" -> `type`.map(PropertyType.Text.Property(_)),
-            "name" -> name.map(PropertyType.Text.Property(_)),
-            "description" -> description.map(PropertyType.Text.Property(_))
+            "externalId" -> Some(PropertyType.Text.Property(externalId))
           ).map { case (k, v) =>
             v.map(k -> _)
           }
