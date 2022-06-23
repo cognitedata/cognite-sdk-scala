@@ -3,39 +3,26 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.Id
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common._
 
 import java.time.temporal.ChronoUnit
 import java.time.Instant
-import scala.concurrent.duration.DurationInt
 import scala.util.control.NonFatal
 import java.util.UUID
 
 @SuppressWarnings(
-  Array(
-    "org.wartremover.warts.NonUnitStatements",
-    "org.wartremover.warts.AsInstanceOf",
-    "org.wartremover.warts.OptionPartial"
-  )
+  Array("org.wartremover.warts.NonUnitStatements")
 )
 class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
 
-  private val auth = OAuth2
-    .ClientCredentialsProvider[IO](credentials)
-    .unsafeRunTimed(1.second)
-    .get
-    .getAuth
-    .unsafeRunSync()
-    .asInstanceOf[OidcTokenAuth]
-
-  private lazy val client = new GenericClient[Id](
+  private val client = new GenericClient[IO](
     "scala-sdk-test",
     "extractor-bluefield-testing",
     "https://bluefield.cognitedata.com",
-    BearerTokenAuth(auth.bearerToken),
+    authProvider,
+    None,
     None,
     None
   )
@@ -43,7 +30,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   def shortRandomUUID(): String = UUID.randomUUID().toString.substring(0, 8)
 
   it should "list transformations" in {
-    val res = client.transformations.list(Some(5)).compile.toList
+    val res = client.transformations.list(Some(5)).compile.toList.unsafeRunSync()
     res.size shouldBe 5
   }
 
@@ -63,7 +50,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         dataSetId = None
       )
     }
-    val resCreates = client.transformations.createItems(Items(transformationsToCreate))
+    val resCreates =
+      client.transformations.createItems(Items(transformationsToCreate)).unsafeRunSync()
     resCreates.size shouldBe transformationsToCreate.size
     resCreates.map(_.name) should contain theSameElementsAs transformationsToCreate.map(_.name)
     resCreates.map(_.query) should contain theSameElementsAs transformationsToCreate.flatMap(
@@ -79,9 +67,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
     val externalIds = transformationsToCreate.map(_.externalId)
     retryWithExpectedResult[Seq[TransformationRead]](
       {
-        client.transformations.delete(externalIds.map(CogniteExternalId(_)), true)
-        client.transformations
-          .retrieveByExternalIds(externalIds, true)
+        client.transformations.delete(externalIds.map(CogniteExternalId(_)), true).unsafeRunSync()
+        client.transformations.retrieveByExternalIds(externalIds, true).unsafeRunSync()
       },
       t => t shouldBe empty
     )
@@ -103,19 +90,21 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         dataSetId = None
       )
     }
-    val resCreated = client.transformations.createItems(Items(transformationsToCreate))
+    val resCreated =
+      client.transformations.createItems(Items(transformationsToCreate)).unsafeRunSync()
     val externalIds = transformationsToCreate.map(_.externalId)
     val internalIds = resCreated.map(_.id)
 
     try {
-      val resByIds = client.transformations.retrieveByIds(internalIds, true)
+      val resByIds = client.transformations.retrieveByIds(internalIds, true).unsafeRunSync()
       resByIds.size shouldBe transformationsToCreate.size
 
-      val resByExternalIds = client.transformations.retrieveByExternalIds(externalIds, true)
+      val resByExternalIds =
+        client.transformations.retrieveByExternalIds(externalIds, true).unsafeRunSync()
       resByExternalIds.size shouldBe transformationsToCreate.size
     } finally
       try
-        client.transformations.delete(externalIds.map(CogniteExternalId(_)), true)
+        client.transformations.delete(externalIds.map(CogniteExternalId(_)), true).unsafeRunSync()
       catch {
         case NonFatal(_) => // ignore
       }
@@ -137,7 +126,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         dataSetId = Some(216250735038513L)
       )
     }
-    val resCreates = client.transformations.createItems(Items(transformationsToCreate))
+    val resCreates =
+      client.transformations.createItems(Items(transformationsToCreate)).unsafeRunSync()
     val externalIds = transformationsToCreate.map(_.externalId)
 
     try {
@@ -145,6 +135,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         .filter(TransformationsFilter(nameRegex = Some(s"$uniquePrefix")))
         .compile
         .toList
+        .unsafeRunSync()
       resFilterName.size shouldBe transformationsToCreate.size
       resCreates.map(_.name) should contain theSameElementsAs resFilterName.map(_.name)
 
@@ -152,6 +143,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         .filter(TransformationsFilter(queryRegex = Some("select abc")))
         .compile
         .toList
+        .unsafeRunSync()
       resFilterQueryRegex.size should be >= transformationsToCreate.size
       resFilterQueryRegex.map(_.query).forall(q => q.startsWith("select abc")) shouldBe true
 
@@ -161,6 +153,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         )
         .compile
         .toList
+        .unsafeRunSync()
       resFilterUpsertEvents.size should be >= transformationsToCreate.size
       resFilterUpsertEvents
         .map(_.destination.asInstanceOf[GeneralDataSource].`type`)
@@ -177,6 +170,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         )
         .compile
         .toList
+        .unsafeRunSync()
       resFilterCreatedTime1DayAgo shouldBe empty
 
       val min3MinsAgo =
@@ -190,6 +184,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         )
         .compile
         .toList
+        .unsafeRunSync()
       resFilterCreatedTime3MinsAgo.size shouldBe transformationsToCreate.size
 
       val resFilterDataSetId = client.transformations
@@ -201,13 +196,13 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         )
         .compile
         .toList
+        .unsafeRunSync()
       resFilterDataSetId.size shouldBe transformationsToCreate.size
     } finally
       try
-        client.transformations.delete(externalIds.map(CogniteExternalId(_)), true)
+        client.transformations.delete(externalIds.map(CogniteExternalId(_)), true).unsafeRunSync()
       catch {
         case NonFatal(_) => // ignore
       }
-
   }
 }
