@@ -35,57 +35,66 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   it should "create and delete transformations" in {
+    val uniquePrefix = shortRandomUUID()
     val transformationsToCreate = (0 to 3).map { i =>
-      val uniquePrefix = shortRandomUUID()
       TransformationCreate(
-        s"$uniquePrefix-transformation-sdk-test",
+        s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         Some(s"select ${i.toString}"),
         Some(GeneralDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
         sourceOidcCredentials = Some(credentials),
         destinationOidcCredentials = Some(credentials),
-        externalId = s"$uniquePrefix-transformation-sdk-test",
+        externalId = s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         ignoreNullFields = true,
         dataSetId = None
       )
     }
-    val resCreates =
-      client.transformations.createItems(Items(transformationsToCreate)).unsafeRunSync()
-    resCreates.size shouldBe transformationsToCreate.size
-    resCreates.map(_.name) should contain theSameElementsAs transformationsToCreate.map(_.name)
-    resCreates.map(_.query) should contain theSameElementsAs transformationsToCreate.flatMap(
-      _.query
-    )
-    resCreates.map(_.destination) should contain theSameElementsAs transformationsToCreate.flatMap(
-      _.destination
-    )
-    resCreates.map(_.externalId) should contain theSameElementsAs transformationsToCreate.map(
-      _.externalId
-    )
-
     val externalIds = transformationsToCreate.map(_.externalId)
-    retryWithExpectedResult[Seq[TransformationRead]](
-      {
+    try {
+      val resCreates =
+        client.transformations.createItems(Items(transformationsToCreate)).unsafeRunSync()
+      resCreates.size shouldBe transformationsToCreate.size
+      resCreates.map(_.name) should contain theSameElementsAs transformationsToCreate.map(_.name)
+      resCreates.map(_.query) should contain theSameElementsAs transformationsToCreate.flatMap(
+        _.query
+      )
+      resCreates.map(_.destination) should contain theSameElementsAs transformationsToCreate
+        .flatMap(
+          _.destination
+        )
+      resCreates.map(_.externalId) should contain theSameElementsAs transformationsToCreate.map(
+        _.externalId
+      )
+
+      val externalIds = transformationsToCreate.map(_.externalId)
+      retryWithExpectedResult[Seq[TransformationRead]](
+        {
+          client.transformations.delete(externalIds.map(CogniteExternalId(_)), true).unsafeRunSync()
+          client.transformations.retrieveByExternalIds(externalIds, true).unsafeRunSync()
+        },
+        t => t shouldBe empty
+      )
+    } finally
+      try
         client.transformations.delete(externalIds.map(CogniteExternalId(_)), true).unsafeRunSync()
-        client.transformations.retrieveByExternalIds(externalIds, true).unsafeRunSync()
-      },
-      t => t shouldBe empty
-    )
+      catch {
+        case NonFatal(_) => // ignore
+      }
   }
 
   it should "retrieve transformations by ids or externalIds" in {
+    val uniquePrefix = shortRandomUUID()
     val transformationsToCreate = (0 to 3).map { i =>
-      val uniquePrefix = shortRandomUUID()
       TransformationCreate(
-        s"$uniquePrefix-transformation-sdk-test",
+        s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         Some(s"select ${i.toString}"),
         Some(GeneralDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
         sourceOidcCredentials = Some(credentials),
         destinationOidcCredentials = Some(credentials),
-        externalId = s"$uniquePrefix-transformation-sdk-test",
+        externalId = s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         ignoreNullFields = true,
         dataSetId = None
       )
@@ -112,6 +121,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
 
   it should "filter transformations" in {
     val uniquePrefix = shortRandomUUID()
+    val existedDataSetId = 216250735038513L
     val transformationsToCreate = (0 to 3).map { i =>
       TransformationCreate(
         s"$uniquePrefix-transformation-sdk-test-${i.toString}",
@@ -123,7 +133,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         destinationOidcCredentials = Some(credentials),
         externalId = s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         ignoreNullFields = true,
-        dataSetId = Some(216250735038513L)
+        dataSetId = Some(existedDataSetId)
       )
     }
     val resCreates =
@@ -156,15 +166,15 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         .unsafeRunSync()
       resFilterUpsertEvents.size should be >= transformationsToCreate.size
       resFilterUpsertEvents
-        .map(_.destination.asInstanceOf[GeneralDataSource].`type`)
-        .toSet shouldBe Set("events")
+        .map(_.destination)
+        .toSet shouldBe Set(GeneralDataSource("events"))
       resFilterUpsertEvents.map(_.conflictMode).toSet shouldBe Set("upsert")
 
       val max1DaysAgo = TimeFilter(max = Some(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli))
       val resFilterCreatedTime1DayAgo = client.transformations
         .filter(
           TransformationsFilter(
-            nameRegex = Some("transformation-sdk"),
+            nameRegex = Some(s"$uniquePrefix-transformation-sdk-test"),
             createdTime = Some(max1DaysAgo)
           )
         )
@@ -178,7 +188,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       val resFilterCreatedTime3MinsAgo = client.transformations
         .filter(
           TransformationsFilter(
-            nameRegex = Some("transformation-sdk"),
+            nameRegex = Some(s"$uniquePrefix-transformation-sdk-test"),
             createdTime = Some(min3MinsAgo)
           )
         )
@@ -190,7 +200,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       val resFilterDataSetId = client.transformations
         .filter(
           TransformationsFilter(
-            nameRegex = Some("transformation-sdk"),
+            nameRegex = Some(s"$uniquePrefix-transformation-sdk-test"),
             dataSetIds = Some(Seq(CogniteInternalId(216250735038513L)))
           )
         )
