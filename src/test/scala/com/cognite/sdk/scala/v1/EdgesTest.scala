@@ -187,10 +187,6 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
   private val space = "test-space"
 
-  private def toValueMap(res: Map[String, DataModelProperty[_]]) = res.map{ case (str: String, p: DataModelProperty[_]) =>
-    (str -> p.value)
-  }
-
   override def beforeAll(): Unit = {
     blueFieldClient.dataModels
       .createItems(Seq(simpleModelEdge, dataModelNode, dataModelEdge), space)
@@ -414,8 +410,8 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .toList
 
     outputQueryAnd.size shouldBe 1
-    val res = outputQueryAnd.map(_.allProperties).toSet.headOption.map(toValueMap)
-    val expected = fromCreatedToExpectedProps(Set(edgeToCreate2)).headOption.map(toValueMap)
+    val res = outputQueryAnd.map(_.allProperties).toSet.headOption
+    val expected = fromCreatedToExpectedProps(Set(edgeToCreate2)).headOption
 
     res shouldBe expected
 
@@ -466,10 +462,10 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .toList
 
     outputQueryOr.size shouldBe 2
-    val res = outputQueryOr.map(_.allProperties).toSet.map(toValueMap)
+    val res = outputQueryOr.map(_.allProperties).toSet
     val resExpected = fromCreatedToExpectedProps(
       Set(edgeToCreate2, edgeToCreate3)
-    ).map(toValueMap)
+    )
    res shouldBe resExpected
   }
 
@@ -490,9 +486,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .toList
 
     outputQueryNot.size shouldBe 1
-    outputQueryNot.map(_.allProperties).toSet.map(toValueMap) shouldBe fromCreatedToExpectedProps(
+    outputQueryNot.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(edgeToCreate1)
-    ).map(toValueMap)
+    )
   }
 
   it should "work with PREFIX filter" in initAndCleanUpDataForQuery { _ =>
@@ -510,9 +506,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .toList
 
     outputQueryPrefix.size shouldBe 2
-    outputQueryPrefix.map(_.allProperties).toSet.map(toValueMap) shouldBe fromCreatedToExpectedProps(
+    outputQueryPrefix.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(edgeToCreate1, edgeToCreate2)
-    ).map(toValueMap)
+    )
   }
 
   it should "work with RANGE filter" in initAndCleanUpDataForQuery { _ =>
@@ -529,9 +525,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .items
       .toList
 
-    outputQueryRange.map(_.allProperties).toSet.map(toValueMap) shouldBe fromCreatedToExpectedProps(
+    outputQueryRange.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(edgeToCreate2, edgeToCreate3)
-    ).map(toValueMap)
+    )
   }
 
   it should "work with EXISTS filter" in initAndCleanUpDataForQuery { _ =>
@@ -545,9 +541,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .items
       .toList
 
-    outputQueryExists.map(_.allProperties).toSet.map(toValueMap) shouldBe fromCreatedToExpectedProps(
+    outputQueryExists.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(edgeToCreate2, edgeToCreate3)
-    ).map(toValueMap)
+    )
   }
 
   "Delete edges" should "work with multiple externalIds" in {
