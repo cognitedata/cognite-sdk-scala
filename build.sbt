@@ -7,7 +7,7 @@ val scala212 = "2.12.15"
 val supportedScalaVersions = List(scala212, scala213, scala3)
 
 // This is used only for tests.
-val jettyTestVersion = "9.4.46.v20220331"
+val jettyTestVersion = "9.4.48.v20220622"
 
 val sttpVersion = "3.5.2"
 val circeVersion = "0.14.1"
@@ -23,7 +23,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.1.1",
+  version := "2.1.2",
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
@@ -102,7 +102,7 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "3.21.1"
+      "com.google.protobuf" % "protobuf-java" % "3.21.2"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor == 13 =>
