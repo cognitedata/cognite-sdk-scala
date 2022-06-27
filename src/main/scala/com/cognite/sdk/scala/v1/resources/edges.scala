@@ -14,11 +14,6 @@ import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
 
-@SuppressWarnings(
-  Array(
-    "org.wartremover.warts.StringPlusAny"
-  )
-)
 class Edges[F[_]](
     val requestSession: RequestSession[F],
     dataModels: DataModels[F]
