@@ -71,15 +71,10 @@ final case class Node(
     properties: Option[Map[String, DataModelProperty[_]]] = None
 ) extends PropertyMap(
       {
-        val propsToAdd: Seq[Option[(String, DataModelProperty[_])]] =
-          Seq[(String, Option[DataModelProperty[_]])](
-            "externalId" -> Some(PropertyType.Text.Property(externalId))
-          ).map { case (k, v) =>
-            v.map(k -> _)
-          }
+        val propsToAdd: Map[String, DataModelProperty[_]] =
+          Map("externalId" -> PropertyType.Text.Property(externalId))
 
-        properties.getOrElse(Map.empty[String, DataModelProperty[_]]) ++
-          propsToAdd.flatten.toMap
+        properties.getOrElse(Map.empty[String, DataModelProperty[_]]) ++ propsToAdd
       }
     )
 
@@ -138,18 +133,14 @@ final case class Edge(
     properties: Option[Map[String, DataModelProperty[_]]] = None
 ) extends PropertyMap(
       {
-        val propsToAdd: Seq[Option[(String, DataModelProperty[_])]] =
-          Seq[(String, Option[DataModelProperty[_]])](
-            "externalId" -> Some(PropertyType.Text.Property(externalId)),
-            "type" -> Some(PropertyType.Text.Property(`type`)),
-            "startNode" -> Some(PropertyType.Text.Property(startNode)),
-            "endNode" -> Some(PropertyType.Text.Property(endNode))
-          ).map { case (k, v) =>
-            v.map(k -> _)
-          }
+        val propsToAdd: Map[String, DataModelProperty[_]] = Map(
+          "externalId" -> PropertyType.Text.Property(externalId),
+          "type" -> PropertyType.Text.Property(`type`),
+          "startNode" -> PropertyType.Text.Property(startNode),
+          "endNode" -> PropertyType.Text.Property(endNode)
+        )
 
-        properties.getOrElse(Map.empty[String, DataModelProperty[_]]) ++
-          propsToAdd.flatten.toMap
+        properties.getOrElse(Map.empty[String, DataModelProperty[_]]) ++ propsToAdd
       }
     )
 

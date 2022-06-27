@@ -13,24 +13,22 @@ import scala.collection.immutable.Seq
 
 @SuppressWarnings(
   Array(
-    "org.wartremover.warts.PublicInference",
     "org.wartremover.warts.NonUnitStatements",
     "org.wartremover.warts.JavaSerializable",
     "org.wartremover.warts.Product",
-    "org.wartremover.warts.Serializable",
-    "org.wartremover.warts.AnyVal"
+    "org.wartremover.warts.Serializable"
   )
 )
 class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAndAfterAll {
   // val uuid = UUID.randomUUID.toString
-  val fixedUuid = "9e8401a6" // TODO use uuid when we can delete model
-  val dataPropString = DataModelPropertyDefinition(PropertyType.Text)
-  val dataPropBool = DataModelPropertyDefinition(PropertyType.Boolean)
-  val dataPropFloat = DataModelPropertyDefinition(PropertyType.Float32, nullable = false)
-  val dataPropDirectRelation = DataModelPropertyDefinition(PropertyType.DirectRelation)
-  val dataPropDate = DataModelPropertyDefinition(PropertyType.Date)
+  private val fixedUuid = "9e8401a6" // TODO use uuid when we can delete model
+  private val dataPropString = DataModelPropertyDefinition(PropertyType.Text)
+  private val dataPropBool = DataModelPropertyDefinition(PropertyType.Boolean)
+  private val dataPropFloat = DataModelPropertyDefinition(PropertyType.Float32, nullable = false)
+  private val dataPropDirectRelation = DataModelPropertyDefinition(PropertyType.DirectRelation)
+  private val dataPropDate = DataModelPropertyDefinition(PropertyType.Date)
 
-  val dataModelNode = DataModel(
+  private val dataModelNode = DataModel(
     s"Equipment-${fixedUuid}-node",
     Some(
       Map(
@@ -43,7 +41,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     )
   )
 
-  val dataModelEdge = DataModel(
+  private val dataModelEdge = DataModel(
     s"Equipment-${fixedUuid}-ed_ge",
     Some(
       Map(
@@ -57,19 +55,19 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     dataModelType = DataModelType.EdgeType
   )
 
-  val directRelation = DataModelPropertyDefinition(
+  /*private val directRelation = DataModelPropertyDefinition(
     PropertyType.DirectRelation,
     false,
     Some(DataModelIdentifier(None, "node"))
-  )
-  val nullableDirectRelation = DataModelPropertyDefinition(
+  )*/
+  private val nullableDirectRelation = DataModelPropertyDefinition(
     PropertyType.DirectRelation,
     true,
     Some(DataModelIdentifier(None, "node"))
   )
 
-  val newfixedUuid = "fcae0ec0"
-  val simpleModelEdge = DataModel(
+  private val newfixedUuid = "fcae0ec0"
+  private val simpleModelEdge = DataModel(
     s"Equipment-${newfixedUuid}-e",
     Some(
       Map(
@@ -82,7 +80,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     dataModelType = DataModelType.EdgeType
   )
 
-  val nodeToCreate1 =
+  private val nodeToCreate1 =
     Node(
       "node_1",
       properties = Some(
@@ -95,7 +93,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       )
     )
 
-  val nodeToCreate2 =
+  private val nodeToCreate2 =
     Node(
       "node_2",
       properties = Some(
@@ -107,7 +105,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       )
     )
 
-  val nodeToCreate3 =
+  private val nodeToCreate3 =
     Node(
       "node_3",
       properties = Some(
@@ -119,9 +117,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       )
     )
 
-  val nodeToCreates = Seq(nodeToCreate1, nodeToCreate2, nodeToCreate3)
+  private val nodeToCreates = Seq(nodeToCreate1, nodeToCreate2, nodeToCreate3)
 
-  val edgeToCreate1 =
+  private val edgeToCreate1 =
     Edge(
       "ed_ge_12",
       `type` = "ed_ge_12",
@@ -137,7 +135,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       )
     )
 
-  val edgeToCreate2 =
+  private val edgeToCreate2 =
     Edge(
       "ed_ge_13",
       `type` = "ed_ge13",
@@ -152,7 +150,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       )
     )
 
-  val edgeToCreate3 =
+  private val edgeToCreate3 =
     Edge(
       "ed_ge_23",
       `type` = "ed_ge23",
@@ -167,9 +165,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       )
     )
 
-  val edgesToCreates = Seq(edgeToCreate1, edgeToCreate2, edgeToCreate3)
+  private val edgesToCreates = Seq(edgeToCreate1, edgeToCreate2, edgeToCreate3)
 
-  val simpleEdge1 = Edge(
+  private val simpleEdge1 = Edge(
     "simpleed_ge12",
     `type` = "simpleed_ge12",
     startNode = "node_1",
@@ -178,12 +176,13 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       Map("prop_float" -> PropertyType.Float32.Property(0.1f))
     )
   )
-  val simpleEdgesToCreates = Seq(simpleEdge1)
+  private val simpleEdgesToCreates = Seq(simpleEdge1)
 
-  val dataPropArrayString = DataModelPropertyDefinition(PropertyType.Array.Text, true)
-  val dataPropArrayFloat = DataModelPropertyDefinition(PropertyType.Array.Float32, true)
-  val dataPropArrayInt = DataModelPropertyDefinition(PropertyType.Array.Int, true)
-
+  /*
+  private val dataPropArrayString = DataModelPropertyDefinition(PropertyType.Array.Text, true)
+  private val dataPropArrayFloat = DataModelPropertyDefinition(PropertyType.Array.Float32, true)
+  private val dataPropArrayInt = DataModelPropertyDefinition(PropertyType.Array.Int, true)
+  */
 
   private val space = "test-space"
 
