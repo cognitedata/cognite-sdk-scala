@@ -14,10 +14,11 @@ class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {
       missing = None,
       duplicated = None,
       missingFields = None,
-      requestId = None
+      requestId = None,
+      extra = Some(Extra(hint = Some("giving hints to you")))
     )
 
-    ex.getMessage shouldBe s"Request to https://api.cognitedata.com failed with status 404: Not Found."
+    ex.getMessage shouldBe s"Request to https://api.cognitedata.com failed with status 404: Not Found. Hint: giving hints to you"
   }
 
   it should "format messages with request ID" in {

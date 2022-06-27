@@ -14,21 +14,24 @@ import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
 
-class Nodes[F[_]](
+class Edges[F[_]](
     val requestSession: RequestSession[F],
     dataModels: DataModels[F]
 ) extends WithRequestSession[F]
     with DeleteByExternalIds[F]
     with BaseUrl {
-  import Nodes._
 
-  override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/nodes"
+  import Edges._
+
+  override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/edges"
 
   def createItems(
       spaceExternalId: String,
       model: DataModelIdentifier,
+      autoCreateStartNodes: Boolean = false,
+      autoCreateEndNodes: Boolean = false,
       overwrite: Boolean = false,
-      items: Seq[Node]
+      items: Seq[Edge]
   )(implicit F: Async[F]): F[Seq[PropertyMap]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
     dataModels.retrieveByExternalIds(Seq(model.model), model.space.getOrElse("")).flatMap { dm =>
@@ -41,33 +44,33 @@ class Nodes[F[_]](
       //   derivedDecoder is used bellow, so an explicit decoder is defined instead
       implicit val dataModelInstanceItemsDecoder: Decoder[Items[PropertyMap]] =
         Decoder.forProduct1("items")(Items.apply[PropertyMap])
-
-      requestSession
-        .post[Seq[PropertyMap], Items[PropertyMap], DataModelNodeCreate](
-          DataModelNodeCreate(spaceExternalId, model, overwrite, items),
-          uri"$baseUrl",
-          value => value.items
-        )
+      val body = EdgeCreate(
+        spaceExternalId,
+        model,
+        autoCreateStartNodes,
+        autoCreateEndNodes,
+        overwrite,
+        items
+      )
+      requestSession.post[Seq[PropertyMap], Items[PropertyMap], EdgeCreate](
+        body,
+        uri"$baseUrl",
+        value => value.items
+      )
     }
   }
 
-  def query(
-      inputQuery: DataModelInstanceQuery
-  ): F[DataModelInstanceQueryResponse] = {
+  def query(inputQuery: DataModelInstanceQuery): F[DataModelInstanceQueryResponse] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
-    implicit val nodeQueryReponseDecoder: Decoder[DataModelInstanceQueryResponse] =
+    implicit val edgeQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
       DataModelInstanceQueryResponse.createDecoderForQueryResponse()
-
-    requestSession.post[
-      DataModelInstanceQueryResponse,
-      DataModelInstanceQueryResponse,
-      DataModelInstanceQuery
-    ](
-      inputQuery,
-      uri"$baseUrl/list",
-      value => value
-    )
+    requestSession
+      .post[DataModelInstanceQueryResponse, DataModelInstanceQueryResponse, DataModelInstanceQuery](
+        inputQuery,
+        uri"$baseUrl/list",
+        value => value
+      )
   }
 
   private[sdk] def queryWithCursor(
@@ -103,7 +106,7 @@ class Nodes[F[_]](
       model: DataModelIdentifier,
       externalIds: Seq[String]
   ): F[DataModelInstanceQueryResponse] = {
-    implicit val nodeQueryReponseDecoder: Decoder[DataModelInstanceQueryResponse] =
+    implicit val edgeQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
       DataModelInstanceQueryResponse.createDecoderForQueryResponse()
 
     requestSession.post[
@@ -118,20 +121,23 @@ class Nodes[F[_]](
   }
 }
 
-object Nodes {
+object Edges {
 
   implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =
     DataModels.dataModelIdentifierEncoder
 
-  implicit val dataModelNodeCreateEncoder: Encoder[DataModelNodeCreate] =
-    deriveEncoder[DataModelNodeCreate]
+  implicit val edgeCreateEncoder: Encoder[EdgeCreate] = deriveEncoder[EdgeCreate]
 
-  implicit val dataModelNodeItemsEncoder: Encoder[Items[DataModelNodeCreate]] =
-    deriveEncoder[Items[DataModelNodeCreate]]
+  implicit val edgeItemsEncoder: Encoder[Items[EdgeCreate]] = deriveEncoder[Items[EdgeCreate]]
 
   implicit val dataModelInstanceQueryEncoder: Encoder[DataModelInstanceQuery] =
     deriveEncoder[DataModelInstanceQuery]
 
   implicit val dataModelInstanceByExternalIdEncoder: Encoder[DataModelInstanceByExternalId] =
     deriveEncoder[DataModelInstanceByExternalId]
+
+  implicit val dmiByExternalIdItemsWithIgnoreUnknownIdsEncoder
+      : Encoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]] =
+    deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
+
 }

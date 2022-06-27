@@ -45,8 +45,7 @@ final case class DSLContainsAllFilter(property: Seq[String], values: Seq[DataMod
 
 object DomainSpecificLanguageFilter {
 
-  implicit val propEncoder: Encoder[DataModelProperty[_]] =
-    _.encode
+  implicit val propEncoder: Encoder[DataModelProperty[_]] = _.encode
 
   implicit val andFilterEncoder: Encoder[DSLAndFilter] = deriveEncoder[DSLAndFilter]
   implicit val orFilterEncoder: Encoder[DSLOrFilter] = deriveEncoder[DSLOrFilter]

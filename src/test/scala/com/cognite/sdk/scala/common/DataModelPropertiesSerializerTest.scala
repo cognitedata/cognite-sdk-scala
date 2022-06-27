@@ -6,7 +6,7 @@ package com.cognite.sdk.scala.common
 // scalastyle:off file.size.limit
 
 import com.cognite.sdk.scala.v1._
-import com.cognite.sdk.scala.v1.resources.Nodes.createDynamicPropertyDecoder
+import com.cognite.sdk.scala.v1.resources.DataModels
 import io.circe
 import io.circe.CursorOp.DownField
 import io.circe.{Decoder, DecodingFailure, HCursor, Json}
@@ -30,7 +30,7 @@ import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
 
   implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] = {
-    import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyDefinitionDecoder
+    import DataModels.dataModelPropertyDefinitionDecoder
 
     new Decoder[DataModelInstanceQueryResponse] {
       def apply(c: HCursor): Decoder.Result[DataModelInstanceQueryResponse] = {
@@ -39,7 +39,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           .as[Option[Map[String, DataModelPropertyDefinition]]]
         modelProperties.flatMap { props =>
           implicit val propertyTypeDecoder: Decoder[PropertyMap] =
-            createDynamicPropertyDecoder(props.getOrElse(Map()))
+            PropertyMap.createDynamicPropertyDecoder(props.getOrElse(Map()))
           for {
             items <- c.downField("items").as[Seq[PropertyMap]]
             nextCursor <- c.downField("nextCursor").as[Option[String]]
@@ -706,7 +706,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
       }
     }
     "encode PropertyType" should {
-      import com.cognite.sdk.scala.v1.resources.Nodes.dataModelPropertyMapEncoder
+      import PropertyMap.dataModelPropertyMapEncoder
 
       "work for primitive" in {
         val pm:PropertyMap = Node(
