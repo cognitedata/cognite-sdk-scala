@@ -88,7 +88,7 @@ object Filter {
   // scalastyle:off parameter.number
   def filterWithCursor[F[_], R, Fi](
       requestSession: RequestSession[F],
-      baseUrl: Uri,
+      filterUrl: Uri,
       filter: Fi,
       cursor: Option[String],
       limit: Option[Int],
@@ -111,7 +111,7 @@ object Filter {
       ).asJson
     requestSession.post[ItemsWithCursor[R], ItemsWithCursor[R], Json](
       partition.map(_ => body).getOrElse(body.mapObject(o => o.remove("partition"))),
-      uri"$baseUrl/list",
+      uri"$filterUrl",
       value => value
     )
   }

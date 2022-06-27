@@ -133,7 +133,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
   ): F[ItemsWithCursor[File]] =
     Filter.filterWithCursor(
       requestSession,
-      baseUrl,
+      uri"$baseUrl/list",
       filter,
       cursor,
       limit,
