@@ -4,20 +4,8 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.{
-  CdpApiException,
-  DSLAndFilter,
-  DSLContainsAnyFilter,
-  DSLEqualsFilter,
-  DSLExistsFilter,
-  DSLInFilter,
-  DSLNotFilter,
-  DSLOrFilter,
-  DSLPrefixFilter,
-  DSLRangeFilter,
-  RetryWhile
-}
-import org.scalatest.{Assertion, BeforeAndAfterAll}
+import com.cognite.sdk.scala.common.{CdpApiException, DSLAndFilter, DSLContainsAnyFilter, DSLEqualsFilter, DSLExistsFilter, DSLInFilter, DSLNotFilter, DSLOrFilter, DSLPrefixFilter, DSLRangeFilter, RetryWhile}
+import org.scalatest.{Assertion, BeforeAndAfterAll, OptionValues}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -211,8 +199,7 @@ class NodesTest
       .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(invalidInput))
       .unsafeRunSync()
 
-    exception.message should contain ("invalid input")
-    exception.message should contain ("abc")
+    exception.message shouldBe "Value type mismatch. Value could not be coerced to the expected type."
   }
 
   private def insertDMIBeforeQuery() = {
