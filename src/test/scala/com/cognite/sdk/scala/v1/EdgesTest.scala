@@ -305,8 +305,8 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         )
         .unsafeRunSync()
 
-      exception.message.contains("invalid input") shouldBe true
-      exception.message.contains("abc") shouldBe true
+      exception.message should contain ("invalid input")
+      exception.message should contain ("abc")
     }
 
   private def insertEdgesBeforeQuery() = {

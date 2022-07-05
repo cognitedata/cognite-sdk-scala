@@ -211,8 +211,8 @@ class NodesTest
       .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(invalidInput))
       .unsafeRunSync()
 
-    exception.message.contains("invalid input") shouldBe true
-    exception.message.contains("abc") shouldBe true
+    exception.message should contain ("invalid input")
+    exception.message should contain ("abc")
   }
 
   private def insertDMIBeforeQuery() = {
