@@ -305,8 +305,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         )
         .unsafeRunSync()
 
-      exception.message.contains("invalid input") shouldBe true
-      exception.message.contains("abc") shouldBe true
+      exception.message shouldBe "Value type mismatch. Value could not be coerced to the expected type."
     }
 
   private def insertEdgesBeforeQuery() = {

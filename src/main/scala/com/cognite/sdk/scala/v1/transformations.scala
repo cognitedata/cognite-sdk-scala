@@ -92,7 +92,7 @@ final case class JobDetails(
     startedTime: Option[Long],
     finishedTime: Option[Long],
     lastSeenTime: Option[Long],
-    error: String,
+    error: Option[String],
     ignoreNullFields: Boolean,
     status: String
 )

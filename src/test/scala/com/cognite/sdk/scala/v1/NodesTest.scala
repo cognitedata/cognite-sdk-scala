@@ -211,8 +211,7 @@ class NodesTest
       .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(invalidInput))
       .unsafeRunSync()
 
-    exception.message.contains("invalid input") shouldBe true
-    exception.message.contains("abc") shouldBe true
+    exception.message shouldBe "Value type mismatch. Value could not be coerced to the expected type."
   }
 
   private def insertDMIBeforeQuery() = {

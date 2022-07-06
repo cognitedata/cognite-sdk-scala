@@ -35,6 +35,10 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   it should "list transformations" in {
     val res = client.transformations.list(Some(5)).compile.toList.unsafeRunSync()
     res.size shouldBe 5
+
+    val resAll = client.transformations.list().compile.toList.unsafeRunSync()
+    resAll.nonEmpty shouldBe true
+    resAll.flatMap(_.lastFinishedJob).map(_.error).nonEmpty shouldBe true
   }
 
   it should "create and delete transformations" in {
