@@ -432,7 +432,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
 
   it should "retry requests on response code 429 with empty body" in {
     val responseEmptyBody = Response("", StatusCode.TooManyRequests, "", Seq())
-    val responseOK = Response("OK", StatusCode.Ok, "",Seq())
+    val responseOK = Response("OK", StatusCode.Ok, "", Seq())
 
     val sttpRetryOK = SttpBackendStub(implicitly[MonadAsyncError[IO]])
       .whenRequestMatches(r => r.uri.path.endsWith(List("projectName", "sessions", "token")))
