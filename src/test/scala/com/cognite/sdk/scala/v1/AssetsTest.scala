@@ -263,6 +263,32 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     client.labels.deleteByExternalIds(Seq(externalId1, externalId2, externalId3))
   }
 
+  it should "update metadata on assets with empty map" in {
+    val externalId1 = UUID.randomUUID.toString
+
+    // Create asset with metadata
+    val assetToCreate = Seq(
+      AssetCreate(externalId = Some(externalId1),
+        name=externalId1, metadata = Some(Map("test1" -> "test1")))
+    )
+
+    val createdItems = client.assets.createItems(Items(assetToCreate))
+    createdItems.head.metadata shouldBe Some(Map("test1" -> "test1"))
+
+    // Updating metadata with None should have no effect
+    val updatedAssetsWithNone: Seq[Asset] = client.assets.updateByExternalId(Map(
+      externalId1 -> AssetUpdate(name = Some(SetValue("ML :)")), metadata = None))
+    )
+
+    val updatedAssets: Seq[Asset] = client.assets.updateByExternalId(Map(
+      externalId1 -> AssetUpdate(metadata = Some(SetValue(set = Map()))))
+    )
+    client.assets.deleteByExternalIds(Seq(externalId1))
+
+    updatedAssetsWithNone.head.metadata shouldBe Some(Map("test1" -> "test1"))
+    updatedAssets.head.metadata shouldBe Some(Map())
+  }
+
   it should behave like updatableById(
     client.assets,
     Some(client.assets),
