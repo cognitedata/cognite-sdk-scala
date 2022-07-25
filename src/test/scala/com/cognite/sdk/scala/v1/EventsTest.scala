@@ -5,8 +5,9 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 import fs2._
-import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetNull, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common.{CdpApiException, Items, ReadBehaviours, RetryWhile, SdkTestSpec, SetNull, SetValue, WritableBehaviors}
 
+import java.util.UUID
 import scala.util.control.NonFatal
 
 @SuppressWarnings(
@@ -235,6 +236,26 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         case NonFatal(_) => // ignore
       }
     }
+  }
+
+  it should "update metadata on events with empty map" in {
+    val externalId1 = UUID.randomUUID.toString
+
+    // Create event with metadata
+    val eventsToCreate = Seq(
+      EventCreate(externalId = Some(externalId1), metadata = Some(Map("test1" -> "test1"))),
+    )
+
+    val createdItems = client.events.createItems(Items(eventsToCreate))
+    createdItems.head.metadata shouldBe Some(Map("test1" -> "test1"))
+
+    val updatedEvents: Seq[Event] = client.events.updateByExternalId(Map(
+      externalId1 -> EventUpdate(metadata = Some(SetValue(set = Map()))))
+    )
+
+    client.events.deleteByExternalIds(Seq(externalId1))
+
+    updatedEvents.head.metadata shouldBe Some(Map())
   }
 
   it should "support filter" in {

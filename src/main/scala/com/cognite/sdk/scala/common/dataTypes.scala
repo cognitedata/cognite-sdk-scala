@@ -225,9 +225,6 @@ object Setter {
       case null => Some(SetNull()) // scalastyle:ignore null
       case None => None
       case Some(null) => Some(SetNull()) // scalastyle:ignore null
-      case Some(map: Map[_, _]) if map.isEmpty =>
-        // Workaround for CDF-3540 and CDF-953
-        None
       case Some(value) => Some(SetValue(value))
     }
 
@@ -256,9 +253,6 @@ object NonNullableSetter {
   def fromOption[T](option: Option[T]): Option[NonNullableSetter[T]] =
     option match {
       case None => None
-      case Some(map: Map[_, _]) if map.isEmpty =>
-        // Workaround for CDF-3540 and CDF-953
-        None
       case Some(value) =>
         require(
           value != null, // scalastyle:ignore null
