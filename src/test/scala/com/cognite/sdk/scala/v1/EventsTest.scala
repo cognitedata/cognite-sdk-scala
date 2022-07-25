@@ -243,7 +243,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     // Create event with metadata
     val eventsToCreate = Seq(
-      EventCreate(externalId = Some(externalId1), metadata = Some(Map("test1" -> "test1"))),
+      EventCreate(externalId = Some(externalId1), metadata = Some(Map("test1" -> "test1")))
     )
 
     val createdItems = client.events.createItems(Items(eventsToCreate))

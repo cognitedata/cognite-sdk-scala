@@ -269,7 +269,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     // Create asset with metadata
     val assetToCreate = Seq(
       AssetCreate(externalId = Some(externalId1),
-        name=externalId1, metadata = Some(Map("test1" -> "test1"))),
+        name=externalId1, metadata = Some(Map("test1" -> "test1")))
     )
 
     val createdItems = client.assets.createItems(Items(assetToCreate))
