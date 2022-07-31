@@ -6,6 +6,8 @@ package com.cognite.sdk.scala.v1
 import java.time.Instant
 import com.cognite.sdk.scala.common._
 
+import scala.annotation.nowarn
+
 final case class Asset(
     externalId: Option[String] = None,
     name: String,
@@ -77,9 +79,11 @@ final case class AssetUpdate(
     labels: Option[NonNullableSetter[Seq[CogniteExternalId]]] = None
 ) extends WithSetExternalId
 
+@nowarn
 final case class AssetsFilter(
     name: Option[String] = None,
     parentIds: Option[Seq[Long]] = None,
+    @deprecated("Use assetSubtreeIds instead", "2.1.0")
     rootIds: Option[Seq[CogniteId]] = None,
     assetSubtreeIds: Option[Seq[CogniteId]] = None,
     metadata: Option[Map[String, String]] = None,

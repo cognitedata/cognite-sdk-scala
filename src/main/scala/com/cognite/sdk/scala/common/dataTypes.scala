@@ -58,7 +58,8 @@ final case class CdpApiErrorPayload(
     message: String,
     missing: Option[Seq[JsonObject]],
     duplicated: Option[Seq[JsonObject]],
-    missingFields: Option[Seq[String]]
+    missingFields: Option[Seq[String]],
+    extra: Option[Extra]
 )
 
 final case class CdpApiError(error: CdpApiErrorPayload) {
@@ -70,15 +71,21 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
       error.missing,
       error.duplicated,
       error.missingFields,
-      requestId
+      requestId,
+      error.extra
     )
 }
 
 object CdpApiError {
+  implicit val errorExtraDecoder: Decoder[Extra] = deriveDecoder
+
   implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
   implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
 }
 
+final case class Extra(
+    hint: Option[String] = None
+)
 final case class CdpApiException(
     url: Uri,
     code: Int,
@@ -86,17 +93,20 @@ final case class CdpApiException(
     missing: Option[Seq[JsonObject]],
     duplicated: Option[Seq[JsonObject]],
     missingFields: Option[Seq[String]],
-    requestId: Option[String]
+    requestId: Option[String],
+    extra: Option[Extra] = None
 ) extends Throwable({
       import CdpApiException._
       val maybeId = requestId.map(id => s"with id $id ").getOrElse("")
+      val maybeHint = extra.flatMap(e => e.hint.map(h => s" Hint: $h")).getOrElse("")
+
       val details = Seq(
         missingFields.map(fields => s" Missing fields: [${fields.mkString(", ")}]."),
         duplicated.map(describeErrorList("Duplicated")),
         missing.map(describeErrorList("Missing"))
       ).flatMap(_.toList).mkString
 
-      s"Request ${maybeId}to ${url.toString} failed with status ${code.toString}: $message.$details"
+      s"Request ${maybeId}to ${url.toString} failed with status ${code.toString}: $message.$details$maybeHint"
     })
 
 object CdpApiException {
@@ -215,9 +225,6 @@ object Setter {
       case null => Some(SetNull()) // scalastyle:ignore null
       case None => None
       case Some(null) => Some(SetNull()) // scalastyle:ignore null
-      case Some(map: Map[_, _]) if map.isEmpty =>
-        // Workaround for CDF-3540 and CDF-953
-        None
       case Some(value) => Some(SetValue(value))
     }
 
@@ -239,15 +246,13 @@ object NonNullableSetter {
     Array(
       "org.wartremover.warts.Null",
       "org.wartremover.warts.Equals",
-      "org.wartremover.warts.OptionPartial"
+      "org.wartremover.warts.OptionPartial",
+      "scalafix:DisableSyntax.!="
     )
   )
   def fromOption[T](option: Option[T]): Option[NonNullableSetter[T]] =
     option match {
       case None => None
-      case Some(map: Map[_, _]) if map.isEmpty =>
-        // Workaround for CDF-3540 and CDF-953
-        None
       case Some(value) =>
         require(
           value != null, // scalastyle:ignore null

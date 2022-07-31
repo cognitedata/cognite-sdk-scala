@@ -9,13 +9,17 @@ import io.circe.syntax._
 
 // scalastyle:off number.of.types
 
-sealed abstract class DataModelProperty[V](val value: V)(implicit encoder: Encoder[V]) {
+sealed abstract case class DataModelProperty[V](value: V)(implicit encoder: Encoder[V]) {
   def encode: Json = value.asJson
 }
 
 sealed abstract class PropertyType[V](implicit decoder: Decoder[V], encoder: Encoder[V])
     extends Serializable {
-  sealed case class Property(override val value: V) extends DataModelProperty(value)
+  sealed class Property(override val value: V) extends DataModelProperty[V](value)
+  object Property {
+    def apply(v: V): Property = new Property(v)
+    def unapply(p: Property): Option[V] = Some(p.value)
+  }
 
   @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
   def code: String =

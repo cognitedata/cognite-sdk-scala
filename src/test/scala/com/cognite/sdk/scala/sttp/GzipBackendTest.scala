@@ -1,27 +1,26 @@
 // Copyright 2020 Cognite AS
 // SPDX-License-Identifier: Apache-2.0
 
-package com.cognite.sdk.scala.common
+package com.cognite.sdk.scala.sttp
+
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
+import org.apache.commons.io.IOUtils
+import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.handler.gzip.GzipHandler
+import org.eclipse.jetty.servlet.ServletContextHandler
+import org.scalatest.EitherValues.convertEitherToValuable
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.{BeforeAndAfter, OptionValues}
+import sttp.client3._
+import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 import java.io.{ByteArrayInputStream, File}
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.zip.GZIPInputStream
-import cats.effect.IO
-import sttp.client3._
-import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import org.apache.commons.io.IOUtils
-import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.server.handler.gzip.GzipHandler
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.{BeforeAndAfter, OptionValues}
-import org.scalatest.EitherValues.convertEitherToValuable
-
-import cats.effect.unsafe.implicits.global
-
 import scala.io.Source
 
 class EchoServlet extends HttpServlet {
@@ -29,14 +28,14 @@ class EchoServlet extends HttpServlet {
     resp.setContentType("text/plain")
     Option(req.getHeader("X-Content-Length"))
       .orElse(Option(req.getHeader("Content-Length")))
-      .foreach(resp.addHeader(GzipSttpBackendTest.originalLength, _))
+      .foreach(resp.addHeader(GzipBackendTest.originalLength, _))
     val _ = IOUtils.copy(req.getInputStream, resp.getOutputStream)
     ()
   }
 }
 
 @SuppressWarnings(Array("org.wartremover.warts.GlobalExecutionContext", "org.wartremover.warts.NonUnitStatements"))
-class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAfter {
+class GzipBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAfter {
   val port: Int = 50000 + (java.lang.Math.random() * 1000).toInt
 
   val server: Server = new Server(port)
@@ -60,7 +59,7 @@ class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAf
   private val longTestString = "aaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbb" * 50
 
   implicit val sttpBackend: SttpBackend[IO, Any] =
-    new GzipSttpBackend[IO, Any](
+    new GzipBackend[IO, Any](
       AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
     )
 
@@ -72,7 +71,7 @@ class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAf
     val r = request.send(sttpBackend).unsafeRunSync()
     // Very small strings will be larger when compressed.
     assert(
-      r.header(GzipSttpBackendTest.originalLength).value.toInt === smallTestString.getBytes(StandardCharsets.UTF_8).length
+      r.header(GzipBackendTest.originalLength).value.toInt === smallTestString.getBytes(StandardCharsets.UTF_8).length
     )
     assert(r.body.value contains smallTestString)
   }
@@ -83,7 +82,7 @@ class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAf
       .post(uri"http://localhost:$port/string")
     val r = request.send(sttpBackend).unsafeRunSync()
     assert(
-      r.header(GzipSttpBackendTest.originalLength).value.toInt < longTestString.getBytes(StandardCharsets.UTF_8).length
+      r.header(GzipBackendTest.originalLength).value.toInt < longTestString.getBytes(StandardCharsets.UTF_8).length
     )
     assert(r.body.value contains longTestString)
   }
@@ -94,7 +93,7 @@ class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAf
       .post(uri"http://localhost:$port/bytearray")
     val r = request.send(sttpBackend).unsafeRunSync()
     assert(
-      r.header(GzipSttpBackendTest.originalLength).value.toInt < longTestString.getBytes(StandardCharsets.UTF_8).length
+      r.header(GzipBackendTest.originalLength).value.toInt < longTestString.getBytes(StandardCharsets.UTF_8).length
     )
     assert(r.body.value contains longTestString)
   }
@@ -105,7 +104,7 @@ class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAf
       .post(uri"http://localhost:$port/bytebuffer")
     val r = request.send(sttpBackend).unsafeRunSync()
     assert(
-      r.header(GzipSttpBackendTest.originalLength).value.toInt < longTestString.getBytes(StandardCharsets.UTF_8).length
+      r.header(GzipBackendTest.originalLength).value.toInt < longTestString.getBytes(StandardCharsets.UTF_8).length
     )
     assert(r.body.value contains longTestString)
   }
@@ -116,7 +115,7 @@ class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAf
       .post(uri"http://localhost:$port/inputstream")
     val r = request.send(sttpBackend).unsafeRunSync()
     assert(
-      r.header(GzipSttpBackendTest.originalLength).value.toInt < longTestString.getBytes(StandardCharsets.UTF_8).length
+      r.header(GzipBackendTest.originalLength).value.toInt < longTestString.getBytes(StandardCharsets.UTF_8).length
     )
     assert(r.body.value contains longTestString)
   }
@@ -150,13 +149,13 @@ class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAf
   }
 
   it should "not compress an already compressed request" in {
-    val compressedBody = GzipSttpBackend.compress(longTestString.getBytes("utf-8"))
+    val compressedBody = GzipBackend.compress(longTestString.getBytes("utf-8"))
     val request = basicRequest
       .body(compressedBody)
       .header("Content-encoding", "gzip")
       .post(uri"http://localhost:$port/donotcompress")
     val r = request.send(sttpBackend).unsafeRunSync()
-    assert(r.header(GzipSttpBackendTest.originalLength).value.toInt === compressedBody.length)
+    assert(r.header(GzipBackendTest.originalLength).value.toInt === compressedBody.length)
     assert(r.body.value contains longTestString)
 
     val request2 = basicRequest
@@ -169,7 +168,7 @@ class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAf
     val gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(r2.body.value))
     try {
       val uncompressedBody = new String(IOUtils.toByteArray(gzipInputStream), StandardCharsets.UTF_8)
-      assert(r2.header(GzipSttpBackendTest.originalLength).value.toInt === compressedBody.length)
+      assert(r2.header(GzipBackendTest.originalLength).value.toInt === compressedBody.length)
       assert(uncompressedBody === longTestString)
     } finally {
       gzipInputStream.close()
@@ -177,6 +176,6 @@ class GzipSttpBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAf
   }
 }
 
-object GzipSttpBackendTest {
+object GzipBackendTest {
   val originalLength = "X-original-length"
 }

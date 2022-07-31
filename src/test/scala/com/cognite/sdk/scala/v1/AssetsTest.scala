@@ -157,7 +157,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   }
 
   it should "raise a conflict error if input of delete contains internalIdand externalId that represent the same row" in {
-    val createdItems = createAssets("delete-cogniteId")
+    val prefix = s"delete-cogniteId-${shortRandom()}"
+    val createdItems = createAssets(prefix)
 
     val (deleteByInternalIds, deleteByExternalIds) = createdItems.splitAt(createdItems.size/2)
     val internalIds: Seq[CogniteId] = deleteByInternalIds.map(_.id).map(CogniteInternalId.apply)
@@ -177,7 +178,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     //make sure that assets are deletes
     retryWithExpectedResult[Seq[Asset]](
-      client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"delete-cogniteId"))).compile.toList,
+      client.assets.filter(AssetsFilter(externalIdPrefix = Some(prefix))).compile.toList,
       r => r should have size 0
     )
   }
@@ -260,6 +261,32 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     client.assets.deleteByExternalIds(Seq(externalId1, externalId2))
     client.labels.deleteByExternalIds(Seq(externalId1, externalId2, externalId3))
+  }
+
+  it should "update metadata on assets with empty map" in {
+    val externalId1 = UUID.randomUUID.toString
+
+    // Create asset with metadata
+    val assetToCreate = Seq(
+      AssetCreate(externalId = Some(externalId1),
+        name=externalId1, metadata = Some(Map("test1" -> "test1")))
+    )
+
+    val createdItems = client.assets.createItems(Items(assetToCreate))
+    createdItems.head.metadata shouldBe Some(Map("test1" -> "test1"))
+
+    // Updating metadata with None should have no effect
+    val updatedAssetsWithNone: Seq[Asset] = client.assets.updateByExternalId(Map(
+      externalId1 -> AssetUpdate(name = Some(SetValue("ML :)")), metadata = None))
+    )
+
+    val updatedAssets: Seq[Asset] = client.assets.updateByExternalId(Map(
+      externalId1 -> AssetUpdate(metadata = Some(SetValue(set = Map()))))
+    )
+    client.assets.deleteByExternalIds(Seq(externalId1))
+
+    updatedAssetsWithNone.head.metadata shouldBe Some(Map("test1" -> "test1"))
+    updatedAssets.head.metadata shouldBe Some(Map())
   }
 
   it should behave like updatableById(
@@ -347,7 +374,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       client.assets
       .filterPartitions(
         AssetsFilter(
-          rootIds = Some(Seq(CogniteInternalId(7127045760755934L)))
+          assetSubtreeIds = Some(Seq(CogniteInternalId(7127045760755934L)))
         ), 10
       )
       .fold(Stream.empty)(_ ++ _)
@@ -370,7 +397,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     retryWithExpectedResult[Seq[Asset]](
       client.assets
         .filter(AssetsFilter(
-          rootIds = Some(Seq(CogniteInternalId(7127045760755934L)))
+          assetSubtreeIds = Some(Seq(CogniteInternalId(7127045760755934L)))
         ), Some(5), Some(Seq("childCount")))
         .compile.toList,
       a => {

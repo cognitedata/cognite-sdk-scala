@@ -1,28 +1,32 @@
 import wartremover.Wart
 import sbt.project
 
-val scala3 = "3.1.2"
-val scala213 = "2.13.7"
-val scala212 = "2.12.15"
+val scala3 = "3.1.3"
+val scala213 = "2.13.8"
+val scala212 = "2.12.16"
 val supportedScalaVersions = List(scala212, scala213, scala3)
 
 // This is used only for tests.
-val jettyTestVersion = "9.4.46.v20220331"
+val jettyTestVersion = "9.4.48.v20220622"
 
 val sttpVersion = "3.5.2"
-val circeVersion = "0.14.2"
-val catsEffectVersion = "3.3.12"
-val fs2Version = "3.2.7"
+val circeVersion = "0.14.1"
+val catsEffectVersion = "3.3.14"
+val fs2Version = "3.2.10"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
+
+ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.4"
 
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.0.10",
+  version := "2.2.0",
   crossScalaVersions := supportedScalaVersions,
+  semanticdbEnabled := true,
+  semanticdbVersion := scalafixSemanticdb.revision,
   description := "Scala SDK for Cognite Data Fusion.",
   licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
   homepage := Some(url("https://github.com/cognitedata/cognite-sdk-scala")),
@@ -98,7 +102,7 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "3.21.1"
+      "com.google.protobuf" % "protobuf-java" % "3.21.3"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor == 13 =>
@@ -106,6 +110,12 @@ lazy val core = (project in file("."))
           // We use JavaConverters to remain backwards compatible with Scala 2.12,
           // and to avoid a dependency on scala-collection-compat
           "-Wconf:cat=deprecation:i"
+        )
+      case Some((2, minor)) if minor == 12 =>
+        List(
+          // Scala 2.12 doesn't always handle @nowarn correctly,
+          // and doesn't seem to like @deprecated case class fields with default values.
+          "-Wconf:src=src/main/scala/com/cognite/sdk/scala/v1/resources/assets.scala&cat=deprecation:i"
         )
       case Some((3, _)) => List("-source:3.0-migration")
       case _ =>

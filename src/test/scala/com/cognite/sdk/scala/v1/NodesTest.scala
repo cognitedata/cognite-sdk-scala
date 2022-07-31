@@ -161,9 +161,9 @@ class NodesTest
   private val space = "test-space"
 
   override def beforeAll(): Unit = {
-    /* blueFieldClient.dataModels
+    blueFieldClient.dataModels
       .createItems(Seq(dataModel, dataModelArray), space)
-      .unsafeRunSync() */
+      .unsafeRunSync()
 
     retryWithExpectedResult[scala.Seq[DataModel]](
       blueFieldClient.dataModels.list(space).unsafeRunSync(),
@@ -211,8 +211,7 @@ class NodesTest
       .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(invalidInput))
       .unsafeRunSync()
 
-    exception.message.contains("invalid input") shouldBe true
-    exception.message.contains("abc") shouldBe true
+    exception.message shouldBe "Value type mismatch. Value could not be coerced to the expected type."
   }
 
   private def insertDMIBeforeQuery() = {

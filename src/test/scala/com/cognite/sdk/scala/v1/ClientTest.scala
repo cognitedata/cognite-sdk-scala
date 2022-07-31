@@ -11,12 +11,14 @@ import java.util.Base64
 import cats.effect._
 import cats.effect.unsafe.implicits.global
 import cats.Id
+import cats.effect.std.Queue
 import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.sttp.{BackpressureThrottleBackend, RateLimitingBackend, RetryingBackend}
 import org.scalatest.OptionValues
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.impl.cats.implicits.asyncMonadError
 import sttp.client3.testing.SttpBackendStub
-import sttp.client3.{Response, SttpBackend, SttpClientException}
+import sttp.client3.{Response, SttpBackend, SttpClientException, UriContext, basicRequest}
 import sttp.model.{Header, StatusCode}
 import sttp.monad.MonadAsyncError
 
@@ -143,6 +145,35 @@ class ClientTest extends SdkTestSpec with OptionValues {
     ).login.status().unsafeRunSync().loggedIn shouldBe true
   }
 
+  it should "support client with RateLimitingBackend" in {
+    GenericClient[IO](
+      "scala-sdk-test",
+      projectName,
+      baseUrl,
+      auth
+    )(
+      implicitly,
+      RateLimitingBackend[Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5)
+    ).login.status().unsafeRunSync().loggedIn shouldBe true
+  }
+
+  it should "support client with BackpressureThrottleBackend" in {
+    val makeQueueOf1 = for {
+      queue <- Queue.bounded[IO, Unit](1)
+      _ <- queue.offer(())
+    } yield queue
+
+    GenericClient[IO](
+      "scala-sdk-test",
+      projectName,
+      baseUrl,
+      auth
+    )(
+      implicitly,
+      new BackpressureThrottleBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), makeQueueOf1.unsafeRunSync(), 1.seconds)
+    ).login.status().unsafeRunSync().loggedIn shouldBe true
+  }
+
   it should "throw an exception if the authentication is invalid and project is not specified" in {
     implicit val auth: Auth = ApiKeyAuth("invalid-key")
     an[InvalidAuthentication] should be thrownBy GenericClient.forAuth[Id](
@@ -170,19 +201,22 @@ class ClientTest extends SdkTestSpec with OptionValues {
         auth
       )(new LoggingSttpBackend[Id, Any](sttpBackend)).login.status()
     }
-    assertThrows[SdkException] {
-      Client(
-        "url-test-2",
-        projectName,
-        "http://api.cognitedata.com",
-        auth
-      )(sttpBackend).login.status()
-    }
     assertThrows[UnknownHostException] {
       Client(
         "url-test-3",
         projectName,
         "thisShouldThrowAnUnknownHostException:)",
+        auth
+      )(sttpBackend).login.status()
+    }
+  }
+
+  it should "throw an SttpClientException when using plain http" in {
+    assertThrows[SttpClientException] {
+      Client(
+        "url-test-2",
+        projectName,
+        "http://api.cognitedata.com",
         auth
       )(sttpBackend).login.status()
     }
@@ -394,5 +428,28 @@ class ClientTest extends SdkTestSpec with OptionValues {
     // double ordering we compare at integer level.
     scala.math.floor(points.datapoints(0).value * 10).toInt shouldBe 18
     scala.math.ceil(points.datapoints(0).value * 10).toInt shouldBe 19
+  }
+
+  it should "retry requests on response code 429 with empty body" in {
+    val responseEmptyBody = Response("", StatusCode.TooManyRequests, "", Seq())
+    val responseOK = Response("OK", StatusCode.Ok, "", Seq())
+
+    val sttpRetryOK = SttpBackendStub(implicitly[MonadAsyncError[IO]])
+      .whenRequestMatches(r => r.uri.path.endsWith(List("projectName", "sessions", "token")))
+      .thenRespondCyclicResponses(
+        responseEmptyBody,
+        responseEmptyBody,
+        responseOK
+      )
+    val backendRetryOK = new RetryingBackend[IO, Any](sttpRetryOK,3)
+    val requestOK = basicRequest.get(uri"https://api.cognitedata.com/projectName/sessions/token")
+    requestOK.send(backendRetryOK).unsafeRunSync().code shouldBe StatusCode.Ok
+
+    val sttpRetryKO = SttpBackendStub(implicitly[MonadAsyncError[IO]])
+      .whenRequestMatches(r => r.uri.path.endsWith(List("projectName", "sessions", "token")))
+      .thenRespond(responseEmptyBody)
+    val backendRetryKO = new RetryingBackend[IO, Any](sttpRetryKO,3)
+    val requestKO = basicRequest.get(uri"https://api.cognitedata.com/projectName/sessions/token")
+    requestKO.send(backendRetryKO).unsafeRunSync().code shouldBe StatusCode.TooManyRequests
   }
 }
