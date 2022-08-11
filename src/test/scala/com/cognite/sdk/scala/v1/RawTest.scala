@@ -186,8 +186,8 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
 
       rows.retrieveByKey("abc") match {
         case RawRow(key, columns, _) => {
-          assert(key == "abc")
-          assert(columns == Map("a" -> "0".asJson, "abc" -> Map("cde" -> 1).asJson))
+          assert(key === "abc")
+          assert(columns === Map("a" -> "0".asJson, "abc" -> Map("cde" -> 1).asJson))
           }
       }
   }
