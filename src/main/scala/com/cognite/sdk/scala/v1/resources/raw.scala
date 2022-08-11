@@ -106,16 +106,12 @@ object RawTables {
   implicit val rawTableDecoder: Decoder[RawTable] = deriveDecoder[RawTable]
 }
 
-class RawRows[F[_]](
-    val requestSession: RequestSession[F],
-    database: String,
-    table: String
-) extends WithRequestSession[F]
+class RawRows[F[_]](val requestSession: RequestSession[F], database: String, table: String)
+    extends WithRequestSession[F]
     with Readable[RawRow, F]
     with Create[RawRow, RawRow, F]
     with DeleteByIds[F, String]
     with PartitionedFilterF[RawRow, RawRowFilter, F] {
-
   implicit val stringItemsDecoder: Decoder[Items[String]] = deriveDecoder[Items[String]]
 
   implicit val errorOrStringItemsDecoder: Decoder[Either[CdpApiError, Items[String]]] =
