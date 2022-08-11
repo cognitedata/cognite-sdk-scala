@@ -217,9 +217,9 @@ class RawRows[F[_]: Applicative](
       numPartitions: Int,
       limitPerPartition: Option[Int]
   )(implicit F: Applicative[F]): F[Seq[Stream[F, RawRow]]] =
-    _filterPartitionsF(filter, numPartitions, limitPerPartition)
+    privateFilterPartitionsF(filter, numPartitions, limitPerPartition)
 
-  private def _filterPartitionsF(
+  private def privateFilterPartitionsF(
       filter: RawRowFilter,
       numPartitions: Int,
       limitPerPartition: Option[Int]
