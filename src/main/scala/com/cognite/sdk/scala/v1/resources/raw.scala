@@ -106,12 +106,17 @@ object RawTables {
   implicit val rawTableDecoder: Decoder[RawTable] = deriveDecoder[RawTable]
 }
 
-class RawRows[F[_]](val requestSession: RequestSession[F], database: String, table: String)
-    extends WithRequestSession[F]
+class RawRows[F[_]: Applicative](
+    val requestSession: RequestSession[F],
+    database: String,
+    table: String
+) extends WithRequestSession[F]
     with Readable[RawRow, F]
     with Create[RawRow, RawRow, F]
     with DeleteByIds[F, String]
-    with PartitionedFilterF[RawRow, RawRowFilter, F] {
+    with PartitionedFilterF[RawRow, RawRowFilter, F]
+    with RetrieveByExternalIds[RawRow, F] {
+
   implicit val stringItemsDecoder: Decoder[Items[String]] = deriveDecoder[Items[String]]
 
   implicit val errorOrStringItemsDecoder: Decoder[Either[CdpApiError, Items[String]]] =
@@ -147,6 +152,16 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       create(Seq(item)),
       (_: Seq[RawRow]) => item
     )
+
+  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[RawRow]] =
+    externalIds.toList
+      .traverse { key =>
+        requestSession.get[RawRow, RawRow](
+          uri"${requestSession.baseUrl}/raw/dbs/$database/tables/$table/rows/$key",
+          value => value
+        )
+      }
+      .map(_.toSeq)
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -200,6 +215,13 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       numPartitions: Int,
       limitPerPartition: Option[Int]
   )(implicit F: Applicative[F]): F[Seq[Stream[F, RawRow]]] =
+    _filterPartitionsF(filter, numPartitions, limitPerPartition)
+
+  private def _filterPartitionsF(
+      filter: RawRowFilter,
+      numPartitions: Int,
+      limitPerPartition: Option[Int]
+  ) =
     getPartitionCursors(filter, numPartitions).map { cursors =>
       cursors.map(filterOnePartition(filter, _, limitPerPartition))
     }
