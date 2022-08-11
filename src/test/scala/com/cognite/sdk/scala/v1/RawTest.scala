@@ -183,6 +183,13 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
           .toList
           .length === 2
       )
+
+      rows.retrieveByKey("abc") match {
+        case RawRow(key, columns, _) => {
+          assert(key == "abc")
+          assert(columns == Map("a" -> "0".asJson, "abc" -> Map("cde" -> 1).asJson))
+          }
+      }
   }
 
   it should "get partition cursor" in withDatabaseTables {
