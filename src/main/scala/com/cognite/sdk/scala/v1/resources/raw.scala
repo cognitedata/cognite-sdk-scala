@@ -106,7 +106,7 @@ object RawTables {
   implicit val rawTableDecoder: Decoder[RawTable] = deriveDecoder[RawTable]
 }
 
-class RawRows[F[_]: Applicative](
+class RawRows[F[_]](
     val requestSession: RequestSession[F],
     database: String,
     table: String
@@ -114,8 +114,7 @@ class RawRows[F[_]: Applicative](
     with Readable[RawRow, F]
     with Create[RawRow, RawRow, F]
     with DeleteByIds[F, String]
-    with PartitionedFilterF[RawRow, RawRowFilter, F]
-    with RetrieveByExternalIds[RawRow, F] {
+    with PartitionedFilterF[RawRow, RawRowFilter, F] {
 
   implicit val stringItemsDecoder: Decoder[Items[String]] = deriveDecoder[Items[String]]
 
@@ -153,17 +152,11 @@ class RawRows[F[_]: Applicative](
       (_: Seq[RawRow]) => item
     )
 
-  // toSeq is redundant on Scala 2.13, not Scala 2.12.
-  @SuppressWarnings(Array("org.wartremover.warts.RedundantConversions"))
-  override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[RawRow]] =
-    externalIds.toList
-      .traverse { key =>
-        requestSession.get[RawRow, RawRow](
-          uri"${requestSession.baseUrl}/raw/dbs/$database/tables/$table/rows/$key",
-          value => value
-        )
-      }
-      .map(_.toSeq)
+  def retrieveByKey(key: String): F[RawRow] =
+    requestSession.get[RawRow, RawRow](
+      uri"${requestSession.baseUrl}/raw/dbs/$database/tables/$table/rows/$key",
+      value => value
+    )
 
   override private[sdk] def readWithCursor(
       cursor: Option[String],
@@ -217,13 +210,6 @@ class RawRows[F[_]: Applicative](
       numPartitions: Int,
       limitPerPartition: Option[Int]
   )(implicit F: Applicative[F]): F[Seq[Stream[F, RawRow]]] =
-    privateFilterPartitionsF(filter, numPartitions, limitPerPartition)
-
-  private def privateFilterPartitionsF(
-      filter: RawRowFilter,
-      numPartitions: Int,
-      limitPerPartition: Option[Int]
-  ) =
     getPartitionCursors(filter, numPartitions).map { cursors =>
       cursors.map(filterOnePartition(filter, _, limitPerPartition))
     }
