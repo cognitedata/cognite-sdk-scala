@@ -153,6 +153,8 @@ class RawRows[F[_]: Applicative](
       (_: Seq[RawRow]) => item
     )
 
+  // toSeq is redundant on Scala 2.13, not Scala 2.12.
+  @SuppressWarnings(Array("org.wartremover.warts.RedundantConversions"))
   override def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[RawRow]] =
     externalIds.toList
       .traverse { key =>
