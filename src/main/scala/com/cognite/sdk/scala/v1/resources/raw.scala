@@ -148,6 +148,12 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       (_: Seq[RawRow]) => item
     )
 
+  def retrieveByKey(key: String): F[RawRow] =
+    requestSession.get[RawRow, RawRow](
+      uri"${requestSession.baseUrl}/raw/dbs/$database/tables/$table/rows/$key",
+      value => value
+    )
+
   override private[sdk] def readWithCursor(
       cursor: Option[String],
       limit: Option[Int],
