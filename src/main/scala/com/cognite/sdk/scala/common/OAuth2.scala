@@ -17,6 +17,8 @@ import io.circe.generic.semiauto.deriveDecoder
 import sttp.model.Uri
 
 object OAuth2 {
+  final case class OriginalToken(bearerToken: String, expiresAt: Long)
+
   final case class ClientCredentials(
       tokenUri: Uri,
       clientId: String,
@@ -31,7 +33,8 @@ object OAuth2 {
       sessionId: Long,
       sessionKey: String,
       cdfProjectName: String,
-      tokenFromVault: String
+      tokenFromVault: String,
+      originalToken: OriginalToken
   )
 
   private def commonGetAuth[F[_]](cache: CachedResource[F, TokenState])(
@@ -130,22 +133,32 @@ object OAuth2 {
       val authenticate: F[TokenState] = {
         val uri = uri"${session.baseUrl}/api/v1/projects/${session.cdfProjectName}/sessions/token"
         for {
-          payload <- basicRequest
-            .header("Accept", "application/json")
-            .header("Authorization", s"Bearer ${session.tokenFromVault}")
-            .post(uri)
-            .body(RefreshSessionRequest(session.sessionId, session.sessionKey))
-            .response(
-              parseResponse[SessionTokenResponse, SessionTokenResponse](uri, value => value)
-            )
-            .send(sttpBackend)
-            .map(_.body)
-          acquiredAt <- clock.monotonic
-          expiresAt = acquiredAt.toSeconds + payload.expiresIn - refreshSecondsBeforeTTL
-        } yield TokenState(payload.accessToken, expiresAt, session.cdfProjectName)
+          now <- clock.monotonic
+          expiredAt = session.originalToken.expiresAt
+          res <-
+            if (now.toSeconds < (expiredAt - refreshSecondsBeforeTTL)) {
+              F.delay(
+                TokenState(session.originalToken.bearerToken, expiredAt, session.cdfProjectName)
+              )
+            } else {
+              for {
+                payload <- basicRequest
+                  .header("Accept", "application/json")
+                  .header("Authorization", s"Bearer ${session.tokenFromVault}")
+                  .post(uri)
+                  .body(RefreshSessionRequest(session.sessionId, session.sessionKey))
+                  .response(
+                    parseResponse[SessionTokenResponse, SessionTokenResponse](uri, value => value)
+                  )
+                  .send(sttpBackend)
+                  .map(_.body)
+                acquiredAt <- clock.monotonic
+                expiresAt = acquiredAt.toSeconds + payload.expiresIn - refreshSecondsBeforeTTL
+              } yield TokenState(payload.accessToken, expiresAt, session.cdfProjectName)
+            }
+        } yield res
       }
-
-      ConcurrentCachedObject(authenticate).map(new SessionProvider[F](_))
+      ConcurrentCachedObject(authenticate).map(x => new SessionProvider[F](x))
     }
   }
 
