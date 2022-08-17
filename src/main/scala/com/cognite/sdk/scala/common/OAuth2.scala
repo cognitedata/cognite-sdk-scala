@@ -25,7 +25,8 @@ object OAuth2 {
       clientSecret: String,
       scopes: List[String] = List.empty,
       cdfProjectName: String,
-      audience: Option[String] = None
+      audience: Option[String] = None,
+      originalToken: Option[OriginalToken] = None
   )
 
   final case class Session(
@@ -34,7 +35,7 @@ object OAuth2 {
       sessionKey: String,
       cdfProjectName: String,
       tokenFromVault: String,
-      originalToken: OriginalToken
+      originalToken: Option[OriginalToken] = None
   )
 
   private def commonGetAuth[F[_]](cache: CachedResource[F, TokenState])(
@@ -87,37 +88,65 @@ object OAuth2 {
           ) // Send empty audience when it is not provided
         )
         for {
-          response <- basicRequest
-            .header("Accept", "application/json")
-            .post(credentials.tokenUri)
-            .body(body)
-            .response(asJson[ClientCredentialsResponse])
-            .send(sttpBackend)
-          payload <- response.body match {
-            case Right(response) => F.pure(response)
-            case Left(responseException) => // Non-2xx response
-              responseException match {
-                case HttpError(body, statusCode) =>
-                  F.raiseError[ClientCredentialsResponse](
-                    new SdkException(
-                      body,
-                      uri = Some(credentials.tokenUri),
-                      responseCode = Some(statusCode.code)
-                    )
+          now <- clock.monotonic
+          res <- credentials.originalToken match {
+            case Some(originalToken)
+                if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeTTL) =>
+              // VH TODO Remove println
+              F.delay(
+                println(
+                  s" Use static now = ${now.toSeconds} vs ${credentials.originalToken.map(x => x.expiresAt - refreshSecondsBeforeTTL)}"
+                )
+              ) *>
+                F.delay(
+                  TokenState(
+                    originalToken.bearerToken,
+                    originalToken.expiresAt,
+                    credentials.cdfProjectName
                   )
-                case DeserializationException(_, error) =>
-                  F.raiseError(
-                    new SdkException(
-                      s"Failed to parse response from IdP: ${error.getMessage}"
-                    )
+                )
+            case _ =>
+              for {
+                // VH TODO Remove println
+                _ <- F.delay(
+                  println(
+                    s" Ask new token now = ${now.toSeconds} vs ${credentials.originalToken
+                        .map(x => x.expiresAt - refreshSecondsBeforeTTL)}"
                   )
-              }
+                )
+                // _ <- F.delay(println("Coucou we are asking for a new token"))
+                response <- basicRequest
+                  .header("Accept", "application/json")
+                  .post(credentials.tokenUri)
+                  .body(body)
+                  .response(asJson[ClientCredentialsResponse])
+                  .send(sttpBackend)
+                payload <- response.body match {
+                  case Right(response) => F.pure(response)
+                  case Left(responseException) => // Non-2xx response
+                    responseException match {
+                      case HttpError(body, statusCode) =>
+                        F.raiseError[ClientCredentialsResponse](
+                          new SdkException(
+                            body,
+                            uri = Some(credentials.tokenUri),
+                            responseCode = Some(statusCode.code)
+                          )
+                        )
+                      case DeserializationException(_, error) =>
+                        F.raiseError(
+                          new SdkException(
+                            s"Failed to parse response from IdP: ${error.getMessage}"
+                          )
+                        )
+                    }
+                }
+                acquiredAt <- clock.monotonic
+                expiresAt = acquiredAt.toSeconds + payload.expires_in - refreshSecondsBeforeTTL
+              } yield TokenState(payload.access_token, expiresAt, credentials.cdfProjectName)
           }
-          acquiredAt <- clock.monotonic
-          expiresAt = acquiredAt.toSeconds + payload.expires_in - refreshSecondsBeforeTTL
-        } yield TokenState(payload.access_token, expiresAt, credentials.cdfProjectName)
+        } yield res
       }
-
       ConcurrentCachedObject(authenticate).map(new ClientCredentialsProvider[F](_))
     }
   }
@@ -134,13 +163,17 @@ object OAuth2 {
         val uri = uri"${session.baseUrl}/api/v1/projects/${session.cdfProjectName}/sessions/token"
         for {
           now <- clock.monotonic
-          expiredAt = session.originalToken.expiresAt
-          res <-
-            if (now.toSeconds < (expiredAt - refreshSecondsBeforeTTL)) {
+          res <- session.originalToken match {
+            case Some(originalToken)
+                if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeTTL) =>
               F.delay(
-                TokenState(session.originalToken.bearerToken, expiredAt, session.cdfProjectName)
+                TokenState(
+                  originalToken.bearerToken,
+                  originalToken.expiresAt,
+                  session.cdfProjectName
+                )
               )
-            } else {
+            case _ =>
               for {
                 payload <- basicRequest
                   .header("Accept", "application/json")
@@ -155,7 +188,7 @@ object OAuth2 {
                 acquiredAt <- clock.monotonic
                 expiresAt = acquiredAt.toSeconds + payload.expiresIn - refreshSecondsBeforeTTL
               } yield TokenState(payload.accessToken, expiresAt, session.cdfProjectName)
-            }
+          }
         } yield res
       }
       ConcurrentCachedObject(authenticate).map(x => new SessionProvider[F](x))

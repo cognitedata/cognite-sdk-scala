@@ -36,7 +36,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
       "sessionKey-value",
       "irrelevant",
       "tokenFromVault",
-      OriginalToken("bearerToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 6)
+      Some(OriginalToken("bearerToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 6))
     )
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
@@ -84,7 +84,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
       "sessionKey-value",
       "irrelevant",
       "tokenFromVault",
-      OriginalToken("bearerToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 4)
+      Some(OriginalToken("bearerToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 4))
     )
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
@@ -137,8 +137,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
       123,
       "sessionKey-value",
       "irrelevant",
-      "tokenFromVault",
-      OriginalToken("bearerToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 1)
+      "tokenFromVault"
     )
     an[CdpApiException] shouldBe thrownBy {
       OAuth2
@@ -156,8 +155,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
       123,
       "sessionKey-value",
       "irrelevant",
-      "tokenFromVault",
-      OriginalToken("bearerToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 1)
+      "tokenFromVault"
     )
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
