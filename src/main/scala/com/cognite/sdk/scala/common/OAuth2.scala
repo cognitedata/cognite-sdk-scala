@@ -16,8 +16,9 @@ import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.model.Uri
 
+//VH TODO remove this
+@SuppressWarnings(Array("org.wartremover.warts.StringPlusAny"))
 object OAuth2 {
-  final case class OriginalToken(bearerToken: String, expiresAt: Long)
 
   final case class ClientCredentials(
       tokenUri: Uri,
@@ -25,18 +26,89 @@ object OAuth2 {
       clientSecret: String,
       scopes: List[String] = List.empty,
       cdfProjectName: String,
-      audience: Option[String] = None,
-      originalToken: Option[OriginalToken] = None
-  )
+      audience: Option[String] = None
+  ) {
+    def getAuth[F[_]](refreshSecondsBeforeTTL: Long = 30)(
+        implicit F: Async[F],
+        clock: Clock[F],
+        sttpBackend: SttpBackend[F, Any]
+    ): F[TokenState] = {
+      val body = Map[String, String](
+        "grant_type" -> "client_credentials",
+        "client_id" -> clientId,
+        "client_secret" -> clientSecret,
+        // Aize auth flow requires this to be empty in general
+        "scope" -> scopes.mkString(" "), // Send empty scopes when it is not provided
+        // AAD auth flow requires this to be empty
+        "audience" -> audience.getOrElse(
+          ""
+        ) // Send empty audience when it is not provided
+      )
+      for {
+
+        response <- basicRequest
+          .header("Accept", "application/json")
+          .post(tokenUri)
+          .body(body)
+          .response(asJson[ClientCredentialsResponse])
+          .send(sttpBackend)
+        payload <- response.body match {
+          case Right(response) => F.pure(response)
+          case Left(responseException) => // Non-2xx response
+            responseException match {
+              case HttpError(body, statusCode) =>
+                F.raiseError[ClientCredentialsResponse](
+                  new SdkException(
+                    body,
+                    uri = Some(tokenUri),
+                    responseCode = Some(statusCode.code)
+                  )
+                )
+              case DeserializationException(_, error) =>
+                F.raiseError(
+                  new SdkException(
+                    s"Failed to parse response from IdP: ${error.getMessage}"
+                  )
+                )
+            }
+        }
+        acquiredAt <- clock.monotonic
+        expiresAt = acquiredAt.toSeconds + payload.expires_in - refreshSecondsBeforeTTL
+        _ <- F.delay(println(s" Asking for new token and it expires at ${expiresAt}"))
+      } yield TokenState(payload.access_token, expiresAt, cdfProjectName)
+    }
+  }
 
   final case class Session(
       baseUrl: String,
       sessionId: Long,
       sessionKey: String,
       cdfProjectName: String,
-      tokenFromVault: String,
-      originalToken: Option[OriginalToken] = None
-  )
+      tokenFromVault: String
+  ) {
+    def getAuth[F[_]](refreshSecondsBeforeTTL: Long = 30)(
+        implicit F: Async[F],
+        clock: Clock[F],
+        sttpBackend: SttpBackend[F, Any]
+    ): F[TokenState] = {
+      import sttp.client3.circe._
+      val uri = uri"${baseUrl}/api/v1/projects/${cdfProjectName}/sessions/token"
+      for {
+        payload <- basicRequest
+          .header("Accept", "application/json")
+          .header("Authorization", s"Bearer ${tokenFromVault}")
+          .post(uri)
+          .body(RefreshSessionRequest(sessionId, sessionKey))
+          .response(
+            parseResponse[SessionTokenResponse, SessionTokenResponse](uri, value => value)
+          )
+          .send(sttpBackend)
+          .map(_.body)
+        acquiredAt <- clock.monotonic
+        expiresAt = acquiredAt.toSeconds + payload.expiresIn - refreshSecondsBeforeTTL
+      } yield TokenState(payload.accessToken, expiresAt, cdfProjectName)
+    }
+  }
 
   private def commonGetAuth[F[_]](cache: CachedResource[F, TokenState])(
       implicit F: Monad[F],
@@ -69,128 +141,52 @@ object OAuth2 {
   object ClientCredentialsProvider {
     def apply[F[_]](
         credentials: ClientCredentials,
-        refreshSecondsBeforeTTL: Long = 30
+        refreshSecondsBeforeTTL: Long = 30,
+        maybeCacheToken: Option[TokenState] = None
     )(
         implicit F: Async[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[ClientCredentialsProvider[F]] = {
-      val authenticate: F[TokenState] = {
-        val body = Map[String, String](
-          "grant_type" -> "client_credentials",
-          "client_id" -> credentials.clientId,
-          "client_secret" -> credentials.clientSecret,
-          // Aize auth flow requires this to be empty in general
-          "scope" -> credentials.scopes.mkString(" "), // Send empty scopes when it is not provided
-          // AAD auth flow requires this to be empty
-          "audience" -> credentials.audience.getOrElse(
-            ""
-          ) // Send empty audience when it is not provided
-        )
+      val authenticate: F[TokenState] =
         for {
           now <- clock.monotonic
-          res <- credentials.originalToken match {
+          res <- maybeCacheToken match {
             case Some(originalToken)
                 if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeTTL) =>
               // VH TODO Remove println
-              F.delay(
-                println(
-                  s" Use static now = ${now.toSeconds} vs ${credentials.originalToken.map(x => x.expiresAt - refreshSecondsBeforeTTL)}"
-                )
-              ) *>
-                F.delay(
-                  TokenState(
-                    originalToken.bearerToken,
-                    originalToken.expiresAt,
-                    credentials.cdfProjectName
-                  )
-                )
+              F.delay(println(s" Use static now at ${now.toSeconds}")) *>
+                F.delay(originalToken)
             case _ =>
-              for {
-                // VH TODO Remove println
-                _ <- F.delay(
-                  println(
-                    s" Ask new token now = ${now.toSeconds} vs ${credentials.originalToken
-                        .map(x => x.expiresAt - refreshSecondsBeforeTTL)}"
-                  )
-                )
-                // _ <- F.delay(println("Coucou we are asking for a new token"))
-                response <- basicRequest
-                  .header("Accept", "application/json")
-                  .post(credentials.tokenUri)
-                  .body(body)
-                  .response(asJson[ClientCredentialsResponse])
-                  .send(sttpBackend)
-                payload <- response.body match {
-                  case Right(response) => F.pure(response)
-                  case Left(responseException) => // Non-2xx response
-                    responseException match {
-                      case HttpError(body, statusCode) =>
-                        F.raiseError[ClientCredentialsResponse](
-                          new SdkException(
-                            body,
-                            uri = Some(credentials.tokenUri),
-                            responseCode = Some(statusCode.code)
-                          )
-                        )
-                      case DeserializationException(_, error) =>
-                        F.raiseError(
-                          new SdkException(
-                            s"Failed to parse response from IdP: ${error.getMessage}"
-                          )
-                        )
-                    }
-                }
-                acquiredAt <- clock.monotonic
-                expiresAt = acquiredAt.toSeconds + payload.expires_in - refreshSecondsBeforeTTL
-              } yield TokenState(payload.access_token, expiresAt, credentials.cdfProjectName)
+              credentials.getAuth()
           }
         } yield res
-      }
       ConcurrentCachedObject(authenticate).map(new ClientCredentialsProvider[F](_))
     }
   }
   // scalastyle:on method.length
 
   object SessionProvider {
-    def apply[F[_]](session: Session, refreshSecondsBeforeTTL: Long = 30)(
+    def apply[F[_]](
+        session: Session,
+        refreshSecondsBeforeTTL: Long = 30,
+        maybeCacheToken: Option[TokenState] = None
+    )(
         implicit F: Async[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[SessionProvider[F]] = {
-      import sttp.client3.circe._
-      val authenticate: F[TokenState] = {
-        val uri = uri"${session.baseUrl}/api/v1/projects/${session.cdfProjectName}/sessions/token"
+      val authenticate: F[TokenState] =
         for {
           now <- clock.monotonic
-          res <- session.originalToken match {
+          res <- maybeCacheToken match {
             case Some(originalToken)
                 if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeTTL) =>
-              F.delay(
-                TokenState(
-                  originalToken.bearerToken,
-                  originalToken.expiresAt,
-                  session.cdfProjectName
-                )
-              )
+              F.delay(originalToken)
             case _ =>
-              for {
-                payload <- basicRequest
-                  .header("Accept", "application/json")
-                  .header("Authorization", s"Bearer ${session.tokenFromVault}")
-                  .post(uri)
-                  .body(RefreshSessionRequest(session.sessionId, session.sessionKey))
-                  .response(
-                    parseResponse[SessionTokenResponse, SessionTokenResponse](uri, value => value)
-                  )
-                  .send(sttpBackend)
-                  .map(_.body)
-                acquiredAt <- clock.monotonic
-                expiresAt = acquiredAt.toSeconds + payload.expiresIn - refreshSecondsBeforeTTL
-              } yield TokenState(payload.accessToken, expiresAt, session.cdfProjectName)
+              session.getAuth()
           }
         } yield res
-      }
       ConcurrentCachedObject(authenticate).map(x => new SessionProvider[F](x))
     }
   }
@@ -200,5 +196,5 @@ object OAuth2 {
     implicit val decoder: Decoder[ClientCredentialsResponse] = deriveDecoder
   }
 
-  private final case class TokenState(token: String, expiresAt: Long, cdfProjectName: String)
+  final case class TokenState(token: String, expiresAt: Long, cdfProjectName: String)
 }

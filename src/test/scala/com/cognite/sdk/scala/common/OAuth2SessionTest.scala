@@ -5,7 +5,7 @@ import cats.effect.implicits.commutativeApplicativeForParallelF
 import cats.effect.unsafe.implicits._
 import cats.implicits.catsStdInstancesForList
 import cats.syntax.parallel._
-import com.cognite.sdk.scala.common.OAuth2.OriginalToken
+import com.cognite.sdk.scala.common.OAuth2.TokenState
 import com.cognite.sdk.scala.v1.SessionTokenResponse
 import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
@@ -36,7 +36,6 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
       "sessionKey-value",
       "irrelevant",
       "tokenFromVault",
-      Some(OriginalToken("bearerToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 6))
     )
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
@@ -62,7 +61,10 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         }
 
     val io: IO[Unit] = for {
-      authProvider <- OAuth2.SessionProvider[IO](session, refreshSecondsBeforeTTL = 1)
+      authProvider <- OAuth2.SessionProvider[IO](
+        session,
+        refreshSecondsBeforeTTL = 1,
+        Some(TokenState("firstToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 5, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- IO(numTokenRequests shouldBe 0)
       _ <- IO.sleep(3.seconds)
@@ -84,7 +86,6 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
       "sessionKey-value",
       "irrelevant",
       "tokenFromVault",
-      Some(OriginalToken("bearerToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 4))
     )
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
@@ -117,7 +118,10 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         }
 
     val io: IO[Unit] = for {
-      authProvider <- OAuth2.SessionProvider[IO](session, refreshSecondsBeforeTTL = 1)
+      authProvider <- OAuth2.SessionProvider[IO](
+        session,
+        refreshSecondsBeforeTTL = 1,
+        Some(TokenState("firstToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- IO(numTokenRequests shouldBe 0) // original token is still valid
       _ <- IO.sleep(4.seconds)
