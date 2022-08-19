@@ -21,8 +21,6 @@ import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.Var"))
 class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
-  // Override sttpBackend because this doesn't work with the testing backend
-  implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
 
   it should "refresh tokens when they expire" in {
     import sttp.client3.impl.cats.implicits._
@@ -33,8 +31,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
       "https://bluefield.cognitedata.com",
       123,
       "sessionKey-value",
-      "irrelevant",
-      "tokenFromVault"
+      "irrelevant"
     )
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
@@ -45,7 +42,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           req.uri.path.endsWith(
             Seq("api", "v1", "projects", session.cdfProjectName, "sessions", "token")
           ) &&
-          req.headers.contains(Header("Authorization", "Bearer tokenFromVault")) &&
+          req.headers.contains(Header("Authorization", "Bearer kubernetesServiceToken")) &&
           req.body === StringBody(
             """{"sessionId":123,"sessionKey":"sessionKey-value"}""",
             "utf-8",
@@ -67,7 +64,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         }
 
     val io: IO[Unit] = for {
-      authProvider <- OAuth2.SessionProvider[IO](session, refreshSecondsBeforeTTL = 1)
+      authProvider <- OAuth2.SessionProvider[IO](session, refreshSecondsBeforeTTL = 1, MockK8sServiceTokenProvider())
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- IO(numTokenRequests shouldBe 1)
       _ <- IO.sleep(4.seconds)
@@ -78,31 +75,34 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
     io.unsafeRunTimed(10.seconds).value
   }
 
-  it should "throw a valid error when failing to refresh the session" in {
+  it should "throw a CdpApiException error when failing to refresh the session" in {
     val session = OAuth2.Session(
       "https://bluefield.cognitedata.com",
       123,
       "sessionKey-value",
-      "irrelevant",
-      "tokenFromVault"
+      "irrelevant"
     )
-    an[CdpApiException] shouldBe thrownBy {
+
+    implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
+
+    val cdpApiException = the[CdpApiException] thrownBy {
       OAuth2
-        .SessionProvider[IO](session)
+        .SessionProvider[IO](session, tokenProvider = MockK8sServiceTokenProvider())
         .unsafeRunTimed(1.second)
         .value
         .getAuth
         .unsafeRunSync()
     }
+    cdpApiException.code shouldBe 401
+    cdpApiException.message shouldBe "Unauthorized"
   }
 
-  it should "throw an exception when failing to deserialize the refresh response" in {
+  it should "throw an sdk exception when failing to deserialize the refresh response" in {
     val session = OAuth2.Session(
       "https://bluefield.cognitedata.com",
       123,
       "sessionKey-value",
-      "irrelevant",
-      "tokenFromVault"
+      "irrelevant"
     )
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
@@ -113,7 +113,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           req.uri.path.endsWith(
             Seq("api", "v1", "projects", session.cdfProjectName, "sessions", "token")
           ) &&
-          req.headers.contains(Header("Authorization", "Bearer tokenFromVault")) &&
+          req.headers.contains(Header("Authorization", "Bearer kubernetesServiceToken")) &&
           req.body === StringBody(
             """{"sessionId":123,"sessionKey":"sessionKey-value"}""",
             "utf-8",
@@ -131,11 +131,32 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
 
     an[SdkException] shouldBe thrownBy {
       OAuth2
-        .SessionProvider[IO](session)
+        .SessionProvider[IO](session, tokenProvider = MockK8sServiceTokenProvider())
         .unsafeRunTimed(1.second)
         .value
         .getAuth
         .unsafeRunSync()
     }
+  }
+
+  it should "throw an sdk exception when failing to get k8s service token" in {
+    val session = OAuth2.Session(
+      "https://bluefield.cognitedata.com",
+      123,
+      "sessionKey-value",
+      "irrelevant"
+    )
+
+    implicit val mockSttpBackend: SttpBackendStub[IO, Any] = SttpBackendStub(implicitly[MonadError[IO]])
+
+    val sdkException = the[SdkException ] thrownBy {
+      OAuth2
+        .SessionProvider[IO](session, tokenProvider = MockK8sServiceTokenProvider(false))
+        .unsafeRunTimed(1.second)
+        .value
+        .getAuth
+        .unsafeRunSync()
+    }
+    sdkException.getMessage shouldBe "Failed to get k8s service token because Could not get Kubernetes JWT"
   }
 }

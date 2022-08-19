@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.common
 import cats.Monad
 import cats.syntax.all._
 import cats.effect.{Async, Clock}
+import com.cognite.auth.service.{RealServiceTokenProvider, ServiceTokenProvider}
 import com.cognite.sdk.scala.common.internal.{CachedResource, ConcurrentCachedObject}
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.{RefreshSessionRequest, SessionTokenResponse}
@@ -30,8 +31,7 @@ object OAuth2 {
       baseUrl: String,
       sessionId: Long,
       sessionKey: String,
-      cdfProjectName: String,
-      tokenFromVault: String
+      cdfProjectName: String
   )
 
   private def commonGetAuth[F[_]](cache: CachedResource[F, TokenState])(
@@ -91,7 +91,7 @@ object OAuth2 {
             .response(asJson[ClientCredentialsResponse])
             .send(sttpBackend)
           payload <- response.body match {
-            case Right(response) => F.pure(response)
+            case Right(response) => F.delay(response)
             case Left(responseException) => // Non-2xx response
               responseException match {
                 case HttpError(body, statusCode) =>
@@ -121,7 +121,11 @@ object OAuth2 {
   // scalastyle:on method.length
 
   object SessionProvider {
-    def apply[F[_]](session: Session, refreshSecondsBeforeTTL: Long = 30)(
+    def apply[F[_]](
+        session: Session,
+        refreshSecondsBeforeTTL: Long = 30,
+        tokenProvider: ServiceTokenProvider = new RealServiceTokenProvider()
+    )(
         implicit F: Async[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
@@ -130,9 +134,17 @@ object OAuth2 {
       val authenticate: F[TokenState] = {
         val uri = uri"${session.baseUrl}/api/v1/projects/${session.cdfProjectName}/sessions/token"
         for {
+          maybeK8sServiceToken <- F.blocking(tokenProvider.getIdToken.get()).attempt
+          k8sServiceToken <- maybeK8sServiceToken match {
+            case Right(token) => F.delay(token)
+            case Left(err) =>
+              F.raiseError(
+                new SdkException(s"Failed to get k8s service token because ${err.getMessage}")
+              )
+          }
           payload <- basicRequest
             .header("Accept", "application/json")
-            .header("Authorization", s"Bearer ${session.tokenFromVault}")
+            .header("Authorization", s"Bearer ${k8sServiceToken}")
             .post(uri)
             .body(RefreshSessionRequest(session.sessionId, session.sessionKey))
             .response(
