@@ -139,7 +139,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
     }
   }
 
-  it should "throw an sdk exception when failing to get k8s service token" in {
+  it should "throw an sdk exception when failing to get service token" in {
     val session = OAuth2.Session(
       "https://bluefield.cognitedata.com",
       123,
