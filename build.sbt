@@ -16,7 +16,6 @@ val fs2Version = "3.2.11"
 val cogniteAuthVersion = "2.5.3"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
-val artifactory = "https://cognite.jfrog.io/cognite/"
 
 ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.4"
 
@@ -50,9 +49,6 @@ lazy val commonSettings = Seq(
   pomIncludeRepository := { _ =>
     false
   },
-  resolvers ++= Seq(
-    "libs-release".at(artifactory + "libs-release/")
-  ),
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value) Some("snapshots".at(nexus + "content/repositories/snapshots"))
@@ -100,7 +96,6 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "com.cognite.auth" % "service-token" % cogniteAuthVersion,
       "commons-io" % "commons-io" % "2.11.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,

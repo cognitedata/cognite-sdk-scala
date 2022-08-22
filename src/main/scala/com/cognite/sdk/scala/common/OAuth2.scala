@@ -3,7 +3,6 @@ package com.cognite.sdk.scala.common
 import cats.Monad
 import cats.syntax.all._
 import cats.effect.{Async, Clock}
-import com.cognite.auth.service.{RealServiceTokenProvider, ServiceTokenProvider}
 import com.cognite.sdk.scala.common.internal.{CachedResource, ConcurrentCachedObject}
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.{RefreshSessionRequest, SessionTokenResponse}
@@ -123,8 +122,8 @@ object OAuth2 {
   object SessionProvider {
     def apply[F[_]](
         session: Session,
-        refreshSecondsBeforeTTL: Long = 30,
-        tokenProvider: ServiceTokenProvider = new RealServiceTokenProvider()
+        getServiceToken: F[String],
+        refreshSecondsBeforeTTL: Long = 30
     )(
         implicit F: Async[F],
         clock: Clock[F],
@@ -134,7 +133,7 @@ object OAuth2 {
       val authenticate: F[TokenState] = {
         val uri = uri"${session.baseUrl}/api/v1/projects/${session.cdfProjectName}/sessions/token"
         for {
-          maybeK8sServiceToken <- F.blocking(tokenProvider.getIdToken.get()).attempt
+          maybeK8sServiceToken <- getServiceToken.attempt
           k8sServiceToken <- maybeK8sServiceToken match {
             case Right(token) => F.delay(token)
             case Left(err) =>

@@ -64,7 +64,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         }
 
     val io: IO[Unit] = for {
-      authProvider <- OAuth2.SessionProvider[IO](session, refreshSecondsBeforeTTL = 1, MockK8sServiceTokenProvider())
+      authProvider <- OAuth2.SessionProvider[IO](session, IO("kubernetesServiceToken"), refreshSecondsBeforeTTL = 1)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- IO(numTokenRequests shouldBe 1)
       _ <- IO.sleep(4.seconds)
@@ -87,7 +87,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
 
     val cdpApiException = the[CdpApiException] thrownBy {
       OAuth2
-        .SessionProvider[IO](session, tokenProvider = MockK8sServiceTokenProvider())
+        .SessionProvider[IO](session, IO("kubernetesServiceToken"))
         .unsafeRunTimed(1.second)
         .value
         .getAuth
@@ -131,7 +131,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
 
     an[SdkException] shouldBe thrownBy {
       OAuth2
-        .SessionProvider[IO](session, tokenProvider = MockK8sServiceTokenProvider())
+        .SessionProvider[IO](session, IO("kubernetesServiceToken"))
         .unsafeRunTimed(1.second)
         .value
         .getAuth
@@ -151,7 +151,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
 
     val sdkException = the[SdkException ] thrownBy {
       OAuth2
-        .SessionProvider[IO](session, tokenProvider = MockK8sServiceTokenProvider(false))
+        .SessionProvider[IO](session, IO.raiseError(new RuntimeException("Could not get Kubernetes JWT")))
         .unsafeRunTimed(1.second)
         .value
         .getAuth
