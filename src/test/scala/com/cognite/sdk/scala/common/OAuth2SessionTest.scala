@@ -19,7 +19,7 @@ import sttp.monad.MonadError
 import scala.collection.immutable.Seq
 import scala.concurrent.duration._
 
-@SuppressWarnings(Array("org.wartremover.warts.Var"))
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
 class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
 
   it should "refresh tokens when they expire" in {
