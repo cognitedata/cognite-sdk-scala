@@ -10,6 +10,7 @@ import com.cognite.sdk.scala.v1.resources.Sessions.{
   refreshSessionRequestEncoder,
   sessionTokenDecoder
 }
+import fs2.io.file.{Files, Path}
 import sttp.client3._
 import sttp.client3.circe.asJson
 import io.circe.Decoder
@@ -30,8 +31,7 @@ object OAuth2 {
       baseUrl: String,
       sessionId: Long,
       sessionKey: String,
-      cdfProjectName: String,
-      tokenFromVault: String
+      cdfProjectName: String
   )
 
   private def commonGetAuth[F[_]](cache: CachedResource[F, TokenState])(
@@ -121,7 +121,25 @@ object OAuth2 {
   // scalastyle:on method.length
 
   object SessionProvider {
-    def apply[F[_]](session: Session, refreshSecondsBeforeTTL: Long = 30)(
+
+    /** Only use for SessionProvider to interact with Cognite internal SessionAPI */
+    private def getKubernetesJwt[F[_]](implicit F: Async[F]): F[String] = {
+      val serviceAccountTokenPath = Path("/var/run/secrets/tokens/cdf_token")
+      Files[F]
+        .readAll(serviceAccountTokenPath)
+        .through(fs2.text.utf8.decode)
+        .compile
+        .string
+        .adaptError { case err =>
+          new SdkException(s"Failed to get service token because ${err.getMessage}")
+        }
+    }
+
+    def apply[F[_]](
+        session: Session,
+        refreshSecondsBeforeTTL: Long = 30,
+        getToken: Option[F[String]] = None
+    )(
         implicit F: Async[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
@@ -130,9 +148,10 @@ object OAuth2 {
       val authenticate: F[TokenState] = {
         val uri = uri"${session.baseUrl}/api/v1/projects/${session.cdfProjectName}/sessions/token"
         for {
+          kubernetesServiceToken <- getToken.getOrElse(getKubernetesJwt)
           payload <- basicRequest
             .header("Accept", "application/json")
-            .header("Authorization", s"Bearer ${session.tokenFromVault}")
+            .header("Authorization", s"Bearer $kubernetesServiceToken")
             .post(uri)
             .body(RefreshSessionRequest(session.sessionId, session.sessionKey))
             .response(

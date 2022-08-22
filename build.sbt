@@ -23,7 +23,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.2.2",
+  version := "2.3.0",
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
@@ -102,6 +102,7 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
+      "co.fs2" %% "fs2-io" % fs2Version,
       "com.google.protobuf" % "protobuf-java" % "3.21.4"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
