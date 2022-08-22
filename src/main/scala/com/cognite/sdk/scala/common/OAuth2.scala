@@ -133,17 +133,17 @@ object OAuth2 {
       val authenticate: F[TokenState] = {
         val uri = uri"${session.baseUrl}/api/v1/projects/${session.cdfProjectName}/sessions/token"
         for {
-          maybeK8sServiceToken <- getServiceToken.attempt
-          k8sServiceToken <- maybeK8sServiceToken match {
-            case Right(token) => F.delay(token)
+          maybeServiceToken <- getServiceToken.attempt
+          serviceToken <- maybeServiceToken match {
+            case Right(token) => F.pure(token)
             case Left(err) =>
               F.raiseError(
-                new SdkException(s"Failed to get k8s service token because ${err.getMessage}")
+                new SdkException(s"Failed to get service token because ${err.getMessage}")
               )
           }
           payload <- basicRequest
             .header("Accept", "application/json")
-            .header("Authorization", s"Bearer ${k8sServiceToken}")
+            .header("Authorization", s"Bearer $serviceToken")
             .post(uri)
             .body(RefreshSessionRequest(session.sessionId, session.sessionKey))
             .response(

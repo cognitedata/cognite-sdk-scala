@@ -157,6 +157,6 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         .getAuth
         .unsafeRunSync()
     }
-    sdkException.getMessage shouldBe "Failed to get k8s service token because Could not get Kubernetes JWT"
+    sdkException.getMessage shouldBe "Failed to get service token because Could not get Kubernetes JWT"
   }
 }

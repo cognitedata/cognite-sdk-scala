@@ -13,7 +13,6 @@ val sttpVersion = "3.5.2"
 val circeVersion = "0.14.1"
 val catsEffectVersion = "3.3.14"
 val fs2Version = "3.2.11"
-val cogniteAuthVersion = "2.5.3"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -24,7 +23,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.2.3",
+  version := "2.3.0",
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
