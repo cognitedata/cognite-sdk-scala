@@ -122,8 +122,8 @@ object OAuth2 {
   object SessionProvider {
     def apply[F[_]](
         session: Session,
-        getServiceToken: F[String],
-        refreshSecondsBeforeTTL: Long = 30
+        refreshSecondsBeforeTTL: Long = 30,
+        serviceTokenProvider: K8sServiceTokenProvider = K8sServiceToken
     )(
         implicit F: Async[F],
         clock: Clock[F],
@@ -133,17 +133,10 @@ object OAuth2 {
       val authenticate: F[TokenState] = {
         val uri = uri"${session.baseUrl}/api/v1/projects/${session.cdfProjectName}/sessions/token"
         for {
-          maybeServiceToken <- getServiceToken.attempt
-          serviceToken <- maybeServiceToken match {
-            case Right(token) => F.pure(token)
-            case Left(err) =>
-              F.raiseError(
-                new SdkException(s"Failed to get service token because ${err.getMessage}")
-              )
-          }
+          k8sServiceToken <- serviceTokenProvider.getKubernetesJwt
           payload <- basicRequest
             .header("Accept", "application/json")
-            .header("Authorization", s"Bearer $serviceToken")
+            .header("Authorization", s"Bearer $k8sServiceToken")
             .post(uri)
             .body(RefreshSessionRequest(session.sessionId, session.sessionKey))
             .response(

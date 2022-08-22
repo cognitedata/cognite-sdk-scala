@@ -64,7 +64,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         }
 
     val io: IO[Unit] = for {
-      authProvider <- OAuth2.SessionProvider[IO](session, IO("kubernetesServiceToken"), refreshSecondsBeforeTTL = 1)
+      authProvider <- OAuth2.SessionProvider[IO](session, refreshSecondsBeforeTTL = 1, serviceTokenProvider = MockK8sServiceToken())
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- IO(numTokenRequests shouldBe 1)
       _ <- IO.sleep(4.seconds)
@@ -87,7 +87,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
 
     val cdpApiException = the[CdpApiException] thrownBy {
       OAuth2
-        .SessionProvider[IO](session, IO("kubernetesServiceToken"))
+        .SessionProvider[IO](session, serviceTokenProvider = MockK8sServiceToken())
         .unsafeRunTimed(1.second)
         .value
         .getAuth
@@ -131,7 +131,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
 
     an[SdkException] shouldBe thrownBy {
       OAuth2
-        .SessionProvider[IO](session, IO("kubernetesServiceToken"))
+        .SessionProvider[IO](session, serviceTokenProvider = MockK8sServiceToken())
         .unsafeRunTimed(1.second)
         .value
         .getAuth
@@ -149,14 +149,14 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] = SttpBackendStub(implicitly[MonadError[IO]])
 
-    val sdkException = the[SdkException ] thrownBy {
+    val sdkException = the[SdkException] thrownBy {
       OAuth2
-        .SessionProvider[IO](session, IO.raiseError(new RuntimeException("Could not get Kubernetes JWT")))
+        .SessionProvider[IO](session, serviceTokenProvider = MockK8sServiceToken(false))
         .unsafeRunTimed(1.second)
         .value
         .getAuth
         .unsafeRunSync()
     }
-    sdkException.getMessage shouldBe "Failed to get service token because Could not get Kubernetes JWT"
+    sdkException.getMessage shouldBe "Failed to get service token"
   }
 }
