@@ -6,6 +6,7 @@ import java.nio.charset.Charset
 import java.nio.file.{Files, Paths}
 import scala.util.Try
 
+/** Only use for SessionProvider to interact with Cognite internal SessionAPI */
 trait K8sServiceTokenProvider {
   def getKubernetesJwt[F[_]](implicit F: Async[F]): F[String]
 }
