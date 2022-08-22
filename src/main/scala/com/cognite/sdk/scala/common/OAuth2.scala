@@ -90,7 +90,7 @@ object OAuth2 {
             .response(asJson[ClientCredentialsResponse])
             .send(sttpBackend)
           payload <- response.body match {
-            case Right(response) => F.delay(response)
+            case Right(response) => F.pure(response)
             case Left(responseException) => // Non-2xx response
               responseException match {
                 case HttpError(body, statusCode) =>
