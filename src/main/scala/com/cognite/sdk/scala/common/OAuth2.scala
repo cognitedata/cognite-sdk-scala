@@ -27,7 +27,7 @@ object OAuth2 {
       cdfProjectName: String,
       audience: Option[String] = None
   ) {
-    def getAuth[F[_]](refreshSecondsBeforeTTL: Long = 30)(
+    def getAuth[F[_]](refreshSecondsBeforeExpiration: Long = 30)(
         implicit F: Async[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
@@ -72,7 +72,7 @@ object OAuth2 {
             }
         }
         acquiredAt <- clock.monotonic
-        expiresAt = acquiredAt.toSeconds + payload.expires_in - refreshSecondsBeforeTTL
+        expiresAt = acquiredAt.toSeconds + payload.expires_in - refreshSecondsBeforeExpiration
       } yield TokenState(payload.access_token, expiresAt, cdfProjectName)
     }
   }
@@ -97,7 +97,10 @@ object OAuth2 {
         }
     }
 
-    def getAuth[F[_]](refreshSecondsBeforeTTL: Long = 30, getToken: Option[F[String]] = None)(
+    def getAuth[F[_]](
+        refreshSecondsBeforeExpiration: Long = 30,
+        getToken: Option[F[String]] = None
+    )(
         implicit F: Async[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
@@ -117,7 +120,7 @@ object OAuth2 {
           .send(sttpBackend)
           .map(_.body)
         acquiredAt <- clock.monotonic
-        expiresAt = acquiredAt.toSeconds + payload.expiresIn - refreshSecondsBeforeTTL
+        expiresAt = acquiredAt.toSeconds + payload.expiresIn - refreshSecondsBeforeExpiration
       } yield TokenState(payload.accessToken, expiresAt, cdfProjectName)
     }
   }
@@ -153,7 +156,7 @@ object OAuth2 {
   object ClientCredentialsProvider {
     def apply[F[_]](
         credentials: ClientCredentials,
-        refreshSecondsBeforeTTL: Long = 30,
+        refreshSecondsBeforeExpiration: Long = 30,
         maybeCacheToken: Option[TokenState] = None
     )(
         implicit F: Async[F],
@@ -163,14 +166,14 @@ object OAuth2 {
       val authenticate: F[TokenState] =
         for {
           now <- clock.monotonic
-          res <- maybeCacheToken match {
+          newToken <- maybeCacheToken match {
             case Some(originalToken)
-                if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeTTL) =>
+                if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
               F.delay(originalToken)
             case _ =>
               credentials.getAuth()
           }
-        } yield res
+        } yield newToken
       ConcurrentCachedObject(authenticate).map(new ClientCredentialsProvider[F](_))
     }
   }
@@ -179,7 +182,7 @@ object OAuth2 {
   object SessionProvider {
     def apply[F[_]](
         session: Session,
-        refreshSecondsBeforeTTL: Long = 30,
+        refreshSecondsBeforeExpiration: Long = 30,
         getToken: Option[F[String]] = None,
         maybeCacheToken: Option[TokenState] = None
     )(
@@ -190,14 +193,14 @@ object OAuth2 {
       val authenticate: F[TokenState] =
         for {
           now <- clock.monotonic
-          res <- maybeCacheToken match {
+          newToken <- maybeCacheToken match {
             case Some(originalToken)
-                if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeTTL) =>
+                if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
               F.delay(originalToken)
             case _ =>
               session.getAuth(getToken = getToken)
           }
-        } yield res
+        } yield newToken
       ConcurrentCachedObject(authenticate).map(x => new SessionProvider[F](x))
     }
   }
