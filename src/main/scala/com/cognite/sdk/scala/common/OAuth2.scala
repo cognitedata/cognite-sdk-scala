@@ -10,6 +10,7 @@ import com.cognite.sdk.scala.v1.resources.Sessions.{
   refreshSessionRequestEncoder,
   sessionTokenDecoder
 }
+import fs2.io.file.{Files, Path}
 import sttp.client3._
 import sttp.client3.circe.asJson
 import io.circe.Decoder
@@ -83,10 +84,23 @@ object OAuth2 {
       baseUrl: String,
       sessionId: Long,
       sessionKey: String,
-      cdfProjectName: String,
-      tokenFromVault: String
+      cdfProjectName: String
   ) {
-    def getAuth[F[_]](refreshSecondsBeforeTTL: Long = 30)(
+
+    /** Only use for SessionProvider to interact with Cognite internal SessionAPI */
+    private def getKubernetesJwt[F[_]](implicit F: Async[F]): F[String] = {
+      val serviceAccountTokenPath = Path("/var/run/secrets/tokens/cdf_token")
+      Files[F]
+        .readAll(serviceAccountTokenPath)
+        .through(fs2.text.utf8.decode)
+        .compile
+        .string
+        .adaptError { case err =>
+          new SdkException(s"Failed to get service token because ${err.getMessage}")
+        }
+    }
+
+    def getAuth[F[_]](refreshSecondsBeforeTTL: Long = 30, getToken: Option[F[String]] = None)(
         implicit F: Async[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
@@ -94,9 +108,10 @@ object OAuth2 {
       import sttp.client3.circe._
       val uri = uri"${baseUrl}/api/v1/projects/${cdfProjectName}/sessions/token"
       for {
+        kubernetesServiceToken <- getToken.getOrElse(getKubernetesJwt)
         payload <- basicRequest
           .header("Accept", "application/json")
-          .header("Authorization", s"Bearer ${tokenFromVault}")
+          .header("Authorization", s"Bearer ${kubernetesServiceToken}")
           .post(uri)
           .body(RefreshSessionRequest(sessionId, sessionKey))
           .response(
@@ -170,6 +185,7 @@ object OAuth2 {
     def apply[F[_]](
         session: Session,
         refreshSecondsBeforeTTL: Long = 30,
+        getToken: Option[F[String]] = None,
         maybeCacheToken: Option[TokenState] = None
     )(
         implicit F: Async[F],
@@ -184,7 +200,7 @@ object OAuth2 {
                 if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeTTL) =>
               F.delay(originalToken)
             case _ =>
-              session.getAuth()
+              session.getAuth(getToken = getToken)
           }
         } yield res
       ConcurrentCachedObject(authenticate).map(x => new SessionProvider[F](x))
