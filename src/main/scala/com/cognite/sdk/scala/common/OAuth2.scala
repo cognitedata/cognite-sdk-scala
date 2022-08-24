@@ -17,8 +17,6 @@ import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.model.Uri
 
-//VH TODO remove this
-@SuppressWarnings(Array("org.wartremover.warts.StringPlusAny"))
 object OAuth2 {
 
   final case class ClientCredentials(
@@ -75,7 +73,6 @@ object OAuth2 {
         }
         acquiredAt <- clock.monotonic
         expiresAt = acquiredAt.toSeconds + payload.expires_in - refreshSecondsBeforeTTL
-        _ <- F.delay(println(s" Asking for new token and it expires at ${expiresAt}"))
       } yield TokenState(payload.access_token, expiresAt, cdfProjectName)
     }
   }
@@ -169,9 +166,7 @@ object OAuth2 {
           res <- maybeCacheToken match {
             case Some(originalToken)
                 if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeTTL) =>
-              // VH TODO Remove println
-              F.delay(println(s" Use static now at ${now.toSeconds}")) *>
-                F.delay(originalToken)
+              F.delay(originalToken)
             case _ =>
               credentials.getAuth()
           }
