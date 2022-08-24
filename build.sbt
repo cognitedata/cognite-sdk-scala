@@ -12,7 +12,7 @@ val jettyTestVersion = "9.4.48.v20220622"
 val sttpVersion = "3.5.2"
 val circeVersion = "0.14.1"
 val catsEffectVersion = "3.3.14"
-val fs2Version = "3.2.10"
+val fs2Version = "3.2.11"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -23,7 +23,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.2.0",
+  version := "2.3.0",
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
@@ -102,7 +102,8 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "3.21.3"
+      "co.fs2" %% "fs2-io" % fs2Version,
+      "com.google.protobuf" % "protobuf-java" % "3.21.4"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor == 13 =>
@@ -132,7 +133,7 @@ lazy val core = (project in file("."))
   )
 
 val scalaTestDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.12" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.13" % "test"
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,

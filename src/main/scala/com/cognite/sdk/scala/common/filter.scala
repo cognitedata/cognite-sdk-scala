@@ -9,9 +9,9 @@ import com.cognite.sdk.scala.v1.RequestSession
 import sttp.client3._
 import sttp.client3.circe._
 import sttp.model._
-import fs2._
 import io.circe.{Decoder, Encoder, Json, Printer}
 import io.circe.syntax._
+import fs2._
 
 final case class FilterRequest[T](
     filter: T,
