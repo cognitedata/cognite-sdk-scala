@@ -201,7 +201,7 @@ object OAuth2 {
               session.getAuth(getToken = getToken)
           }
         } yield newToken
-      ConcurrentCachedObject(authenticate).map(x => new SessionProvider[F](x))
+      ConcurrentCachedObject(authenticate).map(new SessionProvider[F](_))
     }
   }
 
