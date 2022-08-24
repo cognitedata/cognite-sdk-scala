@@ -117,7 +117,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
     val io: IO[Unit] = for {
       authProvider <- OAuth2.SessionProvider[IO](
         session,
-        refreshSecondsBeforeExpiration = 1,
+        refreshSecondsBeforeExpiration = 2,
         Some(IO("kubernetesServiceToken")),
         Some(TokenState("firstToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
