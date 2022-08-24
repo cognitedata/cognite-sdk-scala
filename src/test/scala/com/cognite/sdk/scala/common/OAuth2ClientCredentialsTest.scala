@@ -5,6 +5,7 @@ import cats.effect.implicits.commutativeApplicativeForParallelF
 import cats.effect.unsafe.implicits._
 import cats.implicits.catsStdInstancesForList
 import cats.syntax.parallel._
+import com.cognite.sdk.scala.common.OAuth2.TokenState
 import com.cognite.sdk.scala.v1._
 import sttp.client3._
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
@@ -122,7 +123,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
             _ <- IO(numTokenRequests += 1)
             body = Json.obj(
               "access_token" -> Json.fromString("foo"),
-              "expires_in" -> Json.fromString("2")
+              "expires_in" -> Json.fromString("5")
             )
           } yield Response(
             body.noSpaces,
@@ -141,12 +142,17 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
     )
 
     val io: IO[Unit] = for {
-      authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials, refreshSecondsBeforeTTL = 1)
+      authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials,
+        refreshSecondsBeforeExpiration = 1,
+        Some(TokenState("firstToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO { numTokenRequests shouldBe 1 }
-      _ <- IO.sleep(1.seconds)
+      _ <- IO(numTokenRequests shouldBe 0) // original token is still valid
+      _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 2)
+      _ <- IO(numTokenRequests shouldBe 1) // original token is expired
+      _ <- IO.sleep(4.seconds)
+      _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
+      _ <- IO(numTokenRequests shouldBe 2) // first renew token is expired
     } yield ()
 
     io.unsafeRunTimed(10.seconds).value
