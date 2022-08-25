@@ -17,6 +17,7 @@ import org.scalatest.matchers.should.Matchers
 import sttp.model.{Header, Method, StatusCode}
 import sttp.monad.MonadError
 
+import java.util.concurrent.atomic.AtomicLong
 import scala.collection.immutable.Seq
 import scala.concurrent.duration._
 
@@ -113,14 +114,14 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
   it should "refresh tokens when they expire" in {
     import sttp.client3.impl.cats.implicits._
 
-    var numTokenRequests = 0
+    val numTokenRequests = new AtomicLong(0L)
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
       SttpBackendStub(implicitly[MonadError[IO]])
         .whenRequestMatches(req => req.method === Method.POST && req.uri.path === Seq("token"))
         .thenRespondF {
           for {
-            _ <- IO(numTokenRequests += 1)
+            _ <- IO(numTokenRequests.incrementAndGet())
             body = Json.obj(
               "access_token" -> Json.fromString("foo"),
               "expires_in" -> Json.fromString("5")
@@ -146,13 +147,13 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
         refreshSecondsBeforeExpiration = 2,
         Some(TokenState("firstToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 0) // original token is still valid
+      _ <- IO(numTokenRequests.get() shouldBe 0L) // original token is still valid
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 1) // original token is expired
+      _ <- IO(numTokenRequests.get() shouldBe 1L) // original token is expired
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 2) // first renew token is expired
+      _ <- IO(numTokenRequests.get() shouldBe 2L) // first renew token is expired
     } yield ()
 
     io.unsafeRunTimed(10.seconds).value

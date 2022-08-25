@@ -17,6 +17,7 @@ import sttp.client3.testing.SttpBackendStub
 import sttp.model.{Header, MediaType, Method, StatusCode}
 import sttp.monad.MonadError
 
+import java.util.concurrent.atomic.AtomicLong
 import scala.collection.immutable.Seq
 import scala.concurrent.duration._
 
@@ -76,7 +77,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
   it should "refresh tokens when they expire" in {
     import sttp.client3.impl.cats.implicits._
 
-    var numTokenRequests = 0
+    val numTokenRequests = new AtomicLong(0L)
 
     val session = OAuth2.Session(
       "https://bluefield.cognitedata.com",
@@ -103,7 +104,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         .thenRespondF {
 
           for {
-            _ <- IO(numTokenRequests += 1)
+            _ <- IO(numTokenRequests.incrementAndGet())
             body = SessionTokenResponse(1, "newAccessToken", 5, None, None)
 
           } yield Response(
@@ -121,13 +122,13 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         Some(IO("kubernetesServiceToken")),
         Some(TokenState("firstToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 0) // original token is still valid
+      _ <- IO(numTokenRequests.get() shouldBe 0L) // original token is still valid
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 1) // original token is expired
+      _ <- IO(numTokenRequests.get() shouldBe 1L) // original token is expired
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 2) // first renew token is expired
+      _ <- IO(numTokenRequests.get() shouldBe 2L) // first renew token is expired
     } yield ()
 
     io.unsafeRunTimed(10.seconds).value
