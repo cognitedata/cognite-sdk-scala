@@ -64,15 +64,13 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         Some(IO("kubernetesServiceToken")),
         Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 5, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      first <- numTokenRequests.get
+      _ <- numTokenRequests.get.map(_ shouldBe 0)
       _ <- IO.sleep(3.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      second <- numTokenRequests.get
-    } yield (first, second)
+      _ <- numTokenRequests.get.map(_ shouldBe 0)
+    } yield ()
 
-    val (first, second) = io.unsafeRunSync()
-    first shouldBe 0
-    second shouldBe 0
+    io.unsafeRunTimed(10.seconds).value
   }
 
   it should "refresh tokens when they expire" in {
@@ -121,19 +119,16 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         Some(IO("kubernetesServiceToken")),
         Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      first <- numTokenRequests.get  // original token is still valid
+      _ <- numTokenRequests.get.map(_ shouldBe 0)  // original token is still valid
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      second <- numTokenRequests.get // original token is expired
+      _ <- numTokenRequests.get.map(_ shouldBe 1) // original token is expired
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      third <- numTokenRequests.get // first renew token is expiredqwq
-    } yield (first, second, third)
+      _ <- numTokenRequests.get.map(_ shouldBe 2) // first renew token is expired
+    } yield ()
 
-    val (first, second, third) = io.unsafeRunSync()
-    first shouldBe 0
-    second shouldBe 1
-    third shouldBe 2
+    io.unsafeRunTimed(10.seconds).value
   }
 
   it should "throw a CdpApiException error when failing to refresh the session" in {

@@ -146,18 +146,15 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
         refreshSecondsBeforeExpiration = 2,
         Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      first <- numTokenRequests.get  // original token is still valid
+      _ <- numTokenRequests.get.map(_ shouldBe 0)  // original token is still valid
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      second <- numTokenRequests.get // original token is expired
+      _ <- numTokenRequests.get.map(_ shouldBe 1) // original token is expired
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      third <- numTokenRequests.get // first renew token is expired
-    } yield (first, second, third)
+      _ <- numTokenRequests.get.map(_ shouldBe 2) // first renew token is expired
+    } yield ()
 
-    val (first, second, third) = io.unsafeRunSync()
-    first shouldBe 0
-    second shouldBe 1
-    third shouldBe 2
+    io.unsafeRunTimed(10.seconds).value
   }
 }
