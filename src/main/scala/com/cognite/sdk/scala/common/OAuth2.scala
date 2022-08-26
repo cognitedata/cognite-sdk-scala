@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.common
 
 import cats.Monad
 import cats.syntax.all._
-import cats.effect.Async
+import cats.effect.{Async, Clock}
 import com.cognite.sdk.scala.common.internal.{CachedResource, ConcurrentCachedObject}
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.{RefreshSessionRequest, SessionTokenResponse}
@@ -17,8 +17,6 @@ import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.model.Uri
 
-import java.time.Instant
-
 object OAuth2 {
 
   final case class ClientCredentials(
@@ -31,6 +29,7 @@ object OAuth2 {
   ) {
     def getAuth[F[_]](refreshSecondsBeforeExpiration: Long = 30)(
         implicit F: Async[F],
+        clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[TokenState] = {
       val body = Map[String, String](
@@ -71,7 +70,7 @@ object OAuth2 {
                 )
             }
         }
-        acquiredAt <- F.delay(Instant.now().getEpochSecond)
+        acquiredAt <- clock.realTime.map(_.toSeconds)
         expiresAt = acquiredAt + payload.expires_in - refreshSecondsBeforeExpiration
       } yield TokenState(payload.access_token, expiresAt, cdfProjectName)
     }
@@ -102,6 +101,7 @@ object OAuth2 {
         getToken: Option[F[String]] = None
     )(
         implicit F: Async[F],
+        clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[TokenState] = {
       import sttp.client3.circe._
@@ -118,32 +118,35 @@ object OAuth2 {
           )
           .send(sttpBackend)
           .map(_.body)
-        acquiredAt <- F.delay(Instant.now().getEpochSecond)
+        acquiredAt <- clock.realTime.map(_.toSeconds)
         expiresAt = acquiredAt + payload.expiresIn - refreshSecondsBeforeExpiration
       } yield TokenState(payload.accessToken, expiresAt, cdfProjectName)
     }
   }
 
   private def commonGetAuth[F[_]](cache: CachedResource[F, TokenState])(
-      implicit F: Monad[F]
+      implicit F: Monad[F],
+      clock: Clock[F]
   ): F[Auth] =
     for {
-      now <- F.pure(Instant.now().getEpochSecond)
+      now <- clock.realTime.map(_.toSeconds)
       _ <- cache.invalidateIfNeeded(_.expiresAt <= now)
       auth <- cache.run(state => F.pure(OidcTokenAuth(state.token, state.cdfProjectName)))
     } yield auth
 
   class ClientCredentialsProvider[F[_]] private (
       cache: CachedResource[F, TokenState]
-  )(implicit F: Monad[F])
-      extends AuthProvider[F]
+  )(
+      implicit F: Monad[F],
+      clock: Clock[F]
+  ) extends AuthProvider[F]
       with Serializable {
     def getAuth: F[Auth] = commonGetAuth(cache)
   }
 
   class SessionProvider[F[_]] private (
       cache: CachedResource[F, TokenState]
-  )(implicit F: Monad[F])
+  )(implicit F: Monad[F], clock: Clock[F])
       extends AuthProvider[F]
       with Serializable {
     def getAuth: F[Auth] = commonGetAuth(cache)
@@ -157,11 +160,12 @@ object OAuth2 {
         maybeCacheToken: Option[TokenState] = None
     )(
         implicit F: Async[F],
+        clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[ClientCredentialsProvider[F]] = {
       val authenticate: F[TokenState] =
         for {
-          now <- F.delay(Instant.now().getEpochSecond)
+          now <- clock.realTime.map(_.toSeconds)
           newToken <- maybeCacheToken match {
             case Some(originalToken)
                 if now < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
@@ -183,11 +187,12 @@ object OAuth2 {
         maybeCacheToken: Option[TokenState] = None
     )(
         implicit F: Async[F],
+        clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[SessionProvider[F]] = {
       val authenticate: F[TokenState] =
         for {
-          now <- F.delay(Instant.now().getEpochSecond)
+          now <- clock.realTime.map(_.toSeconds)
           newToken <- maybeCacheToken match {
             case Some(originalToken)
                 if now < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>

@@ -17,7 +17,6 @@ import sttp.client3.testing.SttpBackendStub
 import sttp.model.{Header, MediaType, Method, StatusCode}
 import sttp.monad.MonadError
 
-import java.time.Instant
 import scala.collection.immutable.Seq
 import scala.concurrent.duration._
 
@@ -63,7 +62,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         session,
         refreshSecondsBeforeExpiration = 1,
         Some(IO("kubernetesServiceToken")),
-        Some(TokenState("firstToken", Instant.now().getEpochSecond + 5, "irrelevant")))
+        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 5, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       first <- numTokenRequests.get
       _ <- IO.sleep(3.seconds)
@@ -120,7 +119,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         session,
         refreshSecondsBeforeExpiration = 2,
         Some(IO("kubernetesServiceToken")),
-        Some(TokenState("firstToken", Instant.now().getEpochSecond + 4, "irrelevant")))
+        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       first <- numTokenRequests.get  // original token is still valid
       _ <- IO.sleep(4.seconds)

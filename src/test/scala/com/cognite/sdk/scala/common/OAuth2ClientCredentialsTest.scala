@@ -17,7 +17,6 @@ import org.scalatest.matchers.should.Matchers
 import sttp.model.{Header, Method, StatusCode}
 import sttp.monad.MonadError
 
-import java.time.Instant
 import scala.collection.immutable.Seq
 import scala.concurrent.duration._
 
@@ -145,7 +144,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
     val io = for {
       authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials,
         refreshSecondsBeforeExpiration = 2,
-        Some(TokenState("firstToken", Instant.now().getEpochSecond + 4, "irrelevant")))
+        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       first <- numTokenRequests.get  // original token is still valid
       _ <- IO.sleep(4.seconds)
