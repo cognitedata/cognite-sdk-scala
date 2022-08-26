@@ -17,6 +17,8 @@ import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.model.Uri
 
+import java.time.Instant
+
 object OAuth2 {
 
   final case class ClientCredentials(
@@ -44,7 +46,6 @@ object OAuth2 {
         ) // Send empty audience when it is not provided
       )
       for {
-
         response <- basicRequest
           .header("Accept", "application/json")
           .post(tokenUri)
@@ -71,8 +72,8 @@ object OAuth2 {
                 )
             }
         }
-        acquiredAt <- clock.monotonic
-        expiresAt = acquiredAt.toSeconds + payload.expires_in - refreshSecondsBeforeExpiration
+        acquiredAt <- F.delay(Instant.now().getEpochSecond)
+        expiresAt = acquiredAt + payload.expires_in - refreshSecondsBeforeExpiration
       } yield TokenState(payload.access_token, expiresAt, cdfProjectName)
     }
   }
@@ -119,8 +120,8 @@ object OAuth2 {
           )
           .send(sttpBackend)
           .map(_.body)
-        acquiredAt <- clock.monotonic
-        expiresAt = acquiredAt.toSeconds + payload.expiresIn - refreshSecondsBeforeExpiration
+        acquiredAt <- F.delay(Instant.now().getEpochSecond)
+        expiresAt = acquiredAt + payload.expiresIn - refreshSecondsBeforeExpiration
       } yield TokenState(payload.accessToken, expiresAt, cdfProjectName)
     }
   }
@@ -128,11 +129,12 @@ object OAuth2 {
   private def commonGetAuth[F[_]](cache: CachedResource[F, TokenState])(
       implicit F: Monad[F],
       clock: Clock[F]
-  ): F[Auth] = for {
-    now <- clock.monotonic
-    _ <- cache.invalidateIfNeeded(_.expiresAt <= now.toSeconds)
-    auth <- cache.run(state => F.pure(OidcTokenAuth(state.token, state.cdfProjectName)))
-  } yield auth
+  ): F[Auth] =
+    for {
+      now <- F.pure(Instant.now().getEpochSecond)
+      _ <- cache.invalidateIfNeeded(_.expiresAt <= now)
+      auth <- cache.run(state => F.pure(OidcTokenAuth(state.token, state.cdfProjectName)))
+    } yield auth
 
   class ClientCredentialsProvider[F[_]] private (
       cache: CachedResource[F, TokenState]
@@ -165,10 +167,10 @@ object OAuth2 {
     ): F[ClientCredentialsProvider[F]] = {
       val authenticate: F[TokenState] =
         for {
-          now <- clock.monotonic
+          now <- F.delay(Instant.now().getEpochSecond)
           newToken <- maybeCacheToken match {
             case Some(originalToken)
-                if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
+                if now < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
               F.delay(originalToken)
             case _ =>
               credentials.getAuth()
@@ -192,25 +194,13 @@ object OAuth2 {
     ): F[SessionProvider[F]] = {
       val authenticate: F[TokenState] =
         for {
-          _ <- F.delay(println(s"Apply is called"))
-          now <- clock.monotonic
+          now <- F.delay(Instant.now().getEpochSecond)
           newToken <- maybeCacheToken match {
             case Some(originalToken)
-                if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
-              F.delay(
-                println(
-                  s"Coucou now ${now.toSeconds} vs ${originalToken.expiresAt - refreshSecondsBeforeExpiration}"
-                )
-              ) *>
-                F.delay(originalToken)
+                if now < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
+              F.delay(originalToken)
             case _ =>
-              F.delay(
-                println(
-                  s"call to get new token because now ${now.toSeconds} vs ${maybeCacheToken
-                      .map(t => t.expiresAt - refreshSecondsBeforeExpiration)}"
-                )
-              ) *>
-                session.getAuth(getToken = getToken)
+              session.getAuth(getToken = getToken)
           }
         } yield newToken
       ConcurrentCachedObject(authenticate).map(new SessionProvider[F](_))
