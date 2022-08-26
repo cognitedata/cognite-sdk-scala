@@ -4,7 +4,7 @@ import cats.effect._
 import cats.effect.implicits.commutativeApplicativeForParallelF
 import cats.effect.unsafe.implicits._
 import cats.implicits.catsStdInstancesForList
-import cats.syntax.parallel._
+import cats.syntax.all._
 import com.cognite.sdk.scala.common.OAuth2.TokenState
 import com.cognite.sdk.scala.v1.SessionTokenResponse
 import org.scalatest.OptionValues
@@ -26,7 +26,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
   it should "not refresh tokens if original token is still valid" in {
     import sttp.client3.impl.cats.implicits._
 
-    var numTokenRequests = 0
+    val numTokenRequests = Ref[IO].of[Int](0).unsafeRunSync()
 
     val session = OAuth2.Session(
       "https://bluefield.cognitedata.com",
@@ -52,22 +52,22 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         }
         .thenRespondF {
           for {
-            _ <- IO(numTokenRequests += 1)
+            _ <- numTokenRequests.modify(x => (x + 1, x))
             body = SessionTokenResponse(1, "newAccessToken", 5, None, None)
           } yield Response(body, StatusCode.Ok)
         }
 
-    val io: IO[Unit] = for {
+    val io = for {
       authProvider <- OAuth2.SessionProvider[IO](
         session,
         refreshSecondsBeforeExpiration = 1,
         Some(IO("kubernetesServiceToken")),
-        Some(TokenState("firstToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 5, "irrelevant")))
+        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 5, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 0)
+      _ <- numTokenRequests.get.map(_ shouldBe 0)
       _ <- IO.sleep(3.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 0)
+      _ <- numTokenRequests.get.map(_ shouldBe 0)
     } yield ()
 
     io.unsafeRunTimed(10.seconds).value
@@ -76,7 +76,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
   it should "refresh tokens when they expire" in {
     import sttp.client3.impl.cats.implicits._
 
-    var numTokenRequests = 0
+    val numTokenRequests = Ref[IO].of[Int](0).unsafeRunSync()
 
     val session = OAuth2.Session(
       "https://bluefield.cognitedata.com",
@@ -85,7 +85,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
       "irrelevant"
     )
 
-    implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
+    implicit val mockSttpBackend: SttpBackendStub[IO, Nothing] =
       SttpBackendStub(implicitly[MonadError[IO]])
         .whenRequestMatches { req =>
           req.method === Method.POST && req.uri.scheme.contains("https") &&
@@ -101,11 +101,9 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           )
         }
         .thenRespondF {
-
           for {
-            _ <- IO(numTokenRequests += 1)
+            _ <- numTokenRequests.modify(x => (x + 1, x))
             body = SessionTokenResponse(1, "newAccessToken", 5, None, None)
-
           } yield Response(
             body,
             StatusCode.Ok,
@@ -114,20 +112,20 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           )
         }
 
-    val io: IO[Unit] = for {
+    val io = for {
       authProvider <- OAuth2.SessionProvider[IO](
         session,
-        refreshSecondsBeforeExpiration = 1,
+        refreshSecondsBeforeExpiration = 2,
         Some(IO("kubernetesServiceToken")),
-        Some(TokenState("firstToken", Clock[IO].monotonic.unsafeRunSync().toSeconds + 4, "irrelevant")))
+        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 0) // original token is still valid
+      _ <- numTokenRequests.get.map(_ shouldBe 0)  // original token is still valid
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 1) // original token is expired
+      _ <- numTokenRequests.get.map(_ shouldBe 1) // original token is expired
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests shouldBe 2) // first renew token is expired
+      _ <- numTokenRequests.get.map(_ shouldBe 2) // first renew token is expired
     } yield ()
 
     io.unsafeRunTimed(10.seconds).value
