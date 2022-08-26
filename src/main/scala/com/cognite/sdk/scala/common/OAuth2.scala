@@ -192,13 +192,25 @@ object OAuth2 {
     ): F[SessionProvider[F]] = {
       val authenticate: F[TokenState] =
         for {
+          _ <- F.delay(println(s"Apply is called"))
           now <- clock.monotonic
           newToken <- maybeCacheToken match {
             case Some(originalToken)
                 if now.toSeconds < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
-              F.delay(originalToken)
+              F.delay(
+                println(
+                  s"Coucou now ${now.toSeconds} vs ${originalToken.expiresAt - refreshSecondsBeforeExpiration}"
+                )
+              ) *>
+                F.delay(originalToken)
             case _ =>
-              session.getAuth(getToken = getToken)
+              F.delay(
+                println(
+                  s"call to get new token because now ${now.toSeconds} vs ${maybeCacheToken
+                      .map(t => t.expiresAt - refreshSecondsBeforeExpiration)}"
+                )
+              ) *>
+                session.getAuth(getToken = getToken)
           }
         } yield newToken
       ConcurrentCachedObject(authenticate).map(new SessionProvider[F](_))

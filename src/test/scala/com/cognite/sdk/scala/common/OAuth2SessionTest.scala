@@ -6,7 +6,7 @@ import cats.effect.unsafe.implicits._
 import cats.implicits.catsStdInstancesForList
 import cats.syntax.parallel._
 import com.cognite.sdk.scala.common.OAuth2.TokenState
-import com.cognite.sdk.scala.v1.SessionTokenResponse
+import com.cognite.sdk.scala.v1.{Event, GenericClient, SessionTokenResponse}
 import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -102,11 +102,9 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
           )
         }
         .thenRespondF {
-
           for {
             _ <- IO(numTokenRequests.incrementAndGet())
             body = SessionTokenResponse(1, "newAccessToken", 5, None, None)
-
           } yield Response(
             body,
             StatusCode.Ok,
@@ -128,7 +126,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
       _ <- IO(numTokenRequests.get() shouldBe 1L) // original token is expired
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests.get() shouldBe 2L) // first renew token is expired
+      _ <- IO(numTokenRequests.get() shouldBe 2L) // first renew token is expiredqwq
     } yield ()
 
     io.unsafeRunTimed(10.seconds).value
@@ -217,5 +215,70 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         .unsafeRunSync()
     }
     sdkException.getMessage shouldBe "Could not get Kubernetes JWT"
+  }
+
+  it should "refresh token for client when it's expired" in {
+    import sttp.client3.impl.cats.implicits._
+
+    val numTokenRequests = new AtomicLong(0L)
+
+    val session = OAuth2.Session(
+      "https://bluefield.cognitedata.com",
+      123,
+      "sessionKey-value",
+      "irrelevant"
+    )
+
+    implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
+      SttpBackendStub(implicitly[MonadError[IO]])
+        .whenRequestMatches { req =>
+          req.method === Method.POST && req.uri.scheme.contains("https") &&
+            req.uri.host.contains("bluefield.cognitedata.com") &&
+            req.uri.path.endsWith(
+              Seq("api", "v1", "projects", session.cdfProjectName, "sessions", "token")
+            ) &&
+            req.headers.contains(Header("Authorization", "Bearer kubernetesServiceToken")) &&
+            req.body === StringBody(
+              """{"sessionId":123,"sessionKey":"sessionKey-value"}""",
+              "utf-8",
+              MediaType.ApplicationJson
+            )
+        }
+        .thenRespondF {
+          for {
+            _ <- IO(numTokenRequests.incrementAndGet())
+            body = SessionTokenResponse(1, "newAccessToken", 5, None, None)
+          } yield Response(
+            body,
+            StatusCode.Ok,
+            "OK",
+            Seq(Header("content-type", "application/json"))
+          )
+        }
+        .whenRequestMatches{ req =>
+          req.method === Method.POST && req.headers.contains(Header("Authorization", "Bearer newAccessToken"))
+      }.thenRespond(Response(Seq(Event(1L)), StatusCode.Ok))
+    val io: IO[Unit] = for {
+      initExpired <- Clock[IO].monotonic.map(_.toSeconds + 4)
+      authProvider <- OAuth2.SessionProvider[IO](
+        session,
+        refreshSecondsBeforeExpiration = 2,
+        Some(IO("kubernetesServiceToken")),
+        Some(TokenState("firstToken", initExpired, "irrelevant")))
+      _ <- IO.sleep(5.seconds)
+      client = new GenericClient(
+        applicationName = "myApp",
+        projectName = session.cdfProjectName,
+        authProvider = authProvider,
+        baseUrl = session.baseUrl,
+        apiVersion = None,
+        clientTag = None,
+        cdfVersion = None
+      )(implicitly, mockSttpBackend)
+      event <- client.events.retrieveById(1)
+      _ <- IO(event shouldBe Event(1))
+    } yield ()
+    io.unsafeRunTimed(10.seconds).value
+
   }
 }
