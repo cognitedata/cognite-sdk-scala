@@ -53,7 +53,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         }
         .thenRespondF {
           for {
-            _ <- numTokenRequests.modify(x=> (x + 1, x))
+            _ <- numTokenRequests.modify(x => (x + 1, x))
             body = SessionTokenResponse(1, "newAccessToken", 5, None, None)
           } yield Response(body, StatusCode.Ok)
         }
@@ -105,7 +105,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         }
         .thenRespondF {
           for {
-            _ <- numTokenRequests.modify(x=> (x + 1, x))
+            _ <- numTokenRequests.modify(x => (x + 1, x))
             body = SessionTokenResponse(1, "newAccessToken", 5, None, None)
           } yield Response(
             body,

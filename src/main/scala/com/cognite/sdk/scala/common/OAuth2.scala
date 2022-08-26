@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.common
 
 import cats.Monad
 import cats.syntax.all._
-import cats.effect.{Async, Clock}
+import cats.effect.Async
 import com.cognite.sdk.scala.common.internal.{CachedResource, ConcurrentCachedObject}
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.{RefreshSessionRequest, SessionTokenResponse}
@@ -31,7 +31,6 @@ object OAuth2 {
   ) {
     def getAuth[F[_]](refreshSecondsBeforeExpiration: Long = 30)(
         implicit F: Async[F],
-        clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[TokenState] = {
       val body = Map[String, String](
@@ -103,7 +102,6 @@ object OAuth2 {
         getToken: Option[F[String]] = None
     )(
         implicit F: Async[F],
-        clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[TokenState] = {
       import sttp.client3.circe._
@@ -127,8 +125,7 @@ object OAuth2 {
   }
 
   private def commonGetAuth[F[_]](cache: CachedResource[F, TokenState])(
-      implicit F: Monad[F],
-      clock: Clock[F]
+      implicit F: Monad[F]
   ): F[Auth] =
     for {
       now <- F.pure(Instant.now().getEpochSecond)
@@ -138,17 +135,15 @@ object OAuth2 {
 
   class ClientCredentialsProvider[F[_]] private (
       cache: CachedResource[F, TokenState]
-  )(
-      implicit F: Monad[F],
-      clock: Clock[F]
-  ) extends AuthProvider[F]
+  )(implicit F: Monad[F])
+      extends AuthProvider[F]
       with Serializable {
     def getAuth: F[Auth] = commonGetAuth(cache)
   }
 
   class SessionProvider[F[_]] private (
       cache: CachedResource[F, TokenState]
-  )(implicit F: Monad[F], clock: Clock[F])
+  )(implicit F: Monad[F])
       extends AuthProvider[F]
       with Serializable {
     def getAuth: F[Auth] = commonGetAuth(cache)
@@ -162,7 +157,6 @@ object OAuth2 {
         maybeCacheToken: Option[TokenState] = None
     )(
         implicit F: Async[F],
-        clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[ClientCredentialsProvider[F]] = {
       val authenticate: F[TokenState] =
@@ -189,7 +183,6 @@ object OAuth2 {
         maybeCacheToken: Option[TokenState] = None
     )(
         implicit F: Async[F],
-        clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[SessionProvider[F]] = {
       val authenticate: F[TokenState] =

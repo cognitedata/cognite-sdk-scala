@@ -18,11 +18,10 @@ import sttp.model.{Header, Method, StatusCode}
 import sttp.monad.MonadError
 
 import java.time.Instant
-import java.util.concurrent.atomic.AtomicLong
 import scala.collection.immutable.Seq
 import scala.concurrent.duration._
 
-@SuppressWarnings(Array("org.wartremover.warts.Var"))
+@SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.NonUnitStatements"))
 class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionValues {
   val tenant: String = sys.env("TEST_AAD_TENANT")
   val clientId: String = sys.env("TEST_CLIENT_ID")
@@ -115,14 +114,14 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
   it should "refresh tokens when they expire" in {
     import sttp.client3.impl.cats.implicits._
 
-    val numTokenRequests = new AtomicLong(0L)
+    val numTokenRequests = Ref[IO].of[Int](0).unsafeRunSync()
 
     implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
       SttpBackendStub(implicitly[MonadError[IO]])
         .whenRequestMatches(req => req.method === Method.POST && req.uri.path === Seq("token"))
         .thenRespondF {
           for {
-            _ <- IO(numTokenRequests.incrementAndGet())
+            _ <- numTokenRequests.modify(x => (x + 1, x))
             body = Json.obj(
               "access_token" -> Json.fromString("foo"),
               "expires_in" -> Json.fromString("5")
@@ -143,20 +142,23 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       cdfProjectName = "irrelevant"
     )
 
-    val io: IO[Unit] = for {
+    val io = for {
       authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials,
         refreshSecondsBeforeExpiration = 2,
         Some(TokenState("firstToken", Instant.now().getEpochSecond + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests.get() shouldBe 0L) // original token is still valid
+      first <- numTokenRequests.get  // original token is still valid
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests.get() shouldBe 1L) // original token is expired
+      second <- numTokenRequests.get // original token is expired
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- IO(numTokenRequests.get() shouldBe 2L) // first renew token is expired
-    } yield ()
+      third <- numTokenRequests.get // first renew token is expired
+    } yield (first, second, third)
 
-    io.unsafeRunTimed(10.seconds).value
+    val (first, second, third) = io.unsafeRunSync()
+    first shouldBe 0
+    second shouldBe 1
+    third shouldBe 2
   }
 }
