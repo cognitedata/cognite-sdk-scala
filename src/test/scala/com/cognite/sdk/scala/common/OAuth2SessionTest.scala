@@ -123,7 +123,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- numTokenRequests.get.map(_ shouldBe 1) // original token is expired
-      _ <- IO.sleep(4.seconds)
+      _ <- IO.sleep(3.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- numTokenRequests.get.map(_ shouldBe 2) // first renew token is expired
     } yield ()
