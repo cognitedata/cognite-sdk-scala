@@ -286,6 +286,8 @@ class ClientTest extends SdkTestSpec with OptionValues {
       StatusCode.ServiceUnavailable, "", Seq(Header("content-type", "application/json; charset=utf-8")))
     val serverError = Response("",
       StatusCode.ServiceUnavailable, "", Seq(Header("content-type", "application/protobuf")))
+    val timeOutError = Response("",
+      StatusCode.RequestTimeout, "", Seq(Header("content-type", "application/json; charset=utf-8")))
     val backendStub = SttpBackendStub(implicitly[MonadAsyncError[IO]])
       .whenAnyRequest
       .thenRespondCyclicResponses(
@@ -293,6 +295,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         badGatewayResponseRight,
         unavailableResponse,
         serverError,
+        timeOutError,
         loginStatusResponse)
     val client = new GenericClient[IO]("scala-sdk-test",
       projectName,

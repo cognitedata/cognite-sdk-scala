@@ -65,7 +65,7 @@ class RetryingBackend[F[_], +P](
 
   private def shouldRetry(status: Int): Boolean =
     status match {
-      case 429 | 401 | 500 | 502 | 503 | 504 => true
+      case 429 | 401 | 408 | 500 | 502 | 503 | 504 => true
       case _ => false
     }
 
