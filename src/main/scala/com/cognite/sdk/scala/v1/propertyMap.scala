@@ -151,7 +151,7 @@ final case class Edge(
           spaceExternalId
             .map(spaceId => Map("spaceExternalId" -> PropertyType.Text.Property(spaceId)))
             .getOrElse(Map[String, DataModelProperty[_]]()) ++
-            Map(
+            Map[String, DataModelProperty[_]](
               "externalId" -> PropertyType.Text.Property(externalId),
               "type" -> PropertyType.Text.Property(`type`),
               "startNode" -> PropertyType.Array.Text.Property(
