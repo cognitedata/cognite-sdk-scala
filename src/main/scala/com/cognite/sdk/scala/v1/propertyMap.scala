@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.v1
 
 import cats.implicits.catsSyntaxEq
 import com.cognite.sdk.scala.common.DomainSpecificLanguageFilter.propEncoder
-import com.cognite.sdk.scala.common.{DomainSpecificLanguageFilter, EmptyFilter}
+import com.cognite.sdk.scala.common.{DomainSpecificLanguageFilter, EmptyFilter, SdkException}
 import com.cognite.sdk.scala.v1.resources.DataModels
 import io.circe.CursorOp.DownField
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, KeyEncoder}
@@ -10,14 +10,23 @@ import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, KeyEncoder}
 import scala.collection.immutable
 
 sealed class PropertyMap(val allProperties: Map[String, DataModelProperty[_]]) {
+  val spaceExternalId: Option[String] = allProperties.get("spaceExternalId") match {
+    case Some(PropertyType.Text.Property(spaceExternalId)) => Some(spaceExternalId)
+    case Some(invalidType) =>
+      throw new SdkException(
+        s"spaceExternalId should be a TextProperty, it is ${invalidType.toString} instead"
+      )
+    case None => None
+  }
+
   val externalId: String = allProperties.get("externalId") match {
     case Some(PropertyType.Text.Property(externalId)) => externalId
     case Some(invalidType) =>
-      throw new Exception(
+      throw new SdkException(
         s"externalId should be a TextProperty, it is ${invalidType.toString} instead"
       )
     case None =>
-      throw new Exception("externalId is required")
+      throw new SdkException("externalId is required")
   }
 }
 
@@ -67,11 +76,14 @@ object PropertyMap {
 }
 
 final case class Node(
+    override val spaceExternalId: Option[String],
     override val externalId: String,
     properties: Option[Map[String, DataModelProperty[_]]] = None
 ) extends PropertyMap(
       {
-        val propsToAdd: Map[String, DataModelProperty[_]] =
+        val propsToAdd: Map[String, DataModelProperty[_]] = spaceExternalId
+          .map(spaceId => Map("spaceExternalId" -> PropertyType.Text.Property(spaceId)))
+          .getOrElse(Map[String, DataModelProperty[_]]()) ++
           Map("externalId" -> PropertyType.Text.Property(externalId))
 
         properties.getOrElse(Map.empty[String, DataModelProperty[_]]) ++ propsToAdd
@@ -79,7 +91,6 @@ final case class Node(
     )
 
 final case class DataModelNodeCreate(
-    spaceExternalId: String,
     model: DataModelIdentifier,
     overwrite: Boolean = false,
     items: Seq[PropertyMap]
@@ -87,6 +98,7 @@ final case class DataModelNodeCreate(
 
 final case class DataModelInstanceQuery(
     model: DataModelIdentifier,
+    spaceExternalId: String,
     filter: DomainSpecificLanguageFilter = EmptyFilter,
     sort: Option[Seq[String]] = None,
     limit: Option[Int] = None,
@@ -121,31 +133,40 @@ object DataModelInstanceQueryResponse {
 }
 
 final case class DataModelInstanceByExternalId(
-    items: Seq[CogniteExternalId],
-    model: DataModelIdentifier
+    model: DataModelIdentifier,
+    spaceExternalId: String,
+    items: Seq[CogniteExternalId]
 )
 
 final case class Edge(
+    override val spaceExternalId: Option[String],
     override val externalId: String,
     `type`: String,
-    startNode: String,
-    endNode: String,
+    startNode: DataModelIdentifier,
+    endNode: DataModelIdentifier,
     properties: Option[Map[String, DataModelProperty[_]]] = None
 ) extends PropertyMap(
       {
-        val propsToAdd: Map[String, DataModelProperty[_]] = Map(
-          "externalId" -> PropertyType.Text.Property(externalId),
-          "type" -> PropertyType.Text.Property(`type`),
-          "startNode" -> PropertyType.Text.Property(startNode),
-          "endNode" -> PropertyType.Text.Property(endNode)
-        )
+        val propsToAdd: Map[String, DataModelProperty[_]] =
+          spaceExternalId
+            .map(spaceId => Map("spaceExternalId" -> PropertyType.Text.Property(spaceId)))
+            .getOrElse(Map[String, DataModelProperty[_]]()) ++
+            Map(
+              "externalId" -> PropertyType.Text.Property(externalId),
+              "type" -> PropertyType.Text.Property(`type`),
+              "startNode" -> PropertyType.Array.Text.Property(
+                startNode.space.map(List(_)).getOrElse(List()) ++ List(startNode.model)
+              ),
+              "endNode" -> PropertyType.Array.Text.Property(
+                endNode.space.map(List(_)).getOrElse(List()) ++ List(endNode.model)
+              )
+            )
 
         properties.getOrElse(Map.empty[String, DataModelProperty[_]]) ++ propsToAdd
       }
     )
 
 final case class EdgeCreate(
-    spaceExternalId: String,
     model: DataModelIdentifier,
     autoCreateStartNodes: Boolean = false,
     autoCreateEndNodes: Boolean = false,

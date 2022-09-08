@@ -18,7 +18,6 @@ class Edges[F[_]](
     val requestSession: RequestSession[F],
     dataModels: DataModels[F]
 ) extends WithRequestSession[F]
-    with DeleteByExternalIds[F]
     with BaseUrl {
 
   import Edges._
@@ -26,7 +25,6 @@ class Edges[F[_]](
   override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/edges"
 
   def createItems(
-      spaceExternalId: String,
       model: DataModelIdentifier,
       autoCreateStartNodes: Boolean = false,
       autoCreateEndNodes: Boolean = false,
@@ -45,7 +43,6 @@ class Edges[F[_]](
       implicit val dataModelInstanceItemsDecoder: Decoder[Items[PropertyMap]] =
         Decoder.forProduct1("items")(Items.apply[PropertyMap])
       val body = EdgeCreate(
-        spaceExternalId,
         model,
         autoCreateStartNodes,
         autoCreateEndNodes,
@@ -99,11 +96,16 @@ class Edges[F[_]](
   )(implicit F: Async[F]): fs2.Stream[F, PropertyMap] =
     queryWithNextCursor(inputQuery, None, limit)
 
-  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
-    DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
+  def deleteByIdentifiers(identifiers: Seq[DataModelInstanceIdentifier]): F[Unit] =
+    requestSession.post[Unit, Unit, Items[DataModelInstanceIdentifier]](
+      Items(identifiers),
+      uri"$baseUrl/delete",
+      _ => ()
+    )
 
   def retrieveByExternalIds(
       model: DataModelIdentifier,
+      spaceExternalId: String,
       externalIds: Seq[String]
   ): F[DataModelInstanceQueryResponse] = {
     implicit val edgeQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] =
@@ -114,7 +116,7 @@ class Edges[F[_]](
       DataModelInstanceQueryResponse,
       DataModelInstanceByExternalId
     ](
-      DataModelInstanceByExternalId(externalIds.map(CogniteExternalId(_)), model),
+      DataModelInstanceByExternalId(model, spaceExternalId, externalIds.map(CogniteExternalId(_))),
       uri"$baseUrl/byids",
       value => value
     )
@@ -140,4 +142,9 @@ object Edges {
       : Encoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]] =
     deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
 
+  implicit val dmiIdentifierEncoder: Encoder[DataModelInstanceIdentifier] =
+    deriveEncoder[DataModelInstanceIdentifier]
+
+  implicit val dmiIdentifierItemsEncoder: Encoder[Items[DataModelInstanceIdentifier]] =
+    deriveEncoder[Items[DataModelInstanceIdentifier]]
 }

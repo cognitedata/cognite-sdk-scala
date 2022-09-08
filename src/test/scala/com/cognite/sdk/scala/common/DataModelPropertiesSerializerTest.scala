@@ -710,6 +710,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
 
       "work for primitive" in {
         val pm:PropertyMap = Node(
+          Some("mySpaceId"),
           "model_primitive",
           properties = Some(
             Map(
@@ -733,6 +734,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
         val res = pm.asJson.spaces2SortKeys
 
         val expectedJsonObj = Json.obj(
+          ("spaceExternalId", Json.fromString("mySpaceId")),
           ("externalId", Json.fromString("model_primitive")),
           ("prop_float64", Json.fromDoubleOrNull(23.0)),
           ("prop_float32", Json.fromDoubleOrNull(23.0)),
@@ -749,6 +751,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
       }
       "work for array" in {
         val pm: PropertyMap = Node(
+          Some("mySpaceId"),
           "model_array",
           properties = Some(
             Map(
@@ -777,6 +780,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
         )
 
         pm.asJson.spaces2SortKeys shouldBe Json.obj(
+          ("spaceExternalId", Json.fromString("mySpaceId")),
           ("externalId", Json.fromString("model_array")),
           ("arr_bool", Json.fromValues(List(Json.fromBoolean(true),
             Json.fromBoolean(false),
@@ -798,6 +802,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
       }
       "work for mixing both primitive and array" in {
         val res: PropertyMap = Node(
+          Some("mySpaceId"),
           "model_mixing",
           properties = Some(
             Map(
@@ -825,6 +830,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           )
         )
         res.asJson.spaces2SortKeys shouldBe Json.obj(
+          ("spaceExternalId", Json.fromString("mySpaceId")),
           ("externalId", Json.fromString("model_mixing")),
           ("prop_bool", Json.fromBoolean(true)),
           ("prop_float64", Json.fromDoubleOrNull(23.0)),

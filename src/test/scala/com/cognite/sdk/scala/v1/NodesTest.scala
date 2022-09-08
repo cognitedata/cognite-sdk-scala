@@ -57,8 +57,12 @@ class NodesTest
     )
   )
 
+  private val space = "test-space"
+
   val dataModelNodeToCreate1 =
-    Node("equipment_43",
+    Node(
+      Some(space),
+      "equipment_43",
       properties = Some(
         Map(
           "prop_string" -> PropertyType.Text.Property("EQ0001"),
@@ -71,6 +75,7 @@ class NodesTest
 
   val dataModelNodeCreate2 =
     Node(
+      Some(space),
       "equipment_44",
       properties = Some(
         Map(
@@ -83,6 +88,7 @@ class NodesTest
 
   val dataModelNodeToCreate3 =
     Node(
+      Some(space),
       "equipment_45",
       properties = Some(
         Map(
@@ -112,6 +118,7 @@ class NodesTest
   )
 
   val dmiArrayToCreate1 = Node(
+    Some(space),
     "equipment_42",
     properties = Some(
       Map(
@@ -129,6 +136,7 @@ class NodesTest
     )
 
   val dmiArrayToCreate2 = Node(
+    Some(space),
     "equipment_43",
     properties = Some(
       Map(
@@ -142,6 +150,7 @@ class NodesTest
     )
   )
   val dmiArrayToCreate3 = Node(
+    Some(space),
     "equipment_44",
     properties = Some(
       Map(
@@ -157,8 +166,6 @@ class NodesTest
 
   val dmiArrayToCreates =
     Seq(dmiArrayToCreate1, dmiArrayToCreate2, dmiArrayToCreate3)
-
-  private val space = "test-space"
 
   override def beforeAll(): Unit = {
     blueFieldClient.dataModels
@@ -190,7 +197,7 @@ class NodesTest
 
   "Insert data model instances" should "work with multiple input" in {
     val dataModelInstances = blueFieldClient.nodes
-      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = toCreates)
+      .createItems(DataModelIdentifier(Some(space), dataModel.externalId), items = toCreates)
       .unsafeRunSync()
       .toList
 
@@ -200,6 +207,7 @@ class NodesTest
 
   it should "fail if input data type is not correct" in {
     val invalidInput = Node(
+      Some(space),
       "equipment_47",
       properties = Some(
         Map(
@@ -208,7 +216,7 @@ class NodesTest
       )
     )
     val exception = the[CdpApiException] thrownBy blueFieldClient.nodes
-      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(invalidInput))
+      .createItems(DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(invalidInput))
       .unsafeRunSync()
 
     exception.message shouldBe "Value type mismatch. Value could not be coerced to the expected type."
@@ -216,7 +224,7 @@ class NodesTest
 
   private def insertDMIBeforeQuery() = {
     val dataModelInstances = blueFieldClient.nodes
-      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = toCreates)
+      .createItems(DataModelIdentifier(Some(space), dataModel.externalId), items = toCreates)
       .unsafeRunSync()
       .toList
     dataModelInstances.size shouldBe 3
@@ -225,13 +233,13 @@ class NodesTest
 
   private def deleteDMIAfterQuery() = {
     val toDeletes =
-      toCreates.map(_.externalId)
+      toCreates.map(n => DataModelInstanceIdentifier(n.spaceExternalId, n.externalId))
     blueFieldClient.nodes
-      .deleteByExternalIds(toDeletes)
+      .deleteByIdentifiers(toDeletes)
       .unsafeRunSync()
 
     // make sure that data is deleted
-    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModel.externalId))
+    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModel.externalId), space)
     val outputNoFilter = blueFieldClient.nodes
       .query(inputNoFilterQuery)
       .unsafeRunSync()
@@ -256,7 +264,8 @@ class NodesTest
 
   "Query data model instances" should "work with empty filter" in initAndCleanUpDataForQuery { _ =>
     val inputNoFilterQuery = DataModelInstanceQuery(
-      DataModelIdentifier(Some(space),dataModel.externalId)
+      DataModelIdentifier(Some(space),dataModel.externalId),
+      space
       )
     val outputNoFilter = blueFieldClient.nodes
       .query(inputNoFilterQuery)
@@ -267,6 +276,7 @@ class NodesTest
   it should "work with AND filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryAnd = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
+      space,
       DSLAndFilter(
         Seq(
           DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0002")),
@@ -289,6 +299,7 @@ class NodesTest
 
     val inputQueryAnd2 = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
+      space,
       DSLAndFilter(
         Seq(
           DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0001")),
@@ -308,6 +319,7 @@ class NodesTest
   it should "work with OR filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryOr = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
+      space,
       DSLOrFilter(
         Seq(
           DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0011")),
@@ -330,6 +342,7 @@ class NodesTest
   it should "work with NOT filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryNot = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
+      space,
       DSLNotFilter(
         DSLInFilter(
           Seq(space, dataModel.externalId, "prop_string"),
@@ -352,6 +365,7 @@ class NodesTest
   it should "work with PREFIX filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryPrefix = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
+      space,
       DSLPrefixFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ000"))
     )
     val outputQueryPrefix = blueFieldClient.nodes
@@ -369,6 +383,7 @@ class NodesTest
   it should "work with RANGE filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryRange = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
+      space,
       DSLRangeFilter(
         Seq(space, dataModel.externalId, "prop_float"),
         gte = Some(PropertyType.Float32.Property(1.64f))
@@ -388,6 +403,7 @@ class NodesTest
   it should "work with EXISTS filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryExists = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
+      space,
       DSLExistsFilter(Seq(space, dataModel.externalId, "prop_bool"))
     )
     val outputQueryExists = blueFieldClient.nodes
@@ -403,7 +419,7 @@ class NodesTest
 
   private def insertDMIArrayBeforeQuery() = {
     val dataModelInstances = blueFieldClient.nodes
-      .createItems(space, DataModelIdentifier(Some(space), dataModelArray.externalId), items = dmiArrayToCreates)
+      .createItems(DataModelIdentifier(Some(space), dataModelArray.externalId), items = dmiArrayToCreates)
       .unsafeRunSync()
       .toList
     dataModelInstances.size shouldBe 3
@@ -411,14 +427,11 @@ class NodesTest
   }
 
   private def deleteDMIArrayAfterQuery() = {
-    val toDeletes =
-      dmiArrayToCreates.map(_.externalId)
-    blueFieldClient.nodes
-      .deleteByExternalIds(toDeletes)
-      .unsafeRunSync()
+    val toDeletes = dmiArrayToCreates.map(n => DataModelInstanceIdentifier(n.spaceExternalId,n.externalId))
+    blueFieldClient.nodes.deleteByIdentifiers(toDeletes).unsafeRunSync()
 
     // make sure that data is deleted
-    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModelArray.externalId))
+    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModelArray.externalId), space)
     val outputNoFilter = blueFieldClient.nodes
       .query(inputNoFilterQuery)
       .unsafeRunSync()
@@ -441,6 +454,7 @@ class NodesTest
   it should "work with CONTAINS ANY filter" in initAndCleanUpArrayDataForQuery { _ =>
     val inputQueryContainsAnyString = DataModelInstanceQuery(
       DataModelIdentifier(Some(space), dataModelArray.externalId),
+      space,
       DSLContainsAnyFilter(
         Seq(space, dataModelArray.externalId, "array_string"),
         Seq(
@@ -485,6 +499,7 @@ class NodesTest
   it should "work with CONTAINS ALL filter" in initAndCleanUpArrayDataForQuery { _ =>
     val inputQueryContainsAllString = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModelArray.externalId),
+      space,
       DSLContainsAnyFilter(
         Seq(space, dataModelArray.externalId, "array_string"),
         Seq(
@@ -531,6 +546,7 @@ class NodesTest
   ignore should "work with sort" in initAndCleanUpDataForQuery { _ =>
     val inputQueryExists = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
+      space,
       DSLExistsFilter(Seq(dataModel.externalId, "prop_float")),
       Some(Seq(dataModel.externalId, "col_float:desc"))
     )
@@ -550,6 +566,7 @@ class NodesTest
   it should "work with limit" in initAndCleanUpDataForQuery { _ =>
     val inputQueryOr = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
+      space,
       DSLOrFilter(
         Seq(
           DSLEqualsFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ0011")),
@@ -578,6 +595,7 @@ class NodesTest
   it should "work with cursor and stream" in initAndCleanUpDataForQuery { _ =>
     val inputQueryPrefix = DataModelInstanceQuery(
       DataModelIdentifier(Some(space),dataModel.externalId),
+      space,
       DSLPrefixFilter(Seq(space, dataModel.externalId, "prop_string"), PropertyType.Text.Property("EQ00"))
     )
 
@@ -619,7 +637,7 @@ class NodesTest
   // Not yet supported
   "List data model instances" should "work with multiple externalIds" in initAndCleanUpDataForQuery{ _=>
     val outputList = blueFieldClient.nodes
-      .retrieveByExternalIds(DataModelIdentifier(Some(space), dataModel.externalId), toCreates.map(_.externalId))
+      .retrieveByExternalIds(DataModelIdentifier(Some(space), dataModel.externalId), space, toCreates.map(_.externalId))
       .unsafeRunSync()
       .items
       .toList
@@ -630,22 +648,19 @@ class NodesTest
   // Not yet supported
   ignore should "raise an exception if input has invalid externalId" in {
     the[CdpApiException] thrownBy blueFieldClient.nodes
-      .retrieveByExternalIds(DataModelIdentifier(Some(space), dataModel.externalId), Seq("toto"))
+      .retrieveByExternalIds(DataModelIdentifier(Some(space), dataModel.externalId), space, Seq("toto"))
       .unsafeRunSync()
       .items
       .toList
   }
 
   "Delete data model instances" should "work with multiple externalIds" in {
-    val toDeletes =
-      toCreates.map(_.externalId)
+    val toDeletes = toCreates.map(n => DataModelInstanceIdentifier(n.spaceExternalId,n.externalId))
 
-    blueFieldClient.nodes
-      .deleteByExternalIds(toDeletes)
-      .unsafeRunSync()
+    blueFieldClient.nodes.deleteByIdentifiers(toDeletes).unsafeRunSync()
 
     // make sure that data is deleted
-    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModel.externalId))
+    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModel.externalId), space)
     val outputNoFilter = blueFieldClient.nodes
       .query(inputNoFilterQuery)
       .unsafeRunSync()
@@ -656,7 +671,7 @@ class NodesTest
 
   it should "ignore unknown externalId" in {
     noException should be thrownBy blueFieldClient.nodes
-      .deleteByExternalIds(Seq("toto"))
+      .deleteByIdentifiers(Seq(DataModelInstanceIdentifier(Some(space), "toto")))
       .unsafeRunSync()
   }
 }
