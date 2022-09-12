@@ -61,7 +61,6 @@ class NodesTest
 
   val dataModelNodeToCreate1 =
     Node(
-      Some(space),
       "equipment_43",
       properties = Some(
         Map(
@@ -75,7 +74,6 @@ class NodesTest
 
   val dataModelNodeCreate2 =
     Node(
-      Some(space),
       "equipment_44",
       properties = Some(
         Map(
@@ -88,7 +86,6 @@ class NodesTest
 
   val dataModelNodeToCreate3 =
     Node(
-      Some(space),
       "equipment_45",
       properties = Some(
         Map(
@@ -118,7 +115,6 @@ class NodesTest
   )
 
   val dmiArrayToCreate1 = Node(
-    Some(space),
     "equipment_42",
     properties = Some(
       Map(
@@ -136,7 +132,6 @@ class NodesTest
     )
 
   val dmiArrayToCreate2 = Node(
-    Some(space),
     "equipment_43",
     properties = Some(
       Map(
@@ -150,7 +145,6 @@ class NodesTest
     )
   )
   val dmiArrayToCreate3 = Node(
-    Some(space),
     "equipment_44",
     properties = Some(
       Map(
@@ -197,7 +191,7 @@ class NodesTest
 
   "Insert data model instances" should "work with multiple input" in {
     val dataModelInstances = blueFieldClient.nodes
-      .createItems(DataModelIdentifier(Some(space), dataModel.externalId), items = toCreates)
+      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = toCreates)
       .unsafeRunSync()
       .toList
 
@@ -207,7 +201,6 @@ class NodesTest
 
   it should "fail if input data type is not correct" in {
     val invalidInput = Node(
-      Some(space),
       "equipment_47",
       properties = Some(
         Map(
@@ -216,7 +209,7 @@ class NodesTest
       )
     )
     val exception = the[CdpApiException] thrownBy blueFieldClient.nodes
-      .createItems(DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(invalidInput))
+      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(invalidInput))
       .unsafeRunSync()
 
     exception.message shouldBe "Value type mismatch. Value could not be coerced to the expected type."
@@ -224,7 +217,7 @@ class NodesTest
 
   private def insertDMIBeforeQuery() = {
     val dataModelInstances = blueFieldClient.nodes
-      .createItems(DataModelIdentifier(Some(space), dataModel.externalId), items = toCreates)
+      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = toCreates)
       .unsafeRunSync()
       .toList
     dataModelInstances.size shouldBe 3
@@ -232,11 +225,8 @@ class NodesTest
   }
 
   private def deleteDMIAfterQuery() = {
-    val toDeletes =
-      toCreates.map(n => DataModelInstanceIdentifier(n.spaceExternalId, n.externalId))
-    blueFieldClient.nodes
-      .deleteByIdentifiers(toDeletes)
-      .unsafeRunSync()
+    val toDeletes = toCreates.map(_.externalId)
+    blueFieldClient.nodes.deleteItems(toDeletes, space).unsafeRunSync()
 
     // make sure that data is deleted
     val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModel.externalId), space)
@@ -419,7 +409,7 @@ class NodesTest
 
   private def insertDMIArrayBeforeQuery() = {
     val dataModelInstances = blueFieldClient.nodes
-      .createItems(DataModelIdentifier(Some(space), dataModelArray.externalId), items = dmiArrayToCreates)
+      .createItems(space, DataModelIdentifier(Some(space), dataModelArray.externalId), items = dmiArrayToCreates)
       .unsafeRunSync()
       .toList
     dataModelInstances.size shouldBe 3
@@ -427,8 +417,8 @@ class NodesTest
   }
 
   private def deleteDMIArrayAfterQuery() = {
-    val toDeletes = dmiArrayToCreates.map(n => DataModelInstanceIdentifier(n.spaceExternalId,n.externalId))
-    blueFieldClient.nodes.deleteByIdentifiers(toDeletes).unsafeRunSync()
+    val toDeletes = dmiArrayToCreates.map(_.externalId)
+    blueFieldClient.nodes.deleteItems(toDeletes, space).unsafeRunSync()
 
     // make sure that data is deleted
     val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModelArray.externalId), space)
@@ -655,9 +645,9 @@ class NodesTest
   }
 
   "Delete data model instances" should "work with multiple externalIds" in {
-    val toDeletes = toCreates.map(n => DataModelInstanceIdentifier(n.spaceExternalId,n.externalId))
+    val toDeletes = toCreates.map(_.externalId)
 
-    blueFieldClient.nodes.deleteByIdentifiers(toDeletes).unsafeRunSync()
+    blueFieldClient.nodes.deleteItems(toDeletes, space).unsafeRunSync()
 
     // make sure that data is deleted
     val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModel.externalId), space)
@@ -671,7 +661,7 @@ class NodesTest
 
   it should "ignore unknown externalId" in {
     noException should be thrownBy blueFieldClient.nodes
-      .deleteByIdentifiers(Seq(DataModelInstanceIdentifier(Some(space), "toto")))
+      .deleteItems(Seq("toto"), space)
       .unsafeRunSync()
   }
 }

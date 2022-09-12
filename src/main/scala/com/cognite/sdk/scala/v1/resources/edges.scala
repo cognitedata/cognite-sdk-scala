@@ -25,6 +25,7 @@ class Edges[F[_]](
   override val baseUrl = uri"${requestSession.baseUrl}/datamodelstorage/edges"
 
   def createItems(
+      spaceExternalId: String,
       model: DataModelIdentifier,
       autoCreateStartNodes: Boolean = false,
       autoCreateEndNodes: Boolean = false,
@@ -43,6 +44,7 @@ class Edges[F[_]](
       implicit val dataModelInstanceItemsDecoder: Decoder[Items[PropertyMap]] =
         Decoder.forProduct1("items")(Items.apply[PropertyMap])
       val body = EdgeCreate(
+        spaceExternalId,
         model,
         autoCreateStartNodes,
         autoCreateEndNodes,
@@ -96,9 +98,9 @@ class Edges[F[_]](
   )(implicit F: Async[F]): fs2.Stream[F, PropertyMap] =
     queryWithNextCursor(inputQuery, None, limit)
 
-  def deleteByIdentifiers(identifiers: Seq[DataModelInstanceIdentifier]): F[Unit] =
-    requestSession.post[Unit, Unit, Items[DataModelInstanceIdentifier]](
-      Items(identifiers),
+  def deleteItems(externalIds: Seq[String], spaceExternalId: String): F[Unit] =
+    requestSession.post[Unit, Unit, SpacedItems[CogniteId]](
+      SpacedItems(spaceExternalId, externalIds.map(CogniteExternalId(_))),
       uri"$baseUrl/delete",
       _ => ()
     )
@@ -142,9 +144,6 @@ object Edges {
       : Encoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]] =
     deriveEncoder[ItemsWithIgnoreUnknownIds[DataModelInstanceByExternalId]]
 
-  implicit val dmiIdentifierEncoder: Encoder[DataModelInstanceIdentifier] =
-    deriveEncoder[DataModelInstanceIdentifier]
-
-  implicit val dmiIdentifierItemsEncoder: Encoder[Items[DataModelInstanceIdentifier]] =
-    deriveEncoder[Items[DataModelInstanceIdentifier]]
+  implicit val cogniteIdSpacedItemsEncoder: Encoder[SpacedItems[CogniteId]] =
+    deriveEncoder[SpacedItems[CogniteId]]
 }

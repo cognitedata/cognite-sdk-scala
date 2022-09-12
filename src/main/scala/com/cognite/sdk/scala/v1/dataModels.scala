@@ -10,7 +10,7 @@ final case class DataModelIdentifier(
     model: String
 )
 
-final case class DataModelInstanceIdentifier(
+final case class DirectRelationIdentifier(
     spaceExternalId: Option[String],
     externalId: String
 )
