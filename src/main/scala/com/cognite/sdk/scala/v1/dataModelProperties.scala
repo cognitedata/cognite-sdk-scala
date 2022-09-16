@@ -83,7 +83,7 @@ object PropertyType {
   case object Date extends PrimitivePropertyType[LocalDate]
   case object Geometry extends PrimitivePropertyType[String]
   case object Geography extends PrimitivePropertyType[String]
-  case object DirectRelation extends PropertyType[String]
+  case object DirectRelation extends PrimitivePropertyType[Seq[String]]
 
   object Array {
     val values: Seq[PropertyType[_]] = Seq[PropertyType[_]](

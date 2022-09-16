@@ -28,6 +28,8 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   private val dataPropDirectRelation = DataModelPropertyDefinition(PropertyType.DirectRelation)
   private val dataPropDate = DataModelPropertyDefinition(PropertyType.Date)
 
+  private val space = "test-space"
+
   private val dataModelNode = DataModel(
     s"Equipment-${fixedUuid}-node",
     Some(
@@ -55,26 +57,15 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     dataModelType = DataModelType.EdgeType
   )
 
-  /*private val directRelation = DataModelPropertyDefinition(
-    PropertyType.DirectRelation,
-    false,
-    Some(DataModelIdentifier(None, "node"))
-  )*/
-  private val nullableDirectRelation = DataModelPropertyDefinition(
-    PropertyType.DirectRelation,
-    true,
-    Some(DataModelIdentifier(None, "node"))
-  )
 
   private val newfixedUuid = "fcae0ec0"
   private val simpleModelEdge = DataModel(
     s"Equipment-${newfixedUuid}-e",
     Some(
       Map(
-        "startNode" -> dataPropString,
-        "type" -> nullableDirectRelation,
+        "prop_string" -> dataPropString,
         "prop_float" -> dataPropFloat,
-        "endNode" -> dataPropDate
+        "prop_date" -> dataPropDate
       )
     ),
     dataModelType = DataModelType.EdgeType
@@ -87,7 +78,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         Map(
           "prop_string" -> PropertyType.Text.Property("EQ0001"),
           "prop_float" -> PropertyType.Float32.Property(0.1f),
-          "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+          "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
           "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
         )
       )
@@ -122,14 +113,14 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   private val edgeToCreate1 =
     Edge(
       "ed_ge_12",
-      `type` = "ed_ge_12",
-      startNode = "node_1",
-      endNode = "node_2",
+      `type` = DirectRelationIdentifier(Some(space), "ed_ge_12"),
+      startNode = DirectRelationIdentifier(Some(space), "node_1"),
+      endNode = DirectRelationIdentifier(Some(space),"node_2"),
       properties = Some(
         Map(
           "prop_string" -> PropertyType.Text.Property("EQ0001"),
           "prop_float" -> PropertyType.Float32.Property(0.1f),
-          "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+          "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
           "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
         )
       )
@@ -138,9 +129,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   private val edgeToCreate2 =
     Edge(
       "ed_ge_13",
-      `type` = "ed_ge13",
-      startNode = "node_1",
-      endNode = "node_3",
+      `type` = DirectRelationIdentifier(Some(space), "ed_ge13"),
+      startNode = DirectRelationIdentifier(Some(space), "node_1"),
+      endNode = DirectRelationIdentifier(Some(space), "node_3"),
       properties = Some(
         Map(
           "prop_string" -> PropertyType.Text.Property("EQ0002"),
@@ -153,9 +144,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   private val edgeToCreate3 =
     Edge(
       "ed_ge_23",
-      `type` = "ed_ge23",
-      startNode = "node_2",
-      endNode = "node_3",
+      `type` = DirectRelationIdentifier(Some(space), "ed_ge23"),
+      startNode = DirectRelationIdentifier(Some(space), "node_2"),
+      endNode = DirectRelationIdentifier(Some(space), "node_3"),
       properties = Some(
         Map(
           "prop_string" -> PropertyType.Text.Property("EQ0011"),
@@ -169,9 +160,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
   private val simpleEdge1 = Edge(
     "simpleed_ge12",
-    `type` = "simpleed_ge12",
-    startNode = "node_1",
-    endNode = "node_2",
+    `type` = DirectRelationIdentifier(Some(space), "simpleed_ge12"),
+    startNode = DirectRelationIdentifier(Some(space), "node_1"),
+    endNode = DirectRelationIdentifier(Some(space), "node_2"),
     properties = Some(
       Map("prop_float" -> PropertyType.Float32.Property(0.1f))
     )
@@ -183,8 +174,6 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   private val dataPropArrayFloat = DataModelPropertyDefinition(PropertyType.Array.Float32, true)
   private val dataPropArrayInt = DataModelPropertyDefinition(PropertyType.Array.Int, true)
   */
-
-  private val space = "test-space"
 
   override def beforeAll(): Unit = {
     blueFieldClient.dataModels
@@ -207,14 +196,11 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   }
 
   override def afterAll(): Unit = {
-    blueFieldClient.nodes.deleteByExternalIds(nodeToCreates.map(_.externalId))
-      .unsafeRunSync()
+    blueFieldClient.nodes.deleteItems(nodeToCreates.map(_.externalId), space).unsafeRunSync()
 
-    blueFieldClient.edges.deleteByExternalId(simpleModelEdge.externalId)
-      .unsafeRunSync()
+    blueFieldClient.edges.deleteItems(Seq(simpleModelEdge.externalId), space).unsafeRunSync()
 
-    blueFieldClient.edges.deleteByExternalIds(edgesToCreates.map(_.externalId))
-      .unsafeRunSync()
+    blueFieldClient.edges.deleteItems(edgesToCreates.map(_.externalId), space).unsafeRunSync()
 
     /*blueFieldClient.dataModels
       .deleteItems(Seq(dataModel.externalId, dataModelArray.externalId), space)
@@ -259,14 +245,14 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     it should "fail if node reference does not exist" in {
       val invalidInput = Edge(
         "ed_ge12",
-        `type` = "ed_ge12",
-        startNode = "non_existing_node",
-        endNode = "node_2",
+        `type` = DirectRelationIdentifier(Some(space), "ed_ge12"),
+        startNode = DirectRelationIdentifier(Some(space), "non_existing_node"),
+        endNode = DirectRelationIdentifier(Some(space), "node_2"),
         properties = Some(
           Map(
             "prop_string" -> PropertyType.Text.Property("EQ0001"),
             "prop_float" -> PropertyType.Text.Property("abc"),
-            "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+            "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
             "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
           )
         )
@@ -278,21 +264,20 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
           items = Seq(invalidInput)
         )
         .unsafeRunSync()
-      exception.message.contains("Unknown resource of type node: '<cannot-be-determined>'") shouldBe true
-
+      exception.message.contains("Could not resolve direct relation: non_existing_node") shouldBe true
     }
 
     it should "fail if input data type is not correct" in {
       val invalidInput = Edge(
         "ed_ge12",
-        `type` = "ed_ge12",
-        startNode = "node_1",
-        endNode = "node_2",
+        `type` = DirectRelationIdentifier(Some(space), "ed_ge12"),
+        startNode = DirectRelationIdentifier(Some(space), "node_1"),
+        endNode = DirectRelationIdentifier(Some(space), "node_2"),
         properties = Some(
           Map(
             "prop_string" -> PropertyType.Text.Property("EQ0001"),
             "prop_float" -> PropertyType.Text.Property("abc"),
-            "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+            "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
             "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
           )
         )
@@ -334,15 +319,13 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
   private def deleteEdgesAfterQuery() = {
     val toDeletes = edgesToCreates.map(_.externalId)
-    blueFieldClient.edges.deleteByExternalIds(toDeletes).unsafeRunSync()
+    blueFieldClient.edges.deleteItems(toDeletes, space).unsafeRunSync()
     val simpleToDeletes = simpleEdgesToCreates.map(_.externalId)
-    blueFieldClient.edges.deleteByExternalIds(simpleToDeletes).unsafeRunSync()
-
-    blueFieldClient.edges.deleteByExternalIds(simpleEdgesToCreates.map(_.externalId)).unsafeRunSync()
+    blueFieldClient.edges.deleteItems(simpleToDeletes, space).unsafeRunSync()
 
     // make sure that data is deleted
     val inputNoFilterQuery = DataModelInstanceQuery(
-      DataModelIdentifier(Some(space), dataModelEdge.externalId)
+      DataModelIdentifier(Some(space), dataModelEdge.externalId), space
     )
     val outputNoFilter = blueFieldClient.edges
       .query(inputNoFilterQuery)
@@ -350,8 +333,9 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .items
       .toList
 
-    val simpleEdgeOut = blueFieldClient.edges.retrieveByExternalIds(      DataModelIdentifier(Some(space), simpleModelEdge.externalId)
-      , simpleToDeletes).unsafeRunSync().items.toList
+    val simpleEdgeOut = blueFieldClient.edges.retrieveByExternalIds(
+      DataModelIdentifier(Some(space), simpleModelEdge.externalId), space, simpleEdgesToCreates.map(_.externalId)
+    ).unsafeRunSync().items.toList
     simpleEdgeOut.isEmpty shouldBe true
     outputNoFilter.isEmpty shouldBe true
   }
@@ -367,12 +351,14 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       ()
     }
 
+  private val expectedSpaceExternalIdInProps = Map("spaceExternalId" -> PropertyType.Text.Property(space))
+
   private def fromCreatedToExpectedProps(edges: Set[PropertyMap]) =
-    edges.map(_.allProperties)
+    edges.map(_.allProperties ++ expectedSpaceExternalIdInProps)
 
   it should "work with empty filter" in initAndCleanUpDataForQuery { _ =>
     val inputNoFilterQuery = DataModelInstanceQuery(
-      DataModelIdentifier(Some(space), simpleModelEdge.externalId)
+      DataModelIdentifier(Some(space), simpleModelEdge.externalId), space
     )
     val outputNoFilter = blueFieldClient.edges
       .query(inputNoFilterQuery)
@@ -384,6 +370,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   it should "work with AND filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryAnd = DataModelInstanceQuery(
       DataModelIdentifier(Some(space), dataModelEdge.externalId),
+      space,
       DSLAndFilter(
         Seq(
           DSLEqualsFilter(
@@ -415,6 +402,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
     val inputQueryAnd2 = DataModelInstanceQuery(
       DataModelIdentifier(Some(space), dataModelEdge.externalId),
+      space,
       DSLAndFilter(
         Seq(
           DSLEqualsFilter(
@@ -440,6 +428,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   it should "work with OR filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryOr = DataModelInstanceQuery(
       DataModelIdentifier(Some(space), dataModelEdge.externalId),
+      space,
       DSLOrFilter(
         Seq(
           DSLEqualsFilter(
@@ -470,6 +459,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   it should "work with NOT filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryNot = DataModelInstanceQuery(
       DataModelIdentifier(Some(space), dataModelEdge.externalId),
+      space,
       DSLNotFilter(
         DSLInFilter(
           Seq(space, dataModelEdge.externalId, "prop_string"),
@@ -492,6 +482,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   it should "work with PREFIX filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryPrefix = DataModelInstanceQuery(
       DataModelIdentifier(Some(space), dataModelEdge.externalId),
+      space,
       DSLPrefixFilter(
         Seq(space, dataModelEdge.externalId, "prop_string"),
         PropertyType.Text.Property("EQ000")
@@ -512,6 +503,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   it should "work with RANGE filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryRange = DataModelInstanceQuery(
       DataModelIdentifier(Some(space), dataModelEdge.externalId),
+      space,
       DSLRangeFilter(
         Seq(space, dataModelEdge.externalId, "prop_float"),
         gte = Some(PropertyType.Float32.Property(1.64f))
@@ -531,6 +523,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   it should "work with EXISTS filter" in initAndCleanUpDataForQuery { _ =>
     val inputQueryExists = DataModelInstanceQuery(
       DataModelIdentifier(Some(space), dataModelEdge.externalId),
+      space,
       DSLExistsFilter(Seq(space, dataModelEdge.externalId, "prop_bool"))
     )
     val outputQueryExists = blueFieldClient.edges
@@ -548,11 +541,11 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     val toDeletes = edgesToCreates.map(_.externalId)
 
     blueFieldClient.edges
-      .deleteByExternalIds(toDeletes)
+      .deleteItems(toDeletes, space)
       .unsafeRunSync()
 
     // make sure that data is deleted
-    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModelEdge.externalId))
+    val inputNoFilterQuery = DataModelInstanceQuery(DataModelIdentifier(Some(space), dataModelEdge.externalId), space)
     val outputNoFilter = blueFieldClient.edges
       .query(inputNoFilterQuery)
       .unsafeRunSync()
@@ -563,7 +556,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
   it should "ignore unknown externalId" in {
     noException should be thrownBy blueFieldClient.edges
-      .deleteByExternalIds(Seq("toto"))
+      .deleteItems(Seq( "toto"), space)
       .unsafeRunSync()
   }
 
