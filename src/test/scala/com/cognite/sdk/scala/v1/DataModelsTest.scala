@@ -128,20 +128,24 @@ class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
     )
   )
 
-  val expectedDataModel1ListRes = dataModel1.copy(properties = dataModel1.properties.map(_ ++ Map("externalId" -> requiredTextProperty)))
+  val defaultTextProperties = Map(
+    "spaceExternalId" -> requiredTextProperty,
+    "externalId" -> requiredTextProperty
+  )
+
+  val expectedDataModel1ListRes = dataModel1.copy(properties = dataModel1.properties.map(_ ++ defaultTextProperties))
   val expectedDataModel2ListRes = expectedDataModel2Output.copy(
-    properties = expectedDataModel2Output.properties.map(_ ++ Map("externalId" -> requiredTextProperty)))
+    properties = expectedDataModel2Output.properties.map(_ ++ defaultTextProperties))
 
   private def insertDataModels = {
 
-    val outputCreates =
+    val outputCreates = Seq(dataModel1, expectedDataModel2Output)
     // TODO: enable transient datamodel tests when fdm team enables delete
     /*
       blueFieldClient.dataModels
         .createItems(Seq(dataModel1, dataModel2), space)
         .unsafeRunSync()
-        .toList */
-      Seq(dataModel1, expectedDataModel2Output)
+        .toList*/
 
     outputCreates.size should be >= 2
     retryWithExpectedResult[scala.collection.Seq[DataModel]](
