@@ -122,9 +122,9 @@ object DataModelInstanceQueryResponse {
 }
 
 final case class DataModelInstanceByExternalId(
-    model: DataModelIdentifier,
     spaceExternalId: String,
-    items: Seq[CogniteExternalId]
+    items: Seq[CogniteExternalId],
+    model: DataModelIdentifier
 )
 
 final case class Edge(

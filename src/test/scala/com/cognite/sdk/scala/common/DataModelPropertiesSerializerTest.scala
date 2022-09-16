@@ -78,7 +78,11 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                                         |            "prop_bool": true,
                                         |            "prop_float64": 23.0,
                                         |            "prop_string": "toto",
-                                        |            "prop_direct_relation": "Asset",
+                                        |            "prop_direct_relation":
+                                        |            [
+                                        |              "spaceExternalId",
+                                        |              "externalId"
+                                        |            ],
                                         |            "prop_date": "2022-03-22",
                                         |            "prop_timestamp": "2022-03-22T12:34:56.789+01:00",
                                         |            "arr_bool":
@@ -187,7 +191,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           "prop_bool" -> PropertyType.Boolean.Property(true),
           "prop_float64" -> PropertyType.Float64.Property(23.0),
           "prop_string" -> PropertyType.Text.Property("toto"),
-          "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+          "prop_direct_relation" -> PropertyType.DirectRelation.Property(List("spaceExternalId", "externalId")),
           "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22)),
           "prop_timestamp" -> PropertyType.Timestamp.Property(
             ZonedDateTime.of(2022, 3, 22, 12, 34, 56, 789000000, ZoneOffset.of("+01:00"))
@@ -219,7 +223,11 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
                                                            |            "externalId": "test",
                                                            |            "prop_float64": 23.0,
                                                            |            "prop_string": "toto",
-                                                           |            "prop_direct_relation": "Asset",
+                                                           |            "prop_direct_relation":
+                                                           |            [
+                                                           |               "spaceExternalId",
+                                                           |               "externalId"
+                                                           |            ],
                                                            |            "arr_bool":
                                                            |            [
                                                            |                true,
@@ -312,7 +320,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           "externalId" -> PropertyType.Text.Property("test"),
           "prop_float64" -> PropertyType.Float64.Property(23.0),
           "prop_string" -> PropertyType.Text.Property("toto"),
-          "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+          "prop_direct_relation" -> PropertyType.DirectRelation.Property(Seq("spaceExternalId", "externalId")),
           "arr_bool" -> PropertyType.Array.Boolean.Property(
             List(true, false, true)
           ),
@@ -720,7 +728,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
               "prop_float32" -> PropertyType.Float32.Property(23.0f),
               "prop_float64" -> PropertyType.Float64.Property(23.0),
               "prop_string" -> PropertyType.Text.Property("toto"),
-              "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+              "prop_direct_relation" -> PropertyType.DirectRelation.Property(List("spaceExternalId", "externalId")),
               "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22)),
               "prop_timestamp" -> PropertyType.Timestamp.Property(
                 ZonedDateTime.of(2022, 3, 22, 12, 34, 56,
@@ -736,7 +744,7 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
           ("externalId", Json.fromString("model_primitive")),
           ("prop_float64", Json.fromDoubleOrNull(23.0)),
           ("prop_float32", Json.fromDoubleOrNull(23.0)),
-          ("prop_direct_relation", Json.fromString("Asset")),
+          ("prop_direct_relation", Json.fromValues(List(Json.fromString("spaceExternalId"), Json.fromString("externalId")))),
           ("prop_int32", Json.fromInt(123)),
           ("prop_string", Json.fromString("toto")),
           ("prop_timestamp", Json.fromString("2022-03-22T12:34:56.789+01:00")),

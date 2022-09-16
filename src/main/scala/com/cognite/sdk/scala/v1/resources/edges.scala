@@ -118,7 +118,7 @@ class Edges[F[_]](
       DataModelInstanceQueryResponse,
       DataModelInstanceByExternalId
     ](
-      DataModelInstanceByExternalId(model, spaceExternalId, externalIds.map(CogniteExternalId(_))),
+      DataModelInstanceByExternalId(spaceExternalId, externalIds.map(CogniteExternalId(_)), model),
       uri"$baseUrl/byids",
       value => value
     )

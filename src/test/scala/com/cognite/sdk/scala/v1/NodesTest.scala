@@ -66,7 +66,7 @@ class NodesTest
         Map(
           "prop_string" -> PropertyType.Text.Property("EQ0001"),
           "prop_float" -> PropertyType.Float32.Property(0.1f),
-          "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+          "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
           "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
         )
       )
@@ -249,8 +249,10 @@ class NodesTest
       ()
     }
 
+  private val expectedSpaceExternalIdInProps = Map("spaceExternalId" -> PropertyType.Text.Property(space))
+
   private def fromCreatedToExpectedProps(instances: Set[PropertyMap]) =
-    instances.map(_.allProperties)
+    instances.map(_.allProperties ++ expectedSpaceExternalIdInProps)
 
   "Query data model instances" should "work with empty filter" in initAndCleanUpDataForQuery { _ =>
     val inputNoFilterQuery = DataModelInstanceQuery(
@@ -624,7 +626,6 @@ class NodesTest
     checkOutputProp(outputLimit3)
   }
 
-  // Not yet supported
   "List data model instances" should "work with multiple externalIds" in initAndCleanUpDataForQuery{ _=>
     val outputList = blueFieldClient.nodes
       .retrieveByExternalIds(DataModelIdentifier(Some(space), dataModel.externalId), space, toCreates.map(_.externalId))
@@ -632,7 +633,7 @@ class NodesTest
       .items
       .toList
     outputList.size shouldBe 3
-    outputList.map(_.allProperties).toSet shouldBe toCreates.map(_.allProperties).toSet
+    outputList.map(_.allProperties).toSet shouldBe toCreates.map(_.allProperties ++ expectedSpaceExternalIdInProps).toSet
   }
 
   // Not yet supported

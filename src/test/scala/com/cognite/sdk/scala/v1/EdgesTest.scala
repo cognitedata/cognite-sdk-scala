@@ -28,6 +28,8 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   private val dataPropDirectRelation = DataModelPropertyDefinition(PropertyType.DirectRelation)
   private val dataPropDate = DataModelPropertyDefinition(PropertyType.Date)
 
+  private val space = "test-space"
+
   private val dataModelNode = DataModel(
     s"Equipment-${fixedUuid}-node",
     Some(
@@ -55,32 +57,19 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     dataModelType = DataModelType.EdgeType
   )
 
-  /*private val directRelation = DataModelPropertyDefinition(
-    PropertyType.DirectRelation,
-    false,
-    Some(DataModelIdentifier(None, "node"))
-  )*/
-  private val nullableDirectRelation = DataModelPropertyDefinition(
-    PropertyType.DirectRelation,
-    true,
-    Some(DataModelIdentifier(None, "node"))
-  )
 
   private val newfixedUuid = "fcae0ec0"
   private val simpleModelEdge = DataModel(
     s"Equipment-${newfixedUuid}-e",
     Some(
       Map(
-        "startNode" -> dataPropString,
-        "type" -> nullableDirectRelation,
+        "prop_string" -> dataPropString,
         "prop_float" -> dataPropFloat,
-        "endNode" -> dataPropDate
+        "prop_date" -> dataPropDate
       )
     ),
     dataModelType = DataModelType.EdgeType
   )
-
-  private val space = "test-space"
 
   private val nodeToCreate1 =
     Node(
@@ -89,7 +78,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         Map(
           "prop_string" -> PropertyType.Text.Property("EQ0001"),
           "prop_float" -> PropertyType.Float32.Property(0.1f),
-          "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+          "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
           "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
         )
       )
@@ -131,7 +120,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         Map(
           "prop_string" -> PropertyType.Text.Property("EQ0001"),
           "prop_float" -> PropertyType.Float32.Property(0.1f),
-          "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+          "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
           "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
         )
       )
@@ -263,7 +252,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
           Map(
             "prop_string" -> PropertyType.Text.Property("EQ0001"),
             "prop_float" -> PropertyType.Text.Property("abc"),
-            "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+            "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
             "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
           )
         )
@@ -275,8 +264,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
           items = Seq(invalidInput)
         )
         .unsafeRunSync()
-      exception.message.contains("Unknown resource of type node: '<cannot-be-determined>'") shouldBe true
-
+      exception.message.contains("Could not resolve direct relation: non_existing_node") shouldBe true
     }
 
     it should "fail if input data type is not correct" in {
@@ -289,7 +277,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
           Map(
             "prop_string" -> PropertyType.Text.Property("EQ0001"),
             "prop_float" -> PropertyType.Text.Property("abc"),
-            "prop_direct_relation" -> PropertyType.DirectRelation.Property("Asset"),
+            "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
             "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
           )
         )
@@ -363,8 +351,10 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       ()
     }
 
+  private val expectedSpaceExternalIdInProps = Map("spaceExternalId" -> PropertyType.Text.Property(space))
+
   private def fromCreatedToExpectedProps(edges: Set[PropertyMap]) =
-    edges.map(_.allProperties)
+    edges.map(_.allProperties ++ expectedSpaceExternalIdInProps)
 
   it should "work with empty filter" in initAndCleanUpDataForQuery { _ =>
     val inputNoFilterQuery = DataModelInstanceQuery(
