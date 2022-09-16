@@ -18,7 +18,6 @@ class Nodes[F[_]](
     val requestSession: RequestSession[F],
     dataModels: DataModels[F]
 ) extends WithRequestSession[F]
-    with DeleteByExternalIds[F]
     with BaseUrl {
   import Nodes._
 
@@ -96,11 +95,16 @@ class Nodes[F[_]](
   )(implicit F: Async[F]): fs2.Stream[F, PropertyMap] =
     queryWithNextCursor(inputQuery, None, limit)
 
-  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
-    DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
+  def deleteItems(externalIds: Seq[String], spaceExternalId: String): F[Unit] =
+    requestSession.post[Unit, Unit, SpacedItems[CogniteId]](
+      SpacedItems(spaceExternalId, externalIds.map(CogniteExternalId(_))),
+      uri"$baseUrl/delete",
+      _ => ()
+    )
 
   def retrieveByExternalIds(
       model: DataModelIdentifier,
+      spaceExternalId: String,
       externalIds: Seq[String]
   ): F[DataModelInstanceQueryResponse] = {
     implicit val nodeQueryReponseDecoder: Decoder[DataModelInstanceQueryResponse] =
@@ -111,7 +115,7 @@ class Nodes[F[_]](
       DataModelInstanceQueryResponse,
       DataModelInstanceByExternalId
     ](
-      DataModelInstanceByExternalId(externalIds.map(CogniteExternalId(_)), model),
+      DataModelInstanceByExternalId(spaceExternalId, externalIds.map(CogniteExternalId(_)), model),
       uri"$baseUrl/byids",
       value => value
     )
@@ -134,4 +138,7 @@ object Nodes {
 
   implicit val dataModelInstanceByExternalIdEncoder: Encoder[DataModelInstanceByExternalId] =
     deriveEncoder[DataModelInstanceByExternalId]
+
+  implicit val cogniteIdSpacedItemsEncoder: Encoder[SpacedItems[CogniteId]] =
+    deriveEncoder[SpacedItems[CogniteId]]
 }

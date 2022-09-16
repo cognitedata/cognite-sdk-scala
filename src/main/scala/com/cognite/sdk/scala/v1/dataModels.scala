@@ -10,6 +10,11 @@ final case class DataModelIdentifier(
     model: String
 )
 
+final case class DirectRelationIdentifier(
+    spaceExternalId: Option[String],
+    externalId: String
+)
+
 final case class DataModelPropertyDefinition(
     `type`: PropertyType[_],
     nullable: Boolean = true,

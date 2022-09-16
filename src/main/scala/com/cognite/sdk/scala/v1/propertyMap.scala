@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.v1
 
 import cats.implicits.catsSyntaxEq
 import com.cognite.sdk.scala.common.DomainSpecificLanguageFilter.propEncoder
-import com.cognite.sdk.scala.common.{DomainSpecificLanguageFilter, EmptyFilter}
+import com.cognite.sdk.scala.common.{DomainSpecificLanguageFilter, EmptyFilter, SdkException}
 import com.cognite.sdk.scala.v1.resources.DataModels
 import io.circe.CursorOp.DownField
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, KeyEncoder}
@@ -13,11 +13,11 @@ sealed class PropertyMap(val allProperties: Map[String, DataModelProperty[_]]) {
   val externalId: String = allProperties.get("externalId") match {
     case Some(PropertyType.Text.Property(externalId)) => externalId
     case Some(invalidType) =>
-      throw new Exception(
-        s"externalId should be a TextProperty, it is ${invalidType.toString} instead"
+      throw new SdkException(
+        s"externalId should be a TextProperty, but a ${invalidType.toString} was used instead"
       )
     case None =>
-      throw new Exception("externalId is required")
+      throw new SdkException("externalId is required")
   }
 }
 
@@ -74,7 +74,7 @@ final case class Node(
         val propsToAdd: Map[String, DataModelProperty[_]] =
           Map("externalId" -> PropertyType.Text.Property(externalId))
 
-        properties.getOrElse(Map.empty[String, DataModelProperty[_]]) ++ propsToAdd
+        properties.map(_ ++ propsToAdd).getOrElse(propsToAdd)
       }
     )
 
@@ -87,6 +87,7 @@ final case class DataModelNodeCreate(
 
 final case class DataModelInstanceQuery(
     model: DataModelIdentifier,
+    spaceExternalId: String,
     filter: DomainSpecificLanguageFilter = EmptyFilter,
     sort: Option[Seq[String]] = None,
     limit: Option[Int] = None,
@@ -121,26 +122,35 @@ object DataModelInstanceQueryResponse {
 }
 
 final case class DataModelInstanceByExternalId(
+    spaceExternalId: String,
     items: Seq[CogniteExternalId],
     model: DataModelIdentifier
 )
 
 final case class Edge(
     override val externalId: String,
-    `type`: String,
-    startNode: String,
-    endNode: String,
+    `type`: DirectRelationIdentifier,
+    startNode: DirectRelationIdentifier,
+    endNode: DirectRelationIdentifier,
     properties: Option[Map[String, DataModelProperty[_]]] = None
 ) extends PropertyMap(
       {
-        val propsToAdd: Map[String, DataModelProperty[_]] = Map(
+        def relationIdentifierToPropertyArrayText(
+            dri: DirectRelationIdentifier
+        ): com.cognite.sdk.scala.v1.PropertyType.Array.Text.Property =
+          PropertyType.Array.Text.Property(
+            dri.spaceExternalId.map(List(_)).getOrElse(List.empty[String]) ++ List(
+              dri.externalId
+            )
+          )
+        val propsToAdd: Map[String, DataModelProperty[_]] = Map[String, DataModelProperty[_]](
           "externalId" -> PropertyType.Text.Property(externalId),
-          "type" -> PropertyType.Text.Property(`type`),
-          "startNode" -> PropertyType.Text.Property(startNode),
-          "endNode" -> PropertyType.Text.Property(endNode)
+          "type" -> relationIdentifierToPropertyArrayText(`type`),
+          "startNode" -> relationIdentifierToPropertyArrayText(startNode),
+          "endNode" -> relationIdentifierToPropertyArrayText(endNode)
         )
 
-        properties.getOrElse(Map.empty[String, DataModelProperty[_]]) ++ propsToAdd
+        properties.map(_ ++ propsToAdd).getOrElse(propsToAdd)
       }
     )
 
