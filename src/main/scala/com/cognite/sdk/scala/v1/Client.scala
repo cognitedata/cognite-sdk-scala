@@ -311,7 +311,7 @@ object GenericClient {
       response match {
         case Left(DeserializationException(_, error)) =>
           if (metadata.code.code == 429) {
-            throw  CdpApiException(
+            throw CdpApiException(
               url = uri"$uri",
               code = 429,
               missing = None,
