@@ -310,7 +310,7 @@ object GenericClient {
     asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
       response match {
         case Left(DeserializationException(_, error)) =>
-          if (metadata.code.code == 429) {
+          if (metadata.code.code === 429) {
             throw CdpApiException(
               url = uri"$uri",
               code = 429,
