@@ -14,7 +14,7 @@ import sttp.client3.circe.asJsonEither
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.capabilities.Effect
-import sttp.model.Uri
+import sttp.model.{StatusCode, Uri}
 import sttp.monad.MonadError
 
 import java.net.{InetAddress, UnknownHostException}
@@ -313,7 +313,7 @@ object GenericClient {
           if (metadata.code.code === 429) {
             throw CdpApiException(
               url = uri"$uri",
-              code = 429,
+              code = StatusCode.TooManyRequests.code,
               missing = None,
               duplicated = None,
               missingFields = None,
