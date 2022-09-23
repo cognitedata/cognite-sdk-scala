@@ -1,29 +1,29 @@
 import wartremover.Wart
 import sbt.project
 
-val scala3 = "3.1.3"
-val scala213 = "2.13.8"
-val scala212 = "2.12.16"
+val scala3 = "3.2.0"
+val scala213 = "2.13.9"
+val scala212 = "2.12.17"
 val supportedScalaVersions = List(scala212, scala213, scala3)
 
 // This is used only for tests.
 val jettyTestVersion = "9.4.48.v20220622"
 
 val sttpVersion = "3.5.2"
-val circeVersion = "0.14.1"
+val circeVersion = "0.14.2"
 val catsEffectVersion = "3.3.14"
-val fs2Version = "3.2.11"
+val fs2Version = "3.3.0"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
-ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.4"
+ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.5"
 
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.3.3",
+  version := "2.3.4-SNAPSHOT",
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
