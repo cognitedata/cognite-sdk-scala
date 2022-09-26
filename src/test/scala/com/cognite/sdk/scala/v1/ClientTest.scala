@@ -48,9 +48,12 @@ class ClientTest extends SdkTestSpec with OptionValues {
       "{\n  \"items\": [\n{\n  \"id\": 5238663994907390,\n  \"createdTime\":" +
         " 1550760030463,\n  \"name\": \"model_793601675501121482\"\n}\n  ]\n}",
       StatusCode.Ok, "", Seq(Header("x-request-id", "test-request-header")))
+
+    val errorTooManyRequestsNoBody = Response("", StatusCode.TooManyRequests, "", Seq(Header("x-request-id", "test-request-header")))
+
     SttpBackendStub(implicitly[MonadAsyncError[IO]])
       .whenAnyRequest
-      .thenRespondCyclicResponses(errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse
+      .thenRespondCyclicResponses(errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse, errorTooManyRequestsNoBody
       )
   }
   private val loginStatusResponseWithApiKeyId = Response(
@@ -452,4 +455,19 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val requestKO = basicRequest.get(uri"https://api.cognitedata.com/projectName/sessions/token")
     requestKO.send(backendRetryKO).unsafeRunSync().code shouldBe StatusCode.TooManyRequests
   }
+
+  it should "fail with CdpApiException on 429 responses with empty body from CDF API" in {
+    assertThrows[CdpApiException] {
+      GenericClient[IO](
+        "scala-sdk-test",
+        projectName,
+        baseUrl,
+        auth
+      )(
+        implicitly,
+        makeTestingBackend()
+      ).threeDModels.list().compile.toList.unsafeRunSync()
+    }
+  }
+
 }
