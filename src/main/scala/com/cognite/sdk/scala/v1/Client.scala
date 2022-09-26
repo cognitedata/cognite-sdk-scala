@@ -14,7 +14,7 @@ import sttp.client3.circe.asJsonEither
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.capabilities.Effect
-import sttp.model.Uri
+import sttp.model.{StatusCode, Uri}
 import sttp.monad.MonadError
 
 import java.net.{InetAddress, UnknownHostException}
@@ -309,6 +309,17 @@ object GenericClient {
   ): ResponseAs[R, Any] =
     asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
       response match {
+        case Left(DeserializationException(_, _))
+            if metadata.code.code === StatusCode.TooManyRequests.code =>
+          throw CdpApiException(
+            url = uri"$uri",
+            code = StatusCode.TooManyRequests.code,
+            missing = None,
+            duplicated = None,
+            missingFields = None,
+            message = "Too many requests.",
+            requestId = metadata.header("x-request-id")
+          )
         case Left(DeserializationException(_, error)) =>
           throw SdkException(
             s"Failed to parse response, reason: ${error.getMessage}",
