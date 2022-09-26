@@ -309,7 +309,8 @@ object GenericClient {
   ): ResponseAs[R, Any] =
     asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
       response match {
-        case Left(DeserializationException(_, _)) if metadata.code.code === StatusCode.TooManyRequests.code =>
+        case Left(DeserializationException(_, _))
+            if metadata.code.code === StatusCode.TooManyRequests.code =>
           throw CdpApiException(
             url = uri"$uri",
             code = StatusCode.TooManyRequests.code,
@@ -317,14 +318,15 @@ object GenericClient {
             duplicated = None,
             missingFields = None,
             message = "Too many requests.",
-            requestId = metadata.header("x-request-id"))
+            requestId = metadata.header("x-request-id")
+          )
         case Left(DeserializationException(_, error)) =>
-            throw SdkException(
-              s"Failed to parse response, reason: ${error.getMessage}",
-              Some(uri),
-              metadata.header("x-request-id"),
-              Some(metadata.code.code)
-            )
+          throw SdkException(
+            s"Failed to parse response, reason: ${error.getMessage}",
+            Some(uri),
+            metadata.header("x-request-id"),
+            Some(metadata.code.code)
+          )
         case Left(HttpError(cdpApiError, _)) =>
           throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
         case Right(value) => mapResult(value)
