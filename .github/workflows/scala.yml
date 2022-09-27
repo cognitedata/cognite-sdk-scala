@@ -156,7 +156,7 @@ jobs:
         AIZE_CLIENT_SECRET: ${{ secrets.AIZE_CLIENT_SECRET }}
       # run: sbt test
       run: |
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalastyle test:scalastyle scalafmtCheck coverage test coverageReport
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalastyle test:scalastyle scalafmtCheck coverage test
 
     - name: Upload test coverage report
       uses: codecov/codecov-action@v1
