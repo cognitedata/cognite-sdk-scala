@@ -36,7 +36,7 @@ object PropertyMap {
   ): Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]] =
     res.filter {
       case Right(_) => true
-      case Left(DecodingFailure("Attempt to decode value on failed cursor", downfields)) =>
+      case Left(DecodingFailure("Missing required field", downfields)) =>
         val nullableProps = downfields
           .filter(_.isInstanceOf[DownField])
           .map(_.asInstanceOf[DownField])
