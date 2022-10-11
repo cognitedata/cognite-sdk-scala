@@ -261,4 +261,39 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
                                      |}""".stripMargin
   }
 
+  it should "run transformation and get job by id" in {
+    val uniquePrefix = shortRandomUUID()
+
+    val newTransformation = TransformationCreate(
+      s"$uniquePrefix-transformation-sdk-test",
+      Some(s"select 1"),
+      Some(GeneralDataSource("events")),
+      conflictMode = Some("upsert"),
+      Some(false),
+      sourceOidcCredentials = Some(credentials),
+      destinationOidcCredentials = Some(credentials),
+      externalId = s"$uniquePrefix-transformation-sdk-test",
+      ignoreNullFields = true,
+      dataSetId = None
+    )
+    val transformationExternalId = newTransformation.externalId
+
+    try {
+      val resCreates =
+        client.transformations.createItems(Items(Seq(newTransformation))).unsafeRunSync()
+      resCreates.size shouldBe 1
+      val newJob = client.transformations.run(transformationExternalId).unsafeRunSync()
+      newJob.transformationExternalId shouldBe newTransformation.externalId
+      val retrievedJobs = client.transformations.retrieveJobByIds(Seq(newJob.id)).unsafeRunSync()
+      retrievedJobs.map(_.id) should contain(newJob.id)
+    } finally
+      try
+        client.transformations
+          .delete(Seq(CogniteExternalId(transformationExternalId)), true)
+          .unsafeRunSync()
+      catch {
+        case NonFatal(_) => // ignore
+      }
+  }
+
 }

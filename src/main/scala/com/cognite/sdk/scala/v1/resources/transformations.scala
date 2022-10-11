@@ -9,6 +9,7 @@ import com.cognite.sdk.scala.v1._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import sttp.client3._
+import sttp.client3.circe._
 
 class Transformations[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -113,6 +114,21 @@ class Transformations[F[_]](val requestSession: RequestSession[F])
       Constants.defaultBatchSize,
       aggregatedProperties
     )
+
+  def run(externalId: String): F[JobDetails] =
+    requestSession.post[JobDetails, JobDetails, TransformationRun](
+      TransformationRun(externalId),
+      uri"$baseUrl/run",
+      value => value
+    )
+
+  def retrieveJobByIds(ids: Seq[Long], ignoreUnknownIds: Boolean = true): F[Seq[JobDetails]] =
+    requestSession
+      .post[Seq[JobDetails], Items[JobDetails], ItemsWithIgnoreUnknownIds[CogniteInternalId]](
+        ItemsWithIgnoreUnknownIds(ids.map(CogniteInternalId.apply), ignoreUnknownIds),
+        uri"$baseUrl/jobs/byids",
+        value => value.items
+      )
 }
 
 object Transformations {
@@ -130,6 +146,7 @@ object Transformations {
     ).reduceLeftOption(_ or _).getOrElse(Decoder[GeneralDataSource].widen)
 
   implicit val jobDetailDecoder: Decoder[JobDetails] = deriveDecoder[JobDetails]
+  implicit val jobDetailItemsDecoder: Decoder[Items[JobDetails]] = deriveDecoder[Items[JobDetails]]
 
   implicit val readDecoder: Decoder[TransformationRead] = deriveDecoder[TransformationRead]
   implicit val readItemsWithCursorDecoder: Decoder[ItemsWithCursor[TransformationRead]] =
@@ -165,4 +182,12 @@ object Transformations {
 
   implicit val transformationsFilterRequestEncoder: Encoder[FilterRequest[TransformationsFilter]] =
     deriveEncoder[FilterRequest[TransformationsFilter]]
+
+  implicit val transformationRunEncoder: Encoder[TransformationRun] =
+    deriveEncoder[TransformationRun]
+
+  implicit val itemsWithIgnoreUnknownIdsEncoder
+      : Encoder[ItemsWithIgnoreUnknownIds[CogniteInternalId]] =
+    deriveEncoder[ItemsWithIgnoreUnknownIds[CogniteInternalId]]
+
 }
