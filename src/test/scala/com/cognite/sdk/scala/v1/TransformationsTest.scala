@@ -47,7 +47,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       TransformationCreate(
         s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         Some(s"select ${i.toString}"),
-        Some(GeneralDataSource("events")),
+        Some(GenericDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
         sourceOidcCredentials = Some(credentials),
@@ -96,7 +96,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       TransformationCreate(
         s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         Some(s"select ${i.toString}"),
-        Some(GeneralDataSource("events")),
+        Some(GenericDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
         sourceOidcCredentials = Some(credentials),
@@ -133,7 +133,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       TransformationCreate(
         s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         Some(s"select abc ${i.toString}"),
-        Some(GeneralDataSource("events")),
+        Some(GenericDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
         sourceOidcCredentials = Some(credentials),
@@ -174,7 +174,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       resFilterUpsertEvents.size should be >= transformationsToCreate.size
       resFilterUpsertEvents
         .map(_.destination)
-        .toSet shouldBe Set(GeneralDataSource("events"))
+        .toSet shouldBe Set(GenericDataSource("events"))
       resFilterUpsertEvents.map(_.conflictMode).toSet shouldBe Set("upsert")
 
       val max1DaysAgo = TimeFilter(max = Some(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli))
@@ -259,6 +259,41 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
                                      |  "audience" : "audience",
                                      |  "scopes" : "scope-1 scope-2 scope-3"
                                      |}""".stripMargin
+  }
+
+  it should "run transformation and get job by id" in {
+    val uniquePrefix = shortRandomUUID()
+
+    val newTransformation = TransformationCreate(
+      s"$uniquePrefix-transformation-sdk-test",
+      Some(s"select 1"),
+      Some(GenericDataSource("events")),
+      conflictMode = Some("upsert"),
+      Some(false),
+      sourceOidcCredentials = Some(credentials),
+      destinationOidcCredentials = Some(credentials),
+      externalId = s"$uniquePrefix-transformation-sdk-test",
+      ignoreNullFields = true,
+      dataSetId = None
+    )
+    val transformationExternalId = newTransformation.externalId
+
+    try {
+      val resCreates =
+        client.transformations.createItems(Items(Seq(newTransformation))).unsafeRunSync()
+      resCreates.size shouldBe 1
+      val newJob = client.transformations.run(transformationExternalId).unsafeRunSync()
+      newJob.transformationExternalId shouldBe newTransformation.externalId
+      val retrievedJobs = client.transformations.retrieveJobByIds(Seq(newJob.id)).unsafeRunSync()
+      retrievedJobs.map(_.id) should contain(newJob.id)
+    } finally
+      try
+        client.transformations
+          .delete(Seq(CogniteExternalId(transformationExternalId)), true)
+          .unsafeRunSync()
+      catch {
+        case NonFatal(_) => // ignore
+      }
   }
 
 }

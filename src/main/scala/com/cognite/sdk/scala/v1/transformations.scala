@@ -71,17 +71,19 @@ object TransformationOwner {
 }
 
 sealed trait DestinationDataSource
-sealed case class GeneralDataSource(`type`: String) extends DestinationDataSource
+sealed case class GenericDataSource(`type`: String) extends DestinationDataSource
 sealed case class RawDataSource(`type`: String, database: String, table: String)
     extends DestinationDataSource
 
 sealed case class SequenceRowDataSource(`type`: String, externalId: String)
     extends DestinationDataSource
 
+final case class TransformationRun(externalId: String)
+
 final case class JobDetails(
-    id: Int,
+    id: Long,
     uuid: String,
-    transformationId: Int,
+    transformationId: Long,
     transformationExternalId: String,
     sourceProject: String,
     destinationProject: String,
