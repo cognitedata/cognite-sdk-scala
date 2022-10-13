@@ -47,7 +47,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       TransformationCreate(
         s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         Some(s"select ${i.toString}"),
-        Some(GeneralDataSource("events")),
+        Some(GenericDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
         sourceOidcCredentials = Some(credentials),
@@ -96,7 +96,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       TransformationCreate(
         s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         Some(s"select ${i.toString}"),
-        Some(GeneralDataSource("events")),
+        Some(GenericDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
         sourceOidcCredentials = Some(credentials),
@@ -133,7 +133,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       TransformationCreate(
         s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         Some(s"select abc ${i.toString}"),
-        Some(GeneralDataSource("events")),
+        Some(GenericDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
         sourceOidcCredentials = Some(credentials),
@@ -174,7 +174,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       resFilterUpsertEvents.size should be >= transformationsToCreate.size
       resFilterUpsertEvents
         .map(_.destination)
-        .toSet shouldBe Set(GeneralDataSource("events"))
+        .toSet shouldBe Set(GenericDataSource("events"))
       resFilterUpsertEvents.map(_.conflictMode).toSet shouldBe Set("upsert")
 
       val max1DaysAgo = TimeFilter(max = Some(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli))
@@ -267,7 +267,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
     val newTransformation = TransformationCreate(
       s"$uniquePrefix-transformation-sdk-test",
       Some(s"select 1"),
-      Some(GeneralDataSource("events")),
+      Some(GenericDataSource("events")),
       conflictMode = Some("upsert"),
       Some(false),
       sourceOidcCredentials = Some(credentials),

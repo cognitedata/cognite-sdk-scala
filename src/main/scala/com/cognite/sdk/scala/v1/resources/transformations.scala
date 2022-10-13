@@ -132,18 +132,18 @@ class Transformations[F[_]](val requestSession: RequestSession[F])
 }
 
 object Transformations {
-  implicit val generalDataSourceDecoder: Decoder[GeneralDataSource] =
-    deriveDecoder[GeneralDataSource]
+  implicit val generalDataSourceDecoder: Decoder[GenericDataSource] =
+    deriveDecoder[GenericDataSource]
   implicit val rawDataSourceDecoder: Decoder[RawDataSource] = deriveDecoder[RawDataSource]
   implicit val seqRowDataSourceDecoder: Decoder[SequenceRowDataSource] =
     deriveDecoder[SequenceRowDataSource]
 
   implicit val destinationDataSourceDecoder: Decoder[DestinationDataSource] =
     List[Decoder[DestinationDataSource]](
-      Decoder[GeneralDataSource].widen,
+      Decoder[GenericDataSource].widen,
       Decoder[RawDataSource].widen,
       Decoder[SequenceRowDataSource].widen
-    ).reduceLeftOption(_ or _).getOrElse(Decoder[GeneralDataSource].widen)
+    ).reduceLeftOption(_ or _).getOrElse(Decoder[GenericDataSource].widen)
 
   implicit val jobDetailDecoder: Decoder[JobDetails] = deriveDecoder[JobDetails]
   implicit val jobDetailItemsDecoder: Decoder[Items[JobDetails]] = deriveDecoder[Items[JobDetails]]
@@ -154,14 +154,14 @@ object Transformations {
   implicit val readItemsDecoder: Decoder[Items[TransformationRead]] =
     deriveDecoder[Items[TransformationRead]]
 
-  implicit val generalDataSourceEncoder: Encoder[GeneralDataSource] =
-    deriveEncoder[GeneralDataSource]
+  implicit val generalDataSourceEncoder: Encoder[GenericDataSource] =
+    deriveEncoder[GenericDataSource]
   implicit val rawDataSourceEncoder: Encoder[RawDataSource] = deriveEncoder[RawDataSource]
   implicit val sequenceRowDataSourceEncoder: Encoder[SequenceRowDataSource] =
     deriveEncoder[SequenceRowDataSource]
 
   implicit val destinationDataSourceEncoder: Encoder[DestinationDataSource] = Encoder.instance {
-    case g: GeneralDataSource => generalDataSourceEncoder(g)
+    case g: GenericDataSource => generalDataSourceEncoder(g)
     case r: RawDataSource => rawDataSourceEncoder(r)
     case sr: SequenceRowDataSource => sequenceRowDataSourceEncoder(sr)
   }

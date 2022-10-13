@@ -71,7 +71,7 @@ object TransformationOwner {
 }
 
 sealed trait DestinationDataSource
-sealed case class GeneralDataSource(`type`: String) extends DestinationDataSource
+sealed case class GenericDataSource(`type`: String) extends DestinationDataSource
 sealed case class RawDataSource(`type`: String, database: String, table: String)
     extends DestinationDataSource
 
