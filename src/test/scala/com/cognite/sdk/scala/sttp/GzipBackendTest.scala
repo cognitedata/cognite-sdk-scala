@@ -122,7 +122,7 @@ class GzipBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAfter 
 
   it should "not interfere with multipart bodies" in {
     val request = basicRequest
-      .multipartBody(
+      .multipartBody[Any](
         multipart("string", "abc"),
         multipart("inputstream", new ByteArrayInputStream("defg".getBytes(StandardCharsets.UTF_8)))
       )

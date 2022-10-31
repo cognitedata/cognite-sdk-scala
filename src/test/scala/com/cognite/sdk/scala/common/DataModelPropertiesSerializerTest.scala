@@ -57,7 +57,9 @@ class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
     res.isLeft shouldBe true
     val Left(decodingFailure) = res
     val error = DecodingFailure.unapply(decodingFailure)
-    error.map(_._1).getOrElse("").contains(propType) shouldBe true
+    val errorMessage =  error.map(_._1).getOrElse("")
+    errorMessage.contains("with wrong type, expecting") || errorMessage.contains("could not be parsed") ||
+      errorMessage.contains(propType) shouldBe true
     val downFields = error
       .map(_._2)
       .getOrElse(List.empty[DownField])
