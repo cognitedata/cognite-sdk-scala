@@ -102,3 +102,5 @@ final case class FunctionScheduleCreate(
     cronExpression: String = "",
     data: Option[Json] = None
 )
+
+final case class FunctionCallData(data: Json, nonce: String)

@@ -64,7 +64,7 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
   private lazy val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
   private lazy val scopes: List[String] = List(baseUrl + "/.default")
 
-  private lazy val credentials = OAuth2.ClientCredentials(
+  lazy val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
       clientId = clientId,
       clientSecret = clientSecret,

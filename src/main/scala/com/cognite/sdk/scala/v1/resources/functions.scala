@@ -78,9 +78,9 @@ class FunctionCalls[F[_]](val requestSession: RequestSession[F], val functionId:
   import FunctionCalls._
   override val baseUrl = uri"${requestSession.baseUrl}/functions/$functionId/calls"
 
-  def callFunction(data: Json): F[FunctionCall] =
-    requestSession.post[FunctionCall, FunctionCall, Json](
-      data,
+  def callFunction(data: Json, nonce: String): F[FunctionCall] =
+    requestSession.post[FunctionCall, FunctionCall, FunctionCallData](
+      FunctionCallData(data, nonce),
       uri"${baseUrl.toString.dropRight(1)}",
       value => value
     )
@@ -149,6 +149,8 @@ object FunctionCalls {
   implicit val deleteRequestWithRecursiveAndIgnoreUnknownIdsEncoder
       : Encoder[ItemsWithRecursiveAndIgnoreUnknownIds] =
     deriveEncoder[ItemsWithRecursiveAndIgnoreUnknownIds]
+  implicit val functionCallDataEncoder: Encoder[FunctionCallData] =
+    deriveEncoder[FunctionCallData]
 }
 
 class FunctionSchedules[F[_]](val requestSession: RequestSession[F])
