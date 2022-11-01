@@ -74,11 +74,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, responseForSessionCreated)
 
-    val resCreate = client.sessions.createWithTokenExchangeFlow(
-      Items[SessionCreateWithToken](
-        Seq(SessionCreateWithToken(true))
-      )
-    )
+    val resCreate = client.sessions.createWithTokenExchangeFlow()
     resCreate shouldBe expectedResponse
   }
 
