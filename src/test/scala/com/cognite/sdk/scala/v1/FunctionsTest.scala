@@ -16,8 +16,6 @@ import com.cognite.sdk.scala.common._
   )
 )
 class FunctionsTest extends SdkTestSpec with ReadBehaviours {
-  override lazy val client: GenericClient[cats.Id] = GenericClient.forAuth[cats.Id](
-    "playground", auth, apiVersion = Some("playground"))(implicitly, sttpBackend)
 
   ignore should "read function items" in {
     client.functions.read().items should not be empty
@@ -77,8 +75,11 @@ class FunctionsTest extends SdkTestSpec with ReadBehaviours {
     schedule.cronExpression should equal(Some("0 0 1 * *"))
   }
 
-  ignore should "call function" in {
-    val res = client.functionCalls(13109660923970L).callFunction(Json.fromJsonObject(JsonObject.empty))
+  it should "call function" in {
+    val nonce = client.sessions
+      .createWithClientCredentialFlow(Items(Seq(SessionCreateWithCredential(credentials.clientId, credentials.clientSecret))))
+      .map(_.nonce).head
+    val res = client.functionCalls(3561851852650878L).callFunction(Json.fromJsonObject(JsonObject.empty), nonce)
     res.status should equal(Some("Running"))
   }
 
