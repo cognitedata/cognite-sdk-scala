@@ -159,7 +159,8 @@ def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
       .exclude("org.typelevel", "cats-core_2.13"),
     ("io.circe" %% "circe-parser" % circeVersion)
       .exclude("org.typelevel", "cats-core_2.12")
-      .exclude("org.typelevel", "cats-core_2.13")
+      .exclude("org.typelevel", "cats-core_2.13"),
+    "io.circe" %% "circe-generic-extras" % circeVersion
   )
 
 scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
