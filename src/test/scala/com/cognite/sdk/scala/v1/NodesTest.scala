@@ -211,8 +211,7 @@ class NodesTest
     val exception = the[CdpApiException] thrownBy blueFieldClient.nodes
       .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(invalidInput))
       .unsafeRunSync()
-
-    exception.message shouldBe "Value type mismatch. Value could not be coerced to the expected type."
+    exception.message shouldBe "Value type mismatch"
   }
 
   private def insertDMIBeforeQuery() = {

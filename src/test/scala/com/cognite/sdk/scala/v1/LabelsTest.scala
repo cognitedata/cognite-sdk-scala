@@ -13,12 +13,20 @@ import com.cognite.sdk.scala.common.{ReadBehaviours, RetryWhile, SdkTestSpec, Wr
 )
 class LabelsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
-
-  def createRandItems(): Seq[LabelCreate] =
+  private val labelDataSet = "test-ds-labels-scala-sdk"
+  def createRandItems(): Seq[LabelCreate] = {
+    val dataSet: Seq[DataSet] = client.dataSets.retrieveByExternalIds(Seq(labelDataSet), ignoreUnknownIds = true)
+    val dataSetId = if (dataSet.isEmpty) {
+      client.dataSets.createOne(DataSetCreate(name = Some(labelDataSet), externalId = Some(labelDataSet))).id
+    } else {
+      dataSet.head.id
+    }
     Seq(
       LabelCreate(name = "scala-sdk-read-example-1", externalId = shortRandom()),
-      LabelCreate(name = "scala-sdk-read-example-2", externalId = shortRandom())
+      LabelCreate(name = "scala-sdk-read-example-2", externalId = shortRandom(), dataSetId = Some(dataSetId))
     )
+  }
+
 
   it should behave like writableWithRequiredExternalId(
     client.labels,
@@ -53,5 +61,14 @@ class LabelsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     val byName = client.labels.filter(LabelsFilter(name = Some(name))).compile.toVector
     byName should have length 1
     byName.head.externalId should be(randItems.last.externalId)
+
+    val dataSetId = client.dataSets.retrieveByExternalId(labelDataSet).id
+    val byDataSetId = client.labels.filter(LabelsFilter(dataSetIds = Some(Seq(CogniteInternalId(dataSetId))))).compile.toVector
+    byDataSetId should have length 1
+    byDataSetId.head.externalId should be(randItems.last.externalId)
+
+    val bydataSetExternalId = client.labels.filter(LabelsFilter(dataSetIds = Some(Seq(CogniteExternalId(labelDataSet))))).compile.toVector
+    bydataSetExternalId should have length 1
+    bydataSetExternalId.head.externalId should be(randItems.last.externalId)
   }
 }

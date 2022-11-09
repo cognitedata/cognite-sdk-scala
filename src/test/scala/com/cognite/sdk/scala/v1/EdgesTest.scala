@@ -238,7 +238,8 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         .unsafeRunSync()
         .toList
 
-      edges.size shouldBe 1
+      edges.
+        size shouldBe 1
       edges.map(_.externalId).toSet shouldBe simpleEdgesToCreates.map(_.externalId).toSet
     }
 
@@ -264,7 +265,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
           items = Seq(invalidInput)
         )
         .unsafeRunSync()
-      exception.message.contains("Could not resolve direct relation: non_existing_node") shouldBe true
+      exception.message.contains("Could not resolve direct relation") shouldBe true
     }
 
     it should "fail if input data type is not correct" in {
@@ -290,7 +291,7 @@ class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         )
         .unsafeRunSync()
 
-      exception.message shouldBe "Value type mismatch. Value could not be coerced to the expected type."
+      exception.message shouldBe "Value type mismatch"
     }
 
   private def insertEdgesBeforeQuery() = {

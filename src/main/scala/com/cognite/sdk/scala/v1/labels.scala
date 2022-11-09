@@ -10,7 +10,8 @@ final case class Label(
     externalId: String,
     name: String,
     description: Option[String] = None,
-    createdTime: Instant = Instant.ofEpochMilli(0)
+    createdTime: Instant = Instant.ofEpochMilli(0),
+    dataSetId: Option[Long] = None
 ) extends WithRequiredExternalId
     with WithCreatedTime
     with ToCreate[LabelCreate] {
@@ -18,14 +19,20 @@ final case class Label(
     LabelCreate(
       externalId,
       name,
-      description
+      description,
+      dataSetId
     )
 }
 
 final case class LabelCreate(
     externalId: String,
     name: String,
-    description: Option[String] = None
+    description: Option[String] = None,
+    dataSetId: Option[Long] = None
 ) extends WithRequiredExternalId
 
-final case class LabelsFilter(name: Option[String] = None, externalIdPrefix: Option[String] = None)
+final case class LabelsFilter(
+    name: Option[String] = None,
+    externalIdPrefix: Option[String] = None,
+    dataSetIds: Option[Seq[CogniteId]] = None
+)
