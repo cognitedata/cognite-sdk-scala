@@ -79,7 +79,7 @@ class FunctionsTest extends SdkTestSpec with ReadBehaviours {
     val nonce = client.sessions
       .createWithClientCredentialFlow(Items(Seq(SessionCreateWithCredential(credentials.clientId, credentials.clientSecret))))
       .map(_.nonce).head
-    val res = client.functionCalls(872317943483962L).callFunction(Json.fromJsonObject(JsonObject.empty), nonce)
+    val res = client.functionCalls(872317943483962L).callFunction(Json.fromJsonObject(JsonObject.empty), Some(nonce))
     res.status should equal(Some("Running"))
   }
 

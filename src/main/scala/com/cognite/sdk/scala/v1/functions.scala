@@ -103,4 +103,4 @@ final case class FunctionScheduleCreate(
     data: Option[Json] = None
 )
 
-final case class FunctionCallData(data: Json, nonce: String)
+final case class FunctionCallData(data: Json, nonce: Option[String] = None)
