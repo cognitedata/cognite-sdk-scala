@@ -1,6 +1,7 @@
 package com.cognite.sdk.scala.v1.containers
 
 import io.circe._
+import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.{deriveEnumerationDecoder, deriveEnumerationEncoder}
 
 sealed trait PropertyDefaultValue
@@ -13,6 +14,8 @@ object PropertyDefaultValue {
   case object Boolean extends PropertyDefaultValue
 
   case object Object extends PropertyDefaultValue
+
+  implicit val configuration: Configuration = Configuration.default.copy(transformMemberNames = _.toLowerCase, transformConstructorNames = _.toLowerCase)
 
   implicit val propertyDefaultValueEncoder: Encoder[PropertyDefaultValue] =
     deriveEnumerationEncoder[PropertyDefaultValue]

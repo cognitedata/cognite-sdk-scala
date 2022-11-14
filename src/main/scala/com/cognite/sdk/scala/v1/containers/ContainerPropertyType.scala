@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1.containers
 
-import cats.implicits.toFunctorOps
+import cats.implicits._
 import io.circe._
 import io.circe.generic.semiauto._
 
@@ -8,24 +8,36 @@ sealed trait ContainerPropertyType
 
 object ContainerPropertyType {
 
-  final case class TextProperty(list: Boolean = false, collation: String = "ucs_basic")
-      extends ContainerPropertyType {
-    val `type` = "text"
+  final case class TextProperty(
+      list: Option[Boolean] = Some(false),
+      collation: Option[String] = Some("ucs_basic")
+  ) extends ContainerPropertyType {
+    val `type`: String = TextProperty.Type
+  }
+  object TextProperty {
+    val Type = "text"
   }
 
-  final case class PrimitiveProperty(`type`: PrimitivePropType, list: Boolean = false)
+  final case class PrimitiveProperty(`type`: PrimitivePropType, list: Option[Boolean] = Some(false))
       extends ContainerPropertyType
 
   final case class DirectNodeRelationProperty(container: Option[ContainerReference])
       extends ContainerPropertyType {
-    val `type` = "direct"
+    val `type`: String = DirectNodeRelationProperty.Type
+  }
+  object DirectNodeRelationProperty {
+    val Type = "direct"
   }
 
-  import com.cognite.sdk.scala.v1.resources.Containers.containerReferenceEncoder
-  import com.cognite.sdk.scala.v1.resources.Containers.containerReferenceDecoder
+  import com.cognite.sdk.scala.v1.resources.Containers.{
+    containerReferenceDecoder,
+    containerReferenceEncoder
+  }
 
   implicit val propertyTypeTextEncoder: Encoder[TextProperty] =
-    deriveEncoder[TextProperty]
+    Encoder.forProduct3("list", "collation", "type")((t: TextProperty) =>
+      (t.list, t.collation, t.`type`)
+    )
 
   implicit val propertyTypeTextDecoder: Decoder[TextProperty] =
     deriveDecoder[TextProperty]
@@ -37,7 +49,9 @@ object ContainerPropertyType {
     deriveDecoder[PrimitiveProperty]
 
   implicit val directNodeRelationPropertyEncoder: Encoder[DirectNodeRelationProperty] =
-    deriveEncoder[DirectNodeRelationProperty]
+    Encoder.forProduct2("container", "type")((d: DirectNodeRelationProperty) =>
+      (d.container, d.`type`)
+    )
 
   implicit val directNodeRelationPropertyDecoder: Decoder[DirectNodeRelationProperty] =
     deriveDecoder[DirectNodeRelationProperty]
@@ -49,9 +63,28 @@ object ContainerPropertyType {
   }
 
   implicit val containerPropertyTypeDecoder: Decoder[ContainerPropertyType] =
-    List[Decoder[ContainerPropertyType]](
-      Decoder[TextProperty].widen,
-      Decoder[PrimitiveProperty].widen,
-      Decoder[DirectNodeRelationProperty].widen
-    ).reduceLeft(_ or _)
+    Decoder.instance { c: HCursor =>
+      val primitiveProperty = c.downField("type").as[PrimitivePropType] match {
+        case Left(err) => Left[DecodingFailure, ContainerPropertyType](err)
+        case Right(ppt: PrimitivePropType) =>
+          for {
+            list <- c.downField("list").as[Option[Boolean]]
+          } yield PrimitiveProperty(ppt, list)
+      }
+
+      primitiveProperty.handleErrorWith { _: DecodingFailure =>
+        c.downField("type").as[String] match {
+          case Left(err) => Left[DecodingFailure, ContainerPropertyType](err)
+          case Right(typeVal) if typeVal == TextProperty.Type =>
+            for {
+              list <- c.downField("list").as[Option[Boolean]]
+              collation <- c.downField("collation").as[Option[String]]
+            } yield TextProperty(list, collation)
+          case Right(typeVal) if typeVal == DirectNodeRelationProperty.Type =>
+            for {
+              containerRef <- c.downField("container").as[Option[ContainerReference]]
+            } yield DirectNodeRelationProperty(containerRef)
+        }
+      }
+    }
 }
