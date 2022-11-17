@@ -1,21 +1,27 @@
+// Copyright 2020 Cognite AS
+// SPDX-License-Identifier: Apache-2.0
+
 package com.cognite.sdk.scala.v1.containers
 
 import io.circe._
-import io.circe.generic.extras.Configuration
-import io.circe.generic.extras.semiauto._
 
-sealed trait ConstraintType
+import java.util.Locale
+
+sealed abstract class ConstraintType extends Product with Serializable
 
 object ConstraintType {
   case object Unique extends ConstraintType
 
   case object Required extends ConstraintType
 
-  implicit val configuration: Configuration = Configuration.default.copy(transformMemberNames = _.toLowerCase, transformConstructorNames = _.toLowerCase)
+  implicit val constraintTypeDecoder: Decoder[ConstraintType] = Decoder[String].emap {
+    case "unique" => Right(Unique)
+    case "required" => Right(Required)
+    case other => Left(s"Invalid Constraint Type: $other")
+  }
 
-  implicit val constraintTypeCodec: Encoder[ConstraintType] =
-    deriveEnumerationEncoder[ConstraintType]
-
-  implicit val constraintTypeDecoder: Decoder[ConstraintType] =
-    deriveEnumerationDecoder[ConstraintType]
+  implicit val constraintTypeEncoder: Encoder[ConstraintType] =
+    Encoder.instance[ConstraintType](p =>
+      io.circe.Json.fromString(p.productPrefix.toLowerCase(Locale.US))
+    )
 }
