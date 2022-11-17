@@ -5,6 +5,10 @@ package com.cognite.sdk.scala.v1.containers
 
 import java.time.Instant
 
+final case class ContainerReference(space: String, externalId: String) {
+  val `type` = "container"
+}
+
 final case class ContainerPropertyDefinition(
     nullable: Option[Boolean] = Some(true),
     autoIncrement: Option[Boolean] = Some(false),

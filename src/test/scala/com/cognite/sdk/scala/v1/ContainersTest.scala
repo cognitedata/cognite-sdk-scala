@@ -83,7 +83,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
       PropertyDefaultValue.String("abc"),
       PropertyDefaultValue.Boolean(true),
       PropertyDefaultValue.Number(123),
-      PropertyDefaultValue.Object(Encoder[CogniteExternalId].apply(CogniteExternalId("test-ext-id")))
+//      PropertyDefaultValue.Object(CogniteExternalId("test-ext-id"))
     )
 
     val afterEncodedAndDecoded = values
