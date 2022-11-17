@@ -9,18 +9,21 @@ import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.containers.ContainerPropertyType._
 import com.cognite.sdk.scala.v1.containers._
 import com.cognite.sdk.scala.v1.resources.Containers
-import com.cognite.sdk.scala.v1.resources.Containers._
-import io.circe.parser.parse
 import io.circe.{Decoder, Encoder}
 
 @SuppressWarnings(
   Array(
     "org.wartremover.warts.PublicInference",
-    "org.wartremover.warts.NonUnitStatements"
+    "org.wartremover.warts.NonUnitStatements",
+    "org.wartremover.warts.JavaSerializable",
+    "org.wartremover.warts.Serializable",
+    "org.wartremover.warts.Product",
+    "org.wartremover.warts.AnyVal"
   )
 )
+// scalastyle:off
 class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
-  val client = new GenericClient[IO](
+  private val client = new GenericClient[IO](
     "mock-server-test",
     "mock",
     "http://localhost:4002",
@@ -29,34 +32,98 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     None,
     Some("alpha")
   )
-  val containers = new Containers[IO](client.requestSession)
+  private val containers = new Containers[IO](client.requestSession)
 
-//  it should "list all data models definitions" in {
-//    println(Encoder[ConstraintType].apply(ConstraintType.Unique).noSpaces)
-//    println(Encoder[ContainerUsage].apply(ContainerUsage.Node).noSpaces)
-//    println(Encoder[PrimitivePropType].apply(PrimitivePropType.Int32).noSpaces)
-//    println(Encoder[PropertyDefaultValue].apply(PropertyDefaultValue.Object).noSpaces)
-//    println(Encoder[ContainerPropertyType].apply(ContainerPropertyType.TextProperty()).noSpaces)
-//    println(Encoder[ContainerPropertyType].apply(ContainerPropertyType.DirectNodeRelationProperty(None)).noSpaces)
-//    1 shouldBe 1
-//  }
+  "Containers" should "serialize & deserialize ConstraintTypes" in {
+    val constraintTypes = Seq(ConstraintType.Unique, ConstraintType.Required)
 
-  it should "list containers" in {
-    val c = containers.list().unsafeRunSync()
-    println(c)
+    val encodedAndDecoded = constraintTypes
+      .map(Encoder[ConstraintType].apply(_))
+      .map(Decoder[ConstraintType].decodeJson)
+      .collect { case Right(e) => e }
 
-    1 shouldBe 1
+    constraintTypes should contain theSameElementsAs encodedAndDecoded
   }
 
+  it should "serialize & deserialize ContainerUsage" in {
+    val values = Seq(ContainerUsage.Node, ContainerUsage.All)
+
+    val afterEncodedAndDecoded = values
+      .map(Encoder[ContainerUsage].apply)
+      .map(Decoder[ContainerUsage].decodeJson)
+      .collect { case Right(e) => e }
+
+    values should contain theSameElementsAs afterEncodedAndDecoded
+  }
+
+  it should "serialize & deserialize PrimitivePropType" in {
+    val values = Seq(
+      PrimitivePropType.Int32,
+      PrimitivePropType.Int64,
+      PrimitivePropType.Json,
+      PrimitivePropType.Boolean,
+      PrimitivePropType.Float32,
+      PrimitivePropType.Float64,
+      PrimitivePropType.Numeric,
+      PrimitivePropType.Timestamp,
+      PrimitivePropType.Date
+    )
+
+    val afterEncodedAndDecoded = values
+      .map(Encoder[PrimitivePropType].apply)
+      .map(Decoder[PrimitivePropType].decodeJson)
+      .collect { case Right(e) => e }
+
+    values should contain theSameElementsAs afterEncodedAndDecoded
+  }
+
+  it should "serialize & deserialize PropertyDefaultValue" in {
+    val values = Seq(
+      PropertyDefaultValue.String,
+      PropertyDefaultValue.Boolean,
+      PropertyDefaultValue.Number,
+      PropertyDefaultValue.Object,
+    )
+
+    val afterEncodedAndDecoded = values
+      .map(Encoder[PropertyDefaultValue].apply)
+      .map(Decoder[PropertyDefaultValue].decodeJson)
+      .collect { case Right(e) => e }
+
+    values should contain theSameElementsAs afterEncodedAndDecoded
+  }
+
+  it should "serialize & deserialize ContainerPropertyType" in {
+    val values = Seq(
+      ContainerPropertyType.TextProperty(),
+      ContainerPropertyType.DirectNodeRelationProperty(None),
+      ContainerPropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32)
+    )
+
+    val afterEncodedAndDecoded = values
+      .map(Encoder[ContainerPropertyType].apply)
+      .map(Decoder[ContainerPropertyType].decodeJson)
+      .collect { case Right(e) => e }
+
+    values should contain theSameElementsAs afterEncodedAndDecoded
+  }
+
+  // TODO: fix after the real impl is live
+  ignore should "list containers" in {
+    val c = containers.list().unsafeRunSync()
+    c.length shouldBe 1
+  }
+
+  // TODO: fix after the real impl is live
   ignore should "create a container" in {
     val containerProperty = ContainerPropertyDefinition(
       defaultValue = Some(PropertyDefaultValue.Number),
       description = Some("Test numeric property"),
       name = Some("numeric-property-prop-1"),
-      `type` = Some(PrimitiveProperty(`type` = PrimitivePropType.Int32))
+      `type` = PrimitiveProperty(`type` = PrimitivePropType.Int32)
     )
-    val constraintProperty = ConstraintDefinition(ConstraintType.Required, properties = Seq.empty)
-    val containerToCreate = Container(
+    val constraintProperty = ContainerConstraint.UniquenessConstraint(properties = Seq.empty)
+    val containerToCreate = ContainerCreate(
       space = "test-space",
       externalId = "test-space-external-id",
       name = Some("test-space-name"),
@@ -67,67 +134,8 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
       indexes = None
     )
 
-    println(Encoder[Container].apply(containerToCreate))
-
     val response = containers.createItems(containers = Seq(containerToCreate)).unsafeRunSync()
 
     response.headOption.isEmpty shouldBe false
-  }
-
-  it should "pass" in {
-
-    val prop1 = Decoder[TextProperty].decodeJson(parse("""{"type": "text","nullable": false}""".stripMargin).toOption.get)
-    val prop2 = Decoder[PrimitiveProperty].decodeJson(parse("""{"type": "int32","nullable": false}""".stripMargin).toOption.get)
-    val prop3 = Decoder[DirectNodeRelationProperty].decodeJson(parse("""{"type": "direct","nullable": false,"targetModelExternalId": "UserTable"}""".stripMargin).toOption.get)
-    val prop4 = Decoder[Map[String, ContainerPropertyType]].decodeJson(parse(s"""{
-                                                                   |        "title": {
-                                                                   |          "type": "text",
-                                                                   |          "nullable": false
-                                                                   |        },
-                                                                   |        "views": {
-                                                                   |          "type": "int32",
-                                                                   |          "nullable": false
-                                                                   |        },
-                                                                   |        "user": {
-                                                                   |          "type": "direct",
-                                                                   |          "nullable": true,
-                                                                   |          "targetModelExternalId": "UserTable"
-                                                                   |        }
-                                                                   |      }""".stripMargin).toOption.get)
-
-    println(prop1)
-    println(prop2)
-    println(prop3)
-    println(prop4)
-
-    val json =
-      s"""
-         |{
-         |      "space": "blog",
-         |      "name": "Post",
-         |      "description": "The Container for Post",
-         |      "externalId": "PostTable",
-         |      "usedFor": "node",
-         |      "properties": {
-         |        "title": {
-         |          "type": "text",
-         |          "nullable": false
-         |        },
-         |        "views": {
-         |          "type": "int32",
-         |          "nullable": false
-         |        },
-         |        "user": {
-         |          "type": "direct",
-         |          "nullable": true,
-         |          "targetModelExternalId": "UserTable"
-         |        }
-         |      }
-         |    }
-         |""".stripMargin
-
-    val result = Decoder[Container].decodeJson(parse(json).toOption.get)
-    println(result)
-    1 shouldBe 1
   }
 }

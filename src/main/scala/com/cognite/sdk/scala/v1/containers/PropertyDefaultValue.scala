@@ -1,10 +1,13 @@
+// Copyright 2020 Cognite AS
+// SPDX-License-Identifier: Apache-2.0
+
 package com.cognite.sdk.scala.v1.containers
 
 import io.circe._
-import io.circe.generic.extras.Configuration
-import io.circe.generic.extras.semiauto.{deriveEnumerationDecoder, deriveEnumerationEncoder}
 
-sealed trait PropertyDefaultValue
+import java.util.Locale
+
+sealed abstract class PropertyDefaultValue extends Product with Serializable
 
 object PropertyDefaultValue {
   case object String extends PropertyDefaultValue
@@ -15,11 +18,17 @@ object PropertyDefaultValue {
 
   case object Object extends PropertyDefaultValue
 
-  implicit val configuration: Configuration = Configuration.default.copy(transformMemberNames = _.toLowerCase, transformConstructorNames = _.toLowerCase)
-
   implicit val propertyDefaultValueEncoder: Encoder[PropertyDefaultValue] =
-    deriveEnumerationEncoder[PropertyDefaultValue]
+    Encoder.instance[PropertyDefaultValue](p =>
+      io.circe.Json.fromString(p.productPrefix.toLowerCase(Locale.US))
+    )
 
   implicit val propertyDefaultValueDecoder: Decoder[PropertyDefaultValue] =
-    deriveEnumerationDecoder[PropertyDefaultValue]
+    Decoder[String].emap {
+      case "string" => Right(String)
+      case "number" => Right(Number)
+      case "boolean" => Right(Boolean)
+      case "object" => Right(Object)
+      case other => Left(s"Invalid Property Default Value: $other")
+    }
 }

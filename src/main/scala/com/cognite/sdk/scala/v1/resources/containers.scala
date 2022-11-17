@@ -18,8 +18,8 @@ class Containers[F[_]](val requestSession: RequestSession[F])
   override val baseUrl = uri"${requestSession.baseUrl}/models/containers"
   import Containers._
 
-  def createItems(containers: Seq[Container]): F[Seq[Container]] =
-    requestSession.post[Seq[Container], Items[Container], Items[Container]](
+  def createItems(containers: Seq[ContainerCreate]): F[Seq[ContainerRead]] =
+    requestSession.post[Seq[ContainerRead], Items[ContainerRead], Items[ContainerCreate]](
       Items(items = containers),
       uri"$baseUrl",
       value => value.items
@@ -31,15 +31,15 @@ class Containers[F[_]](val requestSession: RequestSession[F])
       value => value.items
     )
 
-  def retrieveByExternalIds(containersRefs: Seq[ContainerReference]): F[Seq[Container]] =
-    requestSession.post[Seq[Container], Items[Container], Items[ContainerReference]](
+  def retrieveByExternalIds(containersRefs: Seq[ContainerReference]): F[Seq[ContainerRead]] =
+    requestSession.post[Seq[ContainerRead], Items[ContainerRead], Items[ContainerReference]](
       Items(items = containersRefs),
       uri"$baseUrl/byids",
       value => value.items
     )
 
   def delete(containersRefs: Seq[ContainerReference]): F[Unit] =
-    requestSession.post[Unit, Items[Container], Items[ContainerReference]](
+    requestSession.post[Unit, Items[ContainerCreate], Items[ContainerReference]](
       Items(items = containersRefs),
       uri"$baseUrl/delete",
       _ => ()
@@ -55,43 +55,21 @@ object Containers {
   implicit val containerReferenceDecoder: Decoder[ContainerReference] =
     deriveDecoder[ContainerReference]
 
-  implicit val indexPropertyReferenceEncoder: Encoder[IndexPropertyReference] =
-    deriveEncoder[IndexPropertyReference]
-
-  implicit val indexPropertyReferenceDecoder: Decoder[IndexPropertyReference] =
-    deriveDecoder[IndexPropertyReference]
-
-  implicit val indexDefinitionEncoder: Encoder[IndexDefinition] = deriveEncoder[IndexDefinition]
-
-  implicit val indexDefinitionDecoder: Decoder[IndexDefinition] = deriveDecoder[IndexDefinition]
-
-  implicit val constraintPropertyEncoder: Encoder[ConstraintProperty] =
-    deriveEncoder[ConstraintProperty]
-
-  implicit val constraintPropertyDecoder: Decoder[ConstraintProperty] =
-    deriveDecoder[ConstraintProperty]
-
   implicit val containerPropertyDefinitionEncoder: Encoder[ContainerPropertyDefinition] =
     deriveEncoder[ContainerPropertyDefinition]
 
   implicit val containerPropertyDefinitionDecoder: Decoder[ContainerPropertyDefinition] =
     deriveDecoder[ContainerPropertyDefinition]
 
-  implicit val constraintDefinitionEncoder: Encoder[ConstraintDefinition] =
-    deriveEncoder[ConstraintDefinition]
+  implicit val containerCreateEncoder: Encoder[ContainerCreate] = deriveEncoder[ContainerCreate]
 
-  implicit val constraintDefinitionDecoder: Decoder[ConstraintDefinition] =
-    deriveDecoder[ConstraintDefinition]
+  implicit val containerCreateDecoder: Decoder[ContainerCreate] = deriveDecoder[ContainerCreate]
 
-  implicit val containerCreateEncoder: Encoder[Container] = deriveEncoder[Container]
+  implicit val containerCreateItemsEncoder: Encoder[Items[ContainerCreate]] =
+    deriveEncoder[Items[ContainerCreate]]
 
-  implicit val containerCreateDecoder: Decoder[Container] = deriveDecoder[Container]
-
-  implicit val containerCreateItemsEncoder: Encoder[Items[Container]] =
-    deriveEncoder[Items[Container]]
-
-  implicit val containerCreateItemsDecoder: Decoder[Items[Container]] =
-    deriveDecoder[Items[Container]]
+  implicit val containerCreateItemsDecoder: Decoder[Items[ContainerCreate]] =
+    deriveDecoder[Items[ContainerCreate]]
 
   implicit val containerReferenceItemsEncoder: Encoder[Items[ContainerReference]] =
     deriveEncoder[Items[ContainerReference]]
