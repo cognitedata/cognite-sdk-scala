@@ -1,3 +1,6 @@
+// Copyright 2020 Cognite AS
+// SPDX-License-Identifier: Apache-2.0
+
 package com.cognite.sdk.scala.v1.containers
 
 import cats.implicits._
@@ -63,7 +66,7 @@ object ContainerPropertyType {
   }
 
   implicit val containerPropertyTypeDecoder: Decoder[ContainerPropertyType] =
-    Decoder.instance { c: HCursor =>
+    Decoder.instance { (c: HCursor) =>
       val primitiveProperty = c.downField("type").as[PrimitivePropType] match {
         case Left(err) => Left[DecodingFailure, ContainerPropertyType](err)
         case Right(ppt: PrimitivePropType) =>
@@ -72,18 +75,22 @@ object ContainerPropertyType {
           } yield PrimitiveProperty(ppt, list)
       }
 
-      primitiveProperty.handleErrorWith { _: DecodingFailure =>
+      primitiveProperty.handleErrorWith { (_: DecodingFailure) =>
         c.downField("type").as[String] match {
           case Left(err) => Left[DecodingFailure, ContainerPropertyType](err)
-          case Right(typeVal) if typeVal == TextProperty.Type =>
+          case Right(typeVal) if typeVal === TextProperty.Type =>
             for {
               list <- c.downField("list").as[Option[Boolean]]
               collation <- c.downField("collation").as[Option[String]]
             } yield TextProperty(list, collation)
-          case Right(typeVal) if typeVal == DirectNodeRelationProperty.Type =>
+          case Right(typeVal) if typeVal === DirectNodeRelationProperty.Type =>
             for {
               containerRef <- c.downField("container").as[Option[ContainerReference]]
             } yield DirectNodeRelationProperty(containerRef)
+          case Right(typeVal) =>
+            Left[DecodingFailure, ContainerPropertyType](
+              DecodingFailure(s"Unknown container property type: '$typeVal'", c.history)
+            )
         }
       }
     }
