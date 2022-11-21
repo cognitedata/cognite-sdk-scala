@@ -21,7 +21,7 @@ import org.scalatest.matchers.should.Matchers
 )
 class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBehaviours {
 
-  val client = new GenericClient[IO](
+  private val client = new GenericClient[IO](
     "scala-sdk-test",
     "extractor-bluefield-testing",
     "https://bluefield.cognitedata.com",
@@ -109,6 +109,6 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
     )).unsafeRunSync()
     createRes.length should equal(1)
     client.functionSchedules.deleteByIds(createRes.map(_.id.getOrElse(0L))).unsafeRunSync()
-    client.functionSchedules.read().unsafeRunSync().items.find(_.name == "scala-sdk-write-example-1") shouldBe None
+    client.functionSchedules.read().unsafeRunSync().items.find(_.name === "scala-sdk-write-example-1") shouldBe None
   }
 }
