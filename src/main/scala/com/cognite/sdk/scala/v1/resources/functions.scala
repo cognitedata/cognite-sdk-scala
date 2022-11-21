@@ -78,7 +78,7 @@ class FunctionCalls[F[_]](val requestSession: RequestSession[F], val functionId:
   import FunctionCalls._
   override val baseUrl = uri"${requestSession.baseUrl}/functions/$functionId/calls"
 
-  def callFunction(data: Json, nonce: String): F[FunctionCall] =
+  def callFunction(data: Json, nonce: Option[String] = None): F[FunctionCall] =
     requestSession.post[FunctionCall, FunctionCall, FunctionCallData](
       FunctionCallData(data, nonce),
       uri"${baseUrl.toString.dropRight(1)}",
