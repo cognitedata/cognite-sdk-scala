@@ -270,6 +270,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       )
 
     var uploadedFile = client.files.retrieveByIds(Seq(file.id))
+    println(s"uploadedFile.headOption.map(_.uploaded) = ${uploadedFile.headOption.map(_.uploaded)}")
     var retryCount = 0
     while (!uploadedFile.headOption
         .getOrElse(throw new RuntimeException("File was not uploaded in test"))
