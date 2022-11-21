@@ -25,6 +25,13 @@ class Views[F[_]](val requestSession: RequestSession[F])
       value => value.items
     )
   }
+
+  def deleteItems(externalIds: Seq[DataModelReference]): F[Unit] =
+    requestSession.post[Unit, Unit, Items[DataModelReference]](
+      Items(externalIds),
+      uri"$baseUrl/delete",
+      _ => ()
+    )
 }
 
 // TODO remove this when we work with the real backend, mock server returns a wrong response in create view case.
@@ -47,4 +54,7 @@ object Views {
     deriveEncoder[ViewCreateDefinition]
   implicit val viewCreateDefinitionItemsEncoder: Encoder[Items[ViewCreateDefinition]] =
     deriveEncoder[Items[ViewCreateDefinition]]
+
+  implicit val dataModelReferenceItemsEncoder: Encoder[Items[DataModelReference]] =
+    deriveEncoder[Items[DataModelReference]]
 }

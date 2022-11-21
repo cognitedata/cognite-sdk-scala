@@ -45,14 +45,15 @@ final case class ViewCreateDefinition(
     properties: Map[String, CreatePropertyReference]
 )
 
+// TODO Some of the fields are required but they were made optional to work with mock server
 final case class ViewPropertyDefinition(
     externalId: String,
-    nullable: Boolean = true,
-    autoIncrement: Boolean = false,
+    nullable: Option[Boolean] = Some(true),
+    autoIncrement: Option[Boolean] = Some(false),
 // TODO add later
 //   defaultValue: Option[DataModelProperty[_]] = None,
     description: Option[String] = None,
-    `type`: ContainerPropertyType,
+    `type`: Option[ContainerPropertyType] = None,
     container: Option[ContainerReference] = None,
     containerPropertyExternalId: Option[String] = None
 )
