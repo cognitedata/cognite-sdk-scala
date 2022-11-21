@@ -4,12 +4,8 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.{DomainSpecificLanguageFilter, RetryWhile}
-import com.cognite.sdk.scala.v1.DataModelType.{EdgeType, NodeType}
-
+import com.cognite.sdk.scala.common.{RetryWhile}
 import java.util.UUID
-import scala.collection.Seq
-import scala.collection.immutable.Seq
 
 @SuppressWarnings(
   Array(
@@ -19,17 +15,19 @@ import scala.collection.immutable.Seq
 )
 class ViewsTest extends CommonDataModelTestHelper with RetryWhile {
   it should "create views" in {
+    val uuid = UUID.randomUUID.toString // TODO no need to use uuid for externalId when API is in place
+
     val created = localClient.views.createItems(Seq(
       ViewCreateDefinition(
-                                           space = "test",
-                                           externalId = "test",
-                                           name = Some("test"),
-                                           description = Some("test"),
-                                           filter = None,
-                                           implements = None,
-                                           version = Some("hehe"),
-                                           properties = Map()
-                                         )
+         space = "test",
+         externalId = uuid,
+         name = Some("test"),
+         description = Some("test"),
+         filter = None,
+         implements = None,
+         version = Some("hehe"),
+         properties = Map()
+       )
     )).unsafeRunSync()
     println(s"created = ${created}")
   }
