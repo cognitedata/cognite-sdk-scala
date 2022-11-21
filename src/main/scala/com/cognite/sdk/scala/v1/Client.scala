@@ -211,6 +211,8 @@ class GenericClient[F[_]](
   lazy val views = new Views[F](requestSession)
   lazy val spacesv3 = new SpacesV3[F](requestSession)
 
+  lazy val views = new Views[F](requestSession)
+
   def project: F[Project] =
     requestSession.get[Project, Project](
       requestSession.baseUrl,

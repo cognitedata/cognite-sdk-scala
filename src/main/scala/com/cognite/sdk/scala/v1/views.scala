@@ -52,8 +52,8 @@ final case class ViewCreateDefinition(
 final case class ViewPropertyDefinition(
     nullable: Option[Boolean] = Some(true),
     autoIncrement: Option[Boolean] = Some(false),
-// TODO add later
-//   defaultValue: Option[DataModelProperty[_]] = None,
+    // TODO add later
+    //   defaultValue: Option[DataModelProperty[_]] = None,
     description: Option[String] = None,
     name: Option[String] = None,
     `type`: ContainerPropertyType,
@@ -79,8 +79,8 @@ final case class ViewDefinition(
     externalId: String,
     name: Option[String] = None,
     description: Option[String] = None,
-// TODO Add later
-//   filter: Option[DomainSpecificLanguageFilter] = None,
+    // TODO Add later
+    //   filter: Option[DomainSpecificLanguageFilter] = None,
     implements: Option[Seq[ViewReference]] = None,
     version: Option[String] = None,
     createdTime: Long,
