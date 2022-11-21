@@ -46,4 +46,14 @@ trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
     None,
     Some("alpha")
   )
+
+  lazy val localClient = new GenericClient[IO](
+    "mock",
+    "mock",
+    "http://localhost:4002",
+    authProvider,
+    None,
+    None,
+    Some("alpha")
+  )
 }

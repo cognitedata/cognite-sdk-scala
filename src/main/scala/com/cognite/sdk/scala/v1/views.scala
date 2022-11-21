@@ -4,9 +4,10 @@
 package com.cognite.sdk.scala.v1
 import com.cognite.sdk.scala.common.DomainSpecificLanguageFilter
 import io.circe.{Codec, Decoder, Encoder}
+import io.circe.generic.extras.semiauto.{deriveCodec, deriveEnumerationCodec}
+import io.circe.Codec
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveEnumerationCodec
-
 
 sealed trait ReferenceType {
  def toString: String
@@ -18,9 +19,6 @@ case object ContainerType extends ReferenceType {
  override def toString: String = "container"
 }
 object ReferenceType {
- private implicit val config: Configuration =
-  Configuration.default.copy(transformConstructorNames = _.toString)
-
   implicit val referenceTypeCodec: Codec[ReferenceType] =
    deriveEnumerationCodec[ReferenceType]
 }
@@ -45,7 +43,7 @@ final case class ContainerReference(
 }
 object ContainerReference {
  implicit val containerReferenceCodec: Codec[ContainerReference] =
-  deriveEnumerationCodec[ContainerReference]
+  deriveCodec[ContainerReference]
 }
 
 final case class CreatePropertyReference(
@@ -56,7 +54,7 @@ final case class CreatePropertyReference(
  )
 object CreatePropertyReference {
  implicit val createPropertyReferenceCodec: Codec[CreatePropertyReference] =
-  deriveEnumerationCodec[CreatePropertyReference]
+  deriveCodec[CreatePropertyReference]
 }
 
 final case class ViewCreateDefinition(
@@ -70,12 +68,12 @@ final case class ViewCreateDefinition(
   properties: Map[String, CreatePropertyReference]
  )
 
-sealed trait FDMPropertyType
-sealed trait FDMTextPropertyType extends FDMPropertyType
-sealed trait PrimitivePropertyType extends FDMPropertyType
-sealed trait CDFReferencePropertyType extends FDMPropertyType
-sealed trait DirectNodeRelationPropertyType extends FDMPropertyType
-case object Text extends FDMPropertyType
+
+sealed trait FDMTextPropertyType
+sealed trait PrimitivePropertyType
+sealed trait CDFReferencePropertyType
+sealed trait DirectNodeRelationPropertyType
+case object Text extends FDMTextPropertyType
 case object Boolean extends PrimitivePropertyType
 case object Float32 extends PrimitivePropertyType
 case object Float64 extends PrimitivePropertyType
@@ -87,12 +85,25 @@ case object Date extends PrimitivePropertyType
 case object Json extends PrimitivePropertyType
 case object Resource extends CDFReferencePropertyType
 case object Direct extends DirectNodeRelationPropertyType
-object FDMProperty {
- private implicit val config: Configuration =
-  Configuration.default.copy(transformConstructorNames = _.toLowerCase)
- implicit val fdmPropertyCodec: Codec[FDMPropertyType] =
-  deriveEnumerationCodec[FDMPropertyType]
+object PrimitivePropertyType {
+ implicit val fdmPropertyCodec: Codec[PrimitivePropertyType] =
+  deriveEnumerationCodec[PrimitivePropertyType]
 }
+object FDMTextPropertyType {
+ implicit val fdmPropertyCodec: Codec[FDMTextPropertyType] =
+  deriveEnumerationCodec[FDMTextPropertyType]
+}
+
+object CDFReferencePropertyType {
+ implicit val fdmPropertyCodec: Codec[CDFReferencePropertyType] =
+  deriveEnumerationCodec[CDFReferencePropertyType]
+}
+
+object DirectNodeRelationPropertyType {
+ implicit val fdmPropertyCodec: Codec[DirectNodeRelationPropertyType] =
+  deriveEnumerationCodec[DirectNodeRelationPropertyType]
+}
+
 
 sealed trait FDMPropertyInfo
 case class TextPropertyInfo(

@@ -208,6 +208,8 @@ class GenericClient[F[_]](
   lazy val spaces = new Spaces[F](requestSession)
   lazy val edges = new Edges[F](requestSession, dataModels)
 
+  lazy val views = new Views[F](requestSession)
+
   def project: F[Project] =
     requestSession.get[Project, Project](
       requestSession.baseUrl,
