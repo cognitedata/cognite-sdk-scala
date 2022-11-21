@@ -4,10 +4,7 @@
 package com.cognite.sdk.scala.v1.containers
 
 import cats.implicits._
-import com.cognite.sdk.scala.v1.resources.Containers.{
-  containerReferenceDecoder,
-  containerReferenceEncoder
-}
+import com.cognite.sdk.scala.v1.containers.ContainerReference._
 import io.circe._
 import io.circe.generic.semiauto.deriveDecoder
 
