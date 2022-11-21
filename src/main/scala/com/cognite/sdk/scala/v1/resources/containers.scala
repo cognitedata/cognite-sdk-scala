@@ -47,14 +47,6 @@ class Containers[F[_]](val requestSession: RequestSession[F])
 }
 
 object Containers {
-  implicit val containerReferenceEncoder: Encoder[ContainerReference] =
-    Encoder.forProduct3("type", "space", "externalId")((c: ContainerReference) =>
-      (c.`type`, c.space, c.externalId)
-    )
-
-  implicit val containerReferenceDecoder: Decoder[ContainerReference] =
-    deriveDecoder[ContainerReference]
-
   implicit val containerPropertyDefinitionEncoder: Encoder[ContainerPropertyDefinition] =
     deriveEncoder[ContainerPropertyDefinition]
 
