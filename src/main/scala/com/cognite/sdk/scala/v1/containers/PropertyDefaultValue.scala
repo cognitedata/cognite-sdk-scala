@@ -14,17 +14,14 @@ object PropertyDefaultValue {
 
   final case class Boolean(value: scala.Boolean) extends PropertyDefaultValue
 
-  final case class Object[T <: AnyRef](value: T)(implicit encoder: Encoder[T])
-      extends PropertyDefaultValue {
-    def toJson: Json = Json.fromString(encoder.apply(value).noSpaces)
-  }
+  final case class Object(value: Json) extends PropertyDefaultValue
 
   implicit val propertyDefaultValueEncoder: Encoder[PropertyDefaultValue] =
     Encoder.instance[PropertyDefaultValue] {
       case PropertyDefaultValue.String(value) => Json.fromString(value)
       case PropertyDefaultValue.Number(value) => Json.fromDoubleOrString(value)
       case PropertyDefaultValue.Boolean(value) => Json.fromBoolean(value)
-      case o @ PropertyDefaultValue.Object(_) => o.toJson
+      case PropertyDefaultValue.Object(value) => value
     }
 
   implicit val propertyDefaultValueDecoder: Decoder[PropertyDefaultValue] = { (c: HCursor) =>
@@ -42,13 +39,9 @@ object PropertyDefaultValue {
           Right[DecodingFailure, PropertyDefaultValue](PropertyDefaultValue.Boolean(b))
         )
       case v if v.isObject =>
-        v.asObject.map(o =>
-          Right[DecodingFailure, PropertyDefaultValue](
-            PropertyDefaultValue.Object(Json.fromString(Json.fromJsonObject(o).noSpaces))
-          )
-        )
+        Some(Right[DecodingFailure, PropertyDefaultValue](PropertyDefaultValue.Object(v)))
       case o =>
-        Option(Left(DecodingFailure(s"Unknown Property Default Value :${o.noSpaces}", c.history)))
+        Some(Left(DecodingFailure(s"Unknown Property Default Value :${o.noSpaces}", c.history)))
     }
     result.getOrElse(
       Left(DecodingFailure(s"Unknown Property Default Value :${c.value.noSpaces}", c.history))
