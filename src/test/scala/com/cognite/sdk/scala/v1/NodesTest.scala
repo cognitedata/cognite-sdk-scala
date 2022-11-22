@@ -43,6 +43,7 @@ class NodesTest
   val dataPropFloat = DataModelPropertyDefinition(PropertyType.Float32, nullable = false)
   val dataPropDirectRelation = DataModelPropertyDefinition(PropertyType.DirectRelation)
   val dataPropDate = DataModelPropertyDefinition(PropertyType.Date)
+  val dataPropJson = DataModelPropertyDefinition(PropertyType.Json)
 
   val dataModel = DataModel(
     s"Equipment-instances",
@@ -52,7 +53,8 @@ class NodesTest
         "prop_bool" -> dataPropBool,
         "prop_float" -> dataPropFloat,
         "prop_direct_relation" -> dataPropDirectRelation,
-        "prop_date" -> dataPropDate
+        "prop_date" -> dataPropDate,
+        "prop_json" -> dataPropJson
       )
     )
   )
@@ -67,7 +69,8 @@ class NodesTest
           "prop_string" -> PropertyType.Text.Property("EQ0001"),
           "prop_float" -> PropertyType.Float32.Property(0.1f),
           "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
-          "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
+          "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22)),
+          "prop_json" -> PropertyType.Json.Property("""{"string_val":"toto","int_val":1}""")
         )
       )
     )
