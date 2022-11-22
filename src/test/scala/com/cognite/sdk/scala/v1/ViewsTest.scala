@@ -56,6 +56,29 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile {
     )
   }
 
+  it should "retrieve views by data model reference" in {
+    val uuid = UUID.randomUUID.toString // TODO no need to use uuid for externalId when API is in place
+
+    localClient.views.createItems(Seq(
+      ViewCreateDefinition(
+        space = "test1",
+        externalId = uuid,
+        name = Some("test1"),
+        description = Some("desc"),
+        filter = None,
+        implements = None,
+        version = Some("6.0.0"),
+        properties = Map()
+      ))).unsafeRunSync()
+
+    val retrieved = localClient.views.retrieveViews(Seq(DataModelReference("test1", uuid, "6.0.0"))).unsafeRunSync().head
+    retrieved.space shouldBe "test1"
+    retrieved.externalId shouldBe uuid
+    retrieved.name shouldBe Some("test1")
+    retrieved.description shouldBe Some("desc")
+    retrieved.version shouldBe Some("6.0.0")
+  }
+
   it should "delete views" in {
     val uuid = UUID.randomUUID.toString // TODO no need to use uuid for externalId when API is in place
 
@@ -70,8 +93,13 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile {
         version = Some("5.0.0"),
         properties = Map()
       ))).unsafeRunSync()
-    
+    val retrieved = localClient.views.retrieveViews(Seq(DataModelReference("test", uuid, "5.0.0"))).unsafeRunSync()
+    retrieved.head.externalId shouldBe uuid
+
     localClient.views.deleteItems(Seq(DataModelReference("test", uuid, "5.0.0"))).unsafeRunSync()
+    val retrievedAfterDelete = localClient.views.retrieveViews(Seq(DataModelReference("test", uuid, "5.0.0"))).unsafeRunSync()
+    retrievedAfterDelete.size shouldBe(0)
+
     // TODO This should produce CdpAPIException
     val sCaught = intercept[SdkException] {
       localClient.views.deleteItems(Seq(DataModelReference("test", "test", "test"))).unsafeRunSync()

@@ -26,6 +26,17 @@ class Views[F[_]](val requestSession: RequestSession[F])
     )
   }
 
+  def retrieveViews(
+      items: Seq[DataModelReference],
+      includeInheritedProperties: Option[Boolean] = None
+  ): F[Seq[ViewDefinition]] =
+    requestSession.post[Seq[ViewDefinition], Items[ViewDefinition], Items[DataModelReference]](
+      Items(items),
+      uri"$baseUrl/byids"
+        .addParam("includeInheritedProperties", includeInheritedProperties.map(_.toString)),
+      value => value.items
+    )
+
   def deleteItems(externalIds: Seq[DataModelReference]): F[Unit] =
     requestSession.post[Unit, Unit, Items[DataModelReference]](
       Items(externalIds),
@@ -46,6 +57,8 @@ object Views {
     deriveDecoder[ViewDefinition]
   implicit val wrongItemsDecoder: Decoder[WrongItems[ViewDefinition]] =
     deriveDecoder[WrongItems[ViewDefinition]]
+  implicit val viewDefinitionItemsDecoder: Decoder[Items[ViewDefinition]] =
+    deriveDecoder[Items[ViewDefinition]]
 // TODO remove WrongItems decoder when working with the real API and use ItemsWithCursor
 //  implicit val viewDefinitionItemsWithCursorDecoder: Decoder[ItemsWithCursor[ViewDefinition]] =
 //    deriveDecoder[ItemsWithCursor[ViewDefinition]]
