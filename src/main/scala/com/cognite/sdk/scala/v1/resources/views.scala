@@ -26,7 +26,7 @@ class Views[F[_]](val requestSession: RequestSession[F])
     )
   }
 
-  def retrieveViews(
+  def retrieveItems(
       items: Seq[DataModelReference],
       includeInheritedProperties: Option[Boolean] = None
   ): F[Seq[ViewDefinition]] =

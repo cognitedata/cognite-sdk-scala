@@ -71,7 +71,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile {
         properties = Map()
       ))).unsafeRunSync()
 
-    val retrieved = localClient.views.retrieveViews(Seq(DataModelReference("test1", uuid, "6.0.0"))).unsafeRunSync().head
+    val retrieved = localClient.views.retrieveItems(Seq(DataModelReference("test1", uuid, "6.0.0"))).unsafeRunSync().head
     retrieved.space shouldBe "test1"
     retrieved.externalId shouldBe uuid
     retrieved.name shouldBe Some("test1")
@@ -93,11 +93,11 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile {
         version = Some("5.0.0"),
         properties = Map()
       ))).unsafeRunSync()
-    val retrieved = localClient.views.retrieveViews(Seq(DataModelReference("test", uuid, "5.0.0"))).unsafeRunSync()
+    val retrieved = localClient.views.retrieveItems(Seq(DataModelReference("test", uuid, "5.0.0"))).unsafeRunSync()
     retrieved.head.externalId shouldBe uuid
 
     localClient.views.deleteItems(Seq(DataModelReference("test", uuid, "5.0.0"))).unsafeRunSync()
-    val retrievedAfterDelete = localClient.views.retrieveViews(Seq(DataModelReference("test", uuid, "5.0.0"))).unsafeRunSync()
+    val retrievedAfterDelete = localClient.views.retrieveItems(Seq(DataModelReference("test", uuid, "5.0.0"))).unsafeRunSync()
     retrievedAfterDelete.size shouldBe(0)
 
     // TODO This should produce CdpAPIException
