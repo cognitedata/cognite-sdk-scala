@@ -72,7 +72,6 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile {
       ))).unsafeRunSync()
     
     localClient.views.deleteItems(Seq(DataModelReference("test", uuid, "5.0.0"))).unsafeRunSync()
-
     // TODO This should produce CdpAPIException
     val sCaught = intercept[SdkException] {
       localClient.views.deleteItems(Seq(DataModelReference("test", "test", "test"))).unsafeRunSync()
