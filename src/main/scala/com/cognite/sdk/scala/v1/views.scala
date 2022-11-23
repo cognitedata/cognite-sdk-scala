@@ -16,7 +16,9 @@ final case class ViewReference(
 }
 object ViewReference {
   implicit val viewReferenceEncoder: Encoder[ViewReference] =
-    deriveEncoder[ViewReference]
+    Encoder.forProduct4("type", "space", "externalId", "version")((c: ViewReference) =>
+      (c.`type`, c.space, c.externalId, c.version)
+    )
   implicit val viewReferenceDecoder: Decoder[ViewReference] =
     deriveDecoder[ViewReference]
 }
