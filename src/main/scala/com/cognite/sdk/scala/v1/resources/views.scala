@@ -16,14 +16,14 @@ class Views[F[_]](val requestSession: RequestSession[F])
   import Views._
   override val baseUrl = uri"${requestSession.baseUrl}/models/views"
 
-  def createItems(items: Seq[ViewCreateDefinition]): F[ViewDefinition] = {
+  def createItems(items: Seq[ViewCreateDefinition]): F[Seq[ViewDefinition]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
-    // TODO use ItemsWithCursor[ViewDefinition] rather than  WrongItems[ViewDefinition] when the real API is used.
-    requestSession.post[ViewDefinition, WrongItems[ViewDefinition], Items[ViewCreateDefinition]](
-      Items(items),
-      uri"$baseUrl",
-      value => value.items
-    )
+    requestSession
+      .post[Seq[ViewDefinition], ItemsWithCursor[ViewDefinition], Items[ViewCreateDefinition]](
+        Items(items),
+        uri"$baseUrl",
+        value => value.items
+      )
   }
 
   def retrieveItems(
@@ -45,23 +45,15 @@ class Views[F[_]](val requestSession: RequestSession[F])
     )
 }
 
-// TODO remove this when we work with the real backend, mock server returns a wrong response in create view case.
-case class WrongItems[A](
-    items: A
-)
-
 object Views {
   implicit val viewPropertyDefinition: Decoder[ViewPropertyDefinition] =
     deriveDecoder[ViewPropertyDefinition]
   implicit val viewDefinitionDecoder: Decoder[ViewDefinition] =
     deriveDecoder[ViewDefinition]
-  implicit val wrongItemsDecoder: Decoder[WrongItems[ViewDefinition]] =
-    deriveDecoder[WrongItems[ViewDefinition]]
   implicit val viewDefinitionItemsDecoder: Decoder[Items[ViewDefinition]] =
     deriveDecoder[Items[ViewDefinition]]
-// TODO remove WrongItems decoder when working with the real API and use ItemsWithCursor
-//  implicit val viewDefinitionItemsWithCursorDecoder: Decoder[ItemsWithCursor[ViewDefinition]] =
-//    deriveDecoder[ItemsWithCursor[ViewDefinition]]
+  implicit val viewDefinitionItemsWithCursorDecoder: Decoder[ItemsWithCursor[ViewDefinition]] =
+    deriveDecoder[ItemsWithCursor[ViewDefinition]]
 
   implicit val viewCreateDefinitionEncoder: Encoder[ViewCreateDefinition] =
     deriveEncoder[ViewCreateDefinition]
