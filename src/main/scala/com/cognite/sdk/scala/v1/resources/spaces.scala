@@ -28,7 +28,7 @@ class Spaces[F[_]](val requestSession: RequestSession[F])
   def deleteItems(spaces: Seq[String]): F[Unit] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession.post[Unit, Unit, Items[SpaceId]](
-      Items(spaces.map(SpaceId)),
+      Items(spaces.map(SpaceId(_))),
       uri"$baseUrl/delete",
       _ => ()
     )
@@ -38,7 +38,7 @@ class Spaces[F[_]](val requestSession: RequestSession[F])
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession
       .post[Seq[Space], Items[Space], Items[SpaceId]](
-        Items(spaces.map(SpaceId)),
+        Items(spaces.map(SpaceId(_))),
         uri"$baseUrl/byids",
         value => value.items
       )
