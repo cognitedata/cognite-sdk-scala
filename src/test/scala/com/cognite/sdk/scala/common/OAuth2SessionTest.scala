@@ -113,6 +113,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
         }
 
     val io = for {
+      _ <- numTokenRequests.update(_ => 0)
       authProvider <- OAuth2.SessionProvider[IO](
         session,
         refreshSecondsBeforeExpiration = 2,
