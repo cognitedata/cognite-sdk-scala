@@ -157,7 +157,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
 
     retryWithExpectedResult[(Int,Int,Int)](
       io.unsafeRunTimed(10.seconds).value,
-      r => r shouldBe ((0, 1, 2)),
+      r => r shouldBe ((0, 1, 2))
     )
   }
 }
