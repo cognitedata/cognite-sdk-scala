@@ -3,8 +3,10 @@
 
 package com.cognite.sdk.scala.v1.resources
 
+import cats.effect.Async
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import fs2.Stream
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe._
 import sttp.client3._
@@ -43,6 +45,49 @@ class Views[F[_]](val requestSession: RequestSession[F])
       uri"$baseUrl/delete",
       _ => ()
     )
+
+  def listWithCursor(
+      cursor: Option[String],
+      limit: Option[Int],
+      space: Option[String],
+      includeGlobal: Option[Boolean],
+      includeInheritedProperties: Option[Boolean],
+      @annotation.nowarn partition: Option[Partition] = None
+  ): F[ItemsWithCursor[ViewDefinition]] = {
+    val uriWithParams = uri"$baseUrl/list"
+      .addParam("cursor", cursor)
+      .addParam("limit", limit.map(_.toString))
+      .addParam("space", space)
+      .addParam("includeGlobal", includeGlobal.map(_.toString))
+      .addParam("includeInheritedProperties", includeInheritedProperties.map(_.toString))
+    requestSession.get[ItemsWithCursor[ViewDefinition], ItemsWithCursor[ViewDefinition]](
+      uriWithParams,
+      value => value
+    )
+  }
+  private[sdk] def listWithNextCursor(
+      cursor: Option[String],
+      limit: Option[Int],
+      space: Option[String],
+      includeGlobal: Option[Boolean],
+      includeInheritedProperties: Option[Boolean]
+  )(implicit F: Async[F]): Stream[F, ViewDefinition] =
+    Readable
+      .pullFromCursor(
+        cursor,
+        limit,
+        None,
+        listWithCursor(_, _, space, includeGlobal, includeInheritedProperties, _)
+      )
+      .stream
+
+  def listStream(
+      limit: Option[Int],
+      space: Option[String],
+      includeGlobal: Option[Boolean],
+      includeInheritedProperties: Option[Boolean]
+  )(implicit F: Async[F]): fs2.Stream[F, ViewDefinition] =
+    listWithNextCursor(None, limit, space, includeGlobal, includeInheritedProperties)
 }
 
 object Views {

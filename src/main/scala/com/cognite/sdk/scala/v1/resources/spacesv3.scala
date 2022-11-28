@@ -3,8 +3,10 @@
 
 package com.cognite.sdk.scala.v1.resources
 
+import cats.effect.Async
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import fs2.Stream
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Printer}
 import sttp.client3._
@@ -44,6 +46,34 @@ class SpacesV3[F[_]](val requestSession: RequestSession[F])
         value => value.items
       )
 
+  def listWithCursor(
+      cursor: Option[String],
+      limit: Option[Int],
+      includeGlobal: Option[Boolean],
+      @annotation.nowarn partition: Option[Partition] = None
+  ): F[ItemsWithCursor[SpaceDefinition]] = {
+    val uriWithParams = uri"$baseUrl"
+      .addParam("cursor", cursor)
+      .addParam("limit", limit.map(_.toString))
+      .addParam("includeGlobal", includeGlobal.map(_.toString))
+    requestSession.get[ItemsWithCursor[SpaceDefinition], ItemsWithCursor[SpaceDefinition]](
+      uriWithParams,
+      value => value
+    )
+  }
+  private[sdk] def listWithNextCursor(
+      cursor: Option[String],
+      limit: Option[Int],
+      includeGlobal: Option[Boolean]
+  )(implicit F: Async[F]): Stream[F, SpaceDefinition] =
+    Readable
+      .pullFromCursor(cursor, limit, None, listWithCursor(_, _, includeGlobal, _))
+      .stream
+
+  def listStream(limit: Option[Int], includeGlobal: Option[Boolean] = None)(
+      implicit F: Async[F]
+  ): fs2.Stream[F, SpaceDefinition] =
+    listWithNextCursor(None, limit, includeGlobal)
 }
 
 object SpacesV3 {
@@ -59,4 +89,6 @@ object SpacesV3 {
     deriveDecoder[SpaceDefinition]
   implicit val spaceDefitinitionItemsDecoder: Decoder[Items[SpaceDefinition]] =
     deriveDecoder[Items[SpaceDefinition]]
+  implicit val spaceDefitinitionItemsWithCursorDecoder: Decoder[ItemsWithCursor[SpaceDefinition]] =
+    deriveDecoder[ItemsWithCursor[SpaceDefinition]]
 }
