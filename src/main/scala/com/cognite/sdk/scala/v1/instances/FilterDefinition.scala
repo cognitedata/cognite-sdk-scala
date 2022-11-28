@@ -17,7 +17,7 @@ object FilterDefinition {
 
   final case class And(filters: Seq[FilterDefinition]) extends BoolFilter
   final case class Or(filters: Seq[FilterDefinition]) extends BoolFilter
-  final case class Not(filters: Seq[FilterDefinition]) extends BoolFilter
+  final case class Not(filter: FilterDefinition) extends BoolFilter
 
   final case class Gte(value: ComparableFilterValue) extends RangeFilter
   final case class Gt(value: ComparableFilterValue) extends RangeFilter
@@ -25,13 +25,13 @@ object FilterDefinition {
   final case class Lt(value: ComparableFilterValue) extends RangeFilter
 
   final case class Equals(property: Seq[String], value: FilterValueDefinition) extends LeafFilter
-  final case class In(property: Seq[String], value: Seq[FilterValueDefinition]) extends LeafFilter
+  final case class In(property: Seq[String], values: Seq[FilterValueDefinition]) extends LeafFilter
   final case class Range(
       property: Seq[String],
-      gte: Option[ComparableFilterValue],
-      gt: Option[ComparableFilterValue],
-      lte: Option[ComparableFilterValue],
-      lt: Option[ComparableFilterValue]
+      gte: Option[ComparableFilterValue] = None,
+      gt: Option[ComparableFilterValue] = None,
+      lte: Option[ComparableFilterValue] = None,
+      lt: Option[ComparableFilterValue] = None
   ) extends LeafFilter {
     require(
       !(gte.isDefined && gt.isDefined) && // can't have both upper bound in the same time
@@ -42,59 +42,72 @@ object FilterDefinition {
   }
   final case class Prefix(property: Seq[String], value: FilterValueDefinition) extends LeafFilter
   final case class Exists(property: Seq[String]) extends LeafFilter
-  final case class ContainsAny(property: Seq[String], value: Seq[FilterValueDefinition])
+  final case class ContainsAny(property: Seq[String], values: Seq[FilterValueDefinition])
       extends LeafFilter
-  final case class ContainsAll(property: Seq[String], value: Seq[FilterValueDefinition])
+  final case class ContainsAll(property: Seq[String], values: Seq[FilterValueDefinition])
       extends LeafFilter
   final case class Nested(scope: Seq[String], filter: FilterDefinition) extends LeafFilter
   final case class Overlaps(
       startProperty: Seq[String],
       endProperty: Seq[String],
-      gte: Option[Gte],
-      gt: Option[Gt],
-      lte: Option[Lte],
-      lt: Option[Lt]
+      gte: Option[Gte] = None,
+      gt: Option[Gt] = None,
+      lte: Option[Lte] = None,
+      lt: Option[Lt] = None
   ) extends LeafFilter
   final case class HasData(refs: Seq[SourceReference]) extends LeafFilter
 
-  implicit val andFilterEncoder: Encoder[FilterDefinition.And] = deriveEncoder
-  implicit val orFilterEncoder: Encoder[FilterDefinition.Or] = deriveEncoder
-  implicit val notFilterEncoder: Encoder[FilterDefinition.Not] = deriveEncoder
+  implicit val andFilterEncoder: Encoder[FilterDefinition.And] =
+    Encoder.instance[FilterDefinition.And] { e =>
+      Json.fromJsonObject(
+        JsonObject(
+          e.productPrefix.toLowerCase(Locale.US) -> e.filters.asJson
+        )
+      )
+    }
+  implicit val orFilterEncoder: Encoder[FilterDefinition.Or] =
+    Encoder.instance[FilterDefinition.Or] { e =>
+      Json.fromJsonObject(
+        JsonObject(
+          e.productPrefix.toLowerCase(Locale.US) -> e.filters.asJson
+        )
+      )
+    }
+  implicit val notFilterEncoder: Encoder[FilterDefinition.Not] =
+    Encoder.instance[FilterDefinition.Not] { e =>
+      Json.fromJsonObject(
+        JsonObject(
+          e.productPrefix.toLowerCase(Locale.US) -> e.filter.asJson
+        )
+      )
+    }
   implicit val equalsFilterEncoder: Encoder[FilterDefinition.Equals] = deriveEncoder
   implicit val inFilterEncoder: Encoder[FilterDefinition.In] = deriveEncoder
-  implicit val rangeFilterEncoder: Encoder[FilterDefinition.Range] = deriveEncoder
+  implicit val rangeFilterEncoder: Encoder[FilterDefinition.Range] =
+    deriveEncoder[FilterDefinition.Range].mapJson(_.dropNullValues)
   implicit val prefixFilterEncoder: Encoder[FilterDefinition.Prefix] = deriveEncoder
   implicit val existsFilterEncoder: Encoder[FilterDefinition.Exists] = deriveEncoder
   implicit val containsAnyFilterEncoder: Encoder[FilterDefinition.ContainsAny] = deriveEncoder
   implicit val containsAllFilterEncoder: Encoder[FilterDefinition.ContainsAll] = deriveEncoder
   implicit val nestedFilterEncoder: Encoder[FilterDefinition.Nested] = deriveEncoder
-  implicit val overlapsFilterEncoder: Encoder[FilterDefinition.Overlaps] = deriveEncoder
-  implicit val hasDataFilterEncoder: Encoder[FilterDefinition.HasData] = deriveEncoder
-  implicit val gteFilterEncoder: Encoder[FilterDefinition.Gte] = deriveEncoder
-  implicit val gtDataFilterEncoder: Encoder[FilterDefinition.Gt] = deriveEncoder
-  implicit val lteFilterEncoder: Encoder[FilterDefinition.Lte] = deriveEncoder
-  implicit val ltFilterEncoder: Encoder[FilterDefinition.Lt] = deriveEncoder
+  implicit val overlapsFilterEncoder: Encoder[FilterDefinition.Overlaps] =
+    deriveEncoder[FilterDefinition.Overlaps].mapJson(_.dropNullValues)
+  implicit val hasDataFilterEncoder: Encoder[FilterDefinition.HasData] =
+    Encoder.instance[FilterDefinition.HasData](_.refs.asJson)
+  implicit val gteFilterEncoder: Encoder[FilterDefinition.Gte] =
+    Encoder.instance[FilterDefinition.Gte](_.value.asJson)
+  implicit val gtDataFilterEncoder: Encoder[FilterDefinition.Gt] =
+    Encoder.instance[FilterDefinition.Gt](_.value.asJson)
+  implicit val lteFilterEncoder: Encoder[FilterDefinition.Lte] =
+    Encoder.instance[FilterDefinition.Lte](_.value.asJson)
+  implicit val ltFilterEncoder: Encoder[FilterDefinition.Lt] =
+    Encoder.instance[FilterDefinition.Lt](_.value.asJson)
 
   implicit val filterDefinitionEncoder: Encoder[FilterDefinition] =
     Encoder.instance[FilterDefinition] {
-      case e: FilterDefinition.And =>
-        Json.fromJsonObject(
-          JsonObject(
-            e.productPrefix.toLowerCase(Locale.US) -> e.asJson
-          )
-        )
-      case e: FilterDefinition.Or =>
-        Json.fromJsonObject(
-          JsonObject(
-            e.productPrefix.toLowerCase(Locale.US) -> e.asJson
-          )
-        )
-      case e: FilterDefinition.Not =>
-        Json.fromJsonObject(
-          JsonObject(
-            e.productPrefix.toLowerCase(Locale.US) -> e.asJson
-          )
-        )
+      case e: FilterDefinition.And => e.asJson
+      case e: FilterDefinition.Or => e.asJson
+      case e: FilterDefinition.Not => e.asJson
       case e: FilterDefinition.Equals =>
         Json.fromJsonObject(
           JsonObject(
@@ -128,13 +141,13 @@ object FilterDefinition {
       case e: FilterDefinition.ContainsAny =>
         Json.fromJsonObject(
           JsonObject(
-            e.productPrefix.toLowerCase(Locale.US) -> e.asJson
+            "containsAny" -> e.asJson
           )
         )
       case e: FilterDefinition.ContainsAll =>
         Json.fromJsonObject(
           JsonObject(
-            e.productPrefix.toLowerCase(Locale.US) -> e.asJson
+            "containsAll" -> e.asJson
           )
         )
       case e: FilterDefinition.Nested =>
@@ -152,7 +165,7 @@ object FilterDefinition {
       case e: FilterDefinition.HasData =>
         Json.fromJsonObject(
           JsonObject(
-            e.productPrefix.toLowerCase(Locale.US) -> e.asJson
+            "hasData" -> e.refs.asJson
           )
         )
       case e: FilterDefinition.Gte =>

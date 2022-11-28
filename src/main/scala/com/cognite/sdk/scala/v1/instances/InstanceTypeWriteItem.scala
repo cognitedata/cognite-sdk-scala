@@ -3,9 +3,10 @@
 
 package com.cognite.sdk.scala.v1.instances
 
-import com.cognite.sdk.scala.v1.instances.InstanceType.{Edge, Node}
-import io.circe.Encoder
+import com.cognite.sdk.scala.v1.instances.InstanceType._
+import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, DecodingFailure, Encoder, HCursor}
 
 sealed abstract class InstanceTypeWriteItem extends Product with Serializable
 
@@ -92,6 +93,29 @@ object InstanceTypeWriteItem {
       case e: NodeContainerWriteItem => e.asJson
       case e: EdgeViewWriteItem => e.asJson
       case e: EdgeContainerWriteItem => e.asJson
+    }
+
+  implicit val nodeViewWriteItemDecoder: Decoder[NodeViewWriteItem] = deriveDecoder
+
+  implicit val nodeContainerWriteItemDecoder: Decoder[NodeContainerWriteItem] = deriveDecoder
+
+  implicit val edgeViewWriteItemDecoder: Decoder[EdgeViewWriteItem] = deriveDecoder
+
+  implicit val edgeContainerWriteItemDecoder: Decoder[EdgeContainerWriteItem] = deriveDecoder
+
+  implicit val instanceTypeWriteItemDecoder: Decoder[InstanceTypeWriteItem] = (c: HCursor) =>
+    c.downField("instanceType").as[InstanceType] match {
+      case Left(err) => Left[DecodingFailure, InstanceTypeWriteItem](err)
+      case Right(InstanceType.Node) =>
+        c.downField("view").as[Seq[InstanceViewData]] match {
+          case Right(_) => nodeViewWriteItemDecoder.apply(c)
+          case Left(_) => nodeContainerWriteItemDecoder.apply(c)
+        }
+      case Right(InstanceType.Edge) =>
+        c.downField("view").as[Seq[InstanceViewData]] match {
+          case Right(_) => edgeViewWriteItemDecoder.apply(c)
+          case Left(_) => edgeContainerWriteItemDecoder.apply(c)
+        }
     }
 
 }

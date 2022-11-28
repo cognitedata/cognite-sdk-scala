@@ -58,33 +58,6 @@ final case class InstanceRetrieve(
 
 final case class InstanceRetrieveRequest(items: Seq[InstanceRetrieve], includeTyping: Boolean)
 
-sealed trait InstanceDefinition {
-  val `type`: InstanceType
-}
-
-final case class NodeDefinition(
-    space: String,
-    externalId: String,
-    createdTime: Option[Instant],
-    lastUpdatedTime: Option[Instant],
-    properties: Option[Map[String, Map[String, Map[String, InstancePropertyType]]]]
-) extends InstanceDefinition {
-  override val `type`: InstanceType = InstanceType.Node
-}
-
-final case class EdgeDefinition(
-    relation: DirectRelationReference,
-    space: String,
-    externalId: String,
-    createdTime: Option[Instant],
-    lastUpdatedTime: Option[Instant],
-    properties: Option[Map[String, Map[String, Map[String, InstancePropertyType]]]],
-    startNode: Option[DirectRelationReference],
-    endNode: Option[DirectRelationReference]
-) extends InstanceDefinition {
-  override val `type`: InstanceType = InstanceType.Edge
-}
-
 final case class InstancePropertyDefinition(
     identifier: String,
     nullable: Option[Boolean] = Some(true),
@@ -95,7 +68,7 @@ final case class InstancePropertyDefinition(
     `type`: ContainerPropertyType
 )
 
-final case class InstanceRetrieveResponse(
+final case class InstanceFilterResponse(
     items: Seq[InstanceDefinition],
     typing: Option[Map[String, Map[String, Map[String, InstancePropertyDefinition]]]],
     nextCursor: Option[String]
