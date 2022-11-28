@@ -10,8 +10,6 @@ import com.cognite.sdk.scala.v1.containers.{
 }
 import com.cognite.sdk.scala.v1.views.{SourceReference, ViewReference}
 
-import java.time.Instant
-
 final case class InstanceReadRequest(
     limit: Option[Int],
     cursor: Option[String],
@@ -39,14 +37,6 @@ final case class InstanceCreate(
     autoCreateStartNodes: Option[Boolean],
     autoCreateEndNodes: Option[Boolean],
     replace: Option[Boolean]
-)
-
-final case class InstanceCreateResponse(
-    `type`: InstanceType,
-    space: String,
-    externalId: String,
-    createdTime: Instant,
-    lastUpdatedTime: Instant
 )
 
 final case class InstanceRetrieve(

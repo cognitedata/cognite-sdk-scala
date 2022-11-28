@@ -1,5 +1,6 @@
 package com.cognite.sdk.scala.v1.instances
 
+import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.resources.Instances.{
   directRelationReferenceDecoder,
   directRelationReferenceEncoder
@@ -7,7 +8,6 @@ import com.cognite.sdk.scala.v1.resources.Instances.{
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor}
-
 import java.time.Instant
 
 sealed trait InstanceDefinition {
@@ -20,7 +20,7 @@ object InstanceDefinition {
       externalId: String,
       createdTime: Option[Instant],
       lastUpdatedTime: Option[Instant],
-      properties: Option[Map[String, Map[String, Map[String, InstancePropertyType]]]]
+      properties: Map[String, Map[String, Map[String, InstancePropertyType]]]
   ) extends InstanceDefinition {
     override val `type`: InstanceType = InstanceType.Node
   }
