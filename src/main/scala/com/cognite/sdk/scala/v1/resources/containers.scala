@@ -31,15 +31,15 @@ class Containers[F[_]](val requestSession: RequestSession[F])
       value => value.items
     )
 
-  def retrieveByExternalIds(containersRefs: Seq[ContainerReference]): F[Seq[ContainerRead]] =
-    requestSession.post[Seq[ContainerRead], Items[ContainerRead], Items[ContainerReference]](
+  def retrieveByExternalIds(containersRefs: Seq[ContainerId]): F[Seq[ContainerRead]] =
+    requestSession.post[Seq[ContainerRead], Items[ContainerRead], Items[ContainerId]](
       Items(items = containersRefs),
       uri"$baseUrl/byids",
       value => value.items
     )
 
-  def delete(containersRefs: Seq[ContainerReference]): F[Unit] =
-    requestSession.post[Unit, Items[ContainerCreate], Items[ContainerReference]](
+  def delete(containersRefs: Seq[ContainerId]): F[Unit] =
+    requestSession.post[Unit, Items[ContainerCreate], Items[ContainerId]](
       Items(items = containersRefs),
       uri"$baseUrl/delete",
       _ => ()
@@ -49,6 +49,11 @@ class Containers[F[_]](val requestSession: RequestSession[F])
 object Containers {
   implicit val containerPropertyDefinitionEncoder: Encoder[ContainerPropertyDefinition] =
     deriveEncoder[ContainerPropertyDefinition]
+
+  implicit val containerIdEncoder: Encoder[ContainerId] = deriveEncoder[ContainerId]
+
+  implicit val containerIdItemsEncoder: Encoder[Items[ContainerId]] =
+    deriveEncoder[Items[ContainerId]]
 
   implicit val containerPropertyDefinitionDecoder: Decoder[ContainerPropertyDefinition] =
     deriveDecoder[ContainerPropertyDefinition]

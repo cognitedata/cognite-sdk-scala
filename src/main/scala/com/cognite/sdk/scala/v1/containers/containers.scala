@@ -37,3 +37,5 @@ final case class ContainerRead(
     createdTime: Instant,
     lastUpdatedTime: Instant
 )
+
+final case class ContainerId(space: String, externalId: String)

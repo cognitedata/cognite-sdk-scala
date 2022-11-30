@@ -10,7 +10,9 @@ sealed abstract class PropertyDefaultValue extends Product with Serializable
 object PropertyDefaultValue {
   final case class String(value: java.lang.String) extends PropertyDefaultValue
 
-  final case class Number(value: Double) extends PropertyDefaultValue
+  final case class Integer(value: scala.Long) extends PropertyDefaultValue
+
+  final case class Double(value: scala.Double) extends PropertyDefaultValue
 
   final case class Boolean(value: scala.Boolean) extends PropertyDefaultValue
 
@@ -19,7 +21,8 @@ object PropertyDefaultValue {
   implicit val propertyDefaultValueEncoder: Encoder[PropertyDefaultValue] =
     Encoder.instance[PropertyDefaultValue] {
       case PropertyDefaultValue.String(value) => Json.fromString(value)
-      case PropertyDefaultValue.Number(value) => Json.fromDoubleOrString(value)
+      case PropertyDefaultValue.Integer(value) => Json.fromLong(value)
+      case PropertyDefaultValue.Double(value) => Json.fromDoubleOrString(value)
       case PropertyDefaultValue.Boolean(value) => Json.fromBoolean(value)
       case PropertyDefaultValue.Object(value) => value
     }
@@ -31,9 +34,14 @@ object PropertyDefaultValue {
           Right[DecodingFailure, PropertyDefaultValue](PropertyDefaultValue.String(s))
         )
       case v if v.isNumber =>
-        v.asNumber.map(n =>
-          Right[DecodingFailure, PropertyDefaultValue](PropertyDefaultValue.Number(n.toDouble))
-        )
+        val numericPropertyValue = v.asNumber.flatMap { jn =>
+          if (jn.toString.contains(".")) {
+            Some(PropertyDefaultValue.Double(jn.toDouble))
+          } else {
+            jn.toLong.map(PropertyDefaultValue.Integer)
+          }
+        }
+        numericPropertyValue.map(Right[DecodingFailure, PropertyDefaultValue])
       case v if v.isBoolean =>
         v.asBoolean.map(b =>
           Right[DecodingFailure, PropertyDefaultValue](PropertyDefaultValue.Boolean(b))

@@ -3,12 +3,10 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.containers.ContainerPropertyType._
 import com.cognite.sdk.scala.v1.containers._
-import com.cognite.sdk.scala.v1.resources.Containers
 import com.cognite.sdk.scala.v1.resources.Containers.{containerPropertyDefinitionDecoder, containerPropertyDefinitionEncoder}
 import io.circe.{Decoder, Encoder}
 
@@ -24,16 +22,14 @@ import io.circe.{Decoder, Encoder}
 )
 // scalastyle:off
 class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
-  private val client = new GenericClient[IO](
-    "mock-server-test",
-    "mock",
-    "http://localhost:4002",
-    authProvider,
-    None,
-    None,
-    Some("alpha")
-  )
-  private val containers = new Containers[IO](client.requestSession)
+  private val space = "test-space-scala-sdk"
+//  private val containerName = "test-container-scala-sdk"
+//  private val spaceDefinition = blueFieldClient.spacesv3.retrieveItems(Seq(SpaceById(space)))
+//    .map(_.headOption)
+//    .unsafeRunSync()
+//  private val containerDefinition = blueFieldClient.containers.retrieveByExternalIds(Seq(ContainerId(space, externalId = containerName)))
+//    .map(_.headOption)
+//    .unsafeRunSync()
 
   "Containers" should "serialize & deserialize ConstraintTypes" in {
     val constraintTypes = Seq(ConstraintType.Unique, ConstraintType.Required)
@@ -82,8 +78,9 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     val values = Seq(
       PropertyDefaultValue.String("abc"),
       PropertyDefaultValue.Boolean(true),
-      PropertyDefaultValue.Number(123),
-//      PropertyDefaultValue.Object(CogniteExternalId("test-ext-id"))
+      PropertyDefaultValue.Integer(123),
+      PropertyDefaultValue.Double(123.45),
+      PropertyDefaultValue.Object(Encoder[CogniteExternalId].apply(CogniteExternalId("test-ext-id")))
     )
 
     val afterEncodedAndDecoded = values
@@ -111,10 +108,10 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
 
   it should "serialize & deserialize ContainerPropertyDefinition" in {
     val containerProperty = ContainerPropertyDefinition(
-      defaultValue = Some(PropertyDefaultValue.Number(1.0)),
+      defaultValue = Some(PropertyDefaultValue.Double(1.0)),
       description = Some("Test numeric property"),
       name = Some("numeric-property-prop-1"),
-      `type` = PrimitiveProperty(`type` = PrimitivePropType.Int32)
+      `type` = PrimitiveProperty(`type` = PrimitivePropType.Float64)
     )
 
     val jsonStr = Encoder[ContainerPropertyDefinition].apply(containerProperty).noSpaces
@@ -123,33 +120,105 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     Some(containerProperty) shouldBe decodedContainerProperty.toOption
   }
 
+
   // TODO: fix after the real impl is live
   ignore should "list containers" in {
-    val c = containers.list().unsafeRunSync()
+    val c = blueFieldClient.containers.list().unsafeRunSync()
     c.length shouldBe 1
   }
 
-  // TODO: fix after the real impl is live
-  ignore should "create a container" in {
-    val containerProperty = ContainerPropertyDefinition(
-      defaultValue = Some(PropertyDefaultValue.Number(1.0)),
-      description = Some("Test numeric property"),
-      name = Some("numeric-property-prop-1"),
-      `type` = PrimitiveProperty(`type` = PrimitivePropType.Int32)
-    )
-    val constraintProperty = ContainerConstraint.UniquenessConstraint(properties = Seq.empty)
-    val containerToCreate = ContainerCreate(
-      space = "test-space",
-      externalId = "test-space-external-id",
-      name = Some("test-space-name"),
-      description = Some("this is a test space for scala sdk"),
-      usedFor = Some(ContainerUsage.All),
-      properties = Map("property-1" -> containerProperty),
-      constraints = Some(Map("constraint-property-1" -> constraintProperty)),
-      indexes = None
+
+  it should "create a container" in {
+    val vehicleContainerProperties = Map[String, ContainerPropertyDefinition](
+      "manufacturer" -> ContainerPropertyDefinition(
+        defaultValue = None,
+        description = Some("vehicle manufacturer"),
+        name = Some("vehicle-manufacturer-name"),
+        `type` = TextProperty(),
+        nullable = Some(false)
+      ),
+      "model" -> ContainerPropertyDefinition(
+        defaultValue = None,
+        description = Some("vehicle model"),
+        name = Some("vehicle-model-name"),
+        `type` = TextProperty(),
+        nullable = Some(false)
+      ),
+      "year" -> ContainerPropertyDefinition(
+        defaultValue = None,
+        description = Some("vehicle manufactured year"),
+        name = Some("vehicle-manufactured-year"),
+        `type` = PrimitiveProperty(`type` = PrimitivePropType.Int32),
+        nullable = Some(false)
+      ),
+      "displacement" -> ContainerPropertyDefinition(
+        defaultValue = None,
+        description = Some("vehicle engine displacement"),
+        name = Some("vehicle-engine-displacement"),
+        `type` = PrimitiveProperty(`type` = PrimitivePropType.Int32),
+        nullable = Some(false)
+      ),
+      "weight" -> ContainerPropertyDefinition(
+        defaultValue = None,
+        description = Some("vehicle weight in Kg"),
+        name = Some("vehicle-weight"),
+        `type` = PrimitiveProperty(`type` = PrimitivePropType.Int64),
+        nullable = Some(false)
+      ),
+      "break-type" -> ContainerPropertyDefinition(
+        defaultValue = Some(PropertyDefaultValue.String("ABS")),
+        description = Some("vehicle break type"),
+        name = Some("vehicle-break-type"),
+        `type` = PrimitiveProperty(`type` = PrimitivePropType.Boolean),
+        nullable = Some(false)
+      ),
+      "cylinders" -> ContainerPropertyDefinition(
+        defaultValue = Some(PropertyDefaultValue.Integer(4)),
+        description = Some("number of cylinders"),
+        name = Some("number-of-cylinders"),
+        `type` = PrimitiveProperty(`type` = PrimitivePropType.Int32),
+        nullable = Some(true)
+      ),
+      "compression-ratio" -> ContainerPropertyDefinition(
+        defaultValue = Some(PropertyDefaultValue.String("17.5:1")),
+        description = Some("engine compression ratio"),
+        name = Some("compression-ratio"),
+        `type` = TextProperty(),
+        nullable = Some(false)
+      ),
+      "turbocharger" -> ContainerPropertyDefinition(
+        defaultValue = Some(PropertyDefaultValue.Boolean(false)),
+        description = Some("turbocharger availability"),
+        name = Some("turbocharger"),
+        `type` = PrimitiveProperty(`type` = PrimitivePropType.Boolean),
+        nullable = Some(false)
+      ),
+      "vtec" -> ContainerPropertyDefinition(
+        defaultValue = Some(PropertyDefaultValue.Boolean(false)),
+        description = Some("vtec availability"),
+        name = Some("vtec"),
+        `type` = PrimitiveProperty(`type` = PrimitivePropType.Boolean),
+        nullable = Some(true)
+      )
     )
 
-    val response = containers.createItems(containers = Seq(containerToCreate)).unsafeRunSync()
+    val containerToCreate = ContainerCreate(
+      space = space,
+      externalId = s"$space-vehicle-container-1",
+      name = Some(s"vehicle-container"),
+      description = Some("Test container for modeling vehicles"),
+      usedFor = Some(ContainerUsage.All),
+      properties = vehicleContainerProperties,
+      constraints = Some(Map(
+        "unique-properties" -> ContainerConstraint.UniquenessConstraint(Seq("manufacturer", "model")))
+      ),
+      indexes = Some(Map(
+        "manufacturer-index" -> IndexDefinition.BTreeIndexDefinition(Seq("manufacturer")),
+        "model-index" -> IndexDefinition.BTreeIndexDefinition(Seq("model")))
+      )
+    )
+
+    val response = blueFieldClient.containers.createItems(containers = Seq(containerToCreate)).unsafeRunSync()
 
     response.headOption.isEmpty shouldBe false
   }

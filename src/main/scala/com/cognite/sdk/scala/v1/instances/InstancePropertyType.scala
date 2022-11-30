@@ -32,10 +32,11 @@ object InstancePropertyType {
     val result = c.value match {
       case v if v.isString => v.asString.map(s => Right(InstancePropertyType.String(s)))
       case v if v.isNumber =>
-        val numericInstantPropType = v.asNumber.map { jn =>
-          jn.toLong match {
-            case Some(l) => InstancePropertyType.Integer(l)
-            case None => InstancePropertyType.Double(jn.toDouble)
+        val numericInstantPropType = v.asNumber.flatMap { jn =>
+          if (jn.toString.contains(".")) {
+            Some(InstancePropertyType.Double(jn.toDouble))
+          } else {
+            jn.toLong.map(InstancePropertyType.Integer)
           }
         }
         numericInstantPropType.map(Right(_))
@@ -54,11 +55,11 @@ object InstancePropertyType {
                   InstancePropertyType.BooleanList(arr.flatMap(_.asBoolean))
                 )
               case element if element.isNumber =>
-                val matchingPropType = element.asNumber.flatMap(_.toLong) match {
-                  case Some(_) =>
-                    InstancePropertyType.IntegerList(arr.flatMap(_.asNumber).flatMap(_.toLong))
-                  case None =>
+                val matchingPropType = element.asNumber.map(_.toString.contains(".")) match {
+                  case Some(true) =>
                     InstancePropertyType.DoubleList(arr.flatMap(_.asNumber).map(_.toDouble))
+                  case _ =>
+                    InstancePropertyType.IntegerList(arr.flatMap(_.asNumber).flatMap(_.toLong))
                 }
                 Right[DecodingFailure, InstancePropertyType](matchingPropType)
               case element if element.isObject =>

@@ -38,13 +38,14 @@ object FilterValueDefinition {
           Right[DecodingFailure, ComparableFilterValue](FilterValueDefinition.String(s))
         )
       case v if v.isNumber =>
-        v.asNumber.map(n =>
-          Right[DecodingFailure, ComparableFilterValue](
-            n.toLong
-              .map(FilterValueDefinition.Integer)
-              .getOrElse(FilterValueDefinition.Number(n.toDouble))
-          )
+        val numericFilterValue = v.asNumber.flatMap(n =>
+          if (n.toString.contains(".")) {
+            Some(FilterValueDefinition.Number(n.toDouble))
+          } else {
+            n.toLong.map(FilterValueDefinition.Integer)
+          }
         )
+        numericFilterValue.map(Right[DecodingFailure, ComparableFilterValue])
       case o =>
         Some(Left(DecodingFailure(s"Unknown Filter Value Definition :${o.noSpaces}", c.history)))
     }
