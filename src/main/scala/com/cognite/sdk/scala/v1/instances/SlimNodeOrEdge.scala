@@ -2,6 +2,8 @@ package com.cognite.sdk.scala.v1.instances
 
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor}
+import com.cognite.sdk.scala.common._
+import io.circe.generic.semiauto.deriveDecoder
 
 import java.time.Instant
 
@@ -43,23 +45,17 @@ object SlimNodeOrEdge {
     case e: SlimEdgeDefinition => e.asJson
   }
 
-  implicit val slimNodeDefinitionDecoder: Decoder[SlimNodeOrEdge] = (c: HCursor) =>
+  implicit val slimNodeDefinitionDecoder: Decoder[SlimNodeDefinition] = deriveDecoder
+
+  implicit val slimEdgeDefinitionDecoder: Decoder[SlimEdgeDefinition] = deriveDecoder
+
+  implicit val slimNodeOrEdgeDecoder: Decoder[SlimNodeOrEdge] = (c: HCursor) =>
     c.downField("type").as[InstanceType] match {
       case Left(err) => Left[DecodingFailure, SlimNodeOrEdge](err)
       case Right(typeValue) if typeValue == InstanceType.Node =>
-        for {
-          space <- c.downField("space").as[String]
-          externalId <- c.downField("externalId").as[String]
-          createdTime <- c.downField("createdTime").as[Option[Instant]]
-          lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Instant]]
-        } yield SlimNodeDefinition(space, externalId, createdTime, lastUpdatedTime)
+        Decoder[SlimNodeDefinition].apply(c)
       case Right(typeValue) if typeValue == InstanceType.Edge =>
-        for {
-          space <- c.downField("space").as[String]
-          externalId <- c.downField("externalId").as[String]
-          createdTime <- c.downField("createdTime").as[Option[Instant]]
-          lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Instant]]
-        } yield SlimEdgeDefinition(space, externalId, createdTime, lastUpdatedTime)
+        Decoder[SlimEdgeDefinition].apply(c)
       case Right(typeValue) =>
         Left[DecodingFailure, SlimNodeOrEdge](
           DecodingFailure(s"Unknown Instant Type: ${typeValue}", c.history)

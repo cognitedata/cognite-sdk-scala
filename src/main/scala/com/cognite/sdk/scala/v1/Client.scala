@@ -208,6 +208,7 @@ class GenericClient[F[_]](
   lazy val spaces = new Spaces[F](requestSession)
   lazy val edges = new Edges[F](requestSession, dataModels)
   lazy val containers = new Containers[F](requestSession)
+  lazy val instances = new Instances[F](requestSession)
   lazy val views = new Views[F](requestSession)
   lazy val spacesv3 = new SpacesV3[F](requestSession)
 

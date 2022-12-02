@@ -7,7 +7,7 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.cognite.sdk.scala.v1.instances._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, JsonObject, Printer}
+import io.circe.{Decoder, Encoder, Printer}
 import sttp.client3._
 import sttp.client3.circe._
 
@@ -21,19 +21,19 @@ class Instances[F[_]](val requestSession: RequestSession[F])
 
   override val baseUrl = uri"${requestSession.baseUrl}/models/instances"
 
-  def createItems(containers: Seq[InstanceCreate]): F[Seq[SlimNodeOrEdge]] =
+  def createItems(instance: InstanceCreate): F[Seq[SlimNodeOrEdge]] =
     requestSession
-      .post[Seq[SlimNodeOrEdge], Items[SlimNodeOrEdge], Items[InstanceCreate]](
-        Items(items = containers),
+      .post[Seq[SlimNodeOrEdge], Items[SlimNodeOrEdge], InstanceCreate](
+        instance,
         uri"$baseUrl",
-        value => value.items
+        _.items
       )
 
   def filter(filterRequest: InstanceFilterRequest): F[InstanceFilterResponse] =
     requestSession.post[InstanceFilterResponse, InstanceFilterResponse, InstanceFilterRequest](
       filterRequest,
       uri"$baseUrl/list",
-      value => value
+      identity
     )
 
   def retrieveByExternalIds(
@@ -44,15 +44,16 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       .post[InstanceFilterResponse, InstanceFilterResponse, InstanceRetrieveRequest](
         InstanceRetrieveRequest(items, includeTyping),
         uri"$baseUrl/byids",
-        value => value
+        identity
       )
 
-  def delete(instanceRefs: Seq[InstanceDeleteRequest]): F[Unit] =
-    requestSession.post[Unit, JsonObject, Items[InstanceDeleteRequest]](
-      Items(items = instanceRefs),
-      uri"$baseUrl/delete",
-      _ => ()
-    )
+  def delete(instanceRefs: Seq[InstanceDeleteRequest]): F[Seq[InstanceDeleteRequest]] =
+    requestSession
+      .post[Seq[InstanceDeleteRequest], Items[InstanceDeleteRequest], Items[InstanceDeleteRequest]](
+        Items(items = instanceRefs),
+        uri"$baseUrl/delete",
+        _.items
+      )
 }
 
 object Instances {
@@ -69,7 +70,6 @@ object Instances {
   implicit val instanceCreateEncoder: Encoder[InstanceCreate] = deriveEncoder
   implicit val viewPropertyReferenceEncoder: Encoder[ViewPropertyReference] = deriveEncoder
   implicit val propertySortV3Encoder: Encoder[PropertySortV3] = deriveEncoder
-  implicit val itemsInstanceCreateEncoder: Encoder[Items[InstanceCreate]] = deriveEncoder
   implicit val instanceFilterRequestEncoder: Encoder[InstanceFilterRequest] = deriveEncoder
   implicit val instanceRetrieveRequestEncoder: Encoder[InstanceRetrieveRequest] = deriveEncoder
 
@@ -81,5 +81,7 @@ object Instances {
     deriveDecoder
   implicit val instanceFilterResponseDecoder: Decoder[InstanceFilterResponse] = deriveDecoder
   implicit val instanceDeleteRequestDecoder: Decoder[InstanceDeleteRequest] = deriveDecoder
+  implicit val instanceDeleteRequestItemsDecoder: Decoder[Items[InstanceDeleteRequest]] =
+    deriveDecoder
   implicit val slimNodeOrEdgeItemsDecoder: Decoder[Items[SlimNodeOrEdge]] = deriveDecoder
 }
