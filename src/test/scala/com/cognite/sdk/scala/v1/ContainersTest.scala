@@ -3,12 +3,16 @@
 
 package com.cognite.sdk.scala.v1
 
+import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.containers.ContainerPropertyType._
 import com.cognite.sdk.scala.v1.containers._
-import com.cognite.sdk.scala.v1.resources.Containers.{containerPropertyDefinitionDecoder, containerPropertyDefinitionEncoder}
+import com.cognite.sdk.scala.v1.resources.Containers._
 import io.circe.{Decoder, Encoder}
+
+import scala.concurrent.duration.DurationInt
+import scala.util.Random
 
 @SuppressWarnings(
   Array(
@@ -23,13 +27,6 @@ import io.circe.{Decoder, Encoder}
 // scalastyle:off
 class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
   private val space = "test-space-scala-sdk"
-//  private val containerName = "test-container-scala-sdk"
-//  private val spaceDefinition = blueFieldClient.spacesv3.retrieveItems(Seq(SpaceById(space)))
-//    .map(_.headOption)
-//    .unsafeRunSync()
-//  private val containerDefinition = blueFieldClient.containers.retrieveByExternalIds(Seq(ContainerId(space, externalId = containerName)))
-//    .map(_.headOption)
-//    .unsafeRunSync()
 
   "Containers" should "serialize & deserialize ConstraintTypes" in {
     val constraintTypes = Seq(ConstraintType.Unique, ConstraintType.Required)
@@ -120,15 +117,8 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     Some(containerProperty) shouldBe decodedContainerProperty.toOption
   }
 
-
-  // TODO: fix after the real impl is live
-  ignore should "list containers" in {
-    val c = blueFieldClient.containers.list().unsafeRunSync()
-    c.length shouldBe 1
-  }
-
-
-  it should "create a container" in {
+  it should "CRUD a container" in {
+    // TODO: Verify all properties after they fix the bugs
     val vehicleContainerProperties = Map[String, ContainerPropertyDefinition](
       "manufacturer" -> ContainerPropertyDefinition(
         defaultValue = None,
@@ -202,9 +192,10 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
       )
     )
 
+    val containerExternalId = s"vehicle_container_${Random.nextInt(1000)}"
     val containerToCreate = ContainerCreate(
       space = space,
-      externalId = s"$space-vehicle-container-1",
+      externalId = containerExternalId,
       name = Some(s"vehicle-container"),
       description = Some("Test container for modeling vehicles"),
       usedFor = Some(ContainerUsage.All),
@@ -218,8 +209,51 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
       )
     )
 
-    val response = blueFieldClient.containers.createItems(containers = Seq(containerToCreate)).unsafeRunSync()
+    val createdResponse = blueFieldClient.containers.createItems(containers = Seq(containerToCreate)).unsafeRunSync()
+    createdResponse.isEmpty shouldBe false
 
-    response.headOption.isEmpty shouldBe false
+    val readAfterCreateContainers = blueFieldClient.containers.retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))).unsafeRunSync()
+    val insertedContainer = readAfterCreateContainers.find(_.externalId == containerExternalId)
+
+    insertedContainer.isEmpty shouldBe false
+    insertedContainer.get.properties.keys.toList should contain theSameElementsAs vehicleContainerProperties.keys.toList
+//    insertedContainer.get.properties.values.toList should contain theSameElementsAs vehicleContainerProperties.values.toList
+
+    val updatedContainerProperties = vehicleContainerProperties + ("neon-lights" -> ContainerPropertyDefinition(
+      defaultValue = Some(PropertyDefaultValue.Boolean(false)),
+      description = Some("neon lights availability"),
+      name = Some("neon-lights"),
+      `type` = PrimitiveProperty(`type` = PrimitivePropType.Boolean),
+      nullable = Some(true)
+    ))
+    val containerToUpdate = ContainerCreate(
+      space = space,
+      externalId = containerExternalId,
+      name = Some(s"vehicle-container-updated"),
+      description = Some("Test container for modeling vehicles updated"),
+      usedFor = Some(ContainerUsage.All),
+      properties = updatedContainerProperties,
+      constraints = Some(Map(
+        "unique-properties" -> ContainerConstraint.UniquenessConstraint(Seq("manufacturer", "model")))
+      ),
+      indexes = Some(Map(
+        "manufacturer-index" -> IndexDefinition.BTreeIndexDefinition(Seq("manufacturer")),
+        "model-index" -> IndexDefinition.BTreeIndexDefinition(Seq("model")))
+      )
+    )
+
+    val updatedResponse = blueFieldClient.containers.createItems(containers = Seq(containerToUpdate)).unsafeRunSync()
+    updatedResponse.isEmpty shouldBe false
+
+    val readAfterUpdateContainers = (IO.sleep(10.seconds) *> blueFieldClient.containers.retrieveByExternalIds(Seq(ContainerId(space, containerExternalId)))).unsafeRunSync()
+    val updatedContainer = readAfterUpdateContainers.find(_.externalId == containerExternalId)
+
+    updatedContainer.isEmpty shouldBe false
+    updatedContainer.get.properties.keys.toList should contain theSameElementsAs updatedContainerProperties.keys.toList
+    updatedContainer.get.name.get.endsWith("updated") shouldBe true
+    updatedContainer.get.description.get.endsWith("updated") shouldBe true
+
+    val deletedContainer = blueFieldClient.containers.delete(Seq(ContainerId(space, containerExternalId))).unsafeRunSync()
+    deletedContainer.length shouldBe 1
   }
 }
