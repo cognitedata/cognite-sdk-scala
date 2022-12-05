@@ -64,8 +64,6 @@ final case class InstanceFilterResponse(
     nextCursor: Option[String]
 )
 
-final case class InstanceDeleteRequest(`type`: InstanceType, externalId: String, space: String)
-
 final case class ViewPropertyReference(identifier: String, view: Option[ViewReference])
 
 final case class PropertySortV3(

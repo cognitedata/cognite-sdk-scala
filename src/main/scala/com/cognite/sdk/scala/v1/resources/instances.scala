@@ -47,9 +47,11 @@ class Instances[F[_]](val requestSession: RequestSession[F])
         identity
       )
 
-  def delete(instanceRefs: Seq[InstanceDeleteRequest]): F[Seq[InstanceDeleteRequest]] =
+  def delete(instanceRefs: Seq[InstanceDeletionRequest]): F[Seq[InstanceDeletionRequest]] =
     requestSession
-      .post[Seq[InstanceDeleteRequest], Items[InstanceDeleteRequest], Items[InstanceDeleteRequest]](
+      .post[Seq[InstanceDeletionRequest], Items[InstanceDeletionRequest], Items[
+        InstanceDeletionRequest
+      ]](
         Items(items = instanceRefs),
         uri"$baseUrl/delete",
         _.items
@@ -64,9 +66,9 @@ object Instances {
     deriveEncoder
   implicit val instanceRetrieveEncoder: Encoder[InstanceRetrieve] = deriveEncoder
   implicit val instanceRetrieveResponseEncoder: Encoder[InstanceFilterResponse] = deriveEncoder
-  implicit val instanceDeleteRequestEncoder: Encoder[InstanceDeleteRequest] = deriveEncoder
-  implicit val instanceDeleteRequestItemsEncoder: Encoder[Items[InstanceDeleteRequest]] =
+  implicit val instanceDeleteRequestItemsEncoder: Encoder[Items[InstanceDeletionRequest]] =
     deriveEncoder
+
   implicit val instanceCreateEncoder: Encoder[InstanceCreate] = deriveEncoder
   implicit val viewPropertyReferenceEncoder: Encoder[ViewPropertyReference] = deriveEncoder
   implicit val propertySortV3Encoder: Encoder[PropertySortV3] = deriveEncoder
@@ -80,8 +82,7 @@ object Instances {
   implicit val instancePropertyDefinitionDecoder: Decoder[InstancePropertyDefinition] =
     deriveDecoder
   implicit val instanceFilterResponseDecoder: Decoder[InstanceFilterResponse] = deriveDecoder
-  implicit val instanceDeleteRequestDecoder: Decoder[InstanceDeleteRequest] = deriveDecoder
-  implicit val instanceDeleteRequestItemsDecoder: Decoder[Items[InstanceDeleteRequest]] =
-    deriveDecoder
   implicit val slimNodeOrEdgeItemsDecoder: Decoder[Items[SlimNodeOrEdge]] = deriveDecoder
+  implicit val instanceDeleteRequestItemsDecoder: Decoder[Items[InstanceDeletionRequest]] =
+    deriveDecoder
 }

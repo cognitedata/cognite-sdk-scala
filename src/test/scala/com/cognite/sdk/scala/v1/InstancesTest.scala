@@ -3,8 +3,8 @@ package com.cognite.sdk.scala.v1
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.ContainersTest.VehicleContainer._
-import com.cognite.sdk.scala.v1.containers.{ContainerConstraint, ContainerCreate, ContainerRead, ContainerReference, ContainerUsage, IndexDefinition}
-import com.cognite.sdk.scala.v1.instances.{InstanceContainerData, InstanceCreate, InstancePropertyType, InstanceTypeWriteItem}
+import com.cognite.sdk.scala.v1.containers.{ContainerCreate, ContainerRead, ContainerUsage}
+import com.cognite.sdk.scala.v1.instances._
 
 import scala.util.Random
 
@@ -35,19 +35,19 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val createdContainer: ContainerRead = blueFieldClient.containers.createItems(Seq(container)).unsafeRunSync().head
 
   it should "CRUD instances" in {
+    val nodeExternalId = s"vehicle-node-${Random.nextInt(1000)}"
     val instancesToCreate = InstanceCreate(
-      items = Seq(InstanceTypeWriteItem.NodeContainerWriteItem(space, "node-1", Seq(InstanceContainerData(
+      items = Seq(InstanceTypeWriteItem.NodeContainerWriteItem(space, nodeExternalId, Seq(InstanceContainerData(
         container = createdContainer.toContainerReference,
         properties = Map(
+          "id" -> InstancePropertyType.String("1"),
           "manufacturer" -> InstancePropertyType.String("Toyota"),
           "model" -> InstancePropertyType.String("RAV-4"),
           "year" -> InstancePropertyType.Integer(2020),
           "displacement" -> InstancePropertyType.Integer(2487),
           "weight" -> InstancePropertyType.Integer(1200L),
-          "cylinders" -> InstancePropertyType.Integer(4),
           "compression-ratio" -> InstancePropertyType.String("13:1"),
-          "turbocharger" -> InstancePropertyType.Boolean(true),
-          "vtec" -> InstancePropertyType.Boolean(false),
+          "turbocharger" -> InstancePropertyType.Boolean(true)
         )
       )))),
       autoCreateStartNodes = Some(true),
@@ -56,5 +56,8 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     )
     val createdInstances = blueFieldClient.instances.createItems(instancesToCreate).unsafeRunSync()
     createdInstances.length shouldBe 1
+
+//    val deletedInstances = blueFieldClient.instances.delete(Seq(NodeDeletionRequest(space = space, externalId = nodeExternalId))).unsafeRunSync()
+//    deletedInstances.length shouldBe 1
   }
 }

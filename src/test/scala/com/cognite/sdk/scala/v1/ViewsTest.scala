@@ -219,3 +219,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 //    sCaught.responseCode shouldBe  Some(404)
   }
 }
+
+object ViewsTest {
+
+}
