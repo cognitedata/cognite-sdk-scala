@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
-import com.cognite.sdk.scala.v1.ContainersTest._
+import com.cognite.sdk.scala.v1.ContainersTest.VehicleContainer._
 import com.cognite.sdk.scala.v1.containers.{ContainerConstraint, ContainerCreate, ContainerRead, ContainerReference, ContainerUsage, IndexDefinition}
 import com.cognite.sdk.scala.v1.instances.{InstanceContainerData, InstanceCreate, InstancePropertyType, InstanceTypeWriteItem}
 
@@ -29,20 +29,15 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     description = Some("Test container for modeling vehicles updated"),
     usedFor = Some(ContainerUsage.All),
     properties = UpdatedVehicleContainerProperties,
-    constraints = Some(Map(
-      "unique-properties" -> ContainerConstraint.UniquenessConstraint(Seq("manufacturer", "model")))
-    ),
-    indexes = Some(Map(
-      "manufacturer-index" -> IndexDefinition.BTreeIndexDefinition(Seq("manufacturer")),
-      "model-index" -> IndexDefinition.BTreeIndexDefinition(Seq("model")))
-    )
+    constraints = Some(VehicleContainerConstraints),
+    indexes = Some(VehicleContainerIndexes)
   )
   private val createdContainer: ContainerRead = blueFieldClient.containers.createItems(Seq(container)).unsafeRunSync().head
 
   it should "CRUD instances" in {
     val instancesToCreate = InstanceCreate(
       items = Seq(InstanceTypeWriteItem.NodeContainerWriteItem(space, "node-1", Seq(InstanceContainerData(
-        container = ContainerReference(space, createdContainer.externalId),
+        container = createdContainer.toContainerReference,
         properties = Map(
           "manufacturer" -> InstancePropertyType.String("Toyota"),
           "model" -> InstancePropertyType.String("RAV-4"),

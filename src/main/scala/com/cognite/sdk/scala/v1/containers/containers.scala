@@ -36,6 +36,8 @@ final case class ContainerRead(
     indexes: Option[Map[String, IndexDefinition]],
     createdTime: Instant,
     lastUpdatedTime: Instant
-)
+) {
+  def toContainerReference: ContainerReference = ContainerReference(space, externalId)
+}
 
 final case class ContainerId(space: String, externalId: String)
