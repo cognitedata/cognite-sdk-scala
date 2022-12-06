@@ -9,6 +9,7 @@ import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.ContainersTest.VehicleContainer._
 import com.cognite.sdk.scala.v1.containers.ContainerPropertyType._
 import com.cognite.sdk.scala.v1.containers._
+import com.cognite.sdk.scala.v1.instances.{InstanceContainerData, InstancePropertyType}
 import com.cognite.sdk.scala.v1.resources.Containers._
 import io.circe.{Decoder, Encoder}
 
@@ -207,7 +208,7 @@ object ContainersTest {
         description = Some("vehicle engine displacement in CC"),
         name = Some("vehicle-engine-displacement"),
         `type` = PrimitiveProperty(`type` = PrimitivePropType.Int32),
-        nullable = Some(false)
+        nullable = Some(true)
       ),
       "weight" -> ContainerPropertyDefinition(
         defaultValue = None,
@@ -221,7 +222,7 @@ object ContainersTest {
         description = Some("engine compression ratio"),
         name = Some("compression-ratio"),
         `type` = TextProperty(),
-        nullable = Some(false)
+        nullable = Some(true)
       ),
       "turbocharger" -> ContainerPropertyDefinition(
         defaultValue = Some(PropertyDefaultValue.Boolean(false)),
@@ -248,6 +249,85 @@ object ContainersTest {
       `type` = PrimitiveProperty(`type` = PrimitivePropType.Boolean),
       nullable = Some(true)
     ))
+
+    def vehicleInstanceData(containerRef: ContainerReference): Seq[InstanceContainerData] = Seq(
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "id" -> InstancePropertyType.String("1"),
+          "manufacturer" -> InstancePropertyType.String("Toyota"),
+          "model" -> InstancePropertyType.String("RAV-4"),
+          "year" -> InstancePropertyType.Integer(2020),
+          "displacement" -> InstancePropertyType.Integer(2487),
+          "weight" -> InstancePropertyType.Integer(1200L),
+          "compression-ratio" -> InstancePropertyType.String("13:1"),
+          "turbocharger" -> InstancePropertyType.Boolean(true)
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "id" -> InstancePropertyType.String("2"),
+          "manufacturer" -> InstancePropertyType.String("Toyota"),
+          "model" -> InstancePropertyType.String("Prius"),
+          "year" -> InstancePropertyType.Integer(2018),
+          "displacement" -> InstancePropertyType.Integer(2487),
+          "weight" -> InstancePropertyType.Integer(1800L),
+          "compression-ratio" -> InstancePropertyType.String("13:1"),
+          "turbocharger" -> InstancePropertyType.Boolean(true)
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "id" -> InstancePropertyType.String("3"),
+          "manufacturer" -> InstancePropertyType.String("Volkswagen"),
+          "model" -> InstancePropertyType.String("ID.4"),
+          "year" -> InstancePropertyType.Integer(2022),
+          "weight" -> InstancePropertyType.Integer(2224),
+          "turbocharger" -> InstancePropertyType.Boolean(false)
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "id" -> InstancePropertyType.String("4"),
+          "manufacturer" -> InstancePropertyType.String("Volvo"),
+          "model" -> InstancePropertyType.String("XC90"),
+          "year" -> InstancePropertyType.Integer(2002),
+          "weight" -> InstancePropertyType.Integer(2020),
+          "compression-ratio" -> InstancePropertyType.String("17:1"),
+          "displacement" -> InstancePropertyType.Integer(2401),
+          "turbocharger" -> InstancePropertyType.Boolean(true)
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "id" -> InstancePropertyType.String("5"),
+          "manufacturer" -> InstancePropertyType.String("Volvo"),
+          "model" -> InstancePropertyType.String("XC90"),
+          "year" -> InstancePropertyType.Integer(2002),
+          "weight" -> InstancePropertyType.Integer(2020),
+          "compression-ratio" -> InstancePropertyType.String("17:1"),
+          "displacement" -> InstancePropertyType.Integer(2401),
+          "turbocharger" -> InstancePropertyType.Boolean(true)
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "id" -> InstancePropertyType.String("6"),
+          "manufacturer" -> InstancePropertyType.String("Mitsubishi"),
+          "model" -> InstancePropertyType.String("Outlander"),
+          "year" -> InstancePropertyType.Integer(2021),
+          "weight" -> InstancePropertyType.Integer(1745),
+          "compression-ratio" -> InstancePropertyType.String("17:1"),
+          "displacement" -> InstancePropertyType.Integer(2000),
+          "turbocharger" -> InstancePropertyType.Boolean(true)
+        )
+      )
+    )
   }
 
   object RentableContainer {
@@ -346,6 +426,69 @@ object ContainersTest {
       "nationality-index" -> IndexDefinition.BTreeIndexDefinition(Seq("nationality")),
       "national-id-index" -> IndexDefinition.BTreeIndexDefinition(Seq("national-id")),
       "firstname-index" -> IndexDefinition.BTreeIndexDefinition(Seq("firstname-id"))
+    )
+
+    def personInstanceData(containerRef: ContainerReference): Seq[InstanceContainerData] = Seq(
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "national-id" -> InstancePropertyType.String("111111"),
+          "firstname" -> InstancePropertyType.String("Sadio"),
+          "lastname" -> InstancePropertyType.String("Mane"),
+          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1989-11-23")),
+          "nationality" -> InstancePropertyType.String("Senegalese"),
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "national-id" -> InstancePropertyType.String("222222"),
+          "firstname" -> InstancePropertyType.String("Alexander"),
+          "lastname" -> InstancePropertyType.String("Arnold"),
+          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1989-10-23")),
+          "nationality" -> InstancePropertyType.String("British"),
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "national-id" -> InstancePropertyType.String("333333"),
+          "firstname" -> InstancePropertyType.String("Harry"),
+          "lastname" -> InstancePropertyType.String("Kane"),
+          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1990-10-20")),
+          "nationality" -> InstancePropertyType.String("British"),
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "national-id" -> InstancePropertyType.String("444444"),
+          "firstname" -> InstancePropertyType.String("John"),
+          "lastname" -> InstancePropertyType.String("Gotty"),
+          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1978-09-20")),
+          "nationality" -> InstancePropertyType.String("Italian"),
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "national-id" -> InstancePropertyType.String("555555"),
+          "firstname" -> InstancePropertyType.String("Angela"),
+          "lastname" -> InstancePropertyType.String("Merkel"),
+          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1978-05-20")),
+          "nationality" -> InstancePropertyType.String("German"),
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "national-id" -> InstancePropertyType.String("666666"),
+          "firstname" -> InstancePropertyType.String("Elon"),
+          "lastname" -> InstancePropertyType.String("Musk"),
+          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1982-05-20")),
+          "nationality" -> InstancePropertyType.String("American"),
+        )
+      )
     )
   }
 }

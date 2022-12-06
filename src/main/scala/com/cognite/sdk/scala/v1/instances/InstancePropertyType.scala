@@ -3,7 +3,11 @@
 
 package com.cognite.sdk.scala.v1.instances
 
-import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json}
+import io.circe._
+
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, ZonedDateTime}
+import scala.util.{Success, Try}
 
 sealed abstract class InstancePropertyType extends Product with Serializable
 
@@ -16,6 +20,10 @@ object InstancePropertyType {
 
   final case class Boolean(value: scala.Boolean) extends InstancePropertyType
 
+  final case class Date(value: LocalDate) extends InstancePropertyType
+
+  final case class Timestamp(value: ZonedDateTime) extends InstancePropertyType
+
   final case class Object(value: Json) extends InstancePropertyType
 
   final case class StringList(value: Seq[java.lang.String]) extends InstancePropertyType
@@ -26,11 +34,25 @@ object InstancePropertyType {
 
   final case class DoubleList(value: Seq[scala.Double]) extends InstancePropertyType
 
+  final case class DateList(value: Seq[LocalDate]) extends InstancePropertyType
+
+  final case class TimestampList(value: Seq[ZonedDateTime]) extends InstancePropertyType
+
   final case class ObjectsList(value: Seq[Json]) extends InstancePropertyType
 
   implicit val instancePropertyTypeDecoder: Decoder[InstancePropertyType] = { (c: HCursor) =>
     val result = c.value match {
-      case v if v.isString => v.asString.map(s => Right(InstancePropertyType.String(s)))
+      case v if v.isString =>
+        v.asString.flatMap { s =>
+          Try(ZonedDateTime.parse("", DateTimeFormatter.ISO_ZONED_DATE_TIME))
+            .map(InstancePropertyType.Timestamp)
+            .orElse(
+              Try(LocalDate.parse(s, DateTimeFormatter.ISO_DATE)).map(InstancePropertyType.Date)
+            )
+            .orElse(Success(InstancePropertyType.String(s)))
+            .toOption
+            .map(Right[DecodingFailure, InstancePropertyType])
+        }
       case v if v.isNumber =>
         val numericInstantPropType = v.asNumber.flatMap { jn =>
           if (jn.toString.contains(".")) {
@@ -46,6 +68,34 @@ object InstancePropertyType {
         val objArrays = v.asArray match {
           case Some(arr) =>
             arr.headOption.map {
+              case element
+                  if element.isString && element.asString
+                    .flatMap(s =>
+                      Try(ZonedDateTime.parse(s, DateTimeFormatter.ISO_ZONED_DATE_TIME)).toOption
+                    )
+                    .nonEmpty =>
+                Right[DecodingFailure, InstancePropertyType](
+                  InstancePropertyType.TimestampList(
+                    arr
+                      .flatMap(_.asString)
+                      .flatMap(s =>
+                        Try(
+                          ZonedDateTime.parse(s, DateTimeFormatter.ISO_ZONED_DATE_TIME)
+                        ).toOption
+                      )
+                  )
+                )
+              case element
+                  if element.isString && element.asString
+                    .flatMap(s => Try(LocalDate.parse(s, DateTimeFormatter.ISO_DATE)).toOption)
+                    .nonEmpty =>
+                Right[DecodingFailure, InstancePropertyType](
+                  InstancePropertyType.DateList(
+                    arr
+                      .flatMap(_.asString)
+                      .flatMap(s => Try(LocalDate.parse(s, DateTimeFormatter.ISO_DATE)).toOption)
+                  )
+                )
               case element if element.isString =>
                 Right[DecodingFailure, InstancePropertyType](
                   InstancePropertyType.StringList(arr.flatMap(_.asString))
@@ -91,11 +141,21 @@ object InstancePropertyType {
       case Integer(value) => Json.fromLong(value)
       case Double(value) => Json.fromDoubleOrString(value)
       case Boolean(value) => Json.fromBoolean(value)
+      case Date(value) => Json.fromString(value.format(DateTimeFormatter.ISO_DATE))
+      case Timestamp(value) => Json.fromString(value.format(DateTimeFormatter.ISO_ZONED_DATE_TIME))
       case Object(value) => value
       case StringList(values) => Json.arr(values = values.map(Json.fromString): _*)
       case BooleanList(values) => Json.arr(values = values.map(Json.fromBoolean): _*)
       case IntegerList(values) => Json.arr(values = values.map(Json.fromLong): _*)
       case DoubleList(values) => Json.arr(values = values.map(Json.fromDoubleOrString): _*)
+      case DateList(values) =>
+        Json.arr(values =
+          values.map(d => Json.fromString(d.format(DateTimeFormatter.ISO_DATE))): _*
+        )
+      case TimestampList(values) =>
+        Json.arr(values =
+          values.map(d => Json.fromString(d.format(DateTimeFormatter.ISO_ZONED_DATE_TIME))): _*
+        )
       case ObjectsList(values) => Json.arr(values = values: _*)
     }
 }
