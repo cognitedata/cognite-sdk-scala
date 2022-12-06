@@ -13,6 +13,7 @@ import com.cognite.sdk.scala.v1.instances.{InstanceContainerData, InstanceProper
 import com.cognite.sdk.scala.v1.resources.Containers._
 import io.circe.{Decoder, Encoder}
 
+import java.time.{ZoneId, ZonedDateTime}
 import scala.concurrent.duration.DurationInt
 import scala.util.Random
 
@@ -376,6 +377,39 @@ object ContainersTest {
     val RentableContainerIndexes: Map[String, IndexDefinition] = Map(
       "renter-index" -> IndexDefinition.BTreeIndexDefinition(Seq("renter-id")),
       "item-index" -> IndexDefinition.BTreeIndexDefinition(Seq("item-id"))
+    )
+
+    def rentableInstanceData(containerRef: ContainerReference): Seq[InstanceContainerData] = Seq(
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "item-id" -> InstancePropertyType.String("1"),
+          "renter-id" -> InstancePropertyType.String("222222"),
+          "from" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 1, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
+          "to" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 1, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
+          "invoice-id" -> InstancePropertyType.String("inv-1"),
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "item-id" -> InstancePropertyType.String("1"),
+          "renter-id" -> InstancePropertyType.String("222222"),
+          "from" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 2, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
+          "to" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 2, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
+          "invoice-id" -> InstancePropertyType.String("inv-2"),
+        )
+      ),
+      InstanceContainerData(
+        container = containerRef,
+        properties = Map(
+          "item-id" -> InstancePropertyType.String("2"),
+          "renter-id" -> InstancePropertyType.String("333333"),
+          "from" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 2, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
+          "to" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 2, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
+          "invoice-id" -> InstancePropertyType.String("inv-3"),
+        )
+      )
     )
   }
 
