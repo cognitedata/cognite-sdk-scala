@@ -32,10 +32,7 @@ object ContainerPropertyType {
     val Type = "direct"
   }
 
-  import com.cognite.sdk.scala.v1.resources.Containers.{
-    containerReferenceDecoder,
-    containerReferenceEncoder
-  }
+  import com.cognite.sdk.scala.v1.containers.ContainerReference._
 
   implicit val propertyTypeTextEncoder: Encoder[TextProperty] =
     Encoder.forProduct3("list", "collation", "type")((t: TextProperty) =>
