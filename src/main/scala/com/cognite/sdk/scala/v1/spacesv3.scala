@@ -2,13 +2,13 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 
-case class SpaceCreateDefinition(
+final case class SpaceCreateDefinition(
     space: String,
     description: Option[String] = None,
     name: Option[String] = None
 )
 
-case class SpaceDefinition(
+final case class SpaceDefinition(
     space: String,
     description: Option[String] = None,
     name: Option[String] = None,
@@ -16,4 +16,4 @@ case class SpaceDefinition(
     lastUpdatedTime: Instant
 )
 
-case class SpaceById(space: String)
+final case class SpaceById(space: String)

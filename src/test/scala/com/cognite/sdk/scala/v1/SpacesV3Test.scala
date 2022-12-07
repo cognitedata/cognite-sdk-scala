@@ -52,7 +52,7 @@ class SpacesV3Test extends CommonDataModelTestHelper with BeforeAndAfterAll{
 
   ignore should "list spaces" in {
     val spacePrefix = "scala-sdk-test-list-stream"
-    val manySpaces = (1 to 200).map(id => SpaceCreateDefinition(s"$spacePrefix-$id"))
+    val manySpaces = (1 to 200).map(id => SpaceCreateDefinition(s"$spacePrefix-${id.toString}"))
     val createdSpaces = blueFieldClient.spacesv3.createItems(manySpaces).unsafeRunSync()
     createdSpaces.size shouldBe 200
 

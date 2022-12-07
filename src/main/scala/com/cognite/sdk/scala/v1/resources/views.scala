@@ -3,12 +3,12 @@
 
 package com.cognite.sdk.scala.v1.resources
 
-import cats.effect.Async
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import fs2.Stream
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe._
+import io.circe.syntax.EncoderOps
 import sttp.client3._
 import sttp.client3.circe._
 
@@ -20,6 +20,7 @@ class Views[F[_]](val requestSession: RequestSession[F])
 
   def createItems(items: Seq[ViewCreateDefinition]): F[Seq[ViewDefinition]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
+    println(s"views = ${items.asJson.toString()}")
     requestSession
       .post[Seq[ViewDefinition], ItemsWithCursor[ViewDefinition], Items[ViewCreateDefinition]](
         Items(items),
@@ -71,7 +72,7 @@ class Views[F[_]](val requestSession: RequestSession[F])
       space: Option[String],
       includeGlobal: Option[Boolean],
       includeInheritedProperties: Option[Boolean]
-  )(implicit F: Async[F]): Stream[F, ViewDefinition] =
+  ): Stream[F, ViewDefinition] =
     Readable
       .pullFromCursor(
         cursor,
@@ -86,7 +87,7 @@ class Views[F[_]](val requestSession: RequestSession[F])
       space: Option[String],
       includeGlobal: Option[Boolean],
       includeInheritedProperties: Option[Boolean]
-  )(implicit F: Async[F]): fs2.Stream[F, ViewDefinition] =
+  ): fs2.Stream[F, ViewDefinition] =
     listWithNextCursor(None, limit, space, includeGlobal, includeInheritedProperties)
 }
 

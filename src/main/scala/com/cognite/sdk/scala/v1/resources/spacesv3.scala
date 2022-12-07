@@ -3,7 +3,6 @@
 
 package com.cognite.sdk.scala.v1.resources
 
-import cats.effect.Async
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import fs2.Stream
@@ -65,13 +64,14 @@ class SpacesV3[F[_]](val requestSession: RequestSession[F])
       cursor: Option[String],
       limit: Option[Int],
       includeGlobal: Option[Boolean]
-  )(implicit F: Async[F]): Stream[F, SpaceDefinition] =
+  ): Stream[F, SpaceDefinition] =
     Readable
       .pullFromCursor(cursor, limit, None, listWithCursor(_, _, includeGlobal, _))
       .stream
 
-  def listStream(limit: Option[Int], includeGlobal: Option[Boolean] = None)(
-      implicit F: Async[F]
+  def listStream(
+      limit: Option[Int],
+      includeGlobal: Option[Boolean] = None
   ): fs2.Stream[F, SpaceDefinition] =
     listWithNextCursor(None, limit, includeGlobal)
 }

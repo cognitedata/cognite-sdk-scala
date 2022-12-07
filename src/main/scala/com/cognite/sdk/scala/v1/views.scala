@@ -3,14 +3,18 @@
 
 package com.cognite.sdk.scala.v1
 import com.cognite.sdk.scala.common.DomainSpecificLanguageFilter
-import com.cognite.sdk.scala.v1.containers.{ContainerPropertyType, ContainerReference}
+import com.cognite.sdk.scala.v1.containers.{
+  ContainerPropertyType,
+  ContainerReference,
+  ContainerUsage
+}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 final case class ViewReference(
     space: String,
     externalId: String,
-    version: Option[String] = None
+    version: String
 ) {
   val `type`: String = "view"
 }
@@ -25,9 +29,7 @@ object ViewReference {
 
 final case class CreatePropertyReference(
     container: ContainerReference,
-    externalId: String,
-    name: Option[String] = None,
-    description: Option[String] = None
+    containerPropertyIdentifier: String
 )
 object CreatePropertyReference {
   implicit val createPropertyReferenceEncoder: Encoder[CreatePropertyReference] =
@@ -47,17 +49,16 @@ final case class ViewCreateDefinition(
     properties: Map[String, CreatePropertyReference]
 )
 
-// TODO Some of the fields are required but they were made optional to work with mock server
 final case class ViewPropertyDefinition(
-    externalId: String,
     nullable: Option[Boolean] = Some(true),
     autoIncrement: Option[Boolean] = Some(false),
 // TODO add later
 //   defaultValue: Option[DataModelProperty[_]] = None,
     description: Option[String] = None,
-    `type`: Option[ContainerPropertyType] = None,
+    name: Option[String] = None,
+    `type`: ContainerPropertyType,
     container: Option[ContainerReference] = None,
-    containerPropertyExternalId: Option[String] = None
+    containerPropertyIdentifier: Option[String] = None
 )
 
 final case class DataModelReference(
@@ -82,6 +83,9 @@ final case class ViewDefinition(
 //   filter: Option[DomainSpecificLanguageFilter] = None,
     implements: Option[Seq[ViewReference]] = None,
     version: Option[String] = None,
-    properties: Map[String, ViewPropertyDefinition],
-    usedBy: Option[Seq[DataModelReference]] = None
+    createdTime: Long,
+    lastUpdatedTime: Long,
+    writable: Boolean,
+    usedFor: ContainerUsage,
+    properties: Map[String, ViewPropertyDefinition]
 )
