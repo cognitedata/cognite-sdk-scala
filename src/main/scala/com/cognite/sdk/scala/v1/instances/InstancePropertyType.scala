@@ -44,7 +44,7 @@ object InstancePropertyType {
     val result = c.value match {
       case v if v.isString =>
         v.asString.flatMap { s =>
-          Try(ZonedDateTime.parse("", DateTimeFormatter.ISO_ZONED_DATE_TIME))
+          Try(ZonedDateTime.parse(s, DateTimeFormatter.ISO_ZONED_DATE_TIME))
             .map(InstancePropertyType.Timestamp)
             .orElse(
               Try(LocalDate.parse(s, DateTimeFormatter.ISO_DATE)).map(InstancePropertyType.Date)
@@ -104,7 +104,7 @@ object InstancePropertyType {
                 Right[DecodingFailure, InstancePropertyType](
                   InstancePropertyType.BooleanList(arr.flatMap(_.asBoolean))
                 )
-              case element if element.isNumber =>
+              case element if element.isNumber => // 1.0 should be Double not Long
                 val matchingPropType = element.asNumber.map(_.toString.contains(".")) match {
                   case Some(true) =>
                     InstancePropertyType.DoubleList(arr.flatMap(_.asNumber).map(_.toDouble))
@@ -144,6 +144,7 @@ object InstancePropertyType {
       case Date(value) => Json.fromString(value.format(DateTimeFormatter.ISO_DATE))
       case Timestamp(value) => Json.fromString(value.format(DateTimeFormatter.ISO_ZONED_DATE_TIME))
       case Object(value) => value
+      // TODO: Handle null values in Array elements
       case StringList(values) => Json.arr(values = values.map(Json.fromString): _*)
       case BooleanList(values) => Json.arr(values = values.map(Json.fromBoolean): _*)
       case IntegerList(values) => Json.arr(values = values.map(Json.fromLong): _*)

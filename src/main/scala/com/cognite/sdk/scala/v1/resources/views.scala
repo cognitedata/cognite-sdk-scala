@@ -20,7 +20,6 @@ class Views[F[_]](val requestSession: RequestSession[F])
 
   def createItems(items: Seq[ViewCreateDefinition]): F[Seq[ViewDefinition]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
-    println(s"views = ${items.asJson.toString()}")
     requestSession
       .post[Seq[ViewDefinition], ItemsWithCursor[ViewDefinition], Items[ViewCreateDefinition]](
         Items(items),

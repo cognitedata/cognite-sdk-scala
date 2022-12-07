@@ -30,7 +30,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   private val containerListExternalId = "scala_sdk_container_list"
 
   private val containerPropertyInt = ContainerPropertyDefinition(
-    defaultValue = Some(PropertyDefaultValue.Number(1.0)),
+    defaultValue = Some(PropertyDefaultValue.Double(1.0)),
     description = Some("Prop int32"),
     name = Some("Prop int32"),
     `type` = PrimitiveProperty(PrimitivePropType.Int32)
@@ -62,7 +62,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   )
 
   private val containerPropertyListFloat64 = ContainerPropertyDefinition(
-    defaultValue = Some(PropertyDefaultValue.Number(1.0)),
+    defaultValue = Some(PropertyDefaultValue.Double(1.0)),
     description = Some("Prop list float64"),
     name = Some("Prop list float64"),
     `type` = PrimitiveProperty(PrimitivePropType.Float64, list = Some(true))
@@ -90,7 +90,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     val createdContainer =
       blueFieldClient.containers.createItems(Seq(containerPrimitive, containerList)).unsafeRunSync()
     println(s"createdContainer = ${createdContainer.toString()}")
-//    println(s"createdContainer = ${containerPrimitive.toString()}, ${containerList.toString()}")
+    //    println(s"createdContainer = ${containerPrimitive.toString()}, ${containerList.toString()}")
   }
 
   val viewVersion1 = "v1"
@@ -138,14 +138,14 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
           autoIncrement = Some(false),
           `type` = ContainerPropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32),
           container = Some(containerReference),
-          containerPropertyExternalId = None
+          containerPropertyIdentifier = None
         ),
         "prop_text" -> ViewPropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
           `type` = ContainerPropertyType.TextProperty(),
           container = Some(containerReference),
-          containerPropertyExternalId = None
+          containerPropertyIdentifier = None
         )
       )
     )
@@ -212,14 +212,10 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .unsafeRunSync()
     retrievedAfterDelete.size shouldBe 0
 
-//    // TODO This should produce CdpAPIException
-//    val sCaught = intercept[SdkException] {
-//      blueFieldClient.views.deleteItems(Seq(DataModelReference("test", "test", "test"))).unsafeRunSync()
-//    }
-//    sCaught.responseCode shouldBe  Some(404)
+    //    // TODO This should produce CdpAPIException
+    //    val sCaught = intercept[SdkException] {
+    //      blueFieldClient.views.deleteItems(Seq(DataModelReference("test", "test", "test"))).unsafeRunSync()
+    //    }
+    //    sCaught.responseCode shouldBe  Some(404)
   }
-}
-
-object ViewsTest {
-
 }
