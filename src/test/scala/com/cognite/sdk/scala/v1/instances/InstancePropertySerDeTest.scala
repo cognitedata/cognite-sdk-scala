@@ -1,6 +1,7 @@
 package com.cognite.sdk.scala.v1.instances
 
-import com.cognite.sdk.scala.v1.resources.Instances.instanceFilterResponseDecoder
+import com.cognite.sdk.scala.v1.fdm.instances.InstanceFilterResponse
+import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.instanceFilterResponseDecoder
 import io.circe.Decoder
 import io.circe.parser.parse
 import org.scalatest.matchers.should.Matchers

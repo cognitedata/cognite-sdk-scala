@@ -4,16 +4,19 @@
 package com.cognite.sdk.scala.v1
 
 import BuildInfo.BuildInfo
-import cats.{Id, Monad}
 import cats.implicits._
+import cats.{Id, Monad}
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.resources._
-import sttp.client3._
-import sttp.client3.circe.asJsonEither
+import com.cognite.sdk.scala.v1.resources.fdm.containers.Containers
+import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances
+import com.cognite.sdk.scala.v1.resources.fdm.views.Views
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.capabilities.Effect
+import sttp.client3._
+import sttp.client3.circe.asJsonEither
 import sttp.model.{StatusCode, Uri}
 import sttp.monad.MonadError
 
