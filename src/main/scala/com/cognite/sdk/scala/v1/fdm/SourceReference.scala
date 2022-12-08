@@ -14,6 +14,7 @@ object SourceReference {
     case c: ContainerReference => c.asJson
     case v: ViewReference => v.asJson
   }
+
   implicit val sourceReferenceDecoder: Decoder[SourceReference] =
     Decoder.instance[SourceReference] { (c: HCursor) =>
       c.downField("type").as[String] match {

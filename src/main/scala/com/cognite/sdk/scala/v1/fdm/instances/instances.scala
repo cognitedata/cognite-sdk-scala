@@ -59,12 +59,6 @@ final case class InstancePropertyDefinition(
     `type`: ContainerPropertyType
 )
 
-final case class InstanceFilterResponse(
-    items: Seq[InstanceDefinition],
-    typing: Option[Map[String, Map[String, Map[String, InstancePropertyDefinition]]]],
-    nextCursor: Option[String]
-)
-
 final case class ViewPropertyReference(identifier: String, view: Option[ViewReference])
 
 final case class PropertySortV3(

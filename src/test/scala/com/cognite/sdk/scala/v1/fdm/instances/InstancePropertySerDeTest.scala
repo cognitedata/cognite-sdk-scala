@@ -1,7 +1,8 @@
-package com.cognite.sdk.scala.v1.instances
+package com.cognite.sdk.scala.v1.fdm.instances
 
-import com.cognite.sdk.scala.v1.fdm.instances.InstanceFilterResponse
-import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.instanceFilterResponseDecoder
+import com.cognite.sdk.scala.v1.fdm.containers.{ContainerPropertyType, PrimitivePropType, PropertyDefaultValue}
+import com.cognite.sdk.scala.v1.fdm.instances.InstanceDefinition.NodeDefinition
+import io.circe
 import io.circe.Decoder
 import io.circe.parser.parse
 import org.scalatest.matchers.should.Matchers
@@ -21,6 +22,9 @@ import java.time.temporal.ChronoUnit
 )
 class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
 
+  val createdTime: Long = Instant.now().minus(100, ChronoUnit.DAYS).toEpochMilli
+  val lastUpdatedTime: Long = Instant.now().minus(100, ChronoUnit.DAYS).toEpochMilli
+
   val json: String =
     s"""{
        |  "items": [
@@ -28,8 +32,8 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
        |      "type": "node",
        |      "space": "space-1",
        |      "externalId": "space-ext-id-1",
-       |      "createdTime": ${Instant.now().minus(100, ChronoUnit.DAYS).toEpochMilli},
-       |      "lastUpdatedTime": ${Instant.now().minus(10, ChronoUnit.DAYS).toEpochMilli},
+       |      "createdTime": ${createdTime},
+       |      "lastUpdatedTime": ${lastUpdatedTime},
        |      "properties": {
        |        "space-name-1": {
        |          "view-or-container-id-1": {
@@ -168,9 +172,131 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
        |  "nextCursor": "cursor-101"
        |}""".stripMargin
 
+  val instanceFilterResponse = InstanceFilterResponse(
+    Vector(
+      NodeDefinition(
+        "space-1",
+        "space-ext-id-1",
+        Some(Instant.ofEpochMilli(createdTime)),
+        Some(Instant.ofEpochMilli(lastUpdatedTime)),
+        properties = Some(
+          Map(
+            "space-name-1" -> Map(
+              "view-or-container-id-1" -> Map(
+                "property-identifier11" -> InstancePropertyType.String("prop-id-1"),
+                "property-identifier12" -> InstancePropertyType.Integer(102)
+              ),
+              "view-or-container-id-2" -> Map(
+                "property-identifier21" -> InstancePropertyType.Boolean(true),
+                "property-identifier22" -> InstancePropertyType.IntegerList(Vector(1, 3, 4))
+              )
+            ),
+            "space-name-2" -> Map(
+              "view-or-container-id-3" -> Map(
+                "property-identifier31" -> InstancePropertyType.String("prop-id-2"),
+                "property-identifier32" -> InstancePropertyType.Integer(103)
+              ),
+              "view-or-container-id-4" -> Map(
+                "property-identifier41" -> InstancePropertyType.Boolean(false),
+                "property-identifier42" -> InstancePropertyType.StringList(Vector("a", "b", "c"))
+              )
+            )
+          )
+        )
+      )
+    ),
+    typing = Some(
+      Map(
+        "space-name-1" -> Map(
+          "view-or-container-id-1" -> Map(
+            "property-identifier11" -> InstancePropertyDefinition(
+              "property-identifier11",
+              Some(true),
+              Some(false),
+              Some(PropertyDefaultValue.String("default-str")),
+              Some("property-identifier11"),
+              Some("property-identifier11"),
+              ContainerPropertyType.TextProperty(Some(false), Some("ucs_basic"))
+            ),
+            "property-identifier12" -> InstancePropertyDefinition(
+              "property-identifier12",
+              Some(true),
+              Some(false),
+              Some(PropertyDefaultValue.Integer(0)),
+              Some("property-identifier12"),
+              Some("property-identifier12"),
+              ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(false))
+            )
+          ),
+          "view-or-container-id-2" -> Map(
+            "property-identifier21" -> InstancePropertyDefinition(
+              "property-identifier21",
+              Some(true),
+              Some(false),
+              Some(PropertyDefaultValue.Boolean(false)),
+              Some("property-identifier21"),
+              Some("property-identifier21"),
+              ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(false))
+            ),
+            "property-identifier22" -> InstancePropertyDefinition(
+              "property-identifier22",
+              Some(true),
+              Some(false),
+              None,
+              Some("property-identifier22"),
+              Some("property-identifier22"),
+              ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Int64, Some(true))
+            )
+          )
+        ),
+        "space-name-2" -> Map(
+          "view-or-container-id-3" -> Map(
+            "property-identifier31" -> InstancePropertyDefinition(
+              "property-identifier31",
+              Some(true),
+              Some(false),
+              Some(PropertyDefaultValue.String("default-str")),
+              Some("property-identifier31"),
+              Some("property-identifier31"),
+              ContainerPropertyType.TextProperty(Some(false), Some("ucs_basic"))
+            ),
+            "property-identifier32" -> InstancePropertyDefinition(
+              "property-identifier32",
+              Some(true),
+              Some(false),
+              Some(PropertyDefaultValue.Integer(0)),
+              Some("property-identifier32"),
+              Some("property-identifier32"),
+              ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(false))
+            )
+          ),
+          "view-or-container-id-4" -> Map(
+            "property-identifier41" -> InstancePropertyDefinition(
+              "property-identifier41",
+              Some(true),
+              Some(false),
+              Some(PropertyDefaultValue.Boolean(false)),
+              Some("property-identifier41"),
+              Some("property-identifier41"),
+              ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(false))
+            ),
+            "property-identifier42" -> InstancePropertyDefinition(
+              "property-identifier42",
+              Some(true),
+              Some(false),
+              None,
+              Some("property-identifier42"),
+              Some("property-identifier42"),
+              ContainerPropertyType.TextProperty(Some(true), Some("ucs_basic"))
+            )
+          )
+        )
+      )
+    ),
+    Some("cursor-101")
+  )
 
-  val result = parse(json).flatMap(Decoder[InstanceFilterResponse].decodeJson)
-  println(result)
+  val actual: Either[circe.Error, InstanceFilterResponse] = parse(json).flatMap(Decoder[InstanceFilterResponse].decodeJson)
 
-  1 shouldBe 1
+  actual shouldBe Right(instanceFilterResponse)
 }

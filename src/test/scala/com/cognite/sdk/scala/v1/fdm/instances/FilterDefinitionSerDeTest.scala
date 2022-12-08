@@ -1,7 +1,6 @@
-package com.cognite.sdk.scala.v1.instances
+package com.cognite.sdk.scala.v1.fdm.instances
 
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
-import com.cognite.sdk.scala.v1.fdm.instances.FilterValueDefinition
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 import io.circe.Printer
 import io.circe.parser._

@@ -76,10 +76,9 @@ object Instances {
   implicit val instanceViewDataEncoder: Encoder[InstanceViewData] = deriveEncoder
   implicit val instanceContainerDataEncoder: Encoder[InstanceContainerData] = deriveEncoder
   implicit val directRelationReferenceEncoder: Encoder[DirectRelationReference] = deriveEncoder
-  implicit val InstancePropertyDefinitionEncoder: Encoder[InstancePropertyDefinition] =
+  implicit val instancePropertyDefinitionEncoder: Encoder[InstancePropertyDefinition] =
     deriveEncoder
   implicit val instanceRetrieveEncoder: Encoder[InstanceRetrieve] = deriveEncoder
-  implicit val instanceRetrieveResponseEncoder: Encoder[InstanceFilterResponse] = deriveEncoder
   implicit val instanceDeleteRequestItemsEncoder: Encoder[Items[InstanceDeletionRequest]] =
     deriveEncoder
 
@@ -95,7 +94,6 @@ object Instances {
   implicit val instanceRetrieveDecoder: Decoder[InstanceRetrieve] = deriveDecoder
   implicit val instancePropertyDefinitionDecoder: Decoder[InstancePropertyDefinition] =
     deriveDecoder
-  implicit val instanceFilterResponseDecoder: Decoder[InstanceFilterResponse] = deriveDecoder
   implicit val slimNodeOrEdgeItemsDecoder: Decoder[Items[SlimNodeOrEdge]] = deriveDecoder
   implicit val instanceDeleteRequestItemsDecoder: Decoder[Items[InstanceDeletionRequest]] =
     deriveDecoder
