@@ -1,7 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PropertyDefaultValue, PropertyType}
-import com.cognite.sdk.scala.v1.fdm.containers.PrimitivePropType
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDefinition.NodeDefinition
 import io.circe
 import io.circe.Decoder

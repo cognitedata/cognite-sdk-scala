@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.v1.fdm.common.properties
 
 import cats.implicits._
-import com.cognite.sdk.scala.v1.fdm.containers.{ContainerReference, PrimitivePropType}
+import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import io.circe._
 import io.circe.generic.semiauto._
 import io.circe.syntax.EncoderOps

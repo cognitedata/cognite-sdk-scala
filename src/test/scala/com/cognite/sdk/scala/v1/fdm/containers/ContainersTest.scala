@@ -8,7 +8,7 @@ import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{PrimitiveProperty, TextProperty}
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.VehicleContainer._
 import com.cognite.sdk.scala.v1.fdm.instances.{EdgeOrNodeData, InstancePropertyValue}
 import com.cognite.sdk.scala.v1.{CogniteExternalId, CommonDataModelTestHelper}

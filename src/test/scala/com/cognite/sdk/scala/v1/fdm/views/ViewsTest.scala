@@ -6,7 +6,7 @@ package com.cognite.sdk.scala.v1.fdm.views
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewPropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, SpaceCreateDefinition}
 //import com.cognite.sdk.scala.common.{DSLAndFilter, DSLEqualsFilter, DSLInFilter, RetryWhile}
