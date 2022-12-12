@@ -2,7 +2,8 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.implicits.toTraverseOps
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.fdm.containers.{ContainerPropertyType, PrimitivePropType}
+import com.cognite.sdk.scala.v1.fdm.common.PropertyType
+import com.cognite.sdk.scala.v1.fdm.containers.PrimitivePropType
 import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.{
   directRelationReferenceDecoder,
   directRelationReferenceEncoder
@@ -199,85 +200,85 @@ object InstanceDefinition {
   ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
       // List types
-      case ContainerPropertyType.TextProperty(Some(true), _) =>
+      case PropertyType.TextProperty(Some(true), _) =>
         Decoder[Seq[String]]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.StringList.apply)
-      case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(true)) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(true)) =>
         Decoder[Seq[Boolean]]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.BooleanList.apply)
-      case ContainerPropertyType.PrimitiveProperty(
+      case PropertyType.PrimitiveProperty(
             PrimitivePropType.Int32 | PrimitivePropType.Int64,
             Some(true)
           ) =>
         Decoder[Seq[Long]]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.IntegerList.apply)
-      case ContainerPropertyType.PrimitiveProperty(
+      case PropertyType.PrimitiveProperty(
             PrimitivePropType.Float32 | PrimitivePropType.Float64,
             Some(true)
           ) =>
         Decoder[Seq[Double]]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.DoubleList.apply)
-      case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Numeric, Some(true)) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Numeric, Some(true)) =>
         Decoder[Double]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Double.apply)
-      case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Date, Some(true)) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Date, Some(true)) =>
         Decoder[Seq[LocalDate]]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.DateList.apply)
-      case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, Some(true)) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, Some(true)) =>
         Decoder[Seq[ZonedDateTime]]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.TimestampList.apply)
-      case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Json, Some(true)) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Json, Some(true)) =>
         Decoder[Seq[Json]]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.ObjectsList.apply)
 
       // non-list types
-      case ContainerPropertyType.TextProperty(_, _) =>
+      case PropertyType.TextProperty(_, _) =>
         Decoder[String]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.String.apply)
-      case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Boolean, _) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, _) =>
         Decoder[Boolean]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Boolean.apply)
-      case ContainerPropertyType.PrimitiveProperty(
+      case PropertyType.PrimitiveProperty(
             PrimitivePropType.Int32 | PrimitivePropType.Int64,
             _
           ) =>
         Decoder[Long]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Integer.apply)
-      case ContainerPropertyType.PrimitiveProperty(
+      case PropertyType.PrimitiveProperty(
             PrimitivePropType.Float32 | PrimitivePropType.Float64,
             _
           ) =>
         Decoder[Double]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Double.apply)
-      case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Numeric, _) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Numeric, _) =>
         Decoder[Double]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Double.apply)
-      case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Date, _) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Date, _) =>
         Decoder[LocalDate]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Date.apply)
-      case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, _) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, _) =>
         Decoder[ZonedDateTime]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Timestamp.apply)
-      case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Json, _) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Json, _) =>
         Decoder[Json]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Object.apply)
-      case ContainerPropertyType.DirectNodeRelationProperty(_) =>
+      case PropertyType.DirectNodeRelationProperty(_) =>
         Decoder[Seq[String]]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.StringList.apply)

@@ -6,10 +6,11 @@ package com.cognite.sdk.scala.v1.fdm.containers
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
-import com.cognite.sdk.scala.v1.fdm.containers.ContainerPropertyType._
+import com.cognite.sdk.scala.v1.fdm.common.PropertyDefinition.ContainerPropertyDefinition
+import com.cognite.sdk.scala.v1.fdm.common.PropertyType._
+import com.cognite.sdk.scala.v1.fdm.common.{PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.VehicleContainer._
 import com.cognite.sdk.scala.v1.fdm.instances.{EdgeOrNodeData, InstancePropertyValue}
-import com.cognite.sdk.scala.v1.resources.fdm.containers.Containers._
 import com.cognite.sdk.scala.v1.{CogniteExternalId, CommonDataModelTestHelper}
 import io.circe.{Decoder, Encoder}
 
@@ -93,14 +94,14 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
 
   it should "serialize & deserialize ContainerPropertyType" in {
     val values = Seq(
-      ContainerPropertyType.TextProperty(),
-      ContainerPropertyType.DirectNodeRelationProperty(None),
-      ContainerPropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32)
+      PropertyType.TextProperty(),
+      PropertyType.DirectNodeRelationProperty(None),
+      PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32)
     )
 
     val afterEncodedAndDecoded = values
-      .map(Encoder[ContainerPropertyType].apply)
-      .map(Decoder[ContainerPropertyType].decodeJson)
+      .map(Encoder[PropertyType].apply)
+      .map(Decoder[PropertyType].decodeJson)
       .collect { case Right(e) => e }
 
     values should contain theSameElementsAs afterEncodedAndDecoded

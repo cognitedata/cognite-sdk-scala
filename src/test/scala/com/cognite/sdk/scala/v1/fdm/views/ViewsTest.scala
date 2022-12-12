@@ -4,7 +4,9 @@
 package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.v1.fdm.containers.ContainerPropertyType.PrimitiveProperty
+import com.cognite.sdk.scala.v1.fdm.common.PropertyDefinition.{ContainerPropertyDefinition, ViewPropertyDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.PropertyType.PrimitiveProperty
+import com.cognite.sdk.scala.v1.fdm.common.{PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, SpaceCreateDefinition}
 //import com.cognite.sdk.scala.common.{DSLAndFilter, DSLEqualsFilter, DSLInFilter, RetryWhile}
@@ -41,7 +43,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     defaultValue = Some(PropertyDefaultValue.String("toto")),
     description = Some("Prop text"),
     name = Some("Prop text"),
-    `type` = ContainerPropertyType.TextProperty()
+    `type` = PropertyType.TextProperty()
   )
 
   private val containerPrimitive = ContainerCreate(
@@ -137,14 +139,16 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         "prop_int32" -> ViewPropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
-          `type` = ContainerPropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32),
+          defaultValue = None,
+          `type` = PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32),
           container = Some(containerReference),
           containerPropertyIdentifier = None
         ),
         "prop_text" -> ViewPropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
-          `type` = ContainerPropertyType.TextProperty(),
+          defaultValue = None,
+          `type` = PropertyType.TextProperty(),
           container = Some(containerReference),
           containerPropertyIdentifier = None
         )

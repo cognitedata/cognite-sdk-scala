@@ -3,16 +3,9 @@
 
 package com.cognite.sdk.scala.v1.fdm.containers
 
-import java.time.Instant
+import com.cognite.sdk.scala.v1.fdm.common.PropertyDefinition.ContainerPropertyDefinition
 
-final case class ContainerPropertyDefinition(
-    nullable: Option[Boolean] = Some(true),
-    autoIncrement: Option[Boolean] = Some(false),
-    defaultValue: Option[PropertyDefaultValue],
-    description: Option[String],
-    name: Option[String],
-    `type`: ContainerPropertyType
-)
+import java.time.Instant
 
 final case class ContainerCreate(
     space: String,

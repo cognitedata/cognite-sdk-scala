@@ -5,12 +5,7 @@ package com.cognite.sdk.scala.v1.resources.fdm.views
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.cognite.sdk.scala.v1.fdm.views.{
-  DataModelReference,
-  ViewCreateDefinition,
-  ViewDefinition,
-  ViewPropertyDefinition
-}
+import com.cognite.sdk.scala.v1.fdm.views.{DataModelReference, ViewCreateDefinition, ViewDefinition}
 import fs2.Stream
 import io.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -96,8 +91,6 @@ class Views[F[_]](val requestSession: RequestSession[F])
 }
 
 object Views {
-  implicit val viewPropertyDefinition: Decoder[ViewPropertyDefinition] =
-    deriveDecoder[ViewPropertyDefinition]
   implicit val viewDefinitionDecoder: Decoder[ViewDefinition] =
     deriveDecoder[ViewDefinition]
   implicit val viewDefinitionItemsDecoder: Decoder[Items[ViewDefinition]] =

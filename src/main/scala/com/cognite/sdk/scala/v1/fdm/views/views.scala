@@ -4,11 +4,8 @@
 package com.cognite.sdk.scala.v1.fdm.views
 
 import com.cognite.sdk.scala.common.DomainSpecificLanguageFilter
-import com.cognite.sdk.scala.v1.fdm.containers.{
-  ContainerPropertyType,
-  ContainerReference,
-  ContainerUsage
-}
+import com.cognite.sdk.scala.v1.fdm.common.PropertyDefinition.ViewPropertyDefinition
+import com.cognite.sdk.scala.v1.fdm.containers.{ContainerReference, ContainerUsage}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
@@ -32,18 +29,6 @@ final case class ViewCreateDefinition(
     implements: Option[Seq[ViewReference]] = None,
     version: Option[String] = None,
     properties: Map[String, CreatePropertyReference]
-)
-
-final case class ViewPropertyDefinition(
-    nullable: Option[Boolean] = Some(true),
-    autoIncrement: Option[Boolean] = Some(false),
-    // TODO add later
-    //   defaultValue: Option[DataModelProperty[_]] = None,
-    description: Option[String] = None,
-    name: Option[String] = None,
-    `type`: ContainerPropertyType,
-    container: Option[ContainerReference] = None,
-    containerPropertyIdentifier: Option[String] = None
 )
 
 final case class DataModelReference(

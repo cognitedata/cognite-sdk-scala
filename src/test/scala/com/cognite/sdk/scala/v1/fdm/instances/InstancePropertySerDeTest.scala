@@ -1,6 +1,7 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import com.cognite.sdk.scala.v1.fdm.containers.{ContainerPropertyType, PrimitivePropType, PropertyDefaultValue}
+import com.cognite.sdk.scala.v1.fdm.common.{PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.containers.PrimitivePropType
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDefinition.NodeDefinition
 import io.circe
 import io.circe.Decoder
@@ -216,7 +217,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
               Some(PropertyDefaultValue.String("default-str")),
               Some("property-identifier11"),
               Some("property-identifier11"),
-              ContainerPropertyType.TextProperty(Some(false), Some("ucs_basic"))
+              PropertyType.TextProperty(Some(false), Some("ucs_basic"))
             ),
             "property-identifier12" -> InstancePropertyDefinition(
               "property-identifier12",
@@ -225,7 +226,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
               Some(PropertyDefaultValue.Integer(0)),
               Some("property-identifier12"),
               Some("property-identifier12"),
-              ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(false))
+              PropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(false))
             )
           ),
           "view-or-container-id-2" -> Map(
@@ -236,7 +237,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
               Some(PropertyDefaultValue.Boolean(false)),
               Some("property-identifier21"),
               Some("property-identifier21"),
-              ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(false))
+              PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(false))
             ),
             "property-identifier22" -> InstancePropertyDefinition(
               "property-identifier22",
@@ -245,7 +246,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
               None,
               Some("property-identifier22"),
               Some("property-identifier22"),
-              ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Int64, Some(true))
+              PropertyType.PrimitiveProperty(PrimitivePropType.Int64, Some(true))
             )
           )
         ),
@@ -258,7 +259,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
               Some(PropertyDefaultValue.String("default-str")),
               Some("property-identifier31"),
               Some("property-identifier31"),
-              ContainerPropertyType.TextProperty(Some(false), Some("ucs_basic"))
+              PropertyType.TextProperty(Some(false), Some("ucs_basic"))
             ),
             "property-identifier32" -> InstancePropertyDefinition(
               "property-identifier32",
@@ -267,7 +268,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
               Some(PropertyDefaultValue.Integer(0)),
               Some("property-identifier32"),
               Some("property-identifier32"),
-              ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(false))
+              PropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(false))
             )
           ),
           "view-or-container-id-4" -> Map(
@@ -278,7 +279,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
               Some(PropertyDefaultValue.Boolean(false)),
               Some("property-identifier41"),
               Some("property-identifier41"),
-              ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(false))
+              PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(false))
             ),
             "property-identifier42" -> InstancePropertyDefinition(
               "property-identifier42",
@@ -287,7 +288,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
               None,
               Some("property-identifier42"),
               Some("property-identifier42"),
-              ContainerPropertyType.TextProperty(Some(true), Some("ucs_basic"))
+              PropertyType.TextProperty(Some(true), Some("ucs_basic"))
             )
           )
         )

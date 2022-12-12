@@ -3,12 +3,8 @@
 
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import com.cognite.sdk.scala.v1.fdm.common.SourceReference
-import com.cognite.sdk.scala.v1.fdm.containers.{
-  ContainerPropertyType,
-  ContainerReference,
-  PropertyDefaultValue
-}
+import com.cognite.sdk.scala.v1.fdm.common.{PropertyDefaultValue, PropertyType, SourceReference}
+import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 
 final case class InstanceReadRequest(
@@ -51,7 +47,7 @@ final case class InstancePropertyDefinition(
     defaultValue: Option[PropertyDefaultValue],
     description: Option[String],
     name: Option[String],
-    `type`: ContainerPropertyType
+    `type`: PropertyType
 )
 
 final case class ViewPropertyReference(identifier: String, view: Option[ViewReference])

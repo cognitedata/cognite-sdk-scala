@@ -47,9 +47,6 @@ class Containers[F[_]](val requestSession: RequestSession[F])
 }
 
 object Containers {
-  implicit val containerPropertyDefinitionEncoder: Encoder[ContainerPropertyDefinition] =
-    deriveEncoder[ContainerPropertyDefinition]
-
   implicit val containerIdEncoder: Encoder[ContainerId] = deriveEncoder[ContainerId]
 
   implicit val containerIdItemsEncoder: Encoder[Items[ContainerId]] =
@@ -80,9 +77,6 @@ object Containers {
 
   implicit val containerReadItemsDecoder: Decoder[Items[ContainerRead]] =
     deriveDecoder[Items[ContainerRead]]
-
-  implicit val containerPropertyDefinitionDecoder: Decoder[ContainerPropertyDefinition] =
-    deriveDecoder[ContainerPropertyDefinition]
 
   implicit val containerIdDecoder: Decoder[ContainerId] = deriveDecoder[ContainerId]
 
