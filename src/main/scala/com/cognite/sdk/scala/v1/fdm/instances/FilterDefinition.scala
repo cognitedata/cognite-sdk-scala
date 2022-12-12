@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import com.cognite.sdk.scala.v1.fdm.SourceReference
 import FilterValueDefinition.ComparableFilterValue
+import com.cognite.sdk.scala.v1.fdm.common.SourceReference
 import io.circe._
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.syntax._

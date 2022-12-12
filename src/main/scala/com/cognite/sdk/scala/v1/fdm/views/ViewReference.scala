@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.v1.fdm.views
 
-import com.cognite.sdk.scala.v1.fdm.SourceReference
+import com.cognite.sdk.scala.v1.fdm.common.{SourceReference, SourceType}
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.{Decoder, Encoder}
 
@@ -12,12 +12,10 @@ final case class ViewReference(
     externalId: String,
     version: String
 ) extends SourceReference {
-  override val `type`: String = ViewReference.`type`
+  override val `type`: SourceType = SourceType.View
 }
 
 object ViewReference {
-  val `type`: String = "view"
-
   implicit val viewReferenceEncoder: Encoder[ViewReference] =
     Encoder.forProduct4("type", "space", "externalId", "version")((c: ViewReference) =>
       (c.`type`, c.space, c.externalId, c.version)

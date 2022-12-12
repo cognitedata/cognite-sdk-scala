@@ -23,7 +23,7 @@ object InstanceDefinition {
       externalId: String,
       createdTime: Option[Instant],
       lastUpdatedTime: Option[Instant],
-      properties: Option[Map[String, Map[String, Map[String, InstancePropertyType]]]]
+      properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
   ) extends InstanceDefinition {
     override val `type`: InstanceType = InstanceType.Node
   }
@@ -34,7 +34,7 @@ object InstanceDefinition {
       externalId: String,
       createdTime: Option[Instant],
       lastUpdatedTime: Option[Instant],
-      properties: Option[Map[String, Map[String, Map[String, InstancePropertyType]]]],
+      properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]],
       startNode: Option[DirectRelationReference],
       endNode: Option[DirectRelationReference]
   ) extends InstanceDefinition {
@@ -98,7 +98,7 @@ object InstanceDefinition {
 
   private def instancePropertyDefinitionBasedInstancePropertyTypeDecoder(
       types: Map[String, Map[String, Map[String, InstancePropertyDefinition]]]
-  ): Decoder[Option[Map[String, Map[String, Map[String, InstancePropertyType]]]]] = (c: HCursor) =>
+  ): Decoder[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]] = (c: HCursor) =>
     {
       val result = c.value
         .as[Option[Map[String, Map[String, Map[String, Json]]]]]
@@ -116,7 +116,7 @@ object InstanceDefinition {
                         val typedInstancePropType = typeDef match {
                           case Some(t) => toInstancePropertyType(instantPropTypeJson, t)
                           case None =>
-                            Left[DecodingFailure, InstancePropertyType](
+                            Left[DecodingFailure, InstancePropertyValue](
                               DecodingFailure(
                                 s"Couldn't find InstancePropertyDefinition for property $spaceName.$viewOrContainerId.$propId",
                                 c.history
@@ -137,7 +137,7 @@ object InstanceDefinition {
 
           case None =>
             Right[DecodingFailure, Option[
-              Map[String, Map[String, Map[String, InstancePropertyType]]]
+              Map[String, Map[String, Map[String, InstancePropertyValue]]]
             ]](None)
         }
 
@@ -154,7 +154,7 @@ object InstanceDefinition {
       lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Instant]]
       properties <- c
         .downField("properties")
-        .as[Option[Map[String, Map[String, Map[String, InstancePropertyType]]]]](
+        .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
           instancePropertyDefinitionBasedInstancePropertyTypeDecoder(instPropDefMap)
         )
     } yield NodeDefinition(
@@ -176,7 +176,7 @@ object InstanceDefinition {
       lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Instant]]
       properties <- c
         .downField("properties")
-        .as[Option[Map[String, Map[String, Map[String, InstancePropertyType]]]]](
+        .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
           instancePropertyDefinitionBasedInstancePropertyTypeDecoder(instPropDefMap)
         )
       startNode <- c.downField("startNode").as[Option[DirectRelationReference]]
@@ -196,91 +196,91 @@ object InstanceDefinition {
   private def toInstancePropertyType(
       instantPropTypeJson: Json,
       t: InstancePropertyDefinition
-  ): Either[DecodingFailure, InstancePropertyType] =
+  ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
       // List types
       case ContainerPropertyType.TextProperty(Some(true), _) =>
         Decoder[Seq[String]]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.StringList.apply)
+          .map(InstancePropertyValue.StringList.apply)
       case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(true)) =>
         Decoder[Seq[Boolean]]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.BooleanList.apply)
+          .map(InstancePropertyValue.BooleanList.apply)
       case ContainerPropertyType.PrimitiveProperty(
             PrimitivePropType.Int32 | PrimitivePropType.Int64,
             Some(true)
           ) =>
         Decoder[Seq[Long]]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.IntegerList.apply)
+          .map(InstancePropertyValue.IntegerList.apply)
       case ContainerPropertyType.PrimitiveProperty(
             PrimitivePropType.Float32 | PrimitivePropType.Float64,
             Some(true)
           ) =>
         Decoder[Seq[Double]]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.DoubleList.apply)
+          .map(InstancePropertyValue.DoubleList.apply)
       case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Numeric, Some(true)) =>
         Decoder[Double]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.Double.apply)
+          .map(InstancePropertyValue.Double.apply)
       case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Date, Some(true)) =>
         Decoder[Seq[LocalDate]]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.DateList.apply)
+          .map(InstancePropertyValue.DateList.apply)
       case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, Some(true)) =>
         Decoder[Seq[ZonedDateTime]]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.TimestampList.apply)
+          .map(InstancePropertyValue.TimestampList.apply)
       case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Json, Some(true)) =>
         Decoder[Seq[Json]]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.ObjectsList.apply)
+          .map(InstancePropertyValue.ObjectsList.apply)
 
       // non-list types
       case ContainerPropertyType.TextProperty(_, _) =>
         Decoder[String]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.String.apply)
+          .map(InstancePropertyValue.String.apply)
       case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Boolean, _) =>
         Decoder[Boolean]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.Boolean.apply)
+          .map(InstancePropertyValue.Boolean.apply)
       case ContainerPropertyType.PrimitiveProperty(
             PrimitivePropType.Int32 | PrimitivePropType.Int64,
             _
           ) =>
         Decoder[Long]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.Integer.apply)
+          .map(InstancePropertyValue.Integer.apply)
       case ContainerPropertyType.PrimitiveProperty(
             PrimitivePropType.Float32 | PrimitivePropType.Float64,
             _
           ) =>
         Decoder[Double]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.Double.apply)
+          .map(InstancePropertyValue.Double.apply)
       case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Numeric, _) =>
         Decoder[Double]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.Double.apply)
+          .map(InstancePropertyValue.Double.apply)
       case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Date, _) =>
         Decoder[LocalDate]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.Date.apply)
+          .map(InstancePropertyValue.Date.apply)
       case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, _) =>
         Decoder[ZonedDateTime]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.Timestamp.apply)
+          .map(InstancePropertyValue.Timestamp.apply)
       case ContainerPropertyType.PrimitiveProperty(PrimitivePropType.Json, _) =>
         Decoder[Json]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.Object.apply)
+          .map(InstancePropertyValue.Object.apply)
       case ContainerPropertyType.DirectNodeRelationProperty(_) =>
         Decoder[Seq[String]]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyType.StringList.apply)
+          .map(InstancePropertyValue.StringList.apply)
     }
   // scalastyle:on
 }

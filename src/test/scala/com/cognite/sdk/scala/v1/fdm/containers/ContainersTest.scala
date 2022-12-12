@@ -8,7 +8,7 @@ import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerPropertyType._
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.VehicleContainer._
-import com.cognite.sdk.scala.v1.fdm.instances.{InstanceContainerData, InstancePropertyType}
+import com.cognite.sdk.scala.v1.fdm.instances.{EdgeOrNodeData, InstancePropertyValue}
 import com.cognite.sdk.scala.v1.resources.fdm.containers.Containers._
 import com.cognite.sdk.scala.v1.{CogniteExternalId, CommonDataModelTestHelper}
 import io.circe.{Decoder, Encoder}
@@ -218,10 +218,10 @@ object ContainersTest {
         `type` = PrimitiveProperty(`type` = PrimitivePropType.Int64),
         nullable = Some(false)
       ),
-      "compression-ratio" -> ContainerPropertyDefinition(
+      "compressionRatio" -> ContainerPropertyDefinition(
         defaultValue = None,
         description = Some("engine compression ratio"),
-        name = Some("compression-ratio"),
+        name = Some("compressionRatio"),
         `type` = TextProperty(),
         nullable = Some(true)
       ),
@@ -235,12 +235,12 @@ object ContainersTest {
     )
 
     val VehicleContainerConstraints: Map[String, ContainerConstraint] = Map(
-      "unique-id" -> ContainerConstraint.UniquenessConstraint(Seq("id"))
+      "uniqueId" -> ContainerConstraint.UniquenessConstraint(Seq("id"))
     )
 
     val VehicleContainerIndexes: Map[String, IndexDefinition] = Map(
-      "manufacturer-index" -> IndexDefinition.BTreeIndexDefinition(Seq("manufacturer")),
-      "model-index" -> IndexDefinition.BTreeIndexDefinition(Seq("model"))
+      "manufacturerIndex" -> IndexDefinition.BTreeIndexDefinition(Seq("manufacturer")),
+      "modelIndex" -> IndexDefinition.BTreeIndexDefinition(Seq("model"))
     )
 
     val UpdatedVehicleContainerProperties: Map[String, ContainerPropertyDefinition] = VehicleContainerProperties + ("hybrid" -> ContainerPropertyDefinition(
@@ -251,81 +251,93 @@ object ContainersTest {
       nullable = Some(true)
     ))
 
-    def vehicleInstanceData(containerRef: ContainerReference): Seq[InstanceContainerData] = Seq(
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "id" -> InstancePropertyType.String("1"),
-          "manufacturer" -> InstancePropertyType.String("Toyota"),
-          "model" -> InstancePropertyType.String("RAV-4"),
-          "year" -> InstancePropertyType.Integer(2020),
-          "displacement" -> InstancePropertyType.Integer(2487),
-          "weight" -> InstancePropertyType.Integer(1200L),
-          "compression-ratio" -> InstancePropertyType.String("13:1"),
-          "turbocharger" -> InstancePropertyType.Boolean(true)
+    def vehicleInstanceData(containerRef: ContainerReference): Seq[EdgeOrNodeData] = Seq(
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "id" -> InstancePropertyValue.String("1"),
+            "manufacturer" -> InstancePropertyValue.String("Toyota"),
+            "model" -> InstancePropertyValue.String("RAV-4"),
+            "year" -> InstancePropertyValue.Integer(2020),
+            "displacement" -> InstancePropertyValue.Integer(2487),
+            "weight" -> InstancePropertyValue.Integer(1200L),
+            "compressionRatio" -> InstancePropertyValue.String("13 to 1"),
+            "turbocharger" -> InstancePropertyValue.Boolean(true)
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "id" -> InstancePropertyType.String("2"),
-          "manufacturer" -> InstancePropertyType.String("Toyota"),
-          "model" -> InstancePropertyType.String("Prius"),
-          "year" -> InstancePropertyType.Integer(2018),
-          "displacement" -> InstancePropertyType.Integer(2487),
-          "weight" -> InstancePropertyType.Integer(1800L),
-          "compression-ratio" -> InstancePropertyType.String("13:1"),
-          "turbocharger" -> InstancePropertyType.Boolean(true)
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "id" -> InstancePropertyValue.String("2"),
+            "manufacturer" -> InstancePropertyValue.String("Toyota"),
+            "model" -> InstancePropertyValue.String("Prius"),
+            "year" -> InstancePropertyValue.Integer(2018),
+            "displacement" -> InstancePropertyValue.Integer(2487),
+            "weight" -> InstancePropertyValue.Integer(1800L),
+            "compressionRatio" -> InstancePropertyValue.String("13 to 1"),
+            "turbocharger" -> InstancePropertyValue.Boolean(true)
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "id" -> InstancePropertyType.String("3"),
-          "manufacturer" -> InstancePropertyType.String("Volkswagen"),
-          "model" -> InstancePropertyType.String("ID.4"),
-          "year" -> InstancePropertyType.Integer(2022),
-          "weight" -> InstancePropertyType.Integer(2224),
-          "turbocharger" -> InstancePropertyType.Boolean(false)
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "id" -> InstancePropertyValue.String("3"),
+            "manufacturer" -> InstancePropertyValue.String("Volkswagen"),
+            "model" -> InstancePropertyValue.String("ID.4"),
+            "year" -> InstancePropertyValue.Integer(2022),
+            "weight" -> InstancePropertyValue.Integer(2224),
+            "turbocharger" -> InstancePropertyValue.Boolean(false)
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "id" -> InstancePropertyType.String("4"),
-          "manufacturer" -> InstancePropertyType.String("Volvo"),
-          "model" -> InstancePropertyType.String("XC90"),
-          "year" -> InstancePropertyType.Integer(2002),
-          "weight" -> InstancePropertyType.Integer(2020),
-          "compression-ratio" -> InstancePropertyType.String("17:1"),
-          "displacement" -> InstancePropertyType.Integer(2401),
-          "turbocharger" -> InstancePropertyType.Boolean(true)
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "id" -> InstancePropertyValue.String("4"),
+            "manufacturer" -> InstancePropertyValue.String("Volvo"),
+            "model" -> InstancePropertyValue.String("XC90"),
+            "year" -> InstancePropertyValue.Integer(2002),
+            "weight" -> InstancePropertyValue.Integer(2020),
+            "compressionRatio" -> InstancePropertyValue.String("17 to 1"),
+            "displacement" -> InstancePropertyValue.Integer(2401),
+            "turbocharger" -> InstancePropertyValue.Boolean(true)
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "id" -> InstancePropertyType.String("5"),
-          "manufacturer" -> InstancePropertyType.String("Volvo"),
-          "model" -> InstancePropertyType.String("XC90"),
-          "year" -> InstancePropertyType.Integer(2002),
-          "weight" -> InstancePropertyType.Integer(2020),
-          "compression-ratio" -> InstancePropertyType.String("17:1"),
-          "displacement" -> InstancePropertyType.Integer(2401),
-          "turbocharger" -> InstancePropertyType.Boolean(true)
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "id" -> InstancePropertyValue.String("5"),
+            "manufacturer" -> InstancePropertyValue.String("Volvo"),
+            "model" -> InstancePropertyValue.String("XC90"),
+            "year" -> InstancePropertyValue.Integer(2002),
+            "weight" -> InstancePropertyValue.Integer(2020),
+            "compressionRatio" -> InstancePropertyValue.String("17 to 1"),
+            "displacement" -> InstancePropertyValue.Integer(2401),
+            "turbocharger" -> InstancePropertyValue.Boolean(true)
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "id" -> InstancePropertyType.String("6"),
-          "manufacturer" -> InstancePropertyType.String("Mitsubishi"),
-          "model" -> InstancePropertyType.String("Outlander"),
-          "year" -> InstancePropertyType.Integer(2021),
-          "weight" -> InstancePropertyType.Integer(1745),
-          "compression-ratio" -> InstancePropertyType.String("17:1"),
-          "displacement" -> InstancePropertyType.Integer(2000),
-          "turbocharger" -> InstancePropertyType.Boolean(true)
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "id" -> InstancePropertyValue.String("6"),
+            "manufacturer" -> InstancePropertyValue.String("Mitsubishi"),
+            "model" -> InstancePropertyValue.String("Outlander"),
+            "year" -> InstancePropertyValue.Integer(2021),
+            "weight" -> InstancePropertyValue.Integer(1745),
+            "compressionRatio" -> InstancePropertyValue.String("17 to 1"),
+            "displacement" -> InstancePropertyValue.Integer(2000),
+            "turbocharger" -> InstancePropertyValue.Boolean(true)
+          )
         )
       )
     )
@@ -379,35 +391,41 @@ object ContainersTest {
       "item-index" -> IndexDefinition.BTreeIndexDefinition(Seq("item-id"))
     )
 
-    def rentableInstanceData(containerRef: ContainerReference): Seq[InstanceContainerData] = Seq(
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "item-id" -> InstancePropertyType.String("1"),
-          "renter-id" -> InstancePropertyType.String("222222"),
-          "from" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 1, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
-          "to" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 1, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
-          "invoice-id" -> InstancePropertyType.String("inv-1"),
+    def rentableInstanceData(containerRef: ContainerReference): Seq[EdgeOrNodeData] = Seq(
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "item-id" -> InstancePropertyValue.String("1"),
+            "renter-id" -> InstancePropertyValue.String("222222"),
+            "from" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 1, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
+            "to" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 1, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
+            "invoice-id" -> InstancePropertyValue.String("inv-1"),
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "item-id" -> InstancePropertyType.String("1"),
-          "renter-id" -> InstancePropertyType.String("222222"),
-          "from" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 2, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
-          "to" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 2, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
-          "invoice-id" -> InstancePropertyType.String("inv-2"),
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "item-id" -> InstancePropertyValue.String("1"),
+            "renter-id" -> InstancePropertyValue.String("222222"),
+            "from" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 2, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
+            "to" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 2, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
+            "invoice-id" -> InstancePropertyValue.String("inv-2"),
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "item-id" -> InstancePropertyType.String("2"),
-          "renter-id" -> InstancePropertyType.String("333333"),
-          "from" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 2, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
-          "to" -> InstancePropertyType.Timestamp(ZonedDateTime.of(2020, 2, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
-          "invoice-id" -> InstancePropertyType.String("inv-3"),
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "item-id" -> InstancePropertyValue.String("2"),
+            "renter-id" -> InstancePropertyValue.String("333333"),
+            "from" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 2, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
+            "to" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 2, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
+            "invoice-id" -> InstancePropertyValue.String("inv-3"),
+          )
         )
       )
     )
@@ -462,65 +480,77 @@ object ContainersTest {
       "firstname-index" -> IndexDefinition.BTreeIndexDefinition(Seq("firstname-id"))
     )
 
-    def personInstanceData(containerRef: ContainerReference): Seq[InstanceContainerData] = Seq(
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "national-id" -> InstancePropertyType.String("111111"),
-          "firstname" -> InstancePropertyType.String("Sadio"),
-          "lastname" -> InstancePropertyType.String("Mane"),
-          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1989-11-23")),
-          "nationality" -> InstancePropertyType.String("Senegalese"),
+    def personInstanceData(containerRef: ContainerReference): Seq[EdgeOrNodeData] = Seq(
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "national-id" -> InstancePropertyValue.String("111111"),
+            "firstname" -> InstancePropertyValue.String("Sadio"),
+            "lastname" -> InstancePropertyValue.String("Mane"),
+            "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1989-11-23")),
+            "nationality" -> InstancePropertyValue.String("Senegalese"),
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "national-id" -> InstancePropertyType.String("222222"),
-          "firstname" -> InstancePropertyType.String("Alexander"),
-          "lastname" -> InstancePropertyType.String("Arnold"),
-          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1989-10-23")),
-          "nationality" -> InstancePropertyType.String("British"),
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "national-id" -> InstancePropertyValue.String("222222"),
+            "firstname" -> InstancePropertyValue.String("Alexander"),
+            "lastname" -> InstancePropertyValue.String("Arnold"),
+            "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1989-10-23")),
+            "nationality" -> InstancePropertyValue.String("British"),
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "national-id" -> InstancePropertyType.String("333333"),
-          "firstname" -> InstancePropertyType.String("Harry"),
-          "lastname" -> InstancePropertyType.String("Kane"),
-          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1990-10-20")),
-          "nationality" -> InstancePropertyType.String("British"),
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "national-id" -> InstancePropertyValue.String("333333"),
+            "firstname" -> InstancePropertyValue.String("Harry"),
+            "lastname" -> InstancePropertyValue.String("Kane"),
+            "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1990-10-20")),
+            "nationality" -> InstancePropertyValue.String("British"),
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "national-id" -> InstancePropertyType.String("444444"),
-          "firstname" -> InstancePropertyType.String("John"),
-          "lastname" -> InstancePropertyType.String("Gotty"),
-          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1978-09-20")),
-          "nationality" -> InstancePropertyType.String("Italian"),
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "national-id" -> InstancePropertyValue.String("444444"),
+            "firstname" -> InstancePropertyValue.String("John"),
+            "lastname" -> InstancePropertyValue.String("Gotty"),
+            "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1978-09-20")),
+            "nationality" -> InstancePropertyValue.String("Italian"),
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "national-id" -> InstancePropertyType.String("555555"),
-          "firstname" -> InstancePropertyType.String("Angela"),
-          "lastname" -> InstancePropertyType.String("Merkel"),
-          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1978-05-20")),
-          "nationality" -> InstancePropertyType.String("German"),
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "national-id" -> InstancePropertyValue.String("555555"),
+            "firstname" -> InstancePropertyValue.String("Angela"),
+            "lastname" -> InstancePropertyValue.String("Merkel"),
+            "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1978-05-20")),
+            "nationality" -> InstancePropertyValue.String("German"),
+          )
         )
       ),
-      InstanceContainerData(
-        container = containerRef,
-        properties = Map(
-          "national-id" -> InstancePropertyType.String("666666"),
-          "firstname" -> InstancePropertyType.String("Elon"),
-          "lastname" -> InstancePropertyType.String("Musk"),
-          "dob" -> InstancePropertyType.Object(io.circe.Json.fromString("1982-05-20")),
-          "nationality" -> InstancePropertyType.String("American"),
+      EdgeOrNodeData(
+        source = containerRef,
+        properties = Some(
+          Map(
+            "national-id" -> InstancePropertyValue.String("666666"),
+            "firstname" -> InstancePropertyValue.String("Elon"),
+            "lastname" -> InstancePropertyValue.String("Musk"),
+            "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1982-05-20")),
+            "nationality" -> InstancePropertyValue.String("American"),
+          )
         )
       )
     )

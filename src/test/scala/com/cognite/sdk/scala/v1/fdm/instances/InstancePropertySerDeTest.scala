@@ -183,22 +183,22 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
           Map(
             "space-name-1" -> Map(
               "view-or-container-id-1" -> Map(
-                "property-identifier11" -> InstancePropertyType.String("prop-id-1"),
-                "property-identifier12" -> InstancePropertyType.Integer(102)
+                "property-identifier11" -> InstancePropertyValue.String("prop-id-1"),
+                "property-identifier12" -> InstancePropertyValue.Integer(102)
               ),
               "view-or-container-id-2" -> Map(
-                "property-identifier21" -> InstancePropertyType.Boolean(true),
-                "property-identifier22" -> InstancePropertyType.IntegerList(Vector(1, 3, 4))
+                "property-identifier21" -> InstancePropertyValue.Boolean(true),
+                "property-identifier22" -> InstancePropertyValue.IntegerList(Vector(1, 3, 4))
               )
             ),
             "space-name-2" -> Map(
               "view-or-container-id-3" -> Map(
-                "property-identifier31" -> InstancePropertyType.String("prop-id-2"),
-                "property-identifier32" -> InstancePropertyType.Integer(103)
+                "property-identifier31" -> InstancePropertyValue.String("prop-id-2"),
+                "property-identifier32" -> InstancePropertyValue.Integer(103)
               ),
               "view-or-container-id-4" -> Map(
-                "property-identifier41" -> InstancePropertyType.Boolean(false),
-                "property-identifier42" -> InstancePropertyType.StringList(Vector("a", "b", "c"))
+                "property-identifier41" -> InstancePropertyValue.Boolean(false),
+                "property-identifier42" -> InstancePropertyValue.StringList(Vector("a", "b", "c"))
               )
             )
           )

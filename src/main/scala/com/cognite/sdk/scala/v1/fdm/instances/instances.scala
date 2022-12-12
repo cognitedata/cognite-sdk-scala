@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import com.cognite.sdk.scala.v1.fdm.SourceReference
+import com.cognite.sdk.scala.v1.fdm.common.SourceReference
 import com.cognite.sdk.scala.v1.fdm.containers.{
   ContainerPropertyType,
   ContainerReference,
@@ -23,18 +23,13 @@ final case class InstanceReadRequest(
 
 final case class DirectRelationReference(space: String, externalId: String)
 
-final case class InstanceViewData(
-    view: ViewReference,
-    properties: Map[String, InstancePropertyType]
-)
-
-final case class InstanceContainerData(
-    container: ContainerReference,
-    properties: Map[String, InstancePropertyType]
+final case class EdgeOrNodeData(
+    source: SourceReference,
+    properties: Option[Map[String, InstancePropertyValue]]
 )
 
 final case class InstanceCreate(
-    items: Seq[InstanceTypeWriteItem],
+    items: Seq[NodeOrEdgeCreate],
     autoCreateStartNodes: Option[Boolean],
     autoCreateEndNodes: Option[Boolean],
     replace: Option[Boolean]

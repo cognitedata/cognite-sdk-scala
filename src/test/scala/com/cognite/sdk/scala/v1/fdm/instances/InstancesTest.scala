@@ -7,7 +7,7 @@ import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.PersonContainer._
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.RentableContainer._
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.VehicleContainer._
 import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreate, ContainerUsage}
-import com.cognite.sdk.scala.v1.fdm.instances.InstanceTypeWriteItem._
+import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate._
 
 import scala.util.Random
 
@@ -65,7 +65,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     val vehicleNodeExternalId = s"vehicles-node-${Random.nextInt(1000)}"
     val vehicleContainerReference = vehicleContainerCreated.toContainerReference
     val vehicleInstancesToCreate = InstanceCreate(
-      items = Seq(NodeContainerWriteItem(space, vehicleNodeExternalId, vehicleInstanceData(vehicleContainerReference))),
+      items = Seq(NodeWrite(space, vehicleNodeExternalId, vehicleInstanceData(vehicleContainerReference))),
       autoCreateStartNodes = Some(true),
       autoCreateEndNodes = Some(true),
       replace = Some(true)
@@ -76,7 +76,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     val personNodeExternalId = s"persons-node-${Random.nextInt(1000)}"
     val personContainerReference = personContainerCreated.toContainerReference
     val personInstancesToCreate = InstanceCreate(
-      items = Seq(NodeContainerWriteItem(space, personNodeExternalId, personInstanceData(personContainerReference))),
+      items = Seq(NodeWrite(space, personNodeExternalId, personInstanceData(personContainerReference))),
       autoCreateStartNodes = Some(true),
       autoCreateEndNodes = Some(true),
       replace = Some(true)
@@ -88,13 +88,13 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     val rentableContainerReference = rentableContainerCreated.toContainerReference
     val rentableInstancesToCreate = InstanceCreate(
       items = Seq(
-        EdgeContainerWriteItem(
+        EdgeWrite(
           `type` = DirectRelationReference(space, rentableEdgeExternalId),
           space = space,
           externalId = rentableEdgeExternalId,
           startNode = DirectRelationReference(space, vehicleNodeExternalId),
           endNode = DirectRelationReference(space, personNodeExternalId),
-          containers = rentableInstanceData(rentableContainerReference)
+          sources = rentableInstanceData(rentableContainerReference)
         )
       ),
       autoCreateStartNodes = Some(true),

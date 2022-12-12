@@ -5,21 +5,7 @@ package com.cognite.sdk.scala.v1.resources.fdm.instances
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import com.cognite.sdk.scala.v1.fdm.instances.{
-  DirectRelationReference,
-  InstanceContainerData,
-  InstanceCreate,
-  InstanceDeletionRequest,
-  InstanceFilterRequest,
-  InstanceFilterResponse,
-  InstancePropertyDefinition,
-  InstanceRetrieve,
-  InstanceRetrieveRequest,
-  InstanceViewData,
-  PropertySortV3,
-  SlimNodeOrEdge,
-  ViewPropertyReference
-}
+import com.cognite.sdk.scala.v1.fdm.instances._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Printer}
 import sttp.client3._
@@ -73,8 +59,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
 }
 
 object Instances {
-  implicit val instanceViewDataEncoder: Encoder[InstanceViewData] = deriveEncoder
-  implicit val instanceContainerDataEncoder: Encoder[InstanceContainerData] = deriveEncoder
+  implicit val edgeOrNodeDataEncoder: Encoder[EdgeOrNodeData] = deriveEncoder
   implicit val directRelationReferenceEncoder: Encoder[DirectRelationReference] = deriveEncoder
   implicit val instancePropertyDefinitionEncoder: Encoder[InstancePropertyDefinition] =
     deriveEncoder
@@ -88,8 +73,7 @@ object Instances {
   implicit val instanceFilterRequestEncoder: Encoder[InstanceFilterRequest] = deriveEncoder
   implicit val instanceRetrieveRequestEncoder: Encoder[InstanceRetrieveRequest] = deriveEncoder
 
-  implicit val instanceViewDataDecoder: Decoder[InstanceViewData] = deriveDecoder
-  implicit val instanceContainerDataDecoder: Decoder[InstanceContainerData] = deriveDecoder
+  implicit val edgeOrNodeDataDecoder: Decoder[EdgeOrNodeData] = deriveDecoder
   implicit val directRelationReferenceDecoder: Decoder[DirectRelationReference] = deriveDecoder
   implicit val instanceRetrieveDecoder: Decoder[InstanceRetrieve] = deriveDecoder
   implicit val instancePropertyDefinitionDecoder: Decoder[InstancePropertyDefinition] =
