@@ -1,9 +1,10 @@
-package com.cognite.sdk.scala.v1.fdm.instances
+package com.cognite.sdk.scala.v1.fdm.common.filters
 
-import FilterValueDefinition.ComparableFilterValue
-import com.cognite.sdk.scala.v1.fdm.common.SourceReference
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition.ComparableFilterValue
+import com.cognite.sdk.scala.v1.fdm.common.refs.SourceReference
+import io.circe.Decoder.Result
 import io.circe._
-import io.circe.generic.semiauto.deriveEncoder
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax._
 
 import java.util.Locale
@@ -194,4 +195,70 @@ object FilterDefinition {
         )
     }
 
+  implicit val andFilterDecoder: Decoder[FilterDefinition.And] = deriveDecoder
+  implicit val orFilterDecoder: Decoder[FilterDefinition.Or] = deriveDecoder
+  implicit val notFilterDecoder: Decoder[FilterDefinition.Not] = deriveDecoder
+
+  implicit val equalsFilterDecoder: Decoder[FilterDefinition.Equals] = deriveDecoder
+  implicit val inFilterDecoder: Decoder[FilterDefinition.In] = deriveDecoder
+  implicit val rangeFilterDecoder: Decoder[FilterDefinition.Range] = deriveDecoder
+  implicit val prefixFilterDecoder: Decoder[FilterDefinition.Prefix] = deriveDecoder
+  implicit val existsFilterDecoder: Decoder[FilterDefinition.Exists] = deriveDecoder
+  implicit val containsAnyFilterDecoder: Decoder[FilterDefinition.ContainsAny] = deriveDecoder
+  implicit val containsAllFilterDecoder: Decoder[FilterDefinition.ContainsAll] = deriveDecoder
+  implicit val nestedFilterDecoder: Decoder[FilterDefinition.Nested] = deriveDecoder
+  implicit val overlapsFilterDecoder: Decoder[FilterDefinition.Overlaps] = deriveDecoder
+  implicit val hasDataFilterDecoder: Decoder[FilterDefinition.HasData] = deriveDecoder
+
+  implicit val gteFilterDecoder: Decoder[FilterDefinition.Gte] = deriveDecoder
+  implicit val gtDataFilterDecoder: Decoder[FilterDefinition.Gt] = deriveDecoder
+  implicit val lteFilterDecoder: Decoder[FilterDefinition.Lte] = deriveDecoder
+  implicit val ltFilterDecoder: Decoder[FilterDefinition.Lt] = deriveDecoder
+
+  implicit val filterDefinitionDecoder: Decoder[FilterDefinition] = { (c: HCursor) =>
+    val and = c.get[FilterDefinition.And]("and")
+    val or = c.get[FilterDefinition.Or]("or")
+    val not = c.get[FilterDefinition.Or]("not")
+
+    val equals = c.get[FilterDefinition.Equals]("equals")
+    val in = c.get[FilterDefinition.In]("in")
+    val range = c.get[FilterDefinition.Range]("range")
+    val prefix = c.get[FilterDefinition.Prefix]("prefix")
+    val exists = c.get[FilterDefinition.Exists]("exists")
+    val containsAny = c.get[FilterDefinition.ContainsAny]("containsAny")
+    val containsAll = c.get[FilterDefinition.ContainsAll]("containsAll")
+    val nested = c.get[FilterDefinition.Nested]("nested")
+    val overlaps = c.get[FilterDefinition.Overlaps]("overlaps")
+    val hasData = c.get[FilterDefinition.HasData]("hasData")
+
+    val gte = c.get[FilterDefinition.Gte]("gte")
+    val gt = c.get[FilterDefinition.Gt]("gt")
+    val lte = c.get[FilterDefinition.Lte]("lte")
+    val lt = c.get[FilterDefinition.Lt]("lt")
+
+    val result: Result[FilterDefinition] = Seq(
+      and,
+      or,
+      not,
+      equals,
+      in,
+      range,
+      prefix,
+      exists,
+      containsAny,
+      containsAll,
+      nested,
+      overlaps,
+      hasData,
+      gte,
+      gt,
+      lte,
+      lt
+    ).find(_.isRight) match {
+      case Some(value) => value
+      case None =>
+        Left(DecodingFailure(s"Unknown Filter Definition :${c.value.noSpaces}", c.history))
+    }
+    result
+  }
 }

@@ -1,10 +1,10 @@
-package com.cognite.sdk.scala.v1.fdm.common
+package com.cognite.sdk.scala.v1.fdm.common.properties
 
 import cats.implicits.toFunctorOps
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Encoder}
 
 /** Base class for `ContainerPropertyDefinition` & `ViewPropertyDefinition`
   */

@@ -1,5 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 import io.circe.Printer
@@ -18,7 +19,7 @@ import org.scalatest.wordspec.AnyWordSpec
   )
 )
 class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
-  import com.cognite.sdk.scala.v1.fdm.instances.FilterDefinition._
+  import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition._
   implicit val nullDroppingPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
   "FilterDefinition Ser/de" when {

@@ -4,7 +4,8 @@
 package com.cognite.sdk.scala.v1.fdm.views
 
 import com.cognite.sdk.scala.common.DomainSpecificLanguageFilter
-import com.cognite.sdk.scala.v1.fdm.common.PropertyDefinition.ViewPropertyDefinition
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ViewPropertyDefinition
 import com.cognite.sdk.scala.v1.fdm.containers.{ContainerReference, ContainerUsage}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
@@ -49,10 +50,9 @@ final case class ViewDefinition(
     externalId: String,
     name: Option[String] = None,
     description: Option[String] = None,
-    // TODO Add later
-    //   filter: Option[DomainSpecificLanguageFilter] = None,
+    filter: Option[FilterDefinition] = None,
     implements: Option[Seq[ViewReference]] = None,
-    version: Option[String] = None,
+    version: String,
     createdTime: Long,
     lastUpdatedTime: Long,
     writable: Boolean,

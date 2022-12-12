@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.v1.resources.fdm.views
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1._
+import com.cognite.sdk.scala.v1.RequestSession
 import com.cognite.sdk.scala.v1.fdm.views.{DataModelReference, ViewCreateDefinition, ViewDefinition}
 import fs2.Stream
 import io.circe._

@@ -1,7 +1,7 @@
 // Copyright 2020 Cognite AS
 // SPDX-License-Identifier: Apache-2.0
 
-package com.cognite.sdk.scala.v1.fdm.common
+package com.cognite.sdk.scala.v1.fdm.common.properties
 
 import io.circe._
 

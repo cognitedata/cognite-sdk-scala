@@ -1,4 +1,4 @@
-package com.cognite.sdk.scala.v1.fdm.common
+package com.cognite.sdk.scala.v1.fdm.common.refs
 
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference

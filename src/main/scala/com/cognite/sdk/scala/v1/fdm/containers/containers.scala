@@ -3,11 +3,11 @@
 
 package com.cognite.sdk.scala.v1.fdm.containers
 
-import com.cognite.sdk.scala.v1.fdm.common.PropertyDefinition.ContainerPropertyDefinition
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
 
 import java.time.Instant
 
-final case class ContainerCreate(
+final case class ContainerCreateDefinition(
     space: String,
     externalId: String,
     name: Option[String],
@@ -18,7 +18,7 @@ final case class ContainerCreate(
     indexes: Option[Map[String, IndexDefinition]]
 )
 
-final case class ContainerRead(
+final case class ContainerDefinition(
     space: String,
     externalId: String,
     name: Option[String],

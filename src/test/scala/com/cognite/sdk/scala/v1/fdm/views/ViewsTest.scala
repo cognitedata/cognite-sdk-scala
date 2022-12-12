@@ -4,9 +4,9 @@
 package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.v1.fdm.common.PropertyDefinition.{ContainerPropertyDefinition, ViewPropertyDefinition}
-import com.cognite.sdk.scala.v1.fdm.common.PropertyType.PrimitiveProperty
-import com.cognite.sdk.scala.v1.fdm.common.{PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewPropertyDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, SpaceCreateDefinition}
 //import com.cognite.sdk.scala.common.{DSLAndFilter, DSLEqualsFilter, DSLInFilter, RetryWhile}
@@ -46,7 +46,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     `type` = PropertyType.TextProperty()
   )
 
-  private val containerPrimitive = ContainerCreate(
+  private val containerPrimitive = ContainerCreateDefinition(
     space = spaceName,
     externalId = containerPrimitiveExternalId,
     name = Some(containerNamePrim),
@@ -71,7 +71,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     `type` = PrimitiveProperty(PrimitivePropType.Float64, list = Some(true))
   )
 
-  private val containerList = ContainerCreate(
+  private val containerList = ContainerCreateDefinition(
     space = spaceName,
     externalId = containerListExternalId,
     name = Some(containerNameList),
@@ -132,7 +132,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     created.headOption.flatMap(_.name) shouldBe viewToCreate.name
     created.headOption.flatMap(_.description) shouldBe viewToCreate.description
     // created.headOption.flatMap(_.implements) shouldBe None // Some(implements)
-    created.headOption.flatMap(_.version) shouldBe viewToCreate.version
+    created.headOption.map(_.version) shouldBe viewToCreate.version
 
     created.headOption.map(_.properties) shouldBe Some(
       Map(
@@ -194,7 +194,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     view1.map(_.externalId) shouldBe Some(viewExternalId)
     view1.flatMap(_.name) shouldBe Some("first view")
     view1.flatMap(_.description) shouldBe Some("desc")
-    view1.flatMap(_.version) shouldBe Some(viewVersion1)
+    view1.map(_.version) shouldBe Some(viewVersion1)
 
     val view2 = blueFieldClient.views
       .retrieveItems(Seq(DataModelReference(spaceName, view2ExternalId, "v1")))
@@ -204,7 +204,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     view2.map(_.externalId) shouldBe Some(view2ExternalId)
     view2.flatMap(_.name) shouldBe Some("second view")
     view2.flatMap(_.description) shouldBe Some("desc")
-    view2.flatMap(_.version) shouldBe Some(viewVersion1)
+    view2.map(_.version) shouldBe Some(viewVersion1)
   }
 
   ignore should "delete views" in {

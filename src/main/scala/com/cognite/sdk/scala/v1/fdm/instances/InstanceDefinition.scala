@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.implicits.toTraverseOps
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.fdm.common.PropertyType
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType
 import com.cognite.sdk.scala.v1.fdm.containers.PrimitivePropType
 import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.{
   directRelationReferenceDecoder,

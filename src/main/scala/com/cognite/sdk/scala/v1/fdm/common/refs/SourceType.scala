@@ -1,4 +1,4 @@
-package com.cognite.sdk.scala.v1.fdm.common
+package com.cognite.sdk.scala.v1.fdm.common.refs
 
 import io.circe.{Decoder, Encoder}
 

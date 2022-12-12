@@ -18,21 +18,22 @@ class Containers[F[_]](val requestSession: RequestSession[F])
   override val baseUrl = uri"${requestSession.baseUrl}/models/containers"
   import Containers._
 
-  def createItems(containers: Seq[ContainerCreate]): F[Seq[ContainerRead]] =
-    requestSession.post[Seq[ContainerRead], Items[ContainerRead], Items[ContainerCreate]](
-      Items(items = containers),
-      uri"$baseUrl",
-      value => value.items
-    )
+  def createItems(containers: Seq[ContainerCreateDefinition]): F[Seq[ContainerDefinition]] =
+    requestSession
+      .post[Seq[ContainerDefinition], Items[ContainerDefinition], Items[ContainerCreateDefinition]](
+        Items(items = containers),
+        uri"$baseUrl",
+        value => value.items
+      )
 
-  def list(space: String, limit: Int = 10): F[Seq[ContainerRead]] =
-    requestSession.get[Seq[ContainerRead], Items[ContainerRead]](
+  def list(space: String, limit: Int = 10): F[Seq[ContainerDefinition]] =
+    requestSession.get[Seq[ContainerDefinition], Items[ContainerDefinition]](
       uri"$baseUrl".addParams(Map("space" -> space, "limit" -> limit.toString)),
       value => value.items
     )
 
-  def retrieveByExternalIds(containersRefs: Seq[ContainerId]): F[Seq[ContainerRead]] =
-    requestSession.post[Seq[ContainerRead], Items[ContainerRead], Items[ContainerId]](
+  def retrieveByExternalIds(containersRefs: Seq[ContainerId]): F[Seq[ContainerDefinition]] =
+    requestSession.post[Seq[ContainerDefinition], Items[ContainerDefinition], Items[ContainerId]](
       Items(items = containersRefs),
       uri"$baseUrl/byids",
       value => value.items
@@ -52,31 +53,35 @@ object Containers {
   implicit val containerIdItemsEncoder: Encoder[Items[ContainerId]] =
     deriveEncoder[Items[ContainerId]]
 
-  implicit val containerCreateEncoder: Encoder[ContainerCreate] = deriveEncoder[ContainerCreate]
+  implicit val containerCreateEncoder: Encoder[ContainerCreateDefinition] =
+    deriveEncoder[ContainerCreateDefinition]
 
-  implicit val containerCreateItemsEncoder: Encoder[Items[ContainerCreate]] =
-    deriveEncoder[Items[ContainerCreate]]
+  implicit val containerCreateItemsEncoder: Encoder[Items[ContainerCreateDefinition]] =
+    deriveEncoder[Items[ContainerCreateDefinition]]
 
   implicit val containerReferenceItemsEncoder: Encoder[Items[ContainerReference]] =
     deriveEncoder[Items[ContainerReference]]
 
-  implicit val containerReadEncoder: Encoder[ContainerRead] = deriveEncoder[ContainerRead]
+  implicit val containerReadEncoder: Encoder[ContainerDefinition] =
+    deriveEncoder[ContainerDefinition]
 
-  implicit val containerReadItemsEncoder: Encoder[Items[ContainerRead]] =
-    deriveEncoder[Items[ContainerRead]]
+  implicit val containerReadItemsEncoder: Encoder[Items[ContainerDefinition]] =
+    deriveEncoder[Items[ContainerDefinition]]
 
-  implicit val containerCreateDecoder: Decoder[ContainerCreate] = deriveDecoder[ContainerCreate]
+  implicit val containerCreateDecoder: Decoder[ContainerCreateDefinition] =
+    deriveDecoder[ContainerCreateDefinition]
 
-  implicit val containerCreateItemsDecoder: Decoder[Items[ContainerCreate]] =
-    deriveDecoder[Items[ContainerCreate]]
+  implicit val containerCreateItemsDecoder: Decoder[Items[ContainerCreateDefinition]] =
+    deriveDecoder[Items[ContainerCreateDefinition]]
 
   implicit val containerReferenceItemsDecoder: Decoder[Items[ContainerReference]] =
     deriveDecoder[Items[ContainerReference]]
 
-  implicit val containerReadDecoder: Decoder[ContainerRead] = deriveDecoder[ContainerRead]
+  implicit val containerReadDecoder: Decoder[ContainerDefinition] =
+    deriveDecoder[ContainerDefinition]
 
-  implicit val containerReadItemsDecoder: Decoder[Items[ContainerRead]] =
-    deriveDecoder[Items[ContainerRead]]
+  implicit val containerReadItemsDecoder: Decoder[Items[ContainerDefinition]] =
+    deriveDecoder[Items[ContainerDefinition]]
 
   implicit val containerIdDecoder: Decoder[ContainerId] = deriveDecoder[ContainerId]
 

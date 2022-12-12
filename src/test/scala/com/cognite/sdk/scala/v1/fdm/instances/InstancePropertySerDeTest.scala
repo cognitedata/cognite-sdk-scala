@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import com.cognite.sdk.scala.v1.fdm.common.{PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.containers.PrimitivePropType
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDefinition.NodeDefinition
 import io.circe
@@ -173,7 +173,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
        |  "nextCursor": "cursor-101"
        |}""".stripMargin
 
-  val instanceFilterResponse = InstanceFilterResponse(
+  val instanceFilterResponse: InstanceFilterResponse = InstanceFilterResponse(
     Vector(
       NodeDefinition(
         "space-1",

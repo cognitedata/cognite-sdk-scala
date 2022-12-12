@@ -6,9 +6,9 @@ package com.cognite.sdk.scala.v1.fdm.containers
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
-import com.cognite.sdk.scala.v1.fdm.common.PropertyDefinition.ContainerPropertyDefinition
-import com.cognite.sdk.scala.v1.fdm.common.PropertyType._
-import com.cognite.sdk.scala.v1.fdm.common.{PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{PrimitiveProperty, TextProperty}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.VehicleContainer._
 import com.cognite.sdk.scala.v1.fdm.instances.{EdgeOrNodeData, InstancePropertyValue}
 import com.cognite.sdk.scala.v1.{CogniteExternalId, CommonDataModelTestHelper}
@@ -44,7 +44,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   it should "serialize & deserialize ContainerUsage" in {
-    val values = Seq(ContainerUsage.Node, ContainerUsage.All)
+    val values = Seq(ContainerUsage.Node, ContainerUsage.Edge, ContainerUsage.All)
 
     val afterEncodedAndDecoded = values
       .map(Encoder[ContainerUsage].apply)
@@ -81,6 +81,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
       PropertyDefaultValue.Boolean(true),
       PropertyDefaultValue.Integer(123),
       PropertyDefaultValue.Double(123.45),
+      PropertyDefaultValue.Double(123.0),
       PropertyDefaultValue.Object(Encoder[CogniteExternalId].apply(CogniteExternalId("test-ext-id")))
     )
 
@@ -94,9 +95,14 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
 
   it should "serialize & deserialize ContainerPropertyType" in {
     val values = Seq(
-      PropertyType.TextProperty(),
+      PropertyType.TextProperty(list = None),
+      PropertyType.TextProperty(list = Some(true)),
+      PropertyType.TextProperty(list = Some(false)),
       PropertyType.DirectNodeRelationProperty(None),
-      PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32)
+      PropertyType.DirectNodeRelationProperty(Some(ContainerReference(space, "ext-id-1"))),
+      PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32, list = None),
+      PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
+      PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(false))
     )
 
     val afterEncodedAndDecoded = values
@@ -124,7 +130,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
   it should "CRUD a container" in {
     // TODO: Verify all properties after they fix the bugs
     val containerExternalId = s"vehicle_container_${Random.nextInt(1000)}"
-    val containerToCreate = ContainerCreate(
+    val containerToCreate = ContainerCreateDefinition(
       space = space,
       externalId = containerExternalId,
       name = Some(s"vehicle-container"),
@@ -145,7 +151,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     insertedContainer.get.properties.keys.toList should contain theSameElementsAs VehicleContainerProperties.keys.toList
 //    insertedContainer.get.properties.values.toList should contain theSameElementsAs vehicleContainerProperties.values.toList
 
-    val containerToUpdate = ContainerCreate(
+    val containerToUpdate = ContainerCreateDefinition(
       space = space,
       externalId = containerExternalId,
       name = Some(s"vehicle-container-updated"),

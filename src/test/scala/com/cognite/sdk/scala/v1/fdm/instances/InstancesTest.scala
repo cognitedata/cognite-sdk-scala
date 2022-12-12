@@ -6,7 +6,7 @@ import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.PersonContainer._
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.RentableContainer._
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.VehicleContainer._
-import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreate, ContainerUsage}
+import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerUsage}
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate._
 
 import scala.util.Random
@@ -27,7 +27,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val vehicleContainerExternalId = s"vehicle_container_${Random.nextInt(1000)}"
   private val personContainerExternalId = s"person_container_${Random.nextInt(1000)}"
   private val rentableContainerExternalId = s"rentable_container_${Random.nextInt(1000)}"
-  private val vehicleContainer = ContainerCreate(
+  private val vehicleContainer = ContainerCreateDefinition(
     space = space,
     externalId = vehicleContainerExternalId,
     name = Some(s"vehicle-container"),
@@ -37,7 +37,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     constraints = Some(VehicleContainerConstraints),
     indexes = Some(VehicleContainerIndexes)
   )
-  private val personContainer = ContainerCreate(
+  private val personContainer = ContainerCreateDefinition(
     space = space,
     externalId = personContainerExternalId,
     name = Some(s"person-container"),
@@ -47,7 +47,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     constraints = Some(PersonContainerConstraints),
     indexes = Some(PersonContainerIndexes)
   )
-  private val rentableContainer = ContainerCreate(
+  private val rentableContainer = ContainerCreateDefinition(
     space = space,
     externalId = rentableContainerExternalId,
     name = Some(s"rentable-item-container"),

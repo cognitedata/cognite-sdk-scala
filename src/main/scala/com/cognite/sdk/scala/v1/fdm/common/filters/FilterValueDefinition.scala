@@ -1,7 +1,7 @@
-package com.cognite.sdk.scala.v1.fdm.instances
+package com.cognite.sdk.scala.v1.fdm.common.filters
 
 import cats.implicits._
-import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json}
+import io.circe._
 
 sealed abstract class FilterValueDefinition extends Product with Serializable
 

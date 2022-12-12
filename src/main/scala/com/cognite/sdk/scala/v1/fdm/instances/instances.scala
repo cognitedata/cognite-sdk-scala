@@ -3,7 +3,9 @@
 
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import com.cognite.sdk.scala.v1.fdm.common.{PropertyDefaultValue, PropertyType, SourceReference}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition
+import com.cognite.sdk.scala.v1.fdm.common.refs.SourceReference
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 

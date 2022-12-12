@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.v1.resources.fdm.instances
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1._
+import com.cognite.sdk.scala.v1.RequestSession
 import com.cognite.sdk.scala.v1.fdm.instances._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Printer}
