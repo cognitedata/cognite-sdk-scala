@@ -4,19 +4,8 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.{
-  CdpApiException,
-  DSLAndFilter,
-  DSLContainsAnyFilter,
-  DSLEqualsFilter,
-  DSLExistsFilter,
-  DSLInFilter,
-  DSLNotFilter,
-  DSLOrFilter,
-  DSLPrefixFilter,
-  DSLRangeFilter,
-  RetryWhile
-}
+import com.cognite.sdk.scala.common.{CdpApiException, DSLAndFilter, DSLContainsAnyFilter, DSLEqualsFilter, DSLExistsFilter, DSLInFilter, DSLNotFilter, DSLOrFilter, DSLPrefixFilter, DSLRangeFilter, RetryWhile}
+import io.circe.Json
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.time.LocalDate
@@ -70,7 +59,9 @@ class NodesTest
           "prop_float" -> PropertyType.Float32.Property(0.1f),
           "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
           "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22)),
-          "prop_json" -> PropertyType.Json.Property("""{"string_val":"toto","int_val":1}""")
+          "prop_json" -> PropertyType.Json.Property(
+            Json.fromFields(Seq(("string_val", Json.fromString("toto")),("int_val", Json.fromInt(3))))
+          )
         )
       )
     )
