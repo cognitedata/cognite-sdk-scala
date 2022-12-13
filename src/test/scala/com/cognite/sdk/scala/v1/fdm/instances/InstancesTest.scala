@@ -3,10 +3,11 @@ package com.cognite.sdk.scala.v1.fdm.instances
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
+import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.PersonContainer._
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.RentableContainer._
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.VehicleContainer._
-import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerUsage}
+import com.cognite.sdk.scala.v1.fdm.containers.ContainerCreateDefinition
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate._
 
 import scala.util.Random
@@ -32,7 +33,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     externalId = vehicleContainerExternalId,
     name = Some(s"vehicle-container"),
     description = Some("vehicle info container"),
-    usedFor = Some(ContainerUsage.All),
+    usedFor = Some(Usage.All),
     properties = VehicleContainerProperties,
     constraints = Some(VehicleContainerConstraints),
     indexes = Some(VehicleContainerIndexes)
@@ -42,7 +43,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     externalId = personContainerExternalId,
     name = Some(s"person-container"),
     description = Some("person records container"),
-    usedFor = Some(ContainerUsage.All),
+    usedFor = Some(Usage.All),
     properties = PersonContainerProperties,
     constraints = Some(PersonContainerConstraints),
     indexes = Some(PersonContainerIndexes)
@@ -52,7 +53,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     externalId = rentableContainerExternalId,
     name = Some(s"rentable-item-container"),
     description = Some("container to make anything rentable"),
-    usedFor = Some(ContainerUsage.All),
+    usedFor = Some(Usage.All),
     properties = RentableContainerProperties,
     constraints = Some(RentableContainerConstraints),
     indexes = Some(RentableContainerIndexes)

@@ -247,7 +247,7 @@ object InstanceDefinition {
       case PropertyType.PrimitiveProperty(PrimitivePropType.Json, Some(true)) =>
         Decoder[Seq[Json]]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyValue.ObjectsList.apply)
+          .map(InstancePropertyValue.ObjectList.apply)
       case _ =>
         Left[DecodingFailure, InstancePropertyValue](
           DecodingFailure(
@@ -303,7 +303,7 @@ object InstanceDefinition {
       case _ =>
         Left[DecodingFailure, InstancePropertyValue](
           DecodingFailure(
-            s"Expected a non type, but found a list type: ${instantPropTypeJson.noSpaces} as ${t.toString}",
+            s"Expected a non list type, but found a list type: ${instantPropTypeJson.noSpaces} as ${t.toString}",
             List.empty
           )
         )

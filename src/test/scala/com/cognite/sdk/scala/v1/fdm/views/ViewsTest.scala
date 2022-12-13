@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.effect.unsafe.implicits.global
+import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewPropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
@@ -51,7 +52,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     externalId = containerPrimitiveExternalId,
     name = Some(containerNamePrim),
     description = Some("this is a container of primitive types"),
-    usedFor = Some(ContainerUsage.All),
+    usedFor = Some(Usage.All),
     properties = Map("prop_int32" -> containerPropertyInt, "prop_text" -> containerPropertyText),
     constraints = None,
     indexes = None
@@ -76,7 +77,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     externalId = containerListExternalId,
     name = Some(containerNameList),
     description = Some("this is a container of list types"),
-    usedFor = Some(ContainerUsage.All),
+    usedFor = Some(Usage.All),
     properties = Map(
       "prop_list_bool" -> containerPropertyListBool,
       "prop_list_float64" -> containerPropertyListFloat64

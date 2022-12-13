@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.v1.fdm.containers
 
+import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
 
 import java.time.Instant
@@ -12,7 +13,7 @@ final case class ContainerCreateDefinition(
     externalId: String,
     name: Option[String],
     description: Option[String],
-    usedFor: Option[ContainerUsage],
+    usedFor: Option[Usage],
     properties: Map[String, ContainerPropertyDefinition],
     constraints: Option[Map[String, ContainerConstraint]],
     indexes: Option[Map[String, IndexDefinition]]
@@ -23,7 +24,7 @@ final case class ContainerDefinition(
     externalId: String,
     name: Option[String],
     description: Option[String],
-    usedFor: ContainerUsage,
+    usedFor: Usage,
     properties: Map[String, ContainerPropertyDefinition],
     constraints: Option[Map[String, ContainerConstraint]],
     indexes: Option[Map[String, IndexDefinition]],

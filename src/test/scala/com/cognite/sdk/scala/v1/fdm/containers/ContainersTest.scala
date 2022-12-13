@@ -6,6 +6,7 @@ package com.cognite.sdk.scala.v1.fdm.containers
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
+import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{PrimitiveProperty, TextProperty}
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
@@ -44,11 +45,11 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   it should "serialize & deserialize ContainerUsage" in {
-    val values = Seq(ContainerUsage.Node, ContainerUsage.Edge, ContainerUsage.All)
+    val values = Seq(Usage.Node, Usage.Edge, Usage.All)
 
     val afterEncodedAndDecoded = values
-      .map(Encoder[ContainerUsage].apply)
-      .map(Decoder[ContainerUsage].decodeJson)
+      .map(Encoder[Usage].apply)
+      .map(Decoder[Usage].decodeJson)
       .collect { case Right(e) => e }
 
     values should contain theSameElementsAs afterEncodedAndDecoded
@@ -135,7 +136,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
       externalId = containerExternalId,
       name = Some(s"vehicle-container"),
       description = Some("Test container for modeling vehicles"),
-      usedFor = Some(ContainerUsage.All),
+      usedFor = Some(Usage.All),
       properties = VehicleContainerProperties,
       constraints = Some(VehicleContainerConstraints),
       indexes = Some(VehicleContainerIndexes)
@@ -156,7 +157,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
       externalId = containerExternalId,
       name = Some(s"vehicle-container-updated"),
       description = Some("Test container for modeling vehicles updated"),
-      usedFor = Some(ContainerUsage.All),
+      usedFor = Some(Usage.All),
       properties = UpdatedVehicleContainerProperties,
       constraints = Some(VehicleContainerConstraints),
       indexes = Some(VehicleContainerIndexes)

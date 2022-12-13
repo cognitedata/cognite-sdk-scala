@@ -22,7 +22,15 @@ object InstancePropertyValue {
 
   final case class Date(value: LocalDate) extends InstancePropertyValue
 
+  object Date {
+    val formatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
+  }
+
   final case class Timestamp(value: ZonedDateTime) extends InstancePropertyValue
+
+  object Timestamp {
+    val formatter: DateTimeFormatter = DateTimeFormatter.ISO_ZONED_DATE_TIME
+  }
 
   final case class Object(value: Json) extends InstancePropertyValue
 
@@ -38,16 +46,17 @@ object InstancePropertyValue {
 
   final case class TimestampList(value: Seq[ZonedDateTime]) extends InstancePropertyValue
 
-  final case class ObjectsList(value: Seq[Json]) extends InstancePropertyValue
+  final case class ObjectList(value: Seq[Json]) extends InstancePropertyValue
 
   implicit val instancePropertyTypeDecoder: Decoder[InstancePropertyValue] = { (c: HCursor) =>
     val result = c.value match {
       case v if v.isString =>
         v.asString.flatMap { s =>
-          Try(ZonedDateTime.parse(s, DateTimeFormatter.ISO_ZONED_DATE_TIME))
-            .map(InstancePropertyValue.Timestamp)
+          Try(ZonedDateTime.parse(s, InstancePropertyValue.Timestamp.formatter))
+            .map(InstancePropertyValue.Timestamp.apply)
             .orElse(
-              Try(LocalDate.parse(s, DateTimeFormatter.ISO_DATE)).map(InstancePropertyValue.Date)
+              Try(LocalDate.parse(s, InstancePropertyValue.Date.formatter))
+                .map(InstancePropertyValue.Date.apply)
             )
             .orElse(Success(InstancePropertyValue.String(s)))
             .toOption
@@ -55,7 +64,7 @@ object InstancePropertyValue {
         }
       case v if v.isNumber =>
         val numericInstantPropType = v.asNumber.flatMap { jn =>
-          if (jn.toString.contains(".")) {
+          if (jn.toString.contains(".")) { // 1.0 should be a Double not Long
             Some(InstancePropertyValue.Double(jn.toDouble))
           } else {
             jn.toLong.map(InstancePropertyValue.Integer)
@@ -71,7 +80,9 @@ object InstancePropertyValue {
               case element
                   if element.isString && element.asString
                     .flatMap(s =>
-                      Try(ZonedDateTime.parse(s, DateTimeFormatter.ISO_ZONED_DATE_TIME)).toOption
+                      Try(
+                        ZonedDateTime.parse(s, InstancePropertyValue.Timestamp.formatter)
+                      ).toOption
                     )
                     .nonEmpty =>
                 Right[DecodingFailure, InstancePropertyValue](
@@ -80,20 +91,24 @@ object InstancePropertyValue {
                       .flatMap(_.asString)
                       .flatMap(s =>
                         Try(
-                          ZonedDateTime.parse(s, DateTimeFormatter.ISO_ZONED_DATE_TIME)
+                          ZonedDateTime.parse(s, InstancePropertyValue.Timestamp.formatter)
                         ).toOption
                       )
                   )
                 )
               case element
                   if element.isString && element.asString
-                    .flatMap(s => Try(LocalDate.parse(s, DateTimeFormatter.ISO_DATE)).toOption)
+                    .flatMap(s =>
+                      Try(LocalDate.parse(s, InstancePropertyValue.Date.formatter)).toOption
+                    )
                     .nonEmpty =>
                 Right[DecodingFailure, InstancePropertyValue](
                   InstancePropertyValue.DateList(
                     arr
                       .flatMap(_.asString)
-                      .flatMap(s => Try(LocalDate.parse(s, DateTimeFormatter.ISO_DATE)).toOption)
+                      .flatMap(s =>
+                        Try(LocalDate.parse(s, InstancePropertyValue.Date.formatter)).toOption
+                      )
                   )
                 )
               case element if element.isString =>
@@ -104,7 +119,7 @@ object InstancePropertyValue {
                 Right[DecodingFailure, InstancePropertyValue](
                   InstancePropertyValue.BooleanList(arr.flatMap(_.asBoolean))
                 )
-              case element if element.isNumber => // 1.0 should be Double not Long
+              case element if element.isNumber => // 1.0 should be a Double not Long
                 val matchingPropType = element.asNumber.map(_.toString.contains(".")) match {
                   case Some(true) =>
                     InstancePropertyValue.DoubleList(arr.flatMap(_.asNumber).map(_.toDouble))
@@ -114,17 +129,17 @@ object InstancePropertyValue {
                 Right[DecodingFailure, InstancePropertyValue](matchingPropType)
               case element if element.isObject =>
                 Right[DecodingFailure, InstancePropertyValue](
-                  InstancePropertyValue.ObjectsList(arr)
+                  InstancePropertyValue.ObjectList(arr)
                 )
               case _ =>
                 Right[DecodingFailure, InstancePropertyValue](
-                  InstancePropertyValue.ObjectsList(arr)
+                  InstancePropertyValue.ObjectList(arr)
                 )
             }
           case None =>
             Some(
               Right[DecodingFailure, InstancePropertyValue](
-                InstancePropertyValue.ObjectsList(Seq.empty[Json])
+                InstancePropertyValue.ObjectList(Seq.empty[Json])
               )
             )
         }
@@ -145,22 +160,22 @@ object InstancePropertyValue {
       case Integer(value) => Json.fromLong(value)
       case Double(value) => Json.fromDoubleOrString(value)
       case Boolean(value) => Json.fromBoolean(value)
-      case Date(value) => Json.fromString(value.format(DateTimeFormatter.ISO_DATE))
-      case Timestamp(value) => Json.fromString(value.format(DateTimeFormatter.ISO_ZONED_DATE_TIME))
+      case Date(value) => Json.fromString(value.format(InstancePropertyValue.Date.formatter))
+      case Timestamp(value) =>
+        Json.fromString(value.format(InstancePropertyValue.Timestamp.formatter))
       case Object(value) => value
-      // TODO: Handle null values in Array elements
       case StringList(values) => Json.arr(values = values.map(Json.fromString): _*)
       case BooleanList(values) => Json.arr(values = values.map(Json.fromBoolean): _*)
       case IntegerList(values) => Json.arr(values = values.map(Json.fromLong): _*)
       case DoubleList(values) => Json.arr(values = values.map(Json.fromDoubleOrString): _*)
       case DateList(values) =>
         Json.arr(values =
-          values.map(d => Json.fromString(d.format(DateTimeFormatter.ISO_DATE))): _*
+          values.map(d => Json.fromString(d.format(InstancePropertyValue.Date.formatter))): _*
         )
       case TimestampList(values) =>
         Json.arr(values =
-          values.map(d => Json.fromString(d.format(DateTimeFormatter.ISO_ZONED_DATE_TIME))): _*
+          values.map(d => Json.fromString(d.format(InstancePropertyValue.Timestamp.formatter))): _*
         )
-      case ObjectsList(values) => Json.arr(values = values: _*)
+      case ObjectList(values) => Json.arr(values = values: _*)
     }
 }
