@@ -17,6 +17,7 @@ import com.cognite.sdk.scala.common.{
   DSLRangeFilter,
   RetryWhile
 }
+import io.circe.Json
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.time.LocalDate

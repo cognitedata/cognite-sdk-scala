@@ -87,7 +87,7 @@ object PropertyType {
   case object Float64 extends PrimitivePropertyType[scala.Double]
   case object Numeric extends PrimitivePropertyType[scala.BigDecimal]
   case object Text extends PrimitivePropertyType[String]
-  case object Json extends PrimitivePropertyType[String]
+  case object Json extends PrimitivePropertyType[io.circe.Json]
   case object Timestamp extends PrimitivePropertyType[ZonedDateTime]
   case object Date extends PrimitivePropertyType[LocalDate]
   case object Geometry extends PrimitivePropertyType[String]
@@ -129,7 +129,8 @@ object PropertyType {
           PropertyType.Numeric
         )
     case object Text extends ArrayPropertyType[String, PropertyType.Text.type](PropertyType.Text)
-    case object Json extends ArrayPropertyType[String, PropertyType.Json.type](PropertyType.Json)
+    case object Json
+        extends ArrayPropertyType[io.circe.Json, PropertyType.Json.type](PropertyType.Json)
     case object Timestamp
         extends ArrayPropertyType[ZonedDateTime, PropertyType.Timestamp.type](
           PropertyType.Timestamp
