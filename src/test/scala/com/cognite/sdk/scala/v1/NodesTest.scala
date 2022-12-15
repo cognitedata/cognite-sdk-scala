@@ -71,12 +71,12 @@ class NodesTest
           "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
           "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22)),
           "prop_json" -> PropertyType.Json.Property("""{
-                                                      |    "int_val": 2,
-                                                      |    "string_val": "tata",
-                                                      |    "struct_val": {
-                                                      |        "name": "jetfire",
-                                                      |        "age": 25.0
-                                                      |    }
+                                                      |  "int_val" : 2,
+                                                      |  "string_val" : "tata",
+                                                      |  "struct_val" : {
+                                                      |    "age" : 25.0,
+                                                      |    "name" : "jetfire"
+                                                      |  }
                                                       |}""".stripMargin)
         )
       )
@@ -214,8 +214,8 @@ class NodesTest
                                    |  "int_val" : 2,
                                    |  "string_val" : "tata",
                                    |  "struct_val" : {
-                                   |    "name" : "jetfire",
-                                   |    "age" : 25.0
+                                   |    "age" : 25.0,
+                                   |    "name" : "jetfire"
                                    |  }
                                    |}""".stripMargin)
     )
@@ -370,6 +370,11 @@ class NodesTest
       .toList
 
     outputQueryNot.size shouldBe 1
+    println(s"result = ${outputQueryNot.map(_.allProperties).toSet}")
+
+    println(s"expected = ${fromCreatedToExpectedProps(
+      Set(dataModelNodeToCreate1)
+    )}")
     outputQueryNot.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(dataModelNodeToCreate1)
     )
