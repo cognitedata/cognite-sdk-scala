@@ -17,7 +17,6 @@ import com.cognite.sdk.scala.common.{
   DSLRangeFilter,
   RetryWhile
 }
-import io.circe.Json
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.time.LocalDate
@@ -209,7 +208,7 @@ class NodesTest
     dataModelInstances.size shouldBe 3
     dataModelInstances.map(_.externalId).toSet shouldBe toCreates.map(_.externalId).toSet
     dataModelInstances
-      .find(_.externalId == dataModelNodeToCreate1.externalId)
+      .find(_.externalId === dataModelNodeToCreate1.externalId)
       .flatMap(_.allProperties.get("prop_json")) shouldBe Some(
       PropertyType.Json.Property("""{
                                    |  "int_val" : 2,
