@@ -10,7 +10,16 @@ import io.circe.syntax._
 // scalastyle:off number.of.types
 
 sealed abstract case class DataModelProperty[V](value: V)(implicit encoder: Encoder[V]) {
-  def encode: Json = value.asJson
+  import io.circe.parser._
+  def encode: Json =
+    value match {
+      case rawStringJson: String =>
+        parse(rawStringJson) match {
+          case Left(_) => value.asJson
+          case Right(json) => json
+        }
+      case _ => value.asJson
+    }
 }
 
 sealed abstract class PropertyType[V](implicit decoder: Decoder[V], encoder: Encoder[V])

@@ -70,7 +70,14 @@ class NodesTest
           "prop_float" -> PropertyType.Float32.Property(0.1f),
           "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
           "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22)),
-          "prop_json" -> PropertyType.Json.Property("""{"string_val":"toto","int_val":1}""")
+          "prop_json" -> PropertyType.Json.Property("""{
+                                                      |    "int_val": 2,
+                                                      |    "string_val": "tata",
+                                                      |    "struct_val": {
+                                                      |        "name": "jetfire",
+                                                      |        "age": 25.0
+                                                      |    }
+                                                      |}""".stripMargin)
         )
       )
     )
@@ -200,6 +207,18 @@ class NodesTest
 
     dataModelInstances.size shouldBe 3
     dataModelInstances.map(_.externalId).toSet shouldBe toCreates.map(_.externalId).toSet
+    dataModelInstances
+      .find(_.externalId == dataModelNodeToCreate1.externalId)
+      .flatMap(_.allProperties.get("prop_json")) shouldBe Some(
+      PropertyType.Json.Property("""{
+                                   |  "int_val" : 2,
+                                   |  "string_val" : "tata",
+                                   |  "struct_val" : {
+                                   |    "name" : "jetfire",
+                                   |    "age" : 25.0
+                                   |  }
+                                   |}""".stripMargin)
+    )
   }
 
   it should "fail if input data type is not correct" in {
