@@ -370,11 +370,6 @@ class NodesTest
       .toList
 
     outputQueryNot.size shouldBe 1
-    println(s"result = ${outputQueryNot.map(_.allProperties).toSet}")
-
-    println(s"expected = ${fromCreatedToExpectedProps(
-      Set(dataModelNodeToCreate1)
-    )}")
     outputQueryNot.map(_.allProperties).toSet shouldBe fromCreatedToExpectedProps(
       Set(dataModelNodeToCreate1)
     )
