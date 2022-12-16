@@ -21,7 +21,7 @@ import scala.collection.immutable.Seq
 import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.NonUnitStatements"))
-class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionValues {
+class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionValues with RetryWhile {
   val tenant: String = sys.env("TEST_AAD_TENANT")
   val clientId: String = sys.env("TEST_CLIENT_ID")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
@@ -142,19 +142,23 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
     )
 
     val io = for {
+      _ <- numTokenRequests.update(_ => 0)
       authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials,
         refreshSecondsBeforeExpiration = 2,
         Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- numTokenRequests.get.map(_ shouldBe 0)  // original token is still valid
+      noNewToken <- numTokenRequests.get  // original token is still valid
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- numTokenRequests.get.map(_ shouldBe 1) // original token is expired
+      oneRequestedToken <- numTokenRequests.get // original token is expired
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- numTokenRequests.get.map(_ shouldBe 2) // first renew token is expired
-    } yield ()
+      twoRequestedToken <- numTokenRequests.get // first renew token is expired
+    } yield (noNewToken, oneRequestedToken, twoRequestedToken)
 
-    io.unsafeRunTimed(10.seconds).value
+    retryWithExpectedResult[(Int,Int,Int)](
+      io.unsafeRunTimed(10.seconds).value,
+      r => r shouldBe ((0, 1, 2))
+    )
   }
 }

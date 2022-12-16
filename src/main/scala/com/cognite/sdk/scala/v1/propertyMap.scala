@@ -5,7 +5,7 @@ import com.cognite.sdk.scala.common.DomainSpecificLanguageFilter.propEncoder
 import com.cognite.sdk.scala.common.{DomainSpecificLanguageFilter, EmptyFilter, SdkException}
 import com.cognite.sdk.scala.v1.resources.DataModels
 import io.circe.CursorOp.DownField
-import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, KeyEncoder}
+import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json, KeyEncoder}
 
 import scala.collection.immutable
 
@@ -55,7 +55,12 @@ object PropertyMap {
         val res: immutable.Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]] =
           props.map { case (prop, dmp) =>
             for {
-              value <- dmp.`type`.decodeProperty(c.downField(prop))
+              value <- dmp.`type` match {
+                case PropertyType.Json =>
+                  c.downField(prop).as[Json].map(js => PropertyType.Json.Property(js.toString()))
+                case _ => dmp.`type`.decodeProperty(c.downField(prop))
+              }
+
             } yield prop -> value
           }
         filterOutNullableProps(res, props).find(_.isLeft) match {

@@ -10,7 +10,16 @@ import io.circe.syntax._
 // scalastyle:off number.of.types
 
 sealed abstract case class DataModelProperty[V](value: V)(implicit encoder: Encoder[V]) {
-  def encode: Json = value.asJson
+  import io.circe.parser._
+  def encode: Json =
+    value match {
+      case rawStringJson: String =>
+        parse(rawStringJson) match {
+          case Left(_) => value.asJson
+          case Right(json) => json
+        }
+      case _ => value.asJson
+    }
 }
 
 sealed abstract class PropertyType[V](implicit decoder: Decoder[V], encoder: Encoder[V])
@@ -78,7 +87,7 @@ object PropertyType {
   case object Float64 extends PrimitivePropertyType[scala.Double]
   case object Numeric extends PrimitivePropertyType[scala.BigDecimal]
   case object Text extends PrimitivePropertyType[String]
-  case object Json extends PrimitivePropertyType[io.circe.Json]
+  case object Json extends PrimitivePropertyType[String]
   case object Timestamp extends PrimitivePropertyType[ZonedDateTime]
   case object Date extends PrimitivePropertyType[LocalDate]
   case object Geometry extends PrimitivePropertyType[String]
@@ -120,8 +129,7 @@ object PropertyType {
           PropertyType.Numeric
         )
     case object Text extends ArrayPropertyType[String, PropertyType.Text.type](PropertyType.Text)
-    case object Json
-        extends ArrayPropertyType[io.circe.Json, PropertyType.Json.type](PropertyType.Json)
+    case object Json extends ArrayPropertyType[String, PropertyType.Json.type](PropertyType.Json)
     case object Timestamp
         extends ArrayPropertyType[ZonedDateTime, PropertyType.Timestamp.type](
           PropertyType.Timestamp
