@@ -19,7 +19,9 @@ import scala.util.Try
     "org.wartremover.warts.Serializable",
     "org.wartremover.warts.NonUnitStatements",
     "org.wartremover.warts.Product",
-    "org.wartremover.warts.AnyVal"
+    "org.wartremover.warts.AnyVal",
+    "org.wartremover.warts.AsInstanceOf",
+    "org.wartremover.warts.Null"
   )
 )
 class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
@@ -36,8 +38,8 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |      "type": "node",
            |      "space": "space-1",
            |      "externalId": "space-ext-id-1",
-           |      "createdTime": ${createdTime},
-           |      "lastUpdatedTime": ${lastUpdatedTime},
+           |      "createdTime": ${createdTime.toString},
+           |      "lastUpdatedTime": ${lastUpdatedTime.toString},
            |      "properties": {
            |        "space-name-1": {
            |          "view-or-container-id-1": {

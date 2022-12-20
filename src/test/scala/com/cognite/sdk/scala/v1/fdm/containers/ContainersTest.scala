@@ -26,7 +26,8 @@ import scala.util.Random
     "org.wartremover.warts.JavaSerializable",
     "org.wartremover.warts.Serializable",
     "org.wartremover.warts.Product",
-    "org.wartremover.warts.AnyVal"
+    "org.wartremover.warts.AnyVal",
+    "org.wartremover.warts.OptionPartial"
   )
 )
 // scalastyle:off
@@ -130,7 +131,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
 
   it should "CRUD a container" in {
     // TODO: Verify all properties after they fix the bugs
-    val containerExternalId = s"vehicle_container_${Random.nextInt(1000)}"
+    val containerExternalId = s"vehicle_container_${Random.nextInt(1000).toString}"
     val containerToCreate = ContainerCreateDefinition(
       space = space,
       externalId = containerExternalId,
@@ -146,7 +147,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     createdResponse.isEmpty shouldBe false
 
     val readAfterCreateContainers = blueFieldClient.containers.retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))).unsafeRunSync()
-    val insertedContainer = readAfterCreateContainers.find(_.externalId == containerExternalId)
+    val insertedContainer = readAfterCreateContainers.find(_.externalId === containerExternalId)
 
     insertedContainer.isEmpty shouldBe false
     insertedContainer.get.properties.keys.toList should contain theSameElementsAs VehicleContainerProperties.keys.toList
@@ -168,7 +169,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
 
     // TODO: Check update reflection delay and remove 10.seconds sleep
     val readAfterUpdateContainers = (IO.sleep(10.seconds) *> blueFieldClient.containers.retrieveByExternalIds(Seq(ContainerId(space, containerExternalId)))).unsafeRunSync()
-    val updatedContainer = readAfterUpdateContainers.find(_.externalId == containerExternalId)
+    val updatedContainer = readAfterUpdateContainers.find(_.externalId === containerExternalId)
 
     updatedContainer.isEmpty shouldBe false
     updatedContainer.get.properties.keys.toList should contain theSameElementsAs UpdatedVehicleContainerProperties.keys.toList

@@ -19,15 +19,16 @@ import scala.util.Random
     "org.wartremover.warts.JavaSerializable",
     "org.wartremover.warts.Serializable",
     "org.wartremover.warts.Product",
-    "org.wartremover.warts.AnyVal"
+    "org.wartremover.warts.AnyVal",
+    "org.wartremover.warts.IterableOps"
   )
 )
 // scalastyle:off
 class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val space = "test-space-scala-sdk"
-  private val vehicleContainerExternalId = s"vehicle_container_${Random.nextInt(1000)}"
-  private val personContainerExternalId = s"person_container_${Random.nextInt(1000)}"
-  private val rentableContainerExternalId = s"rentable_container_${Random.nextInt(1000)}"
+  private val vehicleContainerExternalId = s"vehicle_container_${Random.nextInt(1000).toString}"
+  private val personContainerExternalId = s"person_container_${Random.nextInt(1000).toString}"
+  private val rentableContainerExternalId = s"rentable_container_${Random.nextInt(1000).toString}"
   private val vehicleContainer = ContainerCreateDefinition(
     space = space,
     externalId = vehicleContainerExternalId,
@@ -63,7 +64,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val rentableContainerCreated = blueFieldClient.containers.createItems(Seq(rentableContainer)).unsafeRunSync().head
 
   it should "CRUD instances" in {
-    val vehicleNodeExternalId = s"vehicles-node-${Random.nextInt(1000)}"
+    val vehicleNodeExternalId = s"vehicles-node-${Random.nextInt(1000).toString}"
     val vehicleContainerReference = vehicleContainerCreated.toContainerReference
     val vehicleInstancesToCreate = InstanceCreate(
       items = Seq(NodeWrite(space, vehicleNodeExternalId, vehicleInstanceData(vehicleContainerReference))),
@@ -74,7 +75,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     val createdVehicleInstances = blueFieldClient.instances.createItems(vehicleInstancesToCreate).unsafeRunSync()
     createdVehicleInstances.length shouldBe 6
 
-    val personNodeExternalId = s"persons-node-${Random.nextInt(1000)}"
+    val personNodeExternalId = s"persons-node-${Random.nextInt(1000).toString}"
     val personContainerReference = personContainerCreated.toContainerReference
     val personInstancesToCreate = InstanceCreate(
       items = Seq(NodeWrite(space, personNodeExternalId, personInstanceData(personContainerReference))),
@@ -85,7 +86,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     val createdPersonInstances = blueFieldClient.instances.createItems(personInstancesToCreate).unsafeRunSync()
     createdPersonInstances.length shouldBe 6
 
-    val rentableEdgeExternalId = s"rentable-edge-${Random.nextInt(1000)}"
+    val rentableEdgeExternalId = s"rentable-edge-${Random.nextInt(1000).toString}"
     val rentableContainerReference = rentableContainerCreated.toContainerReference
     val rentableInstancesToCreate = InstanceCreate(
       items = Seq(

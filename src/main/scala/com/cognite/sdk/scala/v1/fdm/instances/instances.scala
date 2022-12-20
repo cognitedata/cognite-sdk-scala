@@ -34,7 +34,7 @@ final case class InstanceCreate(
 )
 
 final case class InstanceRetrieve(
-    sources: Seq[SourceReference],
+    sources: Option[Seq[SourceReference]],
     instanceType: InstanceType,
     externalId: String,
     space: String

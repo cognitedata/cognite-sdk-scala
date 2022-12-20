@@ -52,13 +52,13 @@ object SlimNodeOrEdge {
   implicit val slimNodeOrEdgeDecoder: Decoder[SlimNodeOrEdge] = (c: HCursor) =>
     c.downField("type").as[InstanceType] match {
       case Left(err) => Left[DecodingFailure, SlimNodeOrEdge](err)
-      case Right(typeValue) if typeValue == InstanceType.Node =>
+      case Right(InstanceType.Node) =>
         Decoder[SlimNodeDefinition].apply(c)
-      case Right(typeValue) if typeValue == InstanceType.Edge =>
+      case Right(InstanceType.Edge) =>
         Decoder[SlimEdgeDefinition].apply(c)
       case Right(typeValue) =>
         Left[DecodingFailure, SlimNodeOrEdge](
-          DecodingFailure(s"Unknown Instant Type: ${typeValue}", c.history)
+          DecodingFailure(s"Unknown Instant Type: ${typeValue.toString}", c.history)
         )
     }
 }
