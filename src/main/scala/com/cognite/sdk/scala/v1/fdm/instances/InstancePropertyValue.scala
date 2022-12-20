@@ -67,7 +67,7 @@ object InstancePropertyValue {
           if (jn.toString.contains(".")) { // 1.0 should be a Double not Long
             Some(InstancePropertyValue.Double(jn.toDouble))
           } else {
-            jn.toLong.map(InstancePropertyValue.Integer)
+            jn.toLong.map(InstancePropertyValue.Integer.apply)
           }
         }
         numericInstantPropType.map(Right(_))

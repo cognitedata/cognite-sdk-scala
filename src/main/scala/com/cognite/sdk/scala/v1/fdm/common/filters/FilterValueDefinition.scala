@@ -42,7 +42,7 @@ object FilterValueDefinition {
           if (n.toString.contains(".")) {
             Some(FilterValueDefinition.Number(n.toDouble))
           } else {
-            n.toLong.map(FilterValueDefinition.Integer)
+            n.toLong.map(FilterValueDefinition.Integer.apply)
           }
         )
         numericFilterValue.map(Right[DecodingFailure, ComparableFilterValue])
