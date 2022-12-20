@@ -56,9 +56,5 @@ object SlimNodeOrEdge {
         Decoder[SlimNodeDefinition].apply(c)
       case Right(InstanceType.Edge) =>
         Decoder[SlimEdgeDefinition].apply(c)
-      case Right(typeValue) =>
-        Left[DecodingFailure, SlimNodeOrEdge](
-          DecodingFailure(s"Unknown Instant Type: ${typeValue.toString}", c.history)
-        )
     }
 }
