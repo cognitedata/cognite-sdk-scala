@@ -1,5 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.common.refs
 
+import com.cognite.sdk.scala.common.SdkException
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 import io.circe.syntax.EncoderOps
@@ -13,6 +14,10 @@ object SourceReference {
   implicit val sourceReferenceEncoder: Encoder[SourceReference] = Encoder.instance {
     case c: ContainerReference => c.asJson
     case v: ViewReference => v.asJson
+    case invalidRefType =>
+      throw new SdkException(
+        s"SourceReference must be ContainerReference or ViewReference, but found ${invalidRefType.toString}"
+      )
   }
 
   implicit val sourceReferenceDecoder: Decoder[SourceReference] =

@@ -202,7 +202,7 @@ object InstanceDefinition {
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.StringList.apply)
       case t if t.isList => toInstancePropertyTypeOfList(instantPropTypeJson, t)
-      case t if !t.isList => toInstancePropertyTypeOfNonList(instantPropTypeJson, t)
+      case t => toInstancePropertyTypeOfNonList(instantPropTypeJson, t)
     }
 
   private def toInstancePropertyTypeOfList(
