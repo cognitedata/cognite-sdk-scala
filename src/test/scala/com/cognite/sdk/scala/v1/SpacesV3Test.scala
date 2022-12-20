@@ -9,7 +9,8 @@ import org.scalatest.BeforeAndAfterAll
 @SuppressWarnings(
   Array(
     "org.wartremover.warts.PublicInference",
-    "org.wartremover.warts.NonUnitStatements"
+    "org.wartremover.warts.NonUnitStatements",
+    "org.wartremover.warts.SizeIs"
   )
 )
 class SpacesV3Test extends CommonDataModelTestHelper with BeforeAndAfterAll{
