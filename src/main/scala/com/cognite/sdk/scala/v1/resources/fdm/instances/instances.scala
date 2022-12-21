@@ -3,9 +3,12 @@
 
 package com.cognite.sdk.scala.v1.resources.fdm.instances
 
+import cats.effect.Async
+import cats.syntax.all._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.RequestSession
 import com.cognite.sdk.scala.v1.fdm.instances._
+import fs2.Stream
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Printer}
 import sttp.client3._
@@ -35,6 +38,32 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       uri"$baseUrl/list",
       identity
     )
+
+  private[sdk] def filterWithCursor(
+      inputQuery: InstanceFilterRequest,
+      cursor: Option[String],
+      limit: Option[Int],
+      @annotation.nowarn partition: Option[Partition] = None
+  )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] =
+    filter(inputQuery.copy(cursor = cursor, limit = limit)).map {
+      case InstanceFilterResponse(items, _, cursor) =>
+        ItemsWithCursor(items, cursor)
+    }
+
+  private[sdk] def filterWithNextCursor(
+      inputQuery: InstanceFilterRequest,
+      cursor: Option[String],
+      limit: Option[Int]
+  )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
+    Readable
+      .pullFromCursor(cursor, limit, None, filterWithCursor(inputQuery, _, _, _))
+      .stream
+
+  def filterStream(
+      inputQuery: InstanceFilterRequest,
+      limit: Option[Int]
+  )(implicit F: Async[F]): fs2.Stream[F, InstanceDefinition] =
+    filterWithNextCursor(inputQuery, None, limit)
 
   def retrieveByExternalIds(
       items: Seq[InstanceRetrieve],

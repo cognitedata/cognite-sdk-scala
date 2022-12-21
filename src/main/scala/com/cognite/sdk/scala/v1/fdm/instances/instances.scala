@@ -61,11 +61,10 @@ final case class PropertySortV3(
 )
 
 final case class InstanceFilterRequest(
-    sources: Seq[SourceReference],
-    spaces: Option[Seq[String]],
-    instanceType: Option[InstanceType],
-    cursor: Option[String],
-    limit: Option[Int],
-    sort: Seq[PropertySortV3],
-    filter: FilterDefinition
+    sources: Option[Seq[SourceReference]] = None,
+    instanceType: Option[InstanceType] = None,
+    cursor: Option[String] = None,
+    limit: Option[Int] = None,
+    sort: Option[Seq[PropertySortV3]] = None,
+    filter: Option[FilterDefinition] = None
 )
