@@ -5,12 +5,13 @@ package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.v1.fdm.common.Usage
+//import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition._
+//import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewPropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, SpaceCreateDefinition}
-//import com.cognite.sdk.scala.common.{DSLAndFilter, DSLEqualsFilter, DSLInFilter, RetryWhile}
 import com.cognite.sdk.scala.common.RetryWhile
 //import com.cognite.sdk.scala.v1.resources.Containers.containerCreateEncoder
 //import io.circe.syntax.EncoderOps
@@ -34,7 +35,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   private val containerListExternalId = "scala_sdk_container_list"
 
   private val containerPropertyInt = ContainerPropertyDefinition(
-    defaultValue = Some(PropertyDefaultValue.Double(1.0)),
+    defaultValue = Some(PropertyDefaultValue.Integer(1)),
     description = Some("Prop int32"),
     name = Some("Prop int32"),
     `type` = PrimitiveProperty(PrimitivePropType.Int32)
@@ -59,14 +60,14 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   )
 
   private val containerPropertyListBool = ContainerPropertyDefinition(
-    defaultValue = Some(PropertyDefaultValue.Boolean(true)),
+    defaultValue = None,
     description = Some("Prop list bool"),
     name = Some("Prop list bool"),
     `type` = PrimitiveProperty(PrimitivePropType.Boolean, list = Some(true))
   )
 
   private val containerPropertyListFloat64 = ContainerPropertyDefinition(
-    defaultValue = Some(PropertyDefaultValue.Double(1.0)),
+    defaultValue = None,
     description = Some("Prop list float64"),
     name = Some("Prop list float64"),
     `type` = PrimitiveProperty(PrimitivePropType.Float64, list = Some(true))
@@ -113,13 +114,12 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       externalId = viewExternalId,
       name = Some("first view"),
       description = Some("desc"),
-      //         filter = Some(DSLAndFilter(Seq(
-      //           DSLInFilter(property = Seq("dummy", "dummy2"), `values` = Seq(
-      //             PropertyType.Bigint.Property(9223372036854775L),
-      //             PropertyType.Text.Property("abcdef"),
-      //           )),
-      //           DSLEqualsFilter(property = Seq("dummy"),  `value` = PropertyType.Text.Property("testValue"))))),
-      // implements = Some(implements),
+//      filter = Some(And(Seq(
+//         In(property = Seq("prop_int32"), `values` = Seq(
+//           FilterValueDefinition.Integer(123L)
+//         )),
+//         Equals(property = Seq("prop_text"),  `value` = FilterValueDefinition.String("testValue"))))),
+      implements = None,
       version = Some(viewVersion1),
       properties = properties
     )
