@@ -26,7 +26,7 @@ import scala.util.Random
 // scalastyle:off
 class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val space = "test-space-scala-sdk"
-  private val vehicleContainerExternalId = "vehicle_container_139" //s"vehicle_container_${Random.nextInt(1000).toString}"
+  private val vehicleContainerExternalId = "vehicle_container_236" //s"vehicle_container_${Random.nextInt(1000).toString}"
   private val personContainerExternalId = "person_container_775" //s"person_container_${Random.nextInt(1000).toString}"
   private val rentableContainerExternalId = s"rentable_container_${Random.nextInt(1000).toString}"
   private val vehicleContainer = ContainerCreateDefinition(

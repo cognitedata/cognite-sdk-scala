@@ -131,7 +131,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
 
   it should "CRUD a container" in {
     // TODO: Verify all properties after they fix the bugs
-    val containerExternalId = "vehicle_container_139" //s"vehicle_container_${Random.nextInt(1000).toString}"
+    val containerExternalId = "vehicle_container_171" //s"vehicle_container_${Random.nextInt(1000).toString}"
     val containerToCreate = ContainerCreateDefinition(
       space = space,
       externalId = containerExternalId,
