@@ -22,7 +22,7 @@ sealed abstract case class DataModelProperty[V](value: V)(implicit encoder: Enco
         val encodedAsJsonResult = arrayRawStringJson.map(s => parse(s.toString))
         if (encodedAsJsonResult.forall(_.isRight)) {
           Json.fromValues(encodedAsJsonResult.collect { case Right(v) => v })
-        } else { arrayRawStringJson.map(_.toString).asJson }
+        } else { value.asJson }
       case _ => value.asJson
     }
 }
