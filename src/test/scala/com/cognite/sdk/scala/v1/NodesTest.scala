@@ -147,7 +147,7 @@ class NodesTest
                   |  "int_val" : 2
                   |}""".stripMargin)
           )
-        ),
+        )
       )
     )
 
