@@ -112,6 +112,7 @@ class NodesTest
   val dataPropArrayString = DataModelPropertyDefinition(PropertyType.Array.Text, true)
   val dataPropArrayFloat = DataModelPropertyDefinition(PropertyType.Array.Float32, true)
   val dataPropArrayInt = DataModelPropertyDefinition(PropertyType.Array.Int, true)
+  val dataPropArrayJson = DataModelPropertyDefinition(PropertyType.Array.Json, true)
 
   val dataModelArray = DataModel(
     s"Equipment-arry",
@@ -119,7 +120,8 @@ class NodesTest
       Map(
         "array_string" -> dataPropArrayString,
         "array_float" -> dataPropArrayFloat,
-        "array_int" -> dataPropArrayInt
+        "array_int" -> dataPropArrayInt,
+        "array_json" -> dataPropArrayJson
       )
     )
   )
@@ -136,8 +138,16 @@ class NodesTest
           ),
         "array_int" -> PropertyType.Array.Int.Property(
           Vector(1,12,13)
+          ),
+        "array_json" -> PropertyType.Array.Json.Property(
+          Vector("""{
+                   |  "string_val" : "tata"
+                   |}""".stripMargin,
+                """{
+                  |  "int_val" : 2
+                  |}""".stripMargin)
           )
-        )
+        ),
       )
     )
 
@@ -218,6 +228,24 @@ class NodesTest
                                    |    "name" : "jetfire"
                                    |  }
                                    |}""".stripMargin)
+    )
+
+    val instancesOfArray = blueFieldClient.nodes
+      .createItems(space, DataModelIdentifier(Some(space), dataModelArray.externalId), items = Seq(dmiArrayToCreate1))
+      .unsafeRunSync()
+      .toList
+
+    instancesOfArray.size shouldBe 1
+    instancesOfArray.map(_.externalId).toSet shouldBe Set(dmiArrayToCreate1.externalId)
+    instancesOfArray
+      .find(_.externalId === dmiArrayToCreate1.externalId)
+      .flatMap(_.allProperties.get("array_json")) shouldBe Some(
+      PropertyType.Array.Json.Property(Seq("""{
+                                             |  "string_val" : "tata"
+                                             |}""".stripMargin,
+                                             """{
+                                             |  "int_val" : 2
+                                             |}""".stripMargin))
     )
   }
 
