@@ -92,10 +92,8 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .createItems(Seq(SpaceCreateDefinition(space = spaceName)))
       .unsafeRunSync()
 
-    val createdContainer =
-      blueFieldClient.containers.createItems(Seq(containerPrimitive, containerList)).unsafeRunSync()
-    println(s"createdContainer = ${createdContainer.toString()}")
-    //    println(s"createdContainer = ${containerPrimitive.toString()}, ${containerList.toString()}")
+    blueFieldClient.containers.createItems(Seq(containerPrimitive, containerList)).unsafeRunSync()
+    ()
   }
 
   val viewVersion1 = "v1"
@@ -103,7 +101,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   val view2ExternalId = "scala_sdk_view_2"
   val view3ExternalId = "scala_sdk_view_3"
 
-  it should "create a view" in {
+  ignore should "create a view" in {
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val properties = Map(
       "prop_int32" -> CreatePropertyReference(containerReference, "prop_int32"),
@@ -158,13 +156,13 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
   }
 
-  it should "create a view that implement another view" in {
+  ignore should "create a view that implement another view" in {
     val containerPrimReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val containerListReference = ContainerReference(spaceName, containerListExternalId)
 
     // Create a second view that reference to scala_sdk_test_view_1
     val implements =
-      Seq(ViewReference(space = spaceName, externalId = "viewExternalId", version = "v1"))
+      Seq(ViewReference(space = spaceName, externalId = viewExternalId, version = "v1"))
     val properties2 = Map(
       "prop_int32" -> CreatePropertyReference(containerPrimReference, "prop_int32"),
       "prop_list_float64" -> CreatePropertyReference(containerListReference, "prop_list_float64")
@@ -180,10 +178,9 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       properties = properties2
     )
 
-    val created2 = blueFieldClient.views
+    blueFieldClient.views
       .createItems(Seq(view2ToCreate))
       .unsafeRunSync()
-    println(s"created2 = ${created2.toString()}")
   }
 
   ignore should "retrieve views by data model reference" in {

@@ -1,6 +1,5 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import cats.implicits._
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDefinition.NodeDefinition
 import io.circe
@@ -11,7 +10,6 @@ import org.scalatest.wordspec.AnyWordSpec
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import scala.util.Try
 
 @SuppressWarnings(
   Array(
@@ -307,15 +305,5 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
       actual shouldBe Right(instanceFilterResponse)
     }
 
-    "pass" in {
-      val x = null // scalastyle:off null
-      val p = x.asInstanceOf[String]
-      println(p)
-
-      val q = Try(p.length) *> Try(true)
-      println(q)
-
-      1 shouldBe 1
-    }
   }
 }

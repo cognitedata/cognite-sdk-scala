@@ -388,7 +388,7 @@ object ContainersTest {
         name = Some("invoice-id"),
         `type` = TextProperty(),
         nullable = Some(false)
-      ),
+      )
     )
 
     val RentableContainerConstraints: Map[String, ContainerConstraint] = Map(
@@ -409,7 +409,7 @@ object ContainersTest {
             "renter-id" -> InstancePropertyValue.String("222222"),
             "from" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 1, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
             "to" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 1, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
-            "invoice-id" -> InstancePropertyValue.String("inv-1"),
+            "invoice-id" -> InstancePropertyValue.String("inv-1")
           )
         )
       ),
@@ -421,7 +421,7 @@ object ContainersTest {
             "renter-id" -> InstancePropertyValue.String("222222"),
             "from" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 2, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
             "to" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 2, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
-            "invoice-id" -> InstancePropertyValue.String("inv-2"),
+            "invoice-id" -> InstancePropertyValue.String("inv-2")
           )
         )
       ),
@@ -433,7 +433,7 @@ object ContainersTest {
             "renter-id" -> InstancePropertyValue.String("333333"),
             "from" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 2, 1, 9, 0, 0, 0, ZoneId.of("GMT+1"))),
             "to" -> InstancePropertyValue.Timestamp(ZonedDateTime.of(2020, 2, 14, 18, 0, 0, 0, ZoneId.of("GMT+1"))),
-            "invoice-id" -> InstancePropertyValue.String("inv-3"),
+            "invoice-id" -> InstancePropertyValue.String("inv-3")
           )
         )
       )
@@ -498,7 +498,7 @@ object ContainersTest {
             "firstname" -> InstancePropertyValue.String("Sadio"),
             "lastname" -> InstancePropertyValue.String("Mane"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1989-11-23")),
-            "nationality" -> InstancePropertyValue.String("Senegalese"),
+            "nationality" -> InstancePropertyValue.String("Senegalese")
           )
         )
       ),
@@ -510,7 +510,7 @@ object ContainersTest {
             "firstname" -> InstancePropertyValue.String("Alexander"),
             "lastname" -> InstancePropertyValue.String("Arnold"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1989-10-23")),
-            "nationality" -> InstancePropertyValue.String("British"),
+            "nationality" -> InstancePropertyValue.String("British")
           )
         )
       ),
@@ -522,7 +522,7 @@ object ContainersTest {
             "firstname" -> InstancePropertyValue.String("Harry"),
             "lastname" -> InstancePropertyValue.String("Kane"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1990-10-20")),
-            "nationality" -> InstancePropertyValue.String("British"),
+            "nationality" -> InstancePropertyValue.String("British")
           )
         )
       ),
@@ -534,7 +534,7 @@ object ContainersTest {
             "firstname" -> InstancePropertyValue.String("John"),
             "lastname" -> InstancePropertyValue.String("Gotty"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1978-09-20")),
-            "nationality" -> InstancePropertyValue.String("Italian"),
+            "nationality" -> InstancePropertyValue.String("Italian")
           )
         )
       ),
@@ -546,7 +546,7 @@ object ContainersTest {
             "firstname" -> InstancePropertyValue.String("Angela"),
             "lastname" -> InstancePropertyValue.String("Merkel"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1978-05-20")),
-            "nationality" -> InstancePropertyValue.String("German"),
+            "nationality" -> InstancePropertyValue.String("German")
           )
         )
       ),
@@ -558,7 +558,7 @@ object ContainersTest {
             "firstname" -> InstancePropertyValue.String("Elon"),
             "lastname" -> InstancePropertyValue.String("Musk"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1982-05-20")),
-            "nationality" -> InstancePropertyValue.String("American"),
+            "nationality" -> InstancePropertyValue.String("American")
           )
         )
       )
