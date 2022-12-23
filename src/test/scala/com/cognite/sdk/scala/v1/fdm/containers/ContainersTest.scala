@@ -17,7 +17,7 @@ import io.circe.{Decoder, Encoder}
 
 import java.time.{ZoneId, ZonedDateTime}
 import scala.concurrent.duration.DurationInt
-import scala.util.Random
+//import scala.util.Random
 
 @SuppressWarnings(
   Array(
@@ -131,7 +131,7 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
 
   it should "CRUD a container" in {
     // TODO: Verify all properties after they fix the bugs
-    val containerExternalId = s"vehicle_container_${Random.nextInt(1000).toString}"
+    val containerExternalId = "vehicle_container_139" //s"vehicle_container_${Random.nextInt(1000).toString}"
     val containerToCreate = ContainerCreateDefinition(
       space = space,
       externalId = containerExternalId,
@@ -442,10 +442,10 @@ object ContainersTest {
 
   object PersonContainer {
     val PersonContainerProperties: Map[String, ContainerPropertyDefinition] = Map(
-      "national-id" -> ContainerPropertyDefinition(
+      "nationalId" -> ContainerPropertyDefinition(
         defaultValue = None,
         description = Some("national identification number"),
-        name = Some("national-id"),
+        name = Some("nationalId"),
         `type` = TextProperty(),
         nullable = Some(false)
       ),
@@ -480,13 +480,13 @@ object ContainersTest {
     )
 
     val PersonContainerConstraints: Map[String, ContainerConstraint] = Map(
-      "national-id-nationality" -> ContainerConstraint.UniquenessConstraint(Seq("national-id", "nationality"))
+      "nationalIdNationality" -> ContainerConstraint.UniquenessConstraint(Seq("nationalId", "nationality"))
     )
 
     val PersonContainerIndexes: Map[String, IndexDefinition] = Map(
-      "nationality-index" -> IndexDefinition.BTreeIndexDefinition(Seq("nationality")),
-      "national-id-index" -> IndexDefinition.BTreeIndexDefinition(Seq("national-id")),
-      "firstname-index" -> IndexDefinition.BTreeIndexDefinition(Seq("firstname-id"))
+      "nationalityIndex" -> IndexDefinition.BTreeIndexDefinition(Seq("nationality")),
+      "nationalIdIndex" -> IndexDefinition.BTreeIndexDefinition(Seq("nationalId")),
+      "firstnameIndex" -> IndexDefinition.BTreeIndexDefinition(Seq("firstnameId"))
     )
 
     def personInstanceData(containerRef: ContainerReference): Seq[EdgeOrNodeData] = Seq(
@@ -494,7 +494,7 @@ object ContainersTest {
         source = containerRef,
         properties = Some(
           Map(
-            "national-id" -> InstancePropertyValue.String("111111"),
+            "nationalId" -> InstancePropertyValue.String("111111"),
             "firstname" -> InstancePropertyValue.String("Sadio"),
             "lastname" -> InstancePropertyValue.String("Mane"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1989-11-23")),
@@ -506,7 +506,7 @@ object ContainersTest {
         source = containerRef,
         properties = Some(
           Map(
-            "national-id" -> InstancePropertyValue.String("222222"),
+            "nationalId" -> InstancePropertyValue.String("222222"),
             "firstname" -> InstancePropertyValue.String("Alexander"),
             "lastname" -> InstancePropertyValue.String("Arnold"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1989-10-23")),
@@ -518,7 +518,7 @@ object ContainersTest {
         source = containerRef,
         properties = Some(
           Map(
-            "national-id" -> InstancePropertyValue.String("333333"),
+            "nationalId" -> InstancePropertyValue.String("333333"),
             "firstname" -> InstancePropertyValue.String("Harry"),
             "lastname" -> InstancePropertyValue.String("Kane"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1990-10-20")),
@@ -530,7 +530,7 @@ object ContainersTest {
         source = containerRef,
         properties = Some(
           Map(
-            "national-id" -> InstancePropertyValue.String("444444"),
+            "nationalId" -> InstancePropertyValue.String("444444"),
             "firstname" -> InstancePropertyValue.String("John"),
             "lastname" -> InstancePropertyValue.String("Gotty"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1978-09-20")),
@@ -542,7 +542,7 @@ object ContainersTest {
         source = containerRef,
         properties = Some(
           Map(
-            "national-id" -> InstancePropertyValue.String("555555"),
+            "nationalId" -> InstancePropertyValue.String("555555"),
             "firstname" -> InstancePropertyValue.String("Angela"),
             "lastname" -> InstancePropertyValue.String("Merkel"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1978-05-20")),
@@ -554,7 +554,7 @@ object ContainersTest {
         source = containerRef,
         properties = Some(
           Map(
-            "national-id" -> InstancePropertyValue.String("666666"),
+            "nationalId" -> InstancePropertyValue.String("666666"),
             "firstname" -> InstancePropertyValue.String("Elon"),
             "lastname" -> InstancePropertyValue.String("Musk"),
             "dob" -> InstancePropertyValue.Object(io.circe.Json.fromString("1982-05-20")),

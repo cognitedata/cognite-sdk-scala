@@ -26,8 +26,8 @@ import scala.util.Random
 // scalastyle:off
 class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val space = "test-space-scala-sdk"
-  private val vehicleContainerExternalId = s"vehicle_container_${Random.nextInt(1000).toString}"
-  private val personContainerExternalId = s"person_container_${Random.nextInt(1000).toString}"
+  private val vehicleContainerExternalId = "vehicle_container_139" //s"vehicle_container_${Random.nextInt(1000).toString}"
+  private val personContainerExternalId = "person_container_775" //s"person_container_${Random.nextInt(1000).toString}"
   private val rentableContainerExternalId = s"rentable_container_${Random.nextInt(1000).toString}"
   private val vehicleContainer = ContainerCreateDefinition(
     space = space,
@@ -63,7 +63,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val personContainerCreated = blueFieldClient.containers.createItems(Seq(personContainer)).unsafeRunSync().head
   private val rentableContainerCreated = blueFieldClient.containers.createItems(Seq(rentableContainer)).unsafeRunSync().head
 
-  it should "CRUD instances" in {
+  ignore should "CRUD instances" in {
     val vehicleNodeExternalId = s"vehicles-node-${Random.nextInt(1000).toString}"
     val vehicleContainerReference = vehicleContainerCreated.toContainerReference
     val vehicleInstancesToCreate = InstanceCreate(
