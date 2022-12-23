@@ -58,6 +58,10 @@ object PropertyMap {
               value <- dmp.`type` match {
                 case PropertyType.Json =>
                   c.downField(prop).as[Json].map(js => PropertyType.Json.Property(js.toString()))
+                case PropertyType.Array.Json =>
+                  c.downField(prop)
+                    .as[Seq[Json]]
+                    .map(js => PropertyType.Array.Json.Property(js.map(_.toString())))
                 case _ => dmp.`type`.decodeProperty(c.downField(prop))
               }
 
