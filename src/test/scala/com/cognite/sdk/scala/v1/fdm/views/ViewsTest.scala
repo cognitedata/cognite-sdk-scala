@@ -35,7 +35,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   private val containerListExternalId = "scala_sdk_container_list"
 
   private val containerPropertyInt = ContainerPropertyDefinition(
-    defaultValue = Some(PropertyDefaultValue.Integer(1)),
+    defaultValue = Some(PropertyDefaultValue.Int32(1)),
     description = Some("Prop int32"),
     name = Some("Prop int32"),
     `type` = PrimitiveProperty(PrimitivePropType.Int32)

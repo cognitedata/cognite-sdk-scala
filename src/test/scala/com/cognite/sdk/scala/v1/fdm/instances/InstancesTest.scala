@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.v1.fdm.instances
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
+import com.cognite.sdk.scala.v1.fdm.Utils.{createInstancePropertyForContainerProperty, createTestContainer}
 import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.PersonContainer._
 import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.RentableContainer._
@@ -108,5 +109,104 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
 
 //    val deletedInstances = blueFieldClient.instances.delete(Seq(NodeDeletionRequest(space = space, externalId = vehicleNodeExternalId))).unsafeRunSync()
 //    deletedInstances.length shouldBe 1
+  }
+
+  it should "CRUD instances with all possible" in {
+//    val containerExternalId = "test_container_896"
+    val allContainerCreateDefinition = createTestContainer(space, "test_all_container", Usage.All)
+    val edgeContainerCreateDefinition = createTestContainer(space, "test_edge_container", Usage.Edge)
+    val nodeContainerCreateDefinition1 = createTestContainer(space, "test_node_container_1", Usage.Node)
+    val nodeContainerCreateDefinition2 = createTestContainer(space, "test_node_container_2", Usage.Node)
+
+    val containersCreated = blueFieldClient.containers.createItems(
+      Seq(allContainerCreateDefinition, edgeContainerCreateDefinition, nodeContainerCreateDefinition1, nodeContainerCreateDefinition2)
+    ).unsafeRunSync()
+    containersCreated.length shouldBe 3
+
+//    val allContainer = containersCreated.head
+//    val edgeContainer = containersCreated(1)
+    val nodeContainer1 = containersCreated(2)
+    val nodeContainer2 = containersCreated(3)
+
+
+    val nodeContainer1Instances = InstanceCreate(
+      items = Seq(
+        NodeWrite(
+          space,
+          s"node1_all_${nodeContainer1.externalId}_1",
+          Seq(
+            EdgeOrNodeData(
+              source = nodeContainer1.toContainerReference,
+              properties = Some(
+                nodeContainer1.properties.map { case (propName, prop) =>
+                  propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+                }
+              )
+            )
+          )
+        ),
+        NodeWrite(
+          space,
+          s"node1_non_nullables_${nodeContainer1.externalId}_1",
+          Seq(
+            EdgeOrNodeData(
+              source = nodeContainer1.toContainerReference,
+              properties = Some(
+                nodeContainer1.properties.filter(_._2.nullable.contains(false)).map { case (propName, prop) =>
+                  propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+                }
+              )
+            )
+          )
+        )
+      ),
+      autoCreateStartNodes = Some(true),
+      autoCreateEndNodes = Some(true),
+      replace = Some(true)
+    )
+
+    val nodeContainer1CreatedInstances = blueFieldClient.instances.createItems(nodeContainer1Instances).unsafeRunSync()
+    nodeContainer1CreatedInstances.length shouldBe 2
+
+    val nodeContainer2Instances = InstanceCreate(
+      items = Seq(
+        NodeWrite(
+          space,
+          s"node2_all_${nodeContainer2.externalId}_1",
+          Seq(
+            EdgeOrNodeData(
+              source = nodeContainer2.toContainerReference,
+              properties = Some(
+                nodeContainer2.properties.map { case (propName, prop) =>
+                  propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+                }
+              )
+            )
+          )
+        ),
+        NodeWrite(
+          space,
+          s"node2_non_nullables_${nodeContainer2.externalId}_1",
+          Seq(
+            EdgeOrNodeData(
+              source = nodeContainer2.toContainerReference,
+              properties = Some(
+                nodeContainer2.properties.filter(_._2.nullable.contains(false)).map { case (propName, prop) =>
+                  propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+                }
+              )
+            )
+          )
+        )
+      ),
+      autoCreateStartNodes = Some(true),
+      autoCreateEndNodes = Some(true),
+      replace = Some(true)
+    )
+
+    val nodeContainer2CreatedInstances = blueFieldClient.instances.createItems(nodeContainer2Instances).unsafeRunSync()
+    nodeContainer2CreatedInstances.length shouldBe 2
+
+
   }
 }

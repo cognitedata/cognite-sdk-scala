@@ -10,9 +10,15 @@ sealed abstract class PropertyDefaultValue extends Product with Serializable
 object PropertyDefaultValue {
   final case class String(value: java.lang.String) extends PropertyDefaultValue
 
-  final case class Integer(value: scala.Long) extends PropertyDefaultValue
+  final case class Int32(value: scala.Int) extends PropertyDefaultValue
 
-  final case class Double(value: scala.Double) extends PropertyDefaultValue
+  final case class Int64(value: scala.Long) extends PropertyDefaultValue
+
+  final case class Float32(value: scala.Float) extends PropertyDefaultValue
+
+  final case class Float64(value: scala.Double) extends PropertyDefaultValue
+
+  final case class Numeric(value: BigDecimal) extends PropertyDefaultValue
 
   final case class Boolean(value: scala.Boolean) extends PropertyDefaultValue
 
@@ -21,12 +27,16 @@ object PropertyDefaultValue {
   implicit val propertyDefaultValueEncoder: Encoder[PropertyDefaultValue] =
     Encoder.instance[PropertyDefaultValue] {
       case PropertyDefaultValue.String(value) => Json.fromString(value)
-      case PropertyDefaultValue.Integer(value) => Json.fromLong(value)
-      case PropertyDefaultValue.Double(value) => Json.fromDoubleOrString(value)
+      case PropertyDefaultValue.Int32(value) => Json.fromInt(value)
+      case PropertyDefaultValue.Int64(value) => Json.fromLong(value)
+      case PropertyDefaultValue.Float32(value) => Json.fromFloatOrString(value)
+      case PropertyDefaultValue.Float64(value) => Json.fromDoubleOrString(value)
+      case PropertyDefaultValue.Numeric(value) => Json.fromBigDecimal(BigDecimal(value.toString))
       case PropertyDefaultValue.Boolean(value) => Json.fromBoolean(value)
       case PropertyDefaultValue.Object(value) => value
     }
 
+  // Ideally this should be done based on the container property type
   implicit val propertyDefaultValueDecoder: Decoder[PropertyDefaultValue] = { (c: HCursor) =>
     val result = c.value match {
       case v if v.isString =>
@@ -35,10 +45,27 @@ object PropertyDefaultValue {
         )
       case v if v.isNumber =>
         val numericPropertyValue = v.asNumber.flatMap { jn =>
+          val bd = BigDecimal(jn.toString)
           if (jn.toString.contains(".")) {
-            Some(PropertyDefaultValue.Double(jn.toDouble))
+            if (bd.isDecimalFloat) {
+              Some(PropertyDefaultValue.Float32(bd.floatValue()))
+            } else if (bd.isDecimalDouble) {
+              Some(PropertyDefaultValue.Float64(bd.doubleValue()))
+            } else {
+              Some(PropertyDefaultValue.Numeric(bd))
+            }
           } else {
-            jn.toLong.map(PropertyDefaultValue.Integer.apply)
+            if (bd.isValidInt) {
+              Some(PropertyDefaultValue.Int32(bd.intValue()))
+            } else if (bd.isValidLong) {
+              Some(PropertyDefaultValue.Int64(bd.longValue()))
+            } else if (bd.isDecimalFloat) {
+              Some(PropertyDefaultValue.Float32(bd.floatValue()))
+            } else if (bd.isDecimalDouble) {
+              Some(PropertyDefaultValue.Float64(bd.doubleValue()))
+            } else {
+              Some(PropertyDefaultValue.Numeric(bd))
+            }
           }
         }
         numericPropertyValue.map(Right[DecodingFailure, PropertyDefaultValue])

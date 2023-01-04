@@ -226,7 +226,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   "property-identifier12",
                   Some(true),
                   Some(false),
-                  Some(PropertyDefaultValue.Integer(0)),
+                  Some(PropertyDefaultValue.Int32(0)),
                   Some("property-identifier12"),
                   Some("property-identifier12"),
                   PropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(false))
@@ -268,7 +268,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   "property-identifier32",
                   Some(true),
                   Some(false),
-                  Some(PropertyDefaultValue.Integer(0)),
+                  Some(PropertyDefaultValue.Int32(0)),
                   Some("property-identifier32"),
                   Some("property-identifier32"),
                   PropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(false))
