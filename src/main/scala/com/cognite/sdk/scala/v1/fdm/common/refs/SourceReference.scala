@@ -16,7 +16,7 @@ object SourceReference {
     case v: ViewReference => v.asJson
     case invalidRefType =>
       throw new SdkException(
-        s"SourceReference must be ContainerReference or ViewReference, but found ${invalidRefType.toString}"
+        s"Reference type must be 'Container' or 'View', but found ${invalidRefType.toString}"
       )
   }
 
