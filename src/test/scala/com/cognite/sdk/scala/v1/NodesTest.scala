@@ -4,7 +4,19 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.common.{
+  CdpApiException,
+  DSLAndFilter,
+  DSLContainsAnyFilter,
+  DSLEqualsFilter,
+  DSLExistsFilter,
+  DSLInFilter,
+  DSLNotFilter,
+  DSLOrFilter,
+  DSLPrefixFilter,
+  DSLRangeFilter,
+  RetryWhile
+}
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.time.LocalDate
@@ -675,13 +687,13 @@ class NodesTest
   }
 
   // Not yet supported
-//  ignore should "raise an exception if input has invalid externalId" in {
-//    the[CdpApiException] thrownBy blueFieldClient.nodes
-//      .retrieveByExternalIds(DataModelIdentifier(Some(space), dataModel.externalId), space, Seq("toto"))
-//      .unsafeRunSync()
-//      .items
-//      .toList
-//  }
+  ignore should "raise an exception if input has invalid externalId" in {
+    the[CdpApiException] thrownBy blueFieldClient.nodes
+      .retrieveByExternalIds(DataModelIdentifier(Some(space), dataModel.externalId), space, Seq("toto"))
+      .unsafeRunSync()
+      .items
+      .toList
+  }
 
   "Delete data model instances" should "work with multiple externalIds" in {
     val toDeletes = toCreates.map(_.externalId)
@@ -705,50 +717,45 @@ class NodesTest
   }
 
   it should "cast any instance property if property definition is a string" in {
-    val dataModel = DataModel(
-      s"cast-test-model-1",
+    val dataModelForCastingTest = DataModel(
+      "cast-test-model-1",
       Some(
         Map(
           "prop_int_as_string" -> dataPropInt,
-          "prop_string_as_int" -> dataPropString,
+          "prop_string_as_int" -> dataPropString
         )
       )
     )
-
     blueFieldClient.dataModels
-      .createItems(Seq(dataModel), space)
+      .createItems(Seq(dataModelForCastingTest), space)
       .unsafeRunSync()
-
     val instance =
       Node(
         "i_1",
         properties = Some(
           Map(
             "prop_int_as_string" -> PropertyType.Text.Property("101"),
-            "prop_string_as_int" -> PropertyType.Int.Property(102),
+            "prop_string_as_int" -> PropertyType.Int.Property(102)
           )
         )
       )
-
     val dataModelInstances = blueFieldClient.nodes
-      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(instance))
+      .createItems(space, DataModelIdentifier(Some(space), dataModelForCastingTest.externalId), items = Seq(instance))
       .unsafeRunSync()
       .toList
-
-    dataModelInstances.size shouldBe 1
-
     val instancePropsValueMap = dataModelInstances
       .find(_.externalId === instance.externalId)
       .map(_.allProperties)
       .getOrElse(Map.empty)
 
+    dataModelInstances.size shouldBe 1
     instancePropsValueMap.get("prop_int_as_string") shouldBe Some(PropertyType.Int.Property(101))
     instancePropsValueMap.get("prop_string_as_int") shouldBe Some(PropertyType.Text.Property("102"))
   }
 
   it should "cast any array instance property if property definition is an array of string" in {
-    val dataModelArray = DataModel(
-      s"cast-array-test-model-1",
+    val dataModelArrayForCastingTest = DataModel(
+      "cast-array-test-model-1",
       Some(
         Map(
           "prop_ints_as_strings" -> dataPropArrayInt,
@@ -756,34 +763,29 @@ class NodesTest
         )
       )
     )
-
     blueFieldClient.dataModels
-      .createItems(Seq(dataModelArray), space)
+      .createItems(Seq(dataModelArrayForCastingTest), space)
       .unsafeRunSync()
-
     val arrayInstance =
       Node(
         "i_2",
         properties = Some(
           Map(
             "prop_ints_as_strings" -> PropertyType.Array.Text.Property(Seq("201", "202")),
-            "prop_strings_as_ints" -> PropertyType.Array.Int.Property(Seq(301, 302)),
+            "prop_strings_as_ints" -> PropertyType.Array.Int.Property(Seq(301, 302))
           )
         )
       )
-
     val arrayDataModelInstances = blueFieldClient.nodes
-      .createItems(space, DataModelIdentifier(Some(space), dataModelArray.externalId), items = Seq(arrayInstance))
+      .createItems(space, DataModelIdentifier(Some(space), dataModelArrayForCastingTest.externalId), items = Seq(arrayInstance))
       .unsafeRunSync()
       .toList
-
-    arrayDataModelInstances.size shouldBe 1
-
     val instanceArrayPropValueMap = arrayDataModelInstances
       .find(_.externalId === arrayInstance.externalId)
       .map(_.allProperties)
       .getOrElse(Map.empty)
 
+    arrayDataModelInstances.size shouldBe 1
     instanceArrayPropValueMap.get("prop_ints_as_strings") shouldBe Some(PropertyType.Array.Int.Property(Seq(201, 202)))
     instanceArrayPropValueMap.get("prop_strings_as_ints") shouldBe Some(PropertyType.Array.Text.Property(Seq("301", "302")))
   }
