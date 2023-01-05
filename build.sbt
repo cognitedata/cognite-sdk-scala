@@ -23,7 +23,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.4.4",
+  version := "2.4.5",
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
@@ -133,7 +133,7 @@ lazy val core = (project in file("."))
   )
 
 val scalaTestDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.13" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.14" % "test"
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
