@@ -59,7 +59,6 @@ object PropertyMap {
           case js if js.isBoolean => js.asBoolean.map(_.toString)
           case js if js.isObject => Some(js.noSpaces)
           case js if js.isArray => js.asArray.map(_.mkString(","))
-          case js if js.isNull => Some("null")
           case js => Some(js.toString())
         }
 
