@@ -47,56 +47,61 @@ object PropertyMap {
       case _ => true
     }
 
-  // scalastyle:off cyclomatic.complexity method.length
   def createDynamicPropertyDecoder(
       props: Map[String, DataModelPropertyDefinition]
   ): Decoder[PropertyMap] =
     new Decoder[PropertyMap] {
-      def toProperString(json: Json): Option[String] =
-        json match {
-          case js if js.isString => js.asString
-          case js if js.isNumber => js.asNumber.map(_.toString)
-          case js if js.isBoolean => js.asBoolean.map(_.toString)
-          case js if js.isObject => Some(js.noSpaces)
-          case js if js.isArray => js.asArray.map(_.mkString(","))
-          case js => Some(js.toString())
-        }
-
       def apply(c: HCursor): Decoder.Result[PropertyMap] = {
         val res: immutable.Iterable[Either[DecodingFailure, (String, DataModelProperty[_])]] =
           props.map { case (prop, dmp) =>
-            for {
-              value <- dmp.`type` match {
-                case PropertyType.Text =>
-                  c.downField(prop)
-                    .as[Json]
-                    .map(toProperString)
-                    .flatMap {
-                      case Some(stringVal) => Right(PropertyType.Text.Property(stringVal))
-                      case None => Left(DecodingFailure(s"Expecting a string", c.history))
-                    }
-
-                case PropertyType.Array.Text =>
-                  c.downField(prop)
-                    .as[Seq[Json]]
-                    .map(_.flatMap(toProperString))
-                    .map(js => PropertyType.Array.Text.Property(js))
-                case PropertyType.Json =>
-                  c.downField(prop).as[Json].map(js => PropertyType.Json.Property(js.toString()))
-                case PropertyType.Array.Json =>
-                  c.downField(prop)
-                    .as[Seq[Json]]
-                    .map(js => PropertyType.Array.Json.Property(js.map(_.toString())))
-                case _ => dmp.`type`.decodeProperty(c.downField(prop))
-              }
-
-            } yield prop -> value
+            dataModelPropertyToPropertyValue(c, prop, dmp).map(p => prop -> p)
           }
+
         filterOutNullableProps(res, props).find(_.isLeft) match {
           case Some(Left(x)) => Left(x)
           case _ => Right(new PropertyMap(res.collect { case Right(value) => value }.toMap))
         }
       }
+    }
+
+  private def dataModelPropertyToPropertyValue(
+      c: HCursor,
+      prop: String,
+      dmp: DataModelPropertyDefinition
+  ) =
+    dmp.`type` match {
+      case PropertyType.Text =>
+        c.downField(prop)
+          .as[Json]
+          .map(asStringValue)
+          .flatMap {
+            case Some(stringVal) => Right(PropertyType.Text.Property(stringVal))
+            case None => Left(DecodingFailure(s"Expecting a string", c.history))
+          }
+
+      case PropertyType.Array.Text =>
+        c.downField(prop)
+          .as[Seq[Json]]
+          .map(_.flatMap(asStringValue))
+          .map(js => PropertyType.Array.Text.Property(js))
+      case PropertyType.Json =>
+        c.downField(prop).as[Json].map(js => PropertyType.Json.Property(js.toString()))
+      case PropertyType.Array.Json =>
+        c.downField(prop)
+          .as[Seq[Json]]
+          .map(js => PropertyType.Array.Json.Property(js.map(_.toString())))
+      case _ => dmp.`type`.decodeProperty(c.downField(prop))
+    }
+
+  // scalastyle:off cyclomatic.complexity
+  private def asStringValue(json: Json): Option[String] =
+    json match {
+      case js if js.isString => js.asString
+      case js if js.isNumber => js.asNumber.map(_.toString)
+      case js if js.isBoolean => js.asBoolean.map(_.toString)
+      case js if js.isObject => Some(js.noSpaces)
+      case js if js.isArray => js.asArray.map(_.mkString(","))
+      case js => Some(js.toString())
     }
   // scalastyle:on cyclomatic.complexity
 }
