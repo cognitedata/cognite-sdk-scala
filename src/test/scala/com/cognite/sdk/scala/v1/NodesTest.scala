@@ -4,19 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.{
-  CdpApiException,
-  DSLAndFilter,
-  DSLContainsAnyFilter,
-  DSLEqualsFilter,
-  DSLExistsFilter,
-  DSLInFilter,
-  DSLNotFilter,
-  DSLOrFilter,
-  DSLPrefixFilter,
-  DSLRangeFilter,
-  RetryWhile
-}
+import com.cognite.sdk.scala.common._
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.time.LocalDate
@@ -44,9 +32,10 @@ class NodesTest
   val dataPropDirectRelation = DataModelPropertyDefinition(PropertyType.DirectRelation)
   val dataPropDate = DataModelPropertyDefinition(PropertyType.Date)
   val dataPropJson = DataModelPropertyDefinition(PropertyType.Json)
+  val dataPropInt = DataModelPropertyDefinition(PropertyType.Int)
 
   val dataModel = DataModel(
-    s"Equipment-instances",
+    s"Equipment-instances-0",
     Some(
       Map(
         "prop_string" -> dataPropString,
@@ -247,6 +236,90 @@ class NodesTest
                                              |  "int_val" : 2
                                              |}""".stripMargin))
     )
+  }
+
+  it should "cast any instance property to string if property definition is a string" in {
+    val dataModel = DataModel(
+      s"cast-test-model-1",
+      Some(
+        Map(
+          "prop_int_as_string" -> dataPropInt,
+          "prop_string_as_int" -> dataPropString,
+        )
+      )
+    )
+
+    blueFieldClient.dataModels
+      .createItems(Seq(dataModel), space)
+      .unsafeRunSync()
+
+    val instance =
+      Node(
+        "i_1",
+        properties = Some(
+          Map(
+            "prop_int_as_string" -> PropertyType.Text.Property("101"),
+            "prop_string_as_int" -> PropertyType.Int.Property(102),
+          )
+        )
+      )
+
+    val dataModelInstances = blueFieldClient.nodes
+      .createItems(space, DataModelIdentifier(Some(space), dataModel.externalId), items = Seq(instance))
+      .unsafeRunSync()
+      .toList
+
+    dataModelInstances.size shouldBe 1
+
+    val instancePropsValueMap = dataModelInstances
+      .find(_.externalId === instance.externalId)
+      .map(_.allProperties)
+      .getOrElse(Map.empty)
+
+    instancePropsValueMap.get("prop_int_as_string") shouldBe Some(PropertyType.Int.Property(101))
+    instancePropsValueMap.get("prop_string_as_int") shouldBe Some(PropertyType.Text.Property("102"))
+  }
+
+  it should "cast any array instance property to string if property definition is an array of string" in {
+    val dataModelArray = DataModel(
+      s"cast-array-test-model-1",
+      Some(
+        Map(
+          "prop_ints_as_strings" -> dataPropArrayInt,
+          "prop_strings_as_ints" -> dataPropArrayString
+        )
+      )
+    )
+
+    blueFieldClient.dataModels
+      .createItems(Seq(dataModelArray), space)
+      .unsafeRunSync()
+
+    val arrayInstance =
+      Node(
+        "i_2",
+        properties = Some(
+          Map(
+            "prop_ints_as_strings" -> PropertyType.Array.Text.Property(Seq("201", "202")),
+            "prop_strings_as_ints" -> PropertyType.Array.Int.Property(Seq(301, 302)),
+          )
+        )
+      )
+
+    val arrayDataModelInstances = blueFieldClient.nodes
+      .createItems(space, DataModelIdentifier(Some(space), dataModelArray.externalId), items = Seq(arrayInstance))
+      .unsafeRunSync()
+      .toList
+
+    arrayDataModelInstances.size shouldBe 1
+
+    val instanceArrayPropValueMap = arrayDataModelInstances
+      .find(_.externalId === arrayInstance.externalId)
+      .map(_.allProperties)
+      .getOrElse(Map.empty)
+
+    instanceArrayPropValueMap.get("prop_ints_as_strings") shouldBe Some(PropertyType.Array.Int.Property(Seq(201, 202)))
+    instanceArrayPropValueMap.get("prop_strings_as_ints") shouldBe Some(PropertyType.Array.Text.Property(Seq("301", "302")))
   }
 
   it should "fail if input data type is not correct" in {
