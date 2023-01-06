@@ -74,7 +74,7 @@ object InstanceDefinition {
 
   private val edgeDefinitionDecoder: Decoder[EdgeDefinition] = deriveDecoder
 
-  def instancePropertyDefinitionBasedInstanceDefinitionDecoder(
+  def instancePropertyDefinitionBasedInstanceDecoder(
       propertyDefinitionsMap: Option[
         Map[String, Map[String, Map[String, InstancePropertyDefinition]]]
       ]

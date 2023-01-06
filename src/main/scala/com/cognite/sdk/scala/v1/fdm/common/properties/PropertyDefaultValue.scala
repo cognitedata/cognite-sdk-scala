@@ -36,7 +36,6 @@ object PropertyDefaultValue {
       case PropertyDefaultValue.Object(value) => value
     }
 
-  // Ideally this should be done based on the container property type
   implicit val propertyDefaultValueDecoder: Decoder[PropertyDefaultValue] = { (c: HCursor) =>
     val result = c.value match {
       case v if v.isString =>

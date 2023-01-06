@@ -6,11 +6,11 @@ package com.cognite.sdk.scala.v1.fdm.containers
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
-import com.cognite.sdk.scala.v1.fdm.Utils.createAllPossibleContainerPropCombinations
+import com.cognite.sdk.scala.v1.fdm.Utils._
 import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{PrimitiveProperty, TextProperty}
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyDefinition, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.instances.{EdgeOrNodeData, InstancePropertyValue}
 import com.cognite.sdk.scala.v1.{CogniteExternalId, CommonDataModelTestHelper}
 import io.circe.{Decoder, Encoder}
@@ -130,6 +130,140 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     Some(containerProperty) shouldBe decodedContainerProperty.toOption
   }
 
+  it should "correctly deserialize default values based on propertyType of ContainerPropertyDefinition" in {
+    val json = s"""
+       |[
+       |  {
+       |    "nullable": true,
+       |    "autoIncrement": false,
+       |    "defaultValue": 1.1,
+       |    "description": "Test float32 property",
+       |    "name": "numeric-property-prop-1",
+       |    "type": {
+       |      "type": "float32",
+       |      "list": false
+       |    }
+       |  },
+       |  {
+       |    "nullable": true,
+       |    "autoIncrement": false,
+       |    "defaultValue": 1.2,
+       |    "description": "Test float64 property",
+       |    "name": "numeric-property-prop-2",
+       |    "type": {
+       |      "type": "float64",
+       |      "list": false
+       |    }
+       |  },
+       |  {
+       |    "nullable": true,
+       |    "autoIncrement": false,
+       |    "defaultValue": 1,
+       |    "description": "Test int32 property",
+       |    "name": "numeric-property-prop-3",
+       |    "type": {
+       |      "type": "int32",
+       |      "list": false
+       |    }
+       |  },
+       |  {
+       |    "nullable": true,
+       |    "autoIncrement": false,
+       |    "defaultValue": 2,
+       |    "description": "Test int64 property",
+       |    "name": "numeric-property-prop-4",
+       |    "type": {
+       |      "type": "int64",
+       |      "list": false
+       |    }
+       |  },
+       |  {
+       |    "nullable": true,
+       |    "autoIncrement": false,
+       |    "description": "Test int64 property",
+       |    "name": "numeric-property-prop-5",
+       |    "type": {
+       |      "type": "int64",
+       |      "list": false
+       |    }
+       |  },
+       |  {
+       |    "nullable": true,
+       |    "autoIncrement": false,
+       |    "description": "Test int32 property",
+       |    "name": "numeric-property-prop-6",
+       |    "type": {
+       |      "type": "int32",
+       |      "list": false
+       |    }
+       |  }
+       |]
+       |""".stripMargin
+
+    val propTypesAndDefaultValues = io.circe.parser.parse(json)
+      .flatMap(Decoder[List[ContainerPropertyDefinition]].decodeJson)
+      .toOption.getOrElse(List.empty)
+      .map(p => (p.`type`, p.defaultValue))
+
+    propTypesAndDefaultValues.length shouldBe 6
+    propTypesAndDefaultValues.contains(
+      (PropertyType.PrimitiveProperty(PrimitivePropType.Float32), Some(PropertyDefaultValue.Float32(1.1F)))
+    ) shouldBe true
+    propTypesAndDefaultValues.contains(
+      (PropertyType.PrimitiveProperty(PrimitivePropType.Float64), Some(PropertyDefaultValue.Float64(1.2)))
+    ) shouldBe true
+    propTypesAndDefaultValues.contains(
+      (PropertyType.PrimitiveProperty(PrimitivePropType.Int32), Some(PropertyDefaultValue.Int32(1)))
+    ) shouldBe true
+    propTypesAndDefaultValues.contains(
+      (PropertyType.PrimitiveProperty(PrimitivePropType.Int32), None)
+    ) shouldBe true
+    propTypesAndDefaultValues.contains(
+      (PropertyType.PrimitiveProperty(PrimitivePropType.Int64), Some(PropertyDefaultValue.Int64(2L)))
+    ) shouldBe true
+    propTypesAndDefaultValues.contains(
+      (PropertyType.PrimitiveProperty(PrimitivePropType.Int64), None)
+    ) shouldBe true
+  }
+
+  it should "validate compatibility with default value type and property type" in {
+    an[java.lang.AssertionError] should be thrownBy {
+      ContainerPropertyDefinition(
+        defaultValue = Some(PropertyDefaultValue.Float32(1.0F)),
+        description = None,
+        name = None,
+        `type` = PrimitiveProperty(`type` = PrimitivePropType.Float64)
+      )
+    }
+    an[java.lang.AssertionError] should be thrownBy {
+      ContainerPropertyDefinition(
+        defaultValue = Some(PropertyDefaultValue.Int32(1)),
+        description = None,
+        name = None,
+        `type` = PrimitiveProperty(`type` = PrimitivePropType.Int64)
+      )
+    }
+    an[java.lang.AssertionError] should be thrownBy {
+      ContainerPropertyDefinition(
+        defaultValue = Some(PropertyDefaultValue.Int64(1L)),
+        description = None,
+        name = None,
+        `type` = PrimitiveProperty(`type` = PrimitivePropType.Numeric)
+      )
+    }
+  }
+
+  ignore should "asses the compatibility of default values and property types" in {
+    val (compatibles, _) = (for {
+      p <- AllContainerPropertyTypes
+      d <- AllPropertyDefaultValues
+    } yield (p, d, PropertyDefinition.defaultValueCompatibleWithPropertyType(p, d)))
+      .partition { case (_, _, compatibility) => compatibility }
+
+    compatibles.count { case (propType, _, _) => propType.isList } shouldBe 0
+    compatibles.length shouldBe 10
+  }
+
   it should "CRUD a container with all possible props" in {
 //    val containerExternalId = s"test_container_${Random.nextInt(1000)}"
     val containerExternalId = s"test_container_896"
@@ -167,17 +301,37 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     val insertedContainer = readAfterCreateContainers.find(_.externalId === containerExternalId)
 
     insertedContainer.isEmpty shouldBe false
+
+
+    println(insertedContainer.get.properties.keys.toList.sorted)
+    println()
+    println(allPossibleProperties.keys.toList.sorted)
+
+    println(insertedContainer.get.properties.values.toList.sortBy(_.name))
+    println()
+    println(allPossibleProperties.values.toList.sortBy(_.name))
+
     insertedContainer.get.properties.keys.toList should contain theSameElementsAs allPossibleProperties.keys.toList
     insertedContainer.get.properties.values.toList should contain theSameElementsAs allPossibleProperties.values.toList
 
     val allPossiblePropertiesToUpdate = allPossibleProperties.map {
       case (k, v) =>
-        k -> v.copy(
-          defaultValue = None,
-          nullable = Some(false),
-          description = v.description.map(d => s"$d Updated"),
-          name = v.name.map(n => s"$n-Updated"),
-        )
+        k -> (v.`type` match {
+          case PropertyType.DirectNodeRelationProperty(_) =>
+            v.copy(
+              defaultValue = None,
+              nullable = Some(true),
+              description = v.description.map(d => s"$d Updated"),
+              name = v.name.map(n => s"$n-Updated"),
+            )
+          case _ =>
+            v.copy(
+              defaultValue = None,
+              nullable = Some(false),
+              description = v.description.map(d => s"$d Updated"),
+              name = v.name.map(n => s"$n-Updated"),
+            )
+        })
     }
     val containerToUpdate = ContainerCreateDefinition(
       space = space,

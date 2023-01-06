@@ -26,7 +26,7 @@ object InstanceFilterResponse {
         .downField("items")
         .as[Seq[InstanceDefinition]](
           Decoder.decodeIterable[InstanceDefinition, Seq](
-            InstanceDefinition.instancePropertyDefinitionBasedInstanceDefinitionDecoder(
+            InstanceDefinition.instancePropertyDefinitionBasedInstanceDecoder(
               typing
             ),
             implicitly

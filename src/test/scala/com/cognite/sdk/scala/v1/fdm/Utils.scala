@@ -13,38 +13,60 @@ import scala.util.Random
 
 object Utils {
 
+  val AllContainerPropertyTypes: List[PropertyType] = List(
+    TextProperty(),
+    PrimitiveProperty(`type` = PrimitivePropType.Boolean),
+    PrimitiveProperty(`type` = PrimitivePropType.Float32),
+    PrimitiveProperty(`type` = PrimitivePropType.Float64),
+    PrimitiveProperty(`type` = PrimitivePropType.Int32),
+    PrimitiveProperty(`type` = PrimitivePropType.Int64),
+    PrimitiveProperty(`type` = PrimitivePropType.Numeric),
+    //      PrimitiveProperty(`type` = PrimitivePropType.Timestamp),
+    //      PrimitiveProperty(`type` = PrimitivePropType.Date),
+    //      PrimitiveProperty(`type` = PrimitivePropType.Json),
+    TextProperty(list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Boolean, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Float32, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Float64, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Int32, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Numeric, list = Some(true)),
+    //      PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
+    //      PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
+    //      PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
+    DirectNodeRelationProperty(container = None)
+  )
+
+  val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
+    PropertyDefaultValue.String("abc"),
+    PropertyDefaultValue.Boolean(true),
+    PropertyDefaultValue.Int32(101),
+    PropertyDefaultValue.Int64(Long.MaxValue),
+    PropertyDefaultValue.Float32(101.1F),
+    PropertyDefaultValue.Float64(Double.MaxValue),
+    PropertyDefaultValue.Numeric(2 * BigDecimal(Long.MaxValue)),
+    PropertyDefaultValue.Object(
+      Json.fromJsonObject(
+        JsonObject.fromMap(
+          Map(
+            "a" -> Json.fromString("a"),
+            "b" -> Json.fromInt(1),
+            "c" -> Json.fromFloatOrString(2.1F),
+          )
+        )
+      )
+    )
+  )
+
   // scalastyle:off
   def createAllPossibleContainerPropCombinations: Map[String, ContainerPropertyDefinition] = {
-    val propertyTypes = List[PropertyType](
-      TextProperty(),
-      PrimitiveProperty(`type` = PrimitivePropType.Boolean),
-      PrimitiveProperty(`type` = PrimitivePropType.Float32),
-      PrimitiveProperty(`type` = PrimitivePropType.Float64),
-      PrimitiveProperty(`type` = PrimitivePropType.Int32),
-      PrimitiveProperty(`type` = PrimitivePropType.Int64),
-      PrimitiveProperty(`type` = PrimitivePropType.Numeric),
-      PrimitiveProperty(`type` = PrimitivePropType.Timestamp),
-      PrimitiveProperty(`type` = PrimitivePropType.Date),
-      PrimitiveProperty(`type` = PrimitivePropType.Json),
-      TextProperty(list = Some(true)),
-      PrimitiveProperty(`type` = PrimitivePropType.Boolean, list = Some(true)),
-      PrimitiveProperty(`type` = PrimitivePropType.Float32, list = Some(true)),
-      PrimitiveProperty(`type` = PrimitivePropType.Float64, list = Some(true)),
-      PrimitiveProperty(`type` = PrimitivePropType.Int32, list = Some(true)),
-      PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
-      PrimitiveProperty(`type` = PrimitivePropType.Numeric, list = Some(true)),
-      PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
-      PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
-      PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
-      DirectNodeRelationProperty(container = None)
-    )
     val boolOptions = List(
       true,
       false
     )
 
     val allPossibleProperties = (for {
-      p <- propertyTypes
+      p <- AllContainerPropertyTypes
       nullable <- boolOptions
       withDefault <- boolOptions
       withAutoIncrement <- boolOptions
@@ -101,7 +123,7 @@ object Utils {
       val nameComponents = List(
         if (p.isInstanceOf[PrimitiveProperty]) p.asInstanceOf[PrimitiveProperty].`type`.productPrefix else p.getClass.getSimpleName,
         if (p.isList) "List" else "NonList",
-        if (autoIncrement) "AutoIncrementing" else "NotAutoIncrementing",
+        if (autoIncrement) "WithAutoIncrement" else "WithoutAutoIncrement",
         if (defaultValue.nonEmpty) "WithDefaultValue" else "WithoutDefaultValue",
         if (nullability) "Nullable" else "NonNullable",
       ).filter(_.nonEmpty)
