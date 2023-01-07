@@ -84,11 +84,6 @@ object PropertyDefinition {
           ) if !p.isList =>
         true
       case (
-            p @ PropertyType.PrimitiveProperty(PrimitivePropType.Numeric, _),
-            _: PropertyDefaultValue.Numeric
-          ) if !p.isList =>
-        true
-      case (
             p @ PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, _),
             _: PropertyDefaultValue.Boolean
           ) if !p.isList =>
@@ -193,8 +188,6 @@ object PropertyDefinition {
           json.asNumber.map(v => PropertyDefaultValue.Float32(v.toFloat))
         case PropertyType.PrimitiveProperty(PrimitivePropType.Float64, None | Some(false)) =>
           json.asNumber.map(v => PropertyDefaultValue.Float64(v.toDouble))
-        case PropertyType.PrimitiveProperty(PrimitivePropType.Numeric, None | Some(false)) =>
-          json.asNumber.flatMap(_.toBigDecimal).map(PropertyDefaultValue.Numeric)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Date, None | Some(false)) =>
           json.asString.map(PropertyDefaultValue.String)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, None | Some(false)) =>

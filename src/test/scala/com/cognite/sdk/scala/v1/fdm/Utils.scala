@@ -20,7 +20,6 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Float64),
     PrimitiveProperty(`type` = PrimitivePropType.Int32),
     PrimitiveProperty(`type` = PrimitivePropType.Int64),
-    PrimitiveProperty(`type` = PrimitivePropType.Numeric),
     //      PrimitiveProperty(`type` = PrimitivePropType.Timestamp),
     //      PrimitiveProperty(`type` = PrimitivePropType.Date),
     //      PrimitiveProperty(`type` = PrimitivePropType.Json),
@@ -30,11 +29,10 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Float64, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Int32, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Numeric, list = Some(true)),
     //      PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
     //      PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
     //      PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
-    DirectNodeRelationProperty(container = None)
+//    DirectNodeRelationProperty(container = None)
   )
 
   val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
@@ -44,7 +42,6 @@ object Utils {
     PropertyDefaultValue.Int64(Long.MaxValue),
     PropertyDefaultValue.Float32(101.1F),
     PropertyDefaultValue.Float64(Double.MaxValue),
-    PropertyDefaultValue.Numeric(2 * BigDecimal(Long.MaxValue)),
     PropertyDefaultValue.Object(
       Json.fromJsonObject(
         JsonObject.fromMap(
@@ -79,7 +76,7 @@ object Utils {
           case PrimitiveProperty(PrimitivePropType.Float64, _) => Some(PropertyDefaultValue.Float64(1.21))
           case PrimitiveProperty(PrimitivePropType.Int32, _) => Some(PropertyDefaultValue.Int32(1))
           case PrimitiveProperty(PrimitivePropType.Int64, _) => Some(PropertyDefaultValue.Int64(12L))
-          case PrimitiveProperty(PrimitivePropType.Numeric, _) => Some(PropertyDefaultValue.Numeric(BigDecimal(123)))
+//          case PrimitiveProperty(PrimitivePropType.Numeric, _) => Some(PropertyDefaultValue.Numeric(BigDecimal(123)))
           case PrimitiveProperty(PrimitivePropType.Timestamp, _) =>
             Some(
               PropertyDefaultValue.String(
@@ -194,8 +191,8 @@ object Utils {
         Some(true)
         ) =>
           InstancePropertyValue.DoubleList((1 to 10).map(_ => Random.nextDouble()).toList)
-        case PropertyType.PrimitiveProperty(PrimitivePropType.Numeric, Some(true)) =>
-          InstancePropertyValue.DoubleList((1 to 10).map(_ => Random.nextDouble()).toList)
+//        case PropertyType.PrimitiveProperty(PrimitivePropType.Numeric, Some(true)) =>
+//          InstancePropertyValue.DoubleList((1 to 10).map(_ => Random.nextDouble()).toList)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Date, Some(true)) =>
           InstancePropertyValue.DateList((1 to 10).toList.map(i => LocalDate.now().minusDays(i.toLong)))
         case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, Some(true)) =>
@@ -245,8 +242,8 @@ object Utils {
         None | Some(false)
         ) =>
           InstancePropertyValue.Double(Random.nextDouble())
-        case PropertyType.PrimitiveProperty(PrimitivePropType.Numeric, None | Some(false)) =>
-          InstancePropertyValue.Double(Random.nextDouble())
+//        case PropertyType.PrimitiveProperty(PrimitivePropType.Numeric, None | Some(false)) =>
+//          InstancePropertyValue.Double(Random.nextDouble())
         case PropertyType.PrimitiveProperty(PrimitivePropType.Date, None | Some(false)) =>
           InstancePropertyValue.Date(LocalDate.now().minusDays(Random.nextInt(30).toLong))
         case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, None | Some(false)) =>

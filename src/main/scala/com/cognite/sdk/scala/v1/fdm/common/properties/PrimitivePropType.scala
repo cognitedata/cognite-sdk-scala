@@ -21,7 +21,7 @@ object PrimitivePropType {
 
   case object Int64 extends PrimitivePropType
 
-  case object Numeric extends PrimitivePropType
+//  case object Numeric extends PrimitivePropType
 
   case object Timestamp extends PrimitivePropType
 
@@ -35,7 +35,7 @@ object PrimitivePropType {
     case "float64" => Right(Float64)
     case "int32" => Right(Int32)
     case "int64" => Right(Int64)
-    case "numeric" => Right(Numeric)
+//    case "numeric" => Right(Numeric)
     case "timestamp" => Right(Timestamp)
     case "date" => Right(Date)
     case "json" => Right(Json)

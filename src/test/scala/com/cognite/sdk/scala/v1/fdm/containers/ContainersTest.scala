@@ -63,7 +63,6 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
       PrimitivePropType.Boolean,
       PrimitivePropType.Float32,
       PrimitivePropType.Float64,
-      PrimitivePropType.Numeric,
       PrimitivePropType.Timestamp,
       PrimitivePropType.Date
     )
@@ -84,7 +83,6 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
       PropertyDefaultValue.Int64(Long.MaxValue),
       PropertyDefaultValue.Float32(101.1F),
       PropertyDefaultValue.Float64(Double.MaxValue),
-      PropertyDefaultValue.Numeric(2 * BigDecimal(Long.MaxValue)),
       PropertyDefaultValue.Object(Encoder[CogniteExternalId].apply(CogniteExternalId("test-ext-id")))
     )
 
@@ -243,14 +241,6 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
         `type` = PrimitiveProperty(`type` = PrimitivePropType.Int64)
       )
     }
-    an[java.lang.AssertionError] should be thrownBy {
-      ContainerPropertyDefinition(
-        defaultValue = Some(PropertyDefaultValue.Int64(1L)),
-        description = None,
-        name = None,
-        `type` = PrimitiveProperty(`type` = PrimitivePropType.Numeric)
-      )
-    }
   }
 
   ignore should "asses the compatibility of default values and property types" in {
@@ -260,8 +250,9 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     } yield (p, d, PropertyDefinition.defaultValueCompatibleWithPropertyType(p, d)))
       .partition { case (_, _, compatibility) => compatibility }
 
+    // default values for list types are not allowed
     compatibles.count { case (propType, _, _) => propType.isList } shouldBe 0
-    compatibles.length shouldBe 10
+    compatibles.length shouldBe 9
   }
 
   it should "CRUD a container with all possible props" in {
