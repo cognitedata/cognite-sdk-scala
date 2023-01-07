@@ -128,7 +128,6 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     val nodeContainer1 = containersCreated(2)
     val nodeContainer2 = containersCreated(3)
 
-
     val nodeContainer1Instances = InstanceCreate(
       items = Seq(
         NodeWrite(

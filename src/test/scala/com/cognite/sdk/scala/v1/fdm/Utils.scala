@@ -55,67 +55,32 @@ object Utils {
     )
   )
 
-  // scalastyle:off
+  // scalastyle:off cyclomatic.complexity
   def createAllPossibleContainerPropCombinations: Map[String, ContainerPropertyDefinition] = {
     val boolOptions = List(
       true,
       false
     )
 
-    val allPossibleProperties = (for {
+    (for {
       p <- AllContainerPropertyTypes
       nullable <- boolOptions
       withDefault <- boolOptions
       withAutoIncrement <- boolOptions
     } yield {
-      val defaultValue: Option[PropertyDefaultValue] = if (withDefault && !p.isList) {
-        p match {
-          case TextProperty(_, _) => Some(PropertyDefaultValue.String("defaultTextValue"))
-          case PrimitiveProperty(PrimitivePropType.Boolean, _) => Some(PropertyDefaultValue.Boolean(false))
-          case PrimitiveProperty(PrimitivePropType.Float32, _) => Some(PropertyDefaultValue.Float32(1.2F))
-          case PrimitiveProperty(PrimitivePropType.Float64, _) => Some(PropertyDefaultValue.Float64(1.21))
-          case PrimitiveProperty(PrimitivePropType.Int32, _) => Some(PropertyDefaultValue.Int32(1))
-          case PrimitiveProperty(PrimitivePropType.Int64, _) => Some(PropertyDefaultValue.Int64(12L))
-//          case PrimitiveProperty(PrimitivePropType.Numeric, _) => Some(PropertyDefaultValue.Numeric(BigDecimal(123)))
-          case PrimitiveProperty(PrimitivePropType.Timestamp, _) =>
-            Some(
-              PropertyDefaultValue.String(
-                LocalDateTime.now().atZone(ZoneId.of("UTC")).format(InstancePropertyValue.Timestamp.formatter)
-              )
-            )
-          case PrimitiveProperty(PrimitivePropType.Date, _) =>
-            Some(PropertyDefaultValue.String(LocalDate.now().format(InstancePropertyValue.Date.formatter)))
-          case PrimitiveProperty(PrimitivePropType.Json, _) =>
-            Some(
-              PropertyDefaultValue.Object(
-                Json.fromJsonObject(
-                  JsonObject.fromMap(
-                    Map(
-                      "a" -> Json.fromString("a"),
-                      "b" -> Json.fromInt(1)
-                    )
-                  )
-                )
-              )
-            )
-          case DirectNodeRelationProperty(_) => None
-        }
-      } else {
-        None
-      }
+      val defaultValue = propertyDefaultValueForPropertyType(p, withDefault)
 
       val autoIncrement = if (withAutoIncrement) {
         defaultValue match {
-          case Some(_: PropertyDefaultValue.Int32) => true
-          case Some(_: PropertyDefaultValue.Int64) => true
+          case Some(PropertyDefaultValue.Int32(_) | PropertyDefaultValue.Int64(_)) => true
+          case Some(PropertyDefaultValue.Float32(_) | PropertyDefaultValue.Float64(_)) => true
           case _ => false
         }
       } else {
         false
       }
 
-      val nullability = if (p.isInstanceOf[DirectNodeRelationProperty]) true
-      else nullable
+      val nullability = p.isInstanceOf[DirectNodeRelationProperty] || nullable
 
       val nameComponents = List(
         if (p.isInstanceOf[PrimitiveProperty]) p.asInstanceOf[PrimitiveProperty].`type`.productPrefix else p.getClass.getSimpleName,
@@ -134,8 +99,47 @@ object Utils {
         `type` = p
       )
     }).distinct.toMap
-    allPossibleProperties
   }
+  // scalastyle:on cyclomatic.complexity
+
+  // scalastyle:off cyclomatic.complexity
+  private def propertyDefaultValueForPropertyType(p: PropertyType, withDefault: Boolean): Option[PropertyDefaultValue] = {
+    if (withDefault && !p.isList) {
+      p match {
+        case TextProperty(_, _) => Some(PropertyDefaultValue.String("defaultTextValue"))
+        case PrimitiveProperty(PrimitivePropType.Boolean, _) => Some(PropertyDefaultValue.Boolean(false))
+        case PrimitiveProperty(PrimitivePropType.Float32, _) => Some(PropertyDefaultValue.Float32(1.2F))
+        case PrimitiveProperty(PrimitivePropType.Float64, _) => Some(PropertyDefaultValue.Float64(1.21))
+        case PrimitiveProperty(PrimitivePropType.Int32, _) => Some(PropertyDefaultValue.Int32(1))
+        case PrimitiveProperty(PrimitivePropType.Int64, _) => Some(PropertyDefaultValue.Int64(12L))
+        case PrimitiveProperty(PrimitivePropType.Timestamp, _) =>
+          Some(
+            PropertyDefaultValue.String(
+              LocalDateTime.now().atZone(ZoneId.of("UTC")).format(InstancePropertyValue.Timestamp.formatter)
+            )
+          )
+        case PrimitiveProperty(PrimitivePropType.Date, _) =>
+          Some(PropertyDefaultValue.String(LocalDate.now().format(InstancePropertyValue.Date.formatter)))
+        case PrimitiveProperty(PrimitivePropType.Json, _) =>
+          Some(
+            PropertyDefaultValue.Object(
+              Json.fromJsonObject(
+                JsonObject.fromMap(
+                  Map(
+                    "a" -> Json.fromString("a"),
+                    "b" -> Json.fromInt(1)
+                  )
+                )
+              )
+            )
+          )
+        case DirectNodeRelationProperty(_) => None
+      }
+    } else {
+      None
+    }
+  }
+  // scalastyle:on cyclomatic.complexity
 
   def createTestContainer(space: String, containerExternalId: String, usage: Usage): ContainerCreateDefinition = {
     val allPossibleProperties: Map[String, ContainerPropertyDefinition] = createAllPossibleContainerPropCombinations
@@ -174,7 +178,6 @@ object Utils {
     }
   }
 
-
   private def listContainerPropToInstanceProperty(propName: String, containerPropType: PropertyType): InstancePropertyValue = {
       containerPropType match {
         case PropertyType.TextProperty(Some(true), _) =>
@@ -191,8 +194,6 @@ object Utils {
         Some(true)
         ) =>
           InstancePropertyValue.DoubleList((1 to 10).map(_ => Random.nextDouble()).toList)
-//        case PropertyType.PrimitiveProperty(PrimitivePropType.Numeric, Some(true)) =>
-//          InstancePropertyValue.DoubleList((1 to 10).map(_ => Random.nextDouble()).toList)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Date, Some(true)) =>
           InstancePropertyValue.DateList((1 to 10).toList.map(i => LocalDate.now().minusDays(i.toLong)))
         case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, Some(true)) =>
@@ -242,8 +243,6 @@ object Utils {
         None | Some(false)
         ) =>
           InstancePropertyValue.Double(Random.nextDouble())
-//        case PropertyType.PrimitiveProperty(PrimitivePropType.Numeric, None | Some(false)) =>
-//          InstancePropertyValue.Double(Random.nextDouble())
         case PropertyType.PrimitiveProperty(PrimitivePropType.Date, None | Some(false)) =>
           InstancePropertyValue.Date(LocalDate.now().minusDays(Random.nextInt(30).toLong))
         case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, None | Some(false)) =>

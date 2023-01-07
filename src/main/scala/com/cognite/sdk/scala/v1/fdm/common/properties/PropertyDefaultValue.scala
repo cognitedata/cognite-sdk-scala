@@ -18,8 +18,6 @@ object PropertyDefaultValue {
 
   final case class Float64(value: scala.Double) extends PropertyDefaultValue
 
-//  final case class Numeric(value: BigDecimal) extends PropertyDefaultValue
-
   final case class Boolean(value: scala.Boolean) extends PropertyDefaultValue
 
   final case class Object(value: Json) extends PropertyDefaultValue
@@ -31,7 +29,6 @@ object PropertyDefaultValue {
       case PropertyDefaultValue.Int64(value) => Json.fromLong(value)
       case PropertyDefaultValue.Float32(value) => Json.fromFloatOrString(value)
       case PropertyDefaultValue.Float64(value) => Json.fromDoubleOrString(value)
-//      case PropertyDefaultValue.Numeric(value) => Json.fromBigDecimal(BigDecimal(value.toString))
       case PropertyDefaultValue.Boolean(value) => Json.fromBoolean(value)
       case PropertyDefaultValue.Object(value) => value
     }

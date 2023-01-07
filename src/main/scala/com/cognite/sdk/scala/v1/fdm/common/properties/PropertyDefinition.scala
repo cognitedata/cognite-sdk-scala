@@ -18,7 +18,7 @@ sealed trait PropertyDefinition {
 
   assert(
     checkDefaultValueAndPropertyTypeCompatibility,
-    s"defaultValue: ${defaultValue.map(_.getClass.getSimpleName)}, is not compatible with the property type: ${`type`.getClass.getSimpleName}"
+    s"defaultValue: ${defaultValue.map(_.productPrefix)} is not compatible with the property type: ${`type`.getClass.getSimpleName}"
   )
 
   private def checkDefaultValueAndPropertyTypeCompatibility: Boolean = {
@@ -136,7 +136,7 @@ object PropertyDefinition {
           p.copy(defaultValue =
             propertyTypeBasedPropertyDefaultValue(
               p.`type`,
-              c.downField("defaultValue").as[Option[Json]].toOption.flatten
+              c.downField("defaultValue").as[Option[Json]].getOrElse(None)
             )
           )
         }
@@ -163,7 +163,7 @@ object PropertyDefinition {
           p.copy(defaultValue =
             propertyTypeBasedPropertyDefaultValue(
               p.`type`,
-              c.downField("defaultValue").as[Option[Json]].toOption.flatten
+              c.downField("defaultValue").as[Option[Json]].getOrElse(None)
             )
           )
         }
