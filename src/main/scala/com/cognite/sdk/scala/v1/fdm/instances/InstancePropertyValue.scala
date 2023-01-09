@@ -14,9 +14,13 @@ sealed abstract class InstancePropertyValue extends Product with Serializable
 object InstancePropertyValue {
   final case class String(value: java.lang.String) extends InstancePropertyValue
 
-  final case class Integer(value: scala.Long) extends InstancePropertyValue
+  final case class Int32(value: scala.Int) extends InstancePropertyValue
 
-  final case class Double(value: scala.Double) extends InstancePropertyValue
+  final case class Int64(value: scala.Long) extends InstancePropertyValue
+
+  final case class Float32(value: scala.Float) extends InstancePropertyValue
+
+  final case class Float64(value: scala.Double) extends InstancePropertyValue
 
   final case class Boolean(value: scala.Boolean) extends InstancePropertyValue
 
@@ -38,9 +42,13 @@ object InstancePropertyValue {
 
   final case class BooleanList(value: Seq[scala.Boolean]) extends InstancePropertyValue
 
-  final case class IntegerList(value: Seq[scala.Long]) extends InstancePropertyValue
+  final case class Int32List(value: Seq[scala.Int]) extends InstancePropertyValue
 
-  final case class DoubleList(value: Seq[scala.Double]) extends InstancePropertyValue
+  final case class Int64List(value: Seq[scala.Long]) extends InstancePropertyValue
+
+  final case class Float32List(value: Seq[scala.Float]) extends InstancePropertyValue
+
+  final case class Float64List(value: Seq[scala.Double]) extends InstancePropertyValue
 
   final case class DateList(value: Seq[LocalDate]) extends InstancePropertyValue
 
@@ -64,10 +72,23 @@ object InstancePropertyValue {
         }
       case v if v.isNumber =>
         val numericInstantPropType = v.asNumber.flatMap { jn =>
+          val bd = BigDecimal(jn.toString)
           if (jn.toString.contains(".")) { // 1.0 should be a Double not Long
-            Some(InstancePropertyValue.Double(jn.toDouble))
+            if (bd.isDecimalFloat) {
+              Some(InstancePropertyValue.Float32(bd.floatValue))
+            } else {
+              Some(InstancePropertyValue.Float64(bd.doubleValue))
+            }
           } else {
-            jn.toLong.map(InstancePropertyValue.Integer.apply)
+            if (bd.isValidInt) {
+              Some(InstancePropertyValue.Int32(bd.intValue))
+            } else if (bd.isValidLong) {
+              Some(InstancePropertyValue.Int64(bd.longValue))
+            } else if (bd.isDecimalFloat) {
+              Some(InstancePropertyValue.Float32(bd.floatValue))
+            } else {
+              Some(InstancePropertyValue.Float64(bd.doubleValue))
+            }
           }
         }
         numericInstantPropType.map(Right(_))
@@ -119,12 +140,27 @@ object InstancePropertyValue {
                 Right[DecodingFailure, InstancePropertyValue](
                   InstancePropertyValue.BooleanList(arr.flatMap(_.asBoolean))
                 )
-              case element if element.isNumber => // 1.0 should be a Double not Long
-                val matchingPropType = element.asNumber.map(_.toString.contains(".")) match {
-                  case Some(true) =>
-                    InstancePropertyValue.DoubleList(arr.flatMap(_.asNumber).map(_.toDouble))
+              case element if element.isNumber =>
+                val matchingPropType = element.asNumber
+                  .flatMap(_.toBigDecimal) match {
+                  case Some(bd) if bd.isValidInt || bd.isValidLong =>
+                    Decoder[Seq[Int]]
+                      .decodeJson(v)
+                      .toOption
+                      .map(InstancePropertyValue.Int32List.apply)
+                      .orElse(
+                        Decoder[Seq[Long]]
+                          .decodeJson(v)
+                          .toOption
+                          .map(InstancePropertyValue.Int64List.apply)
+                      )
+                      .getOrElse(
+                        InstancePropertyValue.Float64List(
+                          arr.flatMap(_.asNumber).map(_.toDouble)
+                        )
+                      )
                   case _ =>
-                    InstancePropertyValue.IntegerList(arr.flatMap(_.asNumber).flatMap(_.toLong))
+                    InstancePropertyValue.Float64List(arr.flatMap(_.asNumber).map(_.toDouble))
                 }
                 Right[DecodingFailure, InstancePropertyValue](matchingPropType)
               case element if element.isObject =>
@@ -157,8 +193,10 @@ object InstancePropertyValue {
   implicit val instancePropertyTypeEncoder: Encoder[InstancePropertyValue] =
     Encoder.instance[InstancePropertyValue] {
       case String(value) => Json.fromString(value)
-      case Integer(value) => Json.fromLong(value)
-      case Double(value) => Json.fromDoubleOrString(value)
+      case Int32(value) => Json.fromInt(value)
+      case Int64(value) => Json.fromLong(value)
+      case Float32(value) => Json.fromFloatOrString(value)
+      case Float64(value) => Json.fromDoubleOrString(value)
       case Boolean(value) => Json.fromBoolean(value)
       case Date(value) => Json.fromString(value.format(InstancePropertyValue.Date.formatter))
       case Timestamp(value) =>
@@ -166,8 +204,10 @@ object InstancePropertyValue {
       case Object(value) => value
       case StringList(values) => Json.arr(values = values.map(Json.fromString): _*)
       case BooleanList(values) => Json.arr(values = values.map(Json.fromBoolean): _*)
-      case IntegerList(values) => Json.arr(values = values.map(Json.fromLong): _*)
-      case DoubleList(values) => Json.arr(values = values.map(Json.fromDoubleOrString): _*)
+      case Int32List(values) => Json.arr(values = values.map(Json.fromInt): _*)
+      case Int64List(values) => Json.arr(values = values.map(Json.fromLong): _*)
+      case Float32List(values) => Json.arr(values = values.map(Json.fromFloatOrString): _*)
+      case Float64List(values) => Json.arr(values = values.map(Json.fromDoubleOrString): _*)
       case DateList(values) =>
         Json.arr(values =
           values.map(d => Json.fromString(d.format(InstancePropertyValue.Date.formatter))): _*

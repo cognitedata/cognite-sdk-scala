@@ -28,9 +28,9 @@ final case class EdgeOrNodeData(
 
 final case class InstanceCreate(
     items: Seq[NodeOrEdgeCreate],
-    autoCreateStartNodes: Option[Boolean],
-    autoCreateEndNodes: Option[Boolean],
-    replace: Option[Boolean]
+    autoCreateStartNodes: Option[Boolean] = Some(false),
+    autoCreateEndNodes: Option[Boolean] = Some(false),
+    replace: Option[Boolean] = Some(false)
 )
 
 final case class InstanceRetrieve(

@@ -224,14 +224,14 @@ object InstanceDefinition {
           ) =>
         Decoder[Seq[Long]]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyValue.IntegerList.apply)
+          .map(InstancePropertyValue.Int64List.apply)
       case PropertyType.PrimitiveProperty(
             PrimitivePropType.Float32 | PrimitivePropType.Float64,
             Some(true)
           ) =>
         Decoder[Seq[Double]]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyValue.DoubleList.apply)
+          .map(InstancePropertyValue.Float64List.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Date, Some(true)) =>
         Decoder[Seq[LocalDate]]
           .decodeJson(instantPropTypeJson)
@@ -272,14 +272,14 @@ object InstanceDefinition {
           ) =>
         Decoder[Long]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyValue.Integer.apply)
+          .map(InstancePropertyValue.Int64.apply)
       case PropertyType.PrimitiveProperty(
             PrimitivePropType.Float32 | PrimitivePropType.Float64,
             None | Some(false)
           ) =>
         Decoder[Double]
           .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyValue.Double.apply)
+          .map(InstancePropertyValue.Float64.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Date, None | Some(false)) =>
         Decoder[LocalDate]
           .decodeJson(instantPropTypeJson)

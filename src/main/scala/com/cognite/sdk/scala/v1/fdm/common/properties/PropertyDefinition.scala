@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.common.properties
 
-import cats.implicits.toFunctorOps
+import cats.implicits.{catsSyntaxEq, toFunctorOps}
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import io.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -18,7 +18,7 @@ sealed trait PropertyDefinition {
 
   assert(
     checkDefaultValueAndPropertyTypeCompatibility,
-    s"defaultValue: ${defaultValue.map(_.productPrefix)} is not compatible with the property type: ${`type`.getClass.getSimpleName}"
+    s"defaultValue: ${defaultValue.map(_.productPrefix).toString} is not compatible with the property type: ${`type`.getClass.getSimpleName}"
   )
 
   private def checkDefaultValueAndPropertyTypeCompatibility: Boolean = {
@@ -127,7 +127,7 @@ object PropertyDefinition {
           Json.fromJsonObject(
             c.value.asObject
               .map(_.filter { case (k, _) =>
-                k != "defaultValue"
+                k =!= "defaultValue"
               })
               .getOrElse(JsonObject.empty)
           )
@@ -154,7 +154,7 @@ object PropertyDefinition {
           Json.fromJsonObject(
             c.value.asObject
               .map(_.filter { case (k, _) =>
-                k != "defaultValue"
+                k =!= "defaultValue"
               })
               .getOrElse(JsonObject.empty)
           )
@@ -177,25 +177,25 @@ object PropertyDefinition {
     val defaultValue = defaultValueJson.flatMap { json =>
       propType match {
         case PropertyType.TextProperty(None | Some(false), _) =>
-          json.asString.map(PropertyDefaultValue.String)
+          json.asString.map(PropertyDefaultValue.String.apply)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, _) =>
-          json.asBoolean.map(PropertyDefaultValue.Boolean)
+          json.asBoolean.map(PropertyDefaultValue.Boolean.apply)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Int32, None | Some(false)) =>
-          json.asNumber.flatMap(_.toInt).map(PropertyDefaultValue.Int32)
+          json.asNumber.flatMap(_.toInt).map(PropertyDefaultValue.Int32.apply)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Int64, None | Some(false)) =>
-          json.asNumber.flatMap(_.toLong).map(PropertyDefaultValue.Int64)
+          json.asNumber.flatMap(_.toLong).map(PropertyDefaultValue.Int64.apply)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Float32, None | Some(false)) =>
           json.asNumber.map(v => PropertyDefaultValue.Float32(v.toFloat))
         case PropertyType.PrimitiveProperty(PrimitivePropType.Float64, None | Some(false)) =>
           json.asNumber.map(v => PropertyDefaultValue.Float64(v.toDouble))
         case PropertyType.PrimitiveProperty(PrimitivePropType.Date, None | Some(false)) =>
-          json.asString.map(PropertyDefaultValue.String)
+          json.asString.map(PropertyDefaultValue.String.apply)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, None | Some(false)) =>
-          json.asString.map(PropertyDefaultValue.String)
+          json.asString.map(PropertyDefaultValue.String.apply)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Json, None | Some(false)) =>
           Some(PropertyDefaultValue.Object(json))
         case PropertyType.DirectNodeRelationProperty(_) =>
-          json.asString.map(PropertyDefaultValue.String)
+          json.asString.map(PropertyDefaultValue.String.apply)
         case _ => None
       }
     }

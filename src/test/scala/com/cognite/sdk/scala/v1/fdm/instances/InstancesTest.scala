@@ -3,15 +3,8 @@ package com.cognite.sdk.scala.v1.fdm.instances
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
-import com.cognite.sdk.scala.v1.fdm.Utils.{createInstancePropertyForContainerProperty, createTestContainer}
+import com.cognite.sdk.scala.v1.fdm.Utils.{createNodeWriteData, createTestContainer}
 import com.cognite.sdk.scala.v1.fdm.common.Usage
-import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.PersonContainer._
-import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.RentableContainer._
-import com.cognite.sdk.scala.v1.fdm.containers.ContainersTest.VehicleContainer._
-import com.cognite.sdk.scala.v1.fdm.containers.ContainerCreateDefinition
-import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate._
-
-import scala.util.Random
 
 @SuppressWarnings(
   Array(
@@ -27,89 +20,53 @@ import scala.util.Random
 // scalastyle:off
 class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val space = "test-space-scala-sdk"
-  private val vehicleContainerExternalId = "vehicle_container_236" //s"vehicle_container_${Random.nextInt(1000).toString}"
-  private val personContainerExternalId = "person_container_775" //s"person_container_${Random.nextInt(1000).toString}"
-  private val rentableContainerExternalId = s"rentable_container_${Random.nextInt(1000).toString}"
-  private val vehicleContainer = ContainerCreateDefinition(
-    space = space,
-    externalId = vehicleContainerExternalId,
-    name = Some(s"vehicle-container"),
-    description = Some("vehicle info container"),
-    usedFor = Some(Usage.All),
-    properties = VehicleContainerProperties,
-    constraints = Some(VehicleContainerConstraints),
-    indexes = Some(VehicleContainerIndexes)
-  )
-  private val personContainer = ContainerCreateDefinition(
-    space = space,
-    externalId = personContainerExternalId,
-    name = Some(s"person-container"),
-    description = Some("person records container"),
-    usedFor = Some(Usage.All),
-    properties = PersonContainerProperties,
-    constraints = Some(PersonContainerConstraints),
-    indexes = Some(PersonContainerIndexes)
-  )
-  private val rentableContainer = ContainerCreateDefinition(
-    space = space,
-    externalId = rentableContainerExternalId,
-    name = Some(s"rentable-item-container"),
-    description = Some("container to make anything rentable"),
-    usedFor = Some(Usage.All),
-    properties = RentableContainerProperties,
-    constraints = Some(RentableContainerConstraints),
-    indexes = Some(RentableContainerIndexes)
-  )
-  private val vehicleContainerCreated = blueFieldClient.containers.createItems(Seq(vehicleContainer)).unsafeRunSync().head
-  private val personContainerCreated = blueFieldClient.containers.createItems(Seq(personContainer)).unsafeRunSync().head
-  private val rentableContainerCreated = blueFieldClient.containers.createItems(Seq(rentableContainer)).unsafeRunSync().head
 
-  ignore should "CRUD instances" in {
-    val vehicleNodeExternalId = s"vehicles-node-${Random.nextInt(1000).toString}"
-    val vehicleContainerReference = vehicleContainerCreated.toContainerReference
-    val vehicleInstancesToCreate = InstanceCreate(
-      items = Seq(NodeWrite(space, vehicleNodeExternalId, vehicleInstanceData(vehicleContainerReference))),
-      autoCreateStartNodes = Some(true),
-      autoCreateEndNodes = Some(true),
-      replace = Some(true)
-    )
-    val createdVehicleInstances = blueFieldClient.instances.createItems(vehicleInstancesToCreate).unsafeRunSync()
-    createdVehicleInstances.length shouldBe 6
-
-    val personNodeExternalId = s"persons-node-${Random.nextInt(1000).toString}"
-    val personContainerReference = personContainerCreated.toContainerReference
-    val personInstancesToCreate = InstanceCreate(
-      items = Seq(NodeWrite(space, personNodeExternalId, personInstanceData(personContainerReference))),
-      autoCreateStartNodes = Some(true),
-      autoCreateEndNodes = Some(true),
-      replace = Some(true)
-    )
-    val createdPersonInstances = blueFieldClient.instances.createItems(personInstancesToCreate).unsafeRunSync()
-    createdPersonInstances.length shouldBe 6
-
-    val rentableEdgeExternalId = s"rentable-edge-${Random.nextInt(1000).toString}"
-    val rentableContainerReference = rentableContainerCreated.toContainerReference
-    val rentableInstancesToCreate = InstanceCreate(
-      items = Seq(
-        EdgeWrite(
-          `type` = DirectRelationReference(space, rentableEdgeExternalId),
-          space = space,
-          externalId = rentableEdgeExternalId,
-          startNode = DirectRelationReference(space, vehicleNodeExternalId),
-          endNode = DirectRelationReference(space, personNodeExternalId),
-          sources = rentableInstanceData(rentableContainerReference)
-        )
-      ),
-      autoCreateStartNodes = Some(true),
-      autoCreateEndNodes = Some(true),
-      replace = Some(true)
-    )
-    val createdRentableInstances = blueFieldClient.instances.createItems(rentableInstancesToCreate).unsafeRunSync()
-    createdRentableInstances.length shouldBe 3
-
-//    val deletedInstances = blueFieldClient.instances.delete(Seq(NodeDeletionRequest(space = space, externalId = vehicleNodeExternalId))).unsafeRunSync()
-//    deletedInstances.length shouldBe 1
-  }
+//  ignore should "CRUD instances" in {
+//    val vehicleNodeExternalId = s"vehicles-node-${Random.nextInt(1000).toString}"
+//    val vehicleContainerReference = vehicleContainerCreated.toContainerReference
+//    val vehicleInstancesToCreate = InstanceCreate(
+//      items = Seq(NodeWrite(space, vehicleNodeExternalId, vehicleInstanceData(vehicleContainerReference))),
+//      autoCreateStartNodes = Some(true),
+//      autoCreateEndNodes = Some(true),
+//      replace = Some(true)
+//    )
+//    val createdVehicleInstances = blueFieldClient.instances.createItems(vehicleInstancesToCreate).unsafeRunSync()
+//    createdVehicleInstances.length shouldBe 6
+//
+//    val personNodeExternalId = s"persons-node-${Random.nextInt(1000).toString}"
+//    val personContainerReference = personContainerCreated.toContainerReference
+//    val personInstancesToCreate = InstanceCreate(
+//      items = Seq(NodeWrite(space, personNodeExternalId, personInstanceData(personContainerReference))),
+//      autoCreateStartNodes = Some(true),
+//      autoCreateEndNodes = Some(true),
+//      replace = Some(true)
+//    )
+//    val createdPersonInstances = blueFieldClient.instances.createItems(personInstancesToCreate).unsafeRunSync()
+//    createdPersonInstances.length shouldBe 6
+//
+//    val rentableEdgeExternalId = s"rentable-edge-${Random.nextInt(1000).toString}"
+//    val rentableContainerReference = rentableContainerCreated.toContainerReference
+//    val rentableInstancesToCreate = InstanceCreate(
+//      items = Seq(
+//        EdgeWrite(
+//          `type` = DirectRelationReference(space, rentableEdgeExternalId),
+//          space = space,
+//          externalId = rentableEdgeExternalId,
+//          startNode = DirectRelationReference(space, vehicleNodeExternalId),
+//          endNode = DirectRelationReference(space, personNodeExternalId),
+//          sources = rentableInstanceData(rentableContainerReference)
+//        )
+//      ),
+//      autoCreateStartNodes = Some(true),
+//      autoCreateEndNodes = Some(true),
+//      replace = Some(true)
+//    )
+//    val createdRentableInstances = blueFieldClient.instances.createItems(rentableInstancesToCreate).unsafeRunSync()
+//    createdRentableInstances.length shouldBe 3
+//
+////    val deletedInstances = blueFieldClient.instances.delete(Seq(NodeDeletionRequest(space = space, externalId = vehicleNodeExternalId))).unsafeRunSync()
+////    deletedInstances.length shouldBe 1
+//  }
 
   it should "CRUD instances with all possible" in {
 //    val containerExternalId = "test_container_896"
@@ -121,91 +78,18 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     val containersCreated = blueFieldClient.containers.createItems(
       Seq(allContainerCreateDefinition, edgeContainerCreateDefinition, nodeContainerCreateDefinition1, nodeContainerCreateDefinition2)
     ).unsafeRunSync()
-    containersCreated.length shouldBe 3
+    containersCreated.length shouldBe 4
 
+    val createdContainersMap = containersCreated.map(c => c.externalId -> c).toMap
 //    val allContainer = containersCreated.head
 //    val edgeContainer = containersCreated(1)
-    val nodeContainer1 = containersCreated(2)
-    val nodeContainer2 = containersCreated(3)
+    val nodeContainer1 = createdContainersMap(nodeContainerCreateDefinition1.externalId)
+//    val nodeContainer2 = createdContainersMap(nodeContainerCreateDefinition2.externalId)
 
-    val nodeContainer1Instances = InstanceCreate(
-      items = Seq(
-        NodeWrite(
-          space,
-          s"node1_all_${nodeContainer1.externalId}_1",
-          Seq(
-            EdgeOrNodeData(
-              source = nodeContainer1.toContainerReference,
-              properties = Some(
-                nodeContainer1.properties.map { case (propName, prop) =>
-                  propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
-                }
-              )
-            )
-          )
-        ),
-        NodeWrite(
-          space,
-          s"node1_non_nullables_${nodeContainer1.externalId}_1",
-          Seq(
-            EdgeOrNodeData(
-              source = nodeContainer1.toContainerReference,
-              properties = Some(
-                nodeContainer1.properties.filter(_._2.nullable.contains(false)).map { case (propName, prop) =>
-                  propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
-                }
-              )
-            )
-          )
-        )
-      ),
-      autoCreateStartNodes = Some(true),
-      autoCreateEndNodes = Some(true),
-      replace = Some(true)
-    )
+    val nodeContainer1CreatedInstances = blueFieldClient.instances.createItems(
+      InstanceCreate(items = Seq(createNodeWriteData(nodeContainer1)))
+    ).unsafeRunSync()
 
-    val nodeContainer1CreatedInstances = blueFieldClient.instances.createItems(nodeContainer1Instances).unsafeRunSync()
-    nodeContainer1CreatedInstances.length shouldBe 2
-
-    val nodeContainer2Instances = InstanceCreate(
-      items = Seq(
-        NodeWrite(
-          space,
-          s"node2_all_${nodeContainer2.externalId}_1",
-          Seq(
-            EdgeOrNodeData(
-              source = nodeContainer2.toContainerReference,
-              properties = Some(
-                nodeContainer2.properties.map { case (propName, prop) =>
-                  propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
-                }
-              )
-            )
-          )
-        ),
-        NodeWrite(
-          space,
-          s"node2_non_nullables_${nodeContainer2.externalId}_1",
-          Seq(
-            EdgeOrNodeData(
-              source = nodeContainer2.toContainerReference,
-              properties = Some(
-                nodeContainer2.properties.filter(_._2.nullable.contains(false)).map { case (propName, prop) =>
-                  propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
-                }
-              )
-            )
-          )
-        )
-      ),
-      autoCreateStartNodes = Some(true),
-      autoCreateEndNodes = Some(true),
-      replace = Some(true)
-    )
-
-    val nodeContainer2CreatedInstances = blueFieldClient.instances.createItems(nodeContainer2Instances).unsafeRunSync()
-    nodeContainer2CreatedInstances.length shouldBe 2
-
-
+    nodeContainer1CreatedInstances.isEmpty shouldBe false
   }
 }

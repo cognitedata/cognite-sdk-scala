@@ -188,17 +188,17 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                 "space-name-1" -> Map(
                   "view-or-container-id-1" -> Map(
                     "property-identifier11" -> InstancePropertyValue.String("prop-id-1"),
-                    "property-identifier12" -> InstancePropertyValue.Integer(102)
+                    "property-identifier12" -> InstancePropertyValue.Int64(102)
                   ),
                   "view-or-container-id-2" -> Map(
                     "property-identifier21" -> InstancePropertyValue.Boolean(true),
-                    "property-identifier22" -> InstancePropertyValue.IntegerList(Vector(1, 3, 4))
+                    "property-identifier22" -> InstancePropertyValue.Int64List(Vector(1, 3, 4))
                   )
                 ),
                 "space-name-2" -> Map(
                   "view-or-container-id-3" -> Map(
                     "property-identifier31" -> InstancePropertyValue.String("prop-id-2"),
-                    "property-identifier32" -> InstancePropertyValue.Integer(103)
+                    "property-identifier32" -> InstancePropertyValue.Int64(103)
                   ),
                   "view-or-container-id-4" -> Map(
                     "property-identifier41" -> InstancePropertyValue.Boolean(false),

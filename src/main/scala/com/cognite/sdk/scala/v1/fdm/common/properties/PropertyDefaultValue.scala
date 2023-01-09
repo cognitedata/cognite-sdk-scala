@@ -41,22 +41,23 @@ object PropertyDefaultValue {
         )
       case v if v.isNumber =>
         val numericPropertyValue = v.asNumber.flatMap { jn =>
-          val bd = BigDecimal(jn.toString)
-          if (jn.toString.contains(".")) {
+          val asString = jn.toString
+          val bd = BigDecimal(asString)
+          if (asString.contains(".")) {
             if (bd.isDecimalFloat) {
-              Some(PropertyDefaultValue.Float32(bd.floatValue()))
+              Some(PropertyDefaultValue.Float32(bd.floatValue))
             } else {
-              Some(PropertyDefaultValue.Float64(bd.doubleValue()))
+              Some(PropertyDefaultValue.Float64(bd.doubleValue))
             }
           } else {
             if (bd.isValidInt) {
-              Some(PropertyDefaultValue.Int32(bd.intValue()))
+              Some(PropertyDefaultValue.Int32(bd.intValue))
             } else if (bd.isValidLong) {
-              Some(PropertyDefaultValue.Int64(bd.longValue()))
+              Some(PropertyDefaultValue.Int64(bd.longValue))
             } else if (bd.isDecimalFloat) {
-              Some(PropertyDefaultValue.Float32(bd.floatValue()))
+              Some(PropertyDefaultValue.Float32(bd.floatValue))
             } else {
-              Some(PropertyDefaultValue.Float64(bd.doubleValue()))
+              Some(PropertyDefaultValue.Float64(bd.doubleValue))
             }
           }
         }

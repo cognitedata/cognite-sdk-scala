@@ -266,7 +266,6 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
       )
     )
 
-//    println(allPossibleProperties)
 
     val indexes: Map[String, IndexDefinition] = Map(
       "index1" -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.take(2)),
@@ -288,14 +287,13 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     createdResponse.isEmpty shouldBe false
 
     // TODO: Check update reflection delay and remove 10.seconds sleep
-    val readAfterCreateContainers = (IO.sleep(10.seconds) *> blueFieldClient.containers.retrieveByExternalIds(Seq(ContainerId(space, containerExternalId)))).unsafeRunSync()
+    val readAfterCreateContainers = (IO.sleep(10.seconds) *> blueFieldClient
+      .containers
+      .retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))))
+      .unsafeRunSync()
     val insertedContainer = readAfterCreateContainers.find(_.externalId === containerExternalId)
 
     insertedContainer.isEmpty shouldBe false
-
-    println(allPossibleProperties.values.toList.sortBy(_.name))
-    println()
-    println(insertedContainer.get.properties.values.toList.sortBy(_.name))
 
 //    insertedContainer.get.properties.keys.toList should contain theSameElementsAs allPossibleProperties.keys.toList
 //    insertedContainer.get.properties.values.toList should contain theSameElementsAs allPossibleProperties.values.toList
@@ -308,14 +306,14 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
               defaultValue = None,
               nullable = Some(true),
               description = v.description.map(d => s"$d Updated"),
-              name = v.name.map(n => s"$n-Updated"),
+              name = v.name.map(n => s"$n-Updated")
             )
           case _ =>
             v.copy(
               defaultValue = None,
               nullable = Some(false),
               description = v.description.map(d => s"$d Updated"),
-              name = v.name.map(n => s"$n-Updated"),
+              name = v.name.map(n => s"$n-Updated")
             )
         })
     }
@@ -334,7 +332,10 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     updatedResponse.isEmpty shouldBe false
 
     // TODO: Check update reflection delay and remove 10.seconds sleep
-    val readAfterUpdateContainers = (IO.sleep(10.seconds) *> blueFieldClient.containers.retrieveByExternalIds(Seq(ContainerId(space, containerExternalId)))).unsafeRunSync()
+    val readAfterUpdateContainers = (IO.sleep(10.seconds) *> blueFieldClient
+      .containers
+      .retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))))
+      .unsafeRunSync()
     val updatedContainer = readAfterUpdateContainers.find(_.externalId === containerExternalId).get
 
     updatedContainer.properties.keys.toList should contain theSameElementsAs allPossiblePropertiesToUpdate.keys.toList
@@ -427,6 +428,7 @@ object ContainersTest {
       nullable = Some(true)
     ))
 
+    // scalastyle:off method.length
     def vehicleInstanceData(containerRef: ContainerReference): Seq[EdgeOrNodeData] = Seq(
       EdgeOrNodeData(
         source = containerRef,
@@ -435,9 +437,9 @@ object ContainersTest {
             "id" -> InstancePropertyValue.String("1"),
             "manufacturer" -> InstancePropertyValue.String("Toyota"),
             "model" -> InstancePropertyValue.String("RAV-4"),
-            "year" -> InstancePropertyValue.Integer(2020),
-            "displacement" -> InstancePropertyValue.Integer(2487),
-            "weight" -> InstancePropertyValue.Integer(1200L),
+            "year" -> InstancePropertyValue.Int64(2020),
+            "displacement" -> InstancePropertyValue.Int64(2487),
+            "weight" -> InstancePropertyValue.Int64(1200L),
             "compressionRatio" -> InstancePropertyValue.String("13 to 1"),
             "turbocharger" -> InstancePropertyValue.Boolean(true)
           )
@@ -450,9 +452,9 @@ object ContainersTest {
             "id" -> InstancePropertyValue.String("2"),
             "manufacturer" -> InstancePropertyValue.String("Toyota"),
             "model" -> InstancePropertyValue.String("Prius"),
-            "year" -> InstancePropertyValue.Integer(2018),
-            "displacement" -> InstancePropertyValue.Integer(2487),
-            "weight" -> InstancePropertyValue.Integer(1800L),
+            "year" -> InstancePropertyValue.Int64(2018),
+            "displacement" -> InstancePropertyValue.Int64(2487),
+            "weight" -> InstancePropertyValue.Int64(1800L),
             "compressionRatio" -> InstancePropertyValue.String("13 to 1"),
             "turbocharger" -> InstancePropertyValue.Boolean(true)
           )
@@ -465,8 +467,8 @@ object ContainersTest {
             "id" -> InstancePropertyValue.String("3"),
             "manufacturer" -> InstancePropertyValue.String("Volkswagen"),
             "model" -> InstancePropertyValue.String("ID.4"),
-            "year" -> InstancePropertyValue.Integer(2022),
-            "weight" -> InstancePropertyValue.Integer(2224),
+            "year" -> InstancePropertyValue.Int64(2022),
+            "weight" -> InstancePropertyValue.Int64(2224),
             "turbocharger" -> InstancePropertyValue.Boolean(false)
           )
         )
@@ -478,10 +480,10 @@ object ContainersTest {
             "id" -> InstancePropertyValue.String("4"),
             "manufacturer" -> InstancePropertyValue.String("Volvo"),
             "model" -> InstancePropertyValue.String("XC90"),
-            "year" -> InstancePropertyValue.Integer(2002),
-            "weight" -> InstancePropertyValue.Integer(2020),
+            "year" -> InstancePropertyValue.Int64(2002),
+            "weight" -> InstancePropertyValue.Int64(2020),
             "compressionRatio" -> InstancePropertyValue.String("17 to 1"),
-            "displacement" -> InstancePropertyValue.Integer(2401),
+            "displacement" -> InstancePropertyValue.Int64(2401),
             "turbocharger" -> InstancePropertyValue.Boolean(true)
           )
         )
@@ -493,10 +495,10 @@ object ContainersTest {
             "id" -> InstancePropertyValue.String("5"),
             "manufacturer" -> InstancePropertyValue.String("Volvo"),
             "model" -> InstancePropertyValue.String("XC90"),
-            "year" -> InstancePropertyValue.Integer(2002),
-            "weight" -> InstancePropertyValue.Integer(2020),
+            "year" -> InstancePropertyValue.Int64(2002),
+            "weight" -> InstancePropertyValue.Int64(2020),
             "compressionRatio" -> InstancePropertyValue.String("17 to 1"),
-            "displacement" -> InstancePropertyValue.Integer(2401),
+            "displacement" -> InstancePropertyValue.Int64(2401),
             "turbocharger" -> InstancePropertyValue.Boolean(true)
           )
         )
@@ -508,15 +510,16 @@ object ContainersTest {
             "id" -> InstancePropertyValue.String("6"),
             "manufacturer" -> InstancePropertyValue.String("Mitsubishi"),
             "model" -> InstancePropertyValue.String("Outlander"),
-            "year" -> InstancePropertyValue.Integer(2021),
-            "weight" -> InstancePropertyValue.Integer(1745),
+            "year" -> InstancePropertyValue.Int64(2021),
+            "weight" -> InstancePropertyValue.Int64(1745),
             "compressionRatio" -> InstancePropertyValue.String("17 to 1"),
-            "displacement" -> InstancePropertyValue.Integer(2000),
+            "displacement" -> InstancePropertyValue.Int64(2000),
             "turbocharger" -> InstancePropertyValue.Boolean(true)
           )
         )
       )
     )
+    // scalastyle:on method.length
   }
 
   object RentableContainer {
@@ -656,6 +659,7 @@ object ContainersTest {
       "firstnameIndex" -> IndexDefinition.BTreeIndexDefinition(Seq("firstnameId"))
     )
 
+    // scalastyle:off method.length
     def personInstanceData(containerRef: ContainerReference): Seq[EdgeOrNodeData] = Seq(
       EdgeOrNodeData(
         source = containerRef,
@@ -730,5 +734,6 @@ object ContainersTest {
         )
       )
     )
+    // scalastyle:on method.length
   }
 }
