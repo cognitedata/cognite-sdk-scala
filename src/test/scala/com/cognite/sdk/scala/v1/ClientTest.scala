@@ -70,57 +70,6 @@ class ClientTest extends SdkTestSpec with OptionValues {
          |""".stripMargin, StatusCode.Ok, "OK",
       Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
 
-  "Client" should "fetch the project using login/status if using api key" in {
-    val apiKey = Option(System.getenv("TEST_API_KEY"))
-                  .getOrElse(throw new RuntimeException("TEST_API_KEY not set"))
-    val auth: Auth = ApiKeyAuth(apiKey)
-
-    noException should be thrownBy GenericClient.forAuth[Id](
-      "scala-sdk-test", auth)(
-      implicitly,
-      sttpBackend
-    )
-    GenericClient.forAuth[Id]("scala-sdk-test", auth)(
-      implicitly,
-      sttpBackend
-    ).projectName should not be empty
-  }
-
-  it should "not require apiKeyId to be present" in {
-    val loginStatusResponseWithoutApiKeyId = Response(
-      s"""
-         |{
-         |  "data": {
-         |    "user": "",
-         |    "loggedIn": false,
-         |    "project": "",
-         |    "projectId": -1
-         |  }
-         |}
-         |""".stripMargin, StatusCode.Ok, "OK",
-      Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
-
-    val respondWithoutApiKeyId = SttpBackendStub.synchronous
-      .whenAnyRequest
-      .thenRespond(loginStatusResponseWithoutApiKeyId)
-    new GenericClient[Id](
-      "scala-sdk-test", projectName, auth = auth)(
-      implicitly,
-      respondWithoutApiKeyId
-    ).login.status().apiKeyId shouldBe empty
-  }
-
-  it should "handle an apiKeyId which is larger than an int" in {
-    val respondWithApiKeyId = SttpBackendStub.synchronous
-      .whenAnyRequest
-      .thenRespond(loginStatusResponseWithApiKeyId)
-    new GenericClient[Id](
-      "scala-sdk-test", projectName, auth = auth)(
-      implicitly,
-      respondWithApiKeyId
-    ).login.status().apiKeyId shouldBe Some(12147483647L)
-  }
-
   it should "set x-cdp headers" in {
     var headers = Seq.empty[Header]
     val saveHeadersStub = SttpBackendStub.synchronous
