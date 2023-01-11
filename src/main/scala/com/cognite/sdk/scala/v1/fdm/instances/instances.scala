@@ -34,10 +34,10 @@ final case class InstanceCreate(
 )
 
 final case class InstanceRetrieve(
-    sources: Option[Seq[SourceReference]],
     instanceType: InstanceType,
     externalId: String,
-    space: String
+    space: String,
+    sources: Option[Seq[SourceReference]]
 )
 
 final case class InstanceRetrieveRequest(items: Seq[InstanceRetrieve], includeTyping: Boolean)

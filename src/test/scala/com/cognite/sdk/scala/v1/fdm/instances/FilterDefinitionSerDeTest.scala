@@ -62,7 +62,7 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
             FilterValueDefinition.Integer(9223372036854775L),
             FilterValueDefinition.String("abcdef"),
             FilterValueDefinition.Boolean(false),
-            FilterValueDefinition.Number(2.64)
+            FilterValueDefinition.Double(2.64)
           )
         ).asJson
         Some(in) shouldBe parse("""{
@@ -140,7 +140,7 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
           Seq("name", "tag"),
           Seq(
             FilterValueDefinition.String("abcdef"),
-            FilterValueDefinition.Number(2.64)
+            FilterValueDefinition.Double(2.64)
           )
         ).asJson
         containsAny.toString() shouldBe """{
@@ -243,7 +243,7 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
             FilterValueDefinition.Integer(1),
             FilterValueDefinition.String("abcdef"),
             FilterValueDefinition.Boolean(false),
-            FilterValueDefinition.Number(2.64)
+            FilterValueDefinition.Double(2.64)
           )
         )
 
@@ -324,7 +324,7 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
           Seq("name", "tag"),
           Seq(
             FilterValueDefinition.String("abcdef"),
-            FilterValueDefinition.Number(2.64)
+            FilterValueDefinition.Double(2.64)
           )
         )
 
@@ -356,14 +356,14 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
             FilterValueDefinition.Integer(9223372036854775L),
             FilterValueDefinition.String("abcdef"),
             FilterValueDefinition.Boolean(false),
-            FilterValueDefinition.Number(2.64)
+            FilterValueDefinition.Double(2.64)
           )
         )
         val containsAny = ContainsAny(
           Seq("name", "tag"),
           Seq(
             FilterValueDefinition.String("abcdef"),
-            FilterValueDefinition.Number(2.64)
+            FilterValueDefinition.Double(2.64)
           )
         )
         val orEqual = Or(Seq(equalInt))
