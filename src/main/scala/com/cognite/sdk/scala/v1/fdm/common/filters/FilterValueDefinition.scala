@@ -1,25 +1,26 @@
 package com.cognite.sdk.scala.v1.fdm.common.filters
 
-import cats.implicits._
 import io.circe._
 
 sealed abstract class FilterValueDefinition extends Product with Serializable
 
 object FilterValueDefinition {
-  sealed abstract class ComparableFilterValue extends FilterValueDefinition
-  sealed abstract class LogicalFilterValue extends FilterValueDefinition
+  sealed trait ComparableFilterValue extends FilterValueDefinition
+  sealed trait LogicalFilterValue extends FilterValueDefinition
+  sealed trait SeqFilterValue
+      extends FilterValueDefinition // TODO: Assert to void creation with empty lists?
 
   final case class String(value: java.lang.String) extends ComparableFilterValue
   final case class Double(value: scala.Double) extends ComparableFilterValue
   final case class Integer(value: scala.Long) extends ComparableFilterValue
-  final case class Object(value: Json) extends ComparableFilterValue
-  final case class StringList(value: Seq[java.lang.String]) extends ComparableFilterValue {
-    // TODO: Avoid creation with empty lists?
-  }
-  final case class DoubleList(value: Seq[scala.Double]) extends ComparableFilterValue
-  final case class IntegerList(value: Seq[scala.Long]) extends ComparableFilterValue
-  final case class ObjectList(value: Seq[Json]) extends ComparableFilterValue
-  final case class BooleanList(value: Seq[scala.Boolean]) extends ComparableFilterValue
+
+  final case class Object(value: Json) extends FilterValueDefinition
+
+  final case class StringList(value: Seq[java.lang.String]) extends SeqFilterValue
+  final case class DoubleList(value: Seq[scala.Double]) extends SeqFilterValue
+  final case class IntegerList(value: Seq[scala.Long]) extends SeqFilterValue
+  final case class ObjectList(value: Seq[Json]) extends SeqFilterValue
+  final case class BooleanList(value: Seq[scala.Boolean]) extends SeqFilterValue
 
   final case class Boolean(value: scala.Boolean) extends LogicalFilterValue
 
@@ -28,7 +29,10 @@ object FilterValueDefinition {
       case FilterValueDefinition.String(value) => Json.fromString(value)
       case FilterValueDefinition.Double(value) => Json.fromDoubleOrString(value)
       case FilterValueDefinition.Integer(value) => Json.fromLong(value)
-      case FilterValueDefinition.Object(value) => value
+    }
+
+  implicit val seqFilterValueEncoder: Encoder[SeqFilterValue] =
+    Encoder.instance[SeqFilterValue] {
       case FilterValueDefinition.StringList(value) => Json.fromValues(value.map(Json.fromString))
       case FilterValueDefinition.DoubleList(value) =>
         Json.fromValues(value.map(Json.fromDoubleOrString))
@@ -44,20 +48,26 @@ object FilterValueDefinition {
 
   implicit val filterValueDefinitionEncoder: Encoder[FilterValueDefinition] =
     Encoder.instance[FilterValueDefinition] {
+      case FilterValueDefinition.Object(value) => value
       case v: FilterValueDefinition.ComparableFilterValue => comparableFilterValueEncoder.apply(v)
+      case v: FilterValueDefinition.SeqFilterValue => seqFilterValueEncoder.apply(v)
       case v: FilterValueDefinition.LogicalFilterValue => logicalFilterValueEncoder.apply(v)
     }
 
-  implicit val comparableFilterValueDecoder: Decoder[ComparableFilterValue] = { (c: HCursor) =>
+  implicit val filterValueDefinitionDecoder: Decoder[FilterValueDefinition] = { (c: HCursor) =>
     val result = c.value match {
       case v if v.isString =>
         v.asString
-          .map(s => Right[DecodingFailure, ComparableFilterValue](FilterValueDefinition.String(s)))
+          .map(s => Right[DecodingFailure, FilterValueDefinition](FilterValueDefinition.String(s)))
       case v if v.isObject =>
         v.asObject.map(j =>
-          Right[DecodingFailure, ComparableFilterValue](
+          Right[DecodingFailure, FilterValueDefinition](
             FilterValueDefinition.Object(Json.fromJsonObject(j))
           )
+        )
+      case v if v.isBoolean =>
+        v.asBoolean.map(j =>
+          Right[DecodingFailure, LogicalFilterValue](FilterValueDefinition.Boolean(j))
         )
       case v if v.isNumber =>
         val numericFilterValue = v.asNumber
@@ -69,7 +79,7 @@ object FilterValueDefinition {
               FilterValueDefinition.Double(bd.doubleValue)
             }
           )
-        numericFilterValue.map(Right[DecodingFailure, ComparableFilterValue])
+        numericFilterValue.map(Right[DecodingFailure, FilterValueDefinition])
       case v if v.isArray =>
         v.asArray
           .flatMap { arr =>
@@ -100,37 +110,66 @@ object FilterValueDefinition {
               case _ => Some(FilterValueDefinition.ObjectList(Seq.empty))
             }
           }
-          .map(Right[DecodingFailure, ComparableFilterValue])
+          .map(Right[DecodingFailure, FilterValueDefinition])
       case o =>
-        Some(Left(DecodingFailure(s"Unknown Filter Value Definition :${o.noSpaces}", c.history)))
-    }
-    result.getOrElse(
-      Left(DecodingFailure(s"Unknown Filter Value Definition :${c.value.noSpaces}", c.history))
-    )
-  }
-
-  implicit val logicalFilterValueDecoder: Decoder[LogicalFilterValue] = { (c: HCursor) =>
-    val result = c.value match {
-      case v if v.isBoolean =>
-        v.asBoolean.map(b =>
-          Right[DecodingFailure, LogicalFilterValue](FilterValueDefinition.Boolean(b))
+        Some(
+          Left(
+            DecodingFailure(
+              s"Expecting a FilterValueDefinition but found: ${o.noSpaces}",
+              c.history
+            )
+          )
         )
-      case o =>
-        Some(Left(DecodingFailure(s"Unknown Filter Value Definition :${o.noSpaces}", c.history)))
     }
     result.getOrElse(
-      Left(DecodingFailure(s"Unknown Filter Value Definition :${c.value.noSpaces}", c.history))
-    )
-  }
-
-  implicit val filterValueDefinitionDecoder: Decoder[FilterValueDefinition] =
-    List[Decoder[FilterValueDefinition]](
-      comparableFilterValueDecoder.widen,
-      logicalFilterValueDecoder.widen
-    ).reduceLeftOption(_ or _)
-      .getOrElse(
-        Decoder.failed[FilterValueDefinition](
-          DecodingFailure("Unable to decode filter value definition", List.empty)
+      Left(
+        DecodingFailure(
+          s"Expecting a FilterValueDefinition but found: ${c.value.noSpaces}",
+          c.history
         )
       )
+    )
+  }
+
+  implicit val comparableFilterValueDefinitionDecoder: Decoder[ComparableFilterValue] =
+    (c: HCursor) =>
+      filterValueDefinitionDecoder.apply(c) match {
+        case Right(v: ComparableFilterValue) => Right(v)
+        case Right(v) =>
+          Left(
+            DecodingFailure(
+              s"Expecting a ComparableFilterValue, but found: ${v.getClass.getSimpleName}",
+              c.history
+            )
+          )
+        case Left(err) => Left(err)
+      }
+
+  implicit val seqFilterValueDefinitionDecoder: Decoder[SeqFilterValue] =
+    (c: HCursor) =>
+      filterValueDefinitionDecoder.apply(c) match {
+        case Right(v: SeqFilterValue) => Right(v)
+        case Right(v) =>
+          Left(
+            DecodingFailure(
+              s"Expecting a SeqFilterValue, but found: ${v.getClass.getSimpleName}",
+              c.history
+            )
+          )
+        case Left(err) => Left(err)
+      }
+
+  implicit val logicalFilterValueDecoder: Decoder[LogicalFilterValue] =
+    (c: HCursor) =>
+      filterValueDefinitionDecoder.apply(c) match {
+        case Right(v: LogicalFilterValue) => Right(v)
+        case Right(v) =>
+          Left(
+            DecodingFailure(
+              s"Expecting a LogicalFilterValue, but found: ${v.getClass.getSimpleName}",
+              c.history
+            )
+          )
+        case Left(err) => Left(err)
+      }
 }

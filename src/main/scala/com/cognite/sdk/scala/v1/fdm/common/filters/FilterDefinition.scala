@@ -1,6 +1,9 @@
 package com.cognite.sdk.scala.v1.fdm.common.filters
 
-import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition.ComparableFilterValue
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition.{
+  ComparableFilterValue,
+  SeqFilterValue
+}
 import com.cognite.sdk.scala.v1.fdm.common.refs.SourceReference
 import io.circe.Decoder.Result
 import io.circe._
@@ -26,7 +29,7 @@ object FilterDefinition {
   final case class Lt(value: ComparableFilterValue) extends RangeFilter
 
   final case class Equals(property: Seq[String], value: FilterValueDefinition) extends LeafFilter
-  final case class In(property: Seq[String], values: Seq[FilterValueDefinition]) extends LeafFilter
+  final case class In(property: Seq[String], values: SeqFilterValue) extends LeafFilter
   final case class Range(
       property: Seq[String],
       gte: Option[ComparableFilterValue] = None,
@@ -43,10 +46,8 @@ object FilterDefinition {
   }
   final case class Prefix(property: Seq[String], value: FilterValueDefinition) extends LeafFilter
   final case class Exists(property: Seq[String]) extends LeafFilter
-  final case class ContainsAny(property: Seq[String], values: Seq[FilterValueDefinition])
-      extends LeafFilter
-  final case class ContainsAll(property: Seq[String], values: Seq[FilterValueDefinition])
-      extends LeafFilter
+  final case class ContainsAny(property: Seq[String], values: SeqFilterValue) extends LeafFilter
+  final case class ContainsAll(property: Seq[String], values: SeqFilterValue) extends LeafFilter
   final case class Nested(scope: Seq[String], filter: FilterDefinition) extends LeafFilter
   final case class Overlaps(
       startProperty: Seq[String],

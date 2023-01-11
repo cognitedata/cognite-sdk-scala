@@ -56,25 +56,15 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
       }
 
       "work for in filter" in {
-        val in = In(
-          Seq("name", "tag"),
-          Seq(
-            FilterValueDefinition.Integer(9223372036854775L),
-            FilterValueDefinition.String("abcdef"),
-            FilterValueDefinition.Boolean(false),
-            FilterValueDefinition.Double(2.64)
-          )
-        ).asJson
+        val in = In(Seq("name", "tag"), FilterValueDefinition.IntegerList(Seq(1L, 2L))).asJson
         Some(in) shouldBe parse("""{
                                   |  "property" : [
                                   |    "name",
                                   |    "tag"
                                   |  ],
                                   |  "values" : [
-                                  |    9223372036854775,
-                                  |    "abcdef",
-                                  |    false,
-                                  |    2.64
+                                  |    1,
+                                  |    2
                                   |  ]
                                   |}""".stripMargin).toOption
 
@@ -136,13 +126,7 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
       }
 
       "work for containsAny filter" in {
-        val containsAny = ContainsAny(
-          Seq("name", "tag"),
-          Seq(
-            FilterValueDefinition.String("abcdef"),
-            FilterValueDefinition.Double(2.64)
-          )
-        ).asJson
+        val containsAny = ContainsAny(Seq("name", "tag"), FilterValueDefinition.StringList(Seq("abcdef", "pqrs"))).asJson
         containsAny.toString() shouldBe """{
                                           |  "property" : [
                                           |    "name",
@@ -150,27 +134,21 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
                                           |  ],
                                           |  "values" : [
                                           |    "abcdef",
-                                          |    2.64
+                                          |    "pqrs"
                                           |  ]
                                           |}""".stripMargin
       }
 
       "work for containsAll filter" in {
-        val containsAll = ContainsAll(
-          Seq("name", "tag"),
-          Seq(
-            FilterValueDefinition.Integer(1),
-            FilterValueDefinition.Boolean(true)
-          )
-        ).asJson
+        val containsAll = ContainsAll(Seq("name", "tag"), FilterValueDefinition.IntegerList(Seq(123, 456))).asJson
         containsAll.toString() shouldBe """{
                                           |  "property" : [
                                           |    "name",
                                           |    "tag"
                                           |  ],
                                           |  "values" : [
-                                          |    1,
-                                          |    true
+                                          |    123,
+                                          |    456
                                           |  ]
                                           |}""".stripMargin
       }
@@ -237,15 +215,7 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
     "BooleanFilters" should {
       "work for and filter" in {
         val equalInt = Equals(Seq("name", "tag"), FilterValueDefinition.Integer(1))
-        val in = In(
-          Seq("name", "tag"),
-          Seq(
-            FilterValueDefinition.Integer(1),
-            FilterValueDefinition.String("abcdef"),
-            FilterValueDefinition.Boolean(false),
-            FilterValueDefinition.Double(2.64)
-          )
-        )
+        val in = In(Seq("name", "tag"), FilterValueDefinition.StringList(Seq("abcdef", "lmnopqr")))
 
         val and = And(Seq(equalInt, in)).asJson
         and.toString() shouldBe """{
@@ -266,10 +236,8 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
                                   |          "tag"
                                   |        ],
                                   |        "values" : [
-                                  |          1,
                                   |          "abcdef",
-                                  |          false,
-                                  |          2.64
+                                  |          "lmnopqr"
                                   |        ]
                                   |      }
                                   |    }
@@ -320,13 +288,7 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
                                  |}""".stripMargin
       }
       "work for not filter" in {
-        val containsAny = ContainsAny(
-          Seq("name", "tag"),
-          Seq(
-            FilterValueDefinition.String("abcdef"),
-            FilterValueDefinition.Double(2.64)
-          )
-        )
+        val containsAny = ContainsAny(Seq("name", "tag"), FilterValueDefinition.StringList(Seq("abcdef", "pqrs")))
 
         val not = Not(containsAny).asJson
         not.toString() shouldBe """{
@@ -338,7 +300,7 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
                                   |      ],
                                   |      "values" : [
                                   |        "abcdef",
-                                  |        2.64
+                                  |        "pqrs"
                                   |      ]
                                   |    }
                                   |  }
@@ -350,22 +312,8 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
       "work for complex case" in {
         val equalInt =
           Equals(Seq("name", "tag"), FilterValueDefinition.Integer(9223372036854775L))
-        val in = In(
-          Seq("name", "tag"),
-          Seq(
-            FilterValueDefinition.Integer(9223372036854775L),
-            FilterValueDefinition.String("abcdef"),
-            FilterValueDefinition.Boolean(false),
-            FilterValueDefinition.Double(2.64)
-          )
-        )
-        val containsAny = ContainsAny(
-          Seq("name", "tag"),
-          Seq(
-            FilterValueDefinition.String("abcdef"),
-            FilterValueDefinition.Double(2.64)
-          )
-        )
+        val in = In(Seq("name", "tag"), FilterValueDefinition.DoubleList(Seq(2.64, 1.23)))
+        val containsAny = ContainsAny(Seq("name", "tag"), FilterValueDefinition.IntegerList(Seq(264, 123)))
         val orEqual = Or(Seq(equalInt))
         val orInContainsAny = Or(Seq(in, containsAny))
 
@@ -394,10 +342,8 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
                                       |              "tag"
                                       |            ],
                                       |            "values" : [
-                                      |              9223372036854775,
-                                      |              "abcdef",
-                                      |              false,
-                                      |              2.64
+                                      |              2.64,
+                                      |              1.23
                                       |            ]
                                       |          }
                                       |        },
@@ -408,8 +354,8 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
                                       |              "tag"
                                       |            ],
                                       |            "values" : [
-                                      |              "abcdef",
-                                      |              2.64
+                                      |              264,
+                                      |              123
                                       |            ]
                                       |          }
                                       |        }

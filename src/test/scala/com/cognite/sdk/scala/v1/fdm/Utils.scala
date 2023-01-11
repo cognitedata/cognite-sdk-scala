@@ -29,7 +29,7 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Float32, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Float64, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Int32, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true))
 //    PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
 //    PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
 //    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
