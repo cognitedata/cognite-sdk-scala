@@ -16,6 +16,7 @@ sealed abstract case class DataModelProperty[V](value: V)(implicit encoder: Enco
       case rawStringJson: String =>
         parse(rawStringJson) match {
           case Left(_) => value.asJson
+          case Right(json) if json.isNumber => Json.fromString(rawStringJson)
           case Right(json) => json
         }
       case arrayRawStringJson: Iterable[_] =>
