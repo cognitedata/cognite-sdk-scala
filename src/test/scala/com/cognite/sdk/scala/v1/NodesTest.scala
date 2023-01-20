@@ -97,7 +97,7 @@ class NodesTest
 
   val dataModelNodeToCreate3 =
     Node(
-      "equipment_45",
+      "45",
       properties = Some(
         Map(
           "prop_string" -> PropertyType.Text.Property("EQ0011"),
