@@ -1,12 +1,13 @@
 package com.cognite.sdk.scala.v1.fdm
 
 import com.cognite.sdk.scala.v1.fdm.common.Usage
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewPropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{DirectNodeRelationProperty, PrimitiveProperty, TextProperty}
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyDefinition, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.{EdgeWrite, NodeWrite}
-import com.cognite.sdk.scala.v1.fdm.instances.{DirectRelationReference, EdgeOrNodeData, InstancePropertyValue}
+import com.cognite.sdk.scala.v1.fdm.instances.{DirectRelationReference, EdgeOrNodeData, InstancePropertyValue, NodeOrEdgeCreate}
 import io.circe.{Json, JsonObject}
 
 import java.time.{LocalDate, LocalDateTime, ZoneId, ZonedDateTime}
@@ -21,19 +22,19 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Float64),
     PrimitiveProperty(`type` = PrimitivePropType.Int32),
     PrimitiveProperty(`type` = PrimitivePropType.Int64),
-//    PrimitiveProperty(`type` = PrimitivePropType.Timestamp),
-//    PrimitiveProperty(`type` = PrimitivePropType.Date),
-//    PrimitiveProperty(`type` = PrimitivePropType.Json),
+    PrimitiveProperty(`type` = PrimitivePropType.Timestamp),
+    PrimitiveProperty(`type` = PrimitivePropType.Date),
+    PrimitiveProperty(`type` = PrimitivePropType.Json),
     TextProperty(list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Boolean, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Float32, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Float64, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Int32, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true))
-//    PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
-//    PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
-//    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
-//    DirectNodeRelationProperty(container = None)
+    PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
+    //    DirectNodeRelationProperty(container = None)
   )
 
   val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
@@ -56,7 +57,22 @@ object Utils {
     )
   )
 
-  // scalastyle:off cyclomatic.complexity
+  def toViewPropertyDefinition(
+                                containerPropDef: ContainerPropertyDefinition,
+                                containerRef: Option[ContainerReference],
+                                containerPropertyIdentifier: Option[String]): ViewPropertyDefinition =
+    ViewPropertyDefinition(
+      nullable = containerPropDef.nullable,
+      autoIncrement = containerPropDef.autoIncrement,
+      defaultValue = containerPropDef.defaultValue,
+      description = containerPropDef.description,
+      name = containerPropDef.name,
+      `type` = containerPropDef.`type`,
+      container = containerRef,
+      containerPropertyIdentifier = containerPropertyIdentifier
+    )
+
+  // scalastyle:off cyclomatic.complexity method.length
   def createAllPossibleContainerPropCombinations: Map[String, ContainerPropertyDefinition] = {
     val boolOptions = List(
       true,
@@ -67,35 +83,35 @@ object Utils {
       p <- AllContainerPropertyTypes
       nullable <- boolOptions
       withDefault <- boolOptions
-      withAutoIncrement <- boolOptions
     } yield {
       val defaultValue = propertyDefaultValueForPropertyType(p, withDefault)
 
-      val autoIncrement = if (withAutoIncrement) {
-        defaultValue match {
-          case Some(PropertyDefaultValue.Int32(_) | PropertyDefaultValue.Int64(_)) => true
-          case Some(PropertyDefaultValue.Float32(_) | PropertyDefaultValue.Float64(_)) => true
-          case _ => false
-        }
-      } else {
-        false
+      val autoIncrementApplicableProp = p match {
+        case PrimitiveProperty(PrimitivePropType.Int32, None | Some(false)) => true
+        case PrimitiveProperty(PrimitivePropType.Int64, None | Some(false)) => true
+        case _ => false
       }
 
-      val nullability = p match {
+      val autoIncrement = autoIncrementApplicableProp && !nullable && !withDefault
+
+      val alwaysNullable = p match {
         case DirectNodeRelationProperty(_) => true
-        case _ => nullable
+        case _ => false
       }
+      val nullability = alwaysNullable || nullable
 
-      val nameComponents = List(
+      val nameComponents = Vector(
         p match {
           case p: PrimitiveProperty => p.`type`.productPrefix
           case _ => p.getClass.getSimpleName
         },
         if (p.isList) "List" else "NonList",
-        if (autoIncrement) "WithAutoIncrement" else "WithoutAutoIncrement",
+        if (autoIncrementApplicableProp) {
+          if (autoIncrement) "WithAutoIncrement" else "WithoutAutoIncrement"
+        } else { "" },
         if (defaultValue.nonEmpty) "WithDefaultValue" else "WithoutDefaultValue",
         if (nullability) "Nullable" else "NonNullable"
-      ).filter(_.nonEmpty)
+      )
 
       s"${nameComponents.mkString("")}" -> ContainerPropertyDefinition(
         nullable = Some(nullability),
@@ -105,15 +121,57 @@ object Utils {
         name = Some(s"Test-${nameComponents.mkString("-")}-Name"),
         `type` = p
       )
-    }).distinct.toMap
+    }).toMap
   }
-  // scalastyle:on cyclomatic.complexity
+  // scalastyle:on cyclomatic.complexity method.length
+
+  def createAllPossibleViewPropCombinations: Map[String, ViewPropertyDefinition] =
+    createAllPossibleContainerPropCombinations.map {
+      case (key, prop) => key -> toViewPropertyDefinition(prop, None, None)
+    }
+
+  def viewPropStr: Vector[String] =
+    createAllPossibleViewPropCombinations.map {
+      case (propName, prop) =>
+        val propTypeStr = prop.`type` match {
+          case t: TextProperty =>
+            val collation = t.collation.map(s => s""""$s"""")
+            s"""PropertyType.TextProperty(${t.list}, $collation)"""
+          case p: PrimitiveProperty =>
+            s"PropertyType.PrimitiveProperty(PrimitivePropType.${p.`type`},${p.list})"
+          case d: DirectNodeRelationProperty => d.toString
+        }
+
+        val defaultValueStr = prop.defaultValue.map {
+          case PropertyDefaultValue.String(value) =>
+            s"""Some(PropertyDefaultValue.String("$value"))""".stripMargin
+          case PropertyDefaultValue.Float32(value) =>
+            s"""Some(PropertyDefaultValue.Float32(${value}F))""".stripMargin
+          case PropertyDefaultValue.Object(value) =>
+            val jsonStr = s"""${value.noSpaces}""".stripMargin
+            s"""io.circe.parser.parse("$jsonStr"").toOption.map(PropertyDefaultValue.Object)""".stripMargin
+          case p => s"Some(PropertyDefaultValue.$p)"
+        }
+
+        s"""
+           | val $propName: ViewPropertyDefinition = ViewPropertyDefinition(
+           |      nullable = ${prop.nullable},
+           |      autoIncrement = ${prop.autoIncrement},
+           |      defaultValue = ${defaultValueStr.getOrElse("None")},
+           |      description = Some("${prop.description.get}"),
+           |      name = Some("${prop.name.get}"),
+           |      `type` = $propTypeStr,
+           |      container = None,
+           |      containerPropertyIdentifier = None
+           |    )
+           |""".stripMargin
+    }.toVector
 
   def createTestContainer(
-      space: String,
-      containerExternalId: String,
-      usage: Usage
-  ): ContainerCreateDefinition = {
+                           space: String,
+                           containerExternalId: String,
+                           usage: Usage
+                         ): ContainerCreateDefinition = {
     val allPossibleProperties: Map[String, ContainerPropertyDefinition] =
       createAllPossibleContainerPropCombinations
     val allPossiblePropertyKeys = allPossibleProperties.keys.toList
@@ -144,98 +202,136 @@ object Utils {
   }
 
   def createInstancePropertyForContainerProperty(
-      propName: String,
-      containerPropType: PropertyType
-  ): InstancePropertyValue =
+                                                  propName: String,
+                                                  containerPropType: PropertyType
+                                                ): InstancePropertyValue =
     if (containerPropType.isList) {
       listContainerPropToInstanceProperty(propName, containerPropType)
     } else {
       nonListContainerPropToInstanceProperty(propName, containerPropType)
     }
 
-  def createNodeWriteData(container: ContainerDefinition): NodeWrite = {
-    container.usedFor match {
-      case Usage.Edge =>
-        throw new IllegalArgumentException(s"Container: ${container.externalId} doesn't support nodes!"
-      )
-      case _ =>
-        val space = container.space
-        val containerRef = container.toContainerReference
-        val containerProps = container.properties
-        val instanceValuesForProps = containerProps.map { case (propName, prop) =>
-          propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
-        }
-        val (nullables, nonNullables) = instanceValuesForProps.partition { case (propName, _) =>
-          containerProps(propName).nullable.getOrElse(true)
-        }
-
-        val nodeData = if (nullables.isEmpty) {
-          List(toInstanceData(containerRef, nonNullables))
-        } else {
-          val withAllProps = toInstanceData(containerRef, instanceValuesForProps)
-          val withRequiredProps = toInstanceData(containerRef, nonNullables)
-          val withEachNonRequired = nullables.map { case (propName, propVal) =>
-            toInstanceData(containerRef, nonNullables + (propName -> propVal))
-          }
-          List(withAllProps, withRequiredProps) ++ withEachNonRequired
-        }
-
-        NodeWrite(
-          space,
-          s"node_instances_${container.externalId}",
-          nodeData
-        )
+  def createNodeWriteData(space: String,
+                          nodeExternalId: String,
+                          sourceRef: SourceReference,
+                          propsMap: Map[String, PropertyDefinition]): NodeWrite = {
+    val instanceValuesForProps = propsMap.map {
+      case (propName, prop) =>
+        propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
     }
+    val (nullables, nonNullables) = instanceValuesForProps.partition {
+      case (propName, _) =>
+        propsMap(propName).nullable.getOrElse(true)
+    }
+
+    val nodeData = if (nullables.isEmpty) {
+      List(toInstanceData(sourceRef, nonNullables))
+    } else {
+      val withAllProps = toInstanceData(sourceRef, instanceValuesForProps)
+      val withRequiredProps = toInstanceData(sourceRef, nonNullables)
+      val withEachNonRequired = nullables.map {
+        case (propName, propVal) =>
+          toInstanceData(sourceRef, nonNullables + (propName -> propVal))
+      }
+      List(withAllProps, withRequiredProps) ++ withEachNonRequired
+    }
+
+    NodeWrite(
+      space,
+      nodeExternalId,
+      nodeData
+    )
   }
 
   def createEdgeWriteData(
-      container: ContainerDefinition,
-      startNode: DirectRelationReference,
-      endNode: DirectRelationReference
-  ): EdgeWrite = {
-    container.usedFor match {
-      case Usage.Node =>
-        throw new IllegalArgumentException(s"Container: ${container.externalId} doesn't support edges!")
+                           space: String,
+                           edgeExternalId: String,
+                           sourceRef: SourceReference,
+                           propsMap: Map[String, PropertyDefinition],
+                           startNode: DirectRelationReference,
+                           endNode: DirectRelationReference
+                         ): EdgeWrite = {
+    val instanceValuesForProps = propsMap.map {
+      case (propName, prop) =>
+        propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+    }
+    val (nullables, nonNullables) = instanceValuesForProps.partition {
+      case (propName, _) =>
+        propsMap(propName).nullable.getOrElse(true)
+    }
+
+    val nodeData = if (nullables.isEmpty) {
+      List(toInstanceData(sourceRef, nonNullables))
+    } else {
+      val withAllProps = toInstanceData(sourceRef, instanceValuesForProps)
+      val withRequiredProps = toInstanceData(sourceRef, nonNullables)
+      val withEachNonRequired = nullables.map {
+        case (propName, propVal) =>
+          toInstanceData(sourceRef, nonNullables + (propName -> propVal))
+      }
+      List(withAllProps, withRequiredProps) ++ withEachNonRequired
+    }
+
+    EdgeWrite(
+      `type` = DirectRelationReference(space, edgeExternalId),
+      space = space,
+      externalId = edgeExternalId,
+      startNode = startNode,
+      endNode = endNode,
+      nodeData
+    )
+  }
+
+  def createEdgeOrNodeWriteData(
+                                 space: String,
+                                 nodeOrEdgeExternalId: String,
+                                 usage: Usage,
+                                 sourceRef: SourceReference,
+                                 propsMap: Map[String, PropertyDefinition],
+                                 startNode: DirectRelationReference,
+                                 endNode: DirectRelationReference
+                         ): NodeOrEdgeCreate =
+    usage match {
+      case u@(Usage.Node | Usage.Edge) =>
+        throw new IllegalArgumentException(s"$sourceRef supports only: ${u.productPrefix}s. Should support both nodes & edges!")
       case _ =>
-        val space = container.space
-        val containerRef = container.toContainerReference
-        val containerProps = container.properties
-        val instanceValuesForProps = containerProps.map { case (propName, prop) =>
-          propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+        val instanceValuesForProps = propsMap.map {
+          case (propName, prop) =>
+            propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
         }
-        val (nullables, nonNullables) = instanceValuesForProps.partition { case (propName, _) =>
-          containerProps(propName).nullable.getOrElse(true)
+        val (nullables, nonNullables) = instanceValuesForProps.partition {
+          case (propName, _) =>
+            propsMap(propName).nullable.getOrElse(true)
         }
 
         val nodeData = if (nullables.isEmpty) {
-          List(toInstanceData(containerRef, nonNullables))
+          List(toInstanceData(sourceRef, nonNullables))
         } else {
-          val withAllProps = toInstanceData(containerRef, instanceValuesForProps)
-          val withRequiredProps = toInstanceData(containerRef, nonNullables)
-          val withEachNonRequired = nullables.map { case (propName, propVal) =>
-            toInstanceData(containerRef, nonNullables + (propName -> propVal))
+          val withAllProps = toInstanceData(sourceRef, instanceValuesForProps)
+          val withRequiredProps = toInstanceData(sourceRef, nonNullables)
+          val withEachNonRequired = nullables.map {
+            case (propName, propVal) =>
+              toInstanceData(sourceRef, nonNullables + (propName -> propVal))
           }
           List(withAllProps, withRequiredProps) ++ withEachNonRequired
         }
 
-        val edgeExternalId = s"edge_instances_${container.externalId}"
         EdgeWrite(
-          `type` = DirectRelationReference(space, edgeExternalId),
+          `type` = DirectRelationReference(space, nodeOrEdgeExternalId),
           space = space,
-          externalId = edgeExternalId,
+          externalId = nodeOrEdgeExternalId,
           startNode = startNode,
           endNode = endNode,
           nodeData
         )
     }
-  }
 
   // scalastyle:off cyclomatic.complexity
   private def listContainerPropToInstanceProperty(
-      propName: String,
-      containerPropType: PropertyType
-  ): InstancePropertyValue =
-    containerPropType match {
+                                                   propName: String,
+                                                   propertyType: PropertyType
+                                                 ): InstancePropertyValue =
+    propertyType match {
       case PropertyType.TextProperty(Some(true), _) =>
         InstancePropertyValue.StringList(List(s"${propName}Value1", s"${propName}Value2"))
       case PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(true)) =>
@@ -286,10 +382,10 @@ object Utils {
 
   // scalastyle:off cyclomatic.complexity
   private def nonListContainerPropToInstanceProperty(
-      propName: String,
-      containerPropType: PropertyType
-  ): InstancePropertyValue =
-    containerPropType match {
+                                                      propName: String,
+                                                      propertyType: PropertyType
+                                                    ): InstancePropertyValue =
+    propertyType match {
       case PropertyType.TextProperty(None | Some(false), _) =>
         InstancePropertyValue.String(s"${propName}Value")
       case PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, _) =>
@@ -318,23 +414,25 @@ object Utils {
             )
           )
         )
+      case PropertyType.DirectNodeRelationProperty(_) => InstancePropertyValue.Object(Json.fromJsonObject(JsonObject.empty))
+
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
   // scalastyle:on cyclomatic.complexity
 
   private def toInstanceData(
-      containerRef: ContainerReference,
-      instancePropertyValues: Map[String, InstancePropertyValue]
-  ) =
+                              ref: SourceReference,
+                              instancePropertyValues: Map[String, InstancePropertyValue]
+                            ) =
     EdgeOrNodeData(
-      source = containerRef,
+      source = ref,
       properties = Some(instancePropertyValues)
     )
   // scalastyle:off cyclomatic.complexity
   private def propertyDefaultValueForPropertyType(
-      p: PropertyType,
-      withDefault: Boolean
-  ): Option[PropertyDefaultValue] =
+                                                   p: PropertyType,
+                                                   withDefault: Boolean
+                                                 ): Option[PropertyDefaultValue] =
     if (withDefault && !p.isList) {
       p match {
         case TextProperty(_, _) => Some(PropertyDefaultValue.String("defaultTextValue"))

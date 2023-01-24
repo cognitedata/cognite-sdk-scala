@@ -4,7 +4,7 @@ import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition.{
   ComparableFilterValue,
   SeqFilterValue
 }
-import com.cognite.sdk.scala.v1.fdm.common.refs.SourceReference
+import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import io.circe.Decoder.Result
 import io.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}

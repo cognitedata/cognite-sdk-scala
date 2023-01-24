@@ -1,7 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.implicits.toTraverseOps
-import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyType}
 import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.{
   directRelationReferenceDecoder,
@@ -11,9 +10,15 @@ import io.circe._
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
 
-import java.time.{Instant, LocalDate, ZonedDateTime}
+import java.time.{LocalDate, ZonedDateTime}
 
 sealed trait InstanceDefinition {
+  def space: String
+  def externalId: String
+  def createdTime: Option[Long]
+  def lastUpdatedTime: Option[Long]
+  def properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
+
   val `type`: InstanceType
 }
 
@@ -21,8 +26,8 @@ object InstanceDefinition {
   final case class NodeDefinition(
       space: String,
       externalId: String,
-      createdTime: Option[Instant],
-      lastUpdatedTime: Option[Instant],
+      createdTime: Option[Long],
+      lastUpdatedTime: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
   ) extends InstanceDefinition {
     override val `type`: InstanceType = InstanceType.Node
@@ -32,8 +37,8 @@ object InstanceDefinition {
       relation: DirectRelationReference,
       space: String,
       externalId: String,
-      createdTime: Option[Instant],
-      lastUpdatedTime: Option[Instant],
+      createdTime: Option[Long],
+      lastUpdatedTime: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]],
       startNode: Option[DirectRelationReference],
       endNode: Option[DirectRelationReference]
@@ -76,7 +81,7 @@ object InstanceDefinition {
 
   def instancePropertyDefinitionBasedInstanceDecoder(
       propertyDefinitionsMap: Option[
-        Map[String, Map[String, Map[String, InstancePropertyDefinition]]]
+        Map[String, Map[String, Map[String, TypePropertyDefinition]]]
       ]
   ): Decoder[InstanceDefinition] = (c: HCursor) =>
     propertyDefinitionsMap match {
@@ -97,7 +102,7 @@ object InstanceDefinition {
     }
 
   private def instancePropertyDefinitionBasedInstancePropertyTypeDecoder(
-      types: Map[String, Map[String, Map[String, InstancePropertyDefinition]]]
+      types: Map[String, Map[String, Map[String, TypePropertyDefinition]]]
   ): Decoder[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]] = (c: HCursor) =>
     {
       val result = c.value
@@ -145,13 +150,13 @@ object InstanceDefinition {
     }
 
   private def instancePropertyDefinitionBasedNodeDefinitionDecoder(
-      instPropDefMap: Map[String, Map[String, Map[String, InstancePropertyDefinition]]]
+      instPropDefMap: Map[String, Map[String, Map[String, TypePropertyDefinition]]]
   ): Decoder[NodeDefinition] = (c: HCursor) =>
     for {
       space <- c.downField("space").as[String]
       externalId <- c.downField("externalId").as[String]
-      createdTime <- c.downField("createdTime").as[Option[Instant]]
-      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Instant]]
+      createdTime <- c.downField("createdTime").as[Option[Long]]
+      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Long]]
       properties <- c
         .downField("properties")
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
@@ -166,14 +171,14 @@ object InstanceDefinition {
     )
 
   private def instancePropertyDefinitionBasedEdgeDefinitionDecoder(
-      instPropDefMap: Map[String, Map[String, Map[String, InstancePropertyDefinition]]]
+      instPropDefMap: Map[String, Map[String, Map[String, TypePropertyDefinition]]]
   ): Decoder[EdgeDefinition] = (c: HCursor) =>
     for {
       relation <- c.downField("relation").as[DirectRelationReference]
       space <- c.downField("space").as[String]
       externalId <- c.downField("externalId").as[String]
-      createdTime <- c.downField("createdTime").as[Option[Instant]]
-      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Instant]]
+      createdTime <- c.downField("createdTime").as[Option[Long]]
+      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Long]]
       properties <- c
         .downField("properties")
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
@@ -194,7 +199,7 @@ object InstanceDefinition {
 
   private def toInstancePropertyType(
       instantPropTypeJson: Json,
-      t: InstancePropertyDefinition
+      t: TypePropertyDefinition
   ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
       case PropertyType.DirectNodeRelationProperty(_) =>

@@ -39,12 +39,13 @@ class Views[F[_]](val requestSession: RequestSession[F])
       value => value.items
     )
 
-  def deleteItems(externalIds: Seq[DataModelReference]): F[Unit] =
-    requestSession.post[Unit, Unit, Items[DataModelReference]](
-      Items(externalIds),
-      uri"$baseUrl/delete",
-      _ => ()
-    )
+  def deleteItems(externalIds: Seq[DataModelReference]): F[Seq[DataModelReference]] =
+    requestSession
+      .post[Seq[DataModelReference], Items[DataModelReference], Items[DataModelReference]](
+        Items(externalIds),
+        uri"$baseUrl/delete",
+        value => value.items
+      )
 
   def listWithCursor(
       cursor: Option[String],
@@ -91,10 +92,14 @@ class Views[F[_]](val requestSession: RequestSession[F])
 }
 
 object Views {
-  implicit val viewDefinitionDecoder: Decoder[ViewDefinition] =
-    deriveDecoder[ViewDefinition]
+  implicit val viewDefinitionDecoder: Decoder[ViewDefinition] = deriveDecoder[ViewDefinition]
   implicit val viewDefinitionItemsDecoder: Decoder[Items[ViewDefinition]] =
     deriveDecoder[Items[ViewDefinition]]
+  implicit val dataModelReferenceDecoder: Decoder[DataModelReference] =
+    deriveDecoder[DataModelReference]
+  implicit val dataModelReferenceItemsDecoder: Decoder[Items[DataModelReference]] =
+    deriveDecoder[Items[DataModelReference]]
+
   implicit val viewDefinitionItemsWithCursorDecoder: Decoder[ItemsWithCursor[ViewDefinition]] =
     deriveDecoder[ItemsWithCursor[ViewDefinition]]
 
@@ -102,7 +107,8 @@ object Views {
     deriveEncoder[ViewCreateDefinition]
   implicit val viewCreateDefinitionItemsEncoder: Encoder[Items[ViewCreateDefinition]] =
     deriveEncoder[Items[ViewCreateDefinition]]
-
+  implicit val dataModelReferenceEncoder: Encoder[DataModelReference] =
+    deriveEncoder[DataModelReference]
   implicit val dataModelReferenceItemsEncoder: Encoder[Items[DataModelReference]] =
     deriveEncoder[Items[DataModelReference]]
 }

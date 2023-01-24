@@ -5,7 +5,13 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import io.circe._
 
-import java.time.format.DateTimeFormatter
+import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
+import java.time.temporal.ChronoField.{
+  HOUR_OF_DAY,
+  MINUTE_OF_HOUR,
+  NANO_OF_SECOND,
+  SECOND_OF_MINUTE
+}
 import java.time.{LocalDate, ZonedDateTime}
 import scala.util.{Success, Try}
 
@@ -33,7 +39,21 @@ object InstancePropertyValue {
   final case class Timestamp(value: ZonedDateTime) extends InstancePropertyValue
 
   object Timestamp {
-    val formatter: DateTimeFormatter = DateTimeFormatter.ISO_ZONED_DATE_TIME
+    val formatter: DateTimeFormatter = new DateTimeFormatterBuilder().parseCaseInsensitive
+      .append(DateTimeFormatter.ISO_LOCAL_DATE)
+      .appendLiteral('T')
+      .appendValue(HOUR_OF_DAY, 2)
+      .appendLiteral(':')
+      .appendValue(MINUTE_OF_HOUR, 2)
+      .optionalStart
+      .appendLiteral(':')
+      .appendValue(SECOND_OF_MINUTE, 2)
+      .optionalStart
+      .appendFraction(NANO_OF_SECOND, 0, 3, true)
+      .optionalStart
+      .parseCaseSensitive
+      .appendOffsetId()
+      .toFormatter()
   }
 
   final case class Object(value: Json) extends InstancePropertyValue

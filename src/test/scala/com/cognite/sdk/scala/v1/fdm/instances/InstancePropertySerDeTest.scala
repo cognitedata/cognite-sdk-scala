@@ -181,8 +181,8 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
           NodeDefinition(
             "space-1",
             "space-ext-id-1",
-            Some(Instant.ofEpochMilli(createdTime)),
-            Some(Instant.ofEpochMilli(lastUpdatedTime)),
+            Some(createdTime),
+            Some(lastUpdatedTime),
             properties = Some(
               Map(
                 "space-name-1" -> Map(
@@ -213,8 +213,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
           Map(
             "space-name-1" -> Map(
               "view-or-container-id-1" -> Map(
-                "property-identifier11" -> InstancePropertyDefinition(
-                  "property-identifier11",
+                "property-identifier11" -> TypePropertyDefinition(
                   Some(true),
                   Some(false),
                   Some(PropertyDefaultValue.String("default-str")),
@@ -222,8 +221,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   Some("property-identifier11"),
                   PropertyType.TextProperty(Some(false), Some("ucs_basic"))
                 ),
-                "property-identifier12" -> InstancePropertyDefinition(
-                  "property-identifier12",
+                "property-identifier12" -> TypePropertyDefinition(
                   Some(true),
                   Some(false),
                   Some(PropertyDefaultValue.Int32(0)),
@@ -233,8 +231,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                 )
               ),
               "view-or-container-id-2" -> Map(
-                "property-identifier21" -> InstancePropertyDefinition(
-                  "property-identifier21",
+                "property-identifier21" -> TypePropertyDefinition(
                   Some(true),
                   Some(false),
                   Some(PropertyDefaultValue.Boolean(false)),
@@ -242,8 +239,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   Some("property-identifier21"),
                   PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(false))
                 ),
-                "property-identifier22" -> InstancePropertyDefinition(
-                  "property-identifier22",
+                "property-identifier22" -> TypePropertyDefinition(
                   Some(true),
                   Some(false),
                   None,
@@ -255,8 +251,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
             ),
             "space-name-2" -> Map(
               "view-or-container-id-3" -> Map(
-                "property-identifier31" -> InstancePropertyDefinition(
-                  "property-identifier31",
+                "property-identifier31" -> TypePropertyDefinition(
                   Some(true),
                   Some(false),
                   Some(PropertyDefaultValue.String("default-str")),
@@ -264,8 +259,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   Some("property-identifier31"),
                   PropertyType.TextProperty(Some(false), Some("ucs_basic"))
                 ),
-                "property-identifier32" -> InstancePropertyDefinition(
-                  "property-identifier32",
+                "property-identifier32" -> TypePropertyDefinition(
                   Some(true),
                   Some(false),
                   Some(PropertyDefaultValue.Int32(0)),
@@ -275,8 +269,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                 )
               ),
               "view-or-container-id-4" -> Map(
-                "property-identifier41" -> InstancePropertyDefinition(
-                  "property-identifier41",
+                "property-identifier41" -> TypePropertyDefinition(
                   Some(true),
                   Some(false),
                   Some(PropertyDefaultValue.Boolean(false)),
@@ -284,8 +277,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   Some("property-identifier41"),
                   PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(false))
                 ),
-                "property-identifier42" -> InstancePropertyDefinition(
-                  "property-identifier42",
+                "property-identifier42" -> TypePropertyDefinition(
                   Some(true),
                   Some(false),
                   None,

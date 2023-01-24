@@ -9,7 +9,7 @@ import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.{
 
 final case class InstanceFilterResponse(
     items: Seq[InstanceDefinition],
-    typing: Option[Map[String, Map[String, Map[String, InstancePropertyDefinition]]]],
+    typing: Option[Map[String, Map[String, Map[String, TypePropertyDefinition]]]],
     nextCursor: Option[String]
 )
 
@@ -20,7 +20,7 @@ object InstanceFilterResponse {
     for {
       typing <- c
         .downField("typing")
-        .as[Option[Map[String, Map[String, Map[String, InstancePropertyDefinition]]]]]
+        .as[Option[Map[String, Map[String, Map[String, TypePropertyDefinition]]]]]
       nextCursor <- c.downField("nextCursor").as[Option[String]]
       items <- c
         .downField("items")

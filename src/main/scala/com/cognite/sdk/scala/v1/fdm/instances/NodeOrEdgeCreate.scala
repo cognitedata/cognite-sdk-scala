@@ -8,7 +8,10 @@ import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor}
 
-sealed abstract class NodeOrEdgeCreate extends Product with Serializable
+sealed abstract class NodeOrEdgeCreate extends Product with Serializable {
+  val space: String
+  val externalId: String
+}
 
 object NodeOrEdgeCreate {
 

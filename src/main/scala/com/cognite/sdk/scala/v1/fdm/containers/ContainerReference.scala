@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.containers
 
-import com.cognite.sdk.scala.v1.fdm.common.refs.{SourceReference, SourceType}
+import com.cognite.sdk.scala.v1.fdm.common.sources.{SourceReference, SourceType}
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.{Decoder, Encoder}
 

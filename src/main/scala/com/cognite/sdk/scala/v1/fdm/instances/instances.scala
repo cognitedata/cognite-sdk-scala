@@ -5,7 +5,7 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition
-import com.cognite.sdk.scala.v1.fdm.common.refs.SourceReference
+import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 
@@ -37,13 +37,14 @@ final case class InstanceRetrieve(
     instanceType: InstanceType,
     externalId: String,
     space: String,
-    sources: Option[Seq[SourceReference]]
+    sources: Option[Seq[InstanceSource]]
 )
+
+final case class InstanceSource(source: SourceReference)
 
 final case class InstanceRetrieveRequest(items: Seq[InstanceRetrieve], includeTyping: Boolean)
 
-final case class InstancePropertyDefinition(
-    identifier: String,
+final case class TypePropertyDefinition(
     nullable: Option[Boolean] = Some(true),
     autoIncrement: Option[Boolean] = Some(false),
     defaultValue: Option[PropertyDefaultValue],
