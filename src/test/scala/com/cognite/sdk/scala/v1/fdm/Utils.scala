@@ -33,7 +33,7 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
+//    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
     //    DirectNodeRelationProperty(container = None)
   )
 

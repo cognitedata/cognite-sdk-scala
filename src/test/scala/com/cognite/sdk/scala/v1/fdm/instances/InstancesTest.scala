@@ -51,11 +51,11 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile with Befor
     val nodeContainerCreateDefinition1 = createTestContainer(space, "test_node_container_1", Usage.Node)
     val nodeContainerCreateDefinition2 = createTestContainer(space, "test_node_container_2", Usage.Node)
 
-    val viewVersion = "v2"
-    val allViewExternalId = s"test_edge_node_view1"
-    val edgeViewExternalId = s"test_edge_view1"
-    val nodeViewExternalId1 = s"test_node_view_11"
-    val nodeViewExternalId2 = s"test_node_view_21"
+    val viewVersion = "v1"
+    val allViewExternalId = s"test_edge_node_view"
+    val edgeViewExternalId = s"test_edge_view"
+    val nodeViewExternalId1 = s"test_node_view_1"
+    val nodeViewExternalId2 = s"test_node_view_2"
 
     val containersCreated = blueFieldClient.containers.createItems(
       Seq(

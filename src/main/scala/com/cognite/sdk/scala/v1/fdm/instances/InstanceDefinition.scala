@@ -210,6 +210,7 @@ object InstanceDefinition {
       case t => toInstancePropertyTypeOfNonList(instantPropTypeJson, t)
     }
 
+  // scalastyle:off cyclomatic.complexity method.length
   private def toInstancePropertyTypeOfList(
       instantPropTypeJson: Json,
       t: PropertyType
@@ -223,17 +224,19 @@ object InstanceDefinition {
         Decoder[Seq[Boolean]]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.BooleanList.apply)
-      case PropertyType.PrimitiveProperty(
-            PrimitivePropType.Int32 | PrimitivePropType.Int64,
-            Some(true)
-          ) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(true)) =>
+        Decoder[Seq[Int]]
+          .decodeJson(instantPropTypeJson)
+          .map(InstancePropertyValue.Int32List.apply)
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Int64, Some(true)) =>
         Decoder[Seq[Long]]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Int64List.apply)
-      case PropertyType.PrimitiveProperty(
-            PrimitivePropType.Float32 | PrimitivePropType.Float64,
-            Some(true)
-          ) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Float32, Some(true)) =>
+        Decoder[Seq[Float]]
+          .decodeJson(instantPropTypeJson)
+          .map(InstancePropertyValue.Float32List.apply)
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Float64, Some(true)) =>
         Decoder[Seq[Double]]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Float64List.apply)
@@ -257,7 +260,9 @@ object InstanceDefinition {
           )
         )
     }
+  // scalastyle:on cyclomatic.complexity method.length
 
+  // scalastyle:off cyclomatic.complexity method.length
   private def toInstancePropertyTypeOfNonList(
       instantPropTypeJson: Json,
       t: PropertyType
@@ -271,17 +276,19 @@ object InstanceDefinition {
         Decoder[Boolean]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Boolean.apply)
-      case PropertyType.PrimitiveProperty(
-            PrimitivePropType.Int32 | PrimitivePropType.Int64,
-            None | Some(false)
-          ) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Int32, None | Some(false)) =>
+        Decoder[Int]
+          .decodeJson(instantPropTypeJson)
+          .map(InstancePropertyValue.Int32.apply)
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Int64, None | Some(false)) =>
         Decoder[Long]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Int64.apply)
-      case PropertyType.PrimitiveProperty(
-            PrimitivePropType.Float32 | PrimitivePropType.Float64,
-            None | Some(false)
-          ) =>
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Float32, None | Some(false)) =>
+        Decoder[Float]
+          .decodeJson(instantPropTypeJson)
+          .map(InstancePropertyValue.Float32.apply)
+      case PropertyType.PrimitiveProperty(PrimitivePropType.Float64, None | Some(false)) =>
         Decoder[Double]
           .decodeJson(instantPropTypeJson)
           .map(InstancePropertyValue.Float64.apply)
@@ -305,4 +312,5 @@ object InstanceDefinition {
           )
         )
     }
+  // scalastyle:on cyclomatic.complexity method.length
 }
