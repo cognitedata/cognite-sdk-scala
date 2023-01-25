@@ -243,8 +243,7 @@ object Utils {
     )
   }
 
-  def createEdgeWriteData(
-                           space: String,
+  def createEdgeWriteData(space: String,
                            edgeExternalId: String,
                            sourceRef: SourceReference,
                            propsMap: Map[String, PropertyDefinition],

@@ -8,7 +8,6 @@ import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteD
 import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerId, ContainerReference}
 import com.cognite.sdk.scala.v1.fdm.views._
-import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.duration.DurationInt
 
@@ -23,8 +22,7 @@ import scala.concurrent.duration.DurationInt
     "org.wartremover.warts.IterableOps"
   )
 )
-// scalastyle:off
-class InstancesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAndAfterAll{
+class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val space = "test-space-scala-sdk"
 
   ignore should "pass" in {
@@ -45,7 +43,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile with Befor
     1 shouldBe 1
   }
 
-  it should "CRUD instances with all possible" in {
+  it should "CRUD instances with all property types" in {
     val allContainerCreateDefinition = createTestContainer(space, "test_edge_node_container", Usage.All)
     val edgeContainerCreateDefinition = createTestContainer(space, "test_edge_container", Usage.Edge)
     val nodeContainerCreateDefinition1 = createTestContainer(space, "test_node_container_1", Usage.Node)
@@ -57,25 +55,20 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile with Befor
     val nodeViewExternalId1 = s"test_node_view_1"
     val nodeViewExternalId2 = s"test_node_view_2"
 
-    val containersCreated = blueFieldClient.containers.createItems(
-      Seq(
-        allContainerCreateDefinition,
-        edgeContainerCreateDefinition,
-        nodeContainerCreateDefinition1,
-        nodeContainerCreateDefinition2
-      )
-    ).unsafeRunSync()
-    containersCreated.length shouldBe 4
+    val containersCreated = createContainers(Seq(
+      allContainerCreateDefinition,
+      edgeContainerCreateDefinition,
+      nodeContainerCreateDefinition1,
+      nodeContainerCreateDefinition2
+    )).unsafeRunSync()
+    containersCreated.size shouldBe 4
 
-    val createdViewsMap = (IO.sleep(2.seconds) *> blueFieldClient.views.createItems(
-      items = Seq(
-        toViewCreateDef(allViewExternalId, viewVersion, allContainerCreateDefinition),
-        toViewCreateDef(edgeViewExternalId, viewVersion, edgeContainerCreateDefinition),
-        toViewCreateDef(nodeViewExternalId1, viewVersion, nodeContainerCreateDefinition1),
-        toViewCreateDef(nodeViewExternalId2, viewVersion, nodeContainerCreateDefinition2),
-      )
-    ))
-      .unsafeRunSync().map(v => v.externalId -> v).toMap
+    val createdViewsMap = (IO.sleep(2.seconds) *> createViews(Seq(
+      toViewCreateDef(allViewExternalId, viewVersion, allContainerCreateDefinition),
+      toViewCreateDef(edgeViewExternalId, viewVersion, edgeContainerCreateDefinition),
+      toViewCreateDef(nodeViewExternalId1, viewVersion, nodeContainerCreateDefinition1),
+      toViewCreateDef(nodeViewExternalId2, viewVersion, nodeContainerCreateDefinition2),
+    ))).unsafeRunSync()
 
     val nodeView1 = createdViewsMap(nodeViewExternalId1)
     val nodeView2 = createdViewsMap(nodeViewExternalId2)
@@ -87,73 +80,90 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile with Befor
 
     val startNode = DirectRelationReference(space, externalId = node1WriteData.externalId)
     val endNode = DirectRelationReference(space, externalId = node2WriteData.externalId)
-    val edgeWriteData = createEdgeWriteData(space, s"edge_ext_id_$edgeViewExternalId", edgeView.toSourceReference, edgeView.properties, startNode = startNode, endNode = endNode)
+    val edgeWriteData = createEdgeWriteData(
+      space,
+      s"edge_ext_id_$edgeViewExternalId",
+      edgeView.toSourceReference,
+      edgeView.properties,
+      startNode = startNode,
+      endNode = endNode
+    )
     val nodeOrEdgeWriteData = Seq(
-      createEdgeWriteData(space, s"nodes_or_edges_ext_id_${allViewExternalId}_edges", allView.toSourceReference, allView.properties, startNode = startNode, endNode = endNode),
-      createNodeWriteData(space, s"nodes_or_edges_ext_id_${allViewExternalId}_nodes", allView.toSourceReference, allView.properties)
+      createEdgeWriteData(
+        space,
+        s"nodes_or_edges_ext_id_${allViewExternalId}_edges",
+        allView.toSourceReference,
+        allView.properties,
+        startNode = startNode,
+        endNode = endNode
+      ),
+      createNodeWriteData(
+        space,
+        s"nodes_or_edges_ext_id_${allViewExternalId}_nodes",
+        allView.toSourceReference,
+        allView.properties
+      )
     )
 
-    val nodeView1Instances = (IO.sleep(2.seconds) *> blueFieldClient.instances.createItems(
-      InstanceCreate(items = Seq(node1WriteData))
-    )).unsafeRunSync()
-    val nodeView2Instances = blueFieldClient.instances.createItems(
-      InstanceCreate(items = Seq(node2WriteData))
-    ).unsafeRunSync()
-    val nodeEdgeInstances = blueFieldClient.instances.createItems(
-      InstanceCreate(items = Seq(edgeWriteData))
-    ).unsafeRunSync()
-    val nodeOrEdgeInstances = blueFieldClient.instances.createItems(
-      InstanceCreate(items = nodeOrEdgeWriteData)
-    ).unsafeRunSync()
+    (IO.sleep(2.seconds) *> createInstance(Seq(node1WriteData))).unsafeRunSync()
+    createInstance(Seq(node2WriteData)).unsafeRunSync()
+    createInstance(Seq(edgeWriteData)).unsafeRunSync()
+    createInstance(nodeOrEdgeWriteData).unsafeRunSync()
 
-    nodeView1Instances.isEmpty shouldBe false
-    nodeView2Instances.isEmpty shouldBe false
-    nodeEdgeInstances.isEmpty shouldBe false
-    nodeOrEdgeInstances.isEmpty shouldBe false
+    val readNodesMapOfNode1 = (IO.sleep(2.seconds) *> fetchNodeInstance(nodeView1.toSourceReference, node1WriteData.externalId)).unsafeRunSync()
+    val readNodesMapOfNode2 = fetchNodeInstance(nodeView2.toSourceReference, node2WriteData.externalId).unsafeRunSync()
+    val readEdgesMapOfEdge = fetchEdgeInstance(edgeView.toSourceReference, edgeWriteData.externalId).unsafeRunSync()
+    val readEdgesMapOfAll = fetchEdgeInstance(allView.toSourceReference, nodeOrEdgeWriteData.head.externalId).unsafeRunSync()
+    val readNodesMapOfAll = fetchNodeInstance(allView.toSourceReference, nodeOrEdgeWriteData(1).externalId).unsafeRunSync()
 
-    val readNodesOfNode1 = (IO.sleep(2.seconds) *> blueFieldClient.instances.retrieveByExternalIds(items = Seq(
-      InstanceRetrieve(InstanceType.Node, node1WriteData.externalId, node1WriteData.space, Some(Seq(InstanceSource(nodeView1.toSourceReference)))))
-    )).unsafeRunSync().items.collect {
-      case n: InstanceDefinition.NodeDefinition => n
-    }
-    val readNodesOfNode2 = blueFieldClient.instances.retrieveByExternalIds(items = Seq(
-      InstanceRetrieve(InstanceType.Node, node2WriteData.externalId, node2WriteData.space, Some(Seq(InstanceSource(nodeView2.toSourceReference)))))
-    ).unsafeRunSync().items.collect {
-      case n: InstanceDefinition.NodeDefinition => n
-    }
-    val readEdges = blueFieldClient.instances.retrieveByExternalIds(items = Seq(
-      InstanceRetrieve(InstanceType.Edge, edgeWriteData.externalId, edgeWriteData.space, Some(Seq(InstanceSource(edgeView.toSourceReference)))))
-    ).unsafeRunSync().items.collect {
-      case n: InstanceDefinition.NodeDefinition => n
-    }
-    val readEdgesOfAll = blueFieldClient.instances.retrieveByExternalIds(items = Seq(
-      InstanceRetrieve(InstanceType.Edge, nodeOrEdgeWriteData.head.externalId, space, Some(Seq(InstanceSource(allView.toSourceReference)))))
-    ).unsafeRunSync().items.collect {
-      case n: InstanceDefinition.EdgeDefinition => n
-    }
-    val readNodesOfAll = blueFieldClient.instances.retrieveByExternalIds(items = Seq(
-      InstanceRetrieve(InstanceType.Node, nodeOrEdgeWriteData(1).externalId, space, Some(Seq(InstanceSource(allView.toSourceReference)))))
-    ).unsafeRunSync().items.collect {
-      case n: InstanceDefinition.NodeDefinition => n
-    }
+    writeDataToMap(node1WriteData) should contain theSameElementsAs readNodesMapOfNode1
+    writeDataToMap(node2WriteData) should contain theSameElementsAs readNodesMapOfNode2
+    writeDataToMap(edgeWriteData) should contain theSameElementsAs readEdgesMapOfEdge
+    writeDataToMap(nodeOrEdgeWriteData.head) should contain theSameElementsAs readEdgesMapOfAll
+    writeDataToMap(nodeOrEdgeWriteData(1)) should contain theSameElementsAs readNodesMapOfAll
+  }
 
-    readNodesOfNode1.isEmpty shouldBe false
-    readNodesOfNode2.isEmpty shouldBe false
-    readEdges.isEmpty shouldBe false
-    readEdgesOfAll.isEmpty shouldBe false
-    readNodesOfAll.isEmpty shouldBe false
+  private def writeDataToMap(writeData: NodeOrEdgeCreate) = writeData match {
+    case n: NodeOrEdgeCreate.NodeWrite => n.sources.flatMap(d => d.properties.getOrElse(Map.empty)).toMap
+    case e: NodeOrEdgeCreate.EdgeWrite => e.sources.flatMap(d => d.properties.getOrElse(Map.empty)).toMap
+  }
 
-    val node1PropMap = readNodesOfNode1.map(n => n.externalId -> n.properties.getOrElse(Map.empty)).toMap
-    val node2PropMap = readNodesOfNode2.map(n => n.externalId -> n.properties.getOrElse(Map.empty)).toMap
-    val edgesPropMap = readEdges.map(n => n.externalId -> n.properties.getOrElse(Map.empty)).toMap
-    val nodesOfNodesOrEdgesPropMap = readNodesOfAll.map(n => n.externalId -> n.properties.getOrElse(Map.empty)).toMap
-    val edgedOfNodesOrEdgesPropMap = readEdgesOfAll.map(n => n.externalId -> n.properties.getOrElse(Map.empty)).toMap
+  private def createContainers(items: Seq[ContainerCreateDefinition]) = {
+    blueFieldClient.containers.createItems(items).map(r => r.map(v => v.externalId -> v).toMap)
+  }
 
-    node1PropMap.nonEmpty shouldBe true
-    node2PropMap.nonEmpty shouldBe true
-    edgesPropMap.nonEmpty shouldBe true
-    nodesOfNodesOrEdgesPropMap.nonEmpty shouldBe true
-    edgedOfNodesOrEdgesPropMap.nonEmpty shouldBe true
+  private def createViews(items: Seq[ViewCreateDefinition]) = {
+    blueFieldClient.views.createItems(items).map(r => r.map(v => v.externalId -> v).toMap)
+  }
+
+  private def createInstance(writeData: Seq[NodeOrEdgeCreate]): IO[Seq[SlimNodeOrEdge]] = {
+    blueFieldClient.instances.createItems(
+      InstanceCreate(items = writeData)
+    )
+  }
+
+  private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) = {
+    blueFieldClient.instances.retrieveByExternalIds(items = Seq(
+      InstanceRetrieve(InstanceType.Node, instanceExternalId, viewRef.space, Some(Seq(InstanceSource(viewRef)))))
+    ).map { r =>
+      r.items.collect {
+        case n: InstanceDefinition.NodeDefinition => n
+      }.flatMap { n =>
+        n.properties.getOrElse(Map.empty).values.flatMap(_.values.flatMap(_.values)).map(i => n.externalId -> i)
+      }.toMap
+    }
+  }
+
+  private def fetchEdgeInstance(viewRef: ViewReference, instanceExternalId: String) = {
+    blueFieldClient.instances.retrieveByExternalIds(items = Seq(
+      InstanceRetrieve(InstanceType.Edge, instanceExternalId, viewRef.space, Some(Seq(InstanceSource(viewRef)))))
+    ).map { r =>
+      r.items.collect {
+        case n: InstanceDefinition.EdgeDefinition => n
+      }.flatMap { n =>
+        n.properties.getOrElse(Map.empty).values.flatMap(_.values.flatMap(_.values)).map(i => n.externalId -> i)
+      }.toMap
+    }
   }
 
   private def toViewCreateDef(viewExternalId: String, viewVersion: String, container: ContainerCreateDefinition): ViewCreateDefinition = {
@@ -169,29 +179,5 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile with Befor
       },
       implements = None,
     )
-  }
-
-  override def beforeAll(): Unit = {
-    //    blueFieldClient.containers.delete(
-    //      containersRefs = Seq(
-    //        ContainerId(space, "test_edge_node_container"),
-    //        ContainerId(space, "test_edge_container"),
-    //        ContainerId(space, "test_node_container_1"),
-    //        ContainerId(space, "test_node_container_2"),
-    //      )
-    //    ).unsafeRunSync()
-    ()
-  }
-
-  override def afterAll(): Unit = {
-    //    blueFieldClient.containers.delete(
-    //      containersRefs = Seq(
-    //        ContainerId(space, "test_edge_node_container"),
-    //        ContainerId(space, "test_edge_container"),
-    //        ContainerId(space, "test_node_container_1"),
-    //        ContainerId(space, "test_node_container_2"),
-    //      )
-    //    ).unsafeRunSync()
-    ()
   }
 }
