@@ -186,6 +186,17 @@ class GenericClient[F[_]](
   lazy val labels = new Labels[F](requestSession)
   lazy val relationships = new Relationships[F](requestSession)
 
+  lazy val wellDataLayerRequestSession: RequestSession[F] =
+    RequestSession(
+      applicationName,
+      uri"$uri/api/${apiVersion.getOrElse("playground")}/projects/$projectName",
+      sttpBackend,
+      authProvider,
+      clientTag,
+      cdfVersion
+    )
+  lazy val wdl = new WellDataLayer[F](wellDataLayerRequestSession)
+
   lazy val rawDatabases = new RawDatabases[F](requestSession)
   def rawTables(database: String): RawTables[F] = new RawTables(requestSession, database)
   def rawRows(database: String, table: String): RawRows[F] =
