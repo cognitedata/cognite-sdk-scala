@@ -9,6 +9,7 @@ import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerId, ContainerReference}
 import com.cognite.sdk.scala.v1.fdm.views._
 
+import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.DurationInt
 
 @SuppressWarnings(
@@ -33,12 +34,15 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
       ContainerId(space, "test_node_container_2"),
     )).unsafeRunSync()
 
-    blueFieldClient.views.deleteItems(Seq(
-      DataModelReference(space, "test_edge_view", "v1"),
-      DataModelReference(space, "test_node_view_1", "v1"),
-      DataModelReference(space, "test_node_view_2", "v1"),
-      DataModelReference(space, "test_edge_node_view", "v1"),
-    )).unsafeRunSync()
+    blueFieldClient.views.deleteItems(
+      (1 to 23).map(i => s"v$i").flatMap { v =>
+      Seq(
+        DataModelReference(space, "test_edge_view", v),
+        DataModelReference(space, "test_node_view_1", v),
+        DataModelReference(space, "test_node_view_2", v),
+        DataModelReference(space, "test_edge_node_view", v),
+      )
+    }).unsafeRunSync()
 
     1 shouldBe 1
   }
@@ -49,7 +53,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     val nodeContainerCreateDefinition1 = createTestContainer(space, "test_node_container_1", Usage.Node)
     val nodeContainerCreateDefinition2 = createTestContainer(space, "test_node_container_2", Usage.Node)
 
-    val viewVersion = "v1"
+    val viewVersion = "v2"
     val allViewExternalId = s"test_edge_node_view"
     val edgeViewExternalId = s"test_edge_view"
     val nodeViewExternalId1 = s"test_node_view_1"
@@ -75,9 +79,18 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     val edgeView = createdViewsMap(edgeViewExternalId)
     val allView = createdViewsMap(allViewExternalId)
 
-    val node1WriteData = createNodeWriteData(space, s"node_ext_id_$nodeViewExternalId1", nodeView1.toSourceReference, nodeView1.properties)
-    val node2WriteData = createNodeWriteData(space, s"node_ext_id_$nodeViewExternalId2", nodeView2.toSourceReference, nodeView2.properties)
-
+    val node1WriteData = createNodeWriteData(
+      space,
+      s"node_ext_id_$nodeViewExternalId1",
+      nodeView1.toSourceReference,
+      nodeView1.properties
+    )
+    val node2WriteData = createNodeWriteData(
+      space,
+      s"node_ext_id_$nodeViewExternalId2",
+      nodeView2.toSourceReference,
+      nodeView2.properties
+    )
     val startNode = DirectRelationReference(space, externalId = node1WriteData.externalId)
     val endNode = DirectRelationReference(space, externalId = node2WriteData.externalId)
     val edgeWriteData = createEdgeWriteData(
@@ -116,11 +129,11 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     val readEdgesMapOfAll = fetchEdgeInstance(allView.toSourceReference, nodeOrEdgeWriteData.head.externalId).unsafeRunSync()
     val readNodesMapOfAll = fetchNodeInstance(allView.toSourceReference, nodeOrEdgeWriteData(1).externalId).unsafeRunSync()
 
-    writeDataToMap(node1WriteData) should contain theSameElementsAs readNodesMapOfNode1
-    writeDataToMap(node2WriteData) should contain theSameElementsAs readNodesMapOfNode2
-    writeDataToMap(edgeWriteData) should contain theSameElementsAs readEdgesMapOfEdge
-    writeDataToMap(nodeOrEdgeWriteData.head) should contain theSameElementsAs readEdgesMapOfAll
-    writeDataToMap(nodeOrEdgeWriteData(1)) should contain theSameElementsAs readNodesMapOfAll
+    instantPropertyMapEquals(writeDataToMap(node1WriteData), readNodesMapOfNode1) shouldBe true
+    instantPropertyMapEquals(writeDataToMap(node2WriteData), readNodesMapOfNode2) shouldBe true
+    instantPropertyMapEquals(writeDataToMap(edgeWriteData), readEdgesMapOfEdge) shouldBe true
+    instantPropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData.head), readEdgesMapOfAll) shouldBe true
+    instantPropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData(1)), readNodesMapOfAll) shouldBe true
   }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate) = writeData match {
@@ -144,25 +157,27 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
 
   private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) = {
     blueFieldClient.instances.retrieveByExternalIds(items = Seq(
-      InstanceRetrieve(InstanceType.Node, instanceExternalId, viewRef.space, Some(Seq(InstanceSource(viewRef)))))
+      InstanceRetrieve(InstanceType.Node, instanceExternalId, viewRef.space, Some(Seq(InstanceSource(viewRef))))),
+      includeTyping = true
     ).map { r =>
       r.items.collect {
         case n: InstanceDefinition.NodeDefinition => n
-      }.flatMap { n =>
-        n.properties.getOrElse(Map.empty).values.flatMap(_.values.flatMap(_.values)).map(i => n.externalId -> i)
-      }.toMap
+      }.map { n =>
+        n.properties.getOrElse(Map.empty).values.flatMap(_.values).foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
+      }.foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
     }
   }
 
   private def fetchEdgeInstance(viewRef: ViewReference, instanceExternalId: String) = {
     blueFieldClient.instances.retrieveByExternalIds(items = Seq(
-      InstanceRetrieve(InstanceType.Edge, instanceExternalId, viewRef.space, Some(Seq(InstanceSource(viewRef)))))
+      InstanceRetrieve(InstanceType.Edge, instanceExternalId, viewRef.space, Some(Seq(InstanceSource(viewRef))))),
+      includeTyping = true
     ).map { r =>
       r.items.collect {
         case n: InstanceDefinition.EdgeDefinition => n
-      }.flatMap { n =>
-        n.properties.getOrElse(Map.empty).values.flatMap(_.values.flatMap(_.values)).map(i => n.externalId -> i)
-      }.toMap
+      }.map { n =>
+        n.properties.getOrElse(Map.empty).values.flatMap(_.values).foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
+      }.foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
     }
   }
 
@@ -179,5 +194,31 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
       },
       implements = None,
     )
+  }
+
+  // compare timestamps adhering to the accepted format
+  private def instantPropertyMapEquals(expected: Map[String, InstancePropertyValue], actual: Map[String, InstancePropertyValue]): Boolean = {
+    val sizeEquals = actual.size === expected.size
+    sizeEquals && expected.forall {
+      case (k, expVal) =>
+        val keyEquals = actual.contains(k)
+        def valueEquals: Boolean = actual(k) match {
+          case actVal: InstancePropertyValue.Timestamp =>
+            val expTs = expVal.asInstanceOf[InstancePropertyValue.Timestamp].value.truncatedTo(ChronoUnit.SECONDS)
+            expTs
+              .format(InstancePropertyValue.Timestamp.formatter) === actVal
+              .value
+              .truncatedTo(ChronoUnit.SECONDS)
+              .format(InstancePropertyValue.Timestamp.formatter)
+          case actVal: InstancePropertyValue.TimestampList =>
+            val expTs = expVal.asInstanceOf[InstancePropertyValue.TimestampList].value
+            expTs
+              .map(_.truncatedTo(ChronoUnit.SECONDS).format(InstancePropertyValue.Timestamp.formatter)) === actVal
+              .value
+              .map(_.truncatedTo(ChronoUnit.SECONDS).format(InstancePropertyValue.Timestamp.formatter))
+          case actVal => actVal === expVal
+        }
+        keyEquals && valueEquals
+    }
   }
 }

@@ -10,7 +10,7 @@ import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.{EdgeWrite, NodeW
 import com.cognite.sdk.scala.v1.fdm.instances.{DirectRelationReference, EdgeOrNodeData, InstancePropertyValue, NodeOrEdgeCreate}
 import io.circe.{Json, JsonObject}
 
-import java.time.{LocalDate, LocalDateTime, ZoneId, ZonedDateTime}
+import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.util.Random
 
 object Utils {
@@ -349,7 +349,7 @@ object Utils {
         )
       case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, Some(true)) =>
         InstancePropertyValue.TimestampList(
-          (1 to 10).toList.map(i => ZonedDateTime.now().minusDays(i.toLong))
+          (1 to 10).toList.map(i => LocalDateTime.now().minusDays(i.toLong).atZone(ZoneId.of("UTC")))
         )
       case PropertyType.PrimitiveProperty(PrimitivePropType.Json, Some(true)) =>
         InstancePropertyValue.ObjectList(
@@ -400,7 +400,7 @@ object Utils {
       case PropertyType.PrimitiveProperty(PrimitivePropType.Date, None | Some(false)) =>
         InstancePropertyValue.Date(LocalDate.now().minusDays(Random.nextInt(30).toLong))
       case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, None | Some(false)) =>
-        InstancePropertyValue.Timestamp(ZonedDateTime.now().minusDays(Random.nextInt(30).toLong))
+        InstancePropertyValue.Timestamp(LocalDateTime.now().minusDays(Random.nextInt(30).toLong).atZone(ZoneId.of("UTC")))
       case PropertyType.PrimitiveProperty(PrimitivePropType.Json, None | Some(false)) =>
         InstancePropertyValue.Object(
           Json.fromJsonObject(

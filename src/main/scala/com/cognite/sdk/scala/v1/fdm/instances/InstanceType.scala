@@ -13,7 +13,7 @@ object InstanceType {
 
   implicit val instantTypeDecoder: Decoder[InstanceType] = Decoder[String].emap {
     case "node" => Right(Node)
-    case "edge" => Right(Node)
+    case "edge" => Right(Edge)
     case other => Left(s"Invalid Instance Type: $other")
   }
 
