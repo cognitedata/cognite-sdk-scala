@@ -35,7 +35,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     )).unsafeRunSync()
 
     blueFieldClient.views.deleteItems(
-      (1 to 23).map(i => s"v$i").flatMap { v =>
+      (1 to 23).map(i => s"v${i.toString}").flatMap { v =>
       Seq(
         DataModelReference(space, "test_edge_view", v),
         DataModelReference(space, "test_node_view_1", v),
@@ -198,25 +198,25 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
 
   // compare timestamps adhering to the accepted format
   private def instantPropertyMapEquals(expected: Map[String, InstancePropertyValue], actual: Map[String, InstancePropertyValue]): Boolean = {
+    import InstancePropertyValue._
     val sizeEquals = actual.size === expected.size
     sizeEquals && expected.forall {
-      case (k, expVal) =>
+      case (k, expectedVal) =>
         val keyEquals = actual.contains(k)
-        def valueEquals: Boolean = actual(k) match {
-          case actVal: InstancePropertyValue.Timestamp =>
-            val expTs = expVal.asInstanceOf[InstancePropertyValue.Timestamp].value.truncatedTo(ChronoUnit.SECONDS)
+        def valueEquals = (actual(k), expectedVal) match {
+          case (actVal:Timestamp, expVal: Timestamp) =>
+            val expTs = expVal.value.truncatedTo(ChronoUnit.SECONDS)
             expTs
               .format(InstancePropertyValue.Timestamp.formatter) === actVal
               .value
               .truncatedTo(ChronoUnit.SECONDS)
               .format(InstancePropertyValue.Timestamp.formatter)
-          case actVal: InstancePropertyValue.TimestampList =>
-            val expTs = expVal.asInstanceOf[InstancePropertyValue.TimestampList].value
-            expTs
+          case (actVal: TimestampList, expVal: TimestampList) =>
+            expVal.value
               .map(_.truncatedTo(ChronoUnit.SECONDS).format(InstancePropertyValue.Timestamp.formatter)) === actVal
               .value
               .map(_.truncatedTo(ChronoUnit.SECONDS).format(InstancePropertyValue.Timestamp.formatter))
-          case actVal => actVal === expVal
+          case actVal => actVal === expectedVal
         }
         keyEquals && valueEquals
     }
