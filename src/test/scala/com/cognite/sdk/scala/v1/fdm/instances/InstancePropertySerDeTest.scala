@@ -66,7 +66,6 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |    "space-name-1": {
            |      "view-or-container-id-1": {
            |        "property-identifier11": {
-           |          "identifier": "property-identifier11",
            |          "nullable": true,
            |          "autoIncrement": false,
            |          "defaultValue": "default-str",
@@ -79,21 +78,19 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |          }
            |        },
            |        "property-identifier12": {
-           |          "identifier": "property-identifier12",
            |          "nullable": true,
            |          "autoIncrement": false,
            |          "defaultValue": 0,
            |          "description": "property-identifier12",
            |          "name": "property-identifier12",
            |          "type": {
-           |            "type": "int32",
+           |            "type": "int64",
            |            "list": false
            |          }
            |        }
            |      },
            |      "view-or-container-id-2": {
            |        "property-identifier21": {
-           |          "identifier": "property-identifier21",
            |          "nullable": true,
            |          "autoIncrement": false,
            |          "defaultValue": false,
@@ -105,7 +102,6 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |          }
            |        },
            |        "property-identifier22": {
-           |          "identifier": "property-identifier22",
            |          "nullable": true,
            |          "autoIncrement": false,
            |          "description": "property-identifier22",
@@ -120,7 +116,6 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |    "space-name-2": {
            |      "view-or-container-id-3": {
            |        "property-identifier31": {
-           |          "identifier": "property-identifier31",
            |          "nullable": true,
            |          "autoIncrement": false,
            |          "defaultValue": "default-str",
@@ -133,7 +128,6 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |          }
            |        },
            |        "property-identifier32": {
-           |          "identifier": "property-identifier32",
            |          "nullable": true,
            |          "autoIncrement": false,
            |          "defaultValue": 0,
@@ -147,7 +141,6 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |      },
            |      "view-or-container-id-4": {
            |        "property-identifier41": {
-           |          "identifier": "property-identifier41",
            |          "nullable": true,
            |          "autoIncrement": false,
            |          "defaultValue": false,
@@ -159,7 +152,6 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |          }
            |        },
            |        "property-identifier42": {
-           |          "identifier": "property-identifier42",
            |          "nullable": true,
            |          "autoIncrement": false,
            |          "description": "property-identifier42",
@@ -192,17 +184,17 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   ),
                   "view-or-container-id-2" -> Map(
                     "property-identifier21" -> InstancePropertyValue.Boolean(true),
-                    "property-identifier22" -> InstancePropertyValue.Int64List(Vector(1, 3, 4))
+                    "property-identifier22" -> InstancePropertyValue.Int64List(List(1, 3, 4))
                   )
                 ),
                 "space-name-2" -> Map(
                   "view-or-container-id-3" -> Map(
                     "property-identifier31" -> InstancePropertyValue.String("prop-id-2"),
-                    "property-identifier32" -> InstancePropertyValue.Int64(103)
+                    "property-identifier32" -> InstancePropertyValue.Int32(103)
                   ),
                   "view-or-container-id-4" -> Map(
                     "property-identifier41" -> InstancePropertyValue.Boolean(false),
-                    "property-identifier42" -> InstancePropertyValue.StringList(Vector("a", "b", "c"))
+                    "property-identifier42" -> InstancePropertyValue.StringList(List("a", "b", "c"))
                   )
                 )
               )
@@ -224,10 +216,10 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                 "property-identifier12" -> TypePropertyDefinition(
                   Some(true),
                   Some(false),
-                  Some(PropertyDefaultValue.Int32(0)),
+                  Some(PropertyDefaultValue.Int64(0)),
                   Some("property-identifier12"),
                   Some("property-identifier12"),
-                  PropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(false))
+                  PropertyType.PrimitiveProperty(PrimitivePropType.Int64, Some(false))
                 )
               ),
               "view-or-container-id-2" -> Map(

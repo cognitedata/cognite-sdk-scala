@@ -80,11 +80,11 @@ object InstanceDefinition {
   private val edgeDefinitionDecoder: Decoder[EdgeDefinition] = deriveDecoder
 
   def instancePropertyDefinitionBasedInstanceDecoder(
-      propertyDefinitionsMap: Option[
+      propertyTypeDefinitionsMap: Option[
         Map[String, Map[String, Map[String, TypePropertyDefinition]]]
       ]
   ): Decoder[InstanceDefinition] = (c: HCursor) =>
-    propertyDefinitionsMap match {
+    propertyTypeDefinitionsMap match {
       case Some(propDefMap) =>
         c.downField("type").as[InstanceType] match {
           case Left(err) => Left[DecodingFailure, InstanceDefinition](err)

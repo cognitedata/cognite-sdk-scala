@@ -90,8 +90,6 @@ class Instances[F[_]](val requestSession: RequestSession[F])
 object Instances {
   implicit val edgeOrNodeDataEncoder: Encoder[EdgeOrNodeData] = deriveEncoder
   implicit val directRelationReferenceEncoder: Encoder[DirectRelationReference] = deriveEncoder
-  implicit val instancePropertyDefinitionEncoder: Encoder[TypePropertyDefinition] =
-    deriveEncoder
   implicit val sourceEncoder: Encoder[InstanceSource] = deriveEncoder
   implicit val instanceRetrieveEncoder: Encoder[InstanceRetrieve] = deriveEncoder
   implicit val instanceDeleteRequestItemsEncoder: Encoder[Items[InstanceDeletionRequest]] =
@@ -107,8 +105,6 @@ object Instances {
   implicit val directRelationReferenceDecoder: Decoder[DirectRelationReference] = deriveDecoder
   implicit val InstanceSourceDecoder: Decoder[InstanceSource] = deriveDecoder
   implicit val instanceRetrieveDecoder: Decoder[InstanceRetrieve] = deriveDecoder
-  implicit val instancePropertyDefinitionDecoder: Decoder[TypePropertyDefinition] =
-    deriveDecoder
   implicit val slimNodeOrEdgeItemsDecoder: Decoder[Items[SlimNodeOrEdge]] = deriveDecoder
   implicit val instanceDeleteRequestItemsDecoder: Decoder[Items[InstanceDeletionRequest]] =
     deriveDecoder

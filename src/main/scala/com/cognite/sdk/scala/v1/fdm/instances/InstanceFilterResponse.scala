@@ -2,10 +2,6 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Decoder, Encoder, HCursor}
-import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.{
-  instancePropertyDefinitionDecoder,
-  instancePropertyDefinitionEncoder
-}
 
 final case class InstanceFilterResponse(
     items: Seq[InstanceDefinition],
