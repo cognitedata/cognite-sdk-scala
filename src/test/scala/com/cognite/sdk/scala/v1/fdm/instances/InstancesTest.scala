@@ -118,12 +118,12 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
       )
     )
 
-    (IO.sleep(2.seconds) *> createInstance(Seq(node1WriteData))).unsafeRunSync()
+    (IO.sleep(3.seconds) *> createInstance(Seq(node1WriteData))).unsafeRunSync()
     createInstance(Seq(node2WriteData)).unsafeRunSync()
     createInstance(Seq(edgeWriteData)).unsafeRunSync()
     createInstance(nodeOrEdgeWriteData).unsafeRunSync()
 
-    val readNodesMapOfNode1 = (IO.sleep(2.seconds) *> fetchNodeInstance(nodeView1.toSourceReference, node1WriteData.externalId)).unsafeRunSync()
+    val readNodesMapOfNode1 = (IO.sleep(3.seconds) *> fetchNodeInstance(nodeView1.toSourceReference, node1WriteData.externalId)).unsafeRunSync()
     val readNodesMapOfNode2 = fetchNodeInstance(nodeView2.toSourceReference, node2WriteData.externalId).unsafeRunSync()
     val readEdgesMapOfEdge = fetchEdgeInstance(edgeView.toSourceReference, edgeWriteData.externalId).unsafeRunSync()
     val readEdgesMapOfAll = fetchEdgeInstance(allView.toSourceReference, nodeOrEdgeWriteData.head.externalId).unsafeRunSync()
@@ -198,26 +198,33 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
 
   // compare timestamps adhering to the accepted format
   private def instantPropertyMapEquals(expected: Map[String, InstancePropertyValue], actual: Map[String, InstancePropertyValue]): Boolean = {
-    import InstancePropertyValue._
     val sizeEquals = actual.size === expected.size
     sizeEquals && expected.forall {
       case (k, expectedVal) =>
         val keyEquals = actual.contains(k)
-        def valueEquals = (actual(k), expectedVal) match {
-          case (actVal:Timestamp, expVal: Timestamp) =>
-            val expTs = expVal.value.truncatedTo(ChronoUnit.SECONDS)
-            expTs
-              .format(InstancePropertyValue.Timestamp.formatter) === actVal
-              .value
-              .truncatedTo(ChronoUnit.SECONDS)
-              .format(InstancePropertyValue.Timestamp.formatter)
-          case (actVal: TimestampList, expVal: TimestampList) =>
-            expVal.value
-              .map(_.truncatedTo(ChronoUnit.SECONDS).format(InstancePropertyValue.Timestamp.formatter)) === actVal
-              .value
-              .map(_.truncatedTo(ChronoUnit.SECONDS).format(InstancePropertyValue.Timestamp.formatter))
-          case actVal => actVal === expectedVal
+
+        def valueEquals = {
+          val formatter = InstancePropertyValue.Timestamp.formatter
+          (actual(k), expectedVal) match {
+            case (actVal: InstancePropertyValue.Timestamp, expVal: InstancePropertyValue.Timestamp) =>
+              val expTs = expVal.value.truncatedTo(ChronoUnit.SECONDS)
+              expTs
+                .format(formatter) === actVal
+                .value
+                .truncatedTo(ChronoUnit.SECONDS)
+                .format(formatter)
+            case (actVal: InstancePropertyValue.TimestampList, expVal: InstancePropertyValue.TimestampList) =>
+              val expTsSeq = expVal
+                .value
+                .map(_.truncatedTo(ChronoUnit.SECONDS).format(formatter))
+              expTsSeq === actVal
+                .value
+                .map(_.truncatedTo(ChronoUnit.SECONDS).format(formatter))
+            case (actVal, expVal) if actVal === expVal => true
+            case (actVal, expVal) => fail(s"Actual: ${actVal.toString}, Expected: ${expVal.toString}")
+          }
         }
+
         keyEquals && valueEquals
     }
   }
