@@ -31,7 +31,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
       ContainerId(space, "test_edge_node_container"),
       ContainerId(space, "test_edge_container"),
       ContainerId(space, "test_node_container_1"),
-      ContainerId(space, "test_node_container_2"),
+      ContainerId(space, "test_node_container_2")
     )).unsafeRunSync()
 
     blueFieldClient.views.deleteItems(
@@ -40,7 +40,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
         DataModelReference(space, "test_edge_view", v),
         DataModelReference(space, "test_node_view_1", v),
         DataModelReference(space, "test_node_view_2", v),
-        DataModelReference(space, "test_edge_node_view", v),
+        DataModelReference(space, "test_edge_node_view", v)
       )
     }).unsafeRunSync()
 
@@ -71,7 +71,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
       toViewCreateDef(allViewExternalId, viewVersion, allContainerCreateDefinition),
       toViewCreateDef(edgeViewExternalId, viewVersion, edgeContainerCreateDefinition),
       toViewCreateDef(nodeViewExternalId1, viewVersion, nodeContainerCreateDefinition1),
-      toViewCreateDef(nodeViewExternalId2, viewVersion, nodeContainerCreateDefinition2),
+      toViewCreateDef(nodeViewExternalId2, viewVersion, nodeContainerCreateDefinition2)
     ))).unsafeRunSync()
 
     val nodeView1 = createdViewsMap(nodeViewExternalId1)
@@ -192,7 +192,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
       properties = container.properties.map {
         case (pName, _) => pName -> CreatePropertyReference(ContainerReference(container.space, container.externalId), pName)
       },
-      implements = None,
+      implements = None
     )
   }
 

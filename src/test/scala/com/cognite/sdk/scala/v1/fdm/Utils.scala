@@ -33,7 +33,7 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
-//    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true))
     //    DirectNodeRelationProperty(container = None)
   )
 
@@ -292,7 +292,7 @@ object Utils {
                          ): NodeOrEdgeCreate =
     usage match {
       case u@(Usage.Node | Usage.Edge) =>
-        throw new IllegalArgumentException(s"$sourceRef supports only: ${u.productPrefix}s. Should support both nodes & edges!")
+        throw new IllegalArgumentException(s"${sourceRef.toString} supports only: ${u.productPrefix}s. Should support both nodes & edges!")
       case _ =>
         val instanceValuesForProps = propsMap.map {
           case (propName, prop) =>
@@ -427,6 +427,7 @@ object Utils {
       source = ref,
       properties = Some(instancePropertyValues)
     )
+
   // scalastyle:off cyclomatic.complexity
   private def propertyDefaultValueForPropertyType(
                                                    p: PropertyType,
