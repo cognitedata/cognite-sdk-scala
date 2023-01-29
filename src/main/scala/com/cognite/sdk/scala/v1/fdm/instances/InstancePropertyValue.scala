@@ -8,8 +8,8 @@ import io.circe._
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
 import java.time.temporal.ChronoField.{
   HOUR_OF_DAY,
+  MILLI_OF_SECOND,
   MINUTE_OF_HOUR,
-  NANO_OF_SECOND,
   SECOND_OF_MINUTE
 }
 import java.time.{LocalDate, ZonedDateTime}
@@ -49,7 +49,7 @@ object InstancePropertyValue {
       .appendLiteral(':')
       .appendValue(SECOND_OF_MINUTE, 2)
       .optionalStart
-      .appendFraction(NANO_OF_SECOND, 0, 3, true)
+      .appendFraction(MILLI_OF_SECOND, 3, 3, true)
       .optionalStart
       .parseCaseSensitive
       .appendOffsetId()
@@ -80,10 +80,10 @@ object InstancePropertyValue {
     val result = c.value match {
       case v if v.isString =>
         v.asString.flatMap { s =>
-          Try(ZonedDateTime.parse(s, InstancePropertyValue.Timestamp.formatter))
+          Try(ZonedDateTime.parse(s))
             .map(InstancePropertyValue.Timestamp.apply)
             .orElse(
-              Try(LocalDate.parse(s, InstancePropertyValue.Date.formatter))
+              Try(LocalDate.parse(s))
                 .map(InstancePropertyValue.Date.apply)
             )
             .orElse(Success(InstancePropertyValue.String(s)))
@@ -122,7 +122,7 @@ object InstancePropertyValue {
                   if element.isString && element.asString
                     .flatMap(s =>
                       Try(
-                        ZonedDateTime.parse(s, InstancePropertyValue.Timestamp.formatter)
+                        ZonedDateTime.parse(s)
                       ).toOption
                     )
                     .nonEmpty =>
@@ -132,24 +132,20 @@ object InstancePropertyValue {
                       .flatMap(_.asString)
                       .flatMap(s =>
                         Try(
-                          ZonedDateTime.parse(s, InstancePropertyValue.Timestamp.formatter)
+                          ZonedDateTime.parse(s)
                         ).toOption
                       )
                   )
                 )
               case element
                   if element.isString && element.asString
-                    .flatMap(s =>
-                      Try(LocalDate.parse(s, InstancePropertyValue.Date.formatter)).toOption
-                    )
+                    .flatMap(s => Try(LocalDate.parse(s)).toOption)
                     .nonEmpty =>
                 Right[DecodingFailure, InstancePropertyValue](
                   InstancePropertyValue.DateList(
                     arr
                       .flatMap(_.asString)
-                      .flatMap(s =>
-                        Try(LocalDate.parse(s, InstancePropertyValue.Date.formatter)).toOption
-                      )
+                      .flatMap(s => Try(LocalDate.parse(s)).toOption)
                   )
                 )
               case element if element.isString =>

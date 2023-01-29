@@ -5,7 +5,6 @@ package com.cognite.sdk.scala.v1.fdm.containers
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.fdm.Utils._
 import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
@@ -27,7 +26,7 @@ import scala.concurrent.duration.DurationInt
     "org.wartremover.warts.OptionPartial"
   )
 )
-class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
+class ContainersTest extends CommonDataModelTestHelper {
   private val space = "test-space-scala-sdk"
 
   "Containers" should "serialize & deserialize ConstraintTypes" in {
@@ -250,6 +249,17 @@ class ContainersTest extends CommonDataModelTestHelper with RetryWhile {
     // default values for list types are not allowed
     compatibles.count { case (propType, _, _) => propType.isList } shouldBe 0
     compatibles.length shouldBe 9
+  }
+
+  ignore should "pass" in {
+    blueFieldClient.containers.delete(Seq(
+      ContainerId(space, "test_container"),
+      ContainerId(space, "test_container_1"),
+      ContainerId(space, "test_container_2"),
+      ContainerId(space, "test_container_3")
+    )).unsafeRunSync()
+
+    1 shouldBe 1
   }
 
   it should "CRUD a container with all possible props" in {
