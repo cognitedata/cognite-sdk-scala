@@ -39,6 +39,8 @@ object InstancePropertyValue {
   final case class Timestamp(value: ZonedDateTime) extends InstancePropertyValue
 
   object Timestamp {
+    // custom formatter to support FDM timestamp format YYYY-MM-DDTHH:MM:SS[.millis][Z|time zone]
+    // Millis has to be in 3 digits
     val formatter: DateTimeFormatter = new DateTimeFormatterBuilder().parseCaseInsensitive
       .append(DateTimeFormatter.ISO_LOCAL_DATE)
       .appendLiteral('T')

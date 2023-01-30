@@ -26,9 +26,8 @@ sealed trait PropertyDefinition {
       .map(d => PropertyDefinition.defaultValueCompatibleWithPropertyType(`type`, d))
 
     compatibility match {
-      case Some(true) => true
+      case Some(true) | None => true
       case Some(false) if `type`.isList => true
-      case None => true
       case _ => false
     }
   }
