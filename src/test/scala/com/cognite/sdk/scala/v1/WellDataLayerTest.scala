@@ -4,7 +4,6 @@ import com.cognite.sdk.scala.common.SdkTestSpec
 import com.cognite.sdk.scala.playground._
 import io.circe.{Json, JsonObject, Printer}
 import org.scalatest.{BeforeAndAfter, OptionValues}
-import cats.syntax.all._
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
 class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValues {
