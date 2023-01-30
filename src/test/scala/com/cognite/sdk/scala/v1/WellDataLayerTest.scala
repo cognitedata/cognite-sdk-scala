@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.SdkTestSpec
+import com.cognite.sdk.scala.common.{CdpApiException, SdkTestSpec}
 import com.cognite.sdk.scala.playground._
 import io.circe.{Json, JsonObject, Printer}
 import org.scalatest.{BeforeAndAfter, OptionValues}
@@ -51,7 +51,7 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
     val sources = client.wdl.listItemsWithGet("sources")
     sources.items.size shouldEqual 2
     val actualWitsml =
-      Json.fromJsonObject(sources.items(0)).printWith(Printer.spaces2.withSortedKeys)
+      Json.fromJsonObject(sources.items.headOption.value).printWith(Printer.spaces2.withSortedKeys)
     actualWitsml shouldEqual
       """{
         |  "description" : "The WITSML data source",
@@ -178,5 +178,17 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
     }
 
     client.wdl.sources.deleteRecursive(Seq(newSource))
+  }
+
+  it should "get schema for Source" in {
+    val schema = client.wdl.getSchema("Source")
+    schema.length should be >= 0
+  }
+
+  it should "fail when getting schema for Wololo" in {
+    val thrown = intercept[CdpApiException] {
+      client.wdl.getSchema("Wololo")
+    }
+    thrown.message shouldEqual "Unknown schema: Wololo"
   }
 }

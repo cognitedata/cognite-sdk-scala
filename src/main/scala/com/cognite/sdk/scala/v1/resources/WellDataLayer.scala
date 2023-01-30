@@ -5,10 +5,11 @@ package com.cognite.sdk.scala.v1.resources
 
 import cats.Monad
 import cats.syntax.all._
-import com.cognite.sdk.scala.common.{Items, ItemsWithCursor}
+import com.cognite.sdk.scala.common.{CdpApiError, Items, ItemsWithCursor}
 import com.cognite.sdk.scala.playground._
 import com.cognite.sdk.scala.v1._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.parser.decode
 import io.circe.{Decoder, Encoder, JsonObject}
 import sttp.client3._
 import sttp.client3.circe._
@@ -16,6 +17,7 @@ import sttp.model.Uri
 
 class WellDataLayer[F[_]: Monad](val requestSession: RequestSession[F]) {
   import WellDataLayer._
+  import CdpApiError._
 
   lazy val wells = new WellDataLayerWells(requestSession)
   lazy val wellbores = new WellDataLayerWellbores(requestSession)
@@ -33,6 +35,25 @@ class WellDataLayer[F[_]: Monad](val requestSession: RequestSession[F]) {
       mapResult: T => R
   )(implicit serializer: BodySerializer[I], decoder: Decoder[T]): F[R] =
     requestSession.post(body, uri, mapResult)
+
+  def getSchema(modelName: String): F[String] = {
+    val uri = uri"${requestSession.baseUrl}/wdl/spark/structtypes/$modelName"
+    val response: F[Either[String, String]] = requestSession
+      .sendCdf { request =>
+        request
+          .get(uri)
+          .response(asString)
+      }
+
+    response.map {
+      case Left(rawError) =>
+        decode[CdpApiError](rawError) match {
+          case Left(deserializationError) => throw deserializationError
+          case Right(cdpApiError) => throw cdpApiError.asException(uri, None)
+        }
+      case Right(schema) => schema
+    }
+  }
 
   def setItems(urlPart: String, items: Seq[JsonObject]): F[Unit] = {
     // uri"" strings will escape slashes when string interpolation, but a list of strings works fine.
