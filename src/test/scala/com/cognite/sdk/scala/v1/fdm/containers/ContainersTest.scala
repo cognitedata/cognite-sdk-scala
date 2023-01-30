@@ -239,7 +239,7 @@ class ContainersTest extends CommonDataModelTestHelper {
     }
   }
 
-  ignore should "asses the compatibility of default values and property types" in {
+  it should "asses the compatibility of default values and property types" in {
     val (compatibles, _) = (for {
       p <- AllContainerPropertyTypes
       d <- AllPropertyDefaultValues
@@ -249,17 +249,6 @@ class ContainersTest extends CommonDataModelTestHelper {
     // default values for list types are not allowed
     compatibles.count { case (propType, _, _) => propType.isList } shouldBe 0
     compatibles.length shouldBe 9
-  }
-
-  ignore should "pass" in {
-    blueFieldClient.containers.delete(Seq(
-      ContainerId(space, "test_container"),
-      ContainerId(space, "test_container_1"),
-      ContainerId(space, "test_container_2"),
-      ContainerId(space, "test_container_3")
-    )).unsafeRunSync()
-
-    1 shouldBe 1
   }
 
   it should "CRUD a container with all possible props" in {

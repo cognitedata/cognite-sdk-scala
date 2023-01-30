@@ -6,7 +6,7 @@ import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
 import com.cognite.sdk.scala.v1.fdm.common.Usage
-import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerId, ContainerReference}
+import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerReference}
 import com.cognite.sdk.scala.v1.fdm.views._
 
 import java.time.temporal.ChronoUnit
@@ -25,27 +25,6 @@ import scala.concurrent.duration.DurationInt
 )
 class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val space = "test-space-scala-sdk"
-
-  ignore should "pass" in {
-    blueFieldClient.containers.delete(Seq(
-      ContainerId(space, "test_edge_node_container"),
-      ContainerId(space, "test_edge_container"),
-      ContainerId(space, "test_node_container_1"),
-      ContainerId(space, "test_node_container_2")
-    )).unsafeRunSync()
-
-    blueFieldClient.views.deleteItems(
-      (1 to 23).map(i => s"v${i.toString}").flatMap { v =>
-      Seq(
-        DataModelReference(space, "test_edge_view", v),
-        DataModelReference(space, "test_node_view_1", v),
-        DataModelReference(space, "test_node_view_2", v),
-        DataModelReference(space, "test_edge_node_view", v)
-      )
-    }).unsafeRunSync()
-
-    1 shouldBe 1
-  }
 
   it should "CRUD instances with all property types" in {
     val allContainerCreateDefinition = createTestContainer(space, "test_edge_node_container", Usage.All)
@@ -118,7 +97,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
       )
     )
 
-    (IO.sleep(3.seconds) *> createInstance(Seq(node1WriteData))).unsafeRunSync()
+    (IO.sleep(5.seconds) *> createInstance(Seq(node1WriteData))).unsafeRunSync()
     createInstance(Seq(node2WriteData)).unsafeRunSync()
     createInstance(Seq(edgeWriteData)).unsafeRunSync()
     createInstance(nodeOrEdgeWriteData).unsafeRunSync()
@@ -134,6 +113,15 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     instantPropertyMapEquals(writeDataToMap(edgeWriteData), readEdgesMapOfEdge) shouldBe true
     instantPropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData.head), readEdgesMapOfAll) shouldBe true
     instantPropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData(1)), readNodesMapOfAll) shouldBe true
+
+    val deleted = deleteViews(Seq(
+      DataModelReference(space, edgeViewExternalId, viewVersion),
+      DataModelReference(space, nodeViewExternalId1, viewVersion),
+      DataModelReference(space, nodeViewExternalId2, viewVersion),
+      DataModelReference(space, allViewExternalId, viewVersion)
+    ))
+
+    deleted.length shouldBe 4
   }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate) = writeData match {
@@ -153,6 +141,10 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     blueFieldClient.instances.createItems(
       InstanceCreate(items = writeData)
     )
+  }
+
+  private def deleteViews(items: Seq[DataModelReference]) = {
+    blueFieldClient.views.deleteItems(items).unsafeRunSync()
   }
 
   private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) = {
