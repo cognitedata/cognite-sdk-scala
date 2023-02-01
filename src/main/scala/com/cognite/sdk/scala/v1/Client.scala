@@ -7,6 +7,7 @@ import BuildInfo.BuildInfo
 import cats.implicits._
 import cats.{Id, Monad}
 import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.playground.PlaygroundClient
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.resources._
 import com.cognite.sdk.scala.v1.resources.fdm.containers.Containers
@@ -186,17 +187,6 @@ class GenericClient[F[_]](
   lazy val labels = new Labels[F](requestSession)
   lazy val relationships = new Relationships[F](requestSession)
 
-  lazy val wellDataLayerRequestSession: RequestSession[F] =
-    RequestSession(
-      applicationName,
-      uri"$uri/api/${apiVersion.getOrElse("playground")}/projects/$projectName",
-      sttpBackend,
-      authProvider,
-      clientTag,
-      cdfVersion
-    )
-  lazy val wdl = new WellDataLayer[F](wellDataLayerRequestSession)
-
   lazy val rawDatabases = new RawDatabases[F](requestSession)
   def rawTables(database: String): RawTables[F] = new RawTables(requestSession, database)
   def rawRows(database: String, table: String): RawRows[F] =
@@ -235,6 +225,20 @@ class GenericClient[F[_]](
   lazy val apiKeys = new ApiKeys[F](requestSession)
   lazy val groups = new Groups[F](requestSession)
   lazy val securityCategories = new SecurityCategories[F](requestSession)
+
+  /** Convenience function for creating a PlaygroundClient using the same credentials.
+    * @return
+    *   PlaygroundClient[F]
+    */
+  def createPlaygroundClient(): PlaygroundClient[F] =
+    new PlaygroundClient(
+      applicationName = applicationName,
+      projectName = projectName,
+      baseUrl = baseUrl,
+      authProvider = authProvider,
+      clientTag = clientTag,
+      cdfVersion = cdfVersion
+    )
 }
 
 object GenericClient {

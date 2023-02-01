@@ -1,7 +1,6 @@
-package com.cognite.sdk.scala.v1
+package com.cognite.sdk.scala.playground
 
 import com.cognite.sdk.scala.common.{CdpApiException, SdkTestSpec}
-import com.cognite.sdk.scala.playground._
 import io.circe.{Json, JsonObject, Printer}
 import org.scalatest.{BeforeAndAfter, OptionValues}
 
@@ -15,24 +14,25 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
       val _ = expectedStr shouldEqual actualStr
     }
   }
+  private val wdl = client.createPlaygroundClient().wdl
 
   before {
-    val sources = client.wdl.sources.list()
+    val sources = wdl.sources.list()
     if (sources.nonEmpty) {
-      client.wdl.sources.deleteRecursive(sources)
+      wdl.sources.deleteRecursive(sources)
     }
   }
 
   it should "create, retrieve, and delete sources" in {
     val newSource = Source(shortRandom())
-    val _ = client.wdl.sources.create(Seq(newSource))
+    val _ = wdl.sources.create(Seq(newSource))
 
-    val sources = client.wdl.sources.list().map(source => source)
+    val sources = wdl.sources.list().map(source => source)
     sources should contain(newSource)
 
-    client.wdl.sources.delete(Seq(newSource))
+    wdl.sources.delete(Seq(newSource))
 
-    client.wdl.sources.list().map(source => source) should not contain newSource
+    wdl.sources.list().map(source => source) should not contain newSource
   }
 
   it should "create and retrieve JsonObject source items" in {
@@ -46,9 +46,9 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
       ("description", Json.fromString("Engineering Data Model"))
     )
 
-    client.wdl.setItems("sources", Seq(source1, source2))
+    wdl.setItems("sources", Seq(source1, source2))
 
-    val sources = client.wdl.listItemsWithGet("sources")
+    val sources = wdl.listItemsWithGet("sources")
     sources.items.size shouldEqual 2
     val actualWitsml =
       Json.fromJsonObject(sources.items.headOption.value).printWith(Printer.spaces2.withSortedKeys)
@@ -67,9 +67,9 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
   }
 
   it should "create and retrieve JsonObject well items" in {
-    client.wdl.sources.create(Seq(Source("A"))).size shouldEqual 1
-    client.wdl.wells.setMergeRules(WellMergeRules(Seq("A")))
-    client.wdl.wellbores.setMergeRules(WellboreMergeRules(Seq("A")))
+    wdl.sources.create(Seq(Source("A"))).size shouldEqual 1
+    wdl.wells.setMergeRules(WellMergeRules(Seq("A")))
+    wdl.wellbores.setMergeRules(WellboreMergeRules(Seq("A")))
 
     val well1 = JsonObject(
       ("matchingId", Json.fromString("deterministic-id")),
@@ -122,8 +122,8 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
       )
     )
 
-    client.wdl.setItems("wells", Seq(well1))
-    val results = client.wdl.listItemsWithPost("wells/list")
+    wdl.setItems("wells", Seq(well1))
+    val results = wdl.listItemsWithPost("wells/list")
     results.items.size shouldEqual 1
 
     results.items.headOption.value.shouldDeepEqual(expected)
@@ -133,13 +133,13 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
     // first, create a new source
 
     val newSource = Source(name = shortRandom())
-    client.wdl.sources.create(Seq(newSource)).size shouldEqual 1
+    wdl.sources.create(Seq(newSource)).size shouldEqual 1
 
     // Then set merge rules
-    client.wdl.wells.setMergeRules(WellMergeRules(Seq(newSource.name)))
-    client.wdl.wellbores.setMergeRules(WellboreMergeRules(Seq(newSource.name)))
+    wdl.wells.setMergeRules(WellMergeRules(Seq(newSource.name)))
+    wdl.wellbores.setMergeRules(WellboreMergeRules(Seq(newSource.name)))
 
-    client.wdl.wells.create(
+    wdl.wells.create(
       Seq(
         WellSource(
           name = "my new well",
@@ -149,7 +149,7 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
       )
     ).size shouldEqual 1
 
-    client.wdl.wellbores.create(
+    wdl.wellbores.create(
       Seq(
         WellboreSource(
           name = "my new wellbore",
@@ -160,7 +160,7 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
       )
     ).size shouldEqual 1
 
-    val wells = client.wdl.wells.list()
+    val wells = wdl.wells.list()
     wells.size shouldEqual 1
     val well = wells.headOption.value
     well.name shouldEqual "my new well"
@@ -177,17 +177,17 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
         wellbore.datum shouldEqual Some(Datum(54.9, "meter", "KB"))
     }
 
-    client.wdl.sources.deleteRecursive(Seq(newSource))
+    wdl.sources.deleteRecursive(Seq(newSource))
   }
 
   it should "get schema for Source" in {
-    val schema = client.wdl.getSchema("Source")
+    val schema = wdl.getSchema("Source")
     schema.length should be >= 0
   }
 
   it should "fail when getting schema for Wololo" in {
     val thrown = intercept[CdpApiException] {
-      client.wdl.getSchema("Wololo")
+      wdl.getSchema("Wololo")
     }
     thrown.message shouldEqual "Unknown schema: Wololo"
   }

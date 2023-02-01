@@ -1,7 +1,7 @@
 // Copyright 2023 Cognite AS
 // SPDX-License-Identifier: Apache-2.0
 
-package com.cognite.sdk.scala.v1.resources
+package com.cognite.sdk.scala.playground.resources
 
 import cats.Monad
 import cats.syntax.all._
@@ -16,8 +16,8 @@ import sttp.client3.circe._
 import sttp.model.Uri
 
 class WellDataLayer[F[_]: Monad](val requestSession: RequestSession[F]) {
-  import WellDataLayer._
   import CdpApiError._
+  import WellDataLayer._
 
   lazy val wells = new WellDataLayerWells(requestSession)
   lazy val wellbores = new WellDataLayerWellbores(requestSession)
@@ -247,7 +247,7 @@ object WellDataLayer {
 
   implicit val limitAndCursorEncoder: Encoder[LimitAndCursor] = deriveEncoder
 
-  private[v1] def discard[T](x: T): Unit = {
+  private[playground] def discard[T](x: T): Unit = {
     val _ = x
   }
 }
