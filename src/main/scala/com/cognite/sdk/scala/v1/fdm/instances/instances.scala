@@ -57,5 +57,6 @@ final case class InstanceFilterRequest(
     cursor: Option[String] = None,
     limit: Option[Int] = None,
     sort: Option[Seq[PropertySortV3]] = None,
-    filter: Option[FilterDefinition] = None
+    filter: Option[FilterDefinition] = None,
+    includeTyping: Option[Boolean]
 )
