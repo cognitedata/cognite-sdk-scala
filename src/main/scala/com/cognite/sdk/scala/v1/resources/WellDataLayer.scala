@@ -126,11 +126,11 @@ class WellDataLayerSources[F[_]: Monad](
       wellSources = wells
         .flatMap(_.sources)
         .filter(assetSource => namesToDelete.contains(assetSource.sourceName))
-      _ =
+      _ <-
         if (wellSources.nonEmpty) {
           this.wells.deleteRecursive(wellSources)
         } else {
-          ()
+          Monad[F].unit
         }
       _ <- delete(items)
     } yield ()
