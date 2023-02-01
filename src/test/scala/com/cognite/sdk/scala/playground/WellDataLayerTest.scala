@@ -178,6 +178,8 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
     }
 
     wdl.sources.deleteRecursive(Seq(newSource))
+    val sourcesAfterDeletion = wdl.sources.list()
+    sourcesAfterDeletion.size shouldEqual 0
   }
 
   it should "get schema for Source" in {
