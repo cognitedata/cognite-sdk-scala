@@ -153,9 +153,9 @@ class WellDataLayerWells[F[_]](val requestSession: RequestSession[F]) {
     )
   }
 
-  def create(items: Seq[WellIngestion]): F[Seq[Well]] = {
-    val body = WellIngestionItems(items)
-    requestSession.post[Seq[Well], WellItems, WellIngestionItems](
+  def create(items: Seq[WellSource]): F[Seq[Well]] = {
+    val body = WellSourceItems(items)
+    requestSession.post[Seq[Well], WellItems, WellSourceItems](
       body,
       uri"${requestSession.baseUrl}/wdl/wells",
       value => value.items
@@ -185,9 +185,9 @@ class WellDataLayerWells[F[_]](val requestSession: RequestSession[F]) {
 class WellDataLayerWellbores[F[_]](val requestSession: RequestSession[F]) {
   import WellDataLayer._
 
-  def create(items: Seq[WellboreIngestion]): F[Seq[Wellbore]] = {
-    val body = WellboreIngestionItems(items)
-    requestSession.post[Seq[Wellbore], WellboreItems, WellboreIngestionItems](
+  def create(items: Seq[WellboreSource]): F[Seq[Wellbore]] = {
+    val body = WellboreSourceItems(items)
+    requestSession.post[Seq[Wellbore], WellboreItems, WellboreSourceItems](
       body,
       uri"${requestSession.baseUrl}/wdl/wellbores",
       value => value.items
@@ -225,13 +225,13 @@ object WellDataLayer {
 
   implicit val wellDecoder: Decoder[Well] = deriveDecoder
 
-  implicit val wellIngestionEncoder: Encoder[WellIngestion] = deriveEncoder
-  implicit val wellIngestionItemsEncoder: Encoder[WellIngestionItems] = deriveEncoder
+  implicit val wellSourceEncoder: Encoder[WellSource] = deriveEncoder
+  implicit val wellSourceItemsEncoder: Encoder[WellSourceItems] = deriveEncoder
   implicit val wellItemsDecoder: Decoder[WellItems] = deriveDecoder
   implicit val wellMergeRulesEncoder: Encoder[WellMergeRules] = deriveEncoder
 
-  implicit val wellboreIngestionEncoder: Encoder[WellboreIngestion] = deriveEncoder
-  implicit val wellboreIngestionItemsEncoder: Encoder[WellboreIngestionItems] = deriveEncoder
+  implicit val wellboreSourceEncoder: Encoder[WellboreSource] = deriveEncoder
+  implicit val wellboreSourceItemsEncoder: Encoder[WellboreSourceItems] = deriveEncoder
   implicit val wellboreItemsDecoder: Decoder[WellboreItems] = deriveDecoder
   implicit val wellboreMergeRulesEncoder: Encoder[WellboreMergeRules] = deriveEncoder
 

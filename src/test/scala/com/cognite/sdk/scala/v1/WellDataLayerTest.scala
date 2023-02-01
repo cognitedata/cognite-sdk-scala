@@ -141,7 +141,7 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
 
     client.wdl.wells.create(
       Seq(
-        WellIngestion(
+        WellSource(
           name = "my new well",
           source = AssetSource("A:my new well", newSource.name),
           wellhead = Some(Wellhead(0.0, 60.0, "EPSG:4326"))
@@ -151,7 +151,7 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
 
     client.wdl.wellbores.create(
       Seq(
-        WellboreIngestion(
+        WellboreSource(
           name = "my new wellbore",
           source = AssetSource("A:my new wellbore", newSource.name),
           datum = Some(Datum(54.9, "meter", "KB")),

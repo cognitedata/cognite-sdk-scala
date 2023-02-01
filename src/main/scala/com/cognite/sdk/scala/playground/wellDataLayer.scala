@@ -152,7 +152,7 @@ final case class Wellhead(
     crs: String
 )
 
-final case class WellIngestion(
+final case class WellSource(
     name: String,
     source: AssetSource,
     matchingId: Option[String] = None,
@@ -171,7 +171,7 @@ final case class WellIngestion(
     wellhead: Option[Wellhead] = None
 )
 
-final case class WellboreIngestion(
+final case class WellboreSource(
     name: String,
     wellAssetExternalId: String,
     source: AssetSource,
@@ -184,12 +184,12 @@ final case class WellboreIngestion(
     kickoffMeasuredDepth: Option[Distance] = None
 )
 
-final case class WellboreIngestionItems(
-    items: Seq[WellboreIngestion]
+final case class WellboreSourceItems(
+    items: Seq[WellboreSource]
 )
 
-final case class WellIngestionItems(
-    items: Seq[WellIngestion]
+final case class WellSourceItems(
+    items: Seq[WellSource]
 )
 
 final case class WellItems(
