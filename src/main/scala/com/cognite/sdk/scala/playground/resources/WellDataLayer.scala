@@ -62,7 +62,7 @@ class WellDataLayer[F[_]: Monad](val requestSession: RequestSession[F]) {
     post[Unit, EmptyObj, Items[JsonObject]](
       body,
       uri"${requestSession.baseUrl}/wdl/$urlParts",
-      discard
+      _ => ()
     )
   }
 
@@ -115,7 +115,7 @@ class WellDataLayerSources[F[_]: Monad](
     requestSession.post[Unit, EmptyObj, DeleteSources](
       body,
       uri"${requestSession.baseUrl}/wdl/sources/delete",
-      discard
+      _ => ()
     )
   }
 
@@ -166,20 +166,18 @@ class WellDataLayerWells[F[_]](val requestSession: RequestSession[F]) {
     requestSession.post[Unit, EmptyObj, WellMergeRules](
       rules,
       uri"${requestSession.baseUrl}/wdl/wells/mergerules",
-      discard
+      _ => ()
     )
 
   def delete(items: Seq[AssetSource]): F[Unit] = delete(items, recursive = false)
   def deleteRecursive(items: Seq[AssetSource]): F[Unit] = delete(items, recursive = true)
 
-  private def delete(items: Seq[AssetSource], recursive: Boolean): F[Unit] = {
-    val body = DeleteWells(items, recursive)
+  private def delete(items: Seq[AssetSource], recursive: Boolean): F[Unit] =
     requestSession.post[Unit, EmptyObj, DeleteWells](
-      body,
+      DeleteWells(items, recursive),
       uri"${requestSession.baseUrl}/wdl/wells/delete",
-      discard
+      _ => ()
     )
-  }
 }
 
 class WellDataLayerWellbores[F[_]](val requestSession: RequestSession[F]) {
@@ -198,7 +196,7 @@ class WellDataLayerWellbores[F[_]](val requestSession: RequestSession[F]) {
     requestSession.post[Unit, EmptyObj, WellboreMergeRules](
       rules,
       uri"${requestSession.baseUrl}/wdl/wellbores/mergerules",
-      discard
+      _ => ()
     )
 }
 
@@ -246,8 +244,4 @@ object WellDataLayer {
   implicit val wellFilterRequestEncoder: Encoder[WellFilterRequest] = deriveEncoder
 
   implicit val limitAndCursorEncoder: Encoder[LimitAndCursor] = deriveEncoder
-
-  private[playground] def discard[T](x: T): Unit = {
-    val _ = x
-  }
 }
