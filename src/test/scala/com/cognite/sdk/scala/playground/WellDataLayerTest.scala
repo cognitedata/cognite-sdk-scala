@@ -14,7 +14,7 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
       val _ = expectedStr shouldEqual actualStr
     }
   }
-  private val wdl = client.createPlaygroundClient().wdl
+  private val wdl = client.wdl
 
   before {
     val sources = wdl.sources.list()

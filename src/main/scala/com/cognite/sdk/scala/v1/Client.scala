@@ -7,7 +7,7 @@ import BuildInfo.BuildInfo
 import cats.implicits._
 import cats.{Id, Monad}
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.playground.PlaygroundClient
+import com.cognite.sdk.scala.playground.resources.WellDataLayer
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.resources._
 import com.cognite.sdk.scala.v1.resources.fdm.containers.Containers
@@ -216,6 +216,17 @@ class GenericClient[F[_]](
   lazy val views = new Views[F](requestSession)
   lazy val spacesv3 = new SpacesV3[F](requestSession)
 
+  lazy val wdl = new WellDataLayer[F](
+    RequestSession(
+      applicationName,
+      uri"$uri/api/playground/projects/$projectName",
+      sttpBackend,
+      authProvider,
+      clientTag,
+      cdfVersion
+    )
+  )
+
   def project: F[Project] =
     requestSession.get[Project, Project](
       requestSession.baseUrl,
@@ -225,20 +236,6 @@ class GenericClient[F[_]](
   lazy val apiKeys = new ApiKeys[F](requestSession)
   lazy val groups = new Groups[F](requestSession)
   lazy val securityCategories = new SecurityCategories[F](requestSession)
-
-  /** Convenience function for creating a PlaygroundClient using the same credentials.
-    * @return
-    *   PlaygroundClient[F]
-    */
-  def createPlaygroundClient(): PlaygroundClient[F] =
-    new PlaygroundClient(
-      applicationName = applicationName,
-      projectName = projectName,
-      baseUrl = baseUrl,
-      authProvider = authProvider,
-      clientTag = clientTag,
-      cdfVersion = cdfVersion
-    )
 }
 
 object GenericClient {
