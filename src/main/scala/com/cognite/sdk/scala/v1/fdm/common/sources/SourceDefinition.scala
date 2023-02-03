@@ -2,6 +2,7 @@ package com.cognite.sdk.scala.v1.fdm.common.sources
 
 import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition
+import com.cognite.sdk.scala.v1.fdm.instances.InstanceSource
 
 trait SourceDefinition {
   def space: String
@@ -14,4 +15,5 @@ trait SourceDefinition {
   def lastUpdatedTime: Long
 
   def toSourceReference: SourceReference
+  def toInstanceSource: InstanceSource = InstanceSource(toSourceReference)
 }
