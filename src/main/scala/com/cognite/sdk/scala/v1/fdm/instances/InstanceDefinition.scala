@@ -40,8 +40,8 @@ object InstanceDefinition {
       createdTime: Option[Long],
       lastUpdatedTime: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]],
-      startNode: Option[DirectRelationReference],
-      endNode: Option[DirectRelationReference]
+      startNode: DirectRelationReference,
+      endNode: DirectRelationReference
   ) extends InstanceDefinition {
     override val `type`: InstanceType = InstanceType.Edge
   }
@@ -184,8 +184,8 @@ object InstanceDefinition {
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
           instancePropertyDefinitionBasedInstancePropertyTypeDecoder(instPropDefMap)
         )
-      startNode <- c.downField("startNode").as[Option[DirectRelationReference]]
-      endNode <- c.downField("endNode").as[Option[DirectRelationReference]]
+      startNode <- c.downField("startNode").as[DirectRelationReference]
+      endNode <- c.downField("endNode").as[DirectRelationReference]
     } yield EdgeDefinition(
       relation = relation,
       space = space,
