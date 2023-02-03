@@ -8,7 +8,11 @@ import io.circe.generic.semiauto.deriveDecoder
 import java.time.Instant
 
 sealed abstract class SlimNodeOrEdge extends Product with Serializable {
+  val space: String
+  val externalId: String
   val `type`: InstanceType
+  val createdTime: Option[Instant]
+  val lastUpdatedTime: Option[Instant]
 }
 
 object SlimNodeOrEdge {
