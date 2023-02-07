@@ -15,8 +15,9 @@ import java.time.{LocalDate, ZonedDateTime}
 sealed trait InstanceDefinition {
   def space: String
   def externalId: String
-  def createdTime: Option[Long]
-  def lastUpdatedTime: Option[Long]
+  def createdTime: Long
+  def lastUpdatedTime: Long
+  def deletedTime: Option[Long]
   def properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
 
   val `type`: InstanceType
@@ -26,8 +27,9 @@ object InstanceDefinition {
   final case class NodeDefinition(
       space: String,
       externalId: String,
-      createdTime: Option[Long],
-      lastUpdatedTime: Option[Long],
+      createdTime: Long,
+      lastUpdatedTime: Long,
+      deletedTime: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
   ) extends InstanceDefinition {
     override val `type`: InstanceType = InstanceType.Node
@@ -37,8 +39,9 @@ object InstanceDefinition {
       relation: DirectRelationReference,
       space: String,
       externalId: String,
-      createdTime: Option[Long],
-      lastUpdatedTime: Option[Long],
+      createdTime: Long,
+      lastUpdatedTime: Long,
+      deletedTime: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]],
       startNode: DirectRelationReference,
       endNode: DirectRelationReference
@@ -155,8 +158,9 @@ object InstanceDefinition {
     for {
       space <- c.downField("space").as[String]
       externalId <- c.downField("externalId").as[String]
-      createdTime <- c.downField("createdTime").as[Option[Long]]
-      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Long]]
+      createdTime <- c.downField("createdTime").as[Long]
+      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Long]
+      deletedTime <- c.downField("deletedTime").as[Option[Long]]
       properties <- c
         .downField("properties")
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
@@ -167,6 +171,7 @@ object InstanceDefinition {
       externalId = externalId,
       createdTime = createdTime,
       lastUpdatedTime = lastUpdatedTime,
+      deletedTime = deletedTime,
       properties = properties
     )
 
@@ -177,8 +182,9 @@ object InstanceDefinition {
       relation <- c.downField("relation").as[DirectRelationReference]
       space <- c.downField("space").as[String]
       externalId <- c.downField("externalId").as[String]
-      createdTime <- c.downField("createdTime").as[Option[Long]]
-      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Long]]
+      createdTime <- c.downField("createdTime").as[Long]
+      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Long]
+      deletedTime <- c.downField("deletedTime").as[Option[Long]]
       properties <- c
         .downField("properties")
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
@@ -192,6 +198,7 @@ object InstanceDefinition {
       externalId = externalId,
       createdTime = createdTime,
       lastUpdatedTime = lastUpdatedTime,
+      deletedTime = deletedTime,
       properties = properties,
       startNode = startNode,
       endNode = endNode
