@@ -218,9 +218,7 @@ object InstanceDefinition {
   ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
       case PropertyType.DirectNodeRelationProperty(_) =>
-        Decoder[Seq[String]]
-          .decodeJson(instantPropTypeJson)
-          .map(InstancePropertyValue.StringList.apply)
+        Right(InstancePropertyValue.Object(instantPropTypeJson))
       case t if t.isList => toInstancePropertyTypeOfList(instantPropTypeJson, t)
       case t => toInstancePropertyTypeOfNonList(instantPropTypeJson, t)
     }
