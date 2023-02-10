@@ -35,13 +35,13 @@ object SlimNodeOrEdge {
   }
 
   implicit val slimNodeDefinitionEncoder: Encoder[SlimNodeDefinition] =
-    Encoder.forProduct5("type", "space", "externalId", "createdTime", "lastUpdatedTime")(
+    Encoder.forProduct5("instanceType", "space", "externalId", "createdTime", "lastUpdatedTime")(
       (e: SlimNodeDefinition) =>
         (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime)
     )
 
   implicit val slimEdgeDefinitionEncoder: Encoder[SlimEdgeDefinition] =
-    Encoder.forProduct5("type", "space", "externalId", "createdTime", "lastUpdatedTime")(
+    Encoder.forProduct5("instanceType", "space", "externalId", "createdTime", "lastUpdatedTime")(
       (e: SlimEdgeDefinition) =>
         (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime)
     )

@@ -50,7 +50,7 @@ object InstanceDefinition {
   }
 
   implicit val nodeDefinitionEncoder: Encoder[NodeDefinition] = Encoder.forProduct6(
-    "type",
+    "instanceType",
     "space",
     "externalId",
     "createdTime",
@@ -61,8 +61,8 @@ object InstanceDefinition {
   )
 
   implicit val edgeDefinitionEncoder: Encoder[EdgeDefinition] = Encoder.forProduct7(
+    "instanceType",
     "type",
-    "relation",
     "space",
     "externalId",
     "createdTime",
