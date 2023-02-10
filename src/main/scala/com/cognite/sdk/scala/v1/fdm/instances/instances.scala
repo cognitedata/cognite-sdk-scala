@@ -5,18 +5,7 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
-import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
-
-final case class InstanceReadRequest(
-    limit: Option[Int],
-    cursor: Option[String],
-    space: Option[String],
-    includeTypeInfo: Option[Boolean],
-    `type`: Option[InstanceType],
-    view: Option[ViewReference],
-    container: Option[ContainerReference]
-)
 
 final case class DirectRelationReference(space: String, externalId: String)
 

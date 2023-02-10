@@ -97,7 +97,7 @@ object InstanceDefinition {
   ): Decoder[InstanceDefinition] = (c: HCursor) =>
     propertyTypeDefinitionsMap match {
       case Some(propDefMap) =>
-        c.downField("type").as[InstanceType] match {
+        c.downField("instanceType").as[InstanceType] match {
           case Left(err) => Left[DecodingFailure, InstanceDefinition](err)
           case Right(InstanceType.Node) =>
             instancePropertyDefinitionBasedNodeDefinitionDecoder(propDefMap).apply(c)
@@ -105,7 +105,7 @@ object InstanceDefinition {
             instancePropertyDefinitionBasedEdgeDefinitionDecoder(propDefMap).apply(c)
         }
       case None =>
-        c.downField("type").as[InstanceType] match {
+        c.downField("instanceType").as[InstanceType] match {
           case Left(err) => Left[DecodingFailure, InstanceDefinition](err)
           case Right(InstanceType.Node) => nodeDefinitionDecoder.apply(c)
           case Right(InstanceType.Edge) => edgeDefinitionDecoder.apply(c)
@@ -187,7 +187,7 @@ object InstanceDefinition {
       instPropDefMap: Map[String, Map[String, Map[String, TypePropertyDefinition]]]
   ): Decoder[EdgeDefinition] = (c: HCursor) =>
     for {
-      relation <- c.downField("relation").as[DirectRelationReference]
+      relation <- c.downField("type").as[DirectRelationReference]
       space <- c.downField("space").as[String]
       externalId <- c.downField("externalId").as[String]
       createdTime <- c.downField("createdTime").as[Long]

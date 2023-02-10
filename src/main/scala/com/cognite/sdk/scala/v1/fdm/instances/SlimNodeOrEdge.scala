@@ -56,7 +56,7 @@ object SlimNodeOrEdge {
   implicit val slimEdgeDefinitionDecoder: Decoder[SlimEdgeDefinition] = deriveDecoder
 
   implicit val slimNodeOrEdgeDecoder: Decoder[SlimNodeOrEdge] = (c: HCursor) =>
-    c.downField("type").as[InstanceType] match {
+    c.downField("instanceType").as[InstanceType] match {
       case Left(err) => Left[DecodingFailure, SlimNodeOrEdge](err)
       case Right(InstanceType.Node) =>
         Decoder[SlimNodeDefinition].apply(c)

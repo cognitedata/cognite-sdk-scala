@@ -6,7 +6,8 @@ import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
 import com.cognite.sdk.scala.v1.fdm.common.Usage
-import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerReference}
+import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerId, ContainerReference}
+import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.{EdgeDeletionRequest, NodeDeletionRequest}
 import com.cognite.sdk.scala.v1.fdm.views._
 
 import java.time.temporal.ChronoUnit
@@ -26,17 +27,28 @@ import scala.concurrent.duration.DurationInt
 class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val space = "test-space-scala-sdk"
 
-  it should "CRUD instances with all property types" in {
-    val allContainerCreateDefinition = createTestContainer(space, "test_edge_node_container", Usage.All)
-    val edgeContainerCreateDefinition = createTestContainer(space, "test_edge_container", Usage.Edge)
-    val nodeContainerCreateDefinition1 = createTestContainer(space, "test_node_container_1", Usage.Node)
-    val nodeContainerCreateDefinition2 = createTestContainer(space, "test_node_container_2", Usage.Node)
+  private val edgeNodeContainerExtId = "sdkEdgeNodeTestContainer"
+  private val edgeContainerExtId = "sdkEdgeTestContainer"
+  private val nodeContainer1ExtId = "sdkNodeTestContainer1"
+  private val nodeContainer2ExtId = "sdkNodeTestContainer2"
 
-    val viewVersion = "v2"
-    val allViewExternalId = s"test_edge_node_view"
-    val edgeViewExternalId = s"test_edge_view"
-    val nodeViewExternalId1 = s"test_node_view_1"
-    val nodeViewExternalId2 = s"test_node_view_2"
+  private val edgeNodeViewExtId = "sdkEdgeNodeView"
+  private val edgeViewExtId = "sdkEdgeView"
+  private val nodeView1ExtId = "sdkNodeView1"
+  private val nodeView2ExtId = "sdkNodeView2"
+
+  private val viewVersion = "v1"
+
+  it should "CRUD instances with all property types" in {
+    val allContainerCreateDefinition = createTestContainer(space, edgeNodeContainerExtId, Usage.All)
+    val edgeContainerCreateDefinition = createTestContainer(space, edgeContainerExtId, Usage.Edge)
+    val nodeContainerCreateDefinition1 = createTestContainer(space, nodeContainer1ExtId, Usage.Node)
+    val nodeContainerCreateDefinition2 = createTestContainer(space, nodeContainer2ExtId, Usage.Node)
+
+    val allViewExternalId = edgeNodeViewExtId
+    val edgeViewExternalId = edgeViewExtId
+    val nodeViewExternalId1 = nodeView1ExtId
+    val nodeViewExternalId2 = nodeView2ExtId
 
     val containersCreated = createContainers(Seq(
       allContainerCreateDefinition,
@@ -114,14 +126,36 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
     instantPropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData.head), readEdgesMapOfAll) shouldBe true
     instantPropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData(1)), readNodesMapOfAll) shouldBe true
 
-    val deleted = deleteViews(Seq(
+    val deletedInstances = deleteInstance(
+      Seq(
+        NodeDeletionRequest(node1WriteData.space, node1WriteData.externalId),
+        NodeDeletionRequest(node2WriteData.space, node2WriteData.externalId),
+        EdgeDeletionRequest(edgeWriteData.space, edgeWriteData.externalId)
+      ) ++ nodeOrEdgeWriteData.map {
+        case n: NodeOrEdgeCreate.NodeWrite => NodeDeletionRequest(n.space, n.externalId)
+        case e: NodeOrEdgeCreate.EdgeWrite => EdgeDeletionRequest(e.space, e.externalId)
+      }
+    )
+    deletedInstances.length shouldBe 5
+
+    val deletedViews = deleteViews(Seq(
       DataModelReference(space, edgeViewExternalId, viewVersion),
       DataModelReference(space, nodeViewExternalId1, viewVersion),
       DataModelReference(space, nodeViewExternalId2, viewVersion),
       DataModelReference(space, allViewExternalId, viewVersion)
     ))
 
-    deleted.length shouldBe 4
+    deletedViews.length shouldBe 4
+
+    val deletedContainers = deleteContainers(
+      Seq(
+        ContainerId(space, allContainerCreateDefinition.externalId),
+        ContainerId(space, edgeContainerCreateDefinition.externalId),
+        ContainerId(space, nodeContainerCreateDefinition1.externalId),
+        ContainerId(space, nodeContainerCreateDefinition2.externalId)
+      )
+    )
+    deletedContainers.length shouldBe 4
   }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate) = writeData match {
@@ -130,21 +164,29 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   private def createContainers(items: Seq[ContainerCreateDefinition]) = {
-    blueFieldClient.containers.createItems(items).map(r => r.map(v => v.externalId -> v).toMap)
+    blueFieldClient.containers.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+  }
+
+  private def deleteContainers(items: Seq[ContainerId]) = {
+    blueFieldClient.containers.delete(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
   }
 
   private def createViews(items: Seq[ViewCreateDefinition]) = {
-    blueFieldClient.views.createItems(items).map(r => r.map(v => v.externalId -> v).toMap)
+    blueFieldClient.views.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
   }
 
   private def createInstance(writeData: Seq[NodeOrEdgeCreate]): IO[Seq[SlimNodeOrEdge]] = {
     blueFieldClient.instances.createItems(
       InstanceCreate(items = writeData)
-    )
+    ).flatTap(_ => IO.sleep(2.seconds))
+  }
+
+  private def deleteInstance(refs: Seq[InstanceDeletionRequest]): Seq[InstanceDeletionRequest] = {
+    blueFieldClient.instances.delete(instanceRefs = refs).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
   }
 
   private def deleteViews(items: Seq[DataModelReference]) = {
-    blueFieldClient.views.deleteItems(items).unsafeRunSync()
+    blueFieldClient.views.deleteItems(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
   }
 
   private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) = {
