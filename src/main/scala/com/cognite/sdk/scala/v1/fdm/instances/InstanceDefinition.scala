@@ -20,7 +20,7 @@ sealed trait InstanceDefinition {
   def deletedTime: Option[Long]
   def properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
 
-  val `type`: InstanceType
+  val instanceType: InstanceType
 }
 
 object InstanceDefinition {
@@ -32,11 +32,11 @@ object InstanceDefinition {
       deletedTime: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
   ) extends InstanceDefinition {
-    override val `type`: InstanceType = InstanceType.Node
+    override val instanceType: InstanceType = InstanceType.Node
   }
 
   final case class EdgeDefinition(
-      relation: DirectRelationReference,
+      `type`: DirectRelationReference,
       space: String,
       externalId: String,
       createdTime: Long,
@@ -46,7 +46,7 @@ object InstanceDefinition {
       startNode: DirectRelationReference,
       endNode: DirectRelationReference
   ) extends InstanceDefinition {
-    override val `type`: InstanceType = InstanceType.Edge
+    override val instanceType: InstanceType = InstanceType.Edge
   }
 
   implicit val nodeDefinitionEncoder: Encoder[NodeDefinition] = Encoder.forProduct6(
@@ -57,7 +57,7 @@ object InstanceDefinition {
     "lastUpdatedTime",
     "properties"
   )((e: NodeDefinition) =>
-    (e.`type`, e.space, e.externalId, e.createdTime, e.lastUpdatedTime, e.properties)
+    (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime, e.properties)
   )
 
   implicit val edgeDefinitionEncoder: Encoder[EdgeDefinition] = Encoder.forProduct7(
@@ -69,7 +69,15 @@ object InstanceDefinition {
     "lastUpdatedTime",
     "properties"
   )((e: EdgeDefinition) =>
-    (e.`type`, e.relation, e.space, e.externalId, e.createdTime, e.lastUpdatedTime, e.properties)
+    (
+      e.instanceType,
+      e.`type`,
+      e.space,
+      e.externalId,
+      e.createdTime,
+      e.lastUpdatedTime,
+      e.properties
+    )
   )
 
   implicit val instanceDefinitionEncoder: Encoder[InstanceDefinition] =
@@ -193,7 +201,7 @@ object InstanceDefinition {
       startNode <- c.downField("startNode").as[DirectRelationReference]
       endNode <- c.downField("endNode").as[DirectRelationReference]
     } yield EdgeDefinition(
-      relation = relation,
+      `type` = relation,
       space = space,
       externalId = externalId,
       createdTime = createdTime,
