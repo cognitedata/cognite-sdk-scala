@@ -9,22 +9,22 @@ sealed trait InstanceDeletionRequest
 object InstanceDeletionRequest {
   final case class NodeDeletionRequest(space: String, externalId: String)
       extends InstanceDeletionRequest {
-    val `type`: InstanceType = InstanceType.Node
+    val `instanceType`: InstanceType = InstanceType.Node
   }
 
   final case class EdgeDeletionRequest(space: String, externalId: String)
       extends InstanceDeletionRequest {
-    val `type`: InstanceType = InstanceType.Edge
+    val `instanceType`: InstanceType = InstanceType.Edge
   }
 
   implicit val nodeDeletionRequestEncoder: Encoder[NodeDeletionRequest] =
-    Encoder.forProduct3("type", "space", "externalId")((e: NodeDeletionRequest) =>
-      (e.`type`, e.space, e.externalId)
+    Encoder.forProduct3("instanceType", "space", "externalId")((e: NodeDeletionRequest) =>
+      (e.`instanceType`, e.space, e.externalId)
     )
 
   implicit val edgeDeletionRequestEncoder: Encoder[EdgeDeletionRequest] =
-    Encoder.forProduct3("type", "space", "externalId")((e: EdgeDeletionRequest) =>
-      (e.`type`, e.space, e.externalId)
+    Encoder.forProduct3("instanceType", "space", "externalId")((e: EdgeDeletionRequest) =>
+      (e.`instanceType`, e.space, e.externalId)
     )
 
   implicit val instanceDeletionRequestEncoder: Encoder[InstanceDeletionRequest] = Encoder.instance {
@@ -37,7 +37,7 @@ object InstanceDeletionRequest {
   implicit val edgeDeletionRequestDecoder: Decoder[EdgeDeletionRequest] = deriveDecoder
 
   implicit val instanceDeletionRequestDecoder: Decoder[InstanceDeletionRequest] = (c: HCursor) =>
-    c.downField("type").as[InstanceType] match {
+    c.downField("instanceType").as[InstanceType] match {
       case Left(err) => Left[DecodingFailure, InstanceDeletionRequest](err)
       case Right(InstanceType.Node) => Decoder[NodeDeletionRequest].apply(c)
       case Right(InstanceType.Edge) => Decoder[EdgeDeletionRequest].apply(c)
