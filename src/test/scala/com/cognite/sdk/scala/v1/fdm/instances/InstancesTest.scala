@@ -5,7 +5,7 @@ import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
-import com.cognite.sdk.scala.v1.fdm.common.Usage
+import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerId, ContainerReference}
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.{EdgeDeletionRequest, NodeDeletionRequest}
 import com.cognite.sdk.scala.v1.fdm.views._
@@ -27,19 +27,33 @@ import scala.concurrent.duration.DurationInt
 class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val space = "test-space-scala-sdk"
 
-  private val edgeNodeContainerExtId = "sdkEdgeNodeTestContainer"
-  private val edgeContainerExtId = "sdkEdgeTestContainer"
-  private val nodeContainer1ExtId = "sdkNodeTestContainer1"
-  private val nodeContainer2ExtId = "sdkNodeTestContainer2"
+  private val edgeNodeContainerExtId = "sdkTestEdgeNodeContainer"
+  private val edgeContainerExtId = "sdkTestEdgeContainer"
+  private val nodeContainer1ExtId = "sdkTestNodeContainer1"
+  private val nodeContainer2ExtId = "sdkTestNodeContainer2"
 
-  private val edgeNodeViewExtId = "sdkEdgeNodeView"
-  private val edgeViewExtId = "sdkEdgeView"
-  private val nodeView1ExtId = "sdkNodeView1"
-  private val nodeView2ExtId = "sdkNodeView2"
+  private val edgeNodeViewExtId = "sdkTestEdgeNodeView"
+  private val edgeViewExtId = "sdkTestEdgeView"
+  private val nodeView1ExtId = "sdkTestNodeView1"
+  private val nodeView2ExtId = "sdkTestNodeView2"
 
   private val viewVersion = "v1"
 
   it should "CRUD instances with all property types" in {
+//    deleteContainers(Seq(
+//      ContainerId(space, edgeNodeContainerExtId),
+//      ContainerId(space, edgeContainerExtId),
+//      ContainerId(space, nodeContainer1ExtId),
+//      ContainerId(space, nodeContainer2ExtId)
+//    ))
+//
+//    deleteViews(Seq(
+//      DataModelReference(space, edgeNodeViewExtId, viewVersion),
+//      DataModelReference(space, edgeViewExtId, viewVersion),
+//      DataModelReference(space, nodeView1ExtId, viewVersion),
+//      DataModelReference(space, nodeView2ExtId, viewVersion)
+//    ))
+
     val allContainerCreateDefinition = createTestContainer(space, edgeNodeContainerExtId, Usage.All)
     val edgeContainerCreateDefinition = createTestContainer(space, edgeContainerExtId, Usage.Edge)
     val nodeContainerCreateDefinition1 = createTestContainer(space, nodeContainer1ExtId, Usage.Node)
@@ -224,7 +238,12 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
       description = Some(s"Test View For Sdk Scala ${container.externalId}"),
       filter = None,
       properties = container.properties.map {
-        case (pName, _) => pName -> CreatePropertyReference(ContainerReference(container.space, container.externalId), pName)
+        case (pName, _) => pName -> ViewProperty.CreateViewProperty(
+          name = Some(pName),
+          description = Some(pName),
+          container = ContainerReference(container.space, container.externalId),
+          containerPropertyIdentifier = pName
+        )
       },
       implements = None
     )

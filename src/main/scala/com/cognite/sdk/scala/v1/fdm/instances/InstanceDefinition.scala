@@ -1,11 +1,8 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.implicits.toTraverseOps
+import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyType}
-import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.{
-  directRelationReferenceDecoder,
-  directRelationReferenceEncoder
-}
 import io.circe._
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
@@ -213,62 +210,64 @@ object InstanceDefinition {
     )
 
   private def toInstancePropertyType(
-      instantPropTypeJson: Json,
+      propValue: Json,
       t: TypePropertyDefinition
   ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
       case PropertyType.DirectNodeRelationProperty(_) =>
-        Right(InstancePropertyValue.Object(instantPropTypeJson))
-      case t if t.isList => toInstancePropertyTypeOfList(instantPropTypeJson, t)
-      case t => toInstancePropertyTypeOfNonList(instantPropTypeJson, t)
+        propValue
+          .as[Option[DirectRelationReference]]
+          .map(InstancePropertyValue.DirectNodeRelation.apply)
+      case t if t.isList => toInstancePropertyTypeOfList(propValue, t)
+      case t => toInstancePropertyTypeOfNonList(propValue, t)
     }
 
   // scalastyle:off cyclomatic.complexity method.length
   private def toInstancePropertyTypeOfList(
-      instantPropTypeJson: Json,
+      propValue: Json,
       t: PropertyType
   ): Either[DecodingFailure, InstancePropertyValue] =
     t match {
       case PropertyType.TextProperty(Some(true), _) =>
         Decoder[Seq[String]]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.StringList.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(true)) =>
         Decoder[Seq[Boolean]]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.BooleanList.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(true)) =>
         Decoder[Seq[Int]]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Int32List.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Int64, Some(true)) =>
         Decoder[Seq[Long]]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Int64List.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Float32, Some(true)) =>
         Decoder[Seq[Float]]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Float32List.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Float64, Some(true)) =>
         Decoder[Seq[Double]]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Float64List.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Date, Some(true)) =>
         Decoder[Seq[LocalDate]]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.DateList.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, Some(true)) =>
         Decoder[Seq[ZonedDateTime]]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.TimestampList.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Json, Some(true)) =>
         Decoder[Seq[Json]]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.ObjectList.apply)
       case _ =>
         Left[DecodingFailure, InstancePropertyValue](
           DecodingFailure(
-            s"Expected a list type, but found a non list type: ${instantPropTypeJson.noSpaces} as ${t.toString}",
+            s"Expected a list type, but found a non list type: ${propValue.noSpaces} as ${t.toString}",
             List.empty
           )
         )
@@ -277,50 +276,50 @@ object InstanceDefinition {
 
   // scalastyle:off cyclomatic.complexity method.length
   private def toInstancePropertyTypeOfNonList(
-      instantPropTypeJson: Json,
+      propValue: Json,
       t: PropertyType
   ): Either[DecodingFailure, InstancePropertyValue] =
     t match {
       case PropertyType.TextProperty(None | Some(false), _) =>
         Decoder[String]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.String.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, _) =>
         Decoder[Boolean]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Boolean.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Int32, None | Some(false)) =>
         Decoder[Int]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Int32.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Int64, None | Some(false)) =>
         Decoder[Long]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Int64.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Float32, None | Some(false)) =>
         Decoder[Float]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Float32.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Float64, None | Some(false)) =>
         Decoder[Double]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Float64.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Date, None | Some(false)) =>
         Decoder[LocalDate]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Date.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, None | Some(false)) =>
         Decoder[ZonedDateTime]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Timestamp.apply)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Json, None | Some(false)) =>
         Decoder[Json]
-          .decodeJson(instantPropTypeJson)
+          .decodeJson(propValue)
           .map(InstancePropertyValue.Object.apply)
       case _ =>
         Left[DecodingFailure, InstancePropertyValue](
           DecodingFailure(
-            s"Expected a non list type, but found a list type: ${instantPropTypeJson.noSpaces} as ${t.toString}",
+            s"Expected a non list type, but found a list type: ${propValue.noSpaces} as ${t.toString}",
             List.empty
           )
         )

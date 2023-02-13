@@ -1,13 +1,13 @@
 package com.cognite.sdk.scala.v1.fdm
 
-import com.cognite.sdk.scala.v1.fdm.common.Usage
+import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewPropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{DirectNodeRelationProperty, PrimitiveProperty, TextProperty}
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyDefinition, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.{EdgeWrite, NodeWrite}
-import com.cognite.sdk.scala.v1.fdm.instances.{DirectRelationReference, EdgeOrNodeData, InstancePropertyValue, NodeOrEdgeCreate}
+import com.cognite.sdk.scala.v1.fdm.instances.{EdgeOrNodeData, InstancePropertyValue, NodeOrEdgeCreate}
 import io.circe.{Json, JsonObject}
 
 import java.time.{LocalDate, LocalDateTime, ZoneId}
@@ -33,8 +33,8 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true))
-    //    DirectNodeRelationProperty(container = None)
+    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
+    DirectNodeRelationProperty(container = None)
   )
 
   val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
@@ -204,12 +204,15 @@ object Utils {
   def createInstancePropertyForContainerProperty(
                                                   propName: String,
                                                   containerPropType: PropertyType
-                                                ): InstancePropertyValue =
-    if (containerPropType.isList) {
-      listContainerPropToInstanceProperty(propName, containerPropType)
-    } else {
-      nonListContainerPropToInstanceProperty(propName, containerPropType)
+                                                ): InstancePropertyValue = {
+    containerPropType match {
+      case DirectNodeRelationProperty(container) =>
+        val ref = container.map(r => DirectRelationReference(r.space, s"someExtId${Random.nextInt(10000)}"))
+        InstancePropertyValue.DirectNodeRelation(ref)
+      case p if p.isList => listContainerPropToInstanceProperty(propName, p)
+      case p => nonListContainerPropToInstanceProperty(propName, p)
     }
+  }
 
   def createNodeWriteData(space: String,
                           nodeExternalId: String,

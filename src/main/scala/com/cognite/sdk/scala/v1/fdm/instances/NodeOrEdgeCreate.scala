@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.v1.fdm.instances
 
+import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceType._
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
