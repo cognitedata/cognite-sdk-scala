@@ -9,7 +9,7 @@ import com.cognite.sdk.scala.v1.fdm.Utils._
 import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyDefinition, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.{CogniteExternalId, CommonDataModelTestHelper}
 import io.circe.{Decoder, Encoder}
 
@@ -237,18 +237,6 @@ class ContainersTest extends CommonDataModelTestHelper {
         `type` = PrimitiveProperty(`type` = PrimitivePropType.Int64)
       )
     }
-  }
-
-  it should "asses the compatibility of default values and property types" in {
-    val (compatibles, _) = (for {
-      p <- AllContainerPropertyTypes
-      d <- AllPropertyDefaultValues
-    } yield (p, d, PropertyDefinition.defaultValueCompatibleWithPropertyType(p, d)))
-      .partition { case (_, _, compatibility) => compatibility }
-
-    // default values for list types are not allowed
-    compatibles.count { case (propType, _, _) => propType.isList } shouldBe 0
-    compatibles.length shouldBe 9
   }
 
   it should "CRUD a container with all possible props" in {

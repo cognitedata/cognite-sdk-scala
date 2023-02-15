@@ -217,7 +217,7 @@ object InstanceDefinition {
       case PropertyType.DirectNodeRelationProperty(_) =>
         propValue
           .as[Option[DirectRelationReference]]
-          .map(InstancePropertyValue.DirectNodeRelation.apply)
+          .map(InstancePropertyValue.ViewDirectNodeRelation.apply)
       case t if t.isList => toInstancePropertyTypeOfList(propValue, t)
       case t => toInstancePropertyTypeOfNonList(propValue, t)
     }

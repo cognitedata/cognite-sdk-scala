@@ -62,7 +62,7 @@ object InstancePropertyValue {
 
   final case class Object(value: Json) extends InstancePropertyValue
 
-  final case class DirectNodeRelation(ref: Option[DirectRelationReference])
+  final case class ViewDirectNodeRelation(value: Option[DirectRelationReference])
       extends InstancePropertyValue
 
   final case class StringList(value: Seq[java.lang.String]) extends InstancePropertyValue
@@ -225,7 +225,7 @@ object InstancePropertyValue {
       case Timestamp(value) =>
         Json.fromString(value.format(InstancePropertyValue.Timestamp.formatter))
       case Object(value) => value
-      case DirectNodeRelation(ref) => ref.map(_.asJson).getOrElse(Json.Null)
+      case ViewDirectNodeRelation(value) => value.map(_.asJson).getOrElse(Json.Null)
       case StringList(values) => Json.arr(values = values.map(Json.fromString): _*)
       case BooleanList(values) => Json.arr(values = values.map(Json.fromBoolean): _*)
       case Int32List(values) => Json.arr(values = values.map(Json.fromInt): _*)

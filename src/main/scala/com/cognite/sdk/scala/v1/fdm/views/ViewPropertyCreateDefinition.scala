@@ -7,15 +7,15 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 
-sealed trait ViewProperty
+sealed trait ViewPropertyCreateDefinition
 
-object ViewProperty {
+object ViewPropertyCreateDefinition {
   final case class CreateViewProperty(
       name: Option[String] = None,
       description: Option[String] = None,
       container: ContainerReference,
       containerPropertyIdentifier: String
-  ) extends ViewProperty
+  ) extends ViewPropertyCreateDefinition
 
   implicit val createViewPropertyEncoder: Encoder[CreateViewProperty] =
     deriveEncoder[CreateViewProperty]
@@ -28,7 +28,7 @@ object ViewProperty {
       container: ContainerReference,
       containerPropertyIdentifier: String,
       source: Option[ViewReference]
-  ) extends ViewProperty
+  ) extends ViewPropertyCreateDefinition
 
   implicit val directRelationCreatePropertyEncoder: Encoder[DirectRelationCreateProperty] =
     deriveEncoder[DirectRelationCreateProperty]
@@ -41,20 +41,20 @@ object ViewProperty {
       `type`: DirectRelationReference,
       source: ViewReference,
       direction: Option[ConnectionDirection]
-  ) extends ViewProperty
+  ) extends ViewPropertyCreateDefinition
 
   implicit val connectionDefinitionEncoder: Encoder[ConnectionDefinition] =
     deriveEncoder[ConnectionDefinition]
   implicit val connectionDefinitionDecoder: Decoder[ConnectionDefinition] =
     deriveDecoder[ConnectionDefinition]
 
-  implicit val viewPropertyEncoder: Encoder[ViewProperty] = Encoder.instance {
+  implicit val viewPropertyEncoder: Encoder[ViewPropertyCreateDefinition] = Encoder.instance {
     case p: CreateViewProperty => p.asJson
     case p: DirectRelationCreateProperty => p.asJson
     case p: ConnectionDefinition => p.asJson
   }
-  implicit val viewPropertyDecoder: Decoder[ViewProperty] =
-    List[Decoder[ViewProperty]](
+  implicit val viewPropertyDecoder: Decoder[ViewPropertyCreateDefinition] =
+    List[Decoder[ViewPropertyCreateDefinition]](
       Decoder[ConnectionDefinition].widen,
       Decoder[DirectRelationCreateProperty].widen,
       Decoder[CreateViewProperty].widen

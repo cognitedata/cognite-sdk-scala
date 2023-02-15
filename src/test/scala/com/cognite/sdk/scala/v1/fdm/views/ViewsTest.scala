@@ -5,16 +5,12 @@ package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.v1.fdm.common.Usage
-//import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition._
-//import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition
 import com.cognite.sdk.scala.common.RetryWhile
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewPropertyDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, SpaceCreateDefinition}
-//import com.cognite.sdk.scala.v1.resources.Containers.containerCreateEncoder
-//import io.circe.syntax.EncoderOps
 import org.scalatest.BeforeAndAfterAll
 
 @SuppressWarnings(
@@ -104,8 +100,8 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   ignore should "create a view" in {
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val properties = Map(
-      "prop_int32" -> ViewProperty.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
-      "prop_text" -> ViewProperty.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text")
+      "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
+      "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text")
     )
     val viewToCreate = ViewCreateDefinition(
       space = spaceName,
@@ -130,7 +126,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
     created.map(_.properties) shouldBe Some(
       Map(
-        "prop_int32" -> ViewPropertyDefinition(
+        "prop_int32" -> ViewCorePropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
           defaultValue = None,
@@ -138,7 +134,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
           container = Some(containerReference),
           containerPropertyIdentifier = None
         ),
-        "prop_text" -> ViewPropertyDefinition(
+        "prop_text" -> ViewCorePropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
           defaultValue = None,
@@ -159,8 +155,14 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     val implements =
       Seq(ViewReference(space = spaceName, externalId = viewExternalId, version = "v1"))
     val properties2 = Map(
-      "prop_int32" -> ViewProperty.CreateViewProperty(container = containerPrimReference, containerPropertyIdentifier = "prop_int32"),
-      "prop_list_float64" -> ViewProperty.CreateViewProperty(container = containerListReference, containerPropertyIdentifier = "prop_list_float64")
+      "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(
+        container = containerPrimReference,
+        containerPropertyIdentifier = "prop_int32"
+      ),
+      "prop_list_float64" -> ViewPropertyCreateDefinition.CreateViewProperty(
+        container = containerListReference,
+        containerPropertyIdentifier = "prop_list_float64"
+      )
     )
 
     val view2ToCreate = ViewCreateDefinition(

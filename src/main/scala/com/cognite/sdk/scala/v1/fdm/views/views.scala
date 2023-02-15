@@ -16,7 +16,7 @@ final case class ViewCreateDefinition(
     filter: Option[FilterDefinition] = None,
     implements: Option[Seq[ViewReference]] = None,
     version: Option[String] = None,
-    properties: Map[String, ViewProperty]
+    properties: Map[String, ViewPropertyCreateDefinition]
 )
 
 final case class ViewDefinition(

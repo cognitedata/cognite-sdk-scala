@@ -5,6 +5,7 @@ import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ViewCorePropertyDefinition
 import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerId, ContainerReference}
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.{EdgeDeletionRequest, NodeDeletionRequest}
@@ -88,13 +89,13 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
       space,
       s"node_ext_id_$nodeViewExternalId1",
       nodeView1.toSourceReference,
-      nodeView1.properties
+      nodeView1.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p}
     )
     val node2WriteData = createNodeWriteData(
       space,
       s"node_ext_id_$nodeViewExternalId2",
       nodeView2.toSourceReference,
-      nodeView2.properties
+      nodeView2.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p}
     )
     val startNode = DirectRelationReference(space, externalId = node1WriteData.externalId)
     val endNode = DirectRelationReference(space, externalId = node2WriteData.externalId)
@@ -102,7 +103,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
       space,
       s"edge_ext_id_$edgeViewExternalId",
       edgeView.toSourceReference,
-      edgeView.properties,
+      edgeView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
       startNode = startNode,
       endNode = endNode
     )
@@ -111,7 +112,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
         space,
         s"nodes_or_edges_ext_id_${allViewExternalId}_edges",
         allView.toSourceReference,
-        allView.properties,
+        allView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
         startNode = startNode,
         endNode = endNode
       ),
@@ -119,7 +120,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
         space,
         s"nodes_or_edges_ext_id_${allViewExternalId}_nodes",
         allView.toSourceReference,
-        allView.properties
+        allView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p}
       )
     )
 
@@ -238,7 +239,7 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
       description = Some(s"Test View For Sdk Scala ${container.externalId}"),
       filter = None,
       properties = container.properties.map {
-        case (pName, _) => pName -> ViewProperty.CreateViewProperty(
+        case (pName, _) => pName -> ViewPropertyCreateDefinition.CreateViewProperty(
           name = Some(pName),
           description = Some(pName),
           container = ContainerReference(container.space, container.externalId),

@@ -1,10 +1,10 @@
 package com.cognite.sdk.scala.v1.fdm
 
-import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewPropertyDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, CorePropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{DirectNodeRelationProperty, PrimitiveProperty, TextProperty}
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyDefinition, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
+import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.{EdgeWrite, NodeWrite}
 import com.cognite.sdk.scala.v1.fdm.instances.{EdgeOrNodeData, InstancePropertyValue, NodeOrEdgeCreate}
@@ -60,8 +60,8 @@ object Utils {
   def toViewPropertyDefinition(
                                 containerPropDef: ContainerPropertyDefinition,
                                 containerRef: Option[ContainerReference],
-                                containerPropertyIdentifier: Option[String]): ViewPropertyDefinition =
-    ViewPropertyDefinition(
+                                containerPropertyIdentifier: Option[String]): ViewCorePropertyDefinition =
+    ViewCorePropertyDefinition(
       nullable = containerPropDef.nullable,
       autoIncrement = containerPropDef.autoIncrement,
       defaultValue = containerPropDef.defaultValue,
@@ -125,7 +125,7 @@ object Utils {
   }
   // scalastyle:on cyclomatic.complexity method.length
 
-  def createAllPossibleViewPropCombinations: Map[String, ViewPropertyDefinition] =
+  def createAllPossibleViewPropCombinations: Map[String, ViewCorePropertyDefinition] =
     createAllPossibleContainerPropCombinations.map {
       case (key, prop) => key -> toViewPropertyDefinition(prop, None, None)
     }
@@ -207,8 +207,8 @@ object Utils {
                                                 ): InstancePropertyValue = {
     containerPropType match {
       case DirectNodeRelationProperty(container) =>
-        val ref = container.map(r => DirectRelationReference(r.space, s"someExtId${Random.nextInt(10000)}"))
-        InstancePropertyValue.DirectNodeRelation(ref)
+        val ref = container.map(r => DirectRelationReference(r.space, s"someExtId${Random.nextInt(10000).toString}"))
+        InstancePropertyValue.ViewDirectNodeRelation(ref)
       case p if p.isList => listContainerPropToInstanceProperty(propName, p)
       case p => nonListContainerPropToInstanceProperty(propName, p)
     }
@@ -217,7 +217,7 @@ object Utils {
   def createNodeWriteData(space: String,
                           nodeExternalId: String,
                           sourceRef: SourceReference,
-                          propsMap: Map[String, PropertyDefinition]): NodeWrite = {
+                          propsMap: Map[String, CorePropertyDefinition]): NodeWrite = {
     val instanceValuesForProps = propsMap.map {
       case (propName, prop) =>
         propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
@@ -247,11 +247,11 @@ object Utils {
   }
 
   def createEdgeWriteData(space: String,
-                           edgeExternalId: String,
-                           sourceRef: SourceReference,
-                           propsMap: Map[String, PropertyDefinition],
-                           startNode: DirectRelationReference,
-                           endNode: DirectRelationReference
+                          edgeExternalId: String,
+                          sourceRef: SourceReference,
+                          propsMap: Map[String, CorePropertyDefinition],
+                          startNode: DirectRelationReference,
+                          endNode: DirectRelationReference
                          ): EdgeWrite = {
     val instanceValuesForProps = propsMap.map {
       case (propName, prop) =>
@@ -289,7 +289,7 @@ object Utils {
                                  nodeOrEdgeExternalId: String,
                                  usage: Usage,
                                  sourceRef: SourceReference,
-                                 propsMap: Map[String, PropertyDefinition],
+                                 propsMap: Map[String, CorePropertyDefinition],
                                  startNode: DirectRelationReference,
                                  endNode: DirectRelationReference
                          ): NodeOrEdgeCreate =
