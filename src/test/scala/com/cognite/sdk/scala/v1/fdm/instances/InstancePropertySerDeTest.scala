@@ -33,7 +33,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
         s"""{
            |  "items": [
            |    {
-           |      "type": "node",
+           |      "instanceType": "node",
            |      "space": "space-1",
            |      "externalId": "space-ext-id-1",
            |      "createdTime": ${createdTime.toString},
@@ -173,8 +173,9 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
           NodeDefinition(
             "space-1",
             "space-ext-id-1",
-            Some(createdTime),
-            Some(lastUpdatedTime),
+            createdTime,
+            lastUpdatedTime,
+            deletedTime = None,
             properties = Some(
               Map(
                 "space-name-1" -> Map(

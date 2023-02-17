@@ -10,7 +10,7 @@ import java.time.Instant
 sealed abstract class SlimNodeOrEdge extends Product with Serializable {
   val space: String
   val externalId: String
-  val `type`: InstanceType
+  val instanceType: InstanceType
   val createdTime: Option[Instant]
   val lastUpdatedTime: Option[Instant]
 }
@@ -22,7 +22,7 @@ object SlimNodeOrEdge {
       createdTime: Option[Instant],
       lastUpdatedTime: Option[Instant]
   ) extends SlimNodeOrEdge {
-    override val `type`: InstanceType = InstanceType.Node
+    override val instanceType: InstanceType = InstanceType.Node
   }
 
   final case class SlimEdgeDefinition(
@@ -31,17 +31,19 @@ object SlimNodeOrEdge {
       createdTime: Option[Instant],
       lastUpdatedTime: Option[Instant]
   ) extends SlimNodeOrEdge {
-    override val `type`: InstanceType = InstanceType.Edge
+    override val instanceType: InstanceType = InstanceType.Edge
   }
 
   implicit val slimNodeDefinitionEncoder: Encoder[SlimNodeDefinition] =
-    Encoder.forProduct5("type", "space", "externalId", "createdTime", "lastUpdatedTime")(
-      (e: SlimNodeDefinition) => (e.`type`, e.space, e.externalId, e.createdTime, e.lastUpdatedTime)
+    Encoder.forProduct5("instanceType", "space", "externalId", "createdTime", "lastUpdatedTime")(
+      (e: SlimNodeDefinition) =>
+        (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime)
     )
 
   implicit val slimEdgeDefinitionEncoder: Encoder[SlimEdgeDefinition] =
-    Encoder.forProduct5("type", "space", "externalId", "createdTime", "lastUpdatedTime")(
-      (e: SlimEdgeDefinition) => (e.`type`, e.space, e.externalId, e.createdTime, e.lastUpdatedTime)
+    Encoder.forProduct5("instanceType", "space", "externalId", "createdTime", "lastUpdatedTime")(
+      (e: SlimEdgeDefinition) =>
+        (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime)
     )
 
   implicit val slimNodeOrEdgeEncoder: Encoder[SlimNodeOrEdge] = Encoder.instance {
@@ -54,7 +56,7 @@ object SlimNodeOrEdge {
   implicit val slimEdgeDefinitionDecoder: Decoder[SlimEdgeDefinition] = deriveDecoder
 
   implicit val slimNodeOrEdgeDecoder: Decoder[SlimNodeOrEdge] = (c: HCursor) =>
-    c.downField("type").as[InstanceType] match {
+    c.downField("instanceType").as[InstanceType] match {
       case Left(err) => Left[DecodingFailure, SlimNodeOrEdge](err)
       case Right(InstanceType.Node) =>
         Decoder[SlimNodeDefinition].apply(c)

@@ -15,58 +15,69 @@ import java.time.{LocalDate, ZonedDateTime}
 sealed trait InstanceDefinition {
   def space: String
   def externalId: String
-  def createdTime: Option[Long]
-  def lastUpdatedTime: Option[Long]
+  def createdTime: Long
+  def lastUpdatedTime: Long
+  def deletedTime: Option[Long]
   def properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
 
-  val `type`: InstanceType
+  val instanceType: InstanceType
 }
 
 object InstanceDefinition {
   final case class NodeDefinition(
       space: String,
       externalId: String,
-      createdTime: Option[Long],
-      lastUpdatedTime: Option[Long],
+      createdTime: Long,
+      lastUpdatedTime: Long,
+      deletedTime: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
   ) extends InstanceDefinition {
-    override val `type`: InstanceType = InstanceType.Node
+    override val instanceType: InstanceType = InstanceType.Node
   }
 
   final case class EdgeDefinition(
-      relation: DirectRelationReference,
+      `type`: DirectRelationReference,
       space: String,
       externalId: String,
-      createdTime: Option[Long],
-      lastUpdatedTime: Option[Long],
+      createdTime: Long,
+      lastUpdatedTime: Long,
+      deletedTime: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]],
       startNode: DirectRelationReference,
       endNode: DirectRelationReference
   ) extends InstanceDefinition {
-    override val `type`: InstanceType = InstanceType.Edge
+    override val instanceType: InstanceType = InstanceType.Edge
   }
 
   implicit val nodeDefinitionEncoder: Encoder[NodeDefinition] = Encoder.forProduct6(
-    "type",
+    "instanceType",
     "space",
     "externalId",
     "createdTime",
     "lastUpdatedTime",
     "properties"
   )((e: NodeDefinition) =>
-    (e.`type`, e.space, e.externalId, e.createdTime, e.lastUpdatedTime, e.properties)
+    (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime, e.properties)
   )
 
   implicit val edgeDefinitionEncoder: Encoder[EdgeDefinition] = Encoder.forProduct7(
+    "instanceType",
     "type",
-    "relation",
     "space",
     "externalId",
     "createdTime",
     "lastUpdatedTime",
     "properties"
   )((e: EdgeDefinition) =>
-    (e.`type`, e.relation, e.space, e.externalId, e.createdTime, e.lastUpdatedTime, e.properties)
+    (
+      e.instanceType,
+      e.`type`,
+      e.space,
+      e.externalId,
+      e.createdTime,
+      e.lastUpdatedTime,
+      e.properties
+    )
   )
 
   implicit val instanceDefinitionEncoder: Encoder[InstanceDefinition] =
@@ -86,7 +97,7 @@ object InstanceDefinition {
   ): Decoder[InstanceDefinition] = (c: HCursor) =>
     propertyTypeDefinitionsMap match {
       case Some(propDefMap) =>
-        c.downField("type").as[InstanceType] match {
+        c.downField("instanceType").as[InstanceType] match {
           case Left(err) => Left[DecodingFailure, InstanceDefinition](err)
           case Right(InstanceType.Node) =>
             instancePropertyDefinitionBasedNodeDefinitionDecoder(propDefMap).apply(c)
@@ -94,7 +105,7 @@ object InstanceDefinition {
             instancePropertyDefinitionBasedEdgeDefinitionDecoder(propDefMap).apply(c)
         }
       case None =>
-        c.downField("type").as[InstanceType] match {
+        c.downField("instanceType").as[InstanceType] match {
           case Left(err) => Left[DecodingFailure, InstanceDefinition](err)
           case Right(InstanceType.Node) => nodeDefinitionDecoder.apply(c)
           case Right(InstanceType.Edge) => edgeDefinitionDecoder.apply(c)
@@ -155,8 +166,9 @@ object InstanceDefinition {
     for {
       space <- c.downField("space").as[String]
       externalId <- c.downField("externalId").as[String]
-      createdTime <- c.downField("createdTime").as[Option[Long]]
-      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Long]]
+      createdTime <- c.downField("createdTime").as[Long]
+      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Long]
+      deletedTime <- c.downField("deletedTime").as[Option[Long]]
       properties <- c
         .downField("properties")
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
@@ -167,6 +179,7 @@ object InstanceDefinition {
       externalId = externalId,
       createdTime = createdTime,
       lastUpdatedTime = lastUpdatedTime,
+      deletedTime = deletedTime,
       properties = properties
     )
 
@@ -174,11 +187,12 @@ object InstanceDefinition {
       instPropDefMap: Map[String, Map[String, Map[String, TypePropertyDefinition]]]
   ): Decoder[EdgeDefinition] = (c: HCursor) =>
     for {
-      relation <- c.downField("relation").as[DirectRelationReference]
+      relation <- c.downField("type").as[DirectRelationReference]
       space <- c.downField("space").as[String]
       externalId <- c.downField("externalId").as[String]
-      createdTime <- c.downField("createdTime").as[Option[Long]]
-      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Option[Long]]
+      createdTime <- c.downField("createdTime").as[Long]
+      lastUpdatedTime <- c.downField("lastUpdatedTime").as[Long]
+      deletedTime <- c.downField("deletedTime").as[Option[Long]]
       properties <- c
         .downField("properties")
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
@@ -187,11 +201,12 @@ object InstanceDefinition {
       startNode <- c.downField("startNode").as[DirectRelationReference]
       endNode <- c.downField("endNode").as[DirectRelationReference]
     } yield EdgeDefinition(
-      relation = relation,
+      `type` = relation,
       space = space,
       externalId = externalId,
       createdTime = createdTime,
       lastUpdatedTime = lastUpdatedTime,
+      deletedTime = deletedTime,
       properties = properties,
       startNode = startNode,
       endNode = endNode
