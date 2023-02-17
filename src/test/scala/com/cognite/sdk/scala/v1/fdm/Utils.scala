@@ -174,7 +174,7 @@ object Utils {
                          ): ContainerCreateDefinition = {
     val allPossibleProperties: Map[String, ContainerPropertyDefinition] =
       createAllPossibleContainerPropCombinations
-    val allPossiblePropertyKeys = allPossibleProperties.keys.toList
+    val allPossiblePropertyKeys = allPossibleProperties.keys.toList.sorted
 
     val constraints: Map[String, ContainerConstraint] = Map(
       "uniqueConstraint" -> ContainerConstraint.UniquenessConstraint(
