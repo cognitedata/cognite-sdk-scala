@@ -27,12 +27,12 @@ class InstancesTest extends CommonDataModelTestHelper with RetryWhile {
   private val space = "test-space-scala-sdk"
 
   it should "CRUD instances with all property types" in {
-    val allContainerCreateDefinition = createTestContainer(space, "test_edge_node_container", Usage.All)
-    val edgeContainerCreateDefinition = createTestContainer(space, "test_edge_container", Usage.Edge)
-    val nodeContainerCreateDefinition1 = createTestContainer(space, "test_node_container_1", Usage.Node)
-    val nodeContainerCreateDefinition2 = createTestContainer(space, "test_node_container_2", Usage.Node)
+    val allContainerCreateDefinition = createTestContainer(space, "test_edge_node_contain5", Usage.All)
+    val edgeContainerCreateDefinition = createTestContainer(space, "test_edge_contain5", Usage.Edge)
+    val nodeContainerCreateDefinition1 = createTestContainer(space, "test_node_container_8", Usage.Node)
+    val nodeContainerCreateDefinition2 = createTestContainer(space, "test_node_container_4", Usage.Node)
 
-    val viewVersion = "v2"
+    val viewVersion = "v9"
     val allViewExternalId = s"test_edge_node_view"
     val edgeViewExternalId = s"test_edge_view"
     val nodeViewExternalId1 = s"test_node_view_1"
