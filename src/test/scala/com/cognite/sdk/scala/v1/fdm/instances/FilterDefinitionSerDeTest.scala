@@ -153,6 +153,11 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
                                           |}""".stripMargin
       }
 
+      "work for matchAll filter" in {
+        val matchAll = MatchAll().asJson
+        matchAll.noSpaces shouldBe "{}"
+      }
+
       "work for nested filter" in {
         val nested = Nested(
           Seq("some", "direct_relation", "property"),

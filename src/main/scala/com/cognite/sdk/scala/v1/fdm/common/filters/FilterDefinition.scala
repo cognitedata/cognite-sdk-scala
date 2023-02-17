@@ -48,6 +48,7 @@ object FilterDefinition {
   final case class Exists(property: Seq[String]) extends LeafFilter
   final case class ContainsAny(property: Seq[String], values: SeqFilterValue) extends LeafFilter
   final case class ContainsAll(property: Seq[String], values: SeqFilterValue) extends LeafFilter
+  final case class MatchAll() extends LeafFilter
   final case class Nested(scope: Seq[String], filter: FilterDefinition) extends LeafFilter
   final case class Overlaps(
       startProperty: Seq[String],
@@ -91,6 +92,7 @@ object FilterDefinition {
   implicit val existsFilterEncoder: Encoder[FilterDefinition.Exists] = deriveEncoder
   implicit val containsAnyFilterEncoder: Encoder[FilterDefinition.ContainsAny] = deriveEncoder
   implicit val containsAllFilterEncoder: Encoder[FilterDefinition.ContainsAll] = deriveEncoder
+  implicit val matchAllFilterEncoder: Encoder[FilterDefinition.MatchAll] = deriveEncoder
   implicit val nestedFilterEncoder: Encoder[FilterDefinition.Nested] = deriveEncoder
   implicit val overlapsFilterEncoder: Encoder[FilterDefinition.Overlaps] =
     deriveEncoder[FilterDefinition.Overlaps].mapJson(_.dropNullValues)
@@ -194,6 +196,12 @@ object FilterDefinition {
             e.productPrefix.toLowerCase(Locale.US) -> e.asJson
           )
         )
+      case e: FilterDefinition.MatchAll =>
+        Json.fromJsonObject(
+          JsonObject(
+            "matchAll" -> e.asJson
+          )
+        )
     }
 
   implicit val andFilterDecoder: Decoder[FilterDefinition.And] = deriveDecoder
@@ -207,6 +215,7 @@ object FilterDefinition {
   implicit val existsFilterDecoder: Decoder[FilterDefinition.Exists] = deriveDecoder
   implicit val containsAnyFilterDecoder: Decoder[FilterDefinition.ContainsAny] = deriveDecoder
   implicit val containsAllFilterDecoder: Decoder[FilterDefinition.ContainsAll] = deriveDecoder
+  implicit val matchAllFilterDecoder: Decoder[FilterDefinition.MatchAll] = deriveDecoder
   implicit val nestedFilterDecoder: Decoder[FilterDefinition.Nested] = deriveDecoder
   implicit val overlapsFilterDecoder: Decoder[FilterDefinition.Overlaps] = deriveDecoder
   implicit val hasDataFilterDecoder: Decoder[FilterDefinition.HasData] = deriveDecoder
@@ -236,6 +245,7 @@ object FilterDefinition {
     val gt = c.get[FilterDefinition.Gt]("gt")
     val lte = c.get[FilterDefinition.Lte]("lte")
     val lt = c.get[FilterDefinition.Lt]("lt")
+    val matchAll = c.get[FilterDefinition.MatchAll]("matchAll")
 
     val result: Result[FilterDefinition] = Seq(
       and,
@@ -254,7 +264,8 @@ object FilterDefinition {
       gte,
       gt,
       lte,
-      lt
+      lt,
+      matchAll
     ).find(_.isRight) match {
       case Some(value) => value
       case None =>
