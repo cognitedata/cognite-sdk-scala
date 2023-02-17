@@ -183,8 +183,8 @@ object Utils {
     )
 
     val indexes: Map[String, IndexDefinition] = Map(
-      "index1" -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.take(2)),
-      "index2" -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.slice(5, 7))
+      "index" + Random.nextInt().toString -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.take(2)),
+      "index" + Random.nextInt().toString -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.slice(5, 7))
     )
 
     val containerToCreate = ContainerCreateDefinition(
