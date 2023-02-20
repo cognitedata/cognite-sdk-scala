@@ -1,19 +1,23 @@
 package com.cognite.sdk.scala.v1.fdm
 
-import com.cognite.sdk.scala.v1.fdm.common.Usage
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewPropertyDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, CorePropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{DirectNodeRelationProperty, PrimitiveProperty, TextProperty}
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyDefinition, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
+import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.{EdgeWrite, NodeWrite}
-import com.cognite.sdk.scala.v1.fdm.instances.{DirectRelationReference, EdgeOrNodeData, InstancePropertyValue, NodeOrEdgeCreate}
+import com.cognite.sdk.scala.v1.fdm.instances.{EdgeOrNodeData, InstancePropertyValue, NodeOrEdgeCreate}
 import io.circe.{Json, JsonObject}
 
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.util.Random
 
 object Utils {
+  val SpaceExternalId = "testSpaceScalaSdk1"
+  val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation5"
+  val DirectNodeRelationViewExtId = "sdkTestNodeViewForDirectRelation5"
+  val ViewVersion = "v1"
 
   val AllContainerPropertyTypes: List[PropertyType] = List[PropertyType](
     TextProperty(),
@@ -33,8 +37,10 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true))
-    //    DirectNodeRelationProperty(container = None)
+    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
+    DirectNodeRelationProperty(
+      container = Some(ContainerReference(space = SpaceExternalId, externalId = DirectNodeRelationContainerExtId)),
+      source = None)
   )
 
   val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
@@ -60,8 +66,8 @@ object Utils {
   def toViewPropertyDefinition(
                                 containerPropDef: ContainerPropertyDefinition,
                                 containerRef: Option[ContainerReference],
-                                containerPropertyIdentifier: Option[String]): ViewPropertyDefinition =
-    ViewPropertyDefinition(
+                                containerPropertyIdentifier: Option[String]): ViewCorePropertyDefinition =
+    ViewCorePropertyDefinition(
       nullable = containerPropDef.nullable,
       autoIncrement = containerPropDef.autoIncrement,
       defaultValue = containerPropDef.defaultValue,
@@ -95,7 +101,7 @@ object Utils {
       val autoIncrement = autoIncrementApplicableProp && !nullable && !withDefault
 
       val alwaysNullable = p match {
-        case DirectNodeRelationProperty(_) => true
+        case _: DirectNodeRelationProperty => true
         case _ => false
       }
       val nullability = alwaysNullable || nullable
@@ -125,7 +131,7 @@ object Utils {
   }
   // scalastyle:on cyclomatic.complexity method.length
 
-  def createAllPossibleViewPropCombinations: Map[String, ViewPropertyDefinition] =
+  def createAllPossibleViewPropCombinations: Map[String, ViewCorePropertyDefinition] =
     createAllPossibleContainerPropCombinations.map {
       case (key, prop) => key -> toViewPropertyDefinition(prop, None, None)
     }
@@ -174,18 +180,18 @@ object Utils {
                          ): ContainerCreateDefinition = {
     val allPossibleProperties: Map[String, ContainerPropertyDefinition] =
       createAllPossibleContainerPropCombinations
-    val allPossiblePropertyKeys = allPossibleProperties.keys.toList
-
-    val constraints: Map[String, ContainerConstraint] = Map(
-      "uniqueConstraint" -> ContainerConstraint.UniquenessConstraint(
-        allPossiblePropertyKeys.take(5)
-      )
-    )
-
-    val indexes: Map[String, IndexDefinition] = Map(
-      "index1" -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.take(2)),
-      "index2" -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.slice(5, 7))
-    )
+//    val allPossiblePropertyKeys = allPossibleProperties.keys.toList
+//
+//    val constraints: Map[String, ContainerConstraint] = Map(
+//      "uniqueConstraint" -> ContainerConstraint.UniquenessConstraint(
+//        allPossiblePropertyKeys.take(5)
+//      )
+//    )
+//
+//    val indexes: Map[String, IndexDefinition] = Map(
+//      "index1" -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.take(2)),
+//      "index2" -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.slice(5, 7))
+//    )
 
     val containerToCreate = ContainerCreateDefinition(
       space = space,
@@ -194,8 +200,8 @@ object Utils {
       description = Some(s"Test ${usage.productPrefix} Container $containerExternalId Description"),
       usedFor = Some(usage),
       properties = allPossibleProperties,
-      constraints = Some(constraints),
-      indexes = Some(indexes)
+      constraints = None,
+      indexes = None
     )
 
     containerToCreate
@@ -204,51 +210,56 @@ object Utils {
   def createInstancePropertyForContainerProperty(
                                                   propName: String,
                                                   containerPropType: PropertyType
-                                                ): InstancePropertyValue =
-    if (containerPropType.isList) {
-      listContainerPropToInstanceProperty(propName, containerPropType)
-    } else {
-      nonListContainerPropToInstanceProperty(propName, containerPropType)
+                                                ): InstancePropertyValue = {
+    containerPropType match {
+      case DirectNodeRelationProperty(container, _) =>
+        val ref = container.map(r => DirectRelationReference(r.space, s"${r.externalId}Instance"))
+        InstancePropertyValue.ViewDirectNodeRelation(ref)
+      case p if p.isList => listContainerPropToInstanceProperty(propName, p)
+      case p => nonListContainerPropToInstanceProperty(propName, p)
     }
+  }
 
   def createNodeWriteData(space: String,
                           nodeExternalId: String,
                           sourceRef: SourceReference,
-                          propsMap: Map[String, PropertyDefinition]): NodeWrite = {
+                          propsMap: Map[String, CorePropertyDefinition]): NodeWrite = {
     val instanceValuesForProps = propsMap.map {
       case (propName, prop) =>
         propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
     }
-    val (nullables, nonNullables) = instanceValuesForProps.partition {
-      case (propName, _) =>
-        propsMap(propName).nullable.getOrElse(true)
-    }
+//    val (nullables, nonNullables) = instanceValuesForProps.partition {
+//      case (propName, _) =>
+//        propsMap(propName).nullable.getOrElse(true)
+//    }
 
-    val nodeData = if (nullables.isEmpty) {
-      List(toInstanceData(sourceRef, nonNullables))
-    } else {
+//    val nodeData = if (nullables.isEmpty) {
+//      List(toInstanceData(sourceRef, nonNullables))
+//    } else
+//    {
       val withAllProps = toInstanceData(sourceRef, instanceValuesForProps)
-      val withRequiredProps = toInstanceData(sourceRef, nonNullables)
-      val withEachNonRequired = nullables.map {
-        case (propName, propVal) =>
-          toInstanceData(sourceRef, nonNullables + (propName -> propVal))
-      }
-      List(withAllProps, withRequiredProps) ++ withEachNonRequired
-    }
+//      val withRequiredProps = toInstanceData(sourceRef, nonNullables)
+//      val withEachNonRequired = nullables.map {
+//        case (propName, propVal) =>
+//          toInstanceData(sourceRef, nonNullables + (propName -> propVal))
+//      }
+//      List(withAllProps, withRequiredProps) ++ withEachNonRequired
+//      withAllProps
+//    }
 
     NodeWrite(
       space,
       nodeExternalId,
-      nodeData
+      Seq(withAllProps)
     )
   }
 
   def createEdgeWriteData(space: String,
-                           edgeExternalId: String,
-                           sourceRef: SourceReference,
-                           propsMap: Map[String, PropertyDefinition],
-                           startNode: DirectRelationReference,
-                           endNode: DirectRelationReference
+                          edgeExternalId: String,
+                          sourceRef: SourceReference,
+                          propsMap: Map[String, CorePropertyDefinition],
+                          startNode: DirectRelationReference,
+                          endNode: DirectRelationReference
                          ): EdgeWrite = {
     val instanceValuesForProps = propsMap.map {
       case (propName, prop) =>
@@ -286,7 +297,7 @@ object Utils {
                                  nodeOrEdgeExternalId: String,
                                  usage: Usage,
                                  sourceRef: SourceReference,
-                                 propsMap: Map[String, PropertyDefinition],
+                                 propsMap: Map[String, CorePropertyDefinition],
                                  startNode: DirectRelationReference,
                                  endNode: DirectRelationReference
                          ): NodeOrEdgeCreate =
@@ -413,16 +424,11 @@ object Utils {
             )
           )
         )
-      case PropertyType.DirectNodeRelationProperty(_) => InstancePropertyValue.Object(Json.fromJsonObject(JsonObject.empty))
-
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
   // scalastyle:on cyclomatic.complexity
 
-  private def toInstanceData(
-                              ref: SourceReference,
-                              instancePropertyValues: Map[String, InstancePropertyValue]
-                            ) =
+  private def toInstanceData(ref: SourceReference, instancePropertyValues: Map[String, InstancePropertyValue]) =
     EdgeOrNodeData(
       source = ref,
       properties = Some(instancePropertyValues)
@@ -472,7 +478,7 @@ object Utils {
               )
             )
           )
-        case DirectNodeRelationProperty(_) => None
+        case _: DirectNodeRelationProperty => None
       }
     } else {
       None

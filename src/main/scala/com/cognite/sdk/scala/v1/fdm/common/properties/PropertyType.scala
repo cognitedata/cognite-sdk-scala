@@ -5,6 +5,7 @@ package com.cognite.sdk.scala.v1.fdm.common.properties
 
 import cats.implicits._
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
+import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 import io.circe._
 import io.circe.generic.semiauto._
 import io.circe.syntax.EncoderOps
@@ -29,8 +30,10 @@ object PropertyType {
   final case class PrimitiveProperty(`type`: PrimitivePropType, list: Option[Boolean] = Some(false))
       extends PropertyType
 
-  final case class DirectNodeRelationProperty(container: Option[ContainerReference])
-      extends PropertyType {
+  final case class DirectNodeRelationProperty(
+      container: Option[ContainerReference],
+      source: Option[ViewReference]
+  ) extends PropertyType {
     val `type`: String = DirectNodeRelationProperty.Type
 
     override def list: Option[Boolean] = None
@@ -51,8 +54,8 @@ object PropertyType {
     deriveEncoder[PrimitiveProperty]
 
   implicit val directNodeRelationPropertyEncoder: Encoder[DirectNodeRelationProperty] =
-    Encoder.forProduct2("container", "type")((d: DirectNodeRelationProperty) =>
-      (d.container, d.`type`)
+    Encoder.forProduct3("type", "container", "source")((d: DirectNodeRelationProperty) =>
+      (d.`type`, d.container, d.source)
     )
 
   implicit val containerPropertyTypeEncoder: Encoder[PropertyType] = Encoder.instance {
@@ -90,7 +93,8 @@ object PropertyType {
         case Right(typeVal) if typeVal === DirectNodeRelationProperty.Type =>
           for {
             containerRef <- c.downField("container").as[Option[ContainerReference]]
-          } yield DirectNodeRelationProperty(containerRef)
+            source <- c.downField("source").as[Option[ViewReference]]
+          } yield DirectNodeRelationProperty(containerRef, source)
         case Right(typeVal) =>
           Left[DecodingFailure, PropertyType](
             DecodingFailure(s"Unknown container property type: '$typeVal'", c.history)
