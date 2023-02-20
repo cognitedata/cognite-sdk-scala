@@ -2,11 +2,11 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDefinition.NodeDefinition
 import io.circe
 import io.circe.Decoder
 import io.circe.parser.parse
-import io.circe.syntax.EncoderOps
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -45,7 +45,10 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |          "view-or-container-id-1": {
            |            "property-identifier11": "prop-id-1",
            |            "property-identifier12": 102,
-           |            "property-identifier13": ${DirectRelationReference(space = "space-name-1", externalId = "extId1").asJson.noSpaces}
+           |            "property-identifier13": {
+           |              "space": "space-name-1",
+           |              "externalId": "extId1"
+           |            }
            |          },
            |          "view-or-container-id-2": {
            |            "property-identifier21": true,
@@ -96,8 +99,12 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |          "description": "property-identifier13",
            |          "name": "property-identifier13",
            |          "type": {
-           |            "type": "json",
-           |            "list": false
+           |            "type": "direct",
+           |            "container": {
+           |              "type": "container",
+           |              "space": "space-name-1",
+           |              "externalId": "extId1"
+           |            }
            |          }
            |        }
            |      },
@@ -243,7 +250,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   None,
                   Some("property-identifier13"),
                   Some("property-identifier13"),
-                  PropertyType.PrimitiveProperty(PrimitivePropType.Json, Some(false))
+                  PropertyType.DirectNodeRelationProperty(Some(ContainerReference("space-name-1", "extId1")), None)
                 )
               ),
               "view-or-container-id-2" -> Map(
