@@ -110,7 +110,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       description = Some("desc"),
       filter = None,
       implements = None,
-      version = Some(viewVersion1),
+      version = viewVersion1,
       properties = properties
     )
 
@@ -171,7 +171,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       name = Some("second view"),
       description = Some("some desc"),
       implements = Some(implements),
-      version = Some(viewVersion1),
+      version = viewVersion1,
       properties = properties2
     )
 

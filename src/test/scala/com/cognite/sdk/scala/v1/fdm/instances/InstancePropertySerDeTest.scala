@@ -1,10 +1,12 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
+import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDefinition.NodeDefinition
 import io.circe
 import io.circe.Decoder
 import io.circe.parser.parse
+import io.circe.syntax.EncoderOps
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -34,7 +36,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |  "items": [
            |    {
            |      "instanceType": "node",
-           |      "space": "space-1",
+           |      "space": "space-name-1",
            |      "externalId": "space-ext-id-1",
            |      "createdTime": ${createdTime.toString},
            |      "lastUpdatedTime": ${lastUpdatedTime.toString},
@@ -42,7 +44,8 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |        "space-name-1": {
            |          "view-or-container-id-1": {
            |            "property-identifier11": "prop-id-1",
-           |            "property-identifier12": 102
+           |            "property-identifier12": 102,
+           |            "property-identifier13": ${DirectRelationReference(space = "space-name-1", externalId = "extId1").asJson.noSpaces}
            |          },
            |          "view-or-container-id-2": {
            |            "property-identifier21": true,
@@ -85,6 +88,15 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |          "name": "property-identifier12",
            |          "type": {
            |            "type": "int64",
+           |            "list": false
+           |          }
+           |        },
+           |        "property-identifier13": {
+           |          "nullable": true,
+           |          "description": "property-identifier13",
+           |          "name": "property-identifier13",
+           |          "type": {
+           |            "type": "json",
            |            "list": false
            |          }
            |        }
@@ -171,7 +183,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
       val instanceFilterResponse: InstanceFilterResponse = InstanceFilterResponse(
         Vector(
           NodeDefinition(
-            "space-1",
+            "space-name-1",
             "space-ext-id-1",
             createdTime,
             lastUpdatedTime,
@@ -181,7 +193,10 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                 "space-name-1" -> Map(
                   "view-or-container-id-1" -> Map(
                     "property-identifier11" -> InstancePropertyValue.String("prop-id-1"),
-                    "property-identifier12" -> InstancePropertyValue.Int64(102)
+                    "property-identifier12" -> InstancePropertyValue.Int64(102),
+                    "property-identifier13" -> InstancePropertyValue.ViewDirectNodeRelation(
+                      Some(DirectRelationReference(space = "space-name-1", externalId = "extId1"))
+                    )
                   ),
                   "view-or-container-id-2" -> Map(
                     "property-identifier21" -> InstancePropertyValue.Boolean(true),
@@ -221,6 +236,14 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   Some("property-identifier12"),
                   Some("property-identifier12"),
                   PropertyType.PrimitiveProperty(PrimitivePropType.Int64, Some(false))
+                ),
+                "property-identifier13" -> TypePropertyDefinition(
+                  Some(true),
+                  None,
+                  None,
+                  Some("property-identifier13"),
+                  Some("property-identifier13"),
+                  PropertyType.PrimitiveProperty(PrimitivePropType.Json, Some(false))
                 )
               ),
               "view-or-container-id-2" -> Map(

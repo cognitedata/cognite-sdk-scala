@@ -14,27 +14,33 @@ import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.util.Random
 
 object Utils {
+  val SpaceExternalId = "testSpaceScalaSdk1"
+  val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation4"
+  val DirectNodeRelationViewExtId = "sdkTestNodeViewForDirectRelation4"
+  val ViewVersion = "v1"
 
   val AllContainerPropertyTypes: List[PropertyType] = List[PropertyType](
-    TextProperty(),
-    PrimitiveProperty(`type` = PrimitivePropType.Boolean),
-    PrimitiveProperty(`type` = PrimitivePropType.Float32),
-    PrimitiveProperty(`type` = PrimitivePropType.Float64),
-    PrimitiveProperty(`type` = PrimitivePropType.Int32),
-    PrimitiveProperty(`type` = PrimitivePropType.Int64),
-    PrimitiveProperty(`type` = PrimitivePropType.Timestamp),
-    PrimitiveProperty(`type` = PrimitivePropType.Date),
-    PrimitiveProperty(`type` = PrimitivePropType.Json),
-    TextProperty(list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Boolean, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Float32, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Float64, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Int32, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
-    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
-    DirectNodeRelationProperty(container = None)
+//    TextProperty(),
+//    PrimitiveProperty(`type` = PrimitivePropType.Boolean),
+//    PrimitiveProperty(`type` = PrimitivePropType.Float32),
+//    PrimitiveProperty(`type` = PrimitivePropType.Float64),
+//    PrimitiveProperty(`type` = PrimitivePropType.Int32),
+//    PrimitiveProperty(`type` = PrimitivePropType.Int64),
+//    PrimitiveProperty(`type` = PrimitivePropType.Timestamp),
+//    PrimitiveProperty(`type` = PrimitivePropType.Date),
+//    PrimitiveProperty(`type` = PrimitivePropType.Json),
+//    TextProperty(list = Some(true)),
+//    PrimitiveProperty(`type` = PrimitivePropType.Boolean, list = Some(true)),
+//    PrimitiveProperty(`type` = PrimitivePropType.Float32, list = Some(true)),
+//    PrimitiveProperty(`type` = PrimitivePropType.Float64, list = Some(true)),
+//    PrimitiveProperty(`type` = PrimitivePropType.Int32, list = Some(true)),
+//    PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
+//    PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
+//    PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
+//    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
+    DirectNodeRelationProperty(
+      container = Some(ContainerReference(space = SpaceExternalId, externalId = DirectNodeRelationContainerExtId)),
+      source = None)
   )
 
   val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
@@ -95,7 +101,7 @@ object Utils {
       val autoIncrement = autoIncrementApplicableProp && !nullable && !withDefault
 
       val alwaysNullable = p match {
-        case DirectNodeRelationProperty(_) => true
+        case _: DirectNodeRelationProperty => true
         case _ => false
       }
       val nullability = alwaysNullable || nullable
@@ -174,18 +180,18 @@ object Utils {
                          ): ContainerCreateDefinition = {
     val allPossibleProperties: Map[String, ContainerPropertyDefinition] =
       createAllPossibleContainerPropCombinations
-    val allPossiblePropertyKeys = allPossibleProperties.keys.toList
-
-    val constraints: Map[String, ContainerConstraint] = Map(
-      "uniqueConstraint" -> ContainerConstraint.UniquenessConstraint(
-        allPossiblePropertyKeys.take(5)
-      )
-    )
-
-    val indexes: Map[String, IndexDefinition] = Map(
-      "index1" -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.take(2)),
-      "index2" -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.slice(5, 7))
-    )
+//    val allPossiblePropertyKeys = allPossibleProperties.keys.toList
+//
+//    val constraints: Map[String, ContainerConstraint] = Map(
+//      "uniqueConstraint" -> ContainerConstraint.UniquenessConstraint(
+//        allPossiblePropertyKeys.take(5)
+//      )
+//    )
+//
+//    val indexes: Map[String, IndexDefinition] = Map(
+//      "index1" -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.take(2)),
+//      "index2" -> IndexDefinition.BTreeIndexDefinition(allPossiblePropertyKeys.slice(5, 7))
+//    )
 
     val containerToCreate = ContainerCreateDefinition(
       space = space,
@@ -194,8 +200,8 @@ object Utils {
       description = Some(s"Test ${usage.productPrefix} Container $containerExternalId Description"),
       usedFor = Some(usage),
       properties = allPossibleProperties,
-      constraints = Some(constraints),
-      indexes = Some(indexes)
+      constraints = None,
+      indexes = None
     )
 
     containerToCreate
@@ -206,8 +212,8 @@ object Utils {
                                                   containerPropType: PropertyType
                                                 ): InstancePropertyValue = {
     containerPropType match {
-      case DirectNodeRelationProperty(container) =>
-        val ref = container.map(r => DirectRelationReference(r.space, s"someExtId${Random.nextInt(10000).toString}"))
+      case DirectNodeRelationProperty(container, _) =>
+        val ref = container.map(r => DirectRelationReference(r.space, s"${r.externalId}Instance"))
         InstancePropertyValue.ViewDirectNodeRelation(ref)
       case p if p.isList => listContainerPropToInstanceProperty(propName, p)
       case p => nonListContainerPropToInstanceProperty(propName, p)
@@ -222,27 +228,29 @@ object Utils {
       case (propName, prop) =>
         propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
     }
-    val (nullables, nonNullables) = instanceValuesForProps.partition {
-      case (propName, _) =>
-        propsMap(propName).nullable.getOrElse(true)
-    }
+//    val (nullables, nonNullables) = instanceValuesForProps.partition {
+//      case (propName, _) =>
+//        propsMap(propName).nullable.getOrElse(true)
+//    }
 
-    val nodeData = if (nullables.isEmpty) {
-      List(toInstanceData(sourceRef, nonNullables))
-    } else {
+//    val nodeData = if (nullables.isEmpty) {
+//      List(toInstanceData(sourceRef, nonNullables))
+//    } else
+//    {
       val withAllProps = toInstanceData(sourceRef, instanceValuesForProps)
-      val withRequiredProps = toInstanceData(sourceRef, nonNullables)
-      val withEachNonRequired = nullables.map {
-        case (propName, propVal) =>
-          toInstanceData(sourceRef, nonNullables + (propName -> propVal))
-      }
-      List(withAllProps, withRequiredProps) ++ withEachNonRequired
-    }
+//      val withRequiredProps = toInstanceData(sourceRef, nonNullables)
+//      val withEachNonRequired = nullables.map {
+//        case (propName, propVal) =>
+//          toInstanceData(sourceRef, nonNullables + (propName -> propVal))
+//      }
+//      List(withAllProps, withRequiredProps) ++ withEachNonRequired
+//      withAllProps
+//    }
 
     NodeWrite(
       space,
       nodeExternalId,
-      nodeData
+      Seq(withAllProps)
     )
   }
 
@@ -416,16 +424,11 @@ object Utils {
             )
           )
         )
-      case PropertyType.DirectNodeRelationProperty(_) => InstancePropertyValue.Object(Json.fromJsonObject(JsonObject.empty))
-
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
   // scalastyle:on cyclomatic.complexity
 
-  private def toInstanceData(
-                              ref: SourceReference,
-                              instancePropertyValues: Map[String, InstancePropertyValue]
-                            ) =
+  private def toInstanceData(ref: SourceReference, instancePropertyValues: Map[String, InstancePropertyValue]) =
     EdgeOrNodeData(
       source = ref,
       properties = Some(instancePropertyValues)
@@ -475,7 +478,7 @@ object Utils {
               )
             )
           )
-        case DirectNodeRelationProperty(_) => None
+        case _: DirectNodeRelationProperty => None
       }
     } else {
       None

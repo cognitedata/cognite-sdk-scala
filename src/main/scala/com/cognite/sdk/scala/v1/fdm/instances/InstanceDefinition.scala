@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import cats.implicits.toTraverseOps
+import cats.implicits._
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyType}
 import io.circe._
@@ -214,7 +214,7 @@ object InstanceDefinition {
       t: TypePropertyDefinition
   ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
-      case PropertyType.DirectNodeRelationProperty(_) =>
+      case _: PropertyType.DirectNodeRelationProperty =>
         propValue
           .as[Option[DirectRelationReference]]
           .map(InstancePropertyValue.ViewDirectNodeRelation.apply)

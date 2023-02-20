@@ -132,8 +132,8 @@ object PropertyDefinition {
           json.asString.map(PropertyDefaultValue.String.apply)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Json, None | Some(false)) =>
           Some(PropertyDefaultValue.Object(json))
-        case PropertyType.DirectNodeRelationProperty(_) =>
-          json.asString.map(PropertyDefaultValue.String.apply)
+        case _: PropertyType.DirectNodeRelationProperty =>
+          Some(PropertyDefaultValue.Object(json))
         case _ => None
       }
     }

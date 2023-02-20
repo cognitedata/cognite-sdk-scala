@@ -11,11 +11,11 @@ import com.cognite.sdk.scala.v1.fdm.common.sources.SourceDefinition
 final case class ViewCreateDefinition(
     space: String,
     externalId: String,
+    version: String,
     name: Option[String] = None,
     description: Option[String] = None,
     filter: Option[FilterDefinition] = None,
     implements: Option[Seq[ViewReference]] = None,
-    version: Option[String] = None,
     properties: Map[String, ViewPropertyCreateDefinition]
 )
 

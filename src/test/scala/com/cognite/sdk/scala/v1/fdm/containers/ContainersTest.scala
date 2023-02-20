@@ -10,6 +10,7 @@ import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 import com.cognite.sdk.scala.v1.{CogniteExternalId, CommonDataModelTestHelper}
 import io.circe.{Decoder, Encoder}
 
@@ -95,8 +96,8 @@ class ContainersTest extends CommonDataModelTestHelper {
       PropertyType.TextProperty(list = None),
       PropertyType.TextProperty(list = Some(true)),
       PropertyType.TextProperty(list = Some(false)),
-      PropertyType.DirectNodeRelationProperty(None),
-      PropertyType.DirectNodeRelationProperty(Some(ContainerReference(space, "ext-id-1"))),
+      PropertyType.DirectNodeRelationProperty(None, None),
+      PropertyType.DirectNodeRelationProperty(Some(ContainerReference(space, "ext-id-1")), Some(ViewReference(space, "ext-id-1", "v1"))),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32, list = None),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(false))
@@ -285,7 +286,7 @@ class ContainersTest extends CommonDataModelTestHelper {
     val allPossiblePropertiesToUpdate = allPossibleProperties.map {
       case (k, v) =>
         k -> (v.`type` match {
-          case PropertyType.DirectNodeRelationProperty(_) =>
+          case _: PropertyType.DirectNodeRelationProperty =>
             v.copy(
               defaultValue = None,
               nullable = Some(true),
