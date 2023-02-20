@@ -15,29 +15,29 @@ import scala.util.Random
 
 object Utils {
   val SpaceExternalId = "testSpaceScalaSdk1"
-  val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation4"
-  val DirectNodeRelationViewExtId = "sdkTestNodeViewForDirectRelation4"
+  val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation5"
+  val DirectNodeRelationViewExtId = "sdkTestNodeViewForDirectRelation5"
   val ViewVersion = "v1"
 
   val AllContainerPropertyTypes: List[PropertyType] = List[PropertyType](
-//    TextProperty(),
-//    PrimitiveProperty(`type` = PrimitivePropType.Boolean),
-//    PrimitiveProperty(`type` = PrimitivePropType.Float32),
-//    PrimitiveProperty(`type` = PrimitivePropType.Float64),
-//    PrimitiveProperty(`type` = PrimitivePropType.Int32),
-//    PrimitiveProperty(`type` = PrimitivePropType.Int64),
-//    PrimitiveProperty(`type` = PrimitivePropType.Timestamp),
-//    PrimitiveProperty(`type` = PrimitivePropType.Date),
-//    PrimitiveProperty(`type` = PrimitivePropType.Json),
-//    TextProperty(list = Some(true)),
-//    PrimitiveProperty(`type` = PrimitivePropType.Boolean, list = Some(true)),
-//    PrimitiveProperty(`type` = PrimitivePropType.Float32, list = Some(true)),
-//    PrimitiveProperty(`type` = PrimitivePropType.Float64, list = Some(true)),
-//    PrimitiveProperty(`type` = PrimitivePropType.Int32, list = Some(true)),
-//    PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
-//    PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
-//    PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
-//    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
+    TextProperty(),
+    PrimitiveProperty(`type` = PrimitivePropType.Boolean),
+    PrimitiveProperty(`type` = PrimitivePropType.Float32),
+    PrimitiveProperty(`type` = PrimitivePropType.Float64),
+    PrimitiveProperty(`type` = PrimitivePropType.Int32),
+    PrimitiveProperty(`type` = PrimitivePropType.Int64),
+    PrimitiveProperty(`type` = PrimitivePropType.Timestamp),
+    PrimitiveProperty(`type` = PrimitivePropType.Date),
+    PrimitiveProperty(`type` = PrimitivePropType.Json),
+    TextProperty(list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Boolean, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Float32, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Float64, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Int32, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
+    PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
     DirectNodeRelationProperty(
       container = Some(ContainerReference(space = SpaceExternalId, externalId = DirectNodeRelationContainerExtId)),
       source = None)

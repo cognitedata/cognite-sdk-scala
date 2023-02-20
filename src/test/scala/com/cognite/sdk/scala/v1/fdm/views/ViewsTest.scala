@@ -122,7 +122,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     created.map(_.externalId) shouldBe Some(viewExternalId)
     created.flatMap(_.name) shouldBe viewToCreate.name
     created.flatMap(_.description) shouldBe viewToCreate.description
-    created.map(_.version) shouldBe viewToCreate.version
+    created.map(_.version) shouldBe Some(viewToCreate.version)
 
     created.map(_.properties) shouldBe Some(
       Map(
