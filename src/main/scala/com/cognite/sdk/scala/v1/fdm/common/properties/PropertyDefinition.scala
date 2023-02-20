@@ -1,39 +1,27 @@
 package com.cognite.sdk.scala.v1.fdm.common.properties
 
-import cats.implicits.{catsSyntaxEq, toFunctorOps}
+import cats.implicits.toFunctorOps
+import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
+import com.cognite.sdk.scala.v1.fdm.views.{ConnectionDirection, ViewReference}
 import io.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 
-/** Base class for `ContainerPropertyDefinition` & `ViewPropertyDefinition`
-  */
-sealed trait PropertyDefinition {
-  val nullable: Option[Boolean]
-  val autoIncrement: Option[Boolean]
-  val defaultValue: Option[PropertyDefaultValue]
-  val description: Option[String]
-  val name: Option[String]
-  val `type`: PropertyType
-
-  assert(
-    checkDefaultValueAndPropertyTypeCompatibility,
-    s"defaultValue: ${defaultValue.map(_.productPrefix).toString} is not compatible with the property type: ${`type`.getClass.getSimpleName}"
-  )
-
-  private def checkDefaultValueAndPropertyTypeCompatibility: Boolean = {
-    val compatibility = defaultValue
-      .map(d => PropertyDefinition.defaultValueCompatibleWithPropertyType(`type`, d))
-
-    compatibility match {
-      case Some(true) | None => true
-      case Some(false) if `type`.isList => true
-      case _ => false
-    }
-  }
-}
+sealed trait PropertyDefinition
 
 object PropertyDefinition {
+  sealed trait CorePropertyDefinition extends PropertyDefinition {
+    val nullable: Option[Boolean]
+    val autoIncrement: Option[Boolean]
+    val defaultValue: Option[PropertyDefaultValue]
+    val description: Option[String]
+    val name: Option[String]
+    val `type`: PropertyType
+  }
+
+  sealed trait ViewPropertyDefinition extends PropertyDefinition
+
   final case class ContainerPropertyDefinition(
       nullable: Option[Boolean] = Some(true),
       autoIncrement: Option[Boolean] = Some(false),
@@ -41,9 +29,9 @@ object PropertyDefinition {
       description: Option[String],
       name: Option[String],
       `type`: PropertyType
-  ) extends PropertyDefinition
+  ) extends CorePropertyDefinition
 
-  final case class ViewPropertyDefinition(
+  final case class ViewCorePropertyDefinition(
       nullable: Option[Boolean] = Some(true),
       autoIncrement: Option[Boolean] = Some(false),
       defaultValue: Option[PropertyDefaultValue],
@@ -52,85 +40,43 @@ object PropertyDefinition {
       `type`: PropertyType,
       container: Option[ContainerReference] = None,
       containerPropertyIdentifier: Option[String] = None
-  ) extends PropertyDefinition
+  ) extends ViewPropertyDefinition
+      with CorePropertyDefinition
 
-  // scalastyle:off cyclomatic.complexity
-  def defaultValueCompatibleWithPropertyType(
-      propertyType: PropertyType,
-      defaultValue: PropertyDefaultValue
-  ): Boolean =
-    (propertyType, defaultValue) match {
-      case (p: PropertyType.TextProperty, _: PropertyDefaultValue.String) if !p.isList =>
-        true
-      case (
-            p @ PropertyType.PrimitiveProperty(PrimitivePropType.Int32, _),
-            _: PropertyDefaultValue.Int32
-          ) if !p.isList =>
-        true
-      case (
-            p @ PropertyType.PrimitiveProperty(PrimitivePropType.Int64, _),
-            _: PropertyDefaultValue.Int64
-          ) if !p.isList =>
-        true
-      case (
-            p @ PropertyType.PrimitiveProperty(PrimitivePropType.Float32, _),
-            _: PropertyDefaultValue.Float32
-          ) if !p.isList =>
-        true
-      case (
-            p @ PropertyType.PrimitiveProperty(PrimitivePropType.Float64, _),
-            _: PropertyDefaultValue.Float64
-          ) if !p.isList =>
-        true
-      case (
-            p @ PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, _),
-            _: PropertyDefaultValue.Boolean
-          ) if !p.isList =>
-        true
-      case (
-            p @ PropertyType.PrimitiveProperty(
-              PrimitivePropType.Timestamp | PrimitivePropType.Date,
-              _
-            ),
-            _: PropertyDefaultValue.String
-          ) if !p.isList =>
-        true
-      case (
-            p @ PropertyType.PrimitiveProperty(PrimitivePropType.Json, _),
-            _: PropertyDefaultValue.Object
-          ) if !p.isList =>
-        true
-      case _ => false
-    }
-  // scalastyle:on cyclomatic.complexity
+  final case class ConnectionDefinition(
+      name: Option[String],
+      description: Option[String],
+      `type`: DirectRelationReference,
+      source: ViewReference,
+      direction: Option[ConnectionDirection]
+  ) extends ViewPropertyDefinition
 
-  implicit val viewPropertyDefinitionEncoder: Encoder[ViewPropertyDefinition] =
-    deriveEncoder[ViewPropertyDefinition]
+  implicit val viewCorePropertyDefinitionEncoder: Encoder[ViewCorePropertyDefinition] =
+    deriveEncoder[ViewCorePropertyDefinition]
 
   implicit val containerPropertyDefinitionEncoder: Encoder[ContainerPropertyDefinition] =
     deriveEncoder[ContainerPropertyDefinition]
 
-  implicit val propertyDefinitionEncoder: Encoder[PropertyDefinition] = Encoder.instance {
+  implicit val connectionDefinitionEncoder: Encoder[ConnectionDefinition] =
+    deriveEncoder[ConnectionDefinition]
+
+  implicit val propertyDefinitionEncoder: Encoder[CorePropertyDefinition] = Encoder.instance {
     case c: ContainerPropertyDefinition => c.asJson
-    case v: ViewPropertyDefinition => v.asJson
+    case v: ViewCorePropertyDefinition => v.asJson
   }
 
-  private val derivedViewPropertyDefinitionDecoder: Decoder[ViewPropertyDefinition] =
-    deriveDecoder[ViewPropertyDefinition]
+  implicit val viewPropertyDefinitionEncoder: Encoder[ViewPropertyDefinition] = Encoder.instance {
+    case c: ViewCorePropertyDefinition => c.asJson
+    case v: ConnectionDefinition => v.asJson
+  }
 
-  // decoding without triggering the DefaultValue And PropertyType Compatibility assertion
-  implicit val viewPropertyDefinitionWithTypeBasedDefaultValue: Decoder[ViewPropertyDefinition] =
-    Decoder.instance[ViewPropertyDefinition] { (c: HCursor) =>
-      derivedViewPropertyDefinitionDecoder
-        .decodeJson(
-          Json.fromJsonObject(
-            c.value.asObject
-              .map(_.filter { case (k, _) =>
-                k =!= "defaultValue"
-              })
-              .getOrElse(JsonObject.empty)
-          )
-        )
+  private val derivedViewPropertyDefinitionDecoder: Decoder[ViewCorePropertyDefinition] =
+    deriveDecoder[ViewCorePropertyDefinition]
+
+  implicit val viewPropertyDefinitionWithTypeBasedDefaultValue
+      : Decoder[ViewCorePropertyDefinition] =
+    Decoder.instance[ViewCorePropertyDefinition] { (c: HCursor) =>
+      derivedViewPropertyDefinitionDecoder(c)
         .map { p =>
           p.copy(defaultValue =
             propertyTypeBasedPropertyDefaultValue(
@@ -144,20 +90,10 @@ object PropertyDefinition {
   private val derivedContainerPropertyDefinitionDecoder: Decoder[ContainerPropertyDefinition] =
     deriveDecoder[ContainerPropertyDefinition]
 
-  // decoding without triggering the DefaultValue And PropertyType Compatibility assertion
   implicit val containerPropertyDefinitionDecoderWithTypeBasedDefaultValue
       : Decoder[ContainerPropertyDefinition] = Decoder.instance[ContainerPropertyDefinition] {
     (c: HCursor) =>
-      derivedContainerPropertyDefinitionDecoder
-        .decodeJson(
-          Json.fromJsonObject(
-            c.value.asObject
-              .map(_.filter { case (k, _) =>
-                k =!= "defaultValue"
-              })
-              .getOrElse(JsonObject.empty)
-          )
-        )
+      derivedContainerPropertyDefinitionDecoder(c)
         .map { p =>
           p.copy(defaultValue =
             propertyTypeBasedPropertyDefaultValue(
@@ -167,6 +103,9 @@ object PropertyDefinition {
           )
         }
   }
+
+  implicit val connectionDefinitionDecoder: Decoder[ConnectionDefinition] =
+    deriveDecoder[ConnectionDefinition]
 
   // scalastyle:off cyclomatic.complexity
   private def propertyTypeBasedPropertyDefaultValue(
@@ -193,8 +132,8 @@ object PropertyDefinition {
           json.asString.map(PropertyDefaultValue.String.apply)
         case PropertyType.PrimitiveProperty(PrimitivePropType.Json, None | Some(false)) =>
           Some(PropertyDefaultValue.Object(json))
-        case PropertyType.DirectNodeRelationProperty(_) =>
-          json.asString.map(PropertyDefaultValue.String.apply)
+        case _: PropertyType.DirectNodeRelationProperty =>
+          Some(PropertyDefaultValue.Object(json))
         case _ => None
       }
     }
@@ -202,9 +141,15 @@ object PropertyDefinition {
   }
   // scalastyle:on cyclomatic.complexity
 
-  implicit val propertyDefinitionDecoder: Decoder[PropertyDefinition] =
-    List[Decoder[PropertyDefinition]](
-      Decoder[ViewPropertyDefinition].widen,
+  implicit val propertyDefinitionDecoder: Decoder[CorePropertyDefinition] =
+    List[Decoder[CorePropertyDefinition]](
+      Decoder[ViewCorePropertyDefinition].widen,
       Decoder[ContainerPropertyDefinition].widen
-    ).reduceLeftOption(_ or _).getOrElse(Decoder[ViewPropertyDefinition].widen)
+    ).reduceLeftOption(_ or _).getOrElse(Decoder[ViewCorePropertyDefinition].widen)
+
+  implicit val viewPropertyDefinitionDecoder: Decoder[ViewPropertyDefinition] =
+    List[Decoder[ViewPropertyDefinition]](
+      Decoder[ViewCorePropertyDefinition].widen,
+      Decoder[ConnectionDefinition].widen
+    ).reduceLeftOption(_ or _).getOrElse(Decoder[ViewCorePropertyDefinition].widen)
 }

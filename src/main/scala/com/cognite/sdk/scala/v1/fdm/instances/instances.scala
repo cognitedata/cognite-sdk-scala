@@ -7,8 +7,6 @@ import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 
-final case class DirectRelationReference(space: String, externalId: String)
-
 final case class EdgeOrNodeData(
     source: SourceReference,
     properties: Option[Map[String, InstancePropertyValue]]

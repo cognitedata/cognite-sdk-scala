@@ -58,6 +58,7 @@ object FilterDefinition {
       lt: Option[Lt] = None
   ) extends LeafFilter
   final case class HasData(refs: Seq[SourceReference]) extends LeafFilter
+  final case class MatchAll(value: JsonObject) extends LeafFilter
 
   implicit val andFilterEncoder: Encoder[FilterDefinition.And] =
     Encoder.instance[FilterDefinition.And] { e =>
@@ -96,6 +97,7 @@ object FilterDefinition {
     deriveEncoder[FilterDefinition.Overlaps].mapJson(_.dropNullValues)
   implicit val hasDataFilterEncoder: Encoder[FilterDefinition.HasData] =
     Encoder.instance[FilterDefinition.HasData](_.refs.asJson)
+  implicit val matchAllFilterEncoder: Encoder[FilterDefinition.MatchAll] = deriveEncoder
   implicit val gteFilterEncoder: Encoder[FilterDefinition.Gte] =
     Encoder.instance[FilterDefinition.Gte](_.value.asJson)
   implicit val gtDataFilterEncoder: Encoder[FilterDefinition.Gt] =
@@ -170,6 +172,12 @@ object FilterDefinition {
             "hasData" -> e.refs.asJson
           )
         )
+      case e: FilterDefinition.MatchAll =>
+        Json.fromJsonObject(
+          JsonObject(
+            "matchAll" -> Json.fromJsonObject(e.value)
+          )
+        )
       case e: FilterDefinition.Gte =>
         Json.fromJsonObject(
           JsonObject(
@@ -210,6 +218,7 @@ object FilterDefinition {
   implicit val nestedFilterDecoder: Decoder[FilterDefinition.Nested] = deriveDecoder
   implicit val overlapsFilterDecoder: Decoder[FilterDefinition.Overlaps] = deriveDecoder
   implicit val hasDataFilterDecoder: Decoder[FilterDefinition.HasData] = deriveDecoder
+  implicit val matchAllFilterDecoder: Decoder[FilterDefinition.MatchAll] = deriveDecoder
 
   implicit val gteFilterDecoder: Decoder[FilterDefinition.Gte] = deriveDecoder
   implicit val gtDataFilterDecoder: Decoder[FilterDefinition.Gt] = deriveDecoder
@@ -217,25 +226,26 @@ object FilterDefinition {
   implicit val ltFilterDecoder: Decoder[FilterDefinition.Lt] = deriveDecoder
 
   implicit val filterDefinitionDecoder: Decoder[FilterDefinition] = { (c: HCursor) =>
-    val and = c.get[FilterDefinition.And]("and")
-    val or = c.get[FilterDefinition.Or]("or")
-    val not = c.get[FilterDefinition.Or]("not")
+    val and = c.downField("and").as[FilterDefinition.And]
+    val or = c.downField("or").as[FilterDefinition.Or]
+    val not = c.downField("not").as[FilterDefinition.Not]
 
-    val equals = c.get[FilterDefinition.Equals]("equals")
-    val in = c.get[FilterDefinition.In]("in")
-    val range = c.get[FilterDefinition.Range]("range")
-    val prefix = c.get[FilterDefinition.Prefix]("prefix")
-    val exists = c.get[FilterDefinition.Exists]("exists")
-    val containsAny = c.get[FilterDefinition.ContainsAny]("containsAny")
-    val containsAll = c.get[FilterDefinition.ContainsAll]("containsAll")
-    val nested = c.get[FilterDefinition.Nested]("nested")
-    val overlaps = c.get[FilterDefinition.Overlaps]("overlaps")
-    val hasData = c.get[FilterDefinition.HasData]("hasData")
+    val equals = c.downField("equals").as[FilterDefinition.Equals]
+    val in = c.downField("in").as[FilterDefinition.In]
+    val range = c.downField("range").as[FilterDefinition.Range]
+    val prefix = c.downField("prefix").as[FilterDefinition.Prefix]
+    val exists = c.downField("exists").as[FilterDefinition.Exists]
+    val containsAny = c.downField("containsAny").as[FilterDefinition.ContainsAny]
+    val containsAll = c.downField("containsAll").as[FilterDefinition.ContainsAll]
+    val matchAll = c.downField("matchAll").as[JsonObject].map(MatchAll.apply)
+    val nested = c.downField("nested").as[FilterDefinition.Nested]
+    val overlaps = c.downField("overlaps").as[FilterDefinition.Overlaps]
+    val hasData = c.downField("hasData").as[Seq[SourceReference]].map(HasData.apply)
 
-    val gte = c.get[FilterDefinition.Gte]("gte")
-    val gt = c.get[FilterDefinition.Gt]("gt")
-    val lte = c.get[FilterDefinition.Lte]("lte")
-    val lt = c.get[FilterDefinition.Lt]("lt")
+    val gte = c.downField("gte").as[FilterDefinition.Gte]
+    val gt = c.downField("gt").as[FilterDefinition.Gt]
+    val lte = c.downField("lte").as[FilterDefinition.Lte]
+    val lt = c.downField("lt").as[FilterDefinition.Lt]
 
     val result: Result[FilterDefinition] = Seq(
       and,
@@ -254,7 +264,8 @@ object FilterDefinition {
       gte,
       gt,
       lte,
-      lt
+      lt,
+      matchAll
     ).find(_.isRight) match {
       case Some(value) => value
       case None =>
