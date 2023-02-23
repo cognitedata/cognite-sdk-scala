@@ -22,19 +22,6 @@ object ViewPropertyCreateDefinition {
   implicit val createViewPropertyDecoder: Decoder[CreateViewProperty] =
     deriveDecoder[CreateViewProperty]
 
-  final case class DirectRelationCreateProperty(
-      name: Option[String],
-      description: Option[String],
-      container: ContainerReference,
-      containerPropertyIdentifier: String,
-      source: Option[ViewReference]
-  ) extends ViewPropertyCreateDefinition
-
-  implicit val directRelationCreatePropertyEncoder: Encoder[DirectRelationCreateProperty] =
-    deriveEncoder[DirectRelationCreateProperty]
-  implicit val directRelationCreatePropertyDecoder: Decoder[DirectRelationCreateProperty] =
-    deriveDecoder[DirectRelationCreateProperty]
-
   final case class ConnectionDefinition(
       name: Option[String],
       description: Option[String],
@@ -50,13 +37,11 @@ object ViewPropertyCreateDefinition {
 
   implicit val viewPropertyEncoder: Encoder[ViewPropertyCreateDefinition] = Encoder.instance {
     case p: CreateViewProperty => p.asJson
-    case p: DirectRelationCreateProperty => p.asJson
     case p: ConnectionDefinition => p.asJson
   }
   implicit val viewPropertyDecoder: Decoder[ViewPropertyCreateDefinition] =
     List[Decoder[ViewPropertyCreateDefinition]](
       Decoder[ConnectionDefinition].widen,
-      Decoder[DirectRelationCreateProperty].widen,
       Decoder[CreateViewProperty].widen
     ).reduceLeftOption(_ or _).getOrElse(Decoder[CreateViewProperty].widen)
 }

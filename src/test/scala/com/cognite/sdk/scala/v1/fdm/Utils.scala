@@ -250,7 +250,7 @@ object Utils {
     NodeWrite(
       space,
       nodeExternalId,
-      Seq(withAllProps)
+      Some(Seq(withAllProps))
     )
   }
 
@@ -288,7 +288,7 @@ object Utils {
       externalId = edgeExternalId,
       startNode = startNode,
       endNode = endNode,
-      nodeData
+      sources = Some(nodeData)
     )
   }
 
@@ -332,7 +332,7 @@ object Utils {
           externalId = nodeOrEdgeExternalId,
           startNode = startNode,
           endNode = endNode,
-          nodeData
+          sources = Some(nodeData)
         )
     }
 
