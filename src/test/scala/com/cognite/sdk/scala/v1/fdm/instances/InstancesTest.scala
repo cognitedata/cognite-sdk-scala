@@ -183,8 +183,8 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate) = writeData match {
-    case n: NodeOrEdgeCreate.NodeWrite => n.sources.flatMap(d => d.properties.getOrElse(Map.empty)).toMap
-    case e: NodeOrEdgeCreate.EdgeWrite => e.sources.flatMap(d => d.properties.getOrElse(Map.empty)).toMap
+    case n: NodeOrEdgeCreate.NodeWrite => n.sources.getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).toMap
+    case e: NodeOrEdgeCreate.EdgeWrite => e.sources.getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).toMap
   }
 
   private def createContainers(items: Seq[ContainerCreateDefinition]) = {

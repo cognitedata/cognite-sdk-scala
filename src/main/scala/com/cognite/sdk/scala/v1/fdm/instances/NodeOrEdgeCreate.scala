@@ -19,7 +19,7 @@ object NodeOrEdgeCreate {
   final case class NodeWrite(
       space: String,
       externalId: String,
-      sources: Seq[EdgeOrNodeData]
+      sources: Option[Seq[EdgeOrNodeData]]
   ) extends NodeOrEdgeCreate {
     val instanceType: InstanceType = Node
   }
@@ -34,7 +34,7 @@ object NodeOrEdgeCreate {
       externalId: String,
       startNode: DirectRelationReference,
       endNode: DirectRelationReference,
-      sources: Seq[EdgeOrNodeData]
+      sources: Option[Seq[EdgeOrNodeData]]
   ) extends NodeOrEdgeCreate {
     val instanceType: InstanceType = Edge
   }
