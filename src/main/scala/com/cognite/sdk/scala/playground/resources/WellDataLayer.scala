@@ -55,16 +55,19 @@ class WellDataLayer[F[_]: Monad](val requestSession: RequestSession[F]) {
     }
   }
 
-  def setItems(urlPart: String, items: Seq[JsonObject]): F[Unit] = {
-    // uri"" strings will escape slashes when string interpolation, but a list of strings works fine.
-    val body = Items(items)
-    val urlParts = urlPart.split("/")
-    post[Unit, EmptyObj, Items[JsonObject]](
-      body,
-      uri"${requestSession.baseUrl}/wdl/$urlParts",
-      _ => ()
-    )
-  }
+  def setItems(urlPart: String, items: Seq[JsonObject]): F[Unit] =
+    if (items.isEmpty) {
+      Monad[F].unit
+    } else {
+      // uri strings will escape slashes when string interpolation, but a list of strings works fine.
+      val body = Items(items)
+      val urlParts = urlPart.split("/")
+      post[Unit, EmptyObj, Items[JsonObject]](
+        body,
+        uri"${requestSession.baseUrl}/wdl/$urlParts",
+        _ => ()
+      )
+    }
 
   def listItemsWithPost(
       urlPart: String,
@@ -101,23 +104,29 @@ class WellDataLayerSources[F[_]: Monad](
       value => value.items
     )
 
-  def create(sources: Seq[Source]): F[Seq[Source]] = {
-    val body = SourceItems(sources)
-    requestSession.post[Seq[Source], SourceItems, SourceItems](
-      body,
-      uri"${requestSession.baseUrl}/wdl/sources",
-      value => value.items
-    )
-  }
+  def create(items: Seq[Source]): F[Seq[Source]] =
+    if (items.isEmpty) {
+      Monad[F].pure(Seq())
+    } else {
+      val body = SourceItems(items)
+      requestSession.post[Seq[Source], SourceItems, SourceItems](
+        body,
+        uri"${requestSession.baseUrl}/wdl/sources",
+        value => value.items
+      )
+    }
 
-  def delete(items: Seq[Source]): F[Unit] = {
-    val body = DeleteSources(items)
-    requestSession.post[Unit, EmptyObj, DeleteSources](
-      body,
-      uri"${requestSession.baseUrl}/wdl/sources/delete",
-      _ => ()
-    )
-  }
+  def delete(items: Seq[Source]): F[Unit] =
+    if (items.isEmpty) {
+      Monad[F].unit
+    } else {
+      val body = DeleteSources(items)
+      requestSession.post[Unit, EmptyObj, DeleteSources](
+        body,
+        uri"${requestSession.baseUrl}/wdl/sources/delete",
+        _ => ()
+      )
+    }
 
   def deleteRecursive(items: Seq[Source]): F[Unit] = {
     val namesToDelete = items.map(_.name)
@@ -126,18 +135,13 @@ class WellDataLayerSources[F[_]: Monad](
       wellSources = wells
         .flatMap(_.sources)
         .filter(assetSource => namesToDelete.contains(assetSource.sourceName))
-      _ <-
-        if (wellSources.nonEmpty) {
-          this.wells.deleteRecursive(wellSources)
-        } else {
-          Monad[F].unit
-        }
+      _ <- this.wells.deleteRecursive(wellSources)
       _ <- delete(items)
     } yield ()
   }
 }
 
-class WellDataLayerWells[F[_]](val requestSession: RequestSession[F]) {
+class WellDataLayerWells[F[_]: Monad](val requestSession: RequestSession[F]) {
   import WellDataLayer._
 
   def list(
@@ -173,24 +177,31 @@ class WellDataLayerWells[F[_]](val requestSession: RequestSession[F]) {
   def deleteRecursive(items: Seq[AssetSource]): F[Unit] = delete(items, recursive = true)
 
   private def delete(items: Seq[AssetSource], recursive: Boolean): F[Unit] =
-    requestSession.post[Unit, EmptyObj, DeleteWells](
-      DeleteWells(items, recursive),
-      uri"${requestSession.baseUrl}/wdl/wells/delete",
-      _ => ()
-    )
+    if (items.isEmpty) {
+      Monad[F].unit
+    } else {
+      requestSession.post[Unit, EmptyObj, DeleteWells](
+        DeleteWells(items, recursive),
+        uri"${requestSession.baseUrl}/wdl/wells/delete",
+        _ => ()
+      )
+    }
 }
 
-class WellDataLayerWellbores[F[_]](val requestSession: RequestSession[F]) {
+class WellDataLayerWellbores[F[_]: Monad](val requestSession: RequestSession[F]) {
   import WellDataLayer._
 
-  def create(items: Seq[WellboreSource]): F[Seq[Wellbore]] = {
-    val body = WellboreSourceItems(items)
-    requestSession.post[Seq[Wellbore], WellboreItems, WellboreSourceItems](
-      body,
-      uri"${requestSession.baseUrl}/wdl/wellbores",
-      value => value.items
-    )
-  }
+  def create(items: Seq[WellboreSource]): F[Seq[Wellbore]] =
+    if (items.isEmpty) {
+      Monad[F].pure(Seq())
+    } else {
+      val body = WellboreSourceItems(items)
+      requestSession.post[Seq[Wellbore], WellboreItems, WellboreSourceItems](
+        body,
+        uri"${requestSession.baseUrl}/wdl/wellbores",
+        value => value.items
+      )
+    }
 
   def setMergeRules(rules: WellboreMergeRules): F[Unit] =
     requestSession.post[Unit, EmptyObj, WellboreMergeRules](
