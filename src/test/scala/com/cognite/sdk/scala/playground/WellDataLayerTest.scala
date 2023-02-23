@@ -1,5 +1,6 @@
 package com.cognite.sdk.scala.playground
 
+import cats.{Id, Monad}
 import com.cognite.sdk.scala.common.{CdpApiException, SdkTestSpec}
 import io.circe.{Json, JsonObject, Printer}
 import org.scalatest.{BeforeAndAfter, OptionValues}
@@ -18,9 +19,7 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
 
   before {
     val sources = wdl.sources.list()
-    if (sources.nonEmpty) {
-      wdl.sources.deleteRecursive(sources)
-    }
+    wdl.sources.deleteRecursive(sources)
   }
 
   it should "create, retrieve, and delete sources" in {
@@ -31,7 +30,6 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
     sources should contain(newSource)
 
     wdl.sources.delete(Seq(newSource))
-
     wdl.sources.list().map(source => source) should not contain newSource
   }
 
@@ -192,5 +190,25 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
       wdl.getSchema("Wololo")
     }
     thrown.message shouldEqual "Unknown schema: Wololo"
+  }
+
+  it should "be safe to create 0 wells" in {
+    wdl.wells.create(Seq()) shouldBe Seq()
+  }
+
+  it should "be safe to delete 0 wells" in {
+    wdl.wells.delete(Seq()) shouldBe Monad[Id].unit
+  }
+
+  it should "be safe to create 0 sources" in {
+    wdl.sources.create(Seq()) shouldBe Seq()
+  }
+
+  it should "be safe to delete 0 sources" in {
+    wdl.sources.delete(Seq()) shouldBe Monad[Id].unit
+  }
+
+  it should "be safe to create 0 wellbores" in {
+    wdl.wellbores.create(Seq()) shouldBe Seq()
   }
 }
