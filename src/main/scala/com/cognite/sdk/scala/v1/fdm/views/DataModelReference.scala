@@ -6,7 +6,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 final case class DataModelReference(
     space: String,
     externalId: String,
-    version: String
+    version: Option[String]
 )
 
 object DataModelReference {
