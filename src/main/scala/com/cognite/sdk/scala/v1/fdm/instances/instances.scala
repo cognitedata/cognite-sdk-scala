@@ -16,6 +16,7 @@ final case class InstanceCreate(
     items: Seq[NodeOrEdgeCreate],
     autoCreateStartNodes: Option[Boolean] = Some(false),
     autoCreateEndNodes: Option[Boolean] = Some(false),
+    skipOnVersionConflict: Option[Boolean] = Some(false),
     replace: Option[Boolean] = Some(false)
 )
 

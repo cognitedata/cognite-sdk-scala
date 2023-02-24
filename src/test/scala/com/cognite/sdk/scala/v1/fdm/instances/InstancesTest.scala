@@ -163,10 +163,10 @@ class InstancesTest extends CommonDataModelTestHelper {
     deletedInstances.length shouldBe 5
 
     val deletedViews = deleteViews(Seq(
-      DataModelReference(space, edgeViewExternalId, viewVersion),
-      DataModelReference(space, nodeViewExternalId1, viewVersion),
-      DataModelReference(space, nodeViewExternalId2, viewVersion),
-      DataModelReference(space, allViewExternalId, viewVersion)
+      DataModelReference(space, edgeViewExternalId, Some(viewVersion)),
+      DataModelReference(space, nodeViewExternalId1, Some(viewVersion)),
+      DataModelReference(space, nodeViewExternalId2, Some(viewVersion)),
+      DataModelReference(space, allViewExternalId, Some(viewVersion))
     ))
 
     deletedViews.length shouldBe 4
