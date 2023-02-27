@@ -3,7 +3,7 @@ package com.cognite.sdk.scala.v1.fdm.datamodels
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
-case class DataModel(
+final case class DataModel(
     space: String,
     externalId: String,
     name: Option[String],
