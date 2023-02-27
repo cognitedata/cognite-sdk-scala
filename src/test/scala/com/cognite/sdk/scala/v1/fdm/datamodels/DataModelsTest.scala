@@ -47,7 +47,7 @@ class DataModelsTest extends CommonDataModelTestHelper {
           indexes = None
         )
       )
-    ).unsafeRunSync().head
+    ).unsafeRunSync().headOption
 
   private val view = blueFieldClient.views
     .createItems(items =
@@ -59,17 +59,19 @@ class DataModelsTest extends CommonDataModelTestHelper {
           name = Some(s"Test-View-Scala-SDK"),
           description = Some("Test View For Scala SDK"),
           filter = None,
-          properties = container.properties.map {
-            case (pName, _) =>
-              pName -> ViewPropertyCreateDefinition.CreateViewProperty(
-                name = Some(pName),
-                container = container.toSourceReference,
-                containerPropertyIdentifier = pName)
-          },
+          properties = container.map {c =>
+            c.properties.map {
+              case (pName, _) =>
+                pName -> ViewPropertyCreateDefinition.CreateViewProperty(
+                  name = Some(pName),
+                  container = c.toSourceReference,
+                  containerPropertyIdentifier = pName)
+            }
+          }.getOrElse(Map.empty),
           implements = None
         )
       )
-    ).unsafeRunSync().head
+    ).unsafeRunSync().headOption
 
 
   "Datamodels" should "create models" in {
@@ -81,14 +83,14 @@ class DataModelsTest extends CommonDataModelTestHelper {
               name = Some("testDataModelV3"),
               description = Some("testDataModelV3"),
               version = "v1",
-              views = Some(Seq(view.toSourceReference))
+              views = view.map(v => Vector(v.toSourceReference))
             )
         )
-      ).unsafeRunSync().head
+      ).unsafeRunSync().headOption
 
 
-    dataModel.externalId shouldBe "testDataModelV3"
-    dataModel.views.flatMap(_.headOption) shouldBe Some(view.toSourceReference)
+    dataModel.map(_.externalId) shouldBe Some("testDataModelV3")
+    dataModel.flatMap(_.views.flatMap(_.headOption)) shouldBe view.map(_.toSourceReference)
   }
 
   "Datamodels" should "retrieve models" in {
@@ -100,10 +102,10 @@ class DataModelsTest extends CommonDataModelTestHelper {
           version = Some("v1")
         )
       )
-    ).unsafeRunSync().head
+    ).unsafeRunSync().headOption
 
 
-    dataModel.externalId shouldBe "testDataModelV3"
-    dataModel.views.flatMap(_.headOption) shouldBe Some(view.toSourceReference)
+    dataModel.map(_.externalId) shouldBe Some("testDataModelV3")
+    dataModel.flatMap(_.views.flatMap(_.headOption)) shouldBe view.map(_.toSourceReference)
   }
 }
