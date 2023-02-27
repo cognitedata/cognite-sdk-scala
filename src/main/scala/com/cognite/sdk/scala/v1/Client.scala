@@ -10,6 +10,7 @@ import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.playground.resources.WellDataLayer
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.resources._
+import com.cognite.sdk.scala.v1.resources.fdm.datamodels.{DataModels => DataModelsV3}
 import com.cognite.sdk.scala.v1.resources.fdm.containers.Containers
 import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances
 import com.cognite.sdk.scala.v1.resources.fdm.views.Views
@@ -215,6 +216,7 @@ class GenericClient[F[_]](
   lazy val instances = new Instances[F](requestSession)
   lazy val views = new Views[F](requestSession)
   lazy val spacesv3 = new SpacesV3[F](requestSession)
+  lazy val dataModelsV3 = new DataModelsV3[F](requestSession)
 
   lazy val wdl = new WellDataLayer[F](
     RequestSession(
