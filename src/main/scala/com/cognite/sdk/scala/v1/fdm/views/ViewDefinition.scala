@@ -7,17 +7,8 @@ import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ViewPropertyDefinition
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceDefinition
-
-final case class ViewCreateDefinition(
-    space: String,
-    externalId: String,
-    version: String,
-    name: Option[String] = None,
-    description: Option[String] = None,
-    filter: Option[FilterDefinition] = None,
-    implements: Option[Seq[ViewReference]] = None,
-    properties: Map[String, ViewPropertyCreateDefinition]
-)
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.{Decoder, Encoder}
 
 final case class ViewDefinition(
     space: String,
@@ -35,4 +26,9 @@ final case class ViewDefinition(
 ) extends SourceDefinition {
   override def toSourceReference: ViewReference =
     ViewReference(space = space, externalId = externalId, version = version)
+}
+
+object ViewDefinition {
+  implicit val viewDefinitionEncoder: Encoder[ViewDefinition] = deriveEncoder[ViewDefinition]
+  implicit val viewDefinitionDecoder: Decoder[ViewDefinition] = deriveDecoder[ViewDefinition]
 }

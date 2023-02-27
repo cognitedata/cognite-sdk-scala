@@ -5,7 +5,8 @@ package com.cognite.sdk.scala.v1.resources.fdm.views
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.RequestSession
-import com.cognite.sdk.scala.v1.fdm.views.{DataModelReference, ViewCreateDefinition, ViewDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.DataModelReference
+import com.cognite.sdk.scala.v1.fdm.views.{ViewCreateDefinition, ViewDefinition}
 import fs2.Stream
 import io.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -92,23 +93,11 @@ class Views[F[_]](val requestSession: RequestSession[F])
 }
 
 object Views {
-  implicit val viewDefinitionDecoder: Decoder[ViewDefinition] = deriveDecoder[ViewDefinition]
-  implicit val viewDefinitionItemsDecoder: Decoder[Items[ViewDefinition]] =
-    deriveDecoder[Items[ViewDefinition]]
   implicit val dataModelReferenceDecoder: Decoder[DataModelReference] =
     deriveDecoder[DataModelReference]
   implicit val dataModelReferenceItemsDecoder: Decoder[Items[DataModelReference]] =
     deriveDecoder[Items[DataModelReference]]
 
-  implicit val viewDefinitionItemsWithCursorDecoder: Decoder[ItemsWithCursor[ViewDefinition]] =
-    deriveDecoder[ItemsWithCursor[ViewDefinition]]
-
-  implicit val viewCreateDefinitionEncoder: Encoder[ViewCreateDefinition] =
-    deriveEncoder[ViewCreateDefinition]
-  implicit val viewCreateDefinitionItemsEncoder: Encoder[Items[ViewCreateDefinition]] =
-    deriveEncoder[Items[ViewCreateDefinition]]
   implicit val dataModelReferenceEncoder: Encoder[DataModelReference] =
     deriveEncoder[DataModelReference]
-  implicit val dataModelReferenceItemsEncoder: Encoder[Items[DataModelReference]] =
-    deriveEncoder[Items[DataModelReference]]
 }

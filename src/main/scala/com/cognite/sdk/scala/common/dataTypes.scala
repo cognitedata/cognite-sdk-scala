@@ -4,11 +4,10 @@
 package com.cognite.sdk.scala.common
 
 import java.time.Instant
-
 import cats.Id
 import com.cognite.sdk.scala.v1.CogniteId
 import io.circe.{Decoder, Encoder, Json, JsonObject, KeyEncoder}
-import io.circe.generic.semiauto.deriveDecoder
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import sttp.model.Uri
 // scalastyle:off number.of.types
 trait ResponseWithCursor {
@@ -16,7 +15,17 @@ trait ResponseWithCursor {
 }
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
     extends ResponseWithCursor
+object ItemsWithCursor {
+  implicit def itemsWithCursorEncoder[A: Encoder]: Encoder[ItemsWithCursor[A]] =
+    deriveEncoder[ItemsWithCursor[A]]
+  implicit def itemsWithCursorDecoder[A: Decoder]: Decoder[ItemsWithCursor[A]] =
+    deriveDecoder[ItemsWithCursor[A]]
+}
 final case class Items[A](items: Seq[A])
+object Items {
+  implicit def itemsEncoder[A: Encoder]: Encoder[Items[A]] = deriveEncoder[Items[A]]
+  implicit def itemsDecoder[A: Decoder]: Decoder[Items[A]] = deriveDecoder[Items[A]]
+}
 final case class ItemsWithIgnoreUnknownIds[A](items: Seq[A], ignoreUnknownIds: Boolean)
 final case class ItemsWithRecursiveAndIgnoreUnknownIds(
     items: Seq[CogniteId],

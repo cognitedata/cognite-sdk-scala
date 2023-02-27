@@ -1,7 +1,7 @@
-package com.cognite.sdk.scala.v1.fdm.views
+package com.cognite.sdk.scala.v1.fdm.common
 
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.{Decoder, Encoder}
 
 final case class DataModelReference(
     space: String,
