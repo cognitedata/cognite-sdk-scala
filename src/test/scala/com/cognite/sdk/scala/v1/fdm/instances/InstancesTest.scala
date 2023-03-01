@@ -7,7 +7,7 @@ import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType
-import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
+import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, DirectRelationReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerId, ContainerReference}
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.{EdgeDeletionRequest, NodeDeletionRequest}
 import com.cognite.sdk.scala.v1.fdm.views._
@@ -163,10 +163,10 @@ class InstancesTest extends CommonDataModelTestHelper {
     deletedInstances.length shouldBe 5
 
     val deletedViews = deleteViews(Seq(
-      DataModelReference(space, edgeViewExternalId, viewVersion),
-      DataModelReference(space, nodeViewExternalId1, viewVersion),
-      DataModelReference(space, nodeViewExternalId2, viewVersion),
-      DataModelReference(space, allViewExternalId, viewVersion)
+      DataModelReference(space, edgeViewExternalId, Some(viewVersion)),
+      DataModelReference(space, nodeViewExternalId1, Some(viewVersion)),
+      DataModelReference(space, nodeViewExternalId2, Some(viewVersion)),
+      DataModelReference(space, allViewExternalId, Some(viewVersion))
     ))
 
     deletedViews.length shouldBe 4
