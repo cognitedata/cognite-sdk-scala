@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.v1.fdm.common.Usage
+import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
@@ -182,7 +182,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
   ignore should "retrieve views by data model reference" in {
     val view1 = blueFieldClient.views
-      .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, "v1")))
+      .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some("v1"))))
       .unsafeRunSync()
       .headOption
     view1.map(_.space) shouldBe Some("test1")
@@ -192,7 +192,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     view1.map(_.version) shouldBe Some(viewVersion1)
 
     val view2 = blueFieldClient.views
-      .retrieveItems(Seq(DataModelReference(spaceName, view2ExternalId, "v1")))
+      .retrieveItems(Seq(DataModelReference(spaceName, view2ExternalId, Some("v1"))))
       .unsafeRunSync()
       .headOption
     view2.map(_.space) shouldBe Some(spaceName)
@@ -204,11 +204,11 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
   ignore should "delete views" in {
     blueFieldClient.views
-      .deleteItems(Seq(DataModelReference(spaceName, viewExternalId, viewVersion1)))
+      .deleteItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
 
     val retrievedAfterDelete = blueFieldClient.views
-      .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, viewVersion1)))
+      .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
     retrievedAfterDelete.size shouldBe 0
 
