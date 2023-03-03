@@ -5,7 +5,7 @@ import com.cognite.sdk.scala.common.{CdpApiException, SdkTestSpec}
 import io.circe.{Json, JsonObject, Printer}
 import org.scalatest.{BeforeAndAfter, OptionValues}
 
-@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.OptionPartial"))
 class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValues {
   implicit class JsonImplicits(val actual: JsonObject) {
     def shouldDeepEqual(expected: JsonObject): Unit = {
