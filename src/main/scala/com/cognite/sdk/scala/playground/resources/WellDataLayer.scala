@@ -78,7 +78,8 @@ class WellDataLayer[F[_]: Monad](val requestSession: RequestSession[F]) {
       limit: Option[Int] = None,
       transformBody: (JsonObject) => JsonObject = it => it
   ): F[ItemsWithCursor[JsonObject]] = {
-    val jsonObject = LimitAndCursor(cursor, limit).asJson.asObject.get
+    val jsonObject = LimitAndCursor(cursor, limit).asJson.asObject
+      .getOrElse(throw new Exception("unreachable"))
     val json = Json.fromJsonObject(transformBody(jsonObject))
     val urlParts = urlPart.split("/")
     post[ItemsWithCursor[JsonObject], ItemsWithCursor[JsonObject], Json](
@@ -214,7 +215,7 @@ class WellDataLayerWells[F[_]: Monad](val requestSession: RequestSession[F]) {
     )
 }
 
-class WellDataLayerWellboreSources[F[_]: Monad](val requestSession: RequestSession[F]) {
+class WellDataLayerWellboreSources[F[_]](val requestSession: RequestSession[F]) {
   import WellDataLayer._
 
   def list(
