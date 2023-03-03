@@ -38,6 +38,30 @@ final case class WellFilter(
     source: Option[Seq[String]] = None
 )
 
+final case class WellSourceFilterRequest(
+    filter: WellSourceFilter,
+    cursor: Option[String] = None,
+    limit: Option[Int] = None
+)
+
+final case class WellSourceFilter(
+    source: Option[Seq[String]] = None
+)
+
+final case class WellboreFilter(
+    source: Option[Seq[String]] = None
+)
+
+final case class WellboreSourceFilterRequest(
+    filter: WellboreSourceFilter,
+    cursor: Option[String] = None,
+    limit: Option[Int] = None
+)
+
+final case class WellboreSourceFilter(
+    source: Option[Seq[String]] = None
+)
+
 object WellboreMergeRules {
   def apply(source: Seq[String]): WellboreMergeRules =
     new WellboreMergeRules(
