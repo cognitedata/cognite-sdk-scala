@@ -10,7 +10,8 @@ import com.cognite.sdk.scala.playground._
 import com.cognite.sdk.scala.v1._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.parser.decode
-import io.circe.{Decoder, Encoder, JsonObject}
+import io.circe.{Decoder, Encoder, Json, JsonObject}
+import io.circe.syntax._
 import sttp.client3._
 import sttp.client3.circe._
 import sttp.model.Uri
@@ -20,8 +21,10 @@ class WellDataLayer[F[_]: Monad](val requestSession: RequestSession[F]) {
   import WellDataLayer._
 
   lazy val wells = new WellDataLayerWells(requestSession)
+  lazy val wellSources = new WellDataLayerWellSources(requestSession)
   lazy val wellbores = new WellDataLayerWellbores(requestSession)
-  lazy val sources = new WellDataLayerSources(requestSession, wells)
+  lazy val wellboreSources = new WellDataLayerWellboreSources(requestSession)
+  lazy val sources = new WellDataLayerSources(requestSession, wellSources)
 
   private def get[R, T](
       uri: Uri,
@@ -72,12 +75,15 @@ class WellDataLayer[F[_]: Monad](val requestSession: RequestSession[F]) {
   def listItemsWithPost(
       urlPart: String,
       cursor: Option[String] = None,
-      limit: Option[Int] = None
+      limit: Option[Int] = None,
+      transformBody: (JsonObject) => JsonObject = it => it
   ): F[ItemsWithCursor[JsonObject]] = {
-    val body = LimitAndCursor(cursor, limit)
+    val jsonObject = LimitAndCursor(cursor, limit).asJson.asObject
+      .getOrElse(throw new Exception("unreachable"))
+    val json = Json.fromJsonObject(transformBody(jsonObject))
     val urlParts = urlPart.split("/")
-    post[ItemsWithCursor[JsonObject], ItemsWithCursor[JsonObject], LimitAndCursor](
-      body,
+    post[ItemsWithCursor[JsonObject], ItemsWithCursor[JsonObject], Json](
+      json,
       uri"${requestSession.baseUrl}/wdl/$urlParts",
       value => value
     )
@@ -94,7 +100,7 @@ class WellDataLayer[F[_]: Monad](val requestSession: RequestSession[F]) {
 
 class WellDataLayerSources[F[_]: Monad](
     val requestSession: RequestSession[F],
-    private val wells: WellDataLayerWells[F]
+    private val wellSources: WellDataLayerWellSources[F]
 ) {
   import WellDataLayer._
 
@@ -131,14 +137,46 @@ class WellDataLayerSources[F[_]: Monad](
   def deleteRecursive(items: Seq[Source]): F[Unit] = {
     val namesToDelete = items.map(_.name)
     for {
-      wells <- wells.list(WellFilter(Some(namesToDelete)))
+      wells <- wellSources.list(WellSourceFilter(Some(namesToDelete)))
       wellSources = wells
-        .flatMap(_.sources)
+        .map(_.source)
         .filter(assetSource => namesToDelete.contains(assetSource.sourceName))
-      _ <- this.wells.deleteRecursive(wellSources)
+      _ <- this.wellSources.deleteRecursive(wellSources)
       _ <- delete(items)
     } yield ()
   }
+}
+
+class WellDataLayerWellSources[F[_]: Monad](val requestSession: RequestSession[F]) {
+  import WellDataLayer._
+
+  def list(
+      filter: WellSourceFilter = WellSourceFilter(),
+      cursor: Option[String] = None,
+      limit: Option[Int] = None
+  ): F[Seq[WellSource]] = {
+    val body = WellSourceFilterRequest(filter, cursor, limit)
+    requestSession.post[Seq[WellSource], WellSourceItems, WellSourceFilterRequest](
+      body,
+      uri"${requestSession.baseUrl}/wdl/wellsources/list",
+      value => value.items
+    )
+  }
+
+  def delete(items: Seq[AssetSource]): F[Unit] = delete(items, recursive = false)
+
+  def deleteRecursive(items: Seq[AssetSource]): F[Unit] = delete(items, recursive = true)
+
+  private def delete(items: Seq[AssetSource], recursive: Boolean): F[Unit] =
+    if (items.isEmpty) {
+      Monad[F].unit
+    } else {
+      requestSession.post[Unit, EmptyObj, DeleteWells](
+        DeleteWells(items, recursive),
+        uri"${requestSession.baseUrl}/wdl/wells/delete",
+        _ => ()
+      )
+    }
 }
 
 class WellDataLayerWells[F[_]: Monad](val requestSession: RequestSession[F]) {
@@ -175,20 +213,23 @@ class WellDataLayerWells[F[_]: Monad](val requestSession: RequestSession[F]) {
       uri"${requestSession.baseUrl}/wdl/wells/mergerules",
       _ => ()
     )
+}
 
-  def delete(items: Seq[AssetSource]): F[Unit] = delete(items, recursive = false)
-  def deleteRecursive(items: Seq[AssetSource]): F[Unit] = delete(items, recursive = true)
+class WellDataLayerWellboreSources[F[_]](val requestSession: RequestSession[F]) {
+  import WellDataLayer._
 
-  private def delete(items: Seq[AssetSource], recursive: Boolean): F[Unit] =
-    if (items.isEmpty) {
-      Monad[F].unit
-    } else {
-      requestSession.post[Unit, EmptyObj, DeleteWells](
-        DeleteWells(items, recursive),
-        uri"${requestSession.baseUrl}/wdl/wells/delete",
-        _ => ()
-      )
-    }
+  def list(
+      filter: WellboreSourceFilter = WellboreSourceFilter(),
+      cursor: Option[String] = None,
+      limit: Option[Int] = None
+  ): F[Seq[WellboreSource]] = {
+    val body = WellboreSourceFilterRequest(filter, cursor, limit)
+    requestSession.post[Seq[WellboreSource], WellboreSourceItems, WellboreSourceFilterRequest](
+      body,
+      uri"${requestSession.baseUrl}/wdl/wellboresources/list",
+      value => value.items
+    )
+  }
 }
 
 class WellDataLayerWellbores[F[_]: Monad](val requestSession: RequestSession[F]) {
@@ -241,11 +282,15 @@ object WellDataLayer {
   implicit val wellSourceItemsEncoder: Encoder[WellSourceItems] = deriveEncoder
   implicit val wellItemsDecoder: Decoder[WellItems] = deriveDecoder
   implicit val wellMergeRulesEncoder: Encoder[WellMergeRules] = deriveEncoder
+  implicit val wellSourceDecoder: Decoder[WellSource] = deriveDecoder
+  implicit val wellSourceItemsDecoder: Decoder[WellSourceItems] = deriveDecoder
 
   implicit val wellboreSourceEncoder: Encoder[WellboreSource] = deriveEncoder
   implicit val wellboreSourceItemsEncoder: Encoder[WellboreSourceItems] = deriveEncoder
   implicit val wellboreItemsDecoder: Decoder[WellboreItems] = deriveDecoder
   implicit val wellboreMergeRulesEncoder: Encoder[WellboreMergeRules] = deriveEncoder
+  implicit val wellboreSourceDecoder: Decoder[WellboreSource] = deriveDecoder
+  implicit val wellboreSourceItemsDecoder: Decoder[WellboreSourceItems] = deriveDecoder
 
   implicit val emptyObjDecoder: Decoder[EmptyObj] = deriveDecoder
   implicit val emptyObjEncoder: Encoder[EmptyObj] = deriveEncoder
@@ -256,6 +301,11 @@ object WellDataLayer {
 
   implicit val wellFilterEncoder: Encoder[WellFilter] = deriveEncoder
   implicit val wellFilterRequestEncoder: Encoder[WellFilterRequest] = deriveEncoder
+  implicit val wellSourceFilterEncoder: Encoder[WellSourceFilter] = deriveEncoder
+  implicit val wellSourceFilterRequestEncoder: Encoder[WellSourceFilterRequest] = deriveEncoder
+  implicit val wellboreSourceFilterEncoder: Encoder[WellboreSourceFilter] = deriveEncoder
+  implicit val wellboreSourceFilterRequestEncoder: Encoder[WellboreSourceFilterRequest] =
+    deriveEncoder
 
   implicit val limitAndCursorEncoder: Encoder[LimitAndCursor] = deriveEncoder
 }

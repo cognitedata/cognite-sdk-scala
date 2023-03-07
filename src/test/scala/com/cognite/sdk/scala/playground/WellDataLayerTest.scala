@@ -5,7 +5,7 @@ import com.cognite.sdk.scala.common.{CdpApiException, SdkTestSpec}
 import io.circe.{Json, JsonObject, Printer}
 import org.scalatest.{BeforeAndAfter, OptionValues}
 
-@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.OptionPartial"))
 class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValues {
   implicit class JsonImplicits(val actual: JsonObject) {
     def shouldDeepEqual(expected: JsonObject): Unit = {
@@ -127,9 +127,58 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
     results.items.headOption.value.shouldDeepEqual(expected)
   }
 
+  it should "transform json with the transformBody hook" in {
+    // first, create a new source
+    val newSource = Source(name = shortRandom())
+    wdl.sources.create(Seq(newSource)).size shouldEqual 1
+
+    // Then set merge rules
+    wdl.wells.setMergeRules(WellMergeRules(Seq(newSource.name)))
+    wdl.wellbores.setMergeRules(WellboreMergeRules(Seq(newSource.name)))
+    wdl.wells.create(
+      Seq(
+        WellSource(
+          name = "well-1",
+          source = AssetSource("well-1", newSource.name),
+          field = Some("VOLVE"),
+          wellhead = Some(Wellhead(0, 0, "EPSG:4326"))
+        ),
+        WellSource(
+          name = "well-2",
+          source = AssetSource("well-2", newSource.name),
+          field = Some("Utsira"),
+          wellhead = Some(Wellhead(0, 0, "EPSG:4326"))
+        )
+      )
+    )
+
+    val items = wdl.listItemsWithPost(
+      "wells/list",
+      transformBody = jsonObject =>
+        jsonObject
+          .add(
+            "filter",
+            Json.fromFields(
+              Seq(
+                (
+                  "field",
+                  Json.fromFields(
+                    Seq(
+                      ("oneOf", Json.fromValues(Seq(Json.fromString("VOLVE"))))
+                    )
+                  )
+                )
+              )
+            )
+          )
+    )
+    items.items.size should be(1)
+    val well = items.items.headOption.get
+    well.toMap("name").asString.get should be("well-1")
+  }
+
   it should "create, retrieve, and delete wells" in {
     // first, create a new source
-
     val newSource = Source(name = shortRandom())
     wdl.sources.create(Seq(newSource)).size shouldEqual 1
 
@@ -137,26 +186,32 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
     wdl.wells.setMergeRules(WellMergeRules(Seq(newSource.name)))
     wdl.wellbores.setMergeRules(WellboreMergeRules(Seq(newSource.name)))
 
-    wdl.wells.create(
-      Seq(
-        WellSource(
-          name = "my new well",
-          source = AssetSource("A:my new well", newSource.name),
-          wellhead = Some(Wellhead(0.0, 60.0, "EPSG:4326"))
+    wdl.wells
+      .create(
+        Seq(
+          WellSource(
+            name = "my new well",
+            source = AssetSource("A:my new well", newSource.name),
+            wellhead = Some(Wellhead(0.0, 60.0, "EPSG:4326"))
+          )
         )
       )
-    ).size shouldEqual 1
+      .size shouldEqual 1
 
-    wdl.wellbores.create(
-      Seq(
-        WellboreSource(
-          name = "my new wellbore",
-          source = AssetSource("A:my new wellbore", newSource.name),
-          datum = Some(Datum(54.9, "meter", "KB")),
-          wellAssetExternalId = "A:my new well"
-        )
-      )
-    ).size shouldEqual 1
+    val wellboreSource = WellboreSource(
+      name = "my new wellbore",
+      source = AssetSource("A:my new wellbore", newSource.name),
+      datum = Some(Datum(54.9, "meter", "KB")),
+      wellAssetExternalId = "A:my new well"
+    )
+
+    wdl.wellbores.create(Seq(wellboreSource)).size shouldEqual 1
+
+    val retrievedWellboreSource = wdl.wellboreSources.list().headOption.value
+    retrievedWellboreSource.name should be("my new wellbore")
+    retrievedWellboreSource.source should be(wellboreSource.source)
+    retrievedWellboreSource.datum should be(wellboreSource.datum)
+    retrievedWellboreSource.wellAssetExternalId should be(wellboreSource.wellAssetExternalId)
 
     val wells = wdl.wells.list()
     wells.size shouldEqual 1
@@ -196,8 +251,8 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
     wdl.wells.create(Seq()) shouldBe Seq()
   }
 
-  it should "be safe to delete 0 wells" in {
-    wdl.wells.delete(Seq()) shouldBe Monad[Id].unit
+  it should "be safe to delete 0 well sources" in {
+    wdl.wellSources.delete(Seq()) shouldBe Monad[Id].unit
   }
 
   it should "be safe to create 0 sources" in {
