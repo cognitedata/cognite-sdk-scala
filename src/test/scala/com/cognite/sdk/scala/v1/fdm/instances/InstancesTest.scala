@@ -29,16 +29,16 @@ import scala.concurrent.duration.DurationInt
 class InstancesTest extends CommonDataModelTestHelper {
   private val space = Utils.SpaceExternalId
 
-  private val edgeNodeContainerExtId = "sdkTest5EdgeNodeContainer"
-  private val edgeContainerExtId = "sdkTest5EdgeContainer"
-  private val nodeContainer1ExtId = "sdkTest5NodeContainer1"
-  private val nodeContainer2ExtId = "sdkTest5NodeContainer2"
+  private val edgeNodeContainerExtId = "sdkTest8EdgeNodeContainer"
+  private val edgeContainerExtId = "sdkTest8EdgeContainer"
+  private val nodeContainer1ExtId = "sdkTest8NodeContainer1"
+  private val nodeContainer2ExtId = "sdkTest8NodeContainer2"
   private val containerForDirectNodeRelationExtId = Utils.DirectNodeRelationContainerExtId
 
-  private val edgeNodeViewExtId = "sdkTest5EdgeNodeView"
-  private val edgeViewExtId = "sdkTest5EdgeView"
-  private val nodeView1ExtId = "sdkTest5NodeView1"
-  private val nodeView2ExtId = "sdkTest5NodeView2"
+  private val edgeNodeViewExtId = "sdkTest8EdgeNodeView"
+  private val edgeViewExtId = "sdkTest8EdgeView"
+  private val nodeView1ExtId = "sdkTest8NodeView1"
+  private val nodeView2ExtId = "sdkTest8NodeView2"
   private val viewForDirectNodeRelationExtId = Utils.DirectNodeRelationViewExtId
 
   private val viewVersion = Utils.ViewVersion
@@ -54,11 +54,11 @@ class InstancesTest extends CommonDataModelTestHelper {
 //    ))
 //
 //    deleteViews(Seq(
-//      DataModelReference(space, edgeNodeViewExtId, viewVersion),
-//      DataModelReference(space, edgeViewExtId, viewVersion),
-//      DataModelReference(space, nodeView1ExtId, viewVersion),
-//      DataModelReference(space, nodeView2ExtId, viewVersion),
-//      DataModelReference(space, viewForDirectNodeRelationExtId, viewVersion)
+//      DataModelReference(space, edgeNodeViewExtId, Some(viewVersion)),
+//      DataModelReference(space, edgeViewExtId, Some(viewVersion)),
+//      DataModelReference(space, nodeView1ExtId, Some(viewVersion)),
+//      DataModelReference(space, nodeView2ExtId, Some(viewVersion)),
+//      DataModelReference(space, viewForDirectNodeRelationExtId, Some(viewVersion))
 //    ))
 
     createContainerForDirectNodeRelations.unsafeRunSync()

@@ -7,6 +7,7 @@ import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ViewPropertyDefinition
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceDefinition
+import com.cognite.sdk.scala.v1.fdm.datamodels.DataModelViewReference
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
@@ -23,7 +24,8 @@ final case class ViewDefinition(
     writable: Boolean,
     usedFor: Usage,
     properties: Map[String, ViewPropertyDefinition]
-) extends SourceDefinition {
+) extends SourceDefinition
+    with DataModelViewReference {
   override def toSourceReference: ViewReference =
     ViewReference(space = space, externalId = externalId, version = version)
 }

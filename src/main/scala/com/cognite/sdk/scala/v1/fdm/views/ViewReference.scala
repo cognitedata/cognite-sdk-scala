@@ -4,7 +4,10 @@
 package com.cognite.sdk.scala.v1.fdm.views
 
 import com.cognite.sdk.scala.v1.fdm.common.sources.{SourceReference, SourceType}
-import com.cognite.sdk.scala.v1.fdm.datamodels.DataModelViewReference
+import com.cognite.sdk.scala.v1.fdm.datamodels.{
+  DataModelCreateViewReference,
+  DataModelViewReference
+}
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.{Decoder, Encoder}
 
@@ -13,6 +16,7 @@ final case class ViewReference(
     externalId: String,
     version: String
 ) extends SourceReference
+    with DataModelCreateViewReference
     with DataModelViewReference {
   override val `type`: SourceType = SourceType.View
 }
