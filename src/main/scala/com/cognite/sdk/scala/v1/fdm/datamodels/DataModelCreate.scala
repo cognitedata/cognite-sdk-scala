@@ -9,7 +9,7 @@ final case class DataModelCreate(
     name: Option[String],
     description: Option[String],
     version: String,
-    views: Option[Seq[DataModelViewReference]]
+    views: Option[Seq[DataModelCreateViewReference]]
 )
 
 object DataModelCreate {

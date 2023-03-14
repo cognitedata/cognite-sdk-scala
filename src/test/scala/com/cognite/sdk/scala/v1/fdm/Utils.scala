@@ -15,8 +15,8 @@ import scala.util.Random
 
 object Utils {
   val SpaceExternalId = "testSpaceScalaSdk1"
-  val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation5"
-  val DirectNodeRelationViewExtId = "sdkTestNodeViewForDirectRelation5"
+  val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation6"
+  val DirectNodeRelationViewExtId = "sdkTestNodeViewForDirectRelation6"
   val ViewVersion = "v1"
 
   val AllContainerPropertyTypes: List[PropertyType] = List[PropertyType](
