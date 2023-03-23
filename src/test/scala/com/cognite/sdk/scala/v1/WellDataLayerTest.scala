@@ -1,17 +1,21 @@
-package com.cognite.sdk.scala.playground
+package com.cognite.sdk.scala.v1
 
 import cats.{Id, Monad}
 import com.cognite.sdk.scala.common.{CdpApiException, SdkTestSpec}
 import io.circe.{Json, JsonObject, Printer}
 import org.scalatest.{BeforeAndAfter, OptionValues}
 
-@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.OptionPartial"))
+@SuppressWarnings(
+  Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.OptionPartial")
+)
 class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValues {
-  implicit class JsonImplicits(val actual: JsonObject) {
+  implicit class JsonImplicits(actual: JsonObject) {
+    def dropTimestamps(): JsonObject =
+      actual.filterKeys(key => !Seq("createdTime", "lastUpdatedTime").contains(key))
     def shouldDeepEqual(expected: JsonObject): Unit = {
       val printer = Printer.spaces2.withSortedKeys.copy(dropNullValues = true)
-      val expectedStr = Json.fromJsonObject(expected).printWith(printer)
-      val actualStr = Json.fromJsonObject(actual).printWith(printer)
+      val expectedStr = Json.fromJsonObject(expected.dropTimestamps()).printWith(printer)
+      val actualStr = Json.fromJsonObject(actual.dropTimestamps()).printWith(printer)
       val _ = expectedStr shouldEqual actualStr
     }
   }
@@ -48,20 +52,22 @@ class WellDataLayerTest extends SdkTestSpec with BeforeAndAfter with OptionValue
 
     val sources = wdl.listItemsWithGet("sources")
     sources.items.size shouldEqual 2
-    val actualWitsml =
-      Json.fromJsonObject(sources.items.headOption.value).printWith(Printer.spaces2.withSortedKeys)
-    actualWitsml shouldEqual
-      """{
-        |  "description" : "The WITSML data source",
-        |  "name" : "WITSML"
-        |}""".stripMargin
-    val actualEdm = Json.fromJsonObject(sources.items(1)).printWith(Printer.spaces2.withSortedKeys)
-    actualEdm shouldEqual
-      """{
-        |  "description" : "Engineering Data Model",
-        |  "name" : "EDM"
-        |}""".stripMargin
 
+    sources.items.headOption.value.shouldDeepEqual(
+      JsonObject(
+        "name" -> Json.fromString("WITSML"),
+        "description" -> Json.fromString("The WITSML data source")
+      )
+    )
+
+    sources
+      .items(1)
+      .shouldDeepEqual(
+        JsonObject(
+          "name" -> Json.fromString("EDM"),
+          "description" -> Json.fromString("Engineering Data Model")
+        )
+      )
   }
 
   it should "create and retrieve JsonObject well items" in {

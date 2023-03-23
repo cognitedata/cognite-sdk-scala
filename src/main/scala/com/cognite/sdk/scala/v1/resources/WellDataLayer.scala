@@ -1,17 +1,16 @@
 // Copyright 2023 Cognite AS
 // SPDX-License-Identifier: Apache-2.0
 
-package com.cognite.sdk.scala.playground.resources
+package com.cognite.sdk.scala.v1.resources
 
 import cats.Monad
 import cats.syntax.all._
 import com.cognite.sdk.scala.common.{CdpApiError, Items, ItemsWithCursor}
-import com.cognite.sdk.scala.playground._
 import com.cognite.sdk.scala.v1._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.parser.decode
-import io.circe.{Decoder, Encoder, Json, JsonObject}
 import io.circe.syntax._
+import io.circe.{Decoder, Encoder, Json, JsonObject}
 import sttp.client3._
 import sttp.client3.circe._
 import sttp.model.Uri
