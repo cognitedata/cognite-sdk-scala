@@ -220,11 +220,11 @@ class GenericClient[F[_]](
   lazy val wdl = new WellDataLayer[F](
     RequestSession(
       applicationName,
-      uri"$uri/api/playground/projects/$projectName",
+      uri"$uri/api/v1/projects/$projectName",
       sttpBackend,
       authProvider,
       clientTag,
-      cdfVersion
+      Some("20221206-beta")
     )
   )
 
