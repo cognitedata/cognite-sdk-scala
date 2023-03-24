@@ -7,7 +7,6 @@ import BuildInfo.BuildInfo
 import cats.implicits._
 import cats.{Id, Monad}
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.playground.resources.WellDataLayer
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.resources._
 import com.cognite.sdk.scala.v1.resources.fdm.datamodels.{DataModels => DataModelsV3}
@@ -221,11 +220,11 @@ class GenericClient[F[_]](
   lazy val wdl = new WellDataLayer[F](
     RequestSession(
       applicationName,
-      uri"$uri/api/playground/projects/$projectName",
+      uri"$uri/api/v1/projects/$projectName",
       sttpBackend,
       authProvider,
       clientTag,
-      cdfVersion
+      Some("20221206-beta")
     )
   )
 

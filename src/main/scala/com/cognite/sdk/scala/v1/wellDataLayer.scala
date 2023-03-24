@@ -1,4 +1,4 @@
-package com.cognite.sdk.scala.playground
+package com.cognite.sdk.scala.v1
 
 final case class Source(
     name: String,
