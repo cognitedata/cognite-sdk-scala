@@ -113,7 +113,7 @@ object PropertyType {
               containerRef <- c.downField("container").as[Option[ContainerReference]]
               source <- c.downField("source").as[Option[ViewReference]]
             } yield DirectNodeRelationProperty(containerRef, source)
-          case Right(typeVal) if typeVal == TimeSeriesProperty.Type =>
+          case Right(typeVal) if typeVal === TimeSeriesProperty.Type =>
             for { _ <- c.downField("type").as[Option[String]] } yield TimeSeriesProperty()
           case Right(typeVal) =>
             Left[DecodingFailure, PropertyType](
