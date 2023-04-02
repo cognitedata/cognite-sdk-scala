@@ -134,6 +134,8 @@ object PropertyDefinition {
           Some(PropertyDefaultValue.Object(json))
         case _: PropertyType.DirectNodeRelationProperty =>
           Some(PropertyDefaultValue.Object(json))
+        case _: PropertyType.TimeSeriesProperty =>
+          json.asString.map(PropertyDefaultValue.String.apply)
         case _ => None
       }
     }

@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1.fdm
 
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, CorePropertyDefinition, ViewCorePropertyDefinition}
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{DirectNodeRelationProperty, PrimitiveProperty, TextProperty}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{DirectNodeRelationProperty, PrimitiveProperty, TextProperty, TimeSeriesProperty}
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
@@ -40,7 +40,8 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
     DirectNodeRelationProperty(
       container = Some(ContainerReference(space = SpaceExternalId, externalId = DirectNodeRelationContainerExtId)),
-      source = None)
+      source = None),
+    TimeSeriesProperty()
   )
 
   val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
@@ -424,6 +425,7 @@ object Utils {
             )
           )
         )
+      case PropertyType.TimeSeriesProperty() => InstancePropertyValue.String(s"${propName}-reference")
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
   // scalastyle:on cyclomatic.complexity
@@ -479,6 +481,7 @@ object Utils {
             )
           )
         case _: DirectNodeRelationProperty => None
+        case _: TimeSeriesProperty => Some(PropertyDefaultValue.String("defaultTimeSeriesExternalIdValue"))
       }
     } else {
       None

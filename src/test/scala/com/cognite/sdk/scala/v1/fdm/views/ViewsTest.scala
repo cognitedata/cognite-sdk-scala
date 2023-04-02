@@ -44,13 +44,22 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     `type` = PropertyType.TextProperty()
   )
 
+  private val containerTimeSeriesProperty = ContainerPropertyDefinition(
+    defaultValue = Some(PropertyDefaultValue.String("flux-capacitor-levels")),
+    description = Some("defaultFlux1"),
+    name = Some("DeLorean flux capacitor levels"),
+    `type` = PropertyType.TimeSeriesProperty()
+  )
+
   private val containerPrimitive = ContainerCreateDefinition(
     space = spaceName,
     externalId = containerPrimitiveExternalId,
     name = Some(containerNamePrim),
     description = Some("this is a container of primitive types"),
     usedFor = Some(Usage.All),
-    properties = Map("prop_int32" -> containerPropertyInt, "prop_text" -> containerPropertyText),
+    properties = Map("prop_int32" -> containerPropertyInt,
+      "prop_text" -> containerPropertyText,
+      "prop_timeseries" -> containerTimeSeriesProperty),
     constraints = None,
     indexes = None
   )
@@ -101,7 +110,8 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val properties = Map(
       "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
-      "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text")
+      "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text"),
+      "prop_timeseries" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_timeseries")
     )
     val viewToCreate = ViewCreateDefinition(
       space = spaceName,
@@ -139,6 +149,14 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
           autoIncrement = Some(false),
           defaultValue = None,
           `type` = PropertyType.TextProperty(),
+          container = Some(containerReference),
+          containerPropertyIdentifier = None
+        ),
+        "prop_timeseries" -> ViewCorePropertyDefinition(
+          nullable = Some(true),
+          autoIncrement = Some(false),
+          defaultValue = Some(PropertyDefaultValue.String("flux-capacitor-levels")),
+          `type` = PropertyType.TimeSeriesProperty(),
           container = Some(containerReference),
           containerPropertyIdentifier = None
         )
