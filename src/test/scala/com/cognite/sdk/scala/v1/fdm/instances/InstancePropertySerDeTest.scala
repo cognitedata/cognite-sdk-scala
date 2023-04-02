@@ -180,6 +180,16 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |            "list": true,
            |            "collation": "ucs_basic"
            |          }
+           |        },
+           |        "property-identifier43": {
+           |          "nullable": true,
+           |          "autoIncrement": false,
+           |          "defaultValue": "timeseries-43",
+           |          "description": "property-identifier43",
+           |          "name": "property-identifier43",
+           |          "type": {
+           |            "type": "timeseries"
+           |          }
            |        }
            |      }
            |    }
@@ -307,6 +317,14 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   Some("property-identifier42"),
                   Some("property-identifier42"),
                   PropertyType.TextProperty(Some(true), Some("ucs_basic"))
+                ),
+                "property-identifier43" -> TypePropertyDefinition(
+                  Some(true),
+                  Some(false),
+                  Some(PropertyDefaultValue.String("timeseries-43")),
+                  Some("property-identifier43"),
+                  Some("property-identifier43"),
+                  PropertyType.TimeSeriesProperty()
                 )
               )
             )
