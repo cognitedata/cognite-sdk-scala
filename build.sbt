@@ -23,7 +23,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.5.9-SNAPSHOT",
+  version := "2.5.10-SNAPSHOT",
   isSnapshot := true,
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
@@ -96,6 +96,7 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
+      ("org.apache.logging.log4j" %% "log4j-api-scala" % "12.0").cross(CrossVersion.for3Use2_13),
       "commons-io" % "commons-io" % "2.11.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
