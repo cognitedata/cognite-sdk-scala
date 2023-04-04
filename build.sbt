@@ -1,10 +1,10 @@
 import wartremover.Wart
 import sbt.project
 
-val scala3 = "3.2.0"
+//val scala3 = "3.2.0"
 val scala213 = "2.13.8"
 val scala212 = "2.12.17"
-val supportedScalaVersions = List(scala212, scala213, scala3)
+val supportedScalaVersions = List(scala212, scala213)
 
 // This is used only for tests.
 val jettyTestVersion = "9.4.48.v20220622"
@@ -23,7 +23,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.5.9-SNAPSHOT",
+  version := "2.5.10-SNAPSHOT",
   isSnapshot := true,
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
@@ -96,6 +96,8 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
+      "org.log4s" %% "log4s" % "1.8.2",
+      "org.apache.logging.log4j" %% "log4j-api-scala" % "12.0",
       "commons-io" % "commons-io" % "2.11.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
