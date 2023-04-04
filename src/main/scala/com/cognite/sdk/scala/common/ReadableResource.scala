@@ -5,10 +5,10 @@ package com.cognite.sdk.scala.common
 
 import cats.effect.Concurrent
 import com.cognite.sdk.scala.v1._
-import sttp.client3._
-import sttp.client3.circe._
 import io.circe.Decoder
 import fs2._
+import sttp.client3._
+import sttp.client3.circe._
 import sttp.model.Uri
 
 // TODO: Verify that index and numPartitions are valid

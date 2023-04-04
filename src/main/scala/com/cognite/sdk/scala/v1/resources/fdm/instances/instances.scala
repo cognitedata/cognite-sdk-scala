@@ -20,6 +20,8 @@ class Instances[F[_]](val requestSession: RequestSession[F])
 
   import Instances._
 
+  private lazy val logger = org.log4s.getLogger(this.getClass)
+
   private implicit val nullDroppingPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
   override val baseUrl = uri"${requestSession.baseUrl}/models/instances"
@@ -39,16 +41,25 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       identity
     )
 
+  @SuppressWarnings(Array("org.wartremover.warts.Null"))
   private[sdk] def filterWithCursor(
       inputQuery: InstanceFilterRequest,
       cursor: Option[String],
       limit: Option[Int],
       @annotation.nowarn partition: Option[Partition] = None
   )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] =
-    filter(inputQuery.copy(cursor = cursor, limit = limit)).map {
-      case InstanceFilterResponse(items, _, cursor) =>
+    filter(inputQuery.copy(cursor = cursor, limit = limit))
+      // TODO: remove after this https://cognitedata.slack.com/archives/C03G11UNHBJ/p1680523725262739?thread_ts=1680005195.920049&cid=C03G11UNHBJ
+      .flatTap(r =>
+        F.delay(
+          logger.warn(
+            s"Instance filter next cursor: ${r.nextCursor.getOrElse("N/A")}"
+          )
+        )
+      )
+      .map { case InstanceFilterResponse(items, _, cursor) =>
         ItemsWithCursor(items, cursor)
-    }
+      }
 
   private[sdk] def filterWithNextCursor(
       inputQuery: InstanceFilterRequest,
