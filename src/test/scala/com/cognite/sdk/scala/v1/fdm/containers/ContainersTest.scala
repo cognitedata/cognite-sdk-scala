@@ -102,7 +102,7 @@ class ContainersTest extends CommonDataModelTestHelper {
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32, list = None),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(false)),
-      PropertyType.TimeSeriesProperty()
+      PropertyType.TimeSeriesReference()
     )
 
     val afterEncodedAndDecoded = values

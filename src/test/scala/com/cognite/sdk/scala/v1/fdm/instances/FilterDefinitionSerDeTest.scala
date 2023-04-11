@@ -180,7 +180,7 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
         val overlaps = Overlaps(
           startProperty = Seq("room", "id"),
           endProperty = Seq("id"),
-          gte = Some(Gte(FilterValueDefinition.Integer(10L)))
+          gte = Some(FilterValueDefinition.Integer(10L))
         ).asJson
         overlaps.toString() shouldBe """{
                                        |  "startProperty" : [

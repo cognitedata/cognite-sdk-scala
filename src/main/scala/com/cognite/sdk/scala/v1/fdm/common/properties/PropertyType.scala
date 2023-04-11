@@ -43,14 +43,38 @@ object PropertyType {
     val Type = "direct"
   }
 
-  final case class TimeSeriesProperty() extends PropertyType {
-    val `type`: String = TimeSeriesProperty.Type
+  sealed trait CDFExternalIdReference extends PropertyType {
+    val `type`: String
+  }
+
+  final case class TimeSeriesReference() extends CDFExternalIdReference {
+    override val `type`: String = TimeSeriesReference.Type
 
     override def list: Option[Boolean] = None
   }
 
-  object TimeSeriesProperty {
+  object TimeSeriesReference {
     val Type = "timeseries"
+  }
+
+  final case class FileReference() extends CDFExternalIdReference {
+    override val `type`: String = FileReference.Type
+
+    override def list: Option[Boolean] = None
+  }
+
+  object FileReference {
+    val Type = "file"
+  }
+
+  final case class SequenceReference() extends CDFExternalIdReference {
+    override val `type`: String = SequenceReference.Type
+
+    override def list: Option[Boolean] = None
+  }
+
+  object SequenceReference {
+    val Type = "sequence"
   }
 
   import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference._
@@ -60,8 +84,8 @@ object PropertyType {
       (t.list, t.collation, t.`type`)
     )
 
-  implicit val propertyTimeSeriesEncoder: Encoder[TimeSeriesProperty] =
-    Encoder.forProduct1("type")((t: TimeSeriesProperty) => t.`type`)
+  implicit val externalIdReferenceEncoder: Encoder[CDFExternalIdReference] =
+    Encoder.forProduct1("type")(_.`type`)
 
   implicit val primitivePropertyEncoder: Encoder[PrimitiveProperty] =
     deriveEncoder[PrimitiveProperty]
@@ -75,7 +99,7 @@ object PropertyType {
     case t: TextProperty => t.asJson
     case p: PrimitiveProperty => p.asJson
     case d: DirectNodeRelationProperty => d.asJson
-    case ts: TimeSeriesProperty => ts.asJson
+    case ts: CDFExternalIdReference => ts.asJson
   }
 
   implicit val primitivePropertyDecoder: Decoder[PrimitiveProperty] =
@@ -84,8 +108,8 @@ object PropertyType {
   implicit val textPropertyDecoder: Decoder[TextProperty] =
     deriveDecoder[TextProperty]
 
-  implicit val timeSeriesPropertyDecoder: Decoder[TimeSeriesProperty] =
-    deriveDecoder[TimeSeriesProperty]
+  implicit val timeSeriesPropertyDecoder: Decoder[TimeSeriesReference] =
+    deriveDecoder[TimeSeriesReference]
 
   implicit val directNodeRelationPropertyDecoder: Decoder[DirectNodeRelationProperty] =
     deriveDecoder[DirectNodeRelationProperty]
@@ -113,8 +137,10 @@ object PropertyType {
               containerRef <- c.downField("container").as[Option[ContainerReference]]
               source <- c.downField("source").as[Option[ViewReference]]
             } yield DirectNodeRelationProperty(containerRef, source)
-          case Right(typeVal) if typeVal === TimeSeriesProperty.Type =>
-            for { _ <- c.downField("type").as[Option[String]] } yield TimeSeriesProperty()
+          case Right(typeVal) if typeVal === TimeSeriesReference.Type =>
+            Right(TimeSeriesReference())
+          case Right(typeVal) if typeVal === FileReference.Type => Right(FileReference())
+          case Right(typeVal) if typeVal === SequenceReference.Type => Right(SequenceReference())
           case Right(typeVal) =>
             Left[DecodingFailure, PropertyType](
               DecodingFailure(s"Unknown container property type: '$typeVal'", c.history)

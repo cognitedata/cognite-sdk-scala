@@ -324,7 +324,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   Some(PropertyDefaultValue.String("timeseries-43")),
                   Some("property-identifier43"),
                   Some("property-identifier43"),
-                  PropertyType.TimeSeriesProperty()
+                  PropertyType.TimeSeriesReference()
                 )
               )
             )

@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1.fdm
 
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, CorePropertyDefinition, ViewCorePropertyDefinition}
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{DirectNodeRelationProperty, PrimitiveProperty, TextProperty, TimeSeriesProperty}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{DirectNodeRelationProperty, FileReference, PrimitiveProperty, SequenceReference, TextProperty, TimeSeriesReference}
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
@@ -41,7 +41,7 @@ object Utils {
     DirectNodeRelationProperty(
       container = Some(ContainerReference(space = SpaceExternalId, externalId = DirectNodeRelationContainerExtId)),
       source = None),
-    TimeSeriesProperty()
+    TimeSeriesReference()
   )
 
   val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
@@ -425,7 +425,7 @@ object Utils {
             )
           )
         )
-      case PropertyType.TimeSeriesProperty() => InstancePropertyValue.String(s"${propName}-reference")
+      case PropertyType.TimeSeriesReference() => InstancePropertyValue.String(s"${propName}-reference")
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
   // scalastyle:on cyclomatic.complexity
@@ -481,7 +481,9 @@ object Utils {
             )
           )
         case _: DirectNodeRelationProperty => None
-        case _: TimeSeriesProperty => Some(PropertyDefaultValue.String("defaultTimeSeriesExternalIdValue"))
+        case _: TimeSeriesReference => Some(PropertyDefaultValue.String("defaultTimeSeriesExternalId"))
+        case _: FileReference => Some(PropertyDefaultValue.String("defaultFileExternalId"))
+        case _: SequenceReference => Some(PropertyDefaultValue.String("defaultSequenceExternalId"))
       }
     } else {
       None

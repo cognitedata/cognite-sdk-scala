@@ -48,7 +48,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     defaultValue = Some(PropertyDefaultValue.String("flux-capacitor-levels")),
     description = Some("defaultFlux1"),
     name = Some("DeLorean flux capacitor levels"),
-    `type` = PropertyType.TimeSeriesProperty()
+    `type` = PropertyType.TimeSeriesReference()
   )
 
   private val containerPrimitive = ContainerCreateDefinition(
@@ -156,7 +156,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
           nullable = Some(true),
           autoIncrement = Some(false),
           defaultValue = Some(PropertyDefaultValue.String("flux-capacitor-levels")),
-          `type` = PropertyType.TimeSeriesProperty(),
+          `type` = PropertyType.TimeSeriesReference(),
           container = Some(containerReference),
           containerPropertyIdentifier = None
         )
