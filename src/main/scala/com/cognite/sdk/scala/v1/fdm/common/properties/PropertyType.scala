@@ -108,9 +108,6 @@ object PropertyType {
   implicit val textPropertyDecoder: Decoder[TextProperty] =
     deriveDecoder[TextProperty]
 
-  implicit val timeSeriesPropertyDecoder: Decoder[TimeSeriesReference] =
-    deriveDecoder[TimeSeriesReference]
-
   implicit val directNodeRelationPropertyDecoder: Decoder[DirectNodeRelationProperty] =
     deriveDecoder[DirectNodeRelationProperty]
 
