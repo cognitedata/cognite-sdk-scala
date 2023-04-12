@@ -339,10 +339,18 @@ object InstanceDefinition {
         Decoder[Json]
           .decodeJson(propValue)
           .map(InstancePropertyValue.Object.apply)
-      case PropertyType.TimeSeriesReference() =>
+      case _: PropertyType.TimeSeriesReference =>
         Decoder[String]
           .decodeJson(propValue)
-          .map(InstancePropertyValue.String.apply)
+          .map(InstancePropertyValue.TimeSeriesReference.apply)
+      case _: PropertyType.FileReference =>
+        Decoder[String]
+          .decodeJson(propValue)
+          .map(InstancePropertyValue.FileReference.apply)
+      case _: PropertyType.SequenceReference =>
+        Decoder[String]
+          .decodeJson(propValue)
+          .map(InstancePropertyValue.SequenceReference.apply)
       case _ =>
         Left[DecodingFailure, InstancePropertyValue](
           DecodingFailure(

@@ -481,9 +481,9 @@ object Utils {
             )
           )
         case _: DirectNodeRelationProperty => None
-        case _: TimeSeriesReference => Some(PropertyDefaultValue.String("defaultTimeSeriesExternalId"))
-        case _: FileReference => Some(PropertyDefaultValue.String("defaultFileExternalId"))
-        case _: SequenceReference => Some(PropertyDefaultValue.String("defaultSequenceExternalId"))
+        case _: TimeSeriesReference => Some(PropertyDefaultValue.TimeSeriesReference("defaultTimeSeriesExternalId"))
+        case _: FileReference => Some(PropertyDefaultValue.FileReference("defaultFileExternalId"))
+        case _: SequenceReference => Some(PropertyDefaultValue.SequenceReference("defaultSequenceExternalId"))
       }
     } else {
       None

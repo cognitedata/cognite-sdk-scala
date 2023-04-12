@@ -43,7 +43,7 @@ object PropertyType {
     val Type = "direct"
   }
 
-  sealed trait CDFExternalIdReference extends PropertyType {
+  sealed abstract class CDFExternalIdReference extends PropertyType {
     val `type`: String
   }
 
