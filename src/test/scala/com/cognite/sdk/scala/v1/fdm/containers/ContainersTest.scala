@@ -101,7 +101,8 @@ class ContainersTest extends CommonDataModelTestHelper {
       PropertyType.DirectNodeRelationProperty(Some(ContainerReference(space, "ext-id-1")), Some(ViewReference(space, "ext-id-1", "v1"))),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32, list = None),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
-      PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(false))
+      PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(false)),
+      PropertyType.TimeSeriesReference()
     )
 
     val afterEncodedAndDecoded = values

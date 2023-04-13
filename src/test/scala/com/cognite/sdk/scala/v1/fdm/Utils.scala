@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.v1.fdm
 
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, CorePropertyDefinition, ViewCorePropertyDefinition}
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{DirectNodeRelationProperty, PrimitiveProperty, TextProperty}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType._
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
@@ -40,7 +40,8 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
     DirectNodeRelationProperty(
       container = Some(ContainerReference(space = SpaceExternalId, externalId = DirectNodeRelationContainerExtId)),
-      source = None)
+      source = None),
+    TimeSeriesReference()
   )
 
   val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
@@ -50,6 +51,7 @@ object Utils {
     PropertyDefaultValue.Int64(Long.MaxValue),
     PropertyDefaultValue.Float32(101.1f),
     PropertyDefaultValue.Float64(Double.MaxValue),
+    PropertyDefaultValue.TimeSeriesReference("defaultTimeSeriesExtId"),
     PropertyDefaultValue.Object(
       Json.fromJsonObject(
         JsonObject.fromMap(
@@ -424,6 +426,9 @@ object Utils {
             )
           )
         )
+      case _: PropertyType.TimeSeriesReference => InstancePropertyValue.TimeSeriesReference(s"$propName-reference")
+      case _: PropertyType.FileReference => InstancePropertyValue.FileReference(s"$propName-reference")
+      case _: PropertyType.SequenceReference => InstancePropertyValue.SequenceReference(s"$propName-reference")
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
   // scalastyle:on cyclomatic.complexity
@@ -479,6 +484,9 @@ object Utils {
             )
           )
         case _: DirectNodeRelationProperty => None
+        case _: TimeSeriesReference => Some(PropertyDefaultValue.TimeSeriesReference("defaultTimeSeriesExternalId"))
+        case _: FileReference => Some(PropertyDefaultValue.FileReference("defaultFileExternalId"))
+        case _: SequenceReference => Some(PropertyDefaultValue.SequenceReference("defaultSequenceExternalId"))
       }
     } else {
       None

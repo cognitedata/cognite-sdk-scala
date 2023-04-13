@@ -43,12 +43,49 @@ object PropertyType {
     val Type = "direct"
   }
 
+  sealed abstract class CDFExternalIdReference extends PropertyType {
+    val `type`: String
+  }
+
+  final case class TimeSeriesReference() extends CDFExternalIdReference {
+    override val `type`: String = TimeSeriesReference.Type
+
+    override def list: Option[Boolean] = None
+  }
+
+  object TimeSeriesReference {
+    val Type = "timeseries"
+  }
+
+  final case class FileReference() extends CDFExternalIdReference {
+    override val `type`: String = FileReference.Type
+
+    override def list: Option[Boolean] = None
+  }
+
+  object FileReference {
+    val Type = "file"
+  }
+
+  final case class SequenceReference() extends CDFExternalIdReference {
+    override val `type`: String = SequenceReference.Type
+
+    override def list: Option[Boolean] = None
+  }
+
+  object SequenceReference {
+    val Type = "sequence"
+  }
+
   import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference._
 
   implicit val propertyTypeTextEncoder: Encoder[TextProperty] =
     Encoder.forProduct3("list", "collation", "type")((t: TextProperty) =>
       (t.list, t.collation, t.`type`)
     )
+
+  implicit val externalIdReferenceEncoder: Encoder[CDFExternalIdReference] =
+    Encoder.forProduct1("type")(_.`type`)
 
   implicit val primitivePropertyEncoder: Encoder[PrimitiveProperty] =
     deriveEncoder[PrimitiveProperty]
@@ -62,6 +99,7 @@ object PropertyType {
     case t: TextProperty => t.asJson
     case p: PrimitiveProperty => p.asJson
     case d: DirectNodeRelationProperty => d.asJson
+    case ts: CDFExternalIdReference => ts.asJson
   }
 
   implicit val primitivePropertyDecoder: Decoder[PrimitiveProperty] =
@@ -83,25 +121,32 @@ object PropertyType {
           } yield PrimitiveProperty(ppt, list)
       }
 
-      val textPropertyOrDirectNodeRelationProperty = c.downField("type").as[String] match {
-        case Left(err) => Left[DecodingFailure, PropertyType](err)
-        case Right(typeVal) if typeVal === TextProperty.Type =>
-          for {
-            list <- c.downField("list").as[Option[Boolean]]
-            collation <- c.downField("collation").as[Option[String]]
-          } yield TextProperty(list, collation)
-        case Right(typeVal) if typeVal === DirectNodeRelationProperty.Type =>
-          for {
-            containerRef <- c.downField("container").as[Option[ContainerReference]]
-            source <- c.downField("source").as[Option[ViewReference]]
-          } yield DirectNodeRelationProperty(containerRef, source)
-        case Right(typeVal) =>
-          Left[DecodingFailure, PropertyType](
-            DecodingFailure(s"Unknown container property type: '$typeVal'", c.history)
-          )
-      }
+      val textPropertyOrDirectNodeRelationPropertyOrTimeSeriesProperty =
+        c.downField("type").as[String] match {
+          case Left(err) => Left[DecodingFailure, PropertyType](err)
+          case Right(typeVal) if typeVal === TextProperty.Type =>
+            for {
+              list <- c.downField("list").as[Option[Boolean]]
+              collation <- c.downField("collation").as[Option[String]]
+            } yield TextProperty(list, collation)
+          case Right(typeVal) if typeVal === DirectNodeRelationProperty.Type =>
+            for {
+              containerRef <- c.downField("container").as[Option[ContainerReference]]
+              source <- c.downField("source").as[Option[ViewReference]]
+            } yield DirectNodeRelationProperty(containerRef, source)
+          case Right(typeVal) if typeVal === TimeSeriesReference.Type =>
+            Right(TimeSeriesReference())
+          case Right(typeVal) if typeVal === FileReference.Type => Right(FileReference())
+          case Right(typeVal) if typeVal === SequenceReference.Type => Right(SequenceReference())
+          case Right(typeVal) =>
+            Left[DecodingFailure, PropertyType](
+              DecodingFailure(s"Unknown container property type: '$typeVal'", c.history)
+            )
+        }
 
-      Seq(primitiveProperty, textPropertyOrDirectNodeRelationProperty).find(_.isRight) match {
+      Seq(primitiveProperty, textPropertyOrDirectNodeRelationPropertyOrTimeSeriesProperty).find(
+        _.isRight
+      ) match {
         case Some(value) => value
         case None => Left(DecodingFailure(s"Unknown Property Type :${c.value.noSpaces}", c.history))
       }
