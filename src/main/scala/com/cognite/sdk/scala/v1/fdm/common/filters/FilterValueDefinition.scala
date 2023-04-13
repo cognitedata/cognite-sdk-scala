@@ -1,20 +1,25 @@
 package com.cognite.sdk.scala.v1.fdm.common.filters
 
+import cats.implicits.toFunctorOps
 import io.circe._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.syntax.EncoderOps
 
 sealed abstract class FilterValueDefinition extends Product with Serializable
 
 object FilterValueDefinition {
-  sealed trait ComparableFilterValue extends FilterValueDefinition
-  sealed trait LogicalFilterValue extends FilterValueDefinition
-  sealed trait SeqFilterValue
-      extends FilterValueDefinition // TODO: Assert to void creation with empty lists?
+  sealed trait ReferencedPropertyValue extends FilterValueDefinition
+  sealed trait RawPropertyValue extends FilterValueDefinition
+
+  sealed trait ComparableFilterValue extends RawPropertyValue
+  sealed trait LogicalFilterValue extends RawPropertyValue
+  sealed trait SeqFilterValue extends RawPropertyValue
 
   final case class String(value: java.lang.String) extends ComparableFilterValue
   final case class Double(value: scala.Double) extends ComparableFilterValue
   final case class Integer(value: scala.Long) extends ComparableFilterValue
 
-  final case class Object(value: Json) extends FilterValueDefinition
+  final case class Object(value: Json) extends RawPropertyValue
 
   final case class StringList(value: Seq[java.lang.String]) extends SeqFilterValue
   final case class DoubleList(value: Seq[scala.Double]) extends SeqFilterValue
@@ -23,6 +28,9 @@ object FilterValueDefinition {
   final case class BooleanList(value: Seq[scala.Boolean]) extends SeqFilterValue
 
   final case class Boolean(value: scala.Boolean) extends LogicalFilterValue
+
+  final case class ReferencedProperty(property: Seq[java.lang.String])
+      extends ReferencedPropertyValue
 
   implicit val comparableFilterValueEncoder: Encoder[ComparableFilterValue] =
     Encoder.instance[ComparableFilterValue] {
@@ -41,6 +49,14 @@ object FilterValueDefinition {
       case FilterValueDefinition.BooleanList(value) => Json.fromValues(value.map(Json.fromBoolean))
     }
 
+  implicit val referencedPropertyEncoder: Encoder[ReferencedProperty] =
+    deriveEncoder[ReferencedProperty]
+
+  implicit val referencedPropertyValueEncoder: Encoder[ReferencedPropertyValue] =
+    Encoder.instance[ReferencedPropertyValue] { case ReferencedProperty(property) =>
+      property.asJson
+    }
+
   implicit val logicalFilterValueEncoder: Encoder[LogicalFilterValue] =
     Encoder.instance[LogicalFilterValue] { case FilterValueDefinition.Boolean(value) =>
       Json.fromBoolean(value)
@@ -52,16 +68,24 @@ object FilterValueDefinition {
       case v: FilterValueDefinition.ComparableFilterValue => comparableFilterValueEncoder.apply(v)
       case v: FilterValueDefinition.SeqFilterValue => seqFilterValueEncoder.apply(v)
       case v: FilterValueDefinition.LogicalFilterValue => logicalFilterValueEncoder.apply(v)
+      case v: FilterValueDefinition.ReferencedPropertyValue =>
+        referencedPropertyValueEncoder.apply(v)
     }
 
-  implicit val filterValueDefinitionDecoder: Decoder[FilterValueDefinition] = { (c: HCursor) =>
+  implicit val referencedPropertyDecoder: Decoder[ReferencedProperty] =
+    deriveDecoder[ReferencedProperty]
+
+  implicit val referencedPropertyValueDecoder: Decoder[ReferencedPropertyValue] =
+    Decoder[ReferencedProperty].widen
+
+  implicit val rawPropertyValueDecoder: Decoder[RawPropertyValue] = { (c: HCursor) =>
     val result = c.value match {
       case v if v.isString =>
         v.asString
-          .map(s => Right[DecodingFailure, FilterValueDefinition](FilterValueDefinition.String(s)))
+          .map(s => Right[DecodingFailure, RawPropertyValue](FilterValueDefinition.String(s)))
       case v if v.isObject =>
         v.asObject.map(j =>
-          Right[DecodingFailure, FilterValueDefinition](
+          Right[DecodingFailure, RawPropertyValue](
             FilterValueDefinition.Object(Json.fromJsonObject(j))
           )
         )
@@ -79,7 +103,7 @@ object FilterValueDefinition {
               FilterValueDefinition.Double(bd.doubleValue)
             }
           )
-        numericFilterValue.map(Right[DecodingFailure, FilterValueDefinition])
+        numericFilterValue.map(Right[DecodingFailure, RawPropertyValue])
       case v if v.isArray =>
         v.asArray
           .flatMap { arr =>
@@ -110,12 +134,12 @@ object FilterValueDefinition {
               case _ => Some(FilterValueDefinition.ObjectList(Seq.empty))
             }
           }
-          .map(Right[DecodingFailure, FilterValueDefinition])
+          .map(Right[DecodingFailure, RawPropertyValue])
       case o =>
         Some(
           Left(
             DecodingFailure(
-              s"Expecting a FilterValueDefinition but found: ${o.noSpaces}",
+              s"Expecting a RawPropertyValue but found: ${o.noSpaces}",
               c.history
             )
           )
@@ -124,7 +148,7 @@ object FilterValueDefinition {
     result.getOrElse(
       Left(
         DecodingFailure(
-          s"Expecting a FilterValueDefinition but found: ${c.value.noSpaces}",
+          s"Expecting a RawPropertyValue but found: ${c.value.noSpaces}",
           c.history
         )
       )
@@ -133,7 +157,7 @@ object FilterValueDefinition {
 
   implicit val comparableFilterValueDefinitionDecoder: Decoder[ComparableFilterValue] =
     (c: HCursor) =>
-      filterValueDefinitionDecoder.apply(c) match {
+      rawPropertyValueDecoder.apply(c) match {
         case Right(v: ComparableFilterValue) => Right(v)
         case Right(v) =>
           Left(
@@ -147,7 +171,7 @@ object FilterValueDefinition {
 
   implicit val seqFilterValueDefinitionDecoder: Decoder[SeqFilterValue] =
     (c: HCursor) =>
-      filterValueDefinitionDecoder.apply(c) match {
+      rawPropertyValueDecoder.apply(c) match {
         case Right(v: SeqFilterValue) => Right(v)
         case Right(v) =>
           Left(
@@ -161,7 +185,7 @@ object FilterValueDefinition {
 
   implicit val logicalFilterValueDecoder: Decoder[LogicalFilterValue] =
     (c: HCursor) =>
-      filterValueDefinitionDecoder.apply(c) match {
+      rawPropertyValueDecoder.apply(c) match {
         case Right(v: LogicalFilterValue) => Right(v)
         case Right(v) =>
           Left(
@@ -172,4 +196,11 @@ object FilterValueDefinition {
           )
         case Left(err) => Left(err)
       }
+
+  implicit val filterValueDefinitionDecoder: Decoder[FilterValueDefinition] =
+    List[Decoder[FilterValueDefinition]](
+      Decoder[ReferencedProperty].widen,
+      Decoder[RawPropertyValue].widen
+    ).reduceLeftOption(_ or _).getOrElse(Decoder[RawPropertyValue].widen)
+
 }

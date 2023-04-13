@@ -64,24 +64,18 @@ object InstancePropertyValue {
 
   final case class ViewDirectNodeRelation(value: Option[DirectRelationReference])
       extends InstancePropertyValue
-
   final case class StringList(value: Seq[java.lang.String]) extends InstancePropertyValue
-
   final case class BooleanList(value: Seq[scala.Boolean]) extends InstancePropertyValue
-
   final case class Int32List(value: Seq[scala.Int]) extends InstancePropertyValue
-
   final case class Int64List(value: Seq[scala.Long]) extends InstancePropertyValue
-
   final case class Float32List(value: Seq[scala.Float]) extends InstancePropertyValue
-
   final case class Float64List(value: Seq[scala.Double]) extends InstancePropertyValue
-
   final case class DateList(value: Seq[LocalDate]) extends InstancePropertyValue
-
   final case class TimestampList(value: Seq[ZonedDateTime]) extends InstancePropertyValue
-
   final case class ObjectList(value: Seq[Json]) extends InstancePropertyValue
+  final case class TimeSeriesReference(value: java.lang.String) extends InstancePropertyValue
+  final case class FileReference(value: java.lang.String) extends InstancePropertyValue
+  final case class SequenceReference(value: java.lang.String) extends InstancePropertyValue
 
   implicit val instancePropertyTypeDecoder: Decoder[InstancePropertyValue] = { (c: HCursor) =>
     val result = c.value match {
@@ -241,5 +235,8 @@ object InstancePropertyValue {
           values.map(d => Json.fromString(d.format(InstancePropertyValue.Timestamp.formatter))): _*
         )
       case ObjectList(values) => Json.arr(values = values: _*)
+      case TimeSeriesReference(value) => Json.fromString(value)
+      case FileReference(value) => Json.fromString(value)
+      case SequenceReference(value) => Json.fromString(value)
     }
 }

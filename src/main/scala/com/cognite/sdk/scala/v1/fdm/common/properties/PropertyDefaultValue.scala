@@ -9,18 +9,15 @@ sealed abstract class PropertyDefaultValue extends Product with Serializable
 
 object PropertyDefaultValue {
   final case class String(value: java.lang.String) extends PropertyDefaultValue
-
   final case class Int32(value: scala.Int) extends PropertyDefaultValue
-
   final case class Int64(value: scala.Long) extends PropertyDefaultValue
-
   final case class Float32(value: scala.Float) extends PropertyDefaultValue
-
   final case class Float64(value: scala.Double) extends PropertyDefaultValue
-
   final case class Boolean(value: scala.Boolean) extends PropertyDefaultValue
-
   final case class Object(value: Json) extends PropertyDefaultValue
+  final case class TimeSeriesReference(value: java.lang.String) extends PropertyDefaultValue
+  final case class FileReference(value: java.lang.String) extends PropertyDefaultValue
+  final case class SequenceReference(value: java.lang.String) extends PropertyDefaultValue
 
   implicit val propertyDefaultValueEncoder: Encoder[PropertyDefaultValue] =
     Encoder.instance[PropertyDefaultValue] {
@@ -31,6 +28,9 @@ object PropertyDefaultValue {
       case PropertyDefaultValue.Float64(value) => Json.fromDoubleOrString(value)
       case PropertyDefaultValue.Boolean(value) => Json.fromBoolean(value)
       case PropertyDefaultValue.Object(value) => value
+      case PropertyDefaultValue.TimeSeriesReference(value) => Json.fromString(value)
+      case PropertyDefaultValue.FileReference(value) => Json.fromString(value)
+      case PropertyDefaultValue.SequenceReference(value) => Json.fromString(value)
     }
 
   implicit val propertyDefaultValueDecoder: Decoder[PropertyDefaultValue] = { (c: HCursor) =>
