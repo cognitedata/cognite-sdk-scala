@@ -56,18 +56,6 @@ class ClientTest extends SdkTestSpec with OptionValues {
       .thenRespondCyclicResponses(errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse, errorTooManyRequestsNoBody
       )
   }
-  private val loginStatusResponse = Response(
-      s"""
-         |{
-         |  "data": {
-         |    "user": "tom@example.com",
-         |    "loggedIn": true,
-         |    "project": "${loginStatus.project}",
-         |    "projectId": ${loginStatus.projectId.toString}
-         |  }
-         |}
-         |""".stripMargin, StatusCode.Ok, "OK",
-      Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
 
   it should "set x-cdp headers" in {
     var headers = Seq.empty[Header]
