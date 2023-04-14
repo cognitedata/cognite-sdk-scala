@@ -18,15 +18,13 @@ lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
 ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.5"
 
-lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
-
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.5." + patchVersion,
-  isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
+  version := "2.5.11-SNAPSHOT",
+  isSnapshot := true,
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
