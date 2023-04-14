@@ -172,8 +172,6 @@ class GenericClient[F[_]](
       clientTag,
       cdfVersion
     )
-  lazy val login =
-    new Login[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
   lazy val token =
     new Token[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
   lazy val assets = new Assets[F](requestSession)
@@ -281,33 +279,36 @@ object GenericClient {
 
   def forAuth[F[_]: Monad](
       applicationName: String,
+      projectName: String,
       auth: Auth,
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
   )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
-    forAuthProvider(applicationName, AuthProvider(auth), baseUrl, apiVersion, clientTag, cdfVersion)
+    forAuthProvider(
+      applicationName,
+      projectName,
+      AuthProvider(auth),
+      baseUrl,
+      apiVersion,
+      clientTag,
+      cdfVersion
+    )
 
   def forAuthProvider[F[_]: Monad](
       applicationName: String,
+      projectName: String,
       authProvider: AuthProvider[F],
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
-  )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] = {
-    val login = new Login[F](
-      RequestSession(applicationName, parseBaseUrlOrThrow(baseUrl), sttpBackend, authProvider)
-    )
-
-    for {
-      status <- login.status()
-      projectName = status.project
-    } yield
-      if (projectName.trim.isEmpty) {
-        throw InvalidAuthentication()
-      } else {
+  )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+    if (projectName.isEmpty) {
+      throw InvalidAuthentication()
+    } else {
+      Monad[F].pure(
         new GenericClient[F](
           applicationName,
           projectName,
@@ -320,8 +321,8 @@ object GenericClient {
           implicitly,
           sttpBackend
         )
-      }
-  }
+      )
+    }
 
   def parseResponse[T, R](uri: Uri, mapResult: T => R)(
       implicit decoder: Decoder[T]
