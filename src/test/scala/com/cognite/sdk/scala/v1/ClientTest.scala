@@ -56,19 +56,6 @@ class ClientTest extends SdkTestSpec with OptionValues {
       .thenRespondCyclicResponses(errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse, errorTooManyRequestsNoBody
       )
   }
-  private val loginStatusResponseWithApiKeyId = Response(
-      s"""
-         |{
-         |  "data": {
-         |    "user": "tom@example.com",
-         |    "loggedIn": true,
-         |    "project": "${loginStatus.project}",
-         |    "projectId": ${loginStatus.projectId.toString},
-         |    "apiKeyId": 12147483647
-         |  }
-         |}
-         |""".stripMargin, StatusCode.Ok, "OK",
-      Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
 
   it should "set x-cdp headers" in {
     var headers = Seq.empty[Header]
@@ -76,7 +63,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
       .whenAnyRequest
       .thenRespondF { req =>
         headers = req.headers
-        Response.ok(loginStatusResponseWithApiKeyId).copy(headers = req.headers)
+        Response.ok(loginStatusResponse).copy(headers = req.headers)
       }
     new GenericClient[Id]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, saveHeadersStub)
       .login.status()
@@ -126,9 +113,8 @@ class ClientTest extends SdkTestSpec with OptionValues {
     ).login.status().unsafeRunSync().loggedIn shouldBe true
   }
 
-  // https://cognitedata.slack.com/archives/C043Z2ZV9KN/p1681452254519989
-  ignore should "throw an exception if the authentication is invalid and project is not specified" in {
-    implicit val auth: Auth = ApiKeyAuth("invalid-key")
+  it should "throw an exception if the authentication is invalid and project is not specified" in {
+    implicit val auth: Auth = BearerTokenAuth("invalid-key")
     an[InvalidAuthentication] should be thrownBy GenericClient.forAuth[Id](
       "scala-sdk-test", auth)(
       implicitly,
@@ -137,7 +123,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
   }
 
   it should "not throw an exception if the authentication is invalid and project is specified" in {
-    implicit val auth: Auth = ApiKeyAuth("invalid-key", project = Some("random-project"))
+    implicit val auth: Auth = BearerTokenAuth("invalid-key", project = Some("random-project"))
     noException should be thrownBy new GenericClient[Id](
       "scala-sdk-test", projectName, auth = auth)(
       implicitly,
@@ -222,7 +208,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     new GenericClient[F]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
-      ApiKeyAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant", Some("randomproject"))
     )(implicitly,
       new RetryingBackend[F, Any](backend,
         maxRetries = maxRetries,
@@ -250,7 +236,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
-      ApiKeyAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant", Some("randomproject"))
 
     )(
       implicitly,
@@ -329,7 +315,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
-      ApiKeyAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant", Some("randomproject"))
     )(
       implicitly,
       new RetryingBackend[IO, Any](
@@ -367,7 +353,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val client2 = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
-      ApiKeyAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant", Some("randomproject"))
     )(
       implicitly,
       new RetryingBackend[IO, Any](

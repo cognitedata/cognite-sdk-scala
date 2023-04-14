@@ -12,8 +12,7 @@ final case class LoginStatus(
     user: String,
     loggedIn: Boolean,
     project: String,
-    projectId: Long,
-    apiKeyId: Option[Long] = None
+    projectId: Long
 )
 final case class DataLoginStatus(data: LoginStatus)
 

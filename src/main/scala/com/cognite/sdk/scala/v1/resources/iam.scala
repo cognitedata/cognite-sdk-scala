@@ -32,27 +32,6 @@ object ServiceAccounts {
     deriveDecoder[ItemsWithCursor[ServiceAccount]]
 }
 
-class ApiKeys[F[_]](val requestSession: RequestSession[F]) extends Readable[ApiKey, F] {
-  import ApiKeys._
-  override val baseUrl = uri"${requestSession.baseUrl}/apikeys"
-
-  override private[sdk] def readWithCursor(
-      cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition]
-  ): F[ItemsWithCursor[ApiKey]] =
-    Readable.readSimple(
-      requestSession,
-      baseUrl
-    )
-}
-
-object ApiKeys {
-  implicit val apiKeyDecoder: Decoder[ApiKey] = deriveDecoder[ApiKey]
-  implicit val apiKeyItemsWithCursorDecoder: Decoder[ItemsWithCursor[ApiKey]] =
-    deriveDecoder[ItemsWithCursor[ApiKey]]
-}
-
 class Groups[F[_]](val requestSession: RequestSession[F]) extends Readable[Group, F] {
   import Groups._
   override val baseUrl = uri"${requestSession.baseUrl}/groups"
