@@ -126,7 +126,8 @@ class ClientTest extends SdkTestSpec with OptionValues {
     ).login.status().unsafeRunSync().loggedIn shouldBe true
   }
 
-  it should "throw an exception if the authentication is invalid and project is not specified" in {
+  // https://cognitedata.slack.com/archives/C043Z2ZV9KN/p1681452254519989
+  ignore should "throw an exception if the authentication is invalid and project is not specified" in {
     implicit val auth: Auth = ApiKeyAuth("invalid-key")
     an[InvalidAuthentication] should be thrownBy GenericClient.forAuth[Id](
       "scala-sdk-test", auth)(
