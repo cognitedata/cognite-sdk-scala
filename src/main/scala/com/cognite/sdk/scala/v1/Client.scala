@@ -143,7 +143,7 @@ class GenericClient[F[_]](
       applicationName: String,
       projectName: String,
       baseUrl: String = GenericClient.defaultBaseUrl,
-      auth: Auth = Auth.defaultAuth,
+      auth: Auth,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
@@ -234,7 +234,6 @@ class GenericClient[F[_]](
       value => value
     )
   lazy val serviceAccounts = new ServiceAccounts[F](requestSession)
-  lazy val apiKeys = new ApiKeys[F](requestSession)
   lazy val groups = new Groups[F](requestSession)
   lazy val securityCategories = new SecurityCategories[F](requestSession)
 }
@@ -360,7 +359,7 @@ class Client(
     override val projectName: String,
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
-    auth: Auth = Auth.defaultAuth
+    auth: Auth
 )(implicit sttpBackend: SttpBackend[Id, Any])
     extends GenericClient[Id](applicationName, projectName, baseUrl, auth)
 

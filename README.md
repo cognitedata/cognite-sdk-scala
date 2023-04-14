@@ -9,8 +9,7 @@ Visit [Maven Repository](https://mvnrepository.com/artifact/com.cognite/cognite-
 to see the available versions, and how to include it as a dependency for sbt, Maven, Gradle,
 and other build tools.
 
-Authentication is specified using an implicit `Auth` parameter, which by default
-looks for an API key to use in the `COGNITE_API_KEY` environment variable.
+Authentication is specified using an implicit `Auth` parameter.
 
 The `GenericClient` requires a backend for [sttp](https://github.com/softwaremill/sttp),
 which can use any effects wrapper (for example,

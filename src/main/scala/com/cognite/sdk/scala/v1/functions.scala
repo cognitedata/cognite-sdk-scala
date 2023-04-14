@@ -18,7 +18,6 @@ final case class Function(
     fileId: Long = 0,
     owner: Option[String] = None,
     description: Option[String] = None,
-    apiKey: Option[String] = None,
     secrets: Option[Map[String, String]] = None,
     createdTime: Option[Instant] = None,
     status: Option[String] = None,
@@ -31,7 +30,6 @@ final case class Function(
       fileId,
       owner,
       description,
-      apiKey,
       secrets,
       externalId,
       error
@@ -43,7 +41,6 @@ final case class FunctionCreate(
     fileId: Long = 0,
     owner: Option[String] = None,
     description: Option[String] = None,
-    apiKey: Option[String] = None,
     secrets: Option[Map[String, String]] = None,
     externalId: Option[String] = None,
     error: Option[FunctionError] = None
