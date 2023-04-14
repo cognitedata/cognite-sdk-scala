@@ -27,13 +27,6 @@ final case class ServiceAccount(
     deletedTime: Option[Instant]
 ) extends WithId[Long]
 
-final case class ApiKey(
-    id: Long,
-    serviceAccountId: Long,
-    createdTime: Instant,
-    status: String
-) extends WithId[Long]
-
 final case class Capability(
     actions: Seq[String],
     scope: Map[String, Map[String, Json]]
