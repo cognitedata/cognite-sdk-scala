@@ -210,5 +210,3 @@ TEST_AAD_TENANT="a valid azure ad tenant id"
 TEST_CLIENT_ID="the id of a valid client credential, belonging to the given tenant, and with access to the playground project"
 TEST_CLIENT_SECRET="a valid client secret for the given client id"
 ```
-
-Some tests for API Keys features are still in place, to run these tests the aditional environment variable `TEST_API_KEY` is needed, this should contain a valid API key for the playground project.
