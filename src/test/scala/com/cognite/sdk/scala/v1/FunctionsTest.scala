@@ -70,7 +70,7 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
 
   it should "retrieve function call response" in {
     val response = client.functionCalls(8590831424885479L).retrieveResponse(3987350585370826L).unsafeRunSync()
-    response.response shouldBe Json.fromFields(Seq(("res_int", Json.fromInt(1)),("res_string", Json.fromString("string response"))))
+    response.response shouldBe Some(Json.fromFields(Seq(("res_int", Json.fromInt(1)),("res_string", Json.fromString("string response")))))
   }
 
   it should "filter function calls" in {

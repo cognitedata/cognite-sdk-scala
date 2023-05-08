@@ -65,7 +65,7 @@ final case class FunctionCallLogEntry(
 )
 
 final case class FunctionCallResponse(
-    response: Json,
+    response: Option[Json],
     functionId: Long,
     callId: Long
 )
