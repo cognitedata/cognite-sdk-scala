@@ -23,13 +23,16 @@ final case class InstanceCreate(
 final case class InstanceRetrieve(
     instanceType: InstanceType,
     externalId: String,
-    space: String,
-    sources: Option[Seq[InstanceSource]]
+    space: String
 )
 
 final case class InstanceSource(source: SourceReference)
 
-final case class InstanceRetrieveRequest(items: Seq[InstanceRetrieve], includeTyping: Boolean)
+final case class InstanceRetrieveRequest(
+    items: Seq[InstanceRetrieve],
+    includeTyping: Boolean,
+    sources: Option[Seq[InstanceSource]]
+)
 
 final case class ViewPropertyReference(identifier: String, view: Option[ViewReference])
 

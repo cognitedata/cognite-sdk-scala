@@ -109,7 +109,7 @@ class ContainersTest extends CommonDataModelTestHelper {
       PropertyType.FileReference(list = None),
 //      PropertyType.FileReference(list = Some(true)),
 //      PropertyType.FileReference(list = Some(false)),
-      PropertyType.SequenceReference(list = None),
+      PropertyType.SequenceReference(list = None)
 //      PropertyType.SequenceReference(list = Some(true)),
 //      PropertyType.SequenceReference(list = Some(false))
     )

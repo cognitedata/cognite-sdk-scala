@@ -43,7 +43,7 @@ object Utils {
       source = None),
     TimeSeriesReference(),
     FileReference(),
-    SequenceReference(),
+    SequenceReference()
 //TODO: Uncomment once the list types are released
 //    TimeSeriesReference(list = Some(true)),
 //    FileReference(list = Some(true)),
@@ -145,43 +145,6 @@ object Utils {
     createAllPossibleContainerPropCombinations.map {
       case (key, prop) => key -> toViewPropertyDefinition(prop, None, None)
     }
-
-//  def viewPropStr: Vector[String] =
-//    createAllPossibleViewPropCombinations.map {
-//      case (propName, prop) =>
-//        val propTypeStr = prop.`type` match {
-//          case t: TextProperty =>
-//            val collation = t.collation.map(s => s""""$s"""")
-//            s"""PropertyType.TextProperty(${t.list}, $collation)"""
-//          case p: PrimitiveProperty =>
-//            s"PropertyType.PrimitiveProperty(PrimitivePropType.${p.`type`},${p.list})"
-//          case d: DirectNodeRelationProperty => d.toString
-//        }
-//
-//        val defaultValueStr = prop.defaultValue.map {
-//          case PropertyDefaultValue.String(value) =>
-//            s"""Some(PropertyDefaultValue.String("$value"))""".stripMargin
-//          case PropertyDefaultValue.Float32(value) =>
-//            s"""Some(PropertyDefaultValue.Float32(${value}F))""".stripMargin
-//          case PropertyDefaultValue.Object(value) =>
-//            val jsonStr = s"""${value.noSpaces}""".stripMargin
-//            s"""io.circe.parser.parse("$jsonStr"").toOption.map(PropertyDefaultValue.Object)""".stripMargin
-//          case p => s"Some(PropertyDefaultValue.$p)"
-//        }
-//
-//        s"""
-//           | val $propName: ViewPropertyDefinition = ViewPropertyDefinition(
-//           |      nullable = ${prop.nullable},
-//           |      autoIncrement = ${prop.autoIncrement},
-//           |      defaultValue = ${defaultValueStr.getOrElse("None")},
-//           |      description = Some("${prop.description.getOrElse("")}"),
-//           |      name = Some("${prop.name.getOrElse("")}"),
-//           |      `type` = $propTypeStr,
-//           |      container = None,
-//           |      containerPropertyIdentifier = None
-//           |    )
-//           |""".stripMargin
-//    }.toVector
 
   def createTestContainer(
                            space: String,
