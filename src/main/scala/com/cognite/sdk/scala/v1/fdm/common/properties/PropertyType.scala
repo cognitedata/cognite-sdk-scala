@@ -47,30 +47,25 @@ object PropertyType {
     val `type`: String
   }
 
-  final case class TimeSeriesReference() extends CDFExternalIdReference {
+  final case class TimeSeriesReference(list: Option[Boolean] = None)
+      extends CDFExternalIdReference {
     override val `type`: String = TimeSeriesReference.Type
-
-    override def list: Option[Boolean] = None
   }
 
   object TimeSeriesReference {
     val Type = "timeseries"
   }
 
-  final case class FileReference() extends CDFExternalIdReference {
+  final case class FileReference(list: Option[Boolean] = None) extends CDFExternalIdReference {
     override val `type`: String = FileReference.Type
-
-    override def list: Option[Boolean] = None
   }
 
   object FileReference {
     val Type = "file"
   }
 
-  final case class SequenceReference() extends CDFExternalIdReference {
+  final case class SequenceReference(list: Option[Boolean] = None) extends CDFExternalIdReference {
     override val `type`: String = SequenceReference.Type
-
-    override def list: Option[Boolean] = None
   }
 
   object SequenceReference {
@@ -86,6 +81,8 @@ object PropertyType {
 
   implicit val externalIdReferenceEncoder: Encoder[CDFExternalIdReference] =
     Encoder.forProduct1("type")(_.`type`)
+  // TODO: Change this to below once list types are released
+  //    Encoder.forProduct2("type", "list")(t => (t.`type`, t.list))
 
   implicit val primitivePropertyEncoder: Encoder[PrimitiveProperty] =
     deriveEncoder[PrimitiveProperty]
@@ -116,12 +113,10 @@ object PropertyType {
       val primitiveProperty = c.downField("type").as[PrimitivePropType] match {
         case Left(err) => Left[DecodingFailure, PropertyType](err)
         case Right(ppt: PrimitivePropType) =>
-          for {
-            list <- c.downField("list").as[Option[Boolean]]
-          } yield PrimitiveProperty(ppt, list)
+          c.downField("list").as[Option[Boolean]].map(PrimitiveProperty(ppt, _))
       }
 
-      val textPropertyOrDirectNodeRelationPropertyOrTimeSeriesProperty =
+      val nonPrimitiveProperty =
         c.downField("type").as[String] match {
           case Left(err) => Left[DecodingFailure, PropertyType](err)
           case Right(typeVal) if typeVal === TextProperty.Type =>
@@ -135,16 +130,18 @@ object PropertyType {
               source <- c.downField("source").as[Option[ViewReference]]
             } yield DirectNodeRelationProperty(containerRef, source)
           case Right(typeVal) if typeVal === TimeSeriesReference.Type =>
-            Right(TimeSeriesReference())
-          case Right(typeVal) if typeVal === FileReference.Type => Right(FileReference())
-          case Right(typeVal) if typeVal === SequenceReference.Type => Right(SequenceReference())
+            c.downField("list").as[Option[Boolean]].map(TimeSeriesReference(_))
+          case Right(typeVal) if typeVal === FileReference.Type =>
+            c.downField("list").as[Option[Boolean]].map(FileReference(_))
+          case Right(typeVal) if typeVal === SequenceReference.Type =>
+            c.downField("list").as[Option[Boolean]].map(SequenceReference(_))
           case Right(typeVal) =>
             Left[DecodingFailure, PropertyType](
               DecodingFailure(s"Unknown container property type: '$typeVal'", c.history)
             )
         }
 
-      Seq(primitiveProperty, textPropertyOrDirectNodeRelationPropertyOrTimeSeriesProperty).find(
+      Seq(primitiveProperty, nonPrimitiveProperty).find(
         _.isRight
       ) match {
         case Some(value) => value
