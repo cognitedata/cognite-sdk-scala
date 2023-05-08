@@ -21,17 +21,11 @@ sealed abstract class InstancePropertyValue extends Product with Serializable
 
 object InstancePropertyValue {
   final case class String(value: java.lang.String) extends InstancePropertyValue
-
   final case class Int32(value: scala.Int) extends InstancePropertyValue
-
   final case class Int64(value: scala.Long) extends InstancePropertyValue
-
   final case class Float32(value: scala.Float) extends InstancePropertyValue
-
   final case class Float64(value: scala.Double) extends InstancePropertyValue
-
   final case class Boolean(value: scala.Boolean) extends InstancePropertyValue
-
   final case class Date(value: LocalDate) extends InstancePropertyValue
 
   object Date {
@@ -61,7 +55,9 @@ object InstancePropertyValue {
   }
 
   final case class Object(value: Json) extends InstancePropertyValue
-
+  final case class TimeSeriesReference(value: java.lang.String) extends InstancePropertyValue
+  final case class FileReference(value: java.lang.String) extends InstancePropertyValue
+  final case class SequenceReference(value: java.lang.String) extends InstancePropertyValue
   final case class ViewDirectNodeRelation(value: Option[DirectRelationReference])
       extends InstancePropertyValue
   final case class StringList(value: Seq[java.lang.String]) extends InstancePropertyValue
@@ -73,9 +69,10 @@ object InstancePropertyValue {
   final case class DateList(value: Seq[LocalDate]) extends InstancePropertyValue
   final case class TimestampList(value: Seq[ZonedDateTime]) extends InstancePropertyValue
   final case class ObjectList(value: Seq[Json]) extends InstancePropertyValue
-  final case class TimeSeriesReference(value: java.lang.String) extends InstancePropertyValue
-  final case class FileReference(value: java.lang.String) extends InstancePropertyValue
-  final case class SequenceReference(value: java.lang.String) extends InstancePropertyValue
+  final case class TimeSeriesReferenceList(value: Seq[java.lang.String])
+      extends InstancePropertyValue
+  final case class FileReferenceList(value: Seq[java.lang.String]) extends InstancePropertyValue
+  final case class SequenceReferenceList(value: Seq[java.lang.String]) extends InstancePropertyValue
 
   implicit val instancePropertyTypeDecoder: Decoder[InstancePropertyValue] = { (c: HCursor) =>
     val result = c.value match {
@@ -220,6 +217,9 @@ object InstancePropertyValue {
         Json.fromString(value.format(InstancePropertyValue.Timestamp.formatter))
       case Object(value) => value
       case ViewDirectNodeRelation(value) => value.map(_.asJson).getOrElse(Json.Null)
+      case TimeSeriesReference(value) => Json.fromString(value)
+      case FileReference(value) => Json.fromString(value)
+      case SequenceReference(value) => Json.fromString(value)
       case StringList(values) => Json.arr(values = values.map(Json.fromString): _*)
       case BooleanList(values) => Json.arr(values = values.map(Json.fromBoolean): _*)
       case Int32List(values) => Json.arr(values = values.map(Json.fromInt): _*)
@@ -235,8 +235,8 @@ object InstancePropertyValue {
           values.map(d => Json.fromString(d.format(InstancePropertyValue.Timestamp.formatter))): _*
         )
       case ObjectList(values) => Json.arr(values = values: _*)
-      case TimeSeriesReference(value) => Json.fromString(value)
-      case FileReference(value) => Json.fromString(value)
-      case SequenceReference(value) => Json.fromString(value)
+      case TimeSeriesReferenceList(values) => Json.arr(values = values.map(Json.fromString): _*)
+      case FileReferenceList(values) => Json.arr(values = values.map(Json.fromString): _*)
+      case SequenceReferenceList(values) => Json.arr(values = values.map(Json.fromString): _*)
     }
 }

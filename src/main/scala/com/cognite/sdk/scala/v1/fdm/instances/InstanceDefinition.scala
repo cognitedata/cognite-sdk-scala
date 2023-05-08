@@ -287,6 +287,18 @@ object InstanceDefinition {
         Decoder[Seq[Json]]
           .decodeJson(propValue)
           .map(InstancePropertyValue.ObjectList.apply)
+      case PropertyType.TimeSeriesReference(Some(true)) =>
+        Decoder[Seq[String]]
+          .decodeJson(propValue)
+          .map(InstancePropertyValue.TimeSeriesReferenceList.apply)
+      case PropertyType.FileReference(Some(true)) =>
+        Decoder[Seq[String]]
+          .decodeJson(propValue)
+          .map(InstancePropertyValue.FileReferenceList.apply)
+      case PropertyType.SequenceReference(Some(true)) =>
+        Decoder[Seq[String]]
+          .decodeJson(propValue)
+          .map(InstancePropertyValue.SequenceReferenceList.apply)
       case _ =>
         Left[DecodingFailure, InstancePropertyValue](
           DecodingFailure(
@@ -339,15 +351,15 @@ object InstanceDefinition {
         Decoder[Json]
           .decodeJson(propValue)
           .map(InstancePropertyValue.Object.apply)
-      case _: PropertyType.TimeSeriesReference =>
+      case PropertyType.TimeSeriesReference(None | Some(false)) =>
         Decoder[String]
           .decodeJson(propValue)
           .map(InstancePropertyValue.TimeSeriesReference.apply)
-      case _: PropertyType.FileReference =>
+      case PropertyType.FileReference(None | Some(false)) =>
         Decoder[String]
           .decodeJson(propValue)
           .map(InstancePropertyValue.FileReference.apply)
-      case _: PropertyType.SequenceReference =>
+      case PropertyType.SequenceReference(None | Some(false)) =>
         Decoder[String]
           .decodeJson(propValue)
           .map(InstancePropertyValue.SequenceReference.apply)
