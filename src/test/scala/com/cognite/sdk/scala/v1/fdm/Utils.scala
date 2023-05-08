@@ -41,7 +41,13 @@ object Utils {
     DirectNodeRelationProperty(
       container = Some(ContainerReference(space = SpaceExternalId, externalId = DirectNodeRelationContainerExtId)),
       source = None),
-    TimeSeriesReference()
+    TimeSeriesReference(),
+    FileReference(),
+    SequenceReference(),
+//TODO: Uncomment once the list types are released
+//    TimeSeriesReference(list = Some(true)),
+//    FileReference(list = Some(true)),
+//    SequenceReference(list = Some(true)),
   )
 
   val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
@@ -52,6 +58,8 @@ object Utils {
     PropertyDefaultValue.Float32(101.1f),
     PropertyDefaultValue.Float64(Double.MaxValue),
     PropertyDefaultValue.TimeSeriesReference("defaultTimeSeriesExtId"),
+    PropertyDefaultValue.FileReference("defaultFileExtId"),
+    PropertyDefaultValue.SequenceReference("defaultSequenceExtId"),
     PropertyDefaultValue.Object(
       Json.fromJsonObject(
         JsonObject.fromMap(

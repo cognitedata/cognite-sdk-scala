@@ -102,7 +102,16 @@ class ContainersTest extends CommonDataModelTestHelper {
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32, list = None),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(false)),
-      PropertyType.TimeSeriesReference()
+      PropertyType.TimeSeriesReference(list = None),
+//TODO: Uncomment once the list types are released
+//      PropertyType.TimeSeriesReference(list = Some(true)),
+//      PropertyType.TimeSeriesReference(list = Some(false)),
+      PropertyType.FileReference(list = None),
+//      PropertyType.FileReference(list = Some(true)),
+//      PropertyType.FileReference(list = Some(false)),
+      PropertyType.SequenceReference(list = None),
+//      PropertyType.SequenceReference(list = Some(true)),
+//      PropertyType.SequenceReference(list = Some(false))
     )
 
     val afterEncodedAndDecoded = values
@@ -225,7 +234,7 @@ class ContainersTest extends CommonDataModelTestHelper {
 
 
   it should "CRUD a container with all possible props" in {
-    val containerExternalId = s"testContainer5"
+    val containerExternalId = s"testContainer6"
     val allPossibleProperties: Map[String, ContainerPropertyDefinition] = createAllPossibleContainerPropCombinations.map {
       case (n, p) => p.`type` match {
         case t: PropertyType.DirectNodeRelationProperty => n -> p.copy(`type` = t.copy(container = None))
@@ -259,8 +268,8 @@ class ContainersTest extends CommonDataModelTestHelper {
     val createdResponse = blueFieldClient.containers.createItems(containers = Seq(containerToCreate)).unsafeRunSync()
     createdResponse.isEmpty shouldBe false
 
-    // TODO: Check update reflection delay and remove 10.seconds sleep
-    val readAfterCreateContainers = (IO.sleep(10.seconds) *> blueFieldClient
+    // TODO: Check update reflection delay and remove 5 seconds sleep
+    val readAfterCreateContainers = (IO.sleep(5.seconds) *> blueFieldClient
       .containers
       .retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))))
       .unsafeRunSync()
@@ -268,53 +277,53 @@ class ContainersTest extends CommonDataModelTestHelper {
 
     insertedContainer.isEmpty shouldBe false
 
-//    insertedContainer.get.properties.keys.toList should contain theSameElementsAs allPossibleProperties.keys.toList
-//    insertedContainer.get.properties.values.toList should contain theSameElementsAs allPossibleProperties.values.toList
+    insertedContainer.get.properties.keys.toList should contain theSameElementsAs allPossibleProperties.keys.toList
+    insertedContainer.get.properties.values.toList should contain theSameElementsAs allPossibleProperties.values.toList
 
-//    val allPossiblePropertiesToUpdate = allPossibleProperties.map {
-//      case (k, v) =>
-//        k -> (v.`type` match {
-//          case _: PropertyType.DirectNodeRelationProperty =>
-//            v.copy(
-//              defaultValue = None,
-//              nullable = Some(true),
-//              description = v.description.map(d => s"$d Updated"),
-//              name = v.name.map(n => s"$n-Updated")
-//            )
-//          case _ =>
-//            v.copy(
-//              defaultValue = None,
-//              nullable = Some(false),
-//              description = v.description.map(d => s"$d Updated"),
-//              name = v.name.map(n => s"$n-Updated")
-//            )
-//        })
-//    }
-//    val containerToUpdate = ContainerCreateDefinition(
-//      space = space,
-//      externalId = containerExternalId,
-//      name = Some(s"Test-Container-Name-Updated"),
-//      description = Some("Test Container Description Updated"),
-//      usedFor = Some(Usage.All),
-//      properties = allPossiblePropertiesToUpdate,
-//      constraints = Some(constraints),
-//      indexes = Some(indexes)
-//    )
+    val allPossiblePropertiesToUpdate = allPossibleProperties.map {
+      case (k, v) =>
+        k -> (v.`type` match {
+          case _: PropertyType.DirectNodeRelationProperty =>
+            v.copy(
+              defaultValue = None,
+              nullable = Some(true),
+              description = v.description.map(d => s"$d Updated"),
+              name = v.name.map(n => s"$n-Updated")
+            )
+          case _ =>
+            v.copy(
+              defaultValue = None,
+              nullable = Some(false),
+              description = v.description.map(d => s"$d Updated"),
+              name = v.name.map(n => s"$n-Updated")
+            )
+        })
+    }
+    val containerToUpdate = ContainerCreateDefinition(
+      space = space,
+      externalId = containerExternalId,
+      name = Some(s"Test-Container-Name-Updated"),
+      description = Some("Test Container Description Updated"),
+      usedFor = Some(Usage.All),
+      properties = allPossiblePropertiesToUpdate,
+      constraints = Some(constraints),
+      indexes = Some(indexes)
+    )
 
-//    val updatedResponse = blueFieldClient.containers.createItems(containers = Seq(containerToUpdate)).unsafeRunSync()
-//    updatedResponse.isEmpty shouldBe false
+    val updatedResponse = blueFieldClient.containers.createItems(containers = Seq(containerToUpdate)).unsafeRunSync()
+    updatedResponse.isEmpty shouldBe false
 
     // TODO: Check update reflection delay and remove 10.seconds sleep
-//    val readAfterUpdateContainers = (IO.sleep(10.seconds) *> blueFieldClient
-//      .containers
-//      .retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))))
-//      .unsafeRunSync()
-//    val updatedContainer = readAfterUpdateContainers.find(_.externalId === containerExternalId).get
+    val readAfterUpdateContainers = (IO.sleep(5.seconds) *> blueFieldClient
+      .containers
+      .retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))))
+      .unsafeRunSync()
+    val updatedContainer = readAfterUpdateContainers.find(_.externalId === containerExternalId).get
 
-//    updatedContainer.properties.keys.toList should contain theSameElementsAs allPossiblePropertiesToUpdate.keys.toList
-//    updatedContainer.properties.values.toList should contain theSameElementsAs allPossiblePropertiesToUpdate.values.toList
-//    updatedContainer.name.get.endsWith("Updated") shouldBe true
-//    updatedContainer.description.get.endsWith("Updated") shouldBe true
+    updatedContainer.properties.keys.toList should contain theSameElementsAs allPossiblePropertiesToUpdate.keys.toList
+    updatedContainer.properties.values.toList should contain theSameElementsAs allPossiblePropertiesToUpdate.values.toList
+    updatedContainer.name.get.endsWith("Updated") shouldBe true
+    updatedContainer.description.get.endsWith("Updated") shouldBe true
 
     val deletedContainer = blueFieldClient.containers.delete(Seq(ContainerId(space, containerExternalId))).unsafeRunSync()
     deletedContainer.length shouldBe 1
