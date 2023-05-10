@@ -54,6 +54,9 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
     projectName,
     baseUrl,
     auth
+  )(
+    implicitly,
+    new RetryingBackend[Id, Any](implicitly)
   )
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
