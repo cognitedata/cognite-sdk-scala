@@ -246,6 +246,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
           )
         )
       )
+      .unsafeRunSync()
     assert(emptyCreatedTimeSearchResults.isEmpty)
     val createdTimeSearchResults = client.sequences
       .search(
@@ -258,6 +259,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
           )
         )
       )
+      .unsafeRunSync()
     assert(createdTimeSearchResults.length == 2)
     val createdTimeSearchResults2 = client.sequences.search(
       SequenceQuery(
@@ -269,7 +271,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
           )
         )
       )
-    )
+    ).unsafeRunSync()
     assert(createdTimeSearchResults2.length == 5)
 
     val externalIdPrefixSearchResults = client.sequences.search(
@@ -282,7 +284,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
           )
         )
       )
-    )
+    ).unsafeRunSync()
     assert(externalIdPrefixSearchResults.length == 2)
 
     val nameSearchResults = client.sequences.search(
@@ -296,7 +298,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
         ),
         search = Some(SequenceSearch(name = Some("relevant")))
       )
-    )
+    ).unsafeRunSync()
     assert(nameSearchResults.length == 1)
 
     val descriptionSearchResults = client.sequences.search(
@@ -310,7 +312,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
         ),
         search = Some(SequenceSearch(description = Some("description")))
       )
-    )
+    ).unsafeRunSync()
     assert(descriptionSearchResults.length == 1)
 
     val limitDescriptionSearchResults = client.sequences.search(
@@ -324,12 +326,12 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
           )
         )
       )
-    )
+    ).unsafeRunSync()
     assert(limitDescriptionSearchResults.length == 1)
   }
 
   it should "support search with dataSetIds" in {
-    val created = client.sequences.createFromRead(sequencesToCreate)
+    val created = client.sequences.createFromRead(sequencesToCreate).unsafeRunSync()
     try {
       val createdTimes = created.map(_.createdTime)
       val foundItems = retryWithExpectedResult(
@@ -339,13 +341,13 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
             min = Some(createdTimes.min),
             max = Some(createdTimes.max)
           ))
-        )))),
+        )))).unsafeRunSync(),
         (a: Seq[_]) => a should not be empty
       )
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
       created.filter(_.dataSetId.isDefined).map(_.id) should contain theSameElementsAs foundItems.map(_.id)
     } finally {
-      client.sequences.deleteByIds(created.map(_.id))
+      client.sequences.deleteByIds(created.map(_.id)).unsafeRunSync()
     }
   }
 }

@@ -9,7 +9,6 @@ import java.net.{ConnectException, UnknownHostException}
 import java.time.Instant
 import java.util.Base64
 import cats.effect._
-import cats.effect.unsafe.implicits.global
 import cats.Id
 import cats.effect.std.Queue
 import com.cognite.sdk.scala.common._

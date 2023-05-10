@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import java.util.UUID
-import cats.Id
+import com.cognite.sdk.scala.sttp.RetryingBackend
 import com.cognite.sdk.scala.v1._
 import com.cognite.sdk.scala.v1.resources.DataSets
 import sttp.client3._
@@ -18,7 +18,7 @@ import sttp.monad.MonadError
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
+import cats.effect.unsafe.IORuntime
 
 class LoggingSttpBackend[F[_], +P](delegate: SttpBackend[F, P]) extends SttpBackend[F, P] {
   override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] =
@@ -47,16 +47,17 @@ class LoggingSttpBackend[F[_], +P](delegate: SttpBackend[F, P]) extends SttpBack
 }
 
 abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
+  implicit val ioRuntime: IORuntime = IORuntime.global
   implicit val authSttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
   // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
-  lazy val client: GenericClient[Id] = GenericClient[Id](
+  lazy val client: GenericClient[IO] = GenericClient[IO](
     "scala-sdk-test",
     projectName,
     baseUrl,
     auth
   )(
     implicitly,
-    new RetryingBackend[Id, Any](implicitly)
+    new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
   )
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
@@ -83,9 +84,9 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
   lazy val dataSetResource = new DataSets(client.requestSession)
 
   lazy val testDataSet: DataSet = {
-    val list = dataSetResource.filter(DataSetFilter(writeProtected = Some(false))).take(1).compile.toList
+    val list = dataSetResource.filter(DataSetFilter(writeProtected = Some(false))).take(1).compile.toList.unsafeRunSync()
     list.headOption.getOrElse({
-      dataSetResource.createOne(DataSetCreate(Some("testDataSet"), Some("data set for Scala SDK tests")))
+      dataSetResource.createOne(DataSetCreate(Some("testDataSet"), Some("data set for Scala SDK tests"))).unsafeRunSync()
     })
   }
 }

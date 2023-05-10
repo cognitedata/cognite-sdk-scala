@@ -12,13 +12,13 @@ class StringDataPointsTest extends SdkTestSpec with StringDataPointsResourceBeha
     val name = Some(s"string-data-points-test-${UUID.randomUUID().toString}")
     val timeSeries = client.timeSeries.createFromRead(
       Seq(TimeSeries(name = name, externalId = name, isString = true))
-    ).head
+    ).unsafeRunSync().head
     try {
       val _ = testCode(timeSeries)
     } catch {
       case t: Throwable => throw t
     } finally {
-      client.timeSeries.deleteByIds(Seq(timeSeries.id))
+      client.timeSeries.deleteByIds(Seq(timeSeries.id)).unsafeRunSync()
     }
   }
 
