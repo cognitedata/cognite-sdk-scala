@@ -134,11 +134,11 @@ object PropertyDefinition {
           Some(PropertyDefaultValue.Object(json))
         case _: PropertyType.DirectNodeRelationProperty =>
           Some(PropertyDefaultValue.Object(json))
-        case _: PropertyType.TimeSeriesReference =>
+        case PropertyType.TimeSeriesReference(None | Some(false)) =>
           json.asString.map(PropertyDefaultValue.TimeSeriesReference.apply)
-        case _: PropertyType.FileReference =>
+        case PropertyType.FileReference(None | Some(false)) =>
           json.asString.map(PropertyDefaultValue.FileReference.apply)
-        case _: PropertyType.SequenceReference =>
+        case PropertyType.SequenceReference(None | Some(false)) =>
           json.asString.map(PropertyDefaultValue.SequenceReference.apply)
         case _ => None
       }

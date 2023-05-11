@@ -41,7 +41,13 @@ object Utils {
     DirectNodeRelationProperty(
       container = Some(ContainerReference(space = SpaceExternalId, externalId = DirectNodeRelationContainerExtId)),
       source = None),
-    TimeSeriesReference()
+    TimeSeriesReference(),
+    FileReference(),
+    SequenceReference()
+//TODO: Uncomment once the list types are released
+//    TimeSeriesReference(list = Some(true)),
+//    FileReference(list = Some(true)),
+//    SequenceReference(list = Some(true)),
   )
 
   val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
@@ -52,6 +58,8 @@ object Utils {
     PropertyDefaultValue.Float32(101.1f),
     PropertyDefaultValue.Float64(Double.MaxValue),
     PropertyDefaultValue.TimeSeriesReference("defaultTimeSeriesExtId"),
+    PropertyDefaultValue.FileReference("defaultFileExtId"),
+    PropertyDefaultValue.SequenceReference("defaultSequenceExtId"),
     PropertyDefaultValue.Object(
       Json.fromJsonObject(
         JsonObject.fromMap(
@@ -137,43 +145,6 @@ object Utils {
     createAllPossibleContainerPropCombinations.map {
       case (key, prop) => key -> toViewPropertyDefinition(prop, None, None)
     }
-
-//  def viewPropStr: Vector[String] =
-//    createAllPossibleViewPropCombinations.map {
-//      case (propName, prop) =>
-//        val propTypeStr = prop.`type` match {
-//          case t: TextProperty =>
-//            val collation = t.collation.map(s => s""""$s"""")
-//            s"""PropertyType.TextProperty(${t.list}, $collation)"""
-//          case p: PrimitiveProperty =>
-//            s"PropertyType.PrimitiveProperty(PrimitivePropType.${p.`type`},${p.list})"
-//          case d: DirectNodeRelationProperty => d.toString
-//        }
-//
-//        val defaultValueStr = prop.defaultValue.map {
-//          case PropertyDefaultValue.String(value) =>
-//            s"""Some(PropertyDefaultValue.String("$value"))""".stripMargin
-//          case PropertyDefaultValue.Float32(value) =>
-//            s"""Some(PropertyDefaultValue.Float32(${value}F))""".stripMargin
-//          case PropertyDefaultValue.Object(value) =>
-//            val jsonStr = s"""${value.noSpaces}""".stripMargin
-//            s"""io.circe.parser.parse("$jsonStr"").toOption.map(PropertyDefaultValue.Object)""".stripMargin
-//          case p => s"Some(PropertyDefaultValue.$p)"
-//        }
-//
-//        s"""
-//           | val $propName: ViewPropertyDefinition = ViewPropertyDefinition(
-//           |      nullable = ${prop.nullable},
-//           |      autoIncrement = ${prop.autoIncrement},
-//           |      defaultValue = ${defaultValueStr.getOrElse("None")},
-//           |      description = Some("${prop.description.getOrElse("")}"),
-//           |      name = Some("${prop.name.getOrElse("")}"),
-//           |      `type` = $propTypeStr,
-//           |      container = None,
-//           |      containerPropertyIdentifier = None
-//           |    )
-//           |""".stripMargin
-//    }.toVector
 
   def createTestContainer(
                            space: String,
