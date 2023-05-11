@@ -140,6 +140,7 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
         )
         .compile
         .toList
+        .unsafeRunSync()
       assert(createdTimeFilterResults.length == 4)
 
       val createdTimeFilterResultsWithLimit = client.dataSets
@@ -154,6 +155,7 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
         )
         .compile
         .toList
+        .unsafeRunSync()
 
       assert(createdTimeFilterResultsWithLimit.length == 1)
     }

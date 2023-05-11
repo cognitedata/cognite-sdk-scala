@@ -67,11 +67,12 @@ class Instances[F[_]](val requestSession: RequestSession[F])
 
   def retrieveByExternalIds(
       items: Seq[InstanceRetrieve],
+      sources: Option[Seq[InstanceSource]],
       includeTyping: Boolean = false
   ): F[InstanceFilterResponse] =
     requestSession
       .post[InstanceFilterResponse, InstanceFilterResponse, InstanceRetrieveRequest](
-        InstanceRetrieveRequest(items, includeTyping),
+        InstanceRetrieveRequest(items, includeTyping, sources),
         uri"$baseUrl/byids",
         identity
       )

@@ -10,7 +10,6 @@ import sttp.client3._
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 import scala.concurrent.duration._
-import cats.effect.unsafe.implicits.global
 
 class TokenTest extends SdkTestSpec with OptionValues {
   val tenant: String = sys.env("TEST_AAD_TENANT")

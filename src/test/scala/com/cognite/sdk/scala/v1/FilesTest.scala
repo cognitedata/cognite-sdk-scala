@@ -81,7 +81,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
 
   it should "be an error to delete using ids that does not exist" in {
     val thrown = the[CdpApiException] thrownBy client.files
-      .deleteByIds(idsThatDoNotExist)
+      .deleteByIds(idsThatDoNotExist).unsafeRunSync()
     val missingIds = thrown.missing
       .getOrElse(Seq.empty)
       .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
@@ -90,7 +90,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
 
     val sameIdsThatDoNotExist = Seq(idsThatDoNotExist.head, idsThatDoNotExist.head)
     val sameIdsThrown = the[CdpApiException] thrownBy client.files
-      .deleteByIds(sameIdsThatDoNotExist)
+      .deleteByIds(sameIdsThatDoNotExist).unsafeRunSync()
     // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
     // if duplicated ids that do not exist are specified.
     val sameMissingIds = sameIdsThrown.duplicated match {
@@ -108,34 +108,34 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
   it should "create and delete items using the read class" in {
     // create a single item
     val testFile = File(name = "scala-sdk-read-example-1")
-    val createdItem = client.files.createOneFromRead(testFile)
+    val createdItem = client.files.createOneFromRead(testFile).unsafeRunSync()
     createdItem.name shouldBe testFile.name
-    client.files.deleteByIds(Seq(createdItem.id))
-    an[CdpApiException] should be thrownBy client.files.retrieveByIds(Seq(createdItem.id))
+    client.files.deleteByIds(Seq(createdItem.id)).unsafeRunSync()
+    an[CdpApiException] should be thrownBy client.files.retrieveByIds(Seq(createdItem.id)).unsafeRunSync()
   }
 
   it should "create and delete items using the create class" in {
     // create a single item
     val testFile = FileCreate(name = "scala-sdk-read-example-1")
-    val createdItem = client.files.createOne(testFile)
+    val createdItem = client.files.createOne(testFile).unsafeRunSync()
     createdItem.name shouldBe testFile.name
-    client.files.deleteByIds(Seq(createdItem.id))
-    an[CdpApiException] should be thrownBy client.files.retrieveByIds(Seq(createdItem.id))
+    client.files.deleteByIds(Seq(createdItem.id)).unsafeRunSync()
+    an[CdpApiException] should be thrownBy client.files.retrieveByIds(Seq(createdItem.id)).unsafeRunSync()
   }
 
   it should "allow updates by Id" in {
     val testFile = File(name = "test-file-1", externalId = Some("test-externalId-1"))
-    val createdItem = client.files.createOneFromRead(testFile)
-    val updatedFile = client.files.updateById(Map(createdItem.id -> FileUpdate(externalId = Some(SetValue("test-externalId-1-1")))))
+    val createdItem = client.files.createOneFromRead(testFile).unsafeRunSync()
+    val updatedFile = client.files.updateById(Map(createdItem.id -> FileUpdate(externalId = Some(SetValue("test-externalId-1-1"))))).unsafeRunSync()
     assert(updatedFile.length == 1)
     assert(createdItem.name === updatedFile.head.name)
     assert(updatedFile.head.externalId.value === s"${testFile.externalId.value}-1")
-    client.files.deleteByExternalId("test-externalId-1-1")
+    client.files.deleteByExternalId("test-externalId-1-1").unsafeRunSync()
   }
 
   it should "allow updates by externalId" in {
     val testFile = File(name = "test-file-1", externalId = Some("test-externalId-1"), source = Some("source-1"), directory = Some("/dir-1"))
-    val createdItem = client.files.createOneFromRead(testFile)
+    val createdItem = client.files.createOneFromRead(testFile).unsafeRunSync()
     val updatedFile = client.files.updateByExternalId(
       Map(
         createdItem.externalId.value -> FileUpdate(
@@ -143,12 +143,12 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
           directory = Some(SetValue("/dir-1-1"))
         )
       )
-    )
+    ).unsafeRunSync()
     assert(updatedFile.length == 1)
     assert(createdItem.name === updatedFile.head.name)
     assert(updatedFile.head.source.value === s"${testFile.source.value}-1")
     assert(updatedFile.head.directory.value === s"${testFile.directory.value}-1")
-    client.files.deleteByExternalId("test-externalId-1")
+    client.files.deleteByExternalId("test-externalId-1").unsafeRunSync()
   }
 
   it should "support filter" in {
@@ -161,6 +161,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       )
       .compile
       .toList
+      .unsafeRunSync()
     assert(createdTimeFilterResults.length == 22)
 
     val createdTimeFilterPartitionResults = client.files
@@ -173,6 +174,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       .fold(Stream.empty)(_ ++ _)
       .compile
       .toList
+      .unsafeRunSync()
     assert(createdTimeFilterPartitionResults.length == 22)
 
     val createdTimeFilterResultsWithLimit = client.files
@@ -185,6 +187,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       )
       .compile
       .toList
+      .unsafeRunSync()
     assert(createdTimeFilterResultsWithLimit.length == 20)
   }
 
@@ -200,6 +203,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
           )
         )
       )
+      .unsafeRunSync()
     assert(createdTimeSearchResults.length == 22)
     val mimeTypeTimeSearchResults = client.files
       .search(
@@ -213,6 +217,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
           )
         )
       )
+      .unsafeRunSync()
     assert(mimeTypeTimeSearchResults.length == 1)
     val nameSearchResults = client.files
       .search(
@@ -230,6 +235,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
           )
         )
       )
+      .unsafeRunSync()
     assert(nameSearchResults.length == 3)
     val limitTimeSearchResults = client.files
       .search(
@@ -243,6 +249,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
           )
         )
       )
+      .unsafeRunSync()
     assert(limitTimeSearchResults.length == 5)
   }
 
@@ -256,9 +263,9 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       client.files.uploadWithName(
         inputStream,
         "uploadTest123.txt"
-      )
+      ).unsafeRunSync()
 
-    client.files.deleteById(file.id)
+    client.files.deleteById(file.id).unsafeRunSync()
 
     assert(file.name === "uploadTest123.txt")
   }
@@ -267,33 +274,33 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     val file =
       client.files.upload(
         new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
-      )
+      ).unsafeRunSync()
 
-    var uploadedFile = client.files.retrieveByIds(Seq(file.id))
+    var uploadedFile = client.files.retrieveByIds(Seq(file.id)).unsafeRunSync()
     var retryCount = 0
     while (!uploadedFile.headOption
         .getOrElse(throw new RuntimeException("File was not uploaded in test"))
         .uploaded) {
       retryCount += 1
       Thread.sleep(500)
-      uploadedFile = client.files.retrieveByIds(Seq(file.id))
+      uploadedFile = client.files.retrieveByIds(Seq(file.id)).unsafeRunSync()
       if (retryCount > 10) {
         throw new RuntimeException("File is not uploaded after 10 retries in test")
       }
     }
 
     val out = new ByteArrayOutputStream()
-    client.files.download(FileDownloadId(file.id), out)
+    client.files.download(FileDownloadId(file.id), out).unsafeRunSync()
 
     val expected =
       Files.readAllBytes(Paths.get("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt"))
 
     assert(out.toByteArray.sameElements(expected))
-    client.files.deleteById(file.id)
+    client.files.deleteById(file.id).unsafeRunSync()
   }
 
   it should "support search with dataSetIds" in {
-    val created = filesToCreate.map(f => client.files.createOneFromRead(f))
+    val created = filesToCreate.map(f => client.files.createOneFromRead(f).unsafeRunSync())
     try {
       val createdTimes = created.map(_.createdTime)
       val foundItems = retryWithExpectedResult[Seq[File]](
@@ -303,14 +310,14 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
             min = Some(createdTimes.min),
             max = Some(createdTimes.max)
           ))
-        )))),
+        )))).unsafeRunSync(),
         a => a should not be empty
       )
 
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
       created.filter(_.dataSetId.isDefined).map(_.id) should contain theSameElementsAs foundItems.map(_.id)
     } finally {
-      client.files.deleteByIds(created.map(_.id))
+      client.files.deleteByIds(created.map(_.id)).unsafeRunSync()
     }
   }
 }

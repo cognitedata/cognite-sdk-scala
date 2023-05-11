@@ -1,7 +1,7 @@
 package com.cognite.sdk.scala.sttp
 
 import cats.effect.IO
-import cats.effect.kernel.MonadCancel
+import cats.effect.kernel.{GenConcurrent, MonadCancel}
 import cats.effect.std.Semaphore
 import cats.effect.unsafe.IORuntime
 import sttp.capabilities.Effect
@@ -37,5 +37,19 @@ object RateLimitingBackend {
     new RateLimitingBackend[IO, S](
       delegate,
       Semaphore[IO](maxParallelRequests.toLong).unsafeRunSync()
+    )
+
+  def apply[F[_], S](
+      delegate: SttpBackend[F, S],
+      maxParallelRequests: Int
+  )(
+      implicit monadCancel: MonadCancel[F, Throwable],
+      genConcurrent: GenConcurrent[F, _]
+  ): F[RateLimitingBackend[F, S]] =
+    monadCancel.map(Semaphore[F](maxParallelRequests.toLong))(
+      new RateLimitingBackend[F, S](
+        delegate,
+        _
+      )
     )
 }

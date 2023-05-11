@@ -24,13 +24,14 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       .createFromRead(
         Seq(TimeSeries(name = name, externalId = name))
       )
+      .unsafeRunSync()
       .head
     try {
       val _ = testCode(timeSeries)
     } catch {
       case t: Throwable => throw t
     } finally {
-      client.timeSeries.deleteByIds(Seq(timeSeries.id))
+      client.timeSeries.deleteByIds(Seq(timeSeries.id)).unsafeRunSync()
     }
   }
 
@@ -43,7 +44,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       Instant.ofEpochMilli(1553795183461L),
       "1d",
       Seq("average", "stepInterpolation")
-    )
+    ).unsafeRunSync()
     val averages = aggregates("average").head.datapoints
     val stepInterpolations = aggregates("stepInterpolation").head.datapoints
     averages.map(_.timestamp).tail should contain theSameElementsInOrderAs stepInterpolations.map(_.timestamp)
@@ -57,7 +58,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       "1d",
       Seq("average", "stepInterpolation"),
       Some(limit)
-    )
+    ).unsafeRunSync()
     val averagesWithLimit = aggregatesWithLimit("average").head.datapoints
     val stepInterpolationsWithLimit = aggregatesWithLimit("stepInterpolation").head.datapoints
     averagesWithLimit.size should be <= limit
@@ -72,7 +73,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       "1d",
       Seq("average", "stepInterpolation"),
       Some(0)
-    )
+    ).unsafeRunSync()
     aggregatesWithZeroLimit should equal (Map())
 
     assertThrows[CdpApiException] {
@@ -84,7 +85,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         "1d",
         Seq("average", "stepInterpolation"),
         Some(-123)
-      )
+      ).unsafeRunSync()
     }
 
     val extAggregates = client.dataPoints.queryAggregatesByExternalId(
@@ -93,7 +94,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       Instant.ofEpochMilli(1553795183461L),
       "1d",
       Seq("average", "stepInterpolation")
-    )
+    ).unsafeRunSync()
     extAggregates.keys should contain theSameElementsAs List("average", "stepInterpolation")
     val extAverages = extAggregates("average").head.datapoints
     val extStepInterpolation = extAggregates("stepInterpolation").head.datapoints
@@ -110,7 +111,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       Instant.ofEpochMilli(1553795183461L),
       "1h",
       Seq("sum", "stepInterpolation")
-    )
+    ).unsafeRunSync()
     val sums2 = aggregates2("sum").head.datapoints
     val stepInterpolation2 = aggregates2("stepInterpolation").head.datapoints
     sums2.head.value should equal(1883.142868757248)
@@ -125,7 +126,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       "1d",
       Seq("average", "stepInterpolation"),
       Some(limit)
-    )
+    ).unsafeRunSync()
     val extAveragesWithLimit = extAggregatesWithLimit("average").head.datapoints
     val extStepInterpolationWithLimit = extAggregatesWithLimit("stepInterpolation").head.datapoints
     extAveragesWithLimit.size should be <= limit
@@ -142,7 +143,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       "1d",
       Seq("average", "stepInterpolation"),
       Some(0)
-    )
+    ).unsafeRunSync()
     extAggregatesWithZeroLimit should equal (Map())
 
     assertThrows[CdpApiException] {
@@ -154,7 +155,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         "1d",
         Seq("average", "stepInterpolation"),
         Some(-1)
-      )
+      ).unsafeRunSync()
     }
 
     val extAggregates2 =
@@ -164,7 +165,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         Instant.ofEpochMilli(1553795183461L),
         "1h",
         Seq("sum", "stepInterpolation")
-      )
+      ).unsafeRunSync()
     val extSum2 = extAggregates2("sum").head.datapoints
     val extStepInterpolation2 = extAggregates2("stepInterpolation").head.datapoints
     extSum2.map(_.timestamp).tail should contain theSameElementsInOrderAs extStepInterpolation2.map(_.timestamp)
@@ -176,7 +177,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         Instant.ofEpochMilli(1553795183461L),
         "1d",
         Seq("invalid aggregate1", "minx")
-      )
+      ).unsafeRunSync()
     }
     assertThrows[CdpApiException] {
       val _ = client.dataPoints.queryAggregatesById(
@@ -185,7 +186,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         Instant.ofEpochMilli(1553795183461L),
         "1d",
         Seq.empty
-      )
+      ).unsafeRunSync()
     }
   }
 
@@ -197,7 +198,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
       "1d",
       Seq("average", "stepInterpolation"),
       ignoreUnknownIds = true
-    )
+    ).unsafeRunSync()
 
     aggregates shouldBe empty
   }
@@ -208,7 +209,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
     Instant.ofEpochMilli(1553795183461L),
     "1d",
     Seq("min")
-  )
+  ).unsafeRunSync()
   sumsOnly.keys should contain theSameElementsAs List("min")
 
   it should "correctly decode an error response as json instead of protobuf" in {
@@ -218,7 +219,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         missingId,
         Instant.ofEpochMilli(0L),
         Instant.ofEpochMilli(1553795183461L)
-      )
+      ).unsafeRunSync()
     }
     caught.missing.value.head.toMap("id").toString shouldEqual missingId.toString
 
@@ -227,7 +228,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         missingId,
         Instant.ofEpochMilli(0L),
         Instant.ofEpochMilli(1553795183461L)
-      )
+      ).unsafeRunSync()
     }
     sCaught.missing.value.head.toMap("id").toString shouldEqual missingId.toString
 
@@ -238,7 +239,7 @@ class DataPointsTest extends SdkTestSpec with DataPointsResourceBehaviors {
         Instant.ofEpochMilli(1553795183461L),
         "1d",
         Seq("average")
-      )
+      ).unsafeRunSync()
     }
     aggregateCaught.missing.value.head.toMap("id").toString shouldEqual missingId.toString
   }

@@ -104,9 +104,10 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
 
     val existingItems = client.relationships
       .filterWithCursor(RelationshipsFilter(dataSetIds = Some(Seq(CogniteInternalId(2694232156565845L)))), None, None, None, None)
+      .unsafeRunSync()
       .items.map(_.externalId)
 
-    client.relationships.deleteByExternalIds(externalIds = existingItems, ignoreUnknownIds = true)
+    client.relationships.deleteByExternalIds(externalIds = existingItems, ignoreUnknownIds = true).unsafeRunSync()
     val randomItems = Seq(
       RelationshipCreate(
         sourceExternalId = "scala-sdk-relationships-test-asset1",
@@ -143,7 +144,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
         dataSetId = Some(2694232156565845L)
       )
     )
-    val createdItems = client.relationships.create(randomItems)
+    val createdItems = client.relationships.create(randomItems).unsafeRunSync()
 
     assert(createdItems.length == 3)
     val minAge = Instant.now().minus(10, ChronoUnit.MINUTES)
@@ -160,6 +161,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
       )
       .compile
       .toList
+      .unsafeRunSync()
     assert(createdTimeFilterResults.length == 3)
 
     val createdTimeFilterResultsLimit = client.relationships
@@ -172,6 +174,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
       )
       .compile
       .toList
+      .unsafeRunSync()
     assert(createdTimeFilterResultsLimit.length == 1)
 
     val targetFilterResults = client.relationships
@@ -185,6 +188,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
       )
       .compile
       .toList
+      .unsafeRunSync()
     assert(targetFilterResults.length == 2)
 
     // labels
@@ -198,6 +202,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
       )
       .compile
       .toList
+      .unsafeRunSync()
     assert(sourceTypeFilterResults.length == 3)
 
     val startTimeFilterResults = client.relationships
@@ -212,6 +217,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
       )
       .compile
       .toList
+      .unsafeRunSync()
     assert(startTimeFilterResults.length == 2)
 
     val activeAtTimeFilterResults = client.relationships
@@ -224,6 +230,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
       )
       .compile
       .toList
+      .unsafeRunSync()
     assert(activeAtTimeFilterResults.length == 2)
 
     val confidenceRangeFilterResults = client.relationships
@@ -236,6 +243,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
       )
       .compile
       .toList
+      .unsafeRunSync()
     assert(confidenceRangeFilterResults.length == 1)
 
     val labels = Seq(
@@ -252,6 +260,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
       )
       .compile
       .toList
+      .unsafeRunSync()
     assert(containsAnyFilterResults.length == 2)
 
     val containsAllFilterResults = client.relationships
@@ -264,6 +273,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
       )
       .compile
       .toList
+      .unsafeRunSync()
     assert(containsAllFilterResults.length == 1)
   }
 }
