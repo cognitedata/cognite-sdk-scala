@@ -29,16 +29,16 @@ import scala.concurrent.duration.DurationInt
 class InstancesTest extends CommonDataModelTestHelper {
   private val space = Utils.SpaceExternalId
 
-  private val edgeNodeContainerExtId = "sdkTest8EdgeNodeContainer"
-  private val edgeContainerExtId = "sdkTest8EdgeContainer"
-  private val nodeContainer1ExtId = "sdkTest8NodeContainer1"
-  private val nodeContainer2ExtId = "sdkTest8NodeContainer2"
+  private val edgeNodeContainerExtId = "sdkTest9EdgeNodeContainer"
+  private val edgeContainerExtId = "sdkTest9EdgeContainer"
+  private val nodeContainer1ExtId = "sdkTest9NodeContainer1"
+  private val nodeContainer2ExtId = "sdkTest9NodeContainer2"
   private val containerForDirectNodeRelationExtId = Utils.DirectNodeRelationContainerExtId
 
-  private val edgeNodeViewExtId = "sdkTest8EdgeNodeView"
-  private val edgeViewExtId = "sdkTest8EdgeView"
-  private val nodeView1ExtId = "sdkTest8NodeView1"
-  private val nodeView2ExtId = "sdkTest8NodeView2"
+  private val edgeNodeViewExtId = "sdkTest9EdgeNodeView"
+  private val edgeViewExtId = "sdkTest9EdgeView"
+  private val nodeView1ExtId = "sdkTest9NodeView1"
+  private val nodeView2ExtId = "sdkTest9NodeView2"
   private val viewForDirectNodeRelationExtId = Utils.DirectNodeRelationViewExtId
 
   private val viewVersion = Utils.ViewVersion
@@ -215,8 +215,9 @@ class InstancesTest extends CommonDataModelTestHelper {
 
   private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) = {
     blueFieldClient.instances.retrieveByExternalIds(items = Seq(
-      InstanceRetrieve(InstanceType.Node, instanceExternalId, viewRef.space, Some(Seq(InstanceSource(viewRef))))),
-      includeTyping = true
+      InstanceRetrieve(InstanceType.Node, instanceExternalId, viewRef.space)),
+      includeTyping = true,
+      sources = Some(Seq(InstanceSource(viewRef)))
     ).map { r =>
       r.items.collect {
         case n: InstanceDefinition.NodeDefinition => n
@@ -228,8 +229,9 @@ class InstancesTest extends CommonDataModelTestHelper {
 
   private def fetchEdgeInstance(viewRef: ViewReference, instanceExternalId: String) = {
     blueFieldClient.instances.retrieveByExternalIds(items = Seq(
-      InstanceRetrieve(InstanceType.Edge, instanceExternalId, viewRef.space, Some(Seq(InstanceSource(viewRef))))),
-      includeTyping = true
+      InstanceRetrieve(InstanceType.Edge, instanceExternalId, viewRef.space)),
+      includeTyping = true,
+      sources = Some(Seq(InstanceSource(viewRef)))
     ).map { r =>
       r.items.collect {
         case n: InstanceDefinition.EdgeDefinition => n

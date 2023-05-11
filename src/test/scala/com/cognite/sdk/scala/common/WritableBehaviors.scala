@@ -4,6 +4,9 @@
 package com.cognite.sdk.scala.common
 
 import cats.Id
+import cats.effect.IO
+import cats.effect.unsafe.IORuntime
+
 import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -12,16 +15,16 @@ import org.scalatest.matchers.should.Matchers
 trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =>
   // scalastyle:off
   def writable[R <: ToCreate[W] with WithId[PrimitiveId], W, PrimitiveId](
-      writable: Create[R, W, Id] with CreateOne[R, W, Id],
-      maybeDeletable: Option[DeleteByIds[Id, PrimitiveId]],
+      writable: Create[R, W, IO] with CreateOne[R, W, IO],
+      maybeDeletable: Option[DeleteByIds[IO, PrimitiveId]],
       readExamples: Seq[R],
       createExamples: Seq[W],
       idsThatDoNotExist: Seq[PrimitiveId],
       supportsMissingAndThrown: Boolean
-  ): Unit = {
+  )(implicit IORuntime: IORuntime): Unit = {
     it should "be an error to delete using ids that does not exist" in {
       maybeDeletable.map { deletable =>
-        val thrown = the[CdpApiException] thrownBy deletable.deleteByIds(idsThatDoNotExist)
+        val thrown = the[CdpApiException] thrownBy deletable.deleteByIds(idsThatDoNotExist).unsafeRunSync()
         if (supportsMissingAndThrown) {
           val missingIds = thrown.missing
             .getOrElse(Seq.empty)
@@ -33,7 +36,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
         val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
         val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByIds(
           sameIdsThatDoNotExist
-        )
+        ).unsafeRunSync()
         if (supportsMissingAndThrown) {
           // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
           // if duplicated ids that do not exist are specified.
@@ -54,43 +57,43 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
 
     it should "include the request id in all cdp api exceptions" in {
       maybeDeletable.map { deletable =>
-        val caught = intercept[CdpApiException](deletable.deleteByIds(idsThatDoNotExist))
+        val caught = intercept[CdpApiException](deletable.deleteByIds(idsThatDoNotExist).unsafeRunSync())
         assert(caught.requestId.isDefined)
       }
     }
 
     it should "create and delete items using the read class" in {
       // create a single item
-      val createdItem = writable.createFromRead(readExamples.take(1))
+      val createdItem = writable.createFromRead(readExamples.take(1)).unsafeRunSync()
       createdItem should have size 1
       createdItem.headOption.value.id should not be 0
 
-      maybeDeletable.map(_.deleteByIds(createdItem.map(_.id)))
+      maybeDeletable.map(_.deleteByIds(createdItem.map(_.id)).unsafeRunSync())
 
       // create multiple items
-      val createdItems = writable.createFromRead(readExamples)
+      val createdItems = writable.createFromRead(readExamples).unsafeRunSync()
       createdItems should have size readExamples.size.toLong
       val createdIds = createdItems.map(_.id)
       createdIds should have size readExamples.size.toLong
 
-      maybeDeletable.map(_.deleteByIds(createdIds))
+      maybeDeletable.map(_.deleteByIds(createdIds).unsafeRunSync())
     }
 
     it should "create and delete items using the create class" in {
       // create a single item
-      val createdItem = writable.create(createExamples.take(1))
+      val createdItem = writable.create(createExamples.take(1)).unsafeRunSync()
       createdItem should have size 1
       createdItem.headOption.value.id should not be 0
 
-      maybeDeletable.map(_.deleteByIds(createdItem.map(_.id)))
+      maybeDeletable.map(_.deleteByIds(createdItem.map(_.id)).unsafeRunSync())
 
       // create multiple items
-      val createdItems = writable.create(createExamples)
+      val createdItems = writable.create(createExamples).unsafeRunSync()
       createdItems should have size createExamples.size.toLong
       val createdIds = createdItems.map(_.id)
       createdIds should have size createExamples.size.toLong
 
-      maybeDeletable.map(_.deleteByIds(createdIds))
+      maybeDeletable.map(_.deleteByIds(createdIds).unsafeRunSync())
     }
     // TODO: test creating multiple items with the same external
     //       id in the same api call for V1
@@ -99,13 +102,13 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   def writableWithExternalId[R <: ToCreate[W] with WithExternalIdGeneric[Option], W <: WithExternalIdGeneric[
     Option
   ]](
-      writable: Create[R, W, Id],
-      maybeDeletable: Option[DeleteByExternalIds[Id]],
+      writable: Create[R, W, IO],
+      maybeDeletable: Option[DeleteByExternalIds[IO]],
       readExamples: Seq[R],
       createExamples: Seq[W],
       externalIdsThatDoNotExist: Seq[String],
       supportsMissingAndThrown: Boolean
-  ): Unit =
+  )(implicit IORuntime: IORuntime): Unit =
     writableWithExternalIdGeneric[Option, R, W](
       writable,
       maybeDeletable,
@@ -118,14 +121,14 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   def writableWithRequiredExternalId[R <: ToCreate[W] with WithExternalIdGeneric[Id], W <: WithExternalIdGeneric[
     Id
   ]](
-      writable: Create[R, W, Id],
-      maybeDeletable: Option[DeleteByExternalIds[Id]],
+      writable: Create[R, W, IO],
+      maybeDeletable: Option[DeleteByExternalIds[IO]],
       readExamples: Seq[R],
       createExamples: Seq[W],
       externalIdsThatDoNotExist: Seq[String],
       supportsMissingAndThrown: Boolean,
       trySameIdsThatDoNotExist: Boolean = true
-  ): Unit =
+  )(implicit IORuntime: IORuntime): Unit =
     writableWithExternalIdGeneric[Id, R, W](
       writable,
       maybeDeletable,
@@ -139,19 +142,19 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   def writableWithExternalIdGeneric[A[_], R <: ToCreate[W] with WithExternalIdGeneric[A], W <: WithExternalIdGeneric[
     A
   ]](
-      writable: Create[R, W, Id],
-      maybeDeletable: Option[DeleteByExternalIds[Id]],
+      writable: Create[R, W, IO],
+      maybeDeletable: Option[DeleteByExternalIds[IO]],
       readExamples: Seq[R],
       createExamples: Seq[W],
       externalIdsThatDoNotExist: Seq[String],
       supportsMissingAndThrown: Boolean,
       trySameIdsThatDoNotExist: Boolean = true
-  ): Unit = {
+  )(implicit ioRuntime: IORuntime): Unit = {
     it should "be an error to delete using external ids that does not exist" in {
       maybeDeletable.map { deletable =>
         val thrown = the[CdpApiException] thrownBy deletable.deleteByExternalIds(
           externalIdsThatDoNotExist
-        )
+        ).unsafeRunSync()
         if (supportsMissingAndThrown) {
           val missingIds = thrown.missing
             .getOrElse(Seq.empty)
@@ -173,7 +176,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
           val sameIdsThatDoNotExist = Seq.fill(2)(externalIdsThatDoNotExist(0))
           val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByExternalIds(
             sameIdsThatDoNotExist
-          )
+          ).unsafeRunSync()
           if (supportsMissingAndThrown) {
             // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
             // if duplicated ids that do not exist are specified.
@@ -193,44 +196,44 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
     }
 
     it should "create and delete items using the read class and external ids" in {
-      val createdItems = writable.createFromRead(readExamples)
+      val createdItems = writable.createFromRead(readExamples).unsafeRunSync()
       createdItems should have size readExamples.size.toLong
       val createdExternalIds = createdItems.map(_.getExternalId.value)
       createdExternalIds should have size readExamples.size.toLong
-      maybeDeletable.map(_.deleteByExternalIds(createdExternalIds))
+      maybeDeletable.map(_.deleteByExternalIds(createdExternalIds).unsafeRunSync())
     }
 
     it should "create and delete items using the create class and external ids" in {
       // create multiple items
-      val createdItems = writable.create(createExamples)
+      val createdItems = writable.create(createExamples).unsafeRunSync()
       createdItems should have size createExamples.size.toLong
       val createdIds = createdItems.map(_.getExternalId.value)
       createdIds should have size createExamples.size.toLong
-      maybeDeletable.map(_.deleteByExternalIds(createdIds))
+      maybeDeletable.map(_.deleteByExternalIds(createdIds).unsafeRunSync())
     }
     // TODO: test creating multiple items with the same external
     //       id in the same api call for V1
   }
 
   def updatable[R <: ToCreate[W] with ToUpdate[U] with WithId[Long], W, U](
-      updatable: Create[R, W, Id] with UpdateById[R, U, Id] with RetrieveByIds[R, Id],
-      maybeDeletable: Option[DeleteByIds[Id, Long]],
+      updatable: Create[R, W, IO] with UpdateById[R, U, IO] with RetrieveByIds[R, IO],
+      maybeDeletable: Option[DeleteByIds[IO, Long]],
       readExamples: Seq[R],
       updateExamples: Seq[R],
       updateId: (Long, R) => R,
       compareItems: (R, R) => Boolean,
       compareUpdated: (Seq[R], Seq[R]) => Unit
-  ): Unit =
+  )(implicit ioRuntime: IORuntime): Unit =
     it should "allow updates using the read class" in {
       // create items
-      val createdIds = updatable.createFromRead(readExamples).map(_.id)
+      val createdIds = updatable.createFromRead(readExamples).unsafeRunSync().map(_.id)
       assert(createdIds.size == readExamples.size)
       createdIds should not contain 0
 
-      val readItems = updatable.retrieveByIds(createdIds)
+      val readItems = updatable.retrieveByIds(createdIds).unsafeRunSync()
 
       // update the item to current values
-      val unchangedUpdatedItems = updatable.updateFromRead(readItems)
+      val unchangedUpdatedItems = updatable.updateFromRead(readItems).unsafeRunSync()
       assert(unchangedUpdatedItems.size == readItems.size)
       assert(unchangedUpdatedItems.zip(readItems).forall {
         case (updated, read) =>
@@ -240,76 +243,76 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       // update the item with new values
       val updates =
         updateExamples.zip(readItems).map { case (updated, read) => updateId(read.id, updated) }
-      val updatedItems = updatable.updateFromRead(updates)
+      val updatedItems = updatable.updateFromRead(updates).unsafeRunSync()
       assert(updatedItems.size == readItems.size)
       compareUpdated(readItems, updatedItems)
 
       // delete it
-      maybeDeletable.map(_.deleteByIds(createdIds))
+      maybeDeletable.map(_.deleteByIds(createdIds).unsafeRunSync())
     }
 
   def updatableByExternalId[R <: ToCreate[W] with WithExternalId, W, U](
-      resource: Create[R, W, Id] with UpdateByExternalId[R, U, Id] with RetrieveByIds[R, Id],
-      maybeDeletable: Option[DeleteByExternalIds[Id]],
+      resource: Create[R, W, IO] with UpdateByExternalId[R, U, IO] with RetrieveByIds[R, IO],
+      maybeDeletable: Option[DeleteByExternalIds[IO]],
       itemsToCreate: Seq[R],
       updatesToMake: Map[String, U],
       expectedBehaviors: (Seq[R], Seq[R]) => Unit
-  ): Unit =
+  )(implicit ioRuntime: IORuntime): Unit =
     it should "allow updating by externalId" in {
-      val createdItems = resource.createFromRead(itemsToCreate)
-      val updatedItems = resource.updateByExternalId(updatesToMake)
+      val createdItems = resource.createFromRead(itemsToCreate).unsafeRunSync()
+      val updatedItems = resource.updateByExternalId(updatesToMake).unsafeRunSync()
       expectedBehaviors(createdItems, updatedItems)
 
-      maybeDeletable.map(_.deleteByExternalIds(updatedItems.map(_.externalId.value)))
+      maybeDeletable.map(_.deleteByExternalIds(updatedItems.map(_.externalId.value)).unsafeRunSync())
     }
 
   def updatableByRequiredExternalId[R <: ToCreate[W] with WithRequiredExternalId, W, U](
-      resource: Create[R, W, Id] with UpdateByExternalId[R, U, Id] with RetrieveByIds[R, Id],
-      maybeDeletable: Option[DeleteByExternalIds[Id]],
+      resource: Create[R, W, IO] with UpdateByExternalId[R, U, IO] with RetrieveByIds[R, IO],
+      maybeDeletable: Option[DeleteByExternalIds[IO]],
       itemsToCreate: Seq[R],
       updatesToMake: Map[String, U],
       expectedBehaviors: (Seq[R], Seq[R]) => Unit
-  ): Unit =
+  )(implicit IORuntime: IORuntime): Unit =
     it should "allow updating by externalId" in {
-      val createdItems = resource.createFromRead(itemsToCreate)
-      val updatedItems = resource.updateByExternalId(updatesToMake)
+      val createdItems = resource.createFromRead(itemsToCreate).unsafeRunSync()
+      val updatedItems = resource.updateByExternalId(updatesToMake).unsafeRunSync()
       expectedBehaviors(createdItems, updatedItems)
 
-      maybeDeletable.map(_.deleteByExternalIds(updatedItems.map(_.externalId)))
+      maybeDeletable.map(_.deleteByExternalIds(updatedItems.map(_.externalId)).unsafeRunSync())
     }
 
   def updatableById[R <: ToCreate[W] with ToUpdate[U] with WithId[Long], W, U](
-      resource: Create[R, W, Id] with UpdateById[R, U, Id] with RetrieveByIds[R, Id],
-      maybeDeletable: Option[DeleteByIds[Id, Long]],
+      resource: Create[R, W, IO] with UpdateById[R, U, IO] with RetrieveByIds[R, IO],
+      maybeDeletable: Option[DeleteByIds[IO, Long]],
       itemsToCreate: Seq[R],
       updatesToMake: Seq[U],
       expectedBehaviors: (Seq[R], Seq[R]) => Unit
-  ): Unit =
+  )(implicit IORuntime: IORuntime): Unit =
     it should "allow updating by Id" in {
-      val createdItems = resource.createFromRead(itemsToCreate)
+      val createdItems = resource.createFromRead(itemsToCreate).unsafeRunSync()
       val updateMap = createdItems.indices.map(i => (createdItems(i).id, updatesToMake(i))).toMap
-      val updatedItems = resource.updateById(updateMap)
+      val updatedItems = resource.updateById(updateMap).unsafeRunSync()
       expectedBehaviors(createdItems, updatedItems)
 
-      maybeDeletable.map(_.deleteByIds(updatedItems.map(_.id)))
+      maybeDeletable.map(_.deleteByIds(updatedItems.map(_.id)).unsafeRunSync())
     }
 
   def deletableWithIgnoreUnknownIds[R <: ToCreate[W] with WithId[Long], W, PrimitiveId](
-      writable: Create[R, W, Id]
-        with DeleteByIdsWithIgnoreUnknownIds[Id, Long]
-        with RetrieveByIds[R, Id],
+      writable: Create[R, W, IO]
+        with DeleteByIdsWithIgnoreUnknownIds[IO, Long]
+        with RetrieveByIds[R, IO],
       readExamples: Seq[R],
       idsThatDoNotExist: Seq[Long]
-  ): Unit =
+  )(implicit IORuntime: IORuntime): Unit =
     it should "support ignoring unknown ids on delete" in {
-      val createdItems: Id[Seq[R]] = writable.createFromRead(readExamples)
-      val createdIds = createdItems.map(_.id)
+      val createdItems: IO[Seq[R]] = writable.createFromRead(readExamples)
+      val createdIds = createdItems.unsafeRunSync().map(_.id)
       val createdAndSomeNonExistingIds = createdIds ++ idsThatDoNotExist
-      writable.deleteByIds(createdAndSomeNonExistingIds, ignoreUnknownIds = true)
-      val retrieveDeletedException = intercept[CdpApiException](writable.retrieveByIds(createdIds))
+      writable.deleteByIds(createdAndSomeNonExistingIds, ignoreUnknownIds = true).unsafeRunSync()
+      val retrieveDeletedException = intercept[CdpApiException](writable.retrieveByIds(createdIds).unsafeRunSync())
       assert(retrieveDeletedException.code === 400)
       val doNotIgnoreException = intercept[CdpApiException](
-        writable.deleteByIds(idsThatDoNotExist)
+        writable.deleteByIds(idsThatDoNotExist).unsafeRunSync()
       )
       assert(doNotIgnoreException.code === 400)
     }

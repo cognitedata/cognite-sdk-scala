@@ -22,13 +22,13 @@ class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with Retry
             SequenceColumn(name = Some("long-column"), externalId = Some(s"ext2-$externalId"), valueType = "LONG")
           )
       )
-    )
+    ).unsafeRunSync()
     try {
       val _ = testCode(sequence)
     } catch {
       case t: Throwable => throw t
     } finally {
-      client.sequences.deleteById(sequence.id)
+      client.sequences.deleteById(sequence.id).unsafeRunSync()
     }
   }
 
@@ -46,13 +46,13 @@ class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with Retry
 
   it should "be possible to insert, update, and delete sequence rows using internalId" in withSequence { sequence =>
     client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.externalId.getOrElse(
-      throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows)
+      throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows).unsafeRunSync()
     val rows = retryWithExpectedResult[Seq[SequenceRow]](
-      client.sequenceRows.queryById(sequence.id, Some(minRow), Some(maxRow + 1))._2.compile.toList,
+      client.sequenceRows.queryById(sequence.id, Some(minRow), Some(maxRow + 1)).unsafeRunSync()._2.compile.toList.unsafeRunSync(),
       r => r should contain theSameElementsAs testRows
     )
     retryWithExpectedResult[Seq[SequenceRow]](
-      client.sequenceRows.queryById(sequence.id, Some(minRow), Some(maxRow + 1), batchSize = 1)._2.compile.toList,
+      client.sequenceRows.queryById(sequence.id, Some(minRow), Some(maxRow + 1), batchSize = 1).unsafeRunSync()._2.compile.toList.unsafeRunSync(),
       r => r should contain theSameElementsAs testRows
     )
 
@@ -60,21 +60,21 @@ class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with Retry
       row.copy(values = row.values.updated(0, row.values.head.mapString(s => s"${s}-updated")))
     }
     client.sequenceRows.insertById(sequence.id, sequence.columns.map(_.externalId.getOrElse(
-      throw new RuntimeException("Unexpected missing column externalId"))).toList, updateRows)
+      throw new RuntimeException("Unexpected missing column externalId"))).toList, updateRows).unsafeRunSync()
     retryWithExpectedResult[Seq[SequenceRow]](
-      client.sequenceRows.queryById(sequence.id, Some(minRow), Some(maxRow + 1))._2.compile.toList,
+      client.sequenceRows.queryById(sequence.id, Some(minRow), Some(maxRow + 1)).unsafeRunSync()._2.compile.toList.unsafeRunSync(),
       r => r should contain theSameElementsAs updateRows
     )
 
-    client.sequenceRows.deleteById(sequence.id, rows.map(_.rowNumber).take(1))
+    client.sequenceRows.deleteById(sequence.id, rows.map(_.rowNumber).take(1)).unsafeRunSync()
     retryWithExpectedResult[Seq[SequenceRow]](
-      client.sequenceRows.queryById(sequence.id, Some(minRow), Some(maxRow + 1))._2.compile.toList,
+      client.sequenceRows.queryById(sequence.id, Some(minRow), Some(maxRow + 1)).unsafeRunSync()._2.compile.toList.unsafeRunSync(),
       r => r should have size testRows.size.toLong - 1
     )
 
-    client.sequenceRows.deleteById(sequence.id, rows.map(_.rowNumber))
+    client.sequenceRows.deleteById(sequence.id, rows.map(_.rowNumber)).unsafeRunSync()
     retryWithExpectedResult[Seq[SequenceRow]](
-      client.sequenceRows.queryById(sequence.id, Some(minRow), Some(maxRow + 1))._2.compile.toList,
+      client.sequenceRows.queryById(sequence.id, Some(minRow), Some(maxRow + 1)).unsafeRunSync()._2.compile.toList.unsafeRunSync(),
       r => r shouldBe empty
     )
   }
@@ -82,21 +82,21 @@ class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with Retry
   it should "be possible to insert, update and delete sequence rows using externalId" in withSequence { sequence =>
     val externalId = sequence.externalId.value
     client.sequenceRows.insertByExternalId(externalId, sequence.columns.map(_.externalId.getOrElse(
-      throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows)
+      throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows).unsafeRunSync()
     val rows = retryWithExpectedResult[Seq[SequenceRow]](
-      client.sequenceRows.queryByExternalId(externalId, None, None)._2.compile.toList,
+      client.sequenceRows.queryByExternalId(externalId, None, None).unsafeRunSync()._2.compile.toList.unsafeRunSync(),
       r => r should contain theSameElementsAs testRows
     )
 
     // note: intentionally using queryById here.
     val (_, rowsByIdStream) = client.sequenceRows.queryById(
-      sequence.id, Some(minRow), Some(maxRow + 1))
-    val rowsById: Seq[SequenceRow] = rowsByIdStream.compile.toList
+      sequence.id, Some(minRow), Some(maxRow + 1)).unsafeRunSync()
+    val rowsById: Seq[SequenceRow] = rowsByIdStream.compile.toList.unsafeRunSync()
     rowsById should contain theSameElementsAs testRows
 
-    client.sequenceRows.deleteByExternalId(externalId, rows.map(_.rowNumber))
+    client.sequenceRows.deleteByExternalId(externalId, rows.map(_.rowNumber)).unsafeRunSync()
     retryWithExpectedResult[Seq[SequenceRow]](
-      client.sequenceRows.queryByExternalId(externalId, Some(minRow), Some(maxRow + 1))._2.compile.toList,
+      client.sequenceRows.queryByExternalId(externalId, Some(minRow), Some(maxRow + 1)).unsafeRunSync()._2.compile.toList.unsafeRunSync(),
       r => r shouldBe empty
     )
   }
@@ -104,29 +104,29 @@ class SequenceRowsTest extends SdkTestSpec with ParallelTestExecution with Retry
   it should "be possible to insert and delete sequence rows using cogniteId" in withSequence { sequence =>
     val externalId = sequence.externalId.value
     client.sequenceRows.insert(CogniteExternalId(externalId), sequence.columns.map(_.externalId.getOrElse(
-      throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows)
+      throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows).unsafeRunSync()
     val rows = retryWithExpectedResult[Seq[SequenceRow]](
-      client.sequenceRows.query(CogniteExternalId(externalId), None, None)._2.compile.toList,
+      client.sequenceRows.query(CogniteExternalId(externalId), None, None).unsafeRunSync()._2.compile.toList.unsafeRunSync(),
       r => r should contain theSameElementsAs testRows
     )
 
-    client.sequenceRows.delete(CogniteExternalId(externalId), rows.map(_.rowNumber))
+    client.sequenceRows.delete(CogniteExternalId(externalId), rows.map(_.rowNumber)).unsafeRunSync()
     retryWithExpectedResult[Seq[SequenceRow]](
-      client.sequenceRows.query(CogniteExternalId(externalId), Some(minRow), Some(maxRow + 1))._2.compile.toList,
+      client.sequenceRows.query(CogniteExternalId(externalId), Some(minRow), Some(maxRow + 1)).unsafeRunSync()._2.compile.toList.unsafeRunSync(),
       r => r shouldBe empty
     )
 
     val internalId = sequence.id
     client.sequenceRows.insert(CogniteInternalId(internalId), sequence.columns.map(_.externalId.getOrElse(
-      throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows)
+      throw new RuntimeException("Unexpected missing column externalId"))).toList, testRows).unsafeRunSync()
     val rows2 = retryWithExpectedResult[Seq[SequenceRow]](
-      client.sequenceRows.query(CogniteInternalId(internalId), None, None)._2.compile.toList,
+      client.sequenceRows.query(CogniteInternalId(internalId), None, None).unsafeRunSync()._2.compile.toList.unsafeRunSync(),
       r => r should contain theSameElementsAs testRows
     )
 
-    client.sequenceRows.delete(CogniteInternalId(internalId), rows2.map(_.rowNumber))
+    client.sequenceRows.delete(CogniteInternalId(internalId), rows2.map(_.rowNumber)).unsafeRunSync()
     retryWithExpectedResult[Seq[SequenceRow]](
-      client.sequenceRows.query(CogniteInternalId(internalId), Some(minRow), Some(maxRow + 1))._2.compile.toList,
+      client.sequenceRows.query(CogniteInternalId(internalId), Some(minRow), Some(maxRow + 1)).unsafeRunSync()._2.compile.toList.unsafeRunSync(),
       r => r shouldBe empty
     )
   }

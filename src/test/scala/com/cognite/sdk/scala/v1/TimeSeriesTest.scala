@@ -113,13 +113,16 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     }
   )
 
+  private val updateExternalId1 = s"externalId-1-${shortRandom()}"
+  private val updateExternalId2 = s"externalId-1-${shortRandom()}"
+
   it should behave like updatableByExternalId(
     client.timeSeries,
     Some(client.timeSeries),
-    Seq(TimeSeries(name = Some("name-1"), externalId = Some("externalId-1")),
-      TimeSeries(name = Some("name-2"), externalId = Some("externalId-2"))),
-    Map("externalId-1" -> TimeSeriesUpdate(name = Some(SetValue("name-1-1"))),
-      "externalId-2" -> TimeSeriesUpdate(name = Some(SetValue("name-2-1")))),
+    Seq(TimeSeries(name = Some("name-1"), externalId = Some(updateExternalId1)),
+      TimeSeries(name = Some("name-2"), externalId = Some(updateExternalId2))),
+    Map(updateExternalId1 -> TimeSeriesUpdate(name = Some(SetValue("name-1-1"))),
+      updateExternalId2 -> TimeSeriesUpdate(name = Some(SetValue("name-2-1")))),
     (readTimeSeries: Seq[TimeSeries], updatedTimeSeries: Seq[TimeSeries]) => {
       assert(readTimeSeries.size == updatedTimeSeries.size)
       assert(updatedTimeSeries.zip(readTimeSeries).forall { case (updated, read) =>
@@ -137,6 +140,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       )
       .compile
       .toList
+      .unsafeRunSync()
     manyTimeSeriesForAsset.size should be (327)
 
     val manyTimeSeriesForAssetWithLimit = client.timeSeries
@@ -148,6 +152,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       )
       .compile
       .toList
+      .unsafeRunSync()
     manyTimeSeriesForAssetWithLimit.size should be (100)
 
     val fewTimeSeriesForOtherAsset = client.timeSeries
@@ -158,6 +163,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       )
       .compile
       .toList
+      .unsafeRunSync()
     fewTimeSeriesForOtherAsset.size should be (1)
 
     val timeSeriesForBothAssets = client.timeSeries
@@ -169,6 +175,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       .fold(Stream.empty)(_ ++ _)
       .compile
       .toList
+      .unsafeRunSync()
     timeSeriesForBothAssets.size should be (manyTimeSeriesForAsset.size + fewTimeSeriesForOtherAsset.size)
 
     val timeSeriesForUnknownAsset = client.timeSeries
@@ -180,6 +187,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       .fold(Stream.empty)(_ ++ _)
       .compile
       .toList
+      .unsafeRunSync()
     timeSeriesForUnknownAsset.size should be (0)
 
     val timeSeriesForManyFilters = client.timeSeries
@@ -196,6 +204,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       .fold(Stream.empty)(_ ++ _)
       .compile
       .toList
+      .unsafeRunSync()
     timeSeriesForManyFilters.size should be (1)
   }
 
@@ -213,10 +222,10 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     val timeseries = keys.map(k=>
       TimeSeriesCreate(name = Some("scala-sdk-delete-cogniteId-" + k), externalId = Some(s"$externalIdPrefix-$k"))
     )
-    val createdItems = client.timeSeries.create(timeseries)
+    val createdItems = client.timeSeries.create(timeseries).unsafeRunSync()
 
     retryWithExpectedResult[Seq[TimeSeries]](
-      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(s"$externalIdPrefix-"))).compile.toList,
+      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(s"$externalIdPrefix-"))).compile.toList.unsafeRunSync(),
       r => r should have size 4
     )
     createdItems
@@ -232,10 +241,10 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
     val cogniteIds = (internalIds ++ externalIds)
 
-    client.timeSeries.delete(cogniteIds, true)
+    client.timeSeries.delete(cogniteIds, true).unsafeRunSync()
 
     retryWithExpectedResult[Seq[TimeSeries]](
-      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(prefix))).compile.toList,
+      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(prefix))).compile.toList.unsafeRunSync(),
       r => r should have size 0
     )
   }
@@ -250,19 +259,19 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
     val conflictInternalIdId:Seq[CogniteId] = Seq(CogniteInternalId.apply(deleteByExternalIds.head.id))
     an[CdpApiException] shouldBe thrownBy {
-      client.timeSeries.delete(externalIds ++ conflictInternalIdId, true)
+      client.timeSeries.delete(externalIds ++ conflictInternalIdId, true).unsafeRunSync()
     }
 
     val conflictExternalId:Seq[CogniteId] = Seq(CogniteExternalId.apply(deleteByInternalIds.last.externalId.getOrElse("")))
     an[CdpApiException] shouldBe thrownBy {
-      client.timeSeries.delete(internalIds ++ conflictExternalId, true)
+      client.timeSeries.delete(internalIds ++ conflictExternalId, true).unsafeRunSync()
     }
 
-    client.timeSeries.delete(internalIds ++ externalIds, true)
+    client.timeSeries.delete(internalIds ++ externalIds, true).unsafeRunSync()
 
     //make sure that timeSeries are deletes
     retryWithExpectedResult[Seq[TimeSeries]](
-      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(prefix))).compile.toList,
+      client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(prefix))).compile.toList.unsafeRunSync(),
       r => r should have size 0
     )
   }
@@ -276,12 +285,12 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     )
 
     val tsFiltered = client.timeSeries
-      .filter(timeSeriesFilter).compile.toList
+      .filter(timeSeriesFilter).compile.toList.unsafeRunSync()
 
     val tsFilteredByPartitions = client.timeSeries
         .filterPartitions(timeSeriesFilter, 8)
       .fold(Stream.empty)(_ ++ _)
-      .compile.toList
+      .compile.toList.unsafeRunSync()
 
     tsFiltered.size should be (10)
     assert(tsFiltered === tsFilteredByPartitions)
@@ -298,6 +307,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
           )
         )
       )
+      .unsafeRunSync()
     assert(createdTimeSearchResults.length == 20)
     val createdTimeSearchResults2 = client.timeSeries.search(
       TimeSeriesQuery(
@@ -309,7 +319,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
           )
         )
       )
-    )
+    ).unsafeRunSync()
     assert(createdTimeSearchResults2.length == 2)
 
     val unitSearchResults = client.timeSeries.search(
@@ -322,7 +332,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
           )
         )
       )
-    )
+    ).unsafeRunSync()
     assert(unitSearchResults.length == 33)
 
     val nameSearchResults = client.timeSeries
@@ -338,6 +348,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
           search = Some(TimeSeriesSearch(name = Some("W0405")))
         )
       )
+      .unsafeRunSync()
     assert(nameSearchResults.length == 19)
 
     val descriptionSearchResults = client.timeSeries.search(
@@ -351,7 +362,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
         ),
         search = Some(TimeSeriesSearch(description = Some("Skarv")))
       )
-    )
+    ).unsafeRunSync()
     assert(descriptionSearchResults.length == 51)
 
     val limitDescriptionSearchResults = client.timeSeries.search(
@@ -366,26 +377,26 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
         ),
         search = Some(TimeSeriesSearch(description = Some("Skarv")))
       )
-    )
+    ).unsafeRunSync()
     assert(limitDescriptionSearchResults.length == 5)
   }
 
   it should "be possible to create and query a time series without a name" in {
-    val timeSeriesID = client.timeSeries.createFromRead(Seq(TimeSeries())).head.id
+    val timeSeriesID = client.timeSeries.createFromRead(Seq(TimeSeries())).unsafeRunSync().head.id
     val startTime = System.currentTimeMillis()
     val endTime = startTime + 20*1000
     val dp = (startTime to endTime by 1000).map(t =>
         DataPoint(Instant.ofEpochMilli(t), java.lang.Math.random()))
-    client.dataPoints.insert(CogniteInternalId(timeSeriesID), dp)
+    client.dataPoints.insert(CogniteInternalId(timeSeriesID), dp).unsafeRunSync()
     retryWithExpectedResult[DataPointsByIdResponse](
       client.dataPoints.queryById(
-        timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000)),
+        timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000)).unsafeRunSync(),
       retrievedDp => retrievedDp.datapoints shouldBe dp)
-    client.dataPoints.deleteRangeById(timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000))
+    client.dataPoints.deleteRangeById(timeSeriesID, Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime + 1000)).unsafeRunSync()
   }
 
   it should "support search with dataSetIds" in {
-    val created = client.timeSeries.createFromRead(timeSeriesToCreate)
+    val created = client.timeSeries.createFromRead(timeSeriesToCreate).unsafeRunSync()
     try {
       val createdTimes = created.map(_.createdTime)
       val foundItems = retryWithExpectedResult(
@@ -395,13 +406,13 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
             min = Some(createdTimes.min),
             max = Some(createdTimes.max)
           ))
-        )))),
+        )))).unsafeRunSync(),
         (a: Seq[_]) => a should not be empty
       )
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
       created.filter(_.dataSetId.isDefined).map(_.id) should contain theSameElementsAs foundItems.map(_.id)
     } finally {
-      client.timeSeries.deleteByIds(created.map(_.id))
+      client.timeSeries.deleteByIds(created.map(_.id)).unsafeRunSync()
     }
   }
 
@@ -410,7 +421,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       Instant.ofEpochMilli(0),
       Instant.ofEpochMilli(1646906518178L),
       1000)
-    val syntheticQuery: Id[Seq[SyntheticTimeSeriesResponse]] = client.timeSeries.syntheticQuery(Items(Seq(query)))
+    val syntheticQuery: Id[Seq[SyntheticTimeSeriesResponse]] = client.timeSeries.syntheticQuery(Items(Seq(query))).unsafeRunSync()
     syntheticQuery.head.datapoints.length should be(1000)
   }
 }
