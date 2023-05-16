@@ -102,14 +102,14 @@ class ContainersTest extends CommonDataModelTestHelper {
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32, list = None),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(false)),
-      PropertyType.TimeSeriesReference(list = None),
+      PropertyType.TimeSeriesReference(list = Some(false)),
 //TODO: Uncomment once the list types are released
 //      PropertyType.TimeSeriesReference(list = Some(true)),
 //      PropertyType.TimeSeriesReference(list = Some(false)),
-      PropertyType.FileReference(list = None),
+      PropertyType.FileReference(list = Some(false)),
 //      PropertyType.FileReference(list = Some(true)),
 //      PropertyType.FileReference(list = Some(false)),
-      PropertyType.SequenceReference(list = None)
+      PropertyType.SequenceReference(list = Some(false))
 //      PropertyType.SequenceReference(list = Some(true)),
 //      PropertyType.SequenceReference(list = Some(false))
     )
