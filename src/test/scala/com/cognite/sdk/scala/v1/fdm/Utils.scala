@@ -41,9 +41,9 @@ object Utils {
     DirectNodeRelationProperty(
       container = Some(ContainerReference(space = SpaceExternalId, externalId = DirectNodeRelationContainerExtId)),
       source = None),
-    TimeSeriesReference(),
-    FileReference(),
-    SequenceReference()
+    TimeSeriesReference(list = Some(false)),
+    FileReference(list = Some(false)),
+    SequenceReference(list = Some(false))
 //TODO: Uncomment once the list types are released
 //    TimeSeriesReference(list = Some(true)),
 //    FileReference(list = Some(true)),
