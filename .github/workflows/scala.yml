@@ -175,4 +175,4 @@ jobs:
         env:
           GPG_KEY_PASSWORD: ${{ secrets.gpg_key_password }}
         run: |
-          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned
+          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned +sonatypeRelease
