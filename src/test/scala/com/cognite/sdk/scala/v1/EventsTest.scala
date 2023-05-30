@@ -280,7 +280,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
           createdTime = Some(
             TimeRange(Some(Instant.ofEpochMilli(1581098334114L)), Some(Instant.ofEpochMilli(1581098400000L)))
           )
-        ), 20
+        ), 10
       )
       .fold(Stream.empty)(_ ++ _)
       .compile

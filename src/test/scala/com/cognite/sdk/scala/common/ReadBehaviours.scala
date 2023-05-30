@@ -81,7 +81,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
         // Limit to 50k as we have a silly number of items for some resource types in our test project.
         val unlimitedLength = readable.list().take(50000).map(_ => 1).compile.toList.unsafeRunSync().length
         val partitionsLength = readable
-          .listPartitions(40)
+          .listPartitions(10)
           .fold(fs2.Stream.empty)(_ ++ _)
           .map(_ => 1)
           .take(50000)
