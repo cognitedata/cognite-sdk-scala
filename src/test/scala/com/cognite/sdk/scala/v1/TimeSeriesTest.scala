@@ -170,7 +170,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       .filterPartitions(
         TimeSeriesFilter(
           assetIds = Some(Seq(4480618819297421L, 95453437348104L))
-        ), 20
+        ), 10
       )
       .fold(Stream.empty)(_ ++ _)
       .compile
@@ -182,7 +182,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
       .filterPartitions(
         TimeSeriesFilter(
           assetIds = Some(Seq(44444L))
-        ), 20
+        ), 10
       )
       .fold(Stream.empty)(_ ++ _)
       .compile
@@ -199,7 +199,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
           unit = None,
           assetIds = Some(Seq(95453437348104L)),
           externalIdPrefix = Some("VAL_23_FIC")
-        ), 20, Some(5)
+        ), 10, Some(5)
       )
       .fold(Stream.empty)(_ ++ _)
       .compile

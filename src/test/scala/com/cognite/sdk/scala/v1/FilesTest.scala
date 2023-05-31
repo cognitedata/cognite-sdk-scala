@@ -169,7 +169,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
         FilesFilter(
           createdTime =
             Some(TimeRange(Some(Instant.ofEpochMilli(0)), Some(Instant.ofEpochMilli(1563284224550L))))
-        ), 20
+        ), 10
       )
       .fold(Stream.empty)(_ ++ _)
       .compile
