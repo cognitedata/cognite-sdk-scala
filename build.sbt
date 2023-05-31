@@ -10,7 +10,7 @@ val supportedScalaVersions = List(scala212, scala213)
 val jettyTestVersion = "9.4.48.v20220622"
 
 val sttpVersion = "3.5.2"
-val circeVersion = "0.14.2"
+val circeVersion = "0.14.5"
 val catsEffectVersion = "3.3.14"
 val fs2Version = "3.3.0"
 
