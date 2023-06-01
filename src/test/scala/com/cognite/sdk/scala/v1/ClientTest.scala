@@ -80,15 +80,12 @@ class ClientTest extends SdkTestSpec with OptionValues {
   }
 
   it should "support client with RateLimitingBackend" in {
-    GenericClient[IO](
-      "scala-sdk-test",
-      projectName,
-      baseUrl,
-      auth
-    )(
-      implicitly,
-      RateLimitingBackend[Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5)
-    ).token.inspect().unsafeRunSync().projects should not be empty
+    for {
+      httpBackend <- AsyncHttpClientCatsBackend[IO]()
+      rateLimiting <- RateLimitingBackend[Any](httpBackend, 5)
+      client = GenericClient[IO]("scala-sdk-test", projectName, baseUrl, auth)(implicitly, rateLimiting)
+      token <- client.token.inspect()
+    } yield (token.projects should not be empty
   }
 
   it should "support client with BackpressureThrottleBackend" in {

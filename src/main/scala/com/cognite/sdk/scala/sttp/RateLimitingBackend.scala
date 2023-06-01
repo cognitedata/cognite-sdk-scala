@@ -33,10 +33,12 @@ object RateLimitingBackend {
   def apply[S](
       delegate: SttpBackend[IO, S],
       maxParallelRequests: Int
-  )(implicit ioRuntime: IORuntime): RateLimitingBackend[IO, S] =
-    new RateLimitingBackend[IO, S](
+  )(implicit ioRuntime: IORuntime): IO[RateLimitingBackend[IO, S]] =
+    for {
+      sem <- Semaphore[IO](maxParallelRequests.toLong)
+    } yield new RateLimitingBackend[IO, S](
       delegate,
-      Semaphore[IO](maxParallelRequests.toLong).unsafeRunSync()
+      sem
     )
 
   def apply[F[_], S](
