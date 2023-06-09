@@ -61,9 +61,9 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: olafurpg/setup-scala@v13
+        uses: coursier/setup-action@v1
         with:
-          java-version: adopt@1.8
+          jvm: adopt:8
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
@@ -101,9 +101,9 @@ jobs:
         git rev-list --count --first-parent HEAD > patch_version.txt
 
     - name: Set up JDK 8
-      uses: olafurpg/setup-scala@v13
+      uses: coursier/setup-action@v1
       with:
-        java-version: adopt@1.8
+        jvm: adopt:8
 
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
     # Can we do something better here?
@@ -152,9 +152,9 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: olafurpg/setup-scala@v13
+        uses: coursier/setup-action@v1
         with:
-          java-version: adopt@1.8
+          jvm: adopt:8
 
       - name: Set up SBT
         env:
