@@ -23,7 +23,7 @@ jobs:
       - name: Set up JDK 8
         uses: coursier/setup-action@v1
         with:
-          jvmf: adopt:8
+          jvm: adopt:8
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
