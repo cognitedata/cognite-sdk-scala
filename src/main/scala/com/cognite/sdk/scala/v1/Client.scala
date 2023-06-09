@@ -4,16 +4,20 @@
 package com.cognite.sdk.scala.v1
 
 import BuildInfo.BuildInfo
-import cats.{Id, Monad}
 import cats.implicits._
+import cats.{Id, Monad}
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.resources._
-import sttp.client3._
-import sttp.client3.circe.asJsonEither
+import com.cognite.sdk.scala.v1.resources.fdm.datamodels.{DataModels => DataModelsV3}
+import com.cognite.sdk.scala.v1.resources.fdm.containers.Containers
+import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances
+import com.cognite.sdk.scala.v1.resources.fdm.views.Views
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.capabilities.Effect
+import sttp.client3._
+import sttp.client3.circe.asJsonEither
 import sttp.model.{StatusCode, Uri}
 import sttp.monad.MonadError
 
@@ -139,7 +143,7 @@ class GenericClient[F[_]](
       applicationName: String,
       projectName: String,
       baseUrl: String = GenericClient.defaultBaseUrl,
-      auth: Auth = Auth.defaultAuth,
+      auth: Auth,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
@@ -168,8 +172,6 @@ class GenericClient[F[_]](
       clientTag,
       cdfVersion
     )
-  lazy val login =
-    new Login[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
   lazy val token =
     new Token[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
   lazy val assets = new Assets[F](requestSession)
@@ -207,6 +209,22 @@ class GenericClient[F[_]](
   lazy val nodes = new Nodes[F](requestSession, dataModels)
   lazy val spaces = new Spaces[F](requestSession)
   lazy val edges = new Edges[F](requestSession, dataModels)
+  lazy val containers = new Containers[F](requestSession)
+  lazy val instances = new Instances[F](requestSession)
+  lazy val views = new Views[F](requestSession)
+  lazy val spacesv3 = new SpacesV3[F](requestSession)
+  lazy val dataModelsV3 = new DataModelsV3[F](requestSession)
+
+  lazy val wdl = new WellDataLayer[F](
+    RequestSession(
+      applicationName,
+      uri"$uri/api/v1/projects/$projectName",
+      sttpBackend,
+      authProvider,
+      clientTag,
+      Some("20221206-beta")
+    )
+  )
 
   def project: F[Project] =
     requestSession.get[Project, Project](
@@ -214,7 +232,6 @@ class GenericClient[F[_]](
       value => value
     )
   lazy val serviceAccounts = new ServiceAccounts[F](requestSession)
-  lazy val apiKeys = new ApiKeys[F](requestSession)
   lazy val groups = new Groups[F](requestSession)
   lazy val securityCategories = new SecurityCategories[F](requestSession)
 }
@@ -262,33 +279,36 @@ object GenericClient {
 
   def forAuth[F[_]: Monad](
       applicationName: String,
+      projectName: String,
       auth: Auth,
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
   )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
-    forAuthProvider(applicationName, AuthProvider(auth), baseUrl, apiVersion, clientTag, cdfVersion)
+    forAuthProvider(
+      applicationName,
+      projectName,
+      AuthProvider(auth),
+      baseUrl,
+      apiVersion,
+      clientTag,
+      cdfVersion
+    )
 
   def forAuthProvider[F[_]: Monad](
       applicationName: String,
+      projectName: String,
       authProvider: AuthProvider[F],
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
-  )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] = {
-    val login = new Login[F](
-      RequestSession(applicationName, parseBaseUrlOrThrow(baseUrl), sttpBackend, authProvider)
-    )
-
-    for {
-      status <- login.status()
-      projectName = status.project
-    } yield
-      if (projectName.trim.isEmpty) {
-        throw InvalidAuthentication()
-      } else {
+  )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+    if (projectName.isEmpty) {
+      throw InvalidAuthentication()
+    } else {
+      Monad[F].pure(
         new GenericClient[F](
           applicationName,
           projectName,
@@ -301,8 +321,8 @@ object GenericClient {
           implicitly,
           sttpBackend
         )
-      }
-  }
+      )
+    }
 
   def parseResponse[T, R](uri: Uri, mapResult: T => R)(
       implicit decoder: Decoder[T]
@@ -329,7 +349,8 @@ object GenericClient {
           )
         case Left(HttpError(cdpApiError, _)) =>
           throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
-        case Right(value) => mapResult(value)
+        case Right(value) =>
+          mapResult(value)
       }
     )
 }
@@ -339,7 +360,7 @@ class Client(
     override val projectName: String,
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
-    auth: Auth = Auth.defaultAuth
+    auth: Auth
 )(implicit sttpBackend: SttpBackend[Id, Any])
     extends GenericClient[Id](applicationName, projectName, baseUrl, auth)
 

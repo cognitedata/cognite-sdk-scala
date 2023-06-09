@@ -9,8 +9,7 @@ Visit [Maven Repository](https://mvnrepository.com/artifact/com.cognite/cognite-
 to see the available versions, and how to include it as a dependency for sbt, Maven, Gradle,
 and other build tools.
 
-Authentication is specified using an implicit `Auth` parameter, which by default
-looks for an API key to use in the `COGNITE_API_KEY` environment variable.
+Authentication is specified using an implicit `Auth` parameter.
 
 The `GenericClient` requires a backend for [sttp](https://github.com/softwaremill/sttp),
 which can use any effects wrapper (for example,
@@ -210,5 +209,3 @@ TEST_AAD_TENANT="a valid azure ad tenant id"
 TEST_CLIENT_ID="the id of a valid client credential, belonging to the given tenant, and with access to the playground project"
 TEST_CLIENT_SECRET="a valid client secret for the given client id"
 ```
-
-Some tests for API Keys features are still in place, to run these tests the aditional environment variable `TEST_API_KEY` is needed, this should contain a valid API key for the playground project.

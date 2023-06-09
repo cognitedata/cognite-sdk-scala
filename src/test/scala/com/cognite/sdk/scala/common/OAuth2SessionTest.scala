@@ -21,7 +21,7 @@ import scala.collection.immutable.Seq
 import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
-class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
+class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with RetryWhile {
 
   it should "not refresh tokens if original token is still valid" in {
     import sttp.client3.impl.cats.implicits._
@@ -62,7 +62,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         session,
         refreshSecondsBeforeExpiration = 1,
         Some(IO("kubernetesServiceToken")),
-        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 5, "irrelevant")))
+        Some(IO.pure(Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 5, "irrelevant")))))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- numTokenRequests.get.map(_ shouldBe 0)
       _ <- IO.sleep(3.seconds)
@@ -113,22 +113,26 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues {
         }
 
     val io = for {
+      _ <- numTokenRequests.update(_ => 0)
       authProvider <- OAuth2.SessionProvider[IO](
         session,
         refreshSecondsBeforeExpiration = 2,
         Some(IO("kubernetesServiceToken")),
-        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
+        Some(IO.pure(Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- numTokenRequests.get.map(_ shouldBe 0)  // original token is still valid
+      noNewToken <- numTokenRequests.get  // original token is still valid
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- numTokenRequests.get.map(_ shouldBe 1) // original token is expired
+      oneRequestedToken <- numTokenRequests.get // original token is expired
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      _ <- numTokenRequests.get.map(_ shouldBe 2) // first renew token is expired
-    } yield ()
+      twoRequestedToken <- numTokenRequests.get // first renew token is expired
+    } yield (noNewToken, oneRequestedToken, twoRequestedToken)
 
-    io.unsafeRunTimed(10.seconds).value
+    retryWithExpectedResult[(Int,Int,Int)](
+      io.unsafeRunTimed(10.seconds).value,
+      r => r shouldBe ((0, 1, 2))
+    )
   }
 
   it should "throw a CdpApiException error when failing to refresh the session" in {

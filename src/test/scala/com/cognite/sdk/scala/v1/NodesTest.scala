@@ -43,16 +43,19 @@ class NodesTest
   val dataPropFloat = DataModelPropertyDefinition(PropertyType.Float32, nullable = false)
   val dataPropDirectRelation = DataModelPropertyDefinition(PropertyType.DirectRelation)
   val dataPropDate = DataModelPropertyDefinition(PropertyType.Date)
+  val dataPropJson = DataModelPropertyDefinition(PropertyType.Json)
+  val dataPropInt = DataModelPropertyDefinition(PropertyType.Int)
 
   val dataModel = DataModel(
-    s"Equipment-instances",
+    s"Equipment-instances-0",
     Some(
       Map(
         "prop_string" -> dataPropString,
         "prop_bool" -> dataPropBool,
         "prop_float" -> dataPropFloat,
         "prop_direct_relation" -> dataPropDirectRelation,
-        "prop_date" -> dataPropDate
+        "prop_date" -> dataPropDate,
+        "prop_json" -> dataPropJson
       )
     )
   )
@@ -67,7 +70,15 @@ class NodesTest
           "prop_string" -> PropertyType.Text.Property("EQ0001"),
           "prop_float" -> PropertyType.Float32.Property(0.1f),
           "prop_direct_relation" -> PropertyType.DirectRelation.Property(List(space, "externalId")),
-          "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22))
+          "prop_date" -> PropertyType.Date.Property(LocalDate.of(2022, 3, 22)),
+          "prop_json" -> PropertyType.Json.Property("""{
+                                                      |  "int_val" : 2,
+                                                      |  "string_val" : "tata",
+                                                      |  "struct_val" : {
+                                                      |    "age" : 25.0,
+                                                      |    "name" : "jetfire"
+                                                      |  }
+                                                      |}""".stripMargin)
         )
       )
     )
@@ -86,7 +97,7 @@ class NodesTest
 
   val dataModelNodeToCreate3 =
     Node(
-      "equipment_45",
+      "45",
       properties = Some(
         Map(
           "prop_string" -> PropertyType.Text.Property("EQ0011"),
@@ -102,6 +113,7 @@ class NodesTest
   val dataPropArrayString = DataModelPropertyDefinition(PropertyType.Array.Text, true)
   val dataPropArrayFloat = DataModelPropertyDefinition(PropertyType.Array.Float32, true)
   val dataPropArrayInt = DataModelPropertyDefinition(PropertyType.Array.Int, true)
+  val dataPropArrayJson = DataModelPropertyDefinition(PropertyType.Array.Json, true)
 
   val dataModelArray = DataModel(
     s"Equipment-arry",
@@ -109,7 +121,8 @@ class NodesTest
       Map(
         "array_string" -> dataPropArrayString,
         "array_float" -> dataPropArrayFloat,
-        "array_int" -> dataPropArrayInt
+        "array_int" -> dataPropArrayInt,
+        "array_json" -> dataPropArrayJson
       )
     )
   )
@@ -126,6 +139,14 @@ class NodesTest
           ),
         "array_int" -> PropertyType.Array.Int.Property(
           Vector(1,12,13)
+          ),
+        "array_json" -> PropertyType.Array.Json.Property(
+          Vector("""{
+                   |  "string_val" : "tata"
+                   |}""".stripMargin,
+                """{
+                  |  "int_val" : 2
+                  |}""".stripMargin)
           )
         )
       )
@@ -197,6 +218,36 @@ class NodesTest
 
     dataModelInstances.size shouldBe 3
     dataModelInstances.map(_.externalId).toSet shouldBe toCreates.map(_.externalId).toSet
+    dataModelInstances
+      .find(_.externalId === dataModelNodeToCreate1.externalId)
+      .flatMap(_.allProperties.get("prop_json")) shouldBe Some(
+      PropertyType.Json.Property("""{
+                                   |  "int_val" : 2,
+                                   |  "string_val" : "tata",
+                                   |  "struct_val" : {
+                                   |    "age" : 25.0,
+                                   |    "name" : "jetfire"
+                                   |  }
+                                   |}""".stripMargin)
+    )
+
+    val instancesOfArray = blueFieldClient.nodes
+      .createItems(space, DataModelIdentifier(Some(space), dataModelArray.externalId), items = Seq(dmiArrayToCreate1))
+      .unsafeRunSync()
+      .toList
+
+    instancesOfArray.size shouldBe 1
+    instancesOfArray.map(_.externalId).toSet shouldBe Set(dmiArrayToCreate1.externalId)
+    instancesOfArray
+      .find(_.externalId === dmiArrayToCreate1.externalId)
+      .flatMap(_.allProperties.get("array_json")) shouldBe Some(
+      PropertyType.Array.Json.Property(Seq("""{
+                                             |  "string_val" : "tata"
+                                             |}""".stripMargin,
+                                             """{
+                                             |  "int_val" : 2
+                                             |}""".stripMargin))
+    )
   }
 
   it should "fail if input data type is not correct" in {
@@ -664,4 +715,79 @@ class NodesTest
       .deleteItems(Seq("toto"), space)
       .unsafeRunSync()
   }
+
+  it should "cast any instance property if property definition is a string" in {
+    val dataModelForCastingTest = DataModel(
+      "cast-test-model-1",
+      Some(
+        Map(
+          "prop_int_as_string" -> dataPropInt,
+          "prop_string_as_int" -> dataPropString
+        )
+      )
+    )
+    blueFieldClient.dataModels
+      .createItems(Seq(dataModelForCastingTest), space)
+      .unsafeRunSync()
+    val instance =
+      Node(
+        "i_1",
+        properties = Some(
+          Map(
+            "prop_int_as_string" -> PropertyType.Text.Property("101"),
+            "prop_string_as_int" -> PropertyType.Int.Property(102)
+          )
+        )
+      )
+    val dataModelInstances = blueFieldClient.nodes
+      .createItems(space, DataModelIdentifier(Some(space), dataModelForCastingTest.externalId), items = Seq(instance))
+      .unsafeRunSync()
+      .toList
+    val instancePropsValueMap = dataModelInstances
+      .find(_.externalId === instance.externalId)
+      .map(_.allProperties)
+      .getOrElse(Map.empty)
+
+    dataModelInstances.size shouldBe 1
+    instancePropsValueMap.get("prop_int_as_string") shouldBe Some(PropertyType.Int.Property(101))
+    instancePropsValueMap.get("prop_string_as_int") shouldBe Some(PropertyType.Text.Property("102"))
+  }
+
+  it should "cast any array instance property if property definition is an array of string" in {
+    val dataModelArrayForCastingTest = DataModel(
+      "cast-array-test-model-1",
+      Some(
+        Map(
+          "prop_ints_as_strings" -> dataPropArrayInt,
+          "prop_strings_as_ints" -> dataPropArrayString
+        )
+      )
+    )
+    blueFieldClient.dataModels
+      .createItems(Seq(dataModelArrayForCastingTest), space)
+      .unsafeRunSync()
+    val arrayInstance =
+      Node(
+        "i_2",
+        properties = Some(
+          Map(
+            "prop_ints_as_strings" -> PropertyType.Array.Text.Property(Seq("201", "202")),
+            "prop_strings_as_ints" -> PropertyType.Array.Int.Property(Seq(301, 302))
+          )
+        )
+      )
+    val arrayDataModelInstances = blueFieldClient.nodes
+      .createItems(space, DataModelIdentifier(Some(space), dataModelArrayForCastingTest.externalId), items = Seq(arrayInstance))
+      .unsafeRunSync()
+      .toList
+    val instanceArrayPropValueMap = arrayDataModelInstances
+      .find(_.externalId === arrayInstance.externalId)
+      .map(_.allProperties)
+      .getOrElse(Map.empty)
+
+    arrayDataModelInstances.size shouldBe 1
+    instanceArrayPropValueMap.get("prop_ints_as_strings") shouldBe Some(PropertyType.Array.Int.Property(Seq(201, 202)))
+    instanceArrayPropValueMap.get("prop_strings_as_ints") shouldBe Some(PropertyType.Array.Text.Property(Seq("301", "302")))
+  }
+
 }

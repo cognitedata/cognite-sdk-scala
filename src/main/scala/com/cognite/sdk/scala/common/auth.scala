@@ -14,12 +14,6 @@ sealed trait Auth {
 }
 
 object Auth {
-  val apiKeyEnvironmentVariable: String = "COGNITE_API_KEY"
-  val defaultAuth: Auth =
-    Option(System.getenv(apiKeyEnvironmentVariable))
-      .map(ApiKeyAuth(_, None))
-      .getOrElse[Auth](NoAuthentication())
-
   implicit class AuthSttpExtension[U[_], T, -R](val r: RequestT[U, T, R]) {
     def auth(auth: Auth): RequestT[U, T, R] =
       auth.auth(r)
@@ -29,14 +23,8 @@ object Auth {
 final case class NoAuthentication() extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     throw new SdkException(
-      s"Authentication not provided and environment variable ${Auth.apiKeyEnvironmentVariable} not set"
+      s"Authentication not provided"
     )
-}
-
-final case class ApiKeyAuth(apiKey: String, override val project: Option[String] = None)
-    extends Auth {
-  def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
-    r.header("api-key", apiKey)
 }
 
 final case class BearerTokenAuth(bearerToken: String, override val project: Option[String] = None)

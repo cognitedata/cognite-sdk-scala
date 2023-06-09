@@ -3,10 +3,14 @@
 
 package com.cognite.sdk.scala.v1
 
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 import io.circe.Json
 import org.scalatest.Inspectors._
 import io.circe.JsonObject
 import com.cognite.sdk.scala.common._
+import org.scalatest.matchers.should.Matchers
+
 
 @SuppressWarnings(
   Array(
@@ -15,16 +19,26 @@ import com.cognite.sdk.scala.common._
     "org.wartremover.warts.IterableOps"
   )
 )
-class FunctionsTest extends SdkTestSpec with ReadBehaviours {
+class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBehaviours {
 
-  ignore should "read function items" in {
-    client.functions.read().items should not be empty
+  private val client = new GenericClient[IO](
+    "scala-sdk-test",
+    "extractor-bluefield-testing",
+    "https://bluefield.cognitedata.com",
+    authProvider,
+    None,
+    None,
+    None
+  )
+
+  it should "read function items" in {
+    client.functions.read().unsafeRunSync().items should not be empty
   }
 
-  ignore should "retrieve function by id" in {
-    val func = client.functions.retrieveById(13109660923970L)
-    func.id should equal(Some(13109660923970L))
-    func.name should equal("Scala SDK test function")
+  it should "retrieve function by id" in {
+    val func = client.functions.retrieveById(8590831424885479L).unsafeRunSync()
+    func.id should equal(Some(8590831424885479L))
+    func.name should equal("scala-sdk-test-function")
     func.status should equal(Some("Ready"))
   }
 
@@ -34,63 +48,67 @@ class FunctionsTest extends SdkTestSpec with ReadBehaviours {
         name = "scala-sdk-write-example-1",
         fileId = 523869369979314L
       )
-    ))
+    )).unsafeRunSync()
     createRes.length should equal(1)
     client.functions.deleteByIds(createRes.map(_.id.getOrElse(0L)))
   }
 
-  ignore should "read function call items" in {
-    client.functionCalls(13109660923970L).read().items should not be empty
+  it should "read function call items" in {
+    client.functionCalls(8590831424885479L).read().unsafeRunSync().items should not be empty
   }
 
-  ignore should "retrieve function call by id" in {
-    val call = client.functionCalls(13109660923970L).retrieveById(4177407523317994L)
-    call.id should equal(Some(4177407523317994L))
-    call.status should equal(Some("Completed"))
+  it should "retrieve function call by id" in {
+    val call = client.functionCalls(8590831424885479L).retrieveById(3987350585370826L).unsafeRunSync()
+    call.id should equal(3987350585370826L)
+    call.status should equal("Completed")
   }
 
-  ignore should "read function call logs items" in {
-    val res = client.functionCalls(13109660923970L).retrieveLogs(4177407523317994L)
-    res.items should not be empty
-    val log = res.items.head
-    log.message should equal(Some("{}"))
+  it should "read function call logs items" in {
+    val res = client.functionCalls(8590831424885479L).retrieveLogs(3987350585370826L).unsafeRunSync()
+    res.items.isEmpty shouldBe true
   }
 
-  ignore should "retrieve function call response" in {
-    val response = client.functionCalls(13109660923970L).retrieveResponse(4177407523317994L)
-    response.response should equal(Some(Json.fromInt(42)))
+  it should "retrieve function call response" in {
+    val response = client.functionCalls(8590831424885479L).retrieveResponse(3987350585370826L).unsafeRunSync()
+    response.response shouldBe Some(Json.fromFields(Seq(("res_int", Json.fromInt(1)),("res_string", Json.fromString("string response")))))
   }
 
-  ignore should "filter function calls" in {
+  it should "filter function calls" in {
     val filter = FunctionCallFilter(status = Some("Completed"))
-    val res = client.functionCalls(13109660923970L).filter(filter).items
-    forAll (res) { call => call.status should equal(Some("Completed")) }
+    val res = client.functionCalls(8590831424885479L).filter(filter).unsafeRunSync().items
+    forAll (res) { call => call.status should equal("Completed") }
   }
 
-  ignore should "read function schedule items" in {
-    val res = client.functionSchedules.read()
+  it should "read function schedule items" in {
+    val res = client.functionSchedules.read().unsafeRunSync()
     res.items should not be empty
     val schedule = res.items.head
-    schedule.name should equal("Scala SDK test schedule")
+    schedule.name should equal("test-schedule-function")
     schedule.cronExpression should equal(Some("0 0 1 * *"))
   }
 
   it should "call function" in {
     val nonce = client.sessions
-      .createWithClientCredentialFlow(Items(Seq(SessionCreateWithCredential(credentials.clientId, credentials.clientSecret))))
+      .createWithClientCredentialFlow(Items(Seq(SessionCreateWithCredential(credentials.clientId, credentials.clientSecret)))).unsafeRunSync()
       .map(_.nonce).head
-    val res = client.functionCalls(872317943483962L).callFunction(Json.fromJsonObject(JsonObject.empty), Some(nonce))
-    res.status should equal(Some("Running"))
+    val res = client.functionCalls(8590831424885479L).callFunction(Json.fromJsonObject(JsonObject.empty), Some(nonce)).unsafeRunSync()
+    res.status should equal("Running")
   }
 
-  ignore should "create and delete function schedules" in {
+  it should "create and delete function schedules" in {
+    val nonce = client.sessions
+      .createWithClientCredentialFlow(Items(Seq(SessionCreateWithCredential(credentials.clientId, credentials.clientSecret)))).unsafeRunSync()
+      .map(_.nonce).head
     val createRes = client.functionSchedules.create(Seq(
       FunctionScheduleCreate(
         name = "scala-sdk-write-example-1",
-        cronExpression = "0 0 1 * *"
+        functionId = Some(8590831424885479L),
+        cronExpression = "0 0 1 * *",
+        nonce = Some(nonce)
       )
-    ))
+    )).unsafeRunSync()
     createRes.length should equal(1)
-    client.functionSchedules.deleteByIds(createRes.map(_.id.getOrElse(0L)))
+    client.functionSchedules.deleteByIds(createRes.map(_.id.getOrElse(0L))).unsafeRunSync()
+    client.functionSchedules.read().unsafeRunSync().items.find(_.name === "scala-sdk-write-example-1") shouldBe None
   }
 }

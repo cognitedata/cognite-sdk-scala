@@ -9,7 +9,6 @@ import java.net.{ConnectException, UnknownHostException}
 import java.time.Instant
 import java.util.Base64
 import cats.effect._
-import cats.effect.unsafe.implicits.global
 import cats.Id
 import cats.effect.std.Queue
 import com.cognite.sdk.scala.common._
@@ -28,19 +27,15 @@ import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
 class ClientTest extends SdkTestSpec with OptionValues {
-  private val loginStatus = client.login.status()
-  private val loginStatusResponse = Response(
+  private val tokenInspectResponse = Response(
     s"""
        |{
-       |  "data": {
-       |    "user": "tom@example.com",
-       |    "loggedIn": true,
-       |    "project": "${loginStatus.project}",
-       |    "projectId": ${loginStatus.projectId.toString}
-       |  }
+       |  "subject": "123",
+       |  "projects": [{"projectUrlName": "111", "groups": []}]
        |}
        |""".stripMargin, StatusCode.Ok, "OK",
     Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
+
   private def makeTestingBackend(): SttpBackend[IO, Any] = {
     val errorResponse = Response("{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Some error\"\n  }\n}",
       StatusCode.TooManyRequests, "", Seq(Header("x-request-id", "test-request-header")))
@@ -56,70 +51,6 @@ class ClientTest extends SdkTestSpec with OptionValues {
       .thenRespondCyclicResponses(errorResponse, errorResponse, errorResponse, errorResponse, errorResponse, successResponse, errorTooManyRequestsNoBody
       )
   }
-  private val loginStatusResponseWithApiKeyId = Response(
-      s"""
-         |{
-         |  "data": {
-         |    "user": "tom@example.com",
-         |    "loggedIn": true,
-         |    "project": "${loginStatus.project}",
-         |    "projectId": ${loginStatus.projectId.toString},
-         |    "apiKeyId": 12147483647
-         |  }
-         |}
-         |""".stripMargin, StatusCode.Ok, "OK",
-      Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
-
-  "Client" should "fetch the project using login/status if using api key" in {
-    val apiKey = Option(System.getenv("TEST_API_KEY"))
-                  .getOrElse(throw new RuntimeException("TEST_API_KEY not set"))
-    val auth: Auth = ApiKeyAuth(apiKey)
-
-    noException should be thrownBy GenericClient.forAuth[Id](
-      "scala-sdk-test", auth)(
-      implicitly,
-      sttpBackend
-    )
-    GenericClient.forAuth[Id]("scala-sdk-test", auth)(
-      implicitly,
-      sttpBackend
-    ).projectName should not be empty
-  }
-
-  it should "not require apiKeyId to be present" in {
-    val loginStatusResponseWithoutApiKeyId = Response(
-      s"""
-         |{
-         |  "data": {
-         |    "user": "",
-         |    "loggedIn": false,
-         |    "project": "",
-         |    "projectId": -1
-         |  }
-         |}
-         |""".stripMargin, StatusCode.Ok, "OK",
-      Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
-
-    val respondWithoutApiKeyId = SttpBackendStub.synchronous
-      .whenAnyRequest
-      .thenRespond(loginStatusResponseWithoutApiKeyId)
-    new GenericClient[Id](
-      "scala-sdk-test", projectName, auth = auth)(
-      implicitly,
-      respondWithoutApiKeyId
-    ).login.status().apiKeyId shouldBe empty
-  }
-
-  it should "handle an apiKeyId which is larger than an int" in {
-    val respondWithApiKeyId = SttpBackendStub.synchronous
-      .whenAnyRequest
-      .thenRespond(loginStatusResponseWithApiKeyId)
-    new GenericClient[Id](
-      "scala-sdk-test", projectName, auth = auth)(
-      implicitly,
-      respondWithApiKeyId
-    ).login.status().apiKeyId shouldBe Some(12147483647L)
-  }
 
   it should "set x-cdp headers" in {
     var headers = Seq.empty[Header]
@@ -127,10 +58,10 @@ class ClientTest extends SdkTestSpec with OptionValues {
       .whenAnyRequest
       .thenRespondF { req =>
         headers = req.headers
-        Response.ok(loginStatusResponseWithApiKeyId).copy(headers = req.headers)
+        Response.ok(tokenInspectResponse).copy(headers = req.headers)
       }
     new GenericClient[Id]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, saveHeadersStub)
-      .login.status()
+      .token.inspect()
     headers should contain (Header("x-cdp-clienttag", "client-test"))
     headers should contain (Header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}"))
     headers should contain (Header("x-cdp-app", "scala-sdk-test"))
@@ -145,7 +76,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     )(
       implicitly,
       new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
-    ).login.status().unsafeRunSync().loggedIn shouldBe true
+    ).token.inspect().unsafeRunSync().projects should not be empty
   }
 
   it should "support client with RateLimitingBackend" in {
@@ -157,7 +88,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     )(
       implicitly,
       RateLimitingBackend[Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5)
-    ).login.status().unsafeRunSync().loggedIn shouldBe true
+    ).token.inspect().unsafeRunSync().projects should not be empty
   }
 
   it should "support client with BackpressureThrottleBackend" in {
@@ -174,20 +105,20 @@ class ClientTest extends SdkTestSpec with OptionValues {
     )(
       implicitly,
       new BackpressureThrottleBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), makeQueueOf1.unsafeRunSync(), 1.seconds)
-    ).login.status().unsafeRunSync().loggedIn shouldBe true
+    ).token.inspect().unsafeRunSync().projects should not be empty
   }
 
   it should "throw an exception if the authentication is invalid and project is not specified" in {
-    implicit val auth: Auth = ApiKeyAuth("invalid-key")
+    implicit val auth: Auth = BearerTokenAuth("invalid-key")
     an[InvalidAuthentication] should be thrownBy GenericClient.forAuth[Id](
-      "scala-sdk-test", auth)(
+      "scala-sdk-test", "", auth)(
       implicitly,
       sttpBackend
     ).assets.list(Some(1)).compile.toList
   }
 
   it should "not throw an exception if the authentication is invalid and project is specified" in {
-    implicit val auth: Auth = ApiKeyAuth("invalid-key", project = Some("random-project"))
+    implicit val auth: Auth = BearerTokenAuth("invalid-key", project = Some("random-project"))
     noException should be thrownBy new GenericClient[Id](
       "scala-sdk-test", projectName, auth = auth)(
       implicitly,
@@ -202,7 +133,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "",
         auth
-      )(new LoggingSttpBackend[Id, Any](sttpBackend)).login.status()
+      )(new LoggingSttpBackend[Id, Any](sttpBackend)).token.inspect()
     }
     assertThrows[UnknownHostException] {
       Client(
@@ -210,7 +141,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "thisShouldThrowAnUnknownHostException:)",
         auth
-      )(sttpBackend).login.status()
+      )(sttpBackend).token.inspect()
     }
   }
 
@@ -221,7 +152,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "http://api.cognitedata.com",
         auth
-      )(sttpBackend).login.status()
+      )(sttpBackend).token.inspect()
     }
   }
 
@@ -272,7 +203,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     new GenericClient[F]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
-      ApiKeyAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant", Some("randomproject"))
     )(implicitly,
       new RetryingBackend[F, Any](backend,
         maxRetries = maxRetries,
@@ -296,11 +227,11 @@ class ClientTest extends SdkTestSpec with OptionValues {
         badGatewayResponseRight,
         unavailableResponse,
         serverError,
-        loginStatusResponse)
+        tokenInspectResponse)
     val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
-      ApiKeyAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant", Some("randomproject"))
 
     )(
       implicitly,
@@ -308,7 +239,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
     )
-    client.login.status().unsafeRunSync().project shouldBe (loginStatus.project)
+    client.token.inspect().unsafeRunSync().subject shouldBe ("123")
   }
 
   it should "retry requests when network errors occur" in {
@@ -324,11 +255,11 @@ class ClientTest extends SdkTestSpec with OptionValues {
           } else if (requestCounter <= 5) {
             throw new SttpClientException.ReadException(req, new TimeoutException("timeout"))
           } else {
-            loginStatusResponse
+            tokenInspectResponse
           }
       })
-    an[SttpClientException] should be thrownBy retryingClient(backendStub, 4).login.status().unsafeRunTimed(1.seconds).value
-    retryingClient(backendStub).login.status().unsafeRunTimed(1.seconds).value.project shouldBe (loginStatus.project)
+    an[SttpClientException] should be thrownBy retryingClient(backendStub, 4).token.inspect().unsafeRunTimed(1.seconds).value
+    retryingClient(backendStub).token.inspect().unsafeRunTimed(1.seconds).value.subject shouldBe ("123")
   }
 
   it should "retry JSON requests based on response code if content type is unknown" in {
@@ -368,7 +299,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         serverError,
         serverErrorHtml,
         badRequest,
-        loginStatusResponse,
+        tokenInspectResponse,
         badGatewayResponse,
         unavailableResponse,
         serverError,
@@ -379,7 +310,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
-      ApiKeyAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant", Some("randomproject"))
     )(
       implicitly,
       new RetryingBackend[IO, Any](
@@ -387,7 +318,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
     )
-    client.login.status().unsafeRunSync().project shouldBe loginStatus.project
+    client.token.inspect().unsafeRunSync().subject shouldBe "123"
     client.assets.list().compile.toList.unsafeRunSync().length should be > 0
   }
 
@@ -417,7 +348,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val client2 = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
-      ApiKeyAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant", Some("randomproject"))
     )(
       implicitly,
       new RetryingBackend[IO, Any](

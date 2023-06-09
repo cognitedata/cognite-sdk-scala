@@ -121,6 +121,8 @@ class FunctionCalls[F[_]](val requestSession: RequestSession[F], val functionId:
 }
 
 object FunctionCalls {
+  implicit val functionCallErrorDecoder: Decoder[FunctionCallError] =
+    deriveDecoder[FunctionCallError]
   implicit val functionCallDecoder: Decoder[FunctionCall] = deriveDecoder[FunctionCall]
   implicit val functionCallLogEntryDecoder: Decoder[FunctionCallLogEntry] =
     deriveDecoder[FunctionCallLogEntry]

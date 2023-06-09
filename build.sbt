@@ -1,16 +1,16 @@
 import wartremover.Wart
 import sbt.project
 
-val scala3 = "3.2.0"
+//val scala3 = "3.2.0"
 val scala213 = "2.13.8"
 val scala212 = "2.12.17"
-val supportedScalaVersions = List(scala212, scala213, scala3)
+val supportedScalaVersions = List(scala212, scala213)
 
 // This is used only for tests.
 val jettyTestVersion = "9.4.48.v20220622"
 
 val sttpVersion = "3.5.2"
-val circeVersion = "0.14.2"
+val circeVersion = "0.14.5"
 val catsEffectVersion = "3.3.14"
 val fs2Version = "3.3.0"
 
@@ -18,12 +18,15 @@ lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
 ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.5"
 
+lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
+
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.4.0",
+  version := "2.6." + patchVersion,
+  isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
@@ -133,7 +136,7 @@ lazy val core = (project in file("."))
   )
 
 val scalaTestDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.13" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.14" % "test"
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,

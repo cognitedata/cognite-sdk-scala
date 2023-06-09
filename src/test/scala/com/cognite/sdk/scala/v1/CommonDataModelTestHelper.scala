@@ -3,6 +3,7 @@ package com.cognite.sdk.scala.v1
 import cats.effect.unsafe.implicits.global
 import cats.effect.IO
 import com.cognite.sdk.scala.common.OAuth2
+import com.cognite.sdk.scala.sttp.RetryingBackend
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sttp.client3._
@@ -45,5 +46,8 @@ trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
     None,
     None,
     Some("alpha")
+  )(
+    implicitly,
+    new RetryingBackend[IO, Any](implicitly)
   )
 }

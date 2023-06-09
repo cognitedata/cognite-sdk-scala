@@ -10,7 +10,22 @@ import io.circe.syntax._
 // scalastyle:off number.of.types
 
 sealed abstract case class DataModelProperty[V](value: V)(implicit encoder: Encoder[V]) {
-  def encode: Json = value.asJson
+  import io.circe.parser._
+  def encode: Json =
+    value match {
+      case rawStringJson: String =>
+        parse(rawStringJson) match {
+          case Left(_) => value.asJson
+          case Right(json) if json.isNumber => Json.fromString(rawStringJson)
+          case Right(json) => json
+        }
+      case arrayRawStringJson: Iterable[_] =>
+        val encodedAsJsonResult = arrayRawStringJson.map(s => parse(s.toString))
+        if (encodedAsJsonResult.forall(_.isRight)) {
+          Json.fromValues(encodedAsJsonResult.collect { case Right(v) => v })
+        } else { value.asJson }
+      case _ => value.asJson
+    }
 }
 
 sealed abstract class PropertyType[V](implicit decoder: Decoder[V], encoder: Encoder[V])
@@ -59,7 +74,8 @@ object PropertyType {
     Date,
     Geometry,
     Geography,
-    DirectRelation
+    DirectRelation,
+    TimeSeries
   ) ++
     Array.values
 
@@ -84,6 +100,7 @@ object PropertyType {
   case object Geometry extends PrimitivePropertyType[String]
   case object Geography extends PrimitivePropertyType[String]
   case object DirectRelation extends PrimitivePropertyType[Seq[String]]
+  case object TimeSeries extends PrimitivePropertyType[String]
 
   object Array {
     val values: Seq[PropertyType[_]] = Seq[PropertyType[_]](

@@ -18,7 +18,6 @@ final case class Function(
     fileId: Long = 0,
     owner: Option[String] = None,
     description: Option[String] = None,
-    apiKey: Option[String] = None,
     secrets: Option[Map[String, String]] = None,
     createdTime: Option[Instant] = None,
     status: Option[String] = None,
@@ -31,7 +30,6 @@ final case class Function(
       fileId,
       owner,
       description,
-      apiKey,
       secrets,
       externalId,
       error
@@ -43,19 +41,22 @@ final case class FunctionCreate(
     fileId: Long = 0,
     owner: Option[String] = None,
     description: Option[String] = None,
-    apiKey: Option[String] = None,
     secrets: Option[Map[String, String]] = None,
     externalId: Option[String] = None,
     error: Option[FunctionError] = None
 ) extends WithExternalId
 
+final case class FunctionCallError(trace: Option[String] = None, message: String)
+
 final case class FunctionCall(
-    id: Option[Long] = None,
-    status: Option[String] = None,
-    startTime: Option[Long] = None,
+    id: Long,
+    status: String,
+    startTime: Long,
     endTime: Option[Long] = None,
+    error: Option[FunctionCallError],
     scheduleId: Option[Long] = None,
-    functionId: Option[Long] = None
+    functionId: Long,
+    scheduledTime: Option[Long] = None
 )
 
 final case class FunctionCallLogEntry(
@@ -64,9 +65,9 @@ final case class FunctionCallLogEntry(
 )
 
 final case class FunctionCallResponse(
-    response: Option[Json] = None,
-    functionId: Option[Long] = None,
-    callId: Option[Long] = None
+    response: Option[Json],
+    functionId: Long,
+    callId: Long
 )
 
 final case class FunctionCallFilter(
@@ -79,7 +80,7 @@ final case class FunctionCallFilter(
 final case class FunctionSchedule(
     id: Option[Long] = None,
     name: String = "",
-    functionExternalId: String = "",
+    functionExternalId: Option[String] = None,
     createdTime: Option[Long] = None,
     description: Option[String] = None,
     cronExpression: Option[String] = None,
@@ -88,6 +89,7 @@ final case class FunctionSchedule(
   override def toCreate: FunctionScheduleCreate =
     FunctionScheduleCreate(
       name,
+      id,
       functionExternalId,
       description,
       cronExpression.getOrElse(""),
@@ -97,10 +99,12 @@ final case class FunctionSchedule(
 
 final case class FunctionScheduleCreate(
     name: String = "",
-    functionExternalId: String = "",
+    functionId: Option[Long] = None,
+    functionExternalId: Option[String] = None,
     description: Option[String] = None,
     cronExpression: String = "",
-    data: Option[Json] = None
+    data: Option[Json] = None,
+    nonce: Option[String] = None
 )
 
 final case class FunctionCallData(data: Json, nonce: Option[String] = None)

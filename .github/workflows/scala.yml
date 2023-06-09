@@ -15,11 +15,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - run: |
+          git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: olafurpg/setup-scala@v13
+        uses: coursier/setup-action@v1
         with:
-          java-version: adopt@1.8
+          jvm: adopt:8
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
@@ -51,11 +55,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - run: |
+          git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: olafurpg/setup-scala@v13
+        uses: coursier/setup-action@v1
         with:
-          java-version: adopt@1.8
+          jvm: adopt:8
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
@@ -79,41 +87,6 @@ jobs:
         run: |
           cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 Test/compile
 
-  compile_scala_3:
-    runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/master'
-
-    timeout-minutes: 20
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up JDK 8
-        uses: olafurpg/setup-scala@v13
-        with:
-          java-version: adopt@1.8
-
-      # Caching dependencies in Pull Requests based on branch name and build.sbt.
-      # Can we do something better here?
-      - name: Cache Coursier dependencies
-        uses: actions/cache@v1
-        env:
-          cache-name: coursier-cache
-        with:
-          path: ~/.cache/coursier/v1
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
-      - name: Cache Ivy 2 cache
-        uses: actions/cache@v1
-        env:
-          cache-name: sbt-ivy2-cache
-        with:
-          path: ~/.ivy2/cache
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
-      - name: Compile
-        run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC ++3.2 Test/compile
 
   test:
     runs-on: ubuntu-latest
@@ -122,11 +95,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - run: |
+        git rev-list --count --first-parent HEAD > patch_version.txt
 
     - name: Set up JDK 8
-      uses: olafurpg/setup-scala@v13
+      uses: coursier/setup-action@v1
       with:
-        java-version: adopt@1.8
+        jvm: adopt:8
 
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
     # Can we do something better here?
@@ -148,7 +125,6 @@ jobs:
 
     - name: Run tests
       env:
-        TEST_API_KEY: ${{ secrets.playgroundApiKey }}
         TEST_AAD_TENANT: "b86328db-09aa-4f0e-9a03-0136f604d20a"
         TEST_CLIENT_ID: ${{ secrets.BLUEFIELD_CLIENT_ID }}
         TEST_CLIENT_SECRET: ${{ secrets.BLUEFIELD_CLIENT_SECRET }}
@@ -170,11 +146,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - run: |
+          git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: olafurpg/setup-scala@v13
+        uses: coursier/setup-action@v1
         with:
-          java-version: adopt@1.8
+          jvm: adopt:8
 
       - name: Set up SBT
         env:
@@ -195,4 +175,4 @@ jobs:
         env:
           GPG_KEY_PASSWORD: ${{ secrets.gpg_key_password }}
         run: |
-          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned
+          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned +sonatypeReleaseAll
