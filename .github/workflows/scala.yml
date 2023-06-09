@@ -21,7 +21,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: olafurpg/setup-scala@v13
+        uses: olafurpg/setup-scala@v14
         with:
           java-version: adopt@1.8
 
@@ -61,7 +61,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: olafurpg/setup-scala@v13
+        uses: olafurpg/setup-scala@v14
         with:
           java-version: adopt@1.8
 
@@ -101,7 +101,7 @@ jobs:
         git rev-list --count --first-parent HEAD > patch_version.txt
 
     - name: Set up JDK 8
-      uses: olafurpg/setup-scala@v13
+      uses: olafurpg/setup-scala@v14
       with:
         java-version: adopt@1.8
 
@@ -152,7 +152,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: olafurpg/setup-scala@v13
+        uses: olafurpg/setup-scala@v14
         with:
           java-version: adopt@1.8
 
