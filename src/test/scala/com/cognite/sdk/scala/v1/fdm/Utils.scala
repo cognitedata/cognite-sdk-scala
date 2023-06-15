@@ -43,11 +43,10 @@ object Utils {
       source = None),
     TimeSeriesReference(list = Some(false)),
     FileReference(list = Some(false)),
-    SequenceReference(list = Some(false))
-//TODO: Uncomment once the list types are released
-//    TimeSeriesReference(list = Some(true)),
-//    FileReference(list = Some(true)),
-//    SequenceReference(list = Some(true)),
+    SequenceReference(list = Some(false)),
+    TimeSeriesReference(list = Some(true)),
+    FileReference(list = Some(true)),
+    SequenceReference(list = Some(true))
   )
 
   val AllPropertyDefaultValues: List[PropertyDefaultValue] = List(
