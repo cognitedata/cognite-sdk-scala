@@ -30,7 +30,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   private val space = Utils.SpaceExternalId
 
   private val edgeNodeContainerExtId = "sdkTest10EdgeNodeContainer2"
-  private val edgeContainerExtId = "sdkTest10EdgeContainer"
+  private val edgeContainerExtId = "sdkTest10EdgeContainer2"
   private val nodeContainer1ExtId = "sdkTest10NodeContainer1"
   private val nodeContainer2ExtId = "sdkTest10NodeContainer2"
   private val containerForDirectNodeRelationExtId = Utils.DirectNodeRelationContainerExtId
