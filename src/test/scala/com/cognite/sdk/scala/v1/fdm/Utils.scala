@@ -1,6 +1,5 @@
 package com.cognite.sdk.scala.v1.fdm
 
-import java.util.UUID
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, CorePropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType._
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
@@ -15,8 +14,7 @@ import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.util.Random
 
 object Utils {
-  def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
-  val SpaceExternalId = s"testSpaceScalaSdk1-${shortRandom()}"
+  val SpaceExternalId = "testSpaceScalaSdk1"
   val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation6"
   val DirectNodeRelationViewExtId = "sdkTestNodeViewForDirectRelation6"
   val ViewVersion = "v1"
