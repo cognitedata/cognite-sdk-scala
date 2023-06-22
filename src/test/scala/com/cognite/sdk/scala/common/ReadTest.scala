@@ -37,7 +37,7 @@ class ReadTest extends SdkTestSpec with OptionValues {
     lazy val dummyClient = Client("foo",
       projectName,
       "https://api.cognitedata.com",
-      auth)(requestHijacker)
+      auth)(implicitly, requestHijacker)
     val dummyRequestSession = dummyClient.requestSession
 
     Readable.readWithCursor(

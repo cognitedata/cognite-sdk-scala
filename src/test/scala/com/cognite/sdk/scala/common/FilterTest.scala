@@ -47,7 +47,7 @@ class FilterTest extends SdkTestSpec with OptionValues {
     lazy val dummyClient = Client("foo",
       projectName,
       "https://api.cognitedata.com",
-      auth)(requestHijacker)
+      auth)(implicitly, requestHijacker)
     val dummyRequestSession = dummyClient.requestSession
 
     val _ = Filter.filterWithCursor(
