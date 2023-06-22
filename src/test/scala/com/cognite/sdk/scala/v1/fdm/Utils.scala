@@ -16,7 +16,7 @@ import scala.util.Random
 
 object Utils {
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
-  val SpaceExternalId: String = s"testSpaceScalaSdk1-${shortRandom()}"
+  val SpaceExternalId = s"testSpaceScalaSdk1-${shortRandom()}"
   val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation6"
   val DirectNodeRelationViewExtId = "sdkTestNodeViewForDirectRelation6"
   val ViewVersion = "v1"
