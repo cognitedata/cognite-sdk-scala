@@ -31,14 +31,14 @@ class InstancesTest extends CommonDataModelTestHelper {
 
   private val edgeNodeContainerExtId = "sdkTest10EdgeNodeContainer2"
   private val edgeContainerExtId = "sdkTest10EdgeContainer2"
-  private val nodeContainer1ExtId = "sdkTest10NodeContainer1"
-  private val nodeContainer2ExtId = "sdkTest10NodeContainer2"
+  private val nodeContainer1ExtId = "sdkTest10NodeContainer3"
+  private val nodeContainer2ExtId = "sdkTest10NodeContainer4"
   private val containerForDirectNodeRelationExtId = Utils.DirectNodeRelationContainerExtId
 
-  private val edgeNodeViewExtId = "sdkTest10EdgeNodeView"
-  private val edgeViewExtId = "sdkTest10EdgeView"
-  private val nodeView1ExtId = "sdkTest10NodeView1"
-  private val nodeView2ExtId = "sdkTest10NodeView2"
+  private val edgeNodeViewExtId = "sdkTest10EdgeNodeView2"
+  private val edgeViewExtId = "sdkTest10EdgeView3"
+  private val nodeView1ExtId = "sdkTest10NodeView4"
+  private val nodeView2ExtId = "sdkTest10NodeView5"
   private val viewForDirectNodeRelationExtId = Utils.DirectNodeRelationViewExtId
 
   private val viewVersion = Utils.ViewVersion
