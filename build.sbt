@@ -93,7 +93,7 @@ lazy val core = (project in file("."))
   .settings(
     buildInfoUsePackageAsPath := true,
     buildInfoKeys := Seq[BuildInfoKey](organization, version, organizationName),
-    buildInfoPackage := "BuildInfo"
+    buildInfoPackage := "com.cognite.scala_sdk"
   )
   .settings(
     commonSettings,

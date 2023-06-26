@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.v1
 
-import BuildInfo.BuildInfo
+import com.cognite.scala_sdk.BuildInfo
 
 import java.net.{ConnectException, UnknownHostException}
 import java.time.Instant

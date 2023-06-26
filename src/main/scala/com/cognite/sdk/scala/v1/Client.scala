@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.v1
 
-import BuildInfo.BuildInfo
+import com.cognite.scala_sdk.BuildInfo
 import cats.implicits._
 import cats.{Id, Monad}
 import com.cognite.sdk.scala.common._
