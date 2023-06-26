@@ -13,6 +13,7 @@ val sttpVersion = "3.5.2"
 val circeVersion = "0.14.5"
 val catsEffectVersion = "3.3.14"
 val fs2Version = "3.3.0"
+val natchezVersion = "0.3.1"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -25,7 +26,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.6." + patchVersion,
+  version := "2.7." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
@@ -106,7 +107,8 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "3.21.4"
+      "com.google.protobuf" % "protobuf-java" % "3.21.4",
+      "org.tpolecat" %% "natchez-core" % natchezVersion
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, minor)) if minor == 13 =>

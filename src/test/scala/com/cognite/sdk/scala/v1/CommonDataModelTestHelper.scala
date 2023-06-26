@@ -12,6 +12,8 @@ import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 import scala.concurrent.duration.DurationInt
 
+import natchez.Trace
+
 @SuppressWarnings(
   Array(
     "org.wartremover.warts.OptionPartial",
@@ -19,6 +21,7 @@ import scala.concurrent.duration.DurationInt
   )
 )
 trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
+  implicit val trace: Trace[IO] = natchez.Trace.Implicits.noop
   val tenant: String = sys.env("TEST_AAD_TENANT")
   val clientId: String = sys.env("TEST_CLIENT_ID")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
@@ -47,6 +50,7 @@ trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
     None,
     Some("alpha")
   )(
+    implicitly,
     implicitly,
     new RetryingBackend[IO, Any](implicitly)
   )

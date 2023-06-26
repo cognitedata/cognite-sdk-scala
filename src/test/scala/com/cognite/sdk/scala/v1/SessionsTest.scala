@@ -39,7 +39,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
-    )(implicitly, responseForSessionCreated)
+    )(implicitly, implicitly, responseForSessionCreated)
 
     val resCreate = client.sessions.createWithClientCredentialFlow(
       Items[SessionCreateWithCredential](
@@ -72,7 +72,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
-    )(implicitly, responseForSessionCreated)
+    )(implicitly, implicitly, responseForSessionCreated)
 
     val resCreate = client.sessions.createWithTokenExchangeFlow(
       Items[SessionCreateWithToken](
@@ -112,7 +112,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
-    )(implicitly, responseForSessionCreated)
+    )(implicitly, implicitly, responseForSessionCreated)
 
     val error = the[CdpApiException] thrownBy client.sessions.createWithClientCredentialFlow(
       Items[SessionCreateWithCredential](
@@ -152,7 +152,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
-    )(implicitly, responseForSessionCreated)
+    )(implicitly, implicitly, responseForSessionCreated)
 
     val error = the[CdpApiException] thrownBy client.sessions.createWithClientCredentialFlow(
       Items[SessionCreateWithCredential](
@@ -195,7 +195,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
-    )(implicitly, responseForSessionList)
+    )(implicitly, implicitly, responseForSessionList)
 
     val responseList = client.sessions.list()
     responseList.size shouldBe 2
@@ -233,7 +233,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
-    )(implicitly, responseForSessionBound)
+    )(implicitly, implicitly, responseForSessionBound)
 
     val responseBind = client.sessions.bind(BindSessionRequest("nonce-value"))
     responseBind shouldBe expectedResponse
@@ -271,7 +271,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
-    )(implicitly, responseForSessionBound)
+    )(implicitly, implicitly, responseForSessionBound)
 
     val error = the[CdpApiException] thrownBy client.sessions.bind(BindSessionRequest("expired-nonce"))
     error.message shouldBe "Nonce has expired"
@@ -308,7 +308,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
-    )(implicitly, responseForSessionRefresh)
+    )(implicitly, implicitly, responseForSessionRefresh)
 
     val responseBind = client.sessions.refresh(RefreshSessionRequest(123, "sessionKey-value"))
     responseBind shouldBe expectedResponse
@@ -346,7 +346,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
-    )(implicitly, responseForSessionRefresh)
+    )(implicitly, implicitly, responseForSessionRefresh)
 
     val error = the[CdpApiException] thrownBy client.sessions.refresh(RefreshSessionRequest(123, "invalid-sessionKey"))
     error.message shouldBe "Session not found"
