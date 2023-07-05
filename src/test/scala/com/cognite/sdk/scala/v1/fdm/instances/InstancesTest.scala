@@ -2,6 +2,7 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
+import com.cognite.sdk.scala.common.CdpApiException
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
@@ -23,7 +24,8 @@ import scala.concurrent.duration.DurationInt
     "org.wartremover.warts.Serializable",
     "org.wartremover.warts.Product",
     "org.wartremover.warts.AnyVal",
-    "org.wartremover.warts.IterableOps"
+    "org.wartremover.warts.IterableOps",
+    "org.wartremover.warts.OptionPartial"
   )
 )
 class InstancesTest extends CommonDataModelTestHelper {
@@ -148,6 +150,31 @@ class InstancesTest extends CommonDataModelTestHelper {
     instancePropertyMapEquals(writeDataToMap(edgeWriteData), readEdgesMapOfEdge) shouldBe true
     instancePropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData.head), readEdgesMapOfAll) shouldBe true
     instancePropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData(1)), readNodesMapOfAll) shouldBe true
+
+    // Test deletion of properties: Make a new edit from node1WriteDta, but with 1 property set to None
+    val nodeSource = node1WriteData.sources.get.head
+    val nodeProps = nodeSource.properties.get
+    val nodeKey = nodeProps.keys.find(k => !k.endsWith("NonNullable")).get
+    val nodeEditData = node1WriteData.copy(sources = Some(Seq(nodeSource.copy(properties = Some(nodeProps + (nodeKey -> None))))))
+    // Update to delete this property
+    createInstance(Seq(nodeEditData)).unsafeRunSync()
+    val readEditedNode = fetchNodeInstance(nodeView1.toSourceReference, nodeEditData.externalId).unsafeRunSync()
+    val expectedEditedNodeProperties = writeDataToMap(nodeEditData) - nodeKey
+    instancePropertyMapEquals(expectedEditedNodeProperties, readEditedNode) shouldBe true
+
+    // Non-nullable properties should fail deletion
+    val edgeSource = edgeWriteData.sources.get.head
+    val edgeProps = edgeSource.properties.get
+    val edgeKey = edgeProps.keys.find(k => k.endsWith("NonNullable")).get
+    val edgeEditData = edgeWriteData.copy(sources = Some(Seq(edgeSource.copy(properties = Some(edgeProps + (edgeKey -> None))))))
+    val ex = intercept[CdpApiException] { createInstance(Seq(edgeEditData)).unsafeRunSync() }
+    ex.code shouldBe 400
+
+    // Unmentioned properties should be left alone
+    val emptyEditData = edgeWriteData.copy(sources = Some(Seq(edgeSource.copy(properties = Some(Map.empty)))))
+    createInstance(Seq(emptyEditData))
+    val readEditedEdge = fetchEdgeInstance(edgeView.toSourceReference, emptyEditData.externalId).unsafeRunSync()
+    instancePropertyMapEquals(writeDataToMap(edgeWriteData), readEditedEdge) shouldBe true
 
     val deletedInstances = deleteInstance(
       Seq(
