@@ -143,11 +143,11 @@ class InstancesTest extends CommonDataModelTestHelper {
     val readEdgesMapOfAll = fetchEdgeInstance(allView.toSourceReference, nodeOrEdgeWriteData.head.externalId).unsafeRunSync()
     val readNodesMapOfAll = fetchNodeInstance(allView.toSourceReference, nodeOrEdgeWriteData(1).externalId).unsafeRunSync()
 
-    instantPropertyMapEquals(writeDataToMap(node1WriteData), readNodesMapOfNode1) shouldBe true
-    instantPropertyMapEquals(writeDataToMap(node2WriteData), readNodesMapOfNode2) shouldBe true
-    instantPropertyMapEquals(writeDataToMap(edgeWriteData), readEdgesMapOfEdge) shouldBe true
-    instantPropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData.head), readEdgesMapOfAll) shouldBe true
-    instantPropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData(1)), readNodesMapOfAll) shouldBe true
+    instancePropertyMapEquals(writeDataToMap(node1WriteData), readNodesMapOfNode1) shouldBe true
+    instancePropertyMapEquals(writeDataToMap(node2WriteData), readNodesMapOfNode2) shouldBe true
+    instancePropertyMapEquals(writeDataToMap(edgeWriteData), readEdgesMapOfEdge) shouldBe true
+    instancePropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData.head), readEdgesMapOfAll) shouldBe true
+    instancePropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData(1)), readNodesMapOfAll) shouldBe true
 
     val deletedInstances = deleteInstance(
       Seq(
@@ -182,10 +182,10 @@ class InstancesTest extends CommonDataModelTestHelper {
     deletedContainers.length shouldBe 4
   }
 
-  private def writeDataToMap(writeData: NodeOrEdgeCreate) = writeData match {
-    case n: NodeOrEdgeCreate.NodeWrite => n.sources.getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).toMap
-    case e: NodeOrEdgeCreate.EdgeWrite => e.sources.getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).toMap
-  }
+  private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
+    case n: NodeOrEdgeCreate.NodeWrite => n.sources
+    case e: NodeOrEdgeCreate.EdgeWrite => e.sources
+  }).getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).flatMap {case (k, v) => v.map(k -> _)}.toMap
 
   private def createContainers(items: Seq[ContainerCreateDefinition]) = {
     blueFieldClient.containers.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
@@ -262,7 +262,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   // compare timestamps adhering to the accepted format
-  private def instantPropertyMapEquals(expected: Map[String, InstancePropertyValue], actual: Map[String, InstancePropertyValue]): Boolean = {
+  private def instancePropertyMapEquals(expected: Map[String, InstancePropertyValue], actual: Map[String, InstancePropertyValue]): Boolean = {
     val sizeEquals = actual.size === expected.size
     sizeEquals && expected.forall {
       case (k, expectedVal) =>
