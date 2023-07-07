@@ -20,7 +20,9 @@ class Instances[F[_]](val requestSession: RequestSession[F])
 
   import Instances._
 
-  private implicit val nullDroppingPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
+  // We need to keep null values. Specifying a null value for a property in InstanceCreate means
+  // that we delete the property. Dropping it means that we leave it alone.
+  private implicit val nullKeepingPrinter: Printer = Printer.noSpaces.copy(dropNullValues = false)
 
   override val baseUrl = uri"${requestSession.baseUrl}/models/instances"
 
