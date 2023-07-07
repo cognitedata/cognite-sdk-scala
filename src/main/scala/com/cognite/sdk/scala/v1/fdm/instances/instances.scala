@@ -9,7 +9,7 @@ import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 
 final case class EdgeOrNodeData(
     source: SourceReference,
-    properties: Option[Map[String, InstancePropertyValue]]
+    properties: Option[Map[String, Option[InstancePropertyValue]]]
 )
 
 final case class InstanceCreate(
