@@ -151,7 +151,7 @@ class InstancesTest extends CommonDataModelTestHelper {
     instancePropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData.head), readEdgesMapOfAll) shouldBe true
     instancePropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData(1)), readNodesMapOfAll) shouldBe true
 
-    // Test deletion of properties: Make a new edit from node1WriteDta, but with 1 property set to None
+    // Test deletion of properties: Make a new edit from node1WriteData, but with 1 property set to None
     val nodeSource = node1WriteData.sources.get.head
     val nodeProps = nodeSource.properties.get
     val nodeKey = nodeProps.keys.find(k => !k.endsWith("NonNullable")).get
@@ -174,6 +174,7 @@ class InstancesTest extends CommonDataModelTestHelper {
     val emptyEditData = edgeWriteData.copy(sources = Some(Seq(edgeSource.copy(properties = Some(Map.empty)))))
     createInstance(Seq(emptyEditData))
     val readEditedEdge = fetchEdgeInstance(edgeView.toSourceReference, emptyEditData.externalId).unsafeRunSync()
+    // The read data equals the original creation data, since the above should be a noop
     instancePropertyMapEquals(writeDataToMap(edgeWriteData), readEditedEdge) shouldBe true
 
     val deletedInstances = deleteInstance(
