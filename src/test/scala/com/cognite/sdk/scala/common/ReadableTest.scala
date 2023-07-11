@@ -19,8 +19,12 @@ class ReadableTest extends SdkTestSpec {
     }
 
     val limit = 50000000 /*50M*/;
-    val longList = readable.list(Some(limit)).compile.toList.unsafeRunSync()
-    longList should have size(limit.toLong)
-    all(longList) should be(0)
+    val count = readable.list(Some(limit)).compile.fold(0){
+        case (c, v) => {
+            v should be(0)
+            c + 1
+        }
+    }.unsafeRunSync()
+    count should be(limit)
   }
 }
