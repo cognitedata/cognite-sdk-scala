@@ -4,6 +4,7 @@ import cats.effect.IO
 import com.cognite.sdk.scala.v1.RequestSession
 import sttp.model.Uri
 
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
 class ReadableTest extends SdkTestSpec {
   it should "not overflow on very long cursor chains" in {
     val readable = new Readable[Int, IO] {
@@ -19,6 +20,7 @@ class ReadableTest extends SdkTestSpec {
 
     val limit = 50000000 /*50M*/;
     val longList = readable.list(Some(limit)).compile.toList.unsafeRunSync()
-    longList should be(List.fill(limit)(0))
+    longList should have size(limit.toLong)
+    all(longList) should be(0)
   }
 }
