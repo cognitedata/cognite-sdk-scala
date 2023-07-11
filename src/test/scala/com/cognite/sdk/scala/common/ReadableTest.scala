@@ -5,7 +5,7 @@ import com.cognite.sdk.scala.v1.RequestSession
 import sttp.model.Uri
 
 class ReadableTest extends SdkTestSpec {
-  it should "not overflow on very long cursor chains" in { 
+  it should "not overflow on very long cursor chains" in {
     val readable = new Readable[Int, IO] {
       override val requestSession: RequestSession[IO] = client.requestSession
       override val baseUrl: Uri = client.uri
@@ -16,7 +16,7 @@ class ReadableTest extends SdkTestSpec {
         IO.pure(ItemsWithCursor(List.fill(itemsToReturn)(0), Some(nextCursor)))
       }
     }
-    
+
     val limit = 50000000 /*50M*/;
     val longList = readable.list(Some(limit)).compile.toList.unsafeRunSync()
     longList should be(List.fill(limit)(0))
