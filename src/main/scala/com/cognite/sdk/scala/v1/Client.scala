@@ -43,7 +43,7 @@ class TraceSttpBackend[F[_]: Trace, +P](delegate: SttpBackend[F, P]) extends Stt
           request.headers(
             knl.toHeaders.map { case (k, v) => Header(k.toString, v) }.toSeq: _*
           )
-        ) // prioritize request headers over kernel ones)
+        )
         _ <- Trace[F].put("client.http.status_code" -> response.code.toString())
       } yield response
     }
