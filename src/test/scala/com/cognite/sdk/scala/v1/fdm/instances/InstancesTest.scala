@@ -2,6 +2,7 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
+import com.cognite.sdk.scala.common.CdpApiException
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
@@ -23,22 +24,23 @@ import scala.concurrent.duration.DurationInt
     "org.wartremover.warts.Serializable",
     "org.wartremover.warts.Product",
     "org.wartremover.warts.AnyVal",
-    "org.wartremover.warts.IterableOps"
+    "org.wartremover.warts.IterableOps",
+    "org.wartremover.warts.OptionPartial"
   )
 )
 class InstancesTest extends CommonDataModelTestHelper {
   private val space = Utils.SpaceExternalId
 
-  private val edgeNodeContainerExtId = "sdkTest10EdgeNodeContainer"
-  private val edgeContainerExtId = "sdkTest10EdgeContainer"
-  private val nodeContainer1ExtId = "sdkTest10NodeContainer1"
-  private val nodeContainer2ExtId = "sdkTest10NodeContainer2"
+  private val edgeNodeContainerExtId = "sdkTest10EdgeNodeContainer2"
+  private val edgeContainerExtId = "sdkTest10EdgeContainer2"
+  private val nodeContainer1ExtId = "sdkTest10NodeContainer3"
+  private val nodeContainer2ExtId = "sdkTest10NodeContainer4"
   private val containerForDirectNodeRelationExtId = Utils.DirectNodeRelationContainerExtId
 
-  private val edgeNodeViewExtId = "sdkTest10EdgeNodeView"
-  private val edgeViewExtId = "sdkTest10EdgeView"
-  private val nodeView1ExtId = "sdkTest10NodeView1"
-  private val nodeView2ExtId = "sdkTest10NodeView2"
+  private val edgeNodeViewExtId = "sdkTest10EdgeNodeView2"
+  private val edgeViewExtId = "sdkTest10EdgeView3"
+  private val nodeView1ExtId = "sdkTest10NodeView4"
+  private val nodeView2ExtId = "sdkTest10NodeView5"
   private val viewForDirectNodeRelationExtId = Utils.DirectNodeRelationViewExtId
 
   private val viewVersion = Utils.ViewVersion
@@ -143,11 +145,37 @@ class InstancesTest extends CommonDataModelTestHelper {
     val readEdgesMapOfAll = fetchEdgeInstance(allView.toSourceReference, nodeOrEdgeWriteData.head.externalId).unsafeRunSync()
     val readNodesMapOfAll = fetchNodeInstance(allView.toSourceReference, nodeOrEdgeWriteData(1).externalId).unsafeRunSync()
 
-    instantPropertyMapEquals(writeDataToMap(node1WriteData), readNodesMapOfNode1) shouldBe true
-    instantPropertyMapEquals(writeDataToMap(node2WriteData), readNodesMapOfNode2) shouldBe true
-    instantPropertyMapEquals(writeDataToMap(edgeWriteData), readEdgesMapOfEdge) shouldBe true
-    instantPropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData.head), readEdgesMapOfAll) shouldBe true
-    instantPropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData(1)), readNodesMapOfAll) shouldBe true
+    instancePropertyMapEquals(writeDataToMap(node1WriteData), readNodesMapOfNode1) shouldBe true
+    instancePropertyMapEquals(writeDataToMap(node2WriteData), readNodesMapOfNode2) shouldBe true
+    instancePropertyMapEquals(writeDataToMap(edgeWriteData), readEdgesMapOfEdge) shouldBe true
+    instancePropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData.head), readEdgesMapOfAll) shouldBe true
+    instancePropertyMapEquals(writeDataToMap(nodeOrEdgeWriteData(1)), readNodesMapOfAll) shouldBe true
+
+    // Test deletion of properties: Make a new edit from node1WriteData, but with 1 property set to None
+    val nodeSource = node1WriteData.sources.get.head
+    val nodeProps = nodeSource.properties.get
+    val nodeKey = nodeProps.keys.find(k => !k.endsWith("NonNullable")).get
+    val nodeEditData = node1WriteData.copy(sources = Some(Seq(nodeSource.copy(properties = Some(nodeProps + (nodeKey -> None))))))
+    // Update to delete this property
+    createInstance(Seq(nodeEditData)).unsafeRunSync()
+    val readEditedNode = fetchNodeInstance(nodeView1.toSourceReference, nodeEditData.externalId).unsafeRunSync()
+    val expectedEditedNodeProperties = writeDataToMap(nodeEditData) - nodeKey
+    instancePropertyMapEquals(expectedEditedNodeProperties, readEditedNode) shouldBe true
+
+    // Non-nullable properties should fail deletion
+    val edgeSource = edgeWriteData.sources.get.head
+    val edgeProps = edgeSource.properties.get
+    val edgeKey = edgeProps.keys.find(k => k.endsWith("NonNullable")).get
+    val edgeEditData = edgeWriteData.copy(sources = Some(Seq(edgeSource.copy(properties = Some(edgeProps + (edgeKey -> None))))))
+    val ex = intercept[CdpApiException] { createInstance(Seq(edgeEditData)).unsafeRunSync() }
+    ex.code shouldBe 400
+
+    // Unmentioned properties should be left alone
+    val emptyEditData = edgeWriteData.copy(sources = Some(Seq(edgeSource.copy(properties = Some(Map.empty)))))
+    createInstance(Seq(emptyEditData))
+    val readEditedEdge = fetchEdgeInstance(edgeView.toSourceReference, emptyEditData.externalId).unsafeRunSync()
+    // The read data equals the original creation data, since the above should be a noop
+    instancePropertyMapEquals(writeDataToMap(edgeWriteData), readEditedEdge) shouldBe true
 
     val deletedInstances = deleteInstance(
       Seq(
@@ -182,10 +210,10 @@ class InstancesTest extends CommonDataModelTestHelper {
     deletedContainers.length shouldBe 4
   }
 
-  private def writeDataToMap(writeData: NodeOrEdgeCreate) = writeData match {
-    case n: NodeOrEdgeCreate.NodeWrite => n.sources.getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).toMap
-    case e: NodeOrEdgeCreate.EdgeWrite => e.sources.getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).toMap
-  }
+  private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
+    case n: NodeOrEdgeCreate.NodeWrite => n.sources
+    case e: NodeOrEdgeCreate.EdgeWrite => e.sources
+  }).getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).flatMap {case (k, v) => v.map(k -> _)}.toMap
 
   private def createContainers(items: Seq[ContainerCreateDefinition]) = {
     blueFieldClient.containers.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
@@ -262,7 +290,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   // compare timestamps adhering to the accepted format
-  private def instantPropertyMapEquals(expected: Map[String, InstancePropertyValue], actual: Map[String, InstancePropertyValue]): Boolean = {
+  private def instancePropertyMapEquals(expected: Map[String, InstancePropertyValue], actual: Map[String, InstancePropertyValue]): Boolean = {
     val sizeEquals = actual.size === expected.size
     sizeEquals && expected.forall {
       case (k, expectedVal) =>

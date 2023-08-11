@@ -406,7 +406,7 @@ object Utils {
   private def toInstanceData(ref: SourceReference, instancePropertyValues: Map[String, InstancePropertyValue]) =
     EdgeOrNodeData(
       source = ref,
-      properties = Some(instancePropertyValues)
+      properties = Some(instancePropertyValues.mapValues(v => Some(v)).toMap)
     )
 
   // scalastyle:off cyclomatic.complexity

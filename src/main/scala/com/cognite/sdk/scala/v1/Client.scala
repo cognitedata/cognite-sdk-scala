@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.v1
 
-import BuildInfo.BuildInfo
+import com.cognite.scala_sdk.BuildInfo
 import cats.implicits._
 import cats.{Id, Monad}
 import com.cognite.sdk.scala.common._
@@ -18,12 +18,42 @@ import io.circe.generic.semiauto.deriveDecoder
 import sttp.capabilities.Effect
 import sttp.client3._
 import sttp.client3.circe.asJsonEither
-import sttp.model.{StatusCode, Uri}
+import sttp.model.{Header, StatusCode, Uri}
 import sttp.monad.MonadError
 
 import java.net.{InetAddress, UnknownHostException}
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
+import natchez.Trace
+
+class TraceSttpBackend[F[_]: Trace, +P](delegate: SttpBackend[F, P]) extends SttpBackend[F, P] {
+
+  def sendImpl[T, R >: P with Effect[F]](
+      request: Request[T, R]
+  )(implicit monad: MonadError[F]): F[Response[T]] =
+    Trace[F].span("sttp-client-request") {
+      import sttp.monad.syntax._
+      for {
+        knl <- Trace[F].kernel
+        _ <- Trace[F].put(
+          "client.http.uri" -> request.uri.toString(),
+          "client.http.method" -> request.method.toString
+        )
+        response <- delegate.send(
+          request.headers(
+            knl.toHeaders.map { case (k, v) => Header(k.toString, v) }.toSeq: _*
+          )
+        )
+        _ <- Trace[F].put("client.http.status_code" -> response.code.toString())
+      } yield response
+    }
+  override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] =
+    sendImpl(request)(responseMonad)
+
+  override def close(): F[Unit] = delegate.close()
+
+  override def responseMonad: MonadError[F] = delegate.responseMonad
+}
 
 class AuthSttpBackend[F[_], +P](delegate: SttpBackend[F, P], authProvider: AuthProvider[F])
     extends SttpBackend[F, P] {
@@ -37,7 +67,7 @@ class AuthSttpBackend[F[_], +P](delegate: SttpBackend[F, P], authProvider: AuthP
   override def responseMonad: MonadError[F] = delegate.responseMonad
 }
 
-final case class RequestSession[F[_]: Monad](
+final case class RequestSession[F[_]: Monad: Trace](
     applicationName: String,
     baseUrl: Uri,
     baseSttpBackend: SttpBackend[F, _],
@@ -45,7 +75,8 @@ final case class RequestSession[F[_]: Monad](
     clientTag: Option[String] = None,
     cdfVersion: Option[String] = None
 ) {
-  val sttpBackend: SttpBackend[F, _] = new AuthSttpBackend(baseSttpBackend, auth)
+  val sttpBackend: SttpBackend[F, _] =
+    new AuthSttpBackend(new TraceSttpBackend(baseSttpBackend), auth)
 
   def send[R](
       r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any]
@@ -130,7 +161,7 @@ final case class RequestSession[F[_]: Monad](
 }
 
 // scalastyle:off parameter.number
-class GenericClient[F[_]](
+class GenericClient[F[_]: Trace](
     applicationName: String,
     val projectName: String,
     baseUrl: String,
@@ -245,10 +276,13 @@ object GenericClient {
   val defaultBaseUrl: String = Option(System.getenv("COGNITE_BASE_URL"))
     .getOrElse("https://api.cognitedata.com")
 
-  def apply[F[_]: Monad](applicationName: String, projectName: String, baseUrl: String, auth: Auth)(
-      implicit sttpBackend: SttpBackend[F, Any]
-  ): GenericClient[F] =
-    new GenericClient(applicationName, projectName, baseUrl, auth)(implicitly, sttpBackend)
+  def apply[F[_]: Monad: Trace](
+      applicationName: String,
+      projectName: String,
+      baseUrl: String,
+      auth: Auth
+  )(implicit sttpBackend: SttpBackend[F, Any]): GenericClient[F] =
+    new GenericClient(applicationName, projectName, baseUrl, auth)
 
   def parseBaseUrlOrThrow(baseUrl: String): Uri =
     try {
@@ -277,7 +311,7 @@ object GenericClient {
         )
     }
 
-  def forAuth[F[_]: Monad](
+  def forAuth[F[_]: Monad: Trace](
       applicationName: String,
       projectName: String,
       auth: Auth,
@@ -296,7 +330,7 @@ object GenericClient {
       cdfVersion
     )
 
-  def forAuthProvider[F[_]: Monad](
+  def forAuthProvider[F[_]: Monad: Trace](
       applicationName: String,
       projectName: String,
       authProvider: AuthProvider[F],
@@ -317,9 +351,6 @@ object GenericClient {
           apiVersion,
           clientTag,
           cdfVersion
-        )(
-          implicitly,
-          sttpBackend
         )
       )
     }
@@ -361,11 +392,17 @@ class Client(
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
     auth: Auth
-)(implicit sttpBackend: SttpBackend[Id, Any])
+)(implicit trace: Trace[Id], sttpBackend: SttpBackend[Id, Any])
     extends GenericClient[Id](applicationName, projectName, baseUrl, auth)
 
 object Client {
-  def apply(applicationName: String, projectName: String, baseUrl: String, auth: Auth)(
-      implicit sttpBackend: SttpBackend[Id, Any]
-  ): Client = new Client(applicationName, projectName, baseUrl, auth)(sttpBackend)
+  def apply(
+      applicationName: String,
+      projectName: String,
+      baseUrl: String,
+      auth: Auth
+  )(
+      implicit trace: Trace[Id],
+      sttpBackend: SttpBackend[Id, Any]
+  ): Client = new Client(applicationName, projectName, baseUrl, auth)
 }

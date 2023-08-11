@@ -17,8 +17,11 @@ import sttp.monad.MonadError
 
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
+import cats.Id
 import cats.effect.IO
 import cats.effect.unsafe.IORuntime
+
+import natchez.Trace
 
 class LoggingSttpBackend[F[_], +P](delegate: SttpBackend[F, P]) extends SttpBackend[F, P] {
   override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] =
@@ -48,6 +51,8 @@ class LoggingSttpBackend[F[_], +P](delegate: SttpBackend[F, P]) extends SttpBack
 
 abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
   implicit val ioRuntime: IORuntime = IORuntime.global
+  implicit val trace: Trace[IO] = natchez.Trace.Implicits.noop
+  implicit val traceId: Trace[Id] = natchez.Trace.Implicits.noop
   implicit val authSttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
   // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
   lazy val client: GenericClient[IO] = GenericClient[IO](
@@ -56,6 +61,7 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
     baseUrl,
     auth
   )(
+    implicitly,
     implicitly,
     new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
   )

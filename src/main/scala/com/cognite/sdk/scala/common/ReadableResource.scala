@@ -57,30 +57,23 @@ trait PartitionedReadable[R, F[_]] extends Readable[R, F] {
 }
 
 object Readable {
-  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private[sdk] def pullFromCursor[F[_], R](
       cursor: Option[String],
       maxItemsReturned: Option[Int],
       partition: Option[Partition],
       get: (Option[String], Option[Int], Option[Partition]) => F[ItemsWithCursor[R]]
   ): Pull[F, R, Unit] =
-    if (maxItemsReturned.exists(_ <= 0)) {
-      Pull.done
-    } else {
-      Pull.eval(get(cursor, maxItemsReturned, partition)).flatMap { items =>
-        Pull.output(Chunk.seq(items.items)) >>
-          items.nextCursor
-            .map { s =>
-              pullFromCursor(
-                Some(s),
-                maxItemsReturned.map(_ - items.items.size),
-                partition,
-                get
-              )
-            }
-            .getOrElse(Pull.done)
-      }
-    }
+    Pull.loop[F, R, (Option[String], Option[Int])] {
+      case (_, Some(remaining)) if remaining <= 0 => Pull.pure(None)
+      case (cursor, remaining) =>
+        Pull
+          .eval(get(cursor, remaining, partition))
+          .flatMap(res =>
+            Pull.output(Chunk.seq(res.items)) >> Pull.pure(
+              res.nextCursor.map(nc => (Some(nc), remaining.map(_ - res.items.size)))
+            )
+          )
+    }((cursor, maxItemsReturned))
 
   @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private[sdk] def pageThroughCursors[F[_], State, Resp <: ResponseWithCursor](

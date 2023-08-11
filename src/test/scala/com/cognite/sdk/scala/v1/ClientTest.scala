@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.v1
 
-import BuildInfo.BuildInfo
+import com.cognite.scala_sdk.BuildInfo
 
 import java.net.{ConnectException, UnknownHostException}
 import java.time.Instant
@@ -60,7 +60,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         headers = req.headers
         Response.ok(tokenInspectResponse).copy(headers = req.headers)
       }
-    new GenericClient[Id]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, saveHeadersStub)
+    new GenericClient[Id]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, implicitly, saveHeadersStub)
       .token.inspect()
     headers should contain (Header("x-cdp-clienttag", "client-test"))
     headers should contain (Header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}"))
@@ -75,6 +75,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
       auth
     )(
       implicitly,
+      implicitly,
       new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
     ).token.inspect().unsafeRunSync().projects should not be empty
   }
@@ -86,6 +87,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
       baseUrl,
       auth
     )(
+      implicitly,
       implicitly,
       RateLimitingBackend[Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5)
     ).token.inspect().unsafeRunSync().projects should not be empty
@@ -104,6 +106,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
       auth
     )(
       implicitly,
+      implicitly,
       new BackpressureThrottleBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), makeQueueOf1.unsafeRunSync(), 1.seconds)
     ).token.inspect().unsafeRunSync().projects should not be empty
   }
@@ -113,6 +116,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     an[InvalidAuthentication] should be thrownBy GenericClient.forAuth[Id](
       "scala-sdk-test", "", auth)(
       implicitly,
+      implicitly,
       sttpBackend
     ).assets.list(Some(1)).compile.toList
   }
@@ -121,6 +125,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     implicit val auth: Auth = BearerTokenAuth("invalid-key", project = Some("random-project"))
     noException should be thrownBy new GenericClient[Id](
       "scala-sdk-test", projectName, auth = auth)(
+      implicitly,
       implicitly,
       sttpBackend
     )
@@ -133,7 +138,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "",
         auth
-      )(new LoggingSttpBackend[Id, Any](sttpBackend)).token.inspect()
+      )(implicitly, new LoggingSttpBackend[Id, Any](sttpBackend)).token.inspect()
     }
     assertThrows[UnknownHostException] {
       Client(
@@ -141,7 +146,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "thisShouldThrowAnUnknownHostException:)",
         auth
-      )(sttpBackend).token.inspect()
+      )(implicitly, sttpBackend).token.inspect()
     }
   }
 
@@ -152,7 +157,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "http://api.cognitedata.com",
         auth
-      )(sttpBackend).token.inspect()
+      )(implicitly, sttpBackend).token.inspect()
     }
   }
 
@@ -165,6 +170,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         auth
       )(
         implicitly,
+        implicitly,
         makeTestingBackend()
       ).threeDModels.list().compile.toList.unsafeRunSync()
     }
@@ -175,6 +181,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         baseUrl,
         auth
       )(
+      implicitly,
       implicitly,
       new RetryingBackend[IO, Any](
         makeTestingBackend(),
@@ -190,6 +197,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         auth
       )(
         implicitly,
+        implicitly,
         new RetryingBackend[IO, Any](
           makeTestingBackend(),
           maxRetries = 4,
@@ -204,7 +212,8 @@ class ClientTest extends SdkTestSpec with OptionValues {
       projectName,
       "https://www.cognite.com/nowhereatall",
       BearerTokenAuth("irrelevant", Some("randomproject"))
-    )(implicitly,
+    )(natchez.Trace.Implicits.noop,
+      implicitly,
       new RetryingBackend[F, Any](backend,
         maxRetries = maxRetries,
         initialRetryDelay = 1.millis,
@@ -234,6 +243,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
       BearerTokenAuth("irrelevant", Some("randomproject"))
 
     )(
+      implicitly,
       implicitly,
       new RetryingBackend[IO, Any](backendStub,
         initialRetryDelay = 1.millis,
@@ -313,6 +323,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
       BearerTokenAuth("irrelevant", Some("randomproject"))
     )(
       implicitly,
+      implicitly,
       new RetryingBackend[IO, Any](
         badRequestBackendStub,
         initialRetryDelay = 1.millis,
@@ -350,6 +361,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
       "https://www.cognite.com/nowhere-at-all",
       BearerTokenAuth("irrelevant", Some("randomproject"))
     )(
+      implicitly,
       implicitly,
       new RetryingBackend[IO, Any](
         badRequestBackendStub1,
@@ -395,6 +407,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         baseUrl,
         auth
       )(
+        implicitly,
         implicitly,
         makeTestingBackend()
       ).threeDModels.list().compile.toList.unsafeRunSync()
