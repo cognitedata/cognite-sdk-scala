@@ -84,18 +84,17 @@ final case class RequestSession[F[_]: Monad: Trace](
     r(emptyRequest.readTimeout(90.seconds)).send(sttpBackend)
 
   private val sttpRequest = {
-    val baseRequest = basicRequest
+    basicRequest
       .followRedirects(false)
       .header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}")
       .header("x-cdp-app", applicationName)
       .readTimeout(90.seconds)
-    (clientTag, cdfVersion) match {
-      case (Some(tag), Some(ver)) =>
-        baseRequest.header("x-cdp-clienttag", tag).header("cdf-version", ver)
-      case (Some(tag), None) => baseRequest.header("x-cdp-clienttag", tag)
-      case (None, Some(ver)) => baseRequest.header("cdf-version", ver)
-      case (None, None) => baseRequest
-    }
+      .headers(
+        Seq(
+          clientTag.map(Header("x-cdp-clienttag", _)),
+          cdfVersion.map(Header("cdf-version", _))
+        ).flatMap(_.toList): _*
+      )
   }
 
   def get[R, T](
