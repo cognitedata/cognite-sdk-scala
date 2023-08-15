@@ -241,6 +241,7 @@ class ContainersTest extends CommonDataModelTestHelper {
         case _ => n -> p
       }
     }
+    allPossibleProperties.size should be <= 100 // limit on service side
     val allPossiblePropertyKeys = allPossibleProperties.keys.toList
 
     val constraints: Map[String, ContainerConstraint] = Map(
