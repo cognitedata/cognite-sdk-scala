@@ -83,7 +83,7 @@ final case class RequestSession[F[_]: Monad: Trace](
   ): F[Response[R]] =
     r(emptyRequest.readTimeout(90.seconds)).send(sttpBackend)
 
-  private val sttpRequest = {
+  private val sttpRequest =
     basicRequest
       .followRedirects(false)
       .header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}")
@@ -95,7 +95,6 @@ final case class RequestSession[F[_]: Monad: Trace](
           cdfVersion.map(Header("cdf-version", _))
         ).flatMap(_.toList): _*
       )
-  }
 
   def get[R, T](
       uri: Uri,
