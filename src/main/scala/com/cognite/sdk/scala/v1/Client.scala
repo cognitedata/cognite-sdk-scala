@@ -262,7 +262,6 @@ class GenericClient[F[_]: Trace](
       requestSession.baseUrl,
       value => value
     )
-  lazy val serviceAccounts = new ServiceAccounts[F](requestSession)
   lazy val groups = new Groups[F](requestSession)
   lazy val securityCategories = new SecurityCategories[F](requestSession)
 }

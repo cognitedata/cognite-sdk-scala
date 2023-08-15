@@ -19,14 +19,6 @@ final case class Project(
     authentication: Option[ProjectAuthentication]
 )
 
-final case class ServiceAccount(
-    name: String,
-    groups: Seq[Long],
-    id: Long,
-    isDeleted: Boolean,
-    deletedTime: Option[Instant]
-) extends WithId[Long]
-
 final case class Capability(
     actions: Seq[String],
     scope: Map[String, Map[String, Json]]
