@@ -234,7 +234,7 @@ class ContainersTest extends CommonDataModelTestHelper {
 
 
   it should "CRUD a container with all possible props" in {
-    val containerExternalId = s"testContainer7"
+    val containerExternalId = s"testContainer88"
     val allPossibleProperties: Map[String, ContainerPropertyDefinition] = createAllPossibleContainerPropCombinations.map {
       case (n, p) => p.`type` match {
         case t: PropertyType.DirectNodeRelationProperty => n -> p.copy(`type` = t.copy(container = None))
