@@ -84,7 +84,7 @@ object OAuth2 {
   ) {
 
     /** Only use for SessionProvider to interact with Cognite internal SessionAPI */
-    private def getKubernetesJwt[F[_]](implicit F: Async[F]): F[String] = {
+    private def getKubernetesJwt[F[_]](implicit F: Async[F], files: Files[F]): F[String] = {
       val serviceAccountTokenPath = Path("/var/run/secrets/tokens/cdf_token")
       Files[F]
         .readAll(serviceAccountTokenPath)
@@ -101,6 +101,7 @@ object OAuth2 {
         getToken: Option[F[String]] = None
     )(
         implicit F: Async[F],
+        files: Files[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[TokenState] = {
@@ -190,6 +191,7 @@ object OAuth2 {
           None // can't use F.pure(None) here hence extra Option[] wrapper
     )(
         implicit F: Async[F],
+        files: Files[F],
         clock: Clock[F],
         sttpBackend: SttpBackend[F, Any]
     ): F[SessionProvider[F]] = {
