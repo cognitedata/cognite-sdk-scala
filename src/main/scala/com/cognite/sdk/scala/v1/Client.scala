@@ -100,6 +100,7 @@ final case class RequestSession[F[_]: Monad: Trace](
         ).flatMap(_.toList): _*
       )
     tags.foldLeft(baseRequest)((req, tag) => req.tag(tag._1, tag._2))
+  }
 
   def get[R, T](
       uri: Uri,
