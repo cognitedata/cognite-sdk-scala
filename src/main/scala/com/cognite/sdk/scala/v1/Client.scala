@@ -93,14 +93,13 @@ final case class RequestSession[F[_]: Monad: Trace](
       .header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}")
       .header("x-cdp-app", applicationName)
       .readTimeout(90.seconds)
-    val taggedRequest = tags.foldLeft(baseRequest)((req, tag) => req.tag(tag._1, tag._2))
-    (clientTag, cdfVersion) match {
-      case (Some(tag), Some(ver)) =>
-        taggedRequest.header("x-cdp-clienttag", tag).header("cdf-version", ver)
-      case (Some(tag), None) => taggedRequest.header("x-cdp-clienttag", tag)
-      case (None, Some(ver)) => taggedRequest.header("cdf-version", ver)
-      case (None, None) => taggedRequest
-    }
+      .headers(
+        Seq(
+          clientTag.map(Header("x-cdp-clienttag", _)),
+          cdfVersion.map(Header("cdf-version", _))
+        ).flatMap(_.toList): _*
+      )
+    tags.foldLeft(baseRequest)((req, tag) => req.tag(tag._1, tag._2))
   }
 
   def get[R, T](
