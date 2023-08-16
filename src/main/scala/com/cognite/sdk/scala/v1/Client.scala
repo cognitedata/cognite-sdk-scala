@@ -73,8 +73,12 @@ final case class RequestSession[F[_]: Monad: Trace](
     baseSttpBackend: SttpBackend[F, _],
     auth: AuthProvider[F],
     clientTag: Option[String] = None,
-    cdfVersion: Option[String] = None
+    cdfVersion: Option[String] = None,
+    tags: Map[String, Any] = Map.empty
 ) {
+  def withResourceType(resourceType: GenericClient.RESOURCE_TYPE): RequestSession[F] =
+    this.copy(tags = this.tags + (GenericClient.RESOURCE_TYPE_TAG -> resourceType))
+
   val sttpBackend: SttpBackend[F, _] =
     new AuthSttpBackend(new TraceSttpBackend(baseSttpBackend), auth)
 
@@ -89,12 +93,13 @@ final case class RequestSession[F[_]: Monad: Trace](
       .header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}")
       .header("x-cdp-app", applicationName)
       .readTimeout(90.seconds)
+    val taggedRequest = tags.foldLeft(baseRequest)((req, tag) => req.tag(tag._1, tag._2))
     (clientTag, cdfVersion) match {
       case (Some(tag), Some(ver)) =>
-        baseRequest.header("x-cdp-clienttag", tag).header("cdf-version", ver)
-      case (Some(tag), None) => baseRequest.header("x-cdp-clienttag", tag)
-      case (None, Some(ver)) => baseRequest.header("cdf-version", ver)
-      case (None, None) => baseRequest
+        taggedRequest.header("x-cdp-clienttag", tag).header("cdf-version", ver)
+      case (Some(tag), None) => taggedRequest.header("x-cdp-clienttag", tag)
+      case (None, Some(ver)) => taggedRequest.header("cdf-version", ver)
+      case (None, None) => taggedRequest
     }
   }
 
@@ -205,46 +210,65 @@ class GenericClient[F[_]: Trace](
     )
   lazy val token =
     new Token[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
-  lazy val assets = new Assets[F](requestSession)
-  lazy val events = new Events[F](requestSession)
-  lazy val files = new Files[F](requestSession)
-  lazy val timeSeries = new TimeSeriesResource[F](requestSession)
-  lazy val dataPoints = new DataPointsResource[F](requestSession)
-  lazy val sequences = new SequencesResource[F](requestSession)
-  lazy val sequenceRows = new SequenceRows[F](requestSession)
-  lazy val dataSets = new DataSets[F](requestSession)
-  lazy val labels = new Labels[F](requestSession)
-  lazy val relationships = new Relationships[F](requestSession)
+  lazy val assets = new Assets[F](requestSession.withResourceType(ASSETS))
+  lazy val events = new Events[F](requestSession.withResourceType(EVENTS))
+  lazy val files = new Files[F](requestSession.withResourceType(FILES))
+  lazy val timeSeries =
+    new TimeSeriesResource[F](requestSession.withResourceType(TIMESERIES))
+  lazy val dataPoints =
+    new DataPointsResource[F](requestSession.withResourceType(DATAPOINTS))
+  lazy val sequences =
+    new SequencesResource[F](requestSession.withResourceType(SEQUENCES))
+  lazy val sequenceRows =
+    new SequenceRows[F](requestSession.withResourceType(SEQUENCES_ROWS))
+  lazy val dataSets = new DataSets[F](requestSession.withResourceType(DATASETS))
+  lazy val labels = new Labels[F](requestSession.withResourceType(LABELS))
+  lazy val relationships =
+    new Relationships[F](requestSession.withResourceType(RELATIONSHIPS))
 
-  lazy val rawDatabases = new RawDatabases[F](requestSession)
-  def rawTables(database: String): RawTables[F] = new RawTables(requestSession, database)
+  lazy val rawDatabases =
+    new RawDatabases[F](requestSession.withResourceType(RAW_METADATA))
+  def rawTables(database: String): RawTables[F] =
+    new RawTables(requestSession.withResourceType(RAW_METADATA), database)
   def rawRows(database: String, table: String): RawRows[F] =
-    new RawRows(requestSession, database, table)
+    new RawRows(requestSession.withResourceType(RAW_ROWS), database, table)
 
-  lazy val threeDModels = new ThreeDModels[F](requestSession)
+  lazy val threeDModels = new ThreeDModels[F](requestSession.withResourceType(THREED))
   def threeDRevisions(modelId: Long): ThreeDRevisions[F] =
-    new ThreeDRevisions(requestSession, modelId)
+    new ThreeDRevisions(requestSession.withResourceType(THREED), modelId)
   def threeDAssetMappings(modelId: Long, revisionId: Long): ThreeDAssetMappings[F] =
-    new ThreeDAssetMappings(requestSession, modelId, revisionId)
+    new ThreeDAssetMappings(
+      requestSession.withResourceType(THREED),
+      modelId,
+      revisionId
+    )
   def threeDNodes(modelId: Long, revisionId: Long): ThreeDNodes[F] =
-    new ThreeDNodes(requestSession, modelId, revisionId)
+    new ThreeDNodes(requestSession.withResourceType(THREED), modelId, revisionId)
 
-  lazy val functions = new Functions[F](requestSession)
+  lazy val functions = new Functions[F](requestSession.withResourceType(FUNCTIONS))
   def functionCalls(functionId: Long): FunctionCalls[F] =
-    new FunctionCalls(requestSession, functionId)
-  lazy val functionSchedules = new FunctionSchedules[F](requestSession)
+    new FunctionCalls(requestSession.withResourceType(FUNCTIONS), functionId)
+  lazy val functionSchedules =
+    new FunctionSchedules[F](requestSession.withResourceType(FUNCTIONS))
 
-  lazy val sessions = new Sessions[F](requestSession)
-  lazy val transformations = new Transformations[F](requestSession)
-  lazy val dataModels = new DataModels[F](requestSession)
-  lazy val nodes = new Nodes[F](requestSession, dataModels)
-  lazy val spaces = new Spaces[F](requestSession)
-  lazy val edges = new Edges[F](requestSession, dataModels)
-  lazy val containers = new Containers[F](requestSession)
-  lazy val instances = new Instances[F](requestSession)
-  lazy val views = new Views[F](requestSession)
-  lazy val spacesv3 = new SpacesV3[F](requestSession)
-  lazy val dataModelsV3 = new DataModelsV3[F](requestSession)
+  lazy val sessions = new Sessions[F](requestSession.withResourceType(SESSIONS))
+  lazy val transformations =
+    new Transformations[F](requestSession.withResourceType(TRANSFORMATIONS))
+  lazy val dataModels =
+    new DataModels[F](requestSession.withResourceType(OLD_DATAMODELS))
+  lazy val nodes =
+    new Nodes[F](requestSession.withResourceType(OLD_DATAMODELS), dataModels)
+  lazy val spaces = new Spaces[F](requestSession.withResourceType(OLD_DATAMODELS))
+  lazy val edges =
+    new Edges[F](requestSession.withResourceType(OLD_DATAMODELS), dataModels)
+  lazy val containers =
+    new Containers[F](requestSession.withResourceType(OLD_DATAMODELS))
+  lazy val instances =
+    new Instances[F](requestSession.withResourceType(OLD_DATAMODELS))
+  lazy val views = new Views[F](requestSession.withResourceType(OLD_DATAMODELS))
+  lazy val spacesv3 = new SpacesV3[F](requestSession.withResourceType(DATAMODELS))
+  lazy val dataModelsV3 =
+    new DataModelsV3[F](requestSession.withResourceType(DATAMODELS))
 
   lazy val wdl = new WellDataLayer[F](
     RequestSession(
@@ -254,19 +278,48 @@ class GenericClient[F[_]: Trace](
       authProvider,
       clientTag,
       Some("20221206-beta")
-    )
+    ).withResourceType(WELLS)
   )
 
   def project: F[Project] =
-    requestSession.get[Project, Project](
-      requestSession.baseUrl,
-      value => value
-    )
-  lazy val groups = new Groups[F](requestSession)
-  lazy val securityCategories = new SecurityCategories[F](requestSession)
+    requestSession
+      .withResourceType(PROJECT)
+      .get[Project, Project](
+        requestSession.baseUrl,
+        value => value
+      )
+  lazy val groups = new Groups[F](requestSession.withResourceType(GROUPS))
+  lazy val securityCategories =
+    new SecurityCategories[F](requestSession.withResourceType(SECURITY_CATEGORIES))
 }
 
 object GenericClient {
+  val RESOURCE_TYPE_TAG = "cdf-resource-type"
+
+  sealed trait RESOURCE_TYPE
+  case object ASSETS extends RESOURCE_TYPE
+  case object EVENTS extends RESOURCE_TYPE
+  case object FILES extends RESOURCE_TYPE
+  case object TIMESERIES extends RESOURCE_TYPE
+  case object DATAPOINTS extends RESOURCE_TYPE
+  case object SEQUENCES extends RESOURCE_TYPE
+  case object SEQUENCES_ROWS extends RESOURCE_TYPE
+  case object DATASETS extends RESOURCE_TYPE
+  case object LABELS extends RESOURCE_TYPE
+  case object RELATIONSHIPS extends RESOURCE_TYPE
+  case object RAW_METADATA extends RESOURCE_TYPE
+  case object RAW_ROWS extends RESOURCE_TYPE
+  case object THREED extends RESOURCE_TYPE
+  case object FUNCTIONS extends RESOURCE_TYPE
+  case object SESSIONS extends RESOURCE_TYPE
+  case object TRANSFORMATIONS extends RESOURCE_TYPE
+  case object OLD_DATAMODELS extends RESOURCE_TYPE
+  case object DATAMODELS extends RESOURCE_TYPE
+  case object WELLS extends RESOURCE_TYPE
+  case object PROJECT extends RESOURCE_TYPE
+  case object GROUPS extends RESOURCE_TYPE
+  case object SECURITY_CATEGORIES extends RESOURCE_TYPE
+
   implicit val projectAuthenticationDecoder: Decoder[ProjectAuthentication] =
     deriveDecoder[ProjectAuthentication]
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
