@@ -157,8 +157,7 @@ object OAuth2 {
     def apply[F[_]](
         credentials: ClientCredentials,
         refreshSecondsBeforeExpiration: Long = 30,
-        maybeCacheToken: Option[F[Option[TokenState]]] =
-          None // can't use F.pure(None) here hence extra Option[] wrapper
+        maybeCacheToken: Option[TokenState] = None
     )(
         implicit F: Async[F],
         clock: Clock[F],
@@ -167,8 +166,7 @@ object OAuth2 {
       val authenticate: F[TokenState] =
         for {
           now <- clock.realTime.map(_.toSeconds)
-          maybeTokenInCache <- maybeCacheToken.getOrElse(F.pure(None))
-          newToken <- maybeTokenInCache match {
+          newToken <- maybeCacheToken match {
             case Some(originalToken)
                 if now < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
               F.delay(originalToken)
@@ -186,8 +184,7 @@ object OAuth2 {
         session: Session,
         refreshSecondsBeforeExpiration: Long = 30,
         getToken: Option[F[String]] = None,
-        maybeCacheToken: Option[F[Option[TokenState]]] =
-          None // can't use F.pure(None) here hence extra Option[] wrapper
+        maybeCacheToken: Option[TokenState] = None
     )(
         implicit F: Async[F],
         clock: Clock[F],
@@ -196,8 +193,7 @@ object OAuth2 {
       val authenticate: F[TokenState] =
         for {
           now <- clock.realTime.map(_.toSeconds)
-          maybeTokenInCache <- maybeCacheToken.getOrElse(F.pure(None))
-          newToken <- maybeTokenInCache match {
+          newToken <- maybeCacheToken match {
             case Some(originalToken)
                 if now < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
               F.delay(originalToken)
