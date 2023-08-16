@@ -9,29 +9,6 @@ import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import sttp.client3._
 
-class ServiceAccounts[F[_]](val requestSession: RequestSession[F])
-    extends Readable[ServiceAccount, F] {
-  import ServiceAccounts._
-  override val baseUrl = uri"${requestSession.baseUrl}/serviceaccounts"
-
-  override private[sdk] def readWithCursor(
-      cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition]
-  ): F[ItemsWithCursor[ServiceAccount]] =
-    Readable.readSimple(
-      requestSession,
-      baseUrl
-    )
-}
-
-object ServiceAccounts {
-  implicit val serviceAccountDecoder: Decoder[ServiceAccount] =
-    deriveDecoder[ServiceAccount]
-  implicit val serviceAccountItemsWithCursorDecoder: Decoder[ItemsWithCursor[ServiceAccount]] =
-    deriveDecoder[ItemsWithCursor[ServiceAccount]]
-}
-
 class Groups[F[_]](val requestSession: RequestSession[F]) extends Readable[Group, F] {
   import Groups._
   override val baseUrl = uri"${requestSession.baseUrl}/groups"
