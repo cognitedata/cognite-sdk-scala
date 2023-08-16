@@ -157,7 +157,7 @@ object OAuth2 {
     def apply[F[_]](
         credentials: ClientCredentials,
         refreshSecondsBeforeExpiration: Long = 30,
-        maybeCacheToken: Option[TokenState] = None
+        initialToken: Option[TokenState] = None
     )(
         implicit F: Async[F],
         clock: Clock[F],
@@ -166,7 +166,7 @@ object OAuth2 {
       val authenticate: F[TokenState] =
         for {
           now <- clock.realTime.map(_.toSeconds)
-          newToken <- maybeCacheToken match {
+          newToken <- initialToken match {
             case Some(originalToken)
                 if now < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
               F.delay(originalToken)
@@ -184,7 +184,7 @@ object OAuth2 {
         session: Session,
         refreshSecondsBeforeExpiration: Long = 30,
         getToken: Option[F[String]] = None,
-        maybeCacheToken: Option[TokenState] = None
+        initialToken: Option[TokenState] = None
     )(
         implicit F: Async[F],
         clock: Clock[F],
@@ -193,7 +193,7 @@ object OAuth2 {
       val authenticate: F[TokenState] =
         for {
           now <- clock.realTime.map(_.toSeconds)
-          newToken <- maybeCacheToken match {
+          newToken <- initialToken match {
             case Some(originalToken)
                 if now < (originalToken.expiresAt - refreshSecondsBeforeExpiration) =>
               F.delay(originalToken)
