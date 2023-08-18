@@ -16,9 +16,9 @@ class Sessions[F[_]](val requestSession: RequestSession[F])
   import Sessions._
   override val baseUrl = uri"${requestSession.baseUrl}/sessions"
 
-  def createWithTokenExchangeFlow(items: Items[SessionCreateWithToken]): F[Seq[Session]] =
+  def createWithTokenExchangeFlow(): F[Seq[Session]] =
     requestSession.post[Seq[Session], Items[Session], Items[SessionCreateWithToken]](
-      items,
+      Items(Seq(SessionCreateWithToken())),
       baseUrl,
       value => value.items
     )
