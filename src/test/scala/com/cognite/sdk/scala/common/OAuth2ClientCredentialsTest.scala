@@ -22,6 +22,7 @@ import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.NonUnitStatements"))
 class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionValues with RetryWhile {
+  import natchez.Trace.Implicits.noop
   val tenant: String = sys.env("TEST_AAD_TENANT")
   val clientId: String = sys.env("TEST_CLIENT_ID")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
