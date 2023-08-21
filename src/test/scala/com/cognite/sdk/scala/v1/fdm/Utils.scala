@@ -362,6 +362,10 @@ object Utils {
         jsonListExamle
       case PropertyType.SequenceReference(Some(true)) =>
         InstancePropertyValue.SequenceReferenceList(List("seq1", "seq2"))
+      case PropertyType.FileReference(Some(true)) =>
+        InstancePropertyValue.FileReferenceList(List("file1", "file2", "file3"))
+      case PropertyType.TimeSeriesReference(Some(true)) =>
+        InstancePropertyValue.TimeSeriesReferenceList(List("ts1", "ts2", "ts3", "ts4"))
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
   // scalastyle:on cyclomatic.complexity
