@@ -308,6 +308,30 @@ object Utils {
         )
     }
 
+  private val jsonListExamle = InstancePropertyValue.ObjectList(
+    List(
+      Json.fromJsonObject(
+        JsonObject.fromMap(
+          Map(
+            "a" -> Json.fromString("a"),
+            "b" -> Json.fromInt(1),
+            "c" -> Json.fromBoolean(true)
+          )
+        )
+      ),
+      Json.fromJsonObject(
+        JsonObject.fromMap(
+          Map(
+            "a" -> Json.fromString("b"),
+            "b" -> Json.fromInt(1),
+            "c" -> Json.fromBoolean(false),
+            "d" -> Json.fromDoubleOrString(1.56)
+          )
+        )
+      )
+    )
+  )
+
   // scalastyle:off cyclomatic.complexity
   private def listContainerPropToInstanceProperty(
                                                    propName: String,
@@ -335,29 +359,7 @@ object Utils {
           (1 to 10).toList.map(i => LocalDateTime.now().minusDays(i.toLong).atZone(ZoneId.of("UTC")))
         )
       case PropertyType.PrimitiveProperty(PrimitivePropType.Json, Some(true)) =>
-        InstancePropertyValue.ObjectList(
-          List(
-            Json.fromJsonObject(
-              JsonObject.fromMap(
-                Map(
-                  "a" -> Json.fromString("a"),
-                  "b" -> Json.fromInt(1),
-                  "c" -> Json.fromBoolean(true)
-                )
-              )
-            ),
-            Json.fromJsonObject(
-              JsonObject.fromMap(
-                Map(
-                  "a" -> Json.fromString("b"),
-                  "b" -> Json.fromInt(1),
-                  "c" -> Json.fromBoolean(false),
-                  "d" -> Json.fromDoubleOrString(1.56)
-                )
-              )
-            )
-          )
-        )
+        jsonListExamle
       case PropertyType.SequenceReference(Some(true)) =>
         InstancePropertyValue.SequenceReferenceList(List("seq1", "seq2"))
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
