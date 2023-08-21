@@ -77,8 +77,11 @@ object CachedResource {
 }
 
 object ConcurrentCachedObject {
-  def apply[F[_]: Async, R](acquire: F[R]): F[CachedResource[F, R]] =
-    Async[F].delay(new ConcurrentCachedObject[F, R](acquire))
+  def apply[F[_]: Async, R](acquire: F[R], init: Option[R] = None): F[CachedResource[F, R]] =
+    Async[F]
+      .delay(new ConcurrentCachedObject[F, R](acquire))
+      .flatTap(res => init.map(res.initWith).getOrElse(Async[F].unit))
+      .map(x => x: CachedResource[F, R])
 }
 
 // private ctor because of Ref.unsafe in class body, `new` needs `F.delay` around it
@@ -135,6 +138,10 @@ class ConcurrentCachedObject[F[_], R] private (acquire: F[R])(
 
   // Using `unsafe` just so that I can have RState be an inner type, to avoid useless type parameters on RState
   private val cache = Ref.unsafe[F, RState](Empty)
+
+  // only meant to be called right after constructor and before any other method
+  private def initWith(r: R): F[Unit] =
+    cache.set(Ready(r))
 
   // empty parens to disambiguate the overload
   private def transition[A](f: RState => (RState, F[A])): F[A] =
