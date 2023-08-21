@@ -358,6 +358,8 @@ object Utils {
             )
           )
         )
+      case PropertyType.SequenceReference(Some(true)) =>
+        InstancePropertyValue.SequenceReferenceList(List("seq1", "seq2"))
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
   // scalastyle:on cyclomatic.complexity
