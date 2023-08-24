@@ -17,6 +17,7 @@ import com.cognite.sdk.scala.v1.DataModelType.NodeType
     "org.wartremover.warts.NonUnitStatements"
   )
 )
+@deprecated
 class DataModelsTest extends CommonDataModelTestHelper with RetryWhile {
 
   val uuid = UUID.randomUUID.toString

@@ -21,7 +21,7 @@ import com.cognite.sdk.scala.v1.fdm.views.{ViewCreateDefinition, ViewPropertyCre
   )
 )
 class DataModelsTest extends CommonDataModelTestHelper {
-  private val space = Utils.SpaceExternalId
+  private val space = Utils.SpaceExternalId: @annotation.nowarn
 
   private val propsMap = Map(
     "stringProp1" -> ContainerPropertyDefinition(
@@ -47,7 +47,7 @@ class DataModelsTest extends CommonDataModelTestHelper {
           indexes = None
         )
       )
-    ).unsafeRunSync().headOption
+    ).unsafeRunSync().headOption: @annotation.nowarn
 
   private val view = blueFieldClient.views
     .createItems(items =
@@ -71,7 +71,7 @@ class DataModelsTest extends CommonDataModelTestHelper {
           implements = None
         )
       )
-    ).unsafeRunSync().headOption
+    ).unsafeRunSync().headOption: @annotation.nowarn
 
 
   "Datamodels" should "create models" in {

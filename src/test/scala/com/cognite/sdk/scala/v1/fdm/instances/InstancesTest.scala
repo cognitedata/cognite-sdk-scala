@@ -28,6 +28,7 @@ import scala.concurrent.duration.DurationInt
     "org.wartremover.warts.OptionPartial"
   )
 )
+@deprecated
 class InstancesTest extends CommonDataModelTestHelper {
   private val space = Utils.SpaceExternalId
 

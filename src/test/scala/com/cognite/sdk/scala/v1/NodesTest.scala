@@ -33,6 +33,7 @@ import scala.collection.immutable.Seq
     "org.wartremover.warts.AnyVal"
   )
 )
+@deprecated
 class NodesTest
     extends CommonDataModelTestHelper
     with RetryWhile

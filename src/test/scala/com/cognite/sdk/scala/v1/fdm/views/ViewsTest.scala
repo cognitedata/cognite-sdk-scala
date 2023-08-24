@@ -22,6 +22,7 @@ import org.scalatest.BeforeAndAfterAll
     "org.wartremover.warts.Product"
   )
 )
+@deprecated
 class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAndAfterAll {
   private val spaceName = "test-space-scala-sdk"
   private val containerNamePrim = "scala sdk container prim"

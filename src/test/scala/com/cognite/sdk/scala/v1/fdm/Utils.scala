@@ -13,6 +13,7 @@ import io.circe.{Json, JsonObject}
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.util.Random
 
+@deprecated
 object Utils {
   val SpaceExternalId = "testSpaceScalaSdk1"
   val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation6"
