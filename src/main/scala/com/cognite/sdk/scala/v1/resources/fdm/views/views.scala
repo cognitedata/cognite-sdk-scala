@@ -13,6 +13,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import sttp.client3._
 import sttp.client3.circe._
 
+@deprecated
 class Views[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
@@ -92,6 +93,7 @@ class Views[F[_]](val requestSession: RequestSession[F])
     listWithNextCursor(None, limit, space, includeGlobal, includeInheritedProperties)
 }
 
+@deprecated
 object Views {
   implicit val dataModelReferenceDecoder: Decoder[DataModelReference] =
     deriveDecoder[DataModelReference]

@@ -264,6 +264,7 @@ object Utils {
     )
   }
 
+  @deprecated
   def createEdgeOrNodeWriteData(
                                  space: String,
                                  nodeOrEdgeExternalId: String,

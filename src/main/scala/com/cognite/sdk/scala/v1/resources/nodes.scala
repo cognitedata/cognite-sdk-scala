@@ -14,6 +14,7 @@ import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
 
+@deprecated
 class Nodes[F[_]](
     val requestSession: RequestSession[F],
     dataModels: DataModels[F]
@@ -122,6 +123,7 @@ class Nodes[F[_]](
   }
 }
 
+@deprecated
 object Nodes {
 
   implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =

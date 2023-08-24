@@ -4,8 +4,11 @@ import io.circe.{Decoder, Encoder}
 
 import java.util.Locale
 
+@deprecated
 sealed abstract class SortDirection extends Product with Serializable
 
+
+@deprecated
 object SortDirection {
   case object Ascending extends SortDirection
   case object Descending extends SortDirection

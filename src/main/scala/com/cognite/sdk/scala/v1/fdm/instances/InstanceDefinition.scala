@@ -9,6 +9,7 @@ import io.circe.syntax.EncoderOps
 
 import java.time.{LocalDate, ZonedDateTime}
 
+@deprecated
 sealed trait InstanceDefinition {
   def space: String
   def externalId: String
@@ -20,6 +21,7 @@ sealed trait InstanceDefinition {
   val instanceType: InstanceType
 }
 
+@deprecated
 object InstanceDefinition {
   final case class NodeDefinition(
       space: String,

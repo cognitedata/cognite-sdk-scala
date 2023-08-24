@@ -5,8 +5,10 @@ import io.circe.{Decoder, DecodingFailure, Encoder, HCursor}
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
 
+@deprecated
 sealed trait IndexDefinition
 
+@deprecated
 object IndexDefinition {
   final case class BTreeIndexDefinition(properties: Seq[String]) extends IndexDefinition {
     val indexType: String = BTreeIndexDefinition.IndexType

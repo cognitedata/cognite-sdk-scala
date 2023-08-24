@@ -7,8 +7,10 @@ import io.circe._
 
 import java.util.Locale
 
+@deprecated
 sealed abstract class ConstraintType extends Product with Serializable
 
+@deprecated
 object ConstraintType {
   case object Unique extends ConstraintType
 

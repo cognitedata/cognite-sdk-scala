@@ -7,11 +7,13 @@ import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 
+@deprecated
 final case class EdgeOrNodeData(
     source: SourceReference,
     properties: Option[Map[String, Option[InstancePropertyValue]]]
 )
 
+@deprecated
 final case class InstanceCreate(
     items: Seq[NodeOrEdgeCreate],
     autoCreateStartNodes: Option[Boolean] = Some(false),
@@ -20,6 +22,7 @@ final case class InstanceCreate(
     replace: Option[Boolean] = Some(false)
 )
 
+@deprecated
 final case class InstanceRetrieve(
     instanceType: InstanceType,
     externalId: String,
@@ -28,20 +31,24 @@ final case class InstanceRetrieve(
 
 final case class InstanceSource(source: SourceReference)
 
+@deprecated
 final case class InstanceRetrieveRequest(
     items: Seq[InstanceRetrieve],
     includeTyping: Boolean,
     sources: Option[Seq[InstanceSource]]
 )
 
+@deprecated
 final case class ViewPropertyReference(identifier: String, view: Option[ViewReference])
 
+@deprecated
 final case class PropertySortV3(
     property: ViewPropertyReference,
     direction: Option[SortDirection],
     nullsFirst: Option[Boolean]
 )
 
+@deprecated
 final case class InstanceFilterRequest(
     sources: Option[Seq[InstanceSource]] = None,
     instanceType: Option[InstanceType] = None,

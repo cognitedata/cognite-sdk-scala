@@ -10,6 +10,7 @@ import io.circe.{Decoder, Printer}
 import sttp.client3._
 import sttp.client3.circe._
 
+@deprecated
 class Spaces[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
@@ -53,6 +54,7 @@ class Spaces[F[_]](val requestSession: RequestSession[F])
 
 }
 
+@deprecated
 object Spaces {
   implicit val externalIdItemsDecoder: Decoder[Items[CogniteExternalId]] =
     deriveDecoder[Items[CogniteExternalId]]

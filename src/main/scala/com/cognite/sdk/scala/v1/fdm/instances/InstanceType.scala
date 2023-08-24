@@ -4,8 +4,10 @@ import io.circe.{Decoder, Encoder}
 
 import java.util.Locale
 
+@deprecated
 sealed abstract class InstanceType extends Product with Serializable
 
+@deprecated
 object InstanceType {
   case object Node extends InstanceType
 

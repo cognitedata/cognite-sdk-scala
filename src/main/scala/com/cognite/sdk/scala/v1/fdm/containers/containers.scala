@@ -7,6 +7,7 @@ import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceDefinition
 
+@deprecated
 final case class ContainerCreateDefinition(
     space: String,
     externalId: String,
@@ -18,6 +19,7 @@ final case class ContainerCreateDefinition(
     indexes: Option[Map[String, IndexDefinition]]
 )
 
+@deprecated
 final case class ContainerDefinition(
     space: String,
     externalId: String,
@@ -33,4 +35,5 @@ final case class ContainerDefinition(
   def toSourceReference: ContainerReference = ContainerReference(space, externalId)
 }
 
+@deprecated
 final case class ContainerId(space: String, externalId: String)

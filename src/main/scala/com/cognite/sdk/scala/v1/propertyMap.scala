@@ -106,6 +106,7 @@ object PropertyMap {
   // scalastyle:on cyclomatic.complexity
 }
 
+@deprecated
 final case class Node(
     override val externalId: String,
     properties: Option[Map[String, DataModelProperty[_]]] = None
@@ -118,6 +119,7 @@ final case class Node(
       }
     )
 
+@deprecated
 final case class DataModelNodeCreate(
     spaceExternalId: String,
     model: DataModelIdentifier,
@@ -125,6 +127,7 @@ final case class DataModelNodeCreate(
     items: Seq[PropertyMap]
 )
 
+@deprecated
 final case class DataModelInstanceQuery(
     model: DataModelIdentifier,
     spaceExternalId: String,
@@ -134,11 +137,13 @@ final case class DataModelInstanceQuery(
     cursor: Option[String] = None
 )
 
+@deprecated
 final case class DataModelInstanceQueryResponse(
     items: Seq[PropertyMap],
     modelProperties: Option[Map[String, DataModelPropertyDefinition]] = None,
     nextCursor: Option[String] = None
 )
+@deprecated
 object DataModelInstanceQueryResponse {
   def createDecoderForQueryResponse(): Decoder[DataModelInstanceQueryResponse] = {
     import DataModels.dataModelPropertyDefinitionDecoder
@@ -161,12 +166,14 @@ object DataModelInstanceQueryResponse {
   }
 }
 
+@deprecated
 final case class DataModelInstanceByExternalId(
     spaceExternalId: String,
     items: Seq[CogniteExternalId],
     model: DataModelIdentifier
 )
 
+@deprecated
 final case class Edge(
     override val externalId: String,
     `type`: DirectRelationIdentifier,
@@ -194,6 +201,7 @@ final case class Edge(
       }
     )
 
+@deprecated
 final case class EdgeCreate(
     spaceExternalId: String,
     model: DataModelIdentifier,
