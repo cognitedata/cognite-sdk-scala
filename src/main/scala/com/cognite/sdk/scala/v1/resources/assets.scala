@@ -73,7 +73,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
       items
     )
 
-  @deprecated("message", since = "0")("Please use deleteRecursive instead", "1.5.22")
+  @deprecated("Please use deleteRecursive instead", "1.5.22")
   def deleteByIds(
       ids: Seq[Long],
       recursive: Boolean,
