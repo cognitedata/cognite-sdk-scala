@@ -17,7 +17,7 @@ import scala.util.Try
     "org.wartremover.warts.Null"
   )
 )
-@deprecated
+@deprecated("message", since = "0")
 class InstancePropertyValueTest extends AnyWordSpec with Matchers {
 
   "InstanceFilterValue" should  {

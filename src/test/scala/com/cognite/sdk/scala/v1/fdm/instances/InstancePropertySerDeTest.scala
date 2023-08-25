@@ -24,7 +24,7 @@ import java.time.temporal.ChronoUnit
     "org.wartremover.warts.Null"
   )
 )
-@deprecated
+@deprecated("message", since = "0")
 class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
 
   "InstanceFilterResponse" should  {

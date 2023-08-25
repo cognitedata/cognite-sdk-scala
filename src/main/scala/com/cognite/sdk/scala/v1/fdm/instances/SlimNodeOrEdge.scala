@@ -7,7 +7,7 @@ import io.circe.generic.semiauto.deriveDecoder
 
 import java.time.Instant
 
-@deprecated
+@deprecated("message", since = "0")
 sealed abstract class SlimNodeOrEdge extends Product with Serializable {
   val space: String
   val externalId: String
@@ -16,7 +16,7 @@ sealed abstract class SlimNodeOrEdge extends Product with Serializable {
   val lastUpdatedTime: Option[Instant]
 }
 
-@deprecated
+@deprecated("message", since = "0")
 object SlimNodeOrEdge {
   final case class SlimNodeDefinition(
       space: String,

@@ -19,7 +19,7 @@ import scala.collection.immutable.Seq
     "org.wartremover.warts.Serializable"
   )
 )
-@deprecated
+@deprecated("message", since = "0")
 class EdgesTest extends CommonDataModelTestHelper with RetryWhile with BeforeAndAfterAll {
   // val uuid = UUID.randomUUID.toString
   private val fixedUuid = "9e8401a6" // TODO use uuid when we can delete model

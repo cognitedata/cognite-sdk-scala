@@ -10,7 +10,7 @@ import io.circe.Decoder.Result
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json}
 import io.circe.generic.semiauto.deriveEncoder
 
-@deprecated
+@deprecated("message", since = "0")
 final case class TypePropertyDefinition(
     nullable: Option[Boolean] = Some(true),
     autoIncrement: Option[Boolean] = Some(false),
@@ -20,7 +20,7 @@ final case class TypePropertyDefinition(
     `type`: PropertyType
 )
 
-@deprecated
+@deprecated("message", since = "0")
 object TypePropertyDefinition {
 
   implicit val typePropertyDefinitionEncoder: Encoder[TypePropertyDefinition] = deriveEncoder

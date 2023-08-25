@@ -14,7 +14,7 @@ import io.circe.generic.semiauto.deriveEncoder
 import sttp.client3._
 import sttp.client3.circe._
 
-@deprecated
+@deprecated("message", since = "0")
 class Edges[F[_]](
     val requestSession: RequestSession[F],
     dataModels: DataModels[F]
@@ -126,7 +126,7 @@ class Edges[F[_]](
   }
 }
 
-@deprecated
+@deprecated("message", since = "0")
 object Edges {
 
   implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =

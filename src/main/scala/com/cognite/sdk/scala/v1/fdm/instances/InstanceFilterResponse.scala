@@ -3,14 +3,14 @@ package com.cognite.sdk.scala.v1.fdm.instances
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Decoder, Encoder, HCursor}
 
-@deprecated
+@deprecated("message", since = "0")
 final case class InstanceFilterResponse(
     items: Seq[InstanceDefinition],
     typing: Option[Map[String, Map[String, Map[String, TypePropertyDefinition]]]],
     nextCursor: Option[String]
 )
 
-@deprecated
+@deprecated("message", since = "0")
 object InstanceFilterResponse {
   implicit val instanceRetrieveResponseEncoder: Encoder[InstanceFilterResponse] = deriveEncoder
 

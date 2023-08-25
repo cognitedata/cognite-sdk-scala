@@ -9,13 +9,13 @@ import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor}
 
-@deprecated
+@deprecated("message", since = "0")
 sealed abstract class NodeOrEdgeCreate extends Product with Serializable {
   val space: String
   val externalId: String
 }
 
-@deprecated
+@deprecated("message", since = "0")
 object NodeOrEdgeCreate {
 
   final case class NodeWrite(
