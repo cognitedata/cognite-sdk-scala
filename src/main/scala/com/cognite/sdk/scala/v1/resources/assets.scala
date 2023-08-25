@@ -81,7 +81,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
   ): F[Unit] =
     deleteRecursive(ids.map(CogniteInternalId.apply), recursive, ignoreUnknownIds)
 
-  @deprecated("message", since = "0")("Please use deleteRecursive instead", "1.5.22")
+  @deprecated("Please use deleteRecursive instead", "1.5.22")
   def deleteByExternalIds(
       externalIds: Seq[String],
       recursive: Boolean,
