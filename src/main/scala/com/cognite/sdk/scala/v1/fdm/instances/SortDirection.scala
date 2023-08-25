@@ -7,7 +7,6 @@ import java.util.Locale
 @deprecated("message", since = "0")
 sealed abstract class SortDirection extends Product with Serializable
 
-
 @deprecated("message", since = "0")
 object SortDirection {
   case object Ascending extends SortDirection
