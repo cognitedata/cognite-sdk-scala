@@ -28,6 +28,7 @@ import scala.concurrent.duration.DurationInt
     "org.wartremover.warts.OptionPartial"
   )
 )
+@deprecated("message", since = "0")
 class ContainersTest extends CommonDataModelTestHelper {
   private val space = Utils.SpaceExternalId
 

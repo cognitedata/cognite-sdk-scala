@@ -8,8 +8,10 @@ import io.circe._
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
 
+@deprecated("message", since = "0")
 sealed trait ContainerConstraint
 
+@deprecated("message", since = "0")
 object ContainerConstraint {
   // TODO: Handle ViewReference as well
   final case class RequiresConstraint(require: Option[ContainerReference])
