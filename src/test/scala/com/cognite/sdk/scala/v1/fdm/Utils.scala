@@ -13,7 +13,6 @@ import io.circe.{Json, JsonObject}
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.util.Random
 
-@deprecated("message", since = "0")
 object Utils {
   val SpaceExternalId = "testSpaceScalaSdk1"
   val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation6"
@@ -265,7 +264,6 @@ object Utils {
     )
   }
 
-  @deprecated("message", since = "0")
   def createEdgeOrNodeWriteData(
                                  space: String,
                                  nodeOrEdgeExternalId: String,

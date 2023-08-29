@@ -264,14 +264,11 @@ class GenericClient[F[_]: Trace](
   @deprecated("message", since = "0")
   lazy val edges =
     new Edges[F](requestSession.withResourceType(OLD_DATAMODELS), dataModels)
-  @deprecated("message", since = "0")
   lazy val containers =
-    new Containers[F](requestSession.withResourceType(OLD_DATAMODELS))
-  @deprecated("message", since = "0")
+    new Containers[F](requestSession.withResourceType(DATAMODELS))
   lazy val instances =
-    new Instances[F](requestSession.withResourceType(OLD_DATAMODELS))
-  @deprecated("message", since = "0")
-  lazy val views = new Views[F](requestSession.withResourceType(OLD_DATAMODELS))
+    new Instances[F](requestSession.withResourceType(DATAMODELS))
+  lazy val views = new Views[F](requestSession.withResourceType(DATAMODELS))
   lazy val spacesv3 = new SpacesV3[F](requestSession.withResourceType(DATAMODELS))
   lazy val dataModelsV3 =
     new DataModelsV3[F](requestSession.withResourceType(DATAMODELS))
