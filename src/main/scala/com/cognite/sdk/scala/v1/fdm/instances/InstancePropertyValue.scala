@@ -17,10 +17,8 @@ import java.time.temporal.ChronoField.{
 import java.time.{LocalDate, ZonedDateTime}
 import scala.util.{Success, Try}
 
-@deprecated("message", since = "0")
 sealed abstract class InstancePropertyValue extends Product with Serializable
 
-@deprecated("message", since = "0")
 object InstancePropertyValue {
   final case class String(value: java.lang.String) extends InstancePropertyValue
   final case class Int32(value: scala.Int) extends InstancePropertyValue

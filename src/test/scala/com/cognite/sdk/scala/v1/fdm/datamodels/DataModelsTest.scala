@@ -20,7 +20,6 @@ import com.cognite.sdk.scala.v1.fdm.views.{ViewCreateDefinition, ViewPropertyCre
     "org.wartremover.warts.OptionPartial"
   )
 )
-@deprecated("message", since = "0")
 class DataModelsTest extends CommonDataModelTestHelper {
   private val space = Utils.SpaceExternalId
 
