@@ -4,10 +4,8 @@ import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor}
 
-@deprecated("message", since = "0")
 sealed trait InstanceDeletionRequest
 
-@deprecated("message", since = "0")
 object InstanceDeletionRequest {
   final case class NodeDeletionRequest(space: String, externalId: String)
       extends InstanceDeletionRequest {
