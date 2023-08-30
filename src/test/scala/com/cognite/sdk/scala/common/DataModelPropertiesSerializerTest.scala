@@ -27,6 +27,7 @@ import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
     "org.wartremover.warts.IsInstanceOf"
   )
 )
+@deprecated("message", since = "0")
 class DataModelPropertiesSerializerTest extends AnyWordSpec with Matchers {
 
   implicit val dataModelInstanceQueryResponseDecoder: Decoder[DataModelInstanceQueryResponse] = {

@@ -10,6 +10,7 @@ import io.circe.{Decoder, Encoder, HCursor, Json, Printer}
 import sttp.client3._
 import sttp.client3.circe._
 
+@deprecated("message", since = "0")
 class DataModels[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
@@ -55,6 +56,7 @@ class DataModels[F[_]](val requestSession: RequestSession[F])
 
 }
 
+@deprecated("message", since = "0")
 object DataModels {
   implicit val dataModelIdentifierEncoder: Encoder[DataModelIdentifier] =
     Encoder
