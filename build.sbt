@@ -28,6 +28,7 @@ lazy val commonSettings = Seq(
   organizationHomepage := Some(url("https://cognite.com")),
   version := "2.7." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
+  scalaVersion := scala213, // use 2.13 by default
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
