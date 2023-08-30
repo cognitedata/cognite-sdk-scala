@@ -14,7 +14,6 @@ import io.circe.{Decoder, Encoder, Printer}
 import sttp.client3._
 import sttp.client3.circe._
 
-@deprecated("message", since = "0")
 class Instances[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
@@ -91,7 +90,6 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       )
 }
 
-@deprecated("message", since = "0")
 object Instances {
   implicit val edgeOrNodeDataEncoder: Encoder[EdgeOrNodeData] = deriveEncoder
   implicit val sourceEncoder: Encoder[InstanceSource] = deriveEncoder
