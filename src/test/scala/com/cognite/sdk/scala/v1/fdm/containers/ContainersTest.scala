@@ -103,15 +103,14 @@ class ContainersTest extends CommonDataModelTestHelper {
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(false)),
       PropertyType.TimeSeriesReference(list = None),
-//TODO: Uncomment once the list types are released
-//      PropertyType.TimeSeriesReference(list = Some(true)),
-//      PropertyType.TimeSeriesReference(list = Some(false)),
+      PropertyType.TimeSeriesReference(list = Some(true)),
+      PropertyType.TimeSeriesReference(list = Some(false)),
       PropertyType.FileReference(list = None),
-//      PropertyType.FileReference(list = Some(true)),
-//      PropertyType.FileReference(list = Some(false)),
-      PropertyType.SequenceReference(list = None)
-//      PropertyType.SequenceReference(list = Some(true)),
-//      PropertyType.SequenceReference(list = Some(false))
+      PropertyType.FileReference(list = Some(true)),
+      PropertyType.FileReference(list = Some(false)),
+      PropertyType.SequenceReference(list = None),
+      PropertyType.SequenceReference(list = Some(true)),
+      PropertyType.SequenceReference(list = Some(false))
     )
 
     val afterEncodedAndDecoded = values
@@ -234,13 +233,14 @@ class ContainersTest extends CommonDataModelTestHelper {
 
 
   it should "CRUD a container with all possible props" in {
-    val containerExternalId = s"testContainer6"
+    val containerExternalId = s"testContainer88"
     val allPossibleProperties: Map[String, ContainerPropertyDefinition] = createAllPossibleContainerPropCombinations.map {
       case (n, p) => p.`type` match {
         case t: PropertyType.DirectNodeRelationProperty => n -> p.copy(`type` = t.copy(container = None))
         case _ => n -> p
       }
     }
+    allPossibleProperties.size should be <= 100 // limit on service side
     val allPossiblePropertyKeys = allPossibleProperties.keys.toList
 
     val constraints: Map[String, ContainerConstraint] = Map(
