@@ -31,16 +31,16 @@ import scala.concurrent.duration.DurationInt
 class InstancesTest extends CommonDataModelTestHelper {
   private val space = Utils.SpaceExternalId
 
-  private val edgeNodeContainerExtId = "sdkTest10EdgeNodeContainer2"
-  private val edgeContainerExtId = "sdkTest10EdgeContainer2"
-  private val nodeContainer1ExtId = "sdkTest10NodeContainer3"
-  private val nodeContainer2ExtId = "sdkTest10NodeContainer4"
+  private val edgeNodeContainerExtId = "sdkTest12EdgeNodeContainer2"
+  private val edgeContainerExtId = "sdkTest12EdgeContainer2"
+  private val nodeContainer1ExtId = "sdkTest12NodeContainer3"
+  private val nodeContainer2ExtId = "sdkTest12NodeContainer4"
   private val containerForDirectNodeRelationExtId = Utils.DirectNodeRelationContainerExtId
 
-  private val edgeNodeViewExtId = "sdkTest10EdgeNodeView2"
-  private val edgeViewExtId = "sdkTest10EdgeView3"
-  private val nodeView1ExtId = "sdkTest10NodeView4"
-  private val nodeView2ExtId = "sdkTest10NodeView5"
+  private val edgeNodeViewExtId = "sdkTest12EdgeNodeView2"
+  private val edgeViewExtId = "sdkTest12EdgeView3"
+  private val nodeView1ExtId = "sdkTest12NodeView4"
+  private val nodeView2ExtId = "sdkTest12NodeView5"
   private val viewForDirectNodeRelationExtId = Utils.DirectNodeRelationViewExtId
 
   private val viewVersion = Utils.ViewVersion
