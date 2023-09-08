@@ -5,7 +5,7 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.2-1")
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.4.4")
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.1")
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0")
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.0.0")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.0.9")
 addSbtPlugin("au.com.onegeek" %% "sbt-dotenv" % "2.1.233")
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.0.6")
 
