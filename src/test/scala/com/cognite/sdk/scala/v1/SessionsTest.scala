@@ -349,28 +349,16 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
   }
 
   it should "revoke a session" in {
-    val expectedResponse = Seq(
-      SessionList(
-        1,
-        "CLIENT_CREDENTIALS",
-        "REVOKED",
-        Instant.now().toEpochMilli,
-        Instant.now().plusSeconds(60).toEpochMilli,
-        Some("clientId")
-      ),
-      SessionList(
-        2,
-        "TOKEN_EXCHANGE",
-        "REVOKED",
-        Instant.now().minusSeconds(120).toEpochMilli,
-        Instant.now().minusSeconds(60).toEpochMilli
+    val expectedIds = Seq(
+        CogniteInternalId(1),
+        CogniteInternalId(2)
       )
-    )
+
     val responseForSessionRevoke = SttpBackendStub.synchronous
       .whenRequestMatches(r => r.method === Method.POST && r.uri.path.endsWith(List("sessions", "revoke")))
       .thenRespond(
         Response(
-          expectedResponse,
+          expectedIds,
           StatusCode.Ok,
           "OK",
           Seq(Header("content-type", "application/json; charset=utf-8"))
@@ -383,12 +371,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionRevoke)
 
-    val responseDelete = client.sessions.revoke(
-      Items(Seq(
-        CogniteInternalId(1),
-        CogniteInternalId(2)
-      )))
+    val responseDelete = client.sessions.revoke(Items(expectedIds))
     responseDelete.size shouldBe 2
-    responseDelete shouldBe Seq(1,2)
+    responseDelete shouldBe expectedIds
   }
 }
