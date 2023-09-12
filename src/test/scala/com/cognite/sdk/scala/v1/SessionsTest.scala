@@ -385,7 +385,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
 
     val responseDelete = client.sessions.revoke(
       Items(Seq(
-        CogniteInternalId(1), 
+        CogniteInternalId(1),
         CogniteInternalId(2)
       )))
     responseDelete.size shouldBe 2
