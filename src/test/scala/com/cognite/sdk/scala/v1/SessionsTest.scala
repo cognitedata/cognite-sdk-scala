@@ -406,6 +406,6 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
     ).asJson
     .as[Seq[CogniteInternalId]]
 
-    parsed shouldBe expectedIds
+    parsed shouldBe Right(expectedIds)
   }
 }
