@@ -7,7 +7,7 @@ val scala212 = "2.12.17"
 val supportedScalaVersions = List(scala212, scala213)
 
 // This is used only for tests.
-val jettyTestVersion = "9.4.48.v20220622"
+val jettyTestVersion = "9.4.52.v20230823"
 
 val sttpVersion = "3.5.2"
 val circeVersion = "0.14.5"
@@ -17,7 +17,7 @@ val natchezVersion = "0.3.1"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
-ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.5"
+ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.2.0"
 
 lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
 
@@ -28,6 +28,7 @@ lazy val commonSettings = Seq(
   organizationHomepage := Some(url("https://cognite.com")),
   version := "2.7." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
+  scalaVersion := scala213, // use 2.13 by default
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
@@ -107,7 +108,7 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "3.21.4",
+      "com.google.protobuf" % "protobuf-java" % "3.24.3",
       "org.tpolecat" %% "natchez-core" % natchezVersion
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -138,7 +139,7 @@ lazy val core = (project in file("."))
   )
 
 val scalaTestDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.14" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.17" % "test"
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,

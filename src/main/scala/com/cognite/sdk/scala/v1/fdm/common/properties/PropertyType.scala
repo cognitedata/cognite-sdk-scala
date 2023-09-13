@@ -80,9 +80,7 @@ object PropertyType {
     )
 
   implicit val externalIdReferenceEncoder: Encoder[CDFExternalIdReference] =
-    Encoder.forProduct1("type")(_.`type`)
-  // TODO: Change this to below once list types are released
-  //    Encoder.forProduct2("type", "list")(t => (t.`type`, t.list))
+    Encoder.forProduct2("type", "list")(t => (t.`type`, t.list))
 
   implicit val primitivePropertyEncoder: Encoder[PrimitiveProperty] =
     deriveEncoder[PrimitiveProperty]

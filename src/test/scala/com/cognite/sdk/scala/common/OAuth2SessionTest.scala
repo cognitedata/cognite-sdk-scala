@@ -62,7 +62,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
         session,
         refreshSecondsBeforeExpiration = 1,
         Some(IO("kubernetesServiceToken")),
-        Some(IO.pure(Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 5, "irrelevant")))))
+        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 5, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- numTokenRequests.get.map(_ shouldBe 0)
       _ <- IO.sleep(3.seconds)
@@ -118,7 +118,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
         session,
         refreshSecondsBeforeExpiration = 2,
         Some(IO("kubernetesServiceToken")),
-        Some(IO.pure(Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))))
+        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       noNewToken <- numTokenRequests.get  // original token is still valid
       _ <- IO.sleep(4.seconds)

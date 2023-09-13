@@ -28,7 +28,7 @@ jobs:
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
       - name: Cache Coursier dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: coursier-cache
         with:
@@ -36,7 +36,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
       - name: Cache Ivy 2 cache
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: sbt-ivy2-cache
         with:
@@ -68,7 +68,7 @@ jobs:
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
       - name: Cache Coursier dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: coursier-cache
         with:
@@ -76,7 +76,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
       - name: Cache Ivy 2 cache
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: sbt-ivy2-cache
         with:
@@ -108,7 +108,7 @@ jobs:
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
     # Can we do something better here?
     - name: Cache Coursier dependencies
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: coursier-cache
       with:
@@ -116,7 +116,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
     - name: Cache Ivy 2 cache
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: sbt-ivy2-cache
       with:
@@ -135,7 +135,7 @@ jobs:
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalastyle test:scalastyle scalafmtCheck coverage test coverageReport
 
     - name: Upload test coverage report
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.codecov_token }}
 
