@@ -12,6 +12,10 @@ import sttp.model.{Header, MediaType, Method, StatusCode}
 import java.time.Instant
 import scala.collection.immutable.Seq
 
+import io.circe.syntax._
+import io.circe.Encoder
+import io.circe.generic.semiauto.deriveEncoder
+
 @SuppressWarnings(
   Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.NonUnitStatements")
 )
@@ -346,5 +350,62 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
 
     val error = the[CdpApiException] thrownBy client.sessions.refresh(RefreshSessionRequest(123, "invalid-sessionKey"))
     error.message shouldBe "Session not found"
+  }
+
+  it should "revoke a session" in {
+    val expectedIds = Seq(
+        CogniteInternalId(1),
+        CogniteInternalId(2)
+      )
+
+    val responseForSessionRevoke = SttpBackendStub.synchronous
+      .whenRequestMatches(r => r.method === Method.POST && r.uri.path.endsWith(List("sessions", "revoke")))
+      .thenRespond(
+        Response(
+          expectedIds,
+          StatusCode.Ok,
+          "OK",
+          Seq(Header("content-type", "application/json; charset=utf-8"))
+        )
+      )
+
+    val client = new GenericClient[Id](
+      applicationName = "CogniteScalaSDK-OAuth-Test",
+      projectName = "session-testing",
+      auth = BearerTokenAuth("bearer Token")
+    )(implicitly, implicitly, responseForSessionRevoke)
+
+    val responseDelete = client.sessions.revoke(Items(expectedIds))
+    responseDelete.size shouldBe 2
+    responseDelete shouldBe expectedIds
+  }
+
+  implicit val sessionListEncoder: Encoder[SessionList] = deriveEncoder
+  it should "parse ids from sessionsList" in {
+    val expectedIds = Seq(
+        CogniteInternalId(1),
+        CogniteInternalId(2)
+      )
+
+    val parsed = Seq(
+      SessionList(
+        1,
+        "CLIENT_CREDENTIALS",
+        "READY",
+        Instant.now().toEpochMilli,
+        Instant.now().plusSeconds(60).toEpochMilli,
+        Some("clientId")
+      ),
+      SessionList(
+        2,
+        "TOKEN_EXCHANGE",
+        "CANCELLED",
+        Instant.now().minusSeconds(120).toEpochMilli,
+        Instant.now().minusSeconds(60).toEpochMilli
+      )
+    ).asJson
+    .as[Seq[CogniteInternalId]]
+
+    parsed shouldBe Right(expectedIds)
   }
 }
