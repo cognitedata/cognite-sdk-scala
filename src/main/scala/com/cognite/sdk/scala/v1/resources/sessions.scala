@@ -51,6 +51,14 @@ class Sessions[F[_]](val requestSession: RequestSession[F])
         uri"$baseUrl/token",
         value => value
       )
+
+  def revoke(ids: Items[CogniteInternalId]): F[Seq[CogniteInternalId]] =
+    requestSession
+      .post[Seq[CogniteInternalId], Items[CogniteInternalId], Items[CogniteInternalId]](
+        ids,
+        uri"$baseUrl/sessions/revoke",
+        value => value.items
+      )
 }
 
 object Sessions {
