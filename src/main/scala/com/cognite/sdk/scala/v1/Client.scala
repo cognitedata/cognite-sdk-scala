@@ -253,17 +253,6 @@ class GenericClient[F[_]: Trace](
   lazy val sessions = new Sessions[F](requestSession.withResourceType(SESSIONS))
   lazy val transformations =
     new Transformations[F](requestSession.withResourceType(TRANSFORMATIONS))
-  @deprecated("message", since = "0")
-  lazy val dataModels =
-    new DataModels[F](requestSession.withResourceType(OLD_DATAMODELS))
-  @deprecated("message", since = "0")
-  lazy val nodes =
-    new Nodes[F](requestSession.withResourceType(OLD_DATAMODELS), dataModels)
-  @deprecated("message", since = "0")
-  lazy val spaces = new Spaces[F](requestSession.withResourceType(OLD_DATAMODELS))
-  @deprecated("message", since = "0")
-  lazy val edges =
-    new Edges[F](requestSession.withResourceType(OLD_DATAMODELS), dataModels)
   lazy val containers =
     new Containers[F](requestSession.withResourceType(DATAMODELS))
   lazy val instances =
@@ -316,8 +305,6 @@ object GenericClient {
   case object FUNCTIONS extends RESOURCE_TYPE
   case object SESSIONS extends RESOURCE_TYPE
   case object TRANSFORMATIONS extends RESOURCE_TYPE
-  @deprecated("message", since = "0")
-  case object OLD_DATAMODELS extends RESOURCE_TYPE
   case object DATAMODELS extends RESOURCE_TYPE
   case object WELLS extends RESOURCE_TYPE
   case object PROJECT extends RESOURCE_TYPE
