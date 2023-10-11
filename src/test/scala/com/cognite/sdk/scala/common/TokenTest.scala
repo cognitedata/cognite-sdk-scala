@@ -24,8 +24,7 @@ class TokenTest extends SdkTestSpec with OptionValues {
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
       clientId = clientId,
       clientSecret = clientSecret,
-      scopes = List("https://bluefield.cognitedata.com/.default"),
-      cdfProjectName = "extractor-bluefield-testing"
+      scopes = List("https://bluefield.cognitedata.com/.default")
     )
 
     val authProvider = OAuth2.ClientCredentialsProvider[IO](credentials)

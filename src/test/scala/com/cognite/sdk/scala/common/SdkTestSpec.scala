@@ -78,8 +78,7 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
       clientId = clientId,
       clientSecret = clientSecret,
-      scopes = scopes,
-      cdfProjectName = projectName
+      scopes = scopes
     )
 
   private lazy val authProvider =

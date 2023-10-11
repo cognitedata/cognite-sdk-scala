@@ -5,7 +5,7 @@ package com.cognite.sdk.scala.v1
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.OAuth2.ClientCredentials
+import com.cognite.sdk.scala.common.OAuth2.{ClientCredentials, ProjectClientCredentials}
 import com.cognite.sdk.scala.common._
 import io.circe.syntax.EncoderOps
 import sttp.model.Uri
@@ -50,8 +50,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         Some(GenericDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
-        sourceOidcCredentials = Some(credentials),
-        destinationOidcCredentials = Some(credentials),
+        sourceOidcCredentials = Some(projectCredentials),
+        destinationOidcCredentials = Some(projectCredentials),
         externalId = s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         ignoreNullFields = true,
         dataSetId = None
@@ -99,8 +99,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         Some(GenericDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
-        sourceOidcCredentials = Some(credentials),
-        destinationOidcCredentials = Some(credentials),
+        sourceOidcCredentials = Some(projectCredentials),
+        destinationOidcCredentials = Some(projectCredentials),
         externalId = s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         ignoreNullFields = true,
         dataSetId = None
@@ -136,8 +136,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         Some(GenericDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
-        sourceOidcCredentials = Some(credentials),
-        destinationOidcCredentials = Some(credentials),
+        sourceOidcCredentials = Some(projectCredentials),
+        destinationOidcCredentials = Some(projectCredentials),
         externalId = s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         ignoreNullFields = true,
         dataSetId = Some(existedDataSetId)
@@ -223,17 +223,16 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       }
   }
 
-  import FlatOidcCredentials.credentialEncoder
+  import ProjectClientCredentialsEncoder.credentialEncoder
 
-  "ClientCredentials encoder" should "work with empty scopes and empty audience" in {
-    val credential = ClientCredentials(
+  "ProjectClientCredentials encoder" should "work with empty scopes and empty audience" in {
+    val credential = ProjectClientCredentials("project", ClientCredentials(
       Uri.unsafeParse("http://tokenUrl.com"),
       "gcp",
       "secret",
       List.empty[String],
-      "project",
       None
-    ).asJson
+    )).asJson
     credential.toString() shouldBe """{
                                      |  "clientId" : "gcp",
                                      |  "clientSecret" : "secret",
@@ -243,14 +242,13 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   it should "work with non empty scopes and non empty audience" in {
-    val credential = ClientCredentials(
+    val credential = ProjectClientCredentials("project", ClientCredentials(
       Uri.unsafeParse("http://tokenUrl.com"),
       "gcp",
       "secret",
       (1 to 3).map(i => s"scope-${i.toString}").toList,
-      "project",
       Some("audience")
-    ).asJson
+    )).asJson
     credential.toString() shouldBe """{
                                      |  "clientId" : "gcp",
                                      |  "clientSecret" : "secret",
@@ -270,8 +268,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       Some(GenericDataSource("events")),
       conflictMode = Some("upsert"),
       Some(false),
-      sourceOidcCredentials = Some(credentials),
-      destinationOidcCredentials = Some(credentials),
+      sourceOidcCredentials = Some(projectCredentials),
+      destinationOidcCredentials = Some(projectCredentials),
       externalId = s"$uniquePrefix-transformation-sdk-test",
       ignoreNullFields = true,
       dataSetId = None
