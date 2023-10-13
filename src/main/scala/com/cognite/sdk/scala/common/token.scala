@@ -35,6 +35,11 @@ final case class ProjectCapability(
     projectScope: ProjectScope
 )
 
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.SizeIs"
+  )
+)
 object ProjectCapability {
   implicit val capabilityDecoder: Decoder[Capability] = deriveDecoder
   implicit val decoder: Decoder[ProjectCapability] = Decoder.instance { h =>
