@@ -18,16 +18,14 @@ object ProjectDetails {
 sealed trait ProjectScope
 
 final case class AllProjectsScope() extends ProjectScope
-final case class ProjectUrlName(projectUrlName: String)
-final case class ProjectsListScope(projectList: Seq[ProjectUrlName]) extends ProjectScope
+final case class ProjectsListScope(projects: Seq[String]) extends ProjectScope
 
 object ProjectScope {
   private final case class AllProjectsScopeShape(allProjects: Unit)
-  implicit val projectNameDecoder: Decoder[ProjectUrlName] = deriveDecoder
   implicit val decoder: Decoder[ProjectScope] =
     deriveDecoder[AllProjectsScopeShape]
       .map(_ => AllProjectsScope())
-      .or(Decoder.decodeSeq(deriveDecoder[ProjectUrlName]).map(ProjectsListScope))
+      .or(deriveDecoder[ProjectsListScope].map(x => x))
 }
 
 final case class ProjectCapability(

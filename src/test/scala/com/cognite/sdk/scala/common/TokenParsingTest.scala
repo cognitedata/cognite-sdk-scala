@@ -16,13 +16,11 @@ class TokenParsingTest extends AnyFlatSpec with Matchers {
   }
   it should "decode ProjectsListScope" in {
     val r = ProjectScope.decoder.decodeJson(json"""
-      [
-        {
-          "projectUrlName": "a"
-        }
-      ]
+      {
+        "projects": ["a"]
+      }
     """)
-    r shouldBe Right(ProjectsListScope(Seq(ProjectUrlName("a"))))
+    r shouldBe Right(ProjectsListScope(Seq("a")))
   }
   it should "require *Acl field" in {
     val r = ProjectCapability.decoder.decodeJson(json"""
@@ -48,13 +46,13 @@ class TokenParsingTest extends AnyFlatSpec with Matchers {
     val r = ProjectCapability.decoder.decodeJson(json"""
       {
           "AssetsAcl": {"actions": [], "scope": {}},
-          "projectScope": [{"projectUrlName": "a"}, {"projectUrlName": "b"}]
+          "projectScope": {"projects": ["a", "b"]}
       }
     """)
     r shouldBe Right(ProjectCapability(
       resourceAcl = Map("AssetsAcl" -> Capability(Seq(), Map())),
       projectScope = ProjectsListScope(
-        Seq(ProjectUrlName("a"), ProjectUrlName("b"))
+        Seq("a", "b")
       )
     ))
   }
@@ -82,9 +80,9 @@ class TokenParsingTest extends AnyFlatSpec with Matchers {
               "actions": ["READ"],
               "scope": {"all": {}}
             },
-            "projectScope": [
-              {"projectUrlName": "b"}
-            ]
+            "projectScope": {
+              "projects": ["b"]
+            }
           }
         ]
       }
@@ -99,7 +97,7 @@ class TokenParsingTest extends AnyFlatSpec with Matchers {
           actions = Seq("READ"),
           scope = Map("all" -> Map.empty))
         ),
-        projectScope = ProjectsListScope(Seq(ProjectUrlName("b")))
+        projectScope = ProjectsListScope(Seq("b"))
       ))
     ))
   }
