@@ -44,7 +44,7 @@ object ProjectCapability {
       projectScope <- h.downField("projectScope").as[ProjectScope]
       acls <- aclKeys
         .traverse(key => h.downField(key).as[Capability].map((key, _)))
-        .map(Map.from(_))
+        .map(Map.newBuilder(_).result())
       _ <- Either.cond(
         acls.sizeIs < 2,
         (),
