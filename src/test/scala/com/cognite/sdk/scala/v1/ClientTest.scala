@@ -31,7 +31,8 @@ class ClientTest extends SdkTestSpec with OptionValues {
     s"""
        |{
        |  "subject": "123",
-       |  "projects": [{"projectUrlName": "111", "groups": []}]
+       |  "projects": [{"projectUrlName": "111", "groups": []}],
+       |  "capabilities": []
        |}
        |""".stripMargin, StatusCode.Ok, "OK",
     Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
