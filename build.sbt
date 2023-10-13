@@ -1,5 +1,5 @@
 import wartremover.Wart
-import sbt.project
+import sbt.{Test, project}
 
 //val scala3 = "3.2.0"
 val scala213 = "2.13.8"
@@ -164,6 +164,9 @@ def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
       .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13"),
     ("io.circe" %% "circe-parser" % circeVersion)
+      .exclude("org.typelevel", "cats-core_2.12")
+      .exclude("org.typelevel", "cats-core_2.13"),
+    ("io.circe" %% "circe-literal" % circeVersion % Test)
       .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13")
   )
