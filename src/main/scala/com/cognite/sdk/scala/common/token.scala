@@ -46,7 +46,7 @@ object ProjectCapability {
         .traverse(key => h.downField(key).as[Capability].map((key, _)))
         .map(_.toMap)
       _ <- Either.cond(
-        acls.sizeIs < 2,
+        acls.size < 2,
         (),
         DecodingFailure(
           DecodingFailure.Reason.CustomReason(
