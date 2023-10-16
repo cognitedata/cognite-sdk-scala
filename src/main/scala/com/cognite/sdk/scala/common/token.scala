@@ -6,13 +6,15 @@ package com.cognite.sdk.scala.common
 import cats.implicits.toTraverseOps
 import com.cognite.sdk.scala.v1.{Capability, RequestSession}
 import sttp.client3._
-import io.circe.{Decoder, DecodingFailure}
-import io.circe.generic.semiauto.deriveDecoder
+import io.circe.{Decoder, DecodingFailure, Encoder, Json}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.syntax.EncoderOps
 
 final case class ProjectDetails(projectUrlName: String, groups: Seq[Long])
 
 object ProjectDetails {
   implicit val decoder: Decoder[ProjectDetails] = deriveDecoder[ProjectDetails]
+  implicit val encoder: Encoder[ProjectDetails] = deriveEncoder[ProjectDetails]
 }
 
 sealed trait ProjectScope
@@ -26,6 +28,15 @@ object ProjectScope {
     deriveDecoder[AllProjectsScopeShape]
       .map(_ => AllProjectsScope())
       .or(deriveDecoder[ProjectsListScope].map(x => x))
+  implicit val encoderAllProjectScope: Encoder[AllProjectsScope] =
+    deriveEncoder[AllProjectsScopeShape]
+      .contramap[AllProjectsScope](_ => AllProjectsScopeShape())
+  implicit val encoderProjectListScope: Encoder[ProjectsListScope] =
+      deriveEncoder[ProjectsListScope]
+  implicit val encoder: Encoder[ProjectScope] = Encoder.instance {
+    case all @ AllProjectsScope() => all.asJson
+    case list @ ProjectsListScope(_) => list.asJson
+  }
 }
 
 final case class ProjectCapability(
@@ -40,6 +51,7 @@ final case class ProjectCapability(
 )
 object ProjectCapability {
   implicit val capabilityDecoder: Decoder[Capability] = deriveDecoder
+  implicit val capabilityEncoder: Encoder[Capability] = deriveEncoder
   implicit val decoder: Decoder[ProjectCapability] = Decoder.instance { h =>
     val keys = h.keys.map(_.toList).toList.flatten
     val aclKeys = keys.filter(_.endsWith("Acl"))
@@ -68,6 +80,12 @@ object ProjectCapability {
       )
     } yield new ProjectCapability(acls, projectScope)
   }
+  implicit val encoder: Encoder[ProjectCapability] = Encoder.instance {
+    case ProjectCapability(acl, scope) =>
+    Json.obj(
+      (Seq("projectScope" -> scope.asJson) ++ acl.mapValues(_.asJson).toList): _*
+    )
+  }
 }
 
 final case class TokenInspectResponse(
@@ -78,6 +96,7 @@ final case class TokenInspectResponse(
 
 object TokenInspectResponse {
   implicit val decoder: Decoder[TokenInspectResponse] = deriveDecoder
+  implicit val encoder: Encoder[TokenInspectResponse] = deriveEncoder
 }
 
 class Token[F[_]](val requestSession: RequestSession[F]) {
