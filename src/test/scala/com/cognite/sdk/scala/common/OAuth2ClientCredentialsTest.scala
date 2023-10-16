@@ -36,8 +36,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
       clientId = clientId,
       clientSecret = clientSecret,
-      scopes = List("https://bluefield.cognitedata.com/.default"),
-      cdfProjectName = "extractor-bluefield-testing"
+      scopes = List("https://bluefield.cognitedata.com/.default")
     )
 
     val authProvider =
@@ -70,7 +69,6 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       tokenUri = uri"https://login.aize.io/oauth/token",
       clientId = sys.env("AIZE_CLIENT_ID"),
       clientSecret = sys.env("AIZE_CLIENT_SECRET"),
-      cdfProjectName = "aize",
       audience = Some("https://twindata.io/cdf/T101014843")
     )
 
@@ -97,8 +95,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
       clientId = "clientId",
       clientSecret = "clientSecret",
-      scopes = List("https://bluefield.cognitedata.com/.default"),
-      cdfProjectName = "extractor-bluefield-testing"
+      scopes = List("https://bluefield.cognitedata.com/.default")
     )
 
     an[SdkException] shouldBe thrownBy {
@@ -138,15 +135,14 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       tokenUri = uri"http://whatever.com/token",
       clientId = "irrelevant",
       clientSecret = "irrelevant",
-      scopes = List("irrelevant"),
-      cdfProjectName = "irrelevant"
+      scopes = List("irrelevant")
     )
 
     val io = for {
       _ <- numTokenRequests.update(_ => 0)
       authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials,
         refreshSecondsBeforeExpiration = 2,
-        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
+        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4)))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       noNewToken <- numTokenRequests.get  // original token is still valid
       _ <- IO.sleep(4.seconds)

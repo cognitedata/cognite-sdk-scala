@@ -166,7 +166,7 @@ object Transformations {
     case sr: SequenceRowDataSource => sequenceRowDataSourceEncoder(sr)
   }
 
-  import FlatOidcCredentials.credentialEncoder
+  import ProjectClientCredentialsEncoder.credentialEncoder
 
   implicit val createEncoder: Encoder[TransformationCreate] = deriveEncoder[TransformationCreate]
   implicit val createItemsEncoder: Encoder[Items[TransformationCreate]] =

@@ -18,13 +18,16 @@ import io.circe.generic.semiauto.deriveDecoder
 import sttp.model.Uri
 
 object OAuth2 {
+  final case class ProjectClientCredentials(
+      cdfProjectName: String,
+      credentials: ClientCredentials
+  ) {}
 
   final case class ClientCredentials(
       tokenUri: Uri,
       clientId: String,
       clientSecret: String,
       scopes: List[String] = List.empty,
-      cdfProjectName: String,
       audience: Option[String] = None
   ) {
     def getAuth[F[_]](
@@ -72,7 +75,7 @@ object OAuth2 {
             }
         }
         expiresAt = acquiredLowerBound + payload.expires_in
-      } yield TokenState(payload.access_token, expiresAt, cdfProjectName)
+      } yield TokenState(payload.access_token, expiresAt)
     }
   }
 
@@ -119,7 +122,7 @@ object OAuth2 {
           .send(sttpBackend)
           .map(_.body)
         expiresAt = acquiredLowerBound + payload.expiresIn
-      } yield TokenState(payload.accessToken, expiresAt, cdfProjectName)
+      } yield TokenState(payload.accessToken, expiresAt)
     }
   }
 
@@ -133,7 +136,7 @@ object OAuth2 {
     for {
       now <- clock.realTime.map(_.toSeconds)
       _ <- cache.invalidateIfNeeded(_.expiresAt - refreshSecondsBeforeExpiration <= now)
-      auth <- cache.run(state => F.pure(OidcTokenAuth(state.token, state.cdfProjectName)))
+      auth <- cache.run(state => F.pure(OidcTokenAuth(state.token)))
     } yield auth
 
   class ClientCredentialsProvider[F[_]] private (
@@ -190,5 +193,5 @@ object OAuth2 {
     implicit val decoder: Decoder[ClientCredentialsResponse] = deriveDecoder
   }
 
-  final case class TokenState(token: String, expiresAt: Long, cdfProjectName: String)
+  final case class TokenState(token: String, expiresAt: Long)
 }
