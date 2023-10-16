@@ -30,7 +30,7 @@ object ProjectScope {
       .or(deriveDecoder[ProjectsListScope].map(x => x))
   implicit val encoderAllProjectScope: Encoder[AllProjectsScope] =
     deriveEncoder[AllProjectsScopeShape]
-      .contramap[AllProjectsScope](_ => AllProjectsScopeShape())
+      .contramap[AllProjectsScope](_ => AllProjectsScopeShape(()))
   implicit val encoderProjectListScope: Encoder[ProjectsListScope] =
       deriveEncoder[ProjectsListScope]
   implicit val encoder: Encoder[ProjectScope] = Encoder.instance {
