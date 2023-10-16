@@ -32,7 +32,7 @@ object ProjectScope {
     deriveEncoder[AllProjectsScopeShape]
       .contramap[AllProjectsScope](_ => AllProjectsScopeShape(()))
   implicit val encoderProjectListScope: Encoder[ProjectsListScope] =
-      deriveEncoder[ProjectsListScope]
+    deriveEncoder[ProjectsListScope]
   implicit val encoder: Encoder[ProjectScope] = Encoder.instance {
     case all @ AllProjectsScope() => all.asJson
     case list @ ProjectsListScope(_) => list.asJson
@@ -82,9 +82,9 @@ object ProjectCapability {
   }
   implicit val encoder: Encoder[ProjectCapability] = Encoder.instance {
     case ProjectCapability(acl, scope) =>
-    Json.obj(
-      (Seq("projectScope" -> scope.asJson) ++ acl.mapValues(_.asJson).toList): _*
-    )
+      Json.obj(
+        (Seq("projectScope" -> scope.asJson) ++ acl.mapValues(_.asJson).toList): _*
+      )
   }
 }
 
