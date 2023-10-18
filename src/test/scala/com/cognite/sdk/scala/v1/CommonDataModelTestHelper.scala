@@ -30,8 +30,11 @@ trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
     tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
     clientId = clientId,
     clientSecret = clientSecret,
-    scopes = List("https://bluefield.cognitedata.com/.default"),
-    cdfProjectName = "extractor-bluefield-testing"
+    scopes = List("https://bluefield.cognitedata.com/.default")
+  )
+  val projectCredentials = OAuth2.ProjectClientCredentials(
+    cdfProjectName = "extractor-bluefield-testing",
+    credentials = credentials
   )
 
   // Override sttpBackend because this doesn't work with the testing backend
