@@ -136,7 +136,7 @@ object OAuth2 {
     for {
       now <- clock.realTime.map(_.toSeconds)
       _ <- cache.invalidateIfNeeded(_.expiresAt - refreshSecondsBeforeExpiration <= now)
-      auth <- cache.run(state => F.pure(OidcTokenAuth(state.token)))
+      auth <- cache.run(state => F.pure(BearerTokenAuth(state.token)))
     } yield auth
 
   class ClientCredentialsProvider[F[_]] private (
