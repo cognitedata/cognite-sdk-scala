@@ -12,27 +12,16 @@ import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import scala.concurrent.duration._
 
 class TokenTest extends SdkTestSpec with OptionValues {
-  val tenant: String = sys.env("TEST_AAD_TENANT")
-  val clientId: String = sys.env("TEST_CLIENT_ID")
-  val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
-
   implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
 
   it should "read token inspect result" in {
-
-    val credentials = OAuth2.ClientCredentials(
-      tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
-      clientId = clientId,
-      clientSecret = clientSecret,
-      scopes = List("https://bluefield.cognitedata.com/.default")
-    )
-
     val authProvider = OAuth2.ClientCredentialsProvider[IO](credentials)
       .unsafeRunTimed(1.second)
       .value
 
     val token =
-      new Token(RequestSession[IO]("CogniteScalaSDK-OAuth-Test", uri"https://bluefield.cognitedata.com", sttpBackend, authProvider))
+      new Token(RequestSession[IO]("CogniteScalaSDK-OAuth-Test", uri"${baseUrl}", sttpBackend,
+        authProvider))
     val status = token.inspect().unsafeRunTimed(10.seconds).value
     assert(status.subject !== "")
   }

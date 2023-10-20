@@ -265,11 +265,11 @@ class ContainersTest extends CommonDataModelTestHelper {
       indexes = Some(indexes)
     )
 
-    val createdResponse = blueFieldClient.containers.createItems(containers = Seq(containerToCreate)).unsafeRunSync()
+    val createdResponse = testClient.containers.createItems(containers = Seq(containerToCreate)).unsafeRunSync()
     createdResponse.isEmpty shouldBe false
 
     // TODO: Check update reflection delay and remove 5 seconds sleep
-    val readAfterCreateContainers = (IO.sleep(5.seconds) *> blueFieldClient
+    val readAfterCreateContainers = (IO.sleep(5.seconds) *> testClient
       .containers
       .retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))))
       .unsafeRunSync()
@@ -310,11 +310,11 @@ class ContainersTest extends CommonDataModelTestHelper {
       indexes = Some(indexes)
     )
 
-    val updatedResponse = blueFieldClient.containers.createItems(containers = Seq(containerToUpdate)).unsafeRunSync()
+    val updatedResponse = testClient.containers.createItems(containers = Seq(containerToUpdate)).unsafeRunSync()
     updatedResponse.isEmpty shouldBe false
 
     // TODO: Check update reflection delay and remove 10.seconds sleep
-    val readAfterUpdateContainers = (IO.sleep(5.seconds) *> blueFieldClient
+    val readAfterUpdateContainers = (IO.sleep(5.seconds) *> testClient
       .containers
       .retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))))
       .unsafeRunSync()
@@ -325,7 +325,7 @@ class ContainersTest extends CommonDataModelTestHelper {
     updatedContainer.name.get.endsWith("Updated") shouldBe true
     updatedContainer.description.get.endsWith("Updated") shouldBe true
 
-    val deletedContainer = blueFieldClient.containers.delete(Seq(ContainerId(space, containerExternalId))).unsafeRunSync()
+    val deletedContainer = testClient.containers.delete(Seq(ContainerId(space, containerExternalId))).unsafeRunSync()
     deletedContainer.length shouldBe 1
   }
 }

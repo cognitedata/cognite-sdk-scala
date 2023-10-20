@@ -216,33 +216,33 @@ class InstancesTest extends CommonDataModelTestHelper {
   }).getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).flatMap {case (k, v) => v.map(k -> _)}.toMap
 
   private def createContainers(items: Seq[ContainerCreateDefinition]) = {
-    blueFieldClient.containers.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+    testClient.containers.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
   }
 
   private def deleteContainers(items: Seq[ContainerId]) = {
-    blueFieldClient.containers.delete(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    testClient.containers.delete(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
   }
 
   private def createViews(items: Seq[ViewCreateDefinition]) = {
-    blueFieldClient.views.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+    testClient.views.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
   }
 
   private def createInstance(writeData: Seq[NodeOrEdgeCreate]): IO[Seq[SlimNodeOrEdge]] = {
-    blueFieldClient.instances.createItems(
+    testClient.instances.createItems(
       InstanceCreate(items = writeData)
     ).flatTap(_ => IO.sleep(2.seconds))
   }
 
   private def deleteInstance(refs: Seq[InstanceDeletionRequest]): Seq[InstanceDeletionRequest] = {
-    blueFieldClient.instances.delete(instanceRefs = refs).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    testClient.instances.delete(instanceRefs = refs).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
   }
 
   private def deleteViews(items: Seq[DataModelReference]) = {
-    blueFieldClient.views.deleteItems(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    testClient.views.deleteItems(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
   }
 
   private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) = {
-    blueFieldClient.instances.retrieveByExternalIds(items = Seq(
+    testClient.instances.retrieveByExternalIds(items = Seq(
       InstanceRetrieve(InstanceType.Node, instanceExternalId, viewRef.space)),
       includeTyping = true,
       sources = Some(Seq(InstanceSource(viewRef)))
@@ -256,7 +256,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   private def fetchEdgeInstance(viewRef: ViewReference, instanceExternalId: String) = {
-    blueFieldClient.instances.retrieveByExternalIds(items = Seq(
+    testClient.instances.retrieveByExternalIds(items = Seq(
       InstanceRetrieve(InstanceType.Edge, instanceExternalId, viewRef.space)),
       includeTyping = true,
       sources = Some(Seq(InstanceSource(viewRef)))
