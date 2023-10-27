@@ -52,39 +52,6 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       cdfVersion = None
     )
 
-//    Reenable this when login.status for tokens is fixed
-//    val loginStatus = client.login.status().unsafeRunTimed(10.seconds).get
-//    assert(loginStatus.loggedIn)
-
-    noException shouldBe thrownBy {
-      client.rawDatabases.list().compile.toVector.unsafeRunTimed(10.seconds).value
-    }
-  }
-
-  // Aize is moving to Azure so we don't have to test their Idp
-  // TODO Reactivated the test if we find new credential or remove the test completely
-  ignore should "authenticate with Aize using OAuth2" in {
-
-    val credentials = OAuth2.ClientCredentials(
-      tokenUri = uri"https://login.aize.io/oauth/token",
-      clientId = sys.env("AIZE_CLIENT_ID"),
-      clientSecret = sys.env("AIZE_CLIENT_SECRET"),
-      audience = Some("https://twindata.io/cdf/T101014843")
-    )
-
-    val authProvider =
-      OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value
-
-    val client = new GenericClient(
-      applicationName = "CogniteScalaSDK-OAuth-Test",
-      projectName = "aize",
-      baseUrl = "https://api.cognitedata.com",
-      authProvider = authProvider,
-      apiVersion = None,
-      clientTag = None,
-      cdfVersion = None
-    )
-
     noException shouldBe thrownBy {
       client.rawDatabases.list().compile.toVector.unsafeRunTimed(10.seconds).value
     }
