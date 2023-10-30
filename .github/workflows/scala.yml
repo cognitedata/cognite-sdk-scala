@@ -130,6 +130,7 @@ jobs:
         TEST_CLIENT_ID: ${{ secrets.BLUEFIELD_CLIENT_ID }}
         TEST_CLIENT_SECRET: ${{ secrets.BLUEFIELD_CLIENT_SECRET }}
         TEST_PROJECT: "extractor-bluefield-testing"
+        TEST_PROJECT2: "playground"
       # run: sbt test
       run: |
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalastyle test:scalastyle scalafmtCheck coverage test coverageReport
