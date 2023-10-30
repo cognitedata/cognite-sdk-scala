@@ -70,13 +70,13 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
   lazy val projectName: String = sys.env.getOrElse("TEST_PROJECT2", "playground")
   lazy val baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL2", GenericClient.defaultBaseUrl)
   lazy val audience = Some(baseUrl)
-  lazy val tokenUri = sys.env.get("TEST_TOKEN_URL")
+  lazy val tokenUri = sys.env.get("TEST_TOKEN_URL2")
     .orElse(
-      sys.env.get("TEST_AAD_TENANT")
+      sys.env.get("TEST_AAD_TENANT2")
         .map(tenant => s"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token"))
     .getOrElse("https://sometokenurl")
-  lazy val clientId: String = sys.env("TEST_CLIENT_ID")
-  lazy val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
+  lazy val clientId: String = sys.env("TEST_CLIENT_ID2")
+  lazy val clientSecret: String = sys.env("TEST_CLIENT_SECRET2")
   lazy val scopes: List[String] = List(baseUrl + "/.default")
 
   lazy val credentials = OAuth2.ClientCredentials(
