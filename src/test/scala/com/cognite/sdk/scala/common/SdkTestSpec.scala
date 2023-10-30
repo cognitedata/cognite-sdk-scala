@@ -68,7 +68,7 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
   lazy val projectName: String = sys.env.getOrElse("TEST_PROJECT2", "playground")
-  lazy val baseUrl: String = GenericClient.defaultBaseUrl
+  lazy val baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL2", GenericClient.defaultBaseUrl)
   lazy val audience = Some(baseUrl)
   lazy val tokenUri = sys.env.get("TEST_TOKEN_URL")
     .orElse(
