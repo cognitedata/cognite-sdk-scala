@@ -61,10 +61,6 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       cdfVersion = None
     )
 
-//    Reenable this when login.status for tokens is fixed
-//    val loginStatus = client.login.status().unsafeRunTimed(10.seconds).get
-//    assert(loginStatus.loggedIn)
-
     noException shouldBe thrownBy {
       client.rawDatabases.list().compile.toVector.unsafeRunTimed(10.seconds).value
     }
