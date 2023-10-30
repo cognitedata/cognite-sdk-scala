@@ -69,8 +69,8 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
   it should "throw a valid error when authenticating with bad credentials" in {
     val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"${tokenUri}",
-      clientId = clientId,
-      clientSecret = clientSecret,
+      clientId = "clientId",
+      clientSecret = "clientSecret",
       scopes = scopes,
       audience = audience
     )
