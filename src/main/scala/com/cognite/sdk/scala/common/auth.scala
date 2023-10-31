@@ -31,6 +31,11 @@ final case class BearerTokenAuth(bearerToken: String) extends Auth {
     r.header("Authorization", s"Bearer $bearerToken")
 }
 
+final case class OidcTokenAuth(bearerToken: String) extends Auth {
+  def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
+    r.header("Authorization", s"Bearer $bearerToken")
+}
+
 final case class TicketAuth(authTicket: String) extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     r.header("auth-ticket", authTicket)
