@@ -36,7 +36,8 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
       clientId = clientId,
       clientSecret = clientSecret,
-      scopes = List("https://bluefield.cognitedata.com/.default")
+      scopes = List("https://bluefield.cognitedata.com/.default"),
+      cdfProjectName = "extractor-bluefield-testing"
     )
 
     val authProvider =
@@ -62,7 +63,8 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
       clientId = "clientId",
       clientSecret = "clientSecret",
-      scopes = List("https://bluefield.cognitedata.com/.default")
+      scopes = List("https://bluefield.cognitedata.com/.default"),
+      cdfProjectName = "extractor-bluefield-testing"
     )
 
     an[SdkException] shouldBe thrownBy {
@@ -102,14 +104,15 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       tokenUri = uri"http://whatever.com/token",
       clientId = "irrelevant",
       clientSecret = "irrelevant",
-      scopes = List("irrelevant")
+      scopes = List("irrelevant"),
+      cdfProjectName = "irrelevant"
     )
 
     val io = for {
       _ <- numTokenRequests.update(_ => 0)
       authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials,
         refreshSecondsBeforeExpiration = 2,
-        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4)))
+        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       noNewToken <- numTokenRequests.get  // original token is still valid
       _ <- IO.sleep(4.seconds)
