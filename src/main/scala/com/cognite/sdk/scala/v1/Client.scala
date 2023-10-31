@@ -262,6 +262,7 @@ class GenericClient[F[_]: Trace](
   lazy val dataModelsV3 =
     new DataModelsV3[F](requestSession.withResourceType(DATAMODELS))
 
+  @deprecated("wdl support is deprecated", "0")
   lazy val wdl = new WellDataLayer[F](
     RequestSession(
       applicationName,

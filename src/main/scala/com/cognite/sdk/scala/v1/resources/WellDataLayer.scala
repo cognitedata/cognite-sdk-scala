@@ -15,6 +15,7 @@ import sttp.client3._
 import sttp.client3.circe._
 import sttp.model.Uri
 
+@deprecated("wdl support is deprecated", "0")
 class WellDataLayer[F[_]: Monad](val requestSession: RequestSession[F]) {
   import CdpApiError._
   import WellDataLayer._
@@ -97,6 +98,7 @@ class WellDataLayer[F[_]: Monad](val requestSession: RequestSession[F]) {
   }
 }
 
+@deprecated("wdl support is deprecated", "0")
 class WellDataLayerSources[F[_]: Monad](
     val requestSession: RequestSession[F],
     private val wellSources: WellDataLayerWellSources[F]
@@ -146,6 +148,7 @@ class WellDataLayerSources[F[_]: Monad](
   }
 }
 
+@deprecated("wdl support is deprecated", "0")
 class WellDataLayerWellSources[F[_]: Monad](val requestSession: RequestSession[F]) {
   import WellDataLayer._
 
@@ -178,6 +181,7 @@ class WellDataLayerWellSources[F[_]: Monad](val requestSession: RequestSession[F
     }
 }
 
+@deprecated("wdl support is deprecated", "0")
 class WellDataLayerWells[F[_]: Monad](val requestSession: RequestSession[F]) {
   import WellDataLayer._
 
@@ -214,6 +218,7 @@ class WellDataLayerWells[F[_]: Monad](val requestSession: RequestSession[F]) {
     )
 }
 
+@deprecated("wdl support is deprecated", "0")
 class WellDataLayerWellboreSources[F[_]](val requestSession: RequestSession[F]) {
   import WellDataLayer._
 
@@ -231,6 +236,7 @@ class WellDataLayerWellboreSources[F[_]](val requestSession: RequestSession[F]) 
   }
 }
 
+@deprecated("wdl support is deprecated", "0")
 class WellDataLayerWellbores[F[_]: Monad](val requestSession: RequestSession[F]) {
   import WellDataLayer._
 
@@ -254,6 +260,7 @@ class WellDataLayerWellbores[F[_]: Monad](val requestSession: RequestSession[F])
     )
 }
 
+@deprecated("wdl support is deprecated", "0")
 object WellDataLayer {
   implicit val sourceEncoder: Encoder[Source] = deriveEncoder
   implicit val sourceDecoder: Decoder[Source] = deriveDecoder
