@@ -9,6 +9,7 @@ import sttp.client3.RequestT
 final case class InvalidAuthentication() extends Throwable(s"Invalid authentication")
 
 sealed trait Auth {
+  val project: Option[String] = None
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S]
 }
 
@@ -26,12 +27,22 @@ final case class NoAuthentication() extends Auth {
     )
 }
 
-final case class BearerTokenAuth(bearerToken: String) extends Auth {
+final case class BearerTokenAuth(bearerToken: String, override val project: Option[String] = None)
+    extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     r.header("Authorization", s"Bearer $bearerToken")
 }
 
-final case class TicketAuth(authTicket: String) extends Auth {
+final case class OidcTokenAuth(bearerToken: String, projectName: String) extends Auth {
+  override val project: Option[String] = Some(projectName)
+
+  def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
+    r.header("Authorization", s"Bearer $bearerToken")
+      .header("project", projectName)
+}
+
+final case class TicketAuth(authTicket: String, override val project: Option[String] = None)
+    extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     r.header("auth-ticket", authTicket)
 }

@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.OAuth2.ProjectClientCredentials
+import com.cognite.sdk.scala.common.OAuth2.ClientCredentials
 
 import java.time.Instant
 import com.cognite.sdk.scala.common._
@@ -95,20 +95,18 @@ final case class JobDetails(
     status: String
 )
 
-object ProjectClientCredentialsEncoder {
-  implicit val credentialEncoder: Encoder[ProjectClientCredentials] =
-    new Encoder[ProjectClientCredentials] {
-      final def apply(cc: ProjectClientCredentials): Json = {
-        val scopes = Option(cc.credentials.scopes).filter(_.nonEmpty).map(_.mkString(" "))
+object FlatOidcCredentials {
+  implicit val credentialEncoder: Encoder[ClientCredentials] =
+    new Encoder[ClientCredentials] {
+      final def apply(cc: ClientCredentials): Json = {
+        val scopes = Option(cc.scopes).filter(_.nonEmpty).map(_.mkString(" "))
         Json.fromFields(
           Seq(
-            "clientId" -> Json.fromString(cc.credentials.clientId),
-            "clientSecret" -> Json.fromString(cc.credentials.clientSecret),
-            "tokenUri" -> Json.fromString(cc.credentials.tokenUri.toString()),
+            "clientId" -> Json.fromString(cc.clientId),
+            "clientSecret" -> Json.fromString(cc.clientSecret),
+            "tokenUri" -> Json.fromString(cc.tokenUri.toString()),
             "cdfProjectName" -> Json.fromString(cc.cdfProjectName)
-          ) ++ cc.credentials.audience
-            .map(a => Seq("audience" -> Json.fromString(a)))
-            .getOrElse(Seq()) ++
+          ) ++ cc.audience.map(a => Seq("audience" -> Json.fromString(a))).getOrElse(Seq()) ++
             scopes.map(s => Seq("scopes" -> Json.fromString(s))).getOrElse(Seq())
         )
       }
@@ -121,8 +119,8 @@ final case class TransformationCreate(
     destination: Option[DestinationDataSource] = None,
     conflictMode: Option[String] = None,
     isPublic: Option[Boolean] = None,
-    sourceOidcCredentials: Option[ProjectClientCredentials] = None,
-    destinationOidcCredentials: Option[ProjectClientCredentials] = None,
+    sourceOidcCredentials: Option[ClientCredentials] = None,
+    destinationOidcCredentials: Option[ClientCredentials] = None,
     externalId: String,
     ignoreNullFields: Boolean,
     dataSetId: Option[Long]
