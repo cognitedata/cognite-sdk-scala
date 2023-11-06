@@ -42,10 +42,6 @@ trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
     audience = audience,
     cdfProjectName = project
   )
-  val projectCredentials = OAuth2.ProjectClientCredentials(
-    cdfProjectName = project,
-    credentials = credentials
-  )
 
   // Override sttpBackend because this doesn't work with the testing backend
   implicit val sttpBackendAuth: SttpBackend[IO, Any] =
