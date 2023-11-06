@@ -84,7 +84,8 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
       clientId = clientId,
       clientSecret = clientSecret,
       scopes = scopes,
-      audience = audience
+      audience = audience,
+      cdfProjectName = projectName
     )
 
   private lazy val authProvider =

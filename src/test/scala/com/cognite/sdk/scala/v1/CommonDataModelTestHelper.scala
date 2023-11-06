@@ -39,7 +39,8 @@ trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
     clientId = clientId,
     clientSecret = clientSecret,
     scopes = scopes,
-    audience = audience
+    audience = audience,
+    cdfProjectName = project
   )
   val projectCredentials = OAuth2.ProjectClientCredentials(
     cdfProjectName = project,
