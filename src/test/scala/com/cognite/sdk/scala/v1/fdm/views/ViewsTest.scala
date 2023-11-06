@@ -93,11 +93,11 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   )
 
   override def beforeAll(): Unit = {
-    blueFieldClient.spacesv3
+    testClient.spacesv3
       .createItems(Seq(SpaceCreateDefinition(space = spaceName)))
       .unsafeRunSync()
 
-    blueFieldClient.containers.createItems(Seq(containerPrimitive, containerList)).unsafeRunSync()
+    testClient.containers.createItems(Seq(containerPrimitive, containerList)).unsafeRunSync()
     ()
   }
 
@@ -124,7 +124,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       properties = properties
     )
 
-    val created = blueFieldClient.views
+    val created = testClient.views
       .createItems(Seq(viewToCreate))
       .unsafeRunSync().headOption
 
@@ -193,13 +193,13 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       properties = properties2
     )
 
-    blueFieldClient.views
+    testClient.views
       .createItems(Seq(view2ToCreate))
       .unsafeRunSync()
   }
 
   ignore should "retrieve views by data model reference" in {
-    val view1 = blueFieldClient.views
+    val view1 = testClient.views
       .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some("v1"))))
       .unsafeRunSync()
       .headOption
@@ -209,7 +209,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     view1.flatMap(_.description) shouldBe Some("desc")
     view1.map(_.version) shouldBe Some(viewVersion1)
 
-    val view2 = blueFieldClient.views
+    val view2 = testClient.views
       .retrieveItems(Seq(DataModelReference(spaceName, view2ExternalId, Some("v1"))))
       .unsafeRunSync()
       .headOption
@@ -221,11 +221,11 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   }
 
   ignore should "delete views" in {
-    blueFieldClient.views
+    testClient.views
       .deleteItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
 
-    val retrievedAfterDelete = blueFieldClient.views
+    val retrievedAfterDelete = testClient.views
       .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
     retrievedAfterDelete.size shouldBe 0

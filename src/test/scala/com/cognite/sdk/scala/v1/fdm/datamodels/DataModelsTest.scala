@@ -33,7 +33,7 @@ class DataModelsTest extends CommonDataModelTestHelper {
       `type` = PropertyType.TextProperty(Some(false), Some("ucs_basic"))
     )
   )
-  private val container = blueFieldClient.containers
+  private val container = testClient.containers
     .createItems(containers =
         Seq(
           ContainerCreateDefinition(
@@ -49,7 +49,7 @@ class DataModelsTest extends CommonDataModelTestHelper {
       )
     ).unsafeRunSync().headOption
 
-  private val view = blueFieldClient.views
+  private val view = testClient.views
     .createItems(items =
       Seq(
         ViewCreateDefinition(
@@ -75,7 +75,7 @@ class DataModelsTest extends CommonDataModelTestHelper {
 
 
   "Datamodels" should "create models" in {
-      val dataModel = blueFieldClient.dataModelsV3.createItems(items =
+      val dataModel = testClient.dataModelsV3.createItems(items =
           Seq(
             DataModelCreate(
               space = space,
@@ -94,7 +94,7 @@ class DataModelsTest extends CommonDataModelTestHelper {
   }
 
   "Datamodels" should "retrieve models" in {
-    val dataModel = blueFieldClient.dataModelsV3.retrieveItems(items =
+    val dataModel = testClient.dataModelsV3.retrieveItems(items =
       Seq(
         DataModelReference(
           space = space,
