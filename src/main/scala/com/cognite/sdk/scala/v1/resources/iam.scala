@@ -29,8 +29,14 @@ class Groups[F[_]](val requestSession: RequestSession[F])
   override def createItems(items: Items[GroupCreate]): F[Seq[Group]] =
     Create.createItems[F, Group, GroupCreate](requestSession, baseUrl, items)
 
-  override def deleteByIds(ids: Seq[Long]): F[Unit] =
-    DeleteByIds.deleteByIds(requestSession, baseUrl, ids)
+  override def deleteByIds(ids: Seq[Long]): F[Unit] = {
+    implicit val idsSeqEncoder: Encoder[Seq[Long]] = Encoder.encodeSeq[Long]
+    requestSession.post[Unit, Unit, Seq[Long]](
+      ids,
+      uri"$baseUrl/delete",
+      _ => ()
+    )
+  }
 }
 
 object Groups {
