@@ -222,6 +222,8 @@ class ClientTest extends SdkTestSpec with OptionValues {
     )
 
   it should "retry requests based on response code if the response is empty" in {
+    val conflictResponse = Response("",
+      StatusCode.Conflict, "", Seq.empty)
     val badGatewayResponseLeft = Response("",
       StatusCode.BadGateway, "", Seq.empty)
     val badGatewayResponseRight = Response("",
@@ -233,6 +235,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val backendStub = SttpBackendStub(implicitly[MonadAsyncError[IO]])
       .whenAnyRequest
       .thenRespondCyclicResponses(
+        conflictResponse,
         badGatewayResponseLeft,
         badGatewayResponseRight,
         unavailableResponse,
