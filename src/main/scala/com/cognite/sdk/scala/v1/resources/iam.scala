@@ -30,7 +30,7 @@ class Groups[F[_]](val requestSession: RequestSession[F])
     Create.createItems[F, Group, GroupCreate](requestSession, baseUrl, items)
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] = {
-    implicit val idsSeqEncoder: Encoder[Seq[Long]] = Encoder.encodeSeq[Long]
+    import sttp.client3.circe._
     requestSession.post[Unit, Unit, Seq[Long]](
       ids,
       uri"$baseUrl/delete",
