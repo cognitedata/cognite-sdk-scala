@@ -29,6 +29,6 @@ class GroupsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         )
       )
     ),
-    idsThatDoNotExist = Seq.empty,
+    idsThatDoNotExist = Seq(11111111L),
     supportsMissingAndThrown = false)
 }
