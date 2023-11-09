@@ -31,8 +31,8 @@ class Groups[F[_]](val requestSession: RequestSession[F])
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] = {
     import sttp.client3.circe._
-    requestSession.post[Unit, Unit, Seq[Long]](
-      ids,
+    requestSession.post[Unit, Unit, Items[Long]](
+      Items(ids),
       uri"$baseUrl/delete",
       _ => ()
     )
