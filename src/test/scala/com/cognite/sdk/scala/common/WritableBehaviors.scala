@@ -34,25 +34,25 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
             missingIds should have size idsThatDoNotExist.size.toLong
             missingIds should contain theSameElementsAs idsThatDoNotExist
           }
-        }
 
-        val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
-        val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByIds(
-          sameIdsThatDoNotExist
-        ).unsafeRunSync()
-        if (supportsMissingAndThrown) {
-          // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
-          // if duplicated ids that do not exist are specified.
-          val sameMissingIds = sameIdsThrown.duplicated match {
-            case Some(duplicatedIds) =>
-              duplicatedIds.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
-            case None =>
-              sameIdsThrown.missing
-                .getOrElse(Seq.empty)
-                .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
+          val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
+          val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByIds(
+            sameIdsThatDoNotExist
+          ).unsafeRunSync()
+          if (supportsMissingAndThrown) {
+            // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
+            // if duplicated ids that do not exist are specified.
+            val sameMissingIds = sameIdsThrown.duplicated match {
+              case Some(duplicatedIds) =>
+                duplicatedIds.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
+              case None =>
+                sameIdsThrown.missing
+                  .getOrElse(Seq.empty)
+                  .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
+            }
+            sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+            sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           }
-          sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
-          sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
         }
       }
 
