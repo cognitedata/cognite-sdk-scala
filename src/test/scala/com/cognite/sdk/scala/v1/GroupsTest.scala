@@ -30,5 +30,6 @@ class GroupsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       )
     ),
     idsThatDoNotExist = Seq(11111111L),
-    supportsMissingAndThrown = false)
+    supportsMissingAndThrown = false,
+    deleteMissingThrows = false)
 }
