@@ -5,6 +5,7 @@ package com.cognite.sdk.scala.sttp
 
 import cats.effect.Temporal
 import com.cognite.sdk.scala.common.{CdpApiException, Constants, SdkException}
+import com.cognite.sdk.scala.v1.GenericClient
 import sttp.capabilities.Effect
 import sttp.client3.{Request, Response, SttpBackend, SttpClientException}
 import sttp.model.StatusCode
@@ -79,6 +80,10 @@ object RetryingBackend {
     override def shouldRetry[T, R](request: Request[T, R], statusCode: StatusCode): Boolean =
       statusCode.code match {
         case 429 | 500 | 502 | 503 | 504 => true
+        case 409
+            // 409 in dms can be transient and retriable
+            if request.tag(GenericClient.RESOURCE_TYPE_TAG).contains(GenericClient.DATAMODELS) =>
+          true
         case _ => false
       }
   }
