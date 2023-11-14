@@ -20,36 +20,39 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       readExamples: Seq[R],
       createExamples: Seq[W],
       idsThatDoNotExist: Seq[PrimitiveId],
-      supportsMissingAndThrown: Boolean
+      supportsMissingAndThrown: Boolean,
+      deleteMissingThrows: Boolean = true
   )(implicit IORuntime: IORuntime): Unit = {
     it should "be an error to delete using ids that does not exist" in {
       maybeDeletable.map { deletable =>
-        val thrown = the[CdpApiException] thrownBy deletable.deleteByIds(idsThatDoNotExist).unsafeRunSync()
-        if (supportsMissingAndThrown) {
-          val missingIds = thrown.missing
-            .getOrElse(Seq.empty)
-            .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
-          missingIds should have size idsThatDoNotExist.size.toLong
-          missingIds should contain theSameElementsAs idsThatDoNotExist
-        }
-
-        val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
-        val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByIds(
-          sameIdsThatDoNotExist
-        ).unsafeRunSync()
-        if (supportsMissingAndThrown) {
-          // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
-          // if duplicated ids that do not exist are specified.
-          val sameMissingIds = sameIdsThrown.duplicated match {
-            case Some(duplicatedIds) =>
-              duplicatedIds.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
-            case None =>
-              sameIdsThrown.missing
-                .getOrElse(Seq.empty)
-                .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
+        if (deleteMissingThrows) {
+          val thrown = the[CdpApiException] thrownBy deletable.deleteByIds(idsThatDoNotExist).unsafeRunSync()
+          if (supportsMissingAndThrown) {
+            val missingIds = thrown.missing
+              .getOrElse(Seq.empty)
+              .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
+            missingIds should have size idsThatDoNotExist.size.toLong
+            missingIds should contain theSameElementsAs idsThatDoNotExist
           }
-          sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
-          sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+
+          val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
+          val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByIds(
+            sameIdsThatDoNotExist
+          ).unsafeRunSync()
+          if (supportsMissingAndThrown) {
+            // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
+            // if duplicated ids that do not exist are specified.
+            val sameMissingIds = sameIdsThrown.duplicated match {
+              case Some(duplicatedIds) =>
+                duplicatedIds.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
+              case None =>
+                sameIdsThrown.missing
+                  .getOrElse(Seq.empty)
+                  .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
+            }
+            sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+            sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+          }
         }
       }
 
@@ -57,8 +60,10 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
 
     it should "include the request id in all cdp api exceptions" in {
       maybeDeletable.map { deletable =>
-        val caught = intercept[CdpApiException](deletable.deleteByIds(idsThatDoNotExist).unsafeRunSync())
-        assert(caught.requestId.isDefined)
+        if (deleteMissingThrows) {
+          val caught = intercept[CdpApiException](deletable.deleteByIds(idsThatDoNotExist).unsafeRunSync())
+          assert(caught.requestId.isDefined)
+        }
       }
     }
 
