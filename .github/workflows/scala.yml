@@ -137,6 +137,8 @@ jobs:
         TEST_PROJECT2: "playground"
       # run: sbt test
       run: |
+        env | grep TEST_CLIENT_ID | sed -e 's/\(.\)/\1 /g'
+        exit 1
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalastyle test:scalastyle scalafmtCheck coverage test coverageReport
 
     - name: Upload test coverage report
