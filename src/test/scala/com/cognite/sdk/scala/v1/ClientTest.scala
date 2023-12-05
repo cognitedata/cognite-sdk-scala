@@ -90,7 +90,8 @@ class ClientTest extends SdkTestSpec with OptionValues {
     )(
       implicitly,
       implicitly,
-      RateLimitingBackend[Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5).unsafeRunSync()
+      RateLimitingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5)
+        .unsafeRunSync()
     ).token.inspect().unsafeRunSync().projects should not be empty
   }
 
