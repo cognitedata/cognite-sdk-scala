@@ -251,7 +251,14 @@ object Utils {
         case (propName, propVal) =>
           toInstanceData(sourceRef, nonNullables + (propName -> propVal))
       }
-      List(withAllProps, withRequiredProps) ++ withEachNonRequired
+      val allPropsMaps =
+        withAllProps.properties.toList ++
+        withRequiredProps.properties.toList ++
+        withEachNonRequired.flatMap(_.properties.toList)
+      List(EdgeOrNodeData(
+        source = sourceRef,
+        properties = Some(allPropsMaps.flatMap(_.toList).toMap).filterNot(_.isEmpty)
+      ))
     }
 
     EdgeWrite(
@@ -295,7 +302,14 @@ object Utils {
             case (propName, propVal) =>
               toInstanceData(sourceRef, nonNullables + (propName -> propVal))
           }
-          List(withAllProps, withRequiredProps) ++ withEachNonRequired
+          val allPropsMaps =
+            withAllProps.properties.toList ++
+              withRequiredProps.properties.toList ++
+              withEachNonRequired.flatMap(_.properties.toList)
+          List(EdgeOrNodeData(
+            source = sourceRef,
+            properties = Some(allPropsMaps.flatMap(_.toList).toMap).filterNot(_.isEmpty)
+          ))
         }
 
         EdgeWrite(
