@@ -37,14 +37,13 @@ class RetryingBackend[F[_], +P](
       retriesRemaining: Int,
       initialDelay: FiniteDuration = initialRetryDelay
   ): F[Response[T]] = {
-    val exponentialDelay = (maxRetryDelay / 2).min(initialDelay * 2)
-    val randomDelayScale = (maxRetryDelay / 2).min(initialDelay * 2).toMillis
-    val nextDelay = Random.nextInt(randomDelayScale.toInt).millis + exponentialDelay
+    val currentDelay = Random.nextInt(initialDelay.toMillis.toInt).millis
+    val nextDelay = maxRetryDelay.min(initialDelay * 2)
 
     val maybeRetry: (Option[StatusCode], Throwable) => F[Response[T]] =
       (code: Option[StatusCode], exception: Throwable) =>
         if (retriesRemaining > 0 && code.forall(shouldRetry.shouldRetry(request, _))) {
-          responseMonad.flatMap(temporal.sleep(initialDelay))(_ =>
+          responseMonad.flatMap(temporal.sleep(currentDelay))(_ =>
             sendWithRetryCounter(request, retriesRemaining - 1, nextDelay)
           )
         } else {
@@ -62,7 +61,7 @@ class RetryingBackend[F[_], +P](
       // This can happen when we get empty responses, as we sometimes do for
       // Service Unavailable or Bad Gateway.
       if (retriesRemaining > 0 && shouldRetry.shouldRetry(request, resp.code)) {
-        responseMonad.flatMap(temporal.sleep(initialDelay))(_ =>
+        responseMonad.flatMap(temporal.sleep(currentDelay))(_ =>
           sendWithRetryCounter(request, retriesRemaining - 1, nextDelay)
         )
       } else {

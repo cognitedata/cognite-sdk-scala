@@ -19,15 +19,16 @@ trait RetryWhile {
       retriesRemaining: Int = 8,
       initialDelay: FiniteDuration = Constants.DefaultInitialRetryDelay
   ): A = {
-    val exponentialDelay = (Constants.DefaultMaxBackoffDelay / 2).min(initialDelay * 2)
+    val currentDelay = Random.nextInt(initialDelay.toMillis.toInt)
+    val nextDelay = Constants.DefaultMaxBackoffDelay.min(initialDelay * 2)
     Try {
       val result = action
       val _ = assertion(result)
       result
     } match {
       case Failure(_: TestFailedException) if retriesRemaining > 0 =>
-        Thread.sleep(initialDelay.toMillis + Random.nextInt(exponentialDelay.toMillis.toInt))
-        retryWithExpectedResult[A](action, assertion, retriesRemaining - 1, exponentialDelay)
+        Thread.sleep(currentDelay.toLong)
+        retryWithExpectedResult[A](action, assertion, retriesRemaining - 1, nextDelay)
       case Failure(exception) => throw exception
       case Success(value) => value
     }
