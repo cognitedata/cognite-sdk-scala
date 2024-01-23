@@ -34,13 +34,12 @@ class BackpressureThrottleBackend[F[_]: Temporal, +S](
       // try to take the permit and release it after the specified delay
       permit.tryTake.flatMap {
         case None => Applicative[F].unit
-        case Some(_) => {
+        case Some(_) =>
           val constantDelay = delay / 2
           val randomDelayScale = delay / 2
           val randomDelay = Random.nextInt(randomDelayScale.toMillis.toInt).millis
           Temporal[F].sleep(constantDelay + randomDelay) *>
             permit.tryOffer(()).void
-        }
       }
     } else {
       Applicative[F].unit
