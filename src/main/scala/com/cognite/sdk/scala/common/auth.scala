@@ -38,7 +38,6 @@ final case class OidcTokenAuth(bearerToken: String, projectName: String) extends
 
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     r.header("Authorization", s"Bearer $bearerToken")
-      .header("project", projectName)
 }
 
 final case class TicketAuth(authTicket: String, override val project: Option[String] = None)
