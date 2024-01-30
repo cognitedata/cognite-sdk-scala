@@ -129,7 +129,7 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
   private def syncToHead(viewRef: ViewReference, cursor: Option[Map[String, String]] = None): Option[Map[String, String]] = {
     val syncResponse = syncNodeInstances(viewRef, cursor).unsafeRunSync()
     val nodes: Seq[NodeDefinition] = syncResponse.items.get("sync").asInstanceOf[Seq[NodeDefinition]]
-    if (nodes.sizeIs > 0) {
+    if (nodes.size > 0) {
       syncToHead(viewRef, syncResponse.nextCursor)
     } else {
       syncResponse.nextCursor
