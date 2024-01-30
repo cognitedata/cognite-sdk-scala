@@ -39,7 +39,7 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
     DirectNodeRelationProperty(
-      container = Some(ContainerReference(space = SpaceExternalId, externalId = DirectNodeRelationContainerExtId)),
+      container = None,
       source = None),
     TimeSeriesReference(list = Some(false)),
     FileReference(list = Some(false)),
