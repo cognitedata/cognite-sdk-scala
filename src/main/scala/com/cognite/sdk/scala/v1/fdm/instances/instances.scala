@@ -73,13 +73,13 @@ final case class NodesTableExpression(
 )
 
 final case class EdgeTableExpression(
-     from: Option[String] = None,
-     chainTo: Option[String] = Option("destination"),
-     maxDistance: Option[Int] = None,
-     direction: Option[String] = Option("inwards"),
-     filter: Option[FilterDefinition] = None,
-     nodeFilter: Option[FilterDefinition] = None,
-     terminationFilter: Option[FilterDefinition] = None
+    from: Option[String] = None,
+    chainTo: Option[String] = Option("destination"),
+    maxDistance: Option[Int] = None,
+    direction: Option[String] = Option("inwards"),
+    filter: Option[FilterDefinition] = None,
+    nodeFilter: Option[FilterDefinition] = None,
+    terminationFilter: Option[FilterDefinition] = None
 )
 
 final case class SelectExpression(

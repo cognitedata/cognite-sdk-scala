@@ -13,7 +13,7 @@ object InstanceSyncResponse {
 
   implicit val instanceSyncResponseDecoder: Decoder[InstanceSyncResponse] = (c: HCursor) =>
     for {
-      nextCursor <- c.downField("nextCursor").as[Option[Map[String,String]]]
+      nextCursor <- c.downField("nextCursor").as[Option[Map[String, String]]]
       items <- c
         .downField("items")
         .as[Option[Map[String, Seq[InstanceDefinition]]]](

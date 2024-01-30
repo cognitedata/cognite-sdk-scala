@@ -113,14 +113,22 @@ object InstancePropertyValue {
         numericInstantPropType.map(Right(_))
       case v if v.isBoolean => v.asBoolean.map(s => Right(InstancePropertyValue.Boolean(s)))
       case v if v.isObject =>
-        val res: Option[Right[DecodingFailure, InstancePropertyValue]] = v.asObject map (obj=>
+        val res: Option[Right[DecodingFailure, InstancePropertyValue]] = v.asObject.map(obj =>
           if (obj.contains("externalId") && obj.contains("space") && obj.size === 2) {
-            Right(InstancePropertyValue.ViewDirectNodeRelation(Option(DirectRelationReference(
-              obj("space").map { json =>json.asString.getOrElse("")}.getOrElse(""),
-              obj("externalId").map { json =>json.asString.getOrElse("")}.getOrElse("")))))
+            Right(
+              InstancePropertyValue.ViewDirectNodeRelation(
+                Option(
+                  DirectRelationReference(
+                    obj("space").map(json => json.asString.getOrElse("")).getOrElse(""),
+                    obj("externalId").map(json => json.asString.getOrElse("")).getOrElse("")
+                  )
+                )
+              )
+            )
           } else {
             Right(InstancePropertyValue.Object(v))
-          })
+          }
+        )
         res
 
       case v if v.isArray =>

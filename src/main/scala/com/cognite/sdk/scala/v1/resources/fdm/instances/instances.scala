@@ -109,12 +109,14 @@ object Instances {
   implicit val propertySortV3Encoder: Encoder[PropertySortV3] = deriveEncoder
   implicit val instanceFilterRequestEncoder: Encoder[InstanceFilterRequest] = deriveEncoder
 
-  implicit val instanceSyncRequestEncoder: Encoder[InstanceSyncRequest] = {
-    deriveEncoder[InstanceSyncRequest].mapJsonObject { jsonObj => jsonObj.filter { case (_, v) => !v.isNull } }
-  }
-  implicit val tableExpression: Encoder[TableExpression] = {
-    deriveEncoder[TableExpression].mapJsonObject { jsonObj => jsonObj.filter { case (_, v) => !v.isNull} }
-  }
+  implicit val instanceSyncRequestEncoder: Encoder[InstanceSyncRequest] =
+    deriveEncoder[InstanceSyncRequest].mapJsonObject { jsonObj =>
+      jsonObj.filter { case (_, v) => !v.isNull }
+    }
+  implicit val tableExpression: Encoder[TableExpression] =
+    deriveEncoder[TableExpression].mapJsonObject { jsonObj =>
+      jsonObj.filter { case (_, v) => !v.isNull }
+    }
   implicit val nodesTableExpression: Encoder[NodesTableExpression] = deriveEncoder
   implicit val edgeTableExpression: Encoder[EdgeTableExpression] = deriveEncoder
   implicit val selectExpression: Encoder[SelectExpression] = deriveEncoder

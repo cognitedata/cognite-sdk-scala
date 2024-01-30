@@ -59,7 +59,16 @@ object InstanceDefinition {
     "version",
     "properties"
   )((e: NodeDefinition) =>
-    (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime, e.deletedTime, e.version, e.properties)
+    (
+      e.instanceType,
+      e.space,
+      e.externalId,
+      e.createdTime,
+      e.lastUpdatedTime,
+      e.deletedTime,
+      e.version,
+      e.properties
+    )
   )
 
   implicit val edgeDefinitionEncoder: Encoder[EdgeDefinition] = Encoder.forProduct9(
