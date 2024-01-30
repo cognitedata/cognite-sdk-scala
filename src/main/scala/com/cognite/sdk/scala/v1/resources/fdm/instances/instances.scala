@@ -41,6 +41,13 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       identity
     )
 
+  def syncRequest(syncRequest: InstanceSyncRequest): F[InstanceSyncResponse] =
+    requestSession.post[InstanceSyncResponse, InstanceSyncResponse, InstanceSyncRequest](
+      syncRequest,
+      uri"$baseUrl/sync",
+      identity
+    )
+
   private[sdk] def filterWithCursor(
       inputQuery: InstanceFilterRequest,
       cursor: Option[String],
@@ -101,6 +108,18 @@ object Instances {
   implicit val viewPropertyReferenceEncoder: Encoder[ViewPropertyReference] = deriveEncoder
   implicit val propertySortV3Encoder: Encoder[PropertySortV3] = deriveEncoder
   implicit val instanceFilterRequestEncoder: Encoder[InstanceFilterRequest] = deriveEncoder
+
+  implicit val instanceSyncRequestEncoder: Encoder[InstanceSyncRequest] = {
+    deriveEncoder[InstanceSyncRequest].mapJsonObject { jsonObj => jsonObj.filter { case (_, v) => !v.isNull } }
+  }
+  implicit val tableExpression: Encoder[TableExpression] = {
+    deriveEncoder[TableExpression].mapJsonObject { jsonObj => jsonObj.filter { case (_, v) => !v.isNull} }
+  }
+  implicit val nodesTableExpression: Encoder[NodesTableExpression] = deriveEncoder
+  implicit val edgeTableExpression: Encoder[EdgeTableExpression] = deriveEncoder
+  implicit val selectExpression: Encoder[SelectExpression] = deriveEncoder
+  implicit val sourceSelector: Encoder[SourceSelector] = deriveEncoder
+
   implicit val instanceRetrieveRequestEncoder: Encoder[InstanceRetrieveRequest] = deriveEncoder
 
   implicit val edgeOrNodeDataDecoder: Decoder[EdgeOrNodeData] = deriveDecoder
