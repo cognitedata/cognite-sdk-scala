@@ -55,7 +55,7 @@ final case class InstanceFilterRequest(
 final case class InstanceSyncRequest(
     `with`: Map[String, TableExpression] = Map.empty,
     cursors: Option[Map[String, String]] = None,
-    select: Map[String, SelectExpression] = Map.empty,
+    select: Map[String, SelectExpression] = Map.empty
 )
 
 final case class TableExpression(
@@ -69,7 +69,7 @@ final case class NodesTableExpression(
     chainTo: Option[String] = Option("destination"),
     direction: Option[String] = Option("inwards"),
     filter: Option[FilterDefinition] = None,
-    through: Option[ViewPropertyReference] = None,
+    through: Option[ViewPropertyReference] = None
 )
 
 final case class EdgeTableExpression(
@@ -79,14 +79,14 @@ final case class EdgeTableExpression(
      direction: Option[String] = Option("inwards"),
      filter: Option[FilterDefinition] = None,
      nodeFilter: Option[FilterDefinition] = None,
-     terminationFilter: Option[FilterDefinition] = None,
+     terminationFilter: Option[FilterDefinition] = None
 )
 
 final case class SelectExpression(
-    sources: Seq[SourceSelector] = Seq.empty,
+    sources: Seq[SourceSelector] = Seq.empty
 )
 
 final case class SourceSelector(
     source: SourceReference,
-    properties: Seq[String] = Seq.empty,
+    properties: Seq[String] = Seq.empty
 )
