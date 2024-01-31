@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.v1.fdm.instances
 
+import cats.implicits.catsSyntaxEq
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
 import io.circe._
 import io.circe.syntax.EncoderOps
@@ -111,7 +112,32 @@ object InstancePropertyValue {
         }
         numericInstantPropType.map(Right(_))
       case v if v.isBoolean => v.asBoolean.map(s => Right(InstancePropertyValue.Boolean(s)))
-      case v if v.isObject => v.asObject.map(_ => Right(InstancePropertyValue.Object(v)))
+      case v if v.isObject =>
+        val res: Option[Either[DecodingFailure, InstancePropertyValue]] = v.asObject.map(obj =>
+          if (obj.contains("externalId") && obj.contains("space") && obj.size === 2) {
+            for {
+              spaceJson <- obj("space").toRight(DecodingFailure("missing space", c.history))
+              space <- spaceJson.asString.toRight(DecodingFailure("space isn't string", c.history))
+              externalIdJson <- obj("externalId").toRight(
+                DecodingFailure("missing externalId", c.history)
+              )
+              externalId <- externalIdJson.asString.toRight(
+                DecodingFailure("externalId isn't string", c.history)
+              )
+            } yield InstancePropertyValue.ViewDirectNodeRelation(
+              Option(
+                DirectRelationReference(
+                  space,
+                  externalId
+                )
+              )
+            )
+          } else {
+            Right(InstancePropertyValue.Object(v))
+          }
+        )
+        res
+
       case v if v.isArray =>
         val objArrays = v.asArray match {
           case Some(arr) =>
@@ -215,8 +241,8 @@ object InstancePropertyValue {
       case Date(value) => Json.fromString(value.format(InstancePropertyValue.Date.formatter))
       case Timestamp(value) =>
         Json.fromString(value.format(InstancePropertyValue.Timestamp.formatter))
-      case Object(value) => value
       case ViewDirectNodeRelation(value) => value.map(_.asJson).getOrElse(Json.Null)
+      case Object(value) => value
       case TimeSeriesReference(value) => Json.fromString(value)
       case FileReference(value) => Json.fromString(value)
       case SequenceReference(value) => Json.fromString(value)

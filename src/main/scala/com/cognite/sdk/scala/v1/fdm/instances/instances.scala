@@ -51,3 +51,42 @@ final case class InstanceFilterRequest(
     filter: Option[FilterDefinition] = None,
     includeTyping: Option[Boolean]
 )
+
+final case class InstanceSyncRequest(
+    `with`: Map[String, TableExpression] = Map.empty,
+    cursors: Option[Map[String, String]] = None,
+    select: Map[String, SelectExpression] = Map.empty
+)
+
+final case class TableExpression(
+    limit: Option[Int] = Option(1000),
+    nodes: Option[NodesTableExpression] = None,
+    edges: Option[EdgeTableExpression] = None
+)
+
+final case class NodesTableExpression(
+    from: Option[String] = None,
+    chainTo: Option[String] = Option("destination"),
+    direction: Option[String] = Option("inwards"),
+    filter: Option[FilterDefinition] = None,
+    through: Option[ViewPropertyReference] = None
+)
+
+final case class EdgeTableExpression(
+    from: Option[String] = None,
+    chainTo: Option[String] = Option("destination"),
+    maxDistance: Option[Int] = None,
+    direction: Option[String] = Option("inwards"),
+    filter: Option[FilterDefinition] = None,
+    nodeFilter: Option[FilterDefinition] = None,
+    terminationFilter: Option[FilterDefinition] = None
+)
+
+final case class SelectExpression(
+    sources: Seq[SourceSelector] = Seq.empty
+)
+
+final case class SourceSelector(
+    source: SourceReference,
+    properties: Seq[String] = Seq.empty
+)

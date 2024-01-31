@@ -6,6 +6,7 @@ import com.cognite.sdk.scala.common.CdpApiException
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.HasData
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, DirectRelationReference, Usage}
@@ -141,6 +142,19 @@ class InstancesTest extends CommonDataModelTestHelper {
 
     val readNodesMapOfNode1 = (IO.sleep(10.seconds) *> fetchNodeInstance(nodeView1.toSourceReference, node1WriteData.externalId)).unsafeRunSync()
     val readNodesMapOfNode2 = fetchNodeInstance(nodeView2.toSourceReference, node2WriteData.externalId).unsafeRunSync()
+    val syncNodesMapOfNodeView1: InstanceSyncResponse = syncNodeInstances(nodeView1.toSourceReference).unsafeRunSync()
+    val syncNodesMapOfNodeView2 = syncNodeInstances(nodeView2.toSourceReference).unsafeRunSync()
+
+    syncNodesMapOfNodeView1.nextCursor.map { map =>
+      map.size shouldBe 1
+      map.keys.find("sync" === _).isDefined shouldBe true
+    }
+
+    syncNodesMapOfNodeView2.nextCursor.map { map =>
+      map.size shouldBe 1
+      map.keys.find("sync" === _).isDefined shouldBe true
+    }
+
     val readEdgesMapOfEdge = fetchEdgeInstance(edgeView.toSourceReference, edgeWriteData.externalId).unsafeRunSync()
     val readEdgesMapOfAll = fetchEdgeInstance(allView.toSourceReference, nodeOrEdgeWriteData.head.externalId).unsafeRunSync()
     val readNodesMapOfAll = fetchNodeInstance(allView.toSourceReference, nodeOrEdgeWriteData(1).externalId).unsafeRunSync()
@@ -253,6 +267,19 @@ class InstancesTest extends CommonDataModelTestHelper {
         n.properties.getOrElse(Map.empty).values.flatMap(_.values).foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
       }.foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
     }
+  }
+
+  private def syncNodeInstances(viewRef: ViewReference) = {
+    val hasData = HasData(Seq(viewRef))
+
+    testClient.instances.syncRequest(
+      InstanceSyncRequest(
+        `with` = Map("sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
+        cursors = None,
+        select = Map("sync" -> SelectExpression(sources =
+          List(SourceSelector(source = viewRef, properties = List("*")))))
+      )
+    )
   }
 
   private def fetchEdgeInstance(viewRef: ViewReference, instanceExternalId: String) = {

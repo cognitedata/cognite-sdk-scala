@@ -205,6 +205,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
             createdTime,
             lastUpdatedTime,
             deletedTime = None,
+            version = None,
             properties = Some(
               Map(
                 "space-name-1" -> Map(

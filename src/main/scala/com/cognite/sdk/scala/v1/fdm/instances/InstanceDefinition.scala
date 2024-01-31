@@ -15,6 +15,7 @@ sealed trait InstanceDefinition {
   def createdTime: Long
   def lastUpdatedTime: Long
   def deletedTime: Option[Long]
+  def version: Option[Long]
   def properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
 
   val instanceType: InstanceType
@@ -27,6 +28,7 @@ object InstanceDefinition {
       createdTime: Long,
       lastUpdatedTime: Long,
       deletedTime: Option[Long],
+      version: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
   ) extends InstanceDefinition {
     override val instanceType: InstanceType = InstanceType.Node
@@ -39,6 +41,7 @@ object InstanceDefinition {
       createdTime: Long,
       lastUpdatedTime: Long,
       deletedTime: Option[Long],
+      version: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]],
       startNode: DirectRelationReference,
       endNode: DirectRelationReference
@@ -46,24 +49,37 @@ object InstanceDefinition {
     override val instanceType: InstanceType = InstanceType.Edge
   }
 
-  implicit val nodeDefinitionEncoder: Encoder[NodeDefinition] = Encoder.forProduct6(
+  implicit val nodeDefinitionEncoder: Encoder[NodeDefinition] = Encoder.forProduct8(
     "instanceType",
     "space",
     "externalId",
     "createdTime",
     "lastUpdatedTime",
+    "deletedTime",
+    "version",
     "properties"
   )((e: NodeDefinition) =>
-    (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime, e.properties)
+    (
+      e.instanceType,
+      e.space,
+      e.externalId,
+      e.createdTime,
+      e.lastUpdatedTime,
+      e.deletedTime,
+      e.version,
+      e.properties
+    )
   )
 
-  implicit val edgeDefinitionEncoder: Encoder[EdgeDefinition] = Encoder.forProduct7(
+  implicit val edgeDefinitionEncoder: Encoder[EdgeDefinition] = Encoder.forProduct9(
     "instanceType",
     "type",
     "space",
     "externalId",
     "createdTime",
     "lastUpdatedTime",
+    "deletedTime",
+    "version",
     "properties"
   )((e: EdgeDefinition) =>
     (
@@ -73,6 +89,8 @@ object InstanceDefinition {
       e.externalId,
       e.createdTime,
       e.lastUpdatedTime,
+      e.deletedTime,
+      e.version,
       e.properties
     )
   )
@@ -166,6 +184,7 @@ object InstanceDefinition {
       createdTime <- c.downField("createdTime").as[Long]
       lastUpdatedTime <- c.downField("lastUpdatedTime").as[Long]
       deletedTime <- c.downField("deletedTime").as[Option[Long]]
+      version <- c.downField("version").as[Option[Long]]
       properties <- c
         .downField("properties")
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
@@ -177,6 +196,7 @@ object InstanceDefinition {
       createdTime = createdTime,
       lastUpdatedTime = lastUpdatedTime,
       deletedTime = deletedTime,
+      version = version,
       properties = properties
     )
 
@@ -190,6 +210,7 @@ object InstanceDefinition {
       createdTime <- c.downField("createdTime").as[Long]
       lastUpdatedTime <- c.downField("lastUpdatedTime").as[Long]
       deletedTime <- c.downField("deletedTime").as[Option[Long]]
+      version <- c.downField("version").as[Option[Long]]
       properties <- c
         .downField("properties")
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
@@ -204,6 +225,7 @@ object InstanceDefinition {
       createdTime = createdTime,
       lastUpdatedTime = lastUpdatedTime,
       deletedTime = deletedTime,
+      version = version,
       properties = properties,
       startNode = startNode,
       endNode = endNode
