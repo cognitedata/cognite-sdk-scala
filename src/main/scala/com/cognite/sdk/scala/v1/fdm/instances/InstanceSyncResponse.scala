@@ -9,7 +9,7 @@ final case class InstanceSyncResponse(
 )
 
 object InstanceSyncResponse {
-  implicit val instanceRetrieveResponseEncoder: Encoder[InstanceSyncResponse] = deriveEncoder
+  implicit val instanceSyncResponseEncoder: Encoder[InstanceSyncResponse] = deriveEncoder
 
   implicit val instanceSyncResponseDecoder: Decoder[InstanceSyncResponse] = (c: HCursor) =>
     for {
