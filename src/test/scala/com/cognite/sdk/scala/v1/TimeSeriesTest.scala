@@ -424,4 +424,41 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     val syntheticQuery: Id[Seq[SyntheticTimeSeriesResponse]] = client.timeSeries.syntheticQuery(Items(Seq(query))).unsafeRunSync()
     syntheticQuery.head.datapoints.length should be(1000)
   }
+
+  it should "support creating and filtering timeseries with unitExternalId" in {
+    val externalId: String = shortRandom()
+    val unitExternalId: String = "temperature:deg_c"
+    val timeseries = Seq(
+      TimeSeriesCreate(
+        externalId = Some(externalId),
+        unitExternalId = Some(unitExternalId)
+      )
+    )
+    val _ = client.timeSeries.create(timeseries).unsafeRunSync()
+
+    // make sure we can retrieve the timeseries by externalId and it has the correct unitExternalId
+    retryWithExpectedResult[TimeSeries](
+      client.timeSeries.retrieveByExternalId(externalId).unsafeRunSync(),
+        r => r.unitExternalId shouldBe Some(unitExternalId)
+    )
+
+    // make sure we can filter by unitExternalId
+    retryWithExpectedResult[Seq[TimeSeries]](
+      client.timeSeries.filter(
+        TimeSeriesFilter(unitExternalId = Some(unitExternalId))
+      ).compile.toList.unsafeRunSync(),
+      r => r should not be empty
+    )
+
+    // make sure we can filter by unitQuantity
+    retryWithExpectedResult[Seq[TimeSeries]](
+      client.timeSeries.filter(
+        TimeSeriesFilter(unitQuantity = Some("Temperature"))
+      ).compile.toList.unsafeRunSync(),
+      r => r should not be empty
+    )
+
+    // clean up
+    client.timeSeries.delete(Seq(CogniteExternalId(externalId)), true).unsafeRunSync()
+  }
 }
