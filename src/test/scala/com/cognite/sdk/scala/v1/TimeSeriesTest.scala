@@ -456,7 +456,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     // make sure we can filter by unitExternalId
     retryWithExpectedResult[Seq[TimeSeries]](
       client.timeSeries.filter(
-        TimeSeriesFilter(unitExternalId = Some(unitExternalId))
+        TimeSeriesFilter(unitExternalId = Some(newUnitExternalId))
       ).compile.toList.unsafeRunSync(),
       r => r should not be empty
     )
