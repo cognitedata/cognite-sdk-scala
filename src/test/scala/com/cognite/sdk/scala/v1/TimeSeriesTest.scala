@@ -425,7 +425,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     syntheticQuery.head.datapoints.length should be(1000)
   }
 
-  it should "support creating and filtering timeseries with unitExternalId" in {
+  it should "support creating, updating and filtering timeseries with unitExternalId" in {
     val externalId: String = shortRandom()
     val unitExternalId: String = "temperature:deg_c"
     val timeseries = Seq(
@@ -440,6 +440,17 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     retryWithExpectedResult[TimeSeries](
       client.timeSeries.retrieveByExternalId(externalId).unsafeRunSync(),
         r => r.unitExternalId shouldBe Some(unitExternalId)
+    )
+
+    // make sure we can update the timeseries with a new unitExternalId
+    val newUnitExternalId = "temperature:deg_f"
+    val update = Map(externalId -> TimeSeriesUpdate(unitExternalId = Some(SetValue(newUnitExternalId))))
+    val _ = client.timeSeries.updateByExternalId(update).unsafeRunSync()
+
+    // make sure we can retrieve the timeseries by externalId and it has the updated unitExternalId
+    retryWithExpectedResult[TimeSeries](
+      client.timeSeries.retrieveByExternalId(externalId).unsafeRunSync(),
+        r => r.unitExternalId shouldBe Some(newUnitExternalId)
     )
 
     // make sure we can filter by unitExternalId
