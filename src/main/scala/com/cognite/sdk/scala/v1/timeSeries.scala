@@ -1,4 +1,4 @@
-// Copyright 2020 Cognite AS
+// Copyright 2024 Cognite AS
 // SPDX-License-Identifier: Apache-2.0
 
 package com.cognite.sdk.scala.v1
@@ -11,6 +11,7 @@ final case class TimeSeries(
     isString: Boolean = false,
     metadata: Option[Map[String, String]] = None,
     unit: Option[String] = None,
+    unitExternalId: Option[String] = None,
     assetId: Option[Long] = None,
     isStep: Boolean = false,
     description: Option[String] = None,
@@ -32,6 +33,7 @@ final case class TimeSeries(
       isString,
       metadata,
       unit,
+      unitExternalId,
       assetId,
       isStep,
       description,
@@ -45,6 +47,7 @@ final case class TimeSeries(
       Setter.fromOption(externalId),
       NonNullableSetter.fromOption(metadata),
       Setter.fromOption(unit),
+      Setter.fromOption(unitExternalId),
       Setter.fromOption(assetId),
       Setter.fromOption(description),
       NonNullableSetter.fromOption(securityCategories),
@@ -58,6 +61,7 @@ final case class TimeSeriesCreate(
     isString: Boolean = false,
     metadata: Option[Map[String, String]] = None,
     unit: Option[String] = None,
+    unitExternalId: Option[String] = None,
     assetId: Option[Long] = None,
     isStep: Boolean = false,
     description: Option[String] = None,
@@ -70,6 +74,7 @@ final case class TimeSeriesUpdate(
     externalId: Option[Setter[String]] = None,
     metadata: Option[NonNullableSetter[Map[String, String]]] = None,
     unit: Option[Setter[String]] = None,
+    unitExternalId: Option[Setter[String]] = None,
     assetId: Option[Setter[Long]] = None,
     description: Option[Setter[String]] = None,
     securityCategories: Option[NonNullableSetter[Seq[Long]]] = None,
@@ -79,6 +84,8 @@ final case class TimeSeriesUpdate(
 final case class TimeSeriesSearchFilter(
     name: Option[String] = None,
     unit: Option[String] = None,
+    unitExternalId: Option[String] = None,
+    unitQuantity: Option[String] = None,
     isString: Option[Boolean] = None,
     isStep: Option[Boolean] = None,
     metadata: Option[Map[String, String]] = None,
@@ -92,6 +99,8 @@ final case class TimeSeriesSearchFilter(
 final case class TimeSeriesFilter(
     name: Option[String] = None,
     unit: Option[String] = None,
+    unitExternalId: Option[String] = None,
+    unitQuantity: Option[String] = None,
     isString: Option[Boolean] = None,
     isStep: Option[Boolean] = None,
     metadata: Option[Map[String, String]] = None,
