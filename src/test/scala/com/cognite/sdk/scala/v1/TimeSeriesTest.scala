@@ -434,7 +434,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
         unitExternalId = Some(unitExternalId)
       )
     )
-    val _ = client.timeSeries.create(timeseries).unsafeRunSync()
+    val tsCreated = client.timeSeries.create(timeseries).unsafeRunSync()
 
     // make sure we can retrieve the timeseries by externalId and it has the correct unitExternalId
     retryWithExpectedResult[TimeSeries](
@@ -445,7 +445,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     // make sure we can update the timeseries with a new unitExternalId
     val newUnitExternalId = "temperature:deg_f"
     val update = Map(externalId -> TimeSeriesUpdate(unitExternalId = Some(SetValue(newUnitExternalId))))
-    val _ = client.timeSeries.updateByExternalId(update).unsafeRunSync()
+    val tsUpdated = client.timeSeries.updateByExternalId(update).unsafeRunSync()
 
     // make sure we can retrieve the timeseries by externalId and it has the updated unitExternalId
     retryWithExpectedResult[TimeSeries](
