@@ -159,7 +159,13 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
           |                                "externalId": "extId1"
           |                            },
           |                            "property-identifier14": 5.1,
-          |                            "property-identifier15": 1.0
+          |                            "property-identifier15": 1.0,
+          |                            "property-identifier16": [
+          |                                 1.0,
+          |                                 5.1,
+          |                                 100.0,
+          |                                 0.1
+          |                             ]
           |                        },
           |                        "view-or-container-id-2": {
           |                            "property-identifier21": true,
@@ -212,6 +218,7 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
                   ),
                   "property-identifier14" -> InstancePropertyValue.Float64(5.1),
                   "property-identifier15" -> InstancePropertyValue.Float32(1.0f),
+                  "property-identifier16" -> InstancePropertyValue.Float64List(List(1.0, 5.1, 100, 0.1))
                 ),
                 "view-or-container-id-2" -> Map(
                   "property-identifier21" -> InstancePropertyValue.Boolean(true),
