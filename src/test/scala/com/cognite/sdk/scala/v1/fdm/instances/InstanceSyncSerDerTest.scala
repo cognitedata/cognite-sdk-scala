@@ -6,9 +6,9 @@ import com.cognite.sdk.scala.v1.fdm.instances.InstanceDefinition.NodeDefinition
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.instanceSyncRequestEncoder
 import io.circe
+import io.circe.Decoder
 import io.circe.parser.parse
 import io.circe.syntax.EncoderOps
-import io.circe.{Decoder, Encoder}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -138,7 +138,62 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
   "Instance Sync Response" should {
 
     "be decoded from " in {
-      val data = List(
+      val encoded =
+        """{
+          |    "items": {
+          |        "sync1": [
+          |            {
+          |                "instanceType": "node",
+          |                "space": "space-ext-id-1",
+          |                "externalId": "space-name-1",
+          |                "createdTime": 100,
+          |                "lastUpdatedTime": 1000,
+          |                "version": 10,
+          |                "properties": {
+          |                    "space-name-1": {
+          |                        "view-or-container-id-1": {
+          |                            "property-identifier11": "prop-id-1",
+          |                            "property-identifier12": 102,
+          |                            "property-identifier13": {
+          |                                "space": "space-name-1",
+          |                                "externalId": "extId1"
+          |                            },
+          |                            "property-identifier14": 5.1,
+          |                            "property-identifier15": 1.0
+          |                        },
+          |                        "view-or-container-id-2": {
+          |                            "property-identifier21": true,
+          |                            "property-identifier22": [
+          |                                1,
+          |                                3,
+          |                                4
+          |                            ]
+          |                        }
+          |                    },
+          |                    "space-name-2": {
+          |                        "view-or-container-id-3": {
+          |                            "property-identifier31": "prop-id-2",
+          |                            "property-identifier32": 103
+          |                        },
+          |                        "view-or-container-id-4": {
+          |                            "property-identifier41": false,
+          |                            "property-identifier42": [
+          |                                "a",
+          |                                "b",
+          |                                "c"
+          |                            ]
+          |                        }
+          |                    }
+          |                }
+          |            }
+          |        ]
+          |    },
+          |    "nextCursor": {
+          |        "sync1": "cursor-101"
+          |    }
+          |}""".stripMargin
+
+      val expectedItems = List(
         NodeDefinition(
           externalId = "space-name-1",
           space = "space-ext-id-1",
@@ -154,7 +209,9 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
                   "property-identifier12" -> InstancePropertyValue.Int32(102),
                   "property-identifier13" -> InstancePropertyValue.ViewDirectNodeRelation(
                     Some(DirectRelationReference(space = "space-name-1", externalId = "extId1"))
-                  )
+                  ),
+                  "property-identifier14" -> InstancePropertyValue.Float64(5.1),
+                  "property-identifier15" -> InstancePropertyValue.Float32(1.0f),
                 ),
                 "view-or-container-id-2" -> Map(
                   "property-identifier21" -> InstancePropertyValue.Boolean(true),
@@ -176,15 +233,12 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
         )
       )
 
-      val items: Map[String, Seq[InstanceDefinition]] = Map("sync1" -> data)
+      val items: Map[String, Seq[InstanceDefinition]] = Map("sync1" -> expectedItems)
       val cursors = Map[String, String]("sync1" -> "cursor-101")
-      val instanceSyncResponse: InstanceSyncResponse =
-        InstanceSyncResponse(items = Option(items), nextCursor = Option(cursors))
-      val encoded = Encoder[InstanceSyncResponse].apply(instanceSyncResponse).noSpaces
 
       val actual: Either[circe.Error, InstanceSyncResponse] = parse(encoded).flatMap(Decoder[InstanceSyncResponse].decodeJson)
-      Right(instanceSyncResponse.nextCursor) shouldBe actual.map(_.nextCursor)
-      Right(instanceSyncResponse.items) shouldBe actual.map(_.items)
+      Right(Some(cursors)) shouldBe actual.map(_.nextCursor)
+      Right(Some(items)) shouldBe actual.map(_.items)
     }
   }
 }
