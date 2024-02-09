@@ -93,7 +93,7 @@ object InstancePropertyValue {
         val numericInstantPropType = v.asNumber.flatMap { jn =>
           val bd = BigDecimal(jn.toString)
           if (jn.toString.contains(".")) { // 1.0 should be a Double not Long
-            if (bd.isDecimalFloat) {
+            if (bd.isExactFloat) {
               Some(InstancePropertyValue.Float32(bd.floatValue))
             } else {
               Some(InstancePropertyValue.Float64(bd.doubleValue))
@@ -103,8 +103,6 @@ object InstancePropertyValue {
               Some(InstancePropertyValue.Int32(bd.intValue))
             } else if (bd.isValidLong) {
               Some(InstancePropertyValue.Int64(bd.longValue))
-            } else if (bd.isDecimalFloat) {
-              Some(InstancePropertyValue.Float32(bd.floatValue))
             } else {
               Some(InstancePropertyValue.Float64(bd.doubleValue))
             }
