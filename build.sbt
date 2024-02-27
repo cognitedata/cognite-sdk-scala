@@ -21,12 +21,18 @@ ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0
 
 lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
 
+credentials += Credentials("Sonatype Nexus Repository Manager",
+  "oss.sonatype.org",
+  System.getenv("SONATYPE_USERNAME"),
+  System.getenv("SONATYPE_PASSWORD"),
+)
+
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.17." + patchVersion,
+  version := "2.18." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   crossScalaVersions := supportedScalaVersions,
