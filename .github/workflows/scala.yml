@@ -46,6 +46,7 @@ jobs:
 
       - name: Compile
         run: |
+          cat /dev/null | sbt -Dsbt.log.noformat=true ++2.12 dependencyLockCheck
           cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.12 Test/compile
 
   compile_scala_213:
@@ -87,6 +88,7 @@ jobs:
 
       - name: Compile
         run: |
+          cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
           cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 Test/compile
 
 
@@ -140,6 +142,7 @@ jobs:
         TEST_PROJECT2: "playground"
       # run: sbt test
       run: |
+        cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalastyle test:scalastyle scalafmtCheck coverage test coverageReport
 
     - name: Upload test coverage report
@@ -167,6 +170,7 @@ jobs:
 
       - name: Build JAR file
         run: |
+          cat /dev/null | sbt -Dsbt.log.noformat=true +dependencyLockCheck
           cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}" "set compile/skip := true" +package
 
       - name: Install GPG & Sonatype credentials for SBT
