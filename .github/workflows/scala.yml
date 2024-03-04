@@ -10,6 +10,7 @@ jobs:
   compile_scala_212:
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/master'
+    environment: CI
 
     timeout-minutes: 20
 
@@ -50,6 +51,7 @@ jobs:
   compile_scala_213:
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/master'
+    environment: CI
 
     timeout-minutes: 20
 
@@ -90,6 +92,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/master' && 'CD' || 'CI' }}
 
     timeout-minutes: 60
 
@@ -148,6 +151,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: github.ref == 'refs/heads/master'
+    environment: CD
 
     steps:
       - uses: actions/checkout@v4
@@ -161,23 +165,30 @@ jobs:
         with:
           jvm: adopt:8
 
-      - name: Set up SBT
-        env:
-          SECRETS_KEY: ${{ secrets.secrets_key }}
-        run: |
-          mkdir -p ~/.sbt/1.0
-          secrets/decrypt.sh secrets/credentials.sbt.gpg ~/.sbt/1.0/credentials.sbt
-          secrets/decrypt.sh secrets/repositories.gpg ~/.sbt/1.0/repositories
-          mkdir -p ~/.sbt/gpg
-          secrets/decrypt.sh secrets/pubring.asc.gpg ~/.sbt/gpg/pubring.asc
-          secrets/decrypt.sh secrets/secring.asc.gpg ~/.sbt/gpg/secring.asc
-
       - name: Build JAR file
         run: |
           cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}" "set compile/skip := true" +package
 
+      - name: Install GPG & Sonatype credentials for SBT
+        env:
+          GPG_PUBLIC_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PUBLIC_KEY }}
+          GPG_PRIVATE_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+        run: |
+          set -x
+
+          echo "$GPG_PUBLIC_KEY" > public.key
+          gpg --import public.key
+          echo "$GPG_PRIVATE_KEY" > private.key
+          gpg --verbose --batch --import-options import-show --import private.key
+
+          mkdir -p ~/.sbt/gpg
+          echo "$GPG_PRIVATE_KEY_PASSPHRASE" | gpg --verbose --batch -a --export-secret-keys --pinentry-mode loopback --passphrase-fd 0 > ~/.sbt/gpg/secring.asc
+
       - name: Publish package
         env:
-          GPG_KEY_PASSWORD: ${{ secrets.gpg_key_password }}
+          GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_OSSRH_USER }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
         run: |
           sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned +sonatypeReleaseAll
