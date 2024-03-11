@@ -11,6 +11,7 @@ import io.circe
 import io.circe.Decoder
 import io.circe.parser.parse
 import io.circe.syntax.EncoderOps
+import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -254,7 +255,7 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
       Right(Some(items)) shouldBe actual.map(_.items)
     }
 
-    def validatePropValueJson(expectedValue: InstancePropertyValue, typePropertyDefinition: TypePropertyDefinition, value: String) = {
+    def validatePropValueJson(expectedValue: InstancePropertyValue, typePropertyDefinition: TypePropertyDefinition, value: String): Assertion = {
       val json ="""
           |{
           |    "items": {
@@ -294,7 +295,9 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
       actual match {
         case Left(value) => throw new Exception(value)
         case Right(value) => {
-          val foundValue = value.items.flatMap(_.get("sync1")).flatMap(_.headOption).flatMap(_.properties.flatMap(_.get("space-1"))).flatMap(_.get("view-1/v1")).flatMap(_.get("testprop"))
+          val foundValue = value.items.flatMap(_.get("sync1"))
+            .flatMap(_.headOption).flatMap(_.properties.flatMap(_.get("space-1")))
+            .flatMap(_.get("view-1/v1")).flatMap(_.get("testprop"))
           foundValue shouldBe Some(expectedValue)
         }
       }
@@ -347,7 +350,8 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
         validatePropValueJson(InstancePropertyValue.Float64List(List(1.0, 1.0, 5.1, 100.0, 0.1)), typeDefToTest, "[1.0,1.0,5.1,100.0,0.1]")
         validatePropValueJson(InstancePropertyValue.Float64List(List(1.0, 1.0, 5.1, 100.0, 0.1)), typeDefToTest, "[1,1,5.1,100,0.1]")
         validatePropValueJson(InstancePropertyValue.Float64List(List(1.0, 1.0, 5.1, 100.0, 0.1)), typeDefToTest, "[1.0,1.0,5.1,100.0,0.1]")
-        validatePropValueJson(InstancePropertyValue.Float64List(List(Double.MaxValue, 100.0, 0.1)), typeDefToTest, "[%s,%s,%s]".format(Double.MaxValue, 100.0, 0.1))
+        validatePropValueJson(InstancePropertyValue.Float64List(List(Double.MaxValue, 100.0, 0.1)),
+          typeDefToTest, "[%s,%s,%s]".format(Double.MaxValue, 100.0, 0.1))
     }
 
     "decoded to be returned as Float64" in {
@@ -404,7 +408,8 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
             PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, Some(false))
         )
         validatePropValueJson(InstancePropertyValue.Timestamp(ZonedDateTime.parse("2023-01-01T01:01:01.001Z")),typeDefToTest, "\"2023-01-01T01:01:01.001Z\"")
-        validatePropValueJson(InstancePropertyValue.Timestamp(ZonedDateTime.parse("2023-01-01T01:01:01.001+05:30")),typeDefToTest, "\"2023-01-01T01:01:01.001+05:30\"")
+        validatePropValueJson(InstancePropertyValue.Timestamp(ZonedDateTime.parse("2023-01-01T01:01:01.001+05:30")),
+          typeDefToTest, "\"2023-01-01T01:01:01.001+05:30\"")
     }
 
     "decoded to be returned as Int64" in {
