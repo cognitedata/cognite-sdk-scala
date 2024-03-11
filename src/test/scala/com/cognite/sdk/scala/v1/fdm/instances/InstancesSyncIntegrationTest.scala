@@ -89,7 +89,8 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
         `with` = Map("sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = cursors,
         select = Map("sync" -> SelectExpression(sources =
-          List(SourceSelector(source = viewRef, properties = List("*")))))
+          List(SourceSelector(source = viewRef, properties = List("*"))))),
+        includeTyping = Some(true)
       )
     )
   }
