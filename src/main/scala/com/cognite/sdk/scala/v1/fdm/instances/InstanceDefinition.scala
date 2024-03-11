@@ -127,7 +127,7 @@ object InstanceDefinition {
         }
     }
 
-  private def instancePropertyDefinitionBasedInstancePropertyTypeDecoder(
+  def instancePropertyDefinitionBasedInstancePropertyTypeDecoder(
       types: Map[String, Map[String, Map[String, TypePropertyDefinition]]]
   ): Decoder[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]] = (c: HCursor) =>
     {
