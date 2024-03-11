@@ -27,7 +27,7 @@ object InstanceSyncResponse {
         .map {
           _.toList
             .traverse { case (groupName, values) =>
-              values
+              values.toList
                 .traverse { item =>
                   item
                     .as[InstanceDefinition](
@@ -40,7 +40,7 @@ object InstanceSyncResponse {
             }
             .map(_.toMap)
         }
-        .traverse(identity)
+        .traverse(decodeResult => decodeResult)
 
     } yield InstanceSyncResponse(items, nextCursor, typing)
 }
