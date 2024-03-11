@@ -1,5 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
+import cats.implicits.toTraverseOps
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Decoder, Encoder, HCursor, Json}
 
@@ -22,19 +23,24 @@ object InstanceSyncResponse {
       itemObjects <- c
         .downField("items")
         .as[Option[Map[String, Seq[Json]]]]
-      items: Option[Map[String, Seq[InstanceDefinition]]] = itemObjects.map { itemObjects =>
-        itemObjects.map { case (key, value) =>
-          key -> value.flatMap { item =>
-            item
-              .as[InstanceDefinition](
-                InstanceDefinition.instancePropertyDefinitionBasedInstanceDecoder(
-                  typing.flatMap(_.get(key))
-                )
-              )
-              .toOption
-          }
+      items <- itemObjects
+        .map {
+          _.toList
+            .traverse { case (groupName, values) =>
+              values
+                .traverse { item =>
+                  item
+                    .as[InstanceDefinition](
+                      InstanceDefinition.instancePropertyDefinitionBasedInstanceDecoder(
+                        typing.flatMap(_.get(groupName))
+                      )
+                    )
+                }
+                .map((groupName, _))
+            }
+            .map(_.toMap)
         }
-      }
+        .traverse(identity)
 
     } yield InstanceSyncResponse(items, nextCursor, typing)
 }
