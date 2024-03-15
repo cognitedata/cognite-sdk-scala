@@ -142,7 +142,7 @@ class InstancesTest extends CommonDataModelTestHelper {
 
     val readNodesMapOfNode1 = (IO.sleep(10.seconds) *> fetchNodeInstance(nodeView1.toSourceReference, node1WriteData.externalId)).unsafeRunSync()
     val readNodesMapOfNode2 = fetchNodeInstance(nodeView2.toSourceReference, node2WriteData.externalId).unsafeRunSync()
-    val syncNodesMapOfNodeView1: InstanceSyncResponse = syncNodeInstances(nodeView1.toSourceReference).unsafeRunSync()
+    val syncNodesMapOfNodeView1: InstanceDataResponse = syncNodeInstances(nodeView1.toSourceReference).unsafeRunSync()
     val syncNodesMapOfNodeView2 = syncNodeInstances(nodeView2.toSourceReference).unsafeRunSync()
 
     syncNodesMapOfNodeView1.nextCursor.map { map =>
@@ -153,6 +153,19 @@ class InstancesTest extends CommonDataModelTestHelper {
     syncNodesMapOfNodeView2.nextCursor.map { map =>
       map.size shouldBe 1
       map.keys.find("sync" === _).isDefined shouldBe true
+    }
+
+    val queryNodesMapOfNodeView1: InstanceDataResponse = queryNodeInstances(nodeView1.toSourceReference).unsafeRunSync()
+    val queryNodesMapOfNodeView2 = queryNodeInstances(nodeView2.toSourceReference).unsafeRunSync()
+
+    queryNodesMapOfNodeView1.nextCursor.map { map =>
+      map.size shouldBe 1
+      map.keys.find("query" === _).isDefined shouldBe true
+    }
+
+    queryNodesMapOfNodeView2.nextCursor.map { map =>
+      map.size shouldBe 1
+      map.keys.find("query" === _).isDefined shouldBe true
     }
 
     val readEdgesMapOfEdge = fetchEdgeInstance(edgeView.toSourceReference, edgeWriteData.externalId).unsafeRunSync()
@@ -277,6 +290,19 @@ class InstancesTest extends CommonDataModelTestHelper {
         `with` = Map("sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = None,
         select = Map("sync" -> SelectExpression(sources =
+          List(SourceSelector(source = viewRef, properties = List("*")))))
+      )
+    )
+  }
+
+  private def queryNodeInstances(viewRef: ViewReference) = {
+    val hasData = HasData(Seq(viewRef))
+
+    testClient.instances.queryRequest(
+      InstanceQueryRequest(
+        `with` = Map("query" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
+        cursors = None,
+        select = Map("query" -> SelectExpression(sources =
           List(SourceSelector(source = viewRef, properties = List("*")))))
       )
     )

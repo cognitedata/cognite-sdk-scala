@@ -52,6 +52,13 @@ final case class InstanceFilterRequest(
     includeTyping: Option[Boolean]
 )
 
+final case class InstanceQueryRequest(
+    `with`: Map[String, TableExpression] = Map.empty,
+    cursors: Option[Map[String, String]] = None,
+    select: Map[String, SelectExpression] = Map.empty,
+    includeTyping: Option[Boolean] = None
+)
+
 final case class InstanceSyncRequest(
     `with`: Map[String, TableExpression] = Map.empty,
     cursors: Option[Map[String, String]] = None,

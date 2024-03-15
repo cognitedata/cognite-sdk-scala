@@ -4,17 +4,17 @@ import cats.implicits.toTraverseOps
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Decoder, Encoder, HCursor, Json}
 
-final case class InstanceSyncResponse(
+final case class InstanceDataResponse(
     items: Option[Map[String, Seq[InstanceDefinition]]] = None,
     nextCursor: Option[Map[String, String]] = None,
     typing: Option[Map[String, Map[String, Map[String, Map[String, TypePropertyDefinition]]]]] =
       None
 )
 
-object InstanceSyncResponse {
-  implicit val instanceSyncResponseEncoder: Encoder[InstanceSyncResponse] = deriveEncoder
+object InstanceDataResponse {
+  implicit val instanceDataResponseEncoder: Encoder[InstanceDataResponse] = deriveEncoder
 
-  implicit val instanceSyncResponseDecoder: Decoder[InstanceSyncResponse] = (c: HCursor) =>
+  implicit val instanceDataResponseDecoder: Decoder[InstanceDataResponse] = (c: HCursor) =>
     for {
       nextCursor <- c.downField("nextCursor").as[Option[Map[String, String]]]
       typing <- c
@@ -42,5 +42,5 @@ object InstanceSyncResponse {
         }
         .traverse(decodeResult => decodeResult)
 
-    } yield InstanceSyncResponse(items, nextCursor, typing)
+    } yield InstanceDataResponse(items, nextCursor, typing)
 }
