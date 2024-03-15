@@ -41,10 +41,17 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       identity
     )
 
-  def syncRequest(syncRequest: InstanceSyncRequest): F[InstanceSyncResponse] =
-    requestSession.post[InstanceSyncResponse, InstanceSyncResponse, InstanceSyncRequest](
+  def syncRequest(syncRequest: InstanceSyncRequest): F[InstanceDataResponse] =
+    requestSession.post[InstanceDataResponse, InstanceDataResponse, InstanceSyncRequest](
       syncRequest,
       uri"$baseUrl/sync",
+      identity
+    )
+
+  def queryRequest(queryRequest: InstanceQueryRequest): F[InstanceDataResponse] =
+    requestSession.post[InstanceDataResponse, InstanceDataResponse, InstanceQueryRequest](
+      queryRequest,
+      uri"$baseUrl/query",
       identity
     )
 
@@ -111,6 +118,10 @@ object Instances {
 
   implicit val instanceSyncRequestEncoder: Encoder[InstanceSyncRequest] =
     deriveEncoder[InstanceSyncRequest].mapJsonObject { jsonObj =>
+      jsonObj.filter { case (_, v) => !v.isNull }
+    }
+  implicit val instanceQueryRequestEncoder: Encoder[InstanceQueryRequest] =
+    deriveEncoder[InstanceQueryRequest].mapJsonObject { jsonObj =>
       jsonObj.filter { case (_, v) => !v.isNull }
     }
   implicit val tableExpression: Encoder[TableExpression] =
