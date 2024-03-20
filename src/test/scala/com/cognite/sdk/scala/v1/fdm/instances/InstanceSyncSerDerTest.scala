@@ -250,8 +250,8 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
       val items: Map[String, Seq[InstanceDefinition]] = Map("sync1" -> expectedItems)
       val cursors = Map[String, String]("sync1" -> "cursor-101")
 
-      val actual: Either[circe.Error, InstanceDataResponse] = parse(encoded).flatMap(Decoder[InstanceDataResponse].decodeJson)
-      Right(Some(cursors)) shouldBe actual.map(_.nextCursor)
+      val actual: Either[circe.Error, InstanceSyncResponse] = parse(encoded).flatMap(Decoder[InstanceSyncResponse].decodeJson)
+      Right(cursors) shouldBe actual.map(_.nextCursor)
       Right(Some(items)) shouldBe actual.map(_.items)
     }
 
@@ -287,10 +287,11 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
           |                 }
           |             }
           |          }
-          |    }
+          |    },
+          |    "nextCursor": {}
           |}""".stripMargin
       print (json)
-      val actual: Either[circe.Error, InstanceDataResponse] = parse(json).flatMap(Decoder[InstanceDataResponse].decodeJson)
+      val actual: Either[circe.Error, InstanceSyncResponse] = parse(json).flatMap(Decoder[InstanceSyncResponse].decodeJson)
 
       actual match {
         case Left(value) => throw new Exception(value)
@@ -711,8 +712,8 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
       val items: Map[String, Seq[InstanceDefinition]] = Map("sync1" -> expectedItems)
       val cursors = Map[String, String]("sync1" -> "cursor-101")
 
-      val actual: Either[circe.Error, InstanceDataResponse] = parse(encoded).flatMap(Decoder[InstanceDataResponse].decodeJson)
-      Right(Some(cursors)) shouldBe actual.map(_.nextCursor)
+      val actual: Either[circe.Error, InstanceSyncResponse] = parse(encoded).flatMap(Decoder[InstanceSyncResponse].decodeJson)
+      Right(cursors) shouldBe actual.map(_.nextCursor)
       Right(Some(items)) shouldBe actual.map(_.items)
     }
   }
