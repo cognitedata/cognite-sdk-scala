@@ -41,15 +41,15 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       identity
     )
 
-  def syncRequest(syncRequest: InstanceSyncRequest): F[InstanceDataResponse] =
-    requestSession.post[InstanceDataResponse, InstanceDataResponse, InstanceSyncRequest](
+  def syncRequest(syncRequest: InstanceSyncRequest): F[InstanceSyncResponse] =
+    requestSession.post[InstanceSyncResponse, InstanceSyncResponse, InstanceSyncRequest](
       syncRequest,
       uri"$baseUrl/sync",
       identity
     )
 
-  def queryRequest(queryRequest: InstanceQueryRequest): F[InstanceDataResponse] =
-    requestSession.post[InstanceDataResponse, InstanceDataResponse, InstanceQueryRequest](
+  def queryRequest(queryRequest: InstanceQueryRequest): F[InstanceQueryResponse] =
+    requestSession.post[InstanceQueryResponse, InstanceQueryResponse, InstanceQueryRequest](
       queryRequest,
       uri"$baseUrl/query",
       identity
