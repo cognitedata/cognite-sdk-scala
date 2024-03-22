@@ -29,7 +29,7 @@ jobs:
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
       - name: Cache Coursier dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: coursier-cache
         with:
@@ -37,7 +37,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
       - name: Cache Ivy 2 cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: sbt-ivy2-cache
         with:
@@ -71,7 +71,7 @@ jobs:
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
       - name: Cache Coursier dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: coursier-cache
         with:
@@ -79,7 +79,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
       - name: Cache Ivy 2 cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: sbt-ivy2-cache
         with:
@@ -113,7 +113,7 @@ jobs:
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
     # Can we do something better here?
     - name: Cache Coursier dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       env:
         cache-name: coursier-cache
       with:
@@ -121,7 +121,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
     - name: Cache Ivy 2 cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       env:
         cache-name: sbt-ivy2-cache
       with:
