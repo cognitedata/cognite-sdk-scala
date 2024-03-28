@@ -12,7 +12,7 @@ val jettyTestVersion = "9.4.53.v20231009"
 val sttpVersion = "3.5.2"
 val circeVersion = "0.14.6"
 val catsEffectVersion = "3.3.14"
-val fs2Version = "3.3.0"
+val fs2Version = "3.10.2"
 val natchezVersion = "0.3.1"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
