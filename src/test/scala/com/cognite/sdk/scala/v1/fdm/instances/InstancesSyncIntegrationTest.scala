@@ -89,7 +89,8 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
         `with` = Map("sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = cursors,
         select = Map("sync" -> SelectExpression(sources =
-          List(SourceSelector(source = viewRef, properties = List("*")))))
+          List(SourceSelector(source = viewRef, properties = List("*"))))),
+        includeTyping = Some(true)
       )
     )
   }
@@ -116,8 +117,8 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
     testClient.instances.delete(nodesToDelete).unsafeRunSync()
   }
 
-  private def syncAndValidate(viewRef: ViewReference, expected: Seq[String], cursor: Option[Map[String, String]], deleted: Boolean = false) = {
-    val syncResponse = syncNodeInstances(viewRef, cursor).unsafeRunSync()
+  private def syncAndValidate(viewRef: ViewReference, expected: Seq[String], cursor: Map[String, String], deleted: Boolean = false) = {
+    val syncResponse = syncNodeInstances(viewRef, Some(cursor)).unsafeRunSync()
     val nodes: Seq[NodeDefinition] = syncResponse.items.get("sync").asInstanceOf[Seq[NodeDefinition]]
     nodes.size shouldBe expected.size
     nodes.map(_.externalId) should contain theSameElementsAs expected
@@ -126,11 +127,12 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
   }
 
   @scala.annotation.tailrec
-  private def syncToHead(viewRef: ViewReference, cursor: Option[Map[String, String]] = None): Option[Map[String, String]] = {
+  private def syncToHead(viewRef: ViewReference, cursor: Option[Map[String, String]] = None)
+  : Map[String, String] = {
     val syncResponse = syncNodeInstances(viewRef, cursor).unsafeRunSync()
     val nodes: Seq[NodeDefinition] = syncResponse.items.get("sync").asInstanceOf[Seq[NodeDefinition]]
     if (nodes.nonEmpty) {
-      syncToHead(viewRef, syncResponse.nextCursor)
+      syncToHead(viewRef, Some(syncResponse.nextCursor))
     } else {
       syncResponse.nextCursor
     }

@@ -48,6 +48,13 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       identity
     )
 
+  def queryRequest(queryRequest: InstanceQueryRequest): F[InstanceQueryResponse] =
+    requestSession.post[InstanceQueryResponse, InstanceQueryResponse, InstanceQueryRequest](
+      queryRequest,
+      uri"$baseUrl/query",
+      identity
+    )
+
   private[sdk] def filterWithCursor(
       inputQuery: InstanceFilterRequest,
       cursor: Option[String],
@@ -111,6 +118,10 @@ object Instances {
 
   implicit val instanceSyncRequestEncoder: Encoder[InstanceSyncRequest] =
     deriveEncoder[InstanceSyncRequest].mapJsonObject { jsonObj =>
+      jsonObj.filter { case (_, v) => !v.isNull }
+    }
+  implicit val instanceQueryRequestEncoder: Encoder[InstanceQueryRequest] =
+    deriveEncoder[InstanceQueryRequest].mapJsonObject { jsonObj =>
       jsonObj.filter { case (_, v) => !v.isNull }
     }
   implicit val tableExpression: Encoder[TableExpression] =
