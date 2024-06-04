@@ -23,7 +23,7 @@ import org.scalatest.BeforeAndAfterAll
   )
 )
 class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAndAfterAll {
-  private val spaceName = "extractor-bluefield-testing"
+  private val spaceName = "testSpaceScalaSdk1"
   private val containerNamePrim = "scala sdk container prim"
   private val containerPrimitiveExternalId = "scala_sdk_container_primitive"
 

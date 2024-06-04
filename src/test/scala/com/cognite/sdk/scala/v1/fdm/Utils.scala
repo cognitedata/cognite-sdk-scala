@@ -14,7 +14,7 @@ import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.util.Random
 
 object Utils {
-  val SpaceExternalId = "extractor-bluefield-testing"
+  val SpaceExternalId = "testSpaceScalaSdk1"
   val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation6"
   val DirectNodeRelationViewExtId = "sdkTestNodeViewForDirectRelation6"
   val ViewVersion = "v1"
