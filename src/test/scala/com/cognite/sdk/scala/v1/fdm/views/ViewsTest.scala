@@ -6,6 +6,7 @@ package com.cognite.sdk.scala.v1.fdm.views
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.common.RetryWhile
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{Int32, TimeSeriesReference}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
@@ -106,7 +107,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   val view2ExternalId = "scala_sdk_view_2"
   val view3ExternalId = "scala_sdk_view_3"
 
-  ignore should "create a view" in {
+  it should "create a view" in {
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val properties = Map(
       "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
@@ -139,33 +140,33 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         "prop_int32" -> ViewCorePropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
-          defaultValue = None,
+          defaultValue = Some(Int32(1)),
           `type` = PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32),
           container = Some(containerReference),
-          containerPropertyIdentifier = None
+          containerPropertyIdentifier = Some("prop_int32")
         ),
         "prop_text" -> ViewCorePropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
-          defaultValue = None,
+          defaultValue = Some(PropertyDefaultValue.String("toto")),
           `type` = PropertyType.TextProperty(),
           container = Some(containerReference),
-          containerPropertyIdentifier = None
+          containerPropertyIdentifier = Some("prop_text")
         ),
         "prop_timeseries" -> ViewCorePropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
-          defaultValue = Some(PropertyDefaultValue.String("flux-capacitor-levels")),
-          `type` = PropertyType.TimeSeriesReference(),
+          defaultValue = Some(TimeSeriesReference("flux-capacitor-levels")),
+          `type` = PropertyType.TimeSeriesReference(Some(false)),
           container = Some(containerReference),
-          containerPropertyIdentifier = None
+          containerPropertyIdentifier = Some("prop_timeseries")
         )
       )
     )
 
   }
 
-  ignore should "create a view that implement another view" in {
+  it should "create a view that implement another view" in {
     val containerPrimReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val containerListReference = ContainerReference(spaceName, containerListExternalId)
 
@@ -198,18 +199,48 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .unsafeRunSync()
   }
 
-  ignore should "retrieve views by data model reference" in {
-    val view1 = testClient.views
-      .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
-      .unsafeRunSync()
-      .headOption
-    view1.map(_.space) shouldBe Some("extractor-bluefield-testing")
-  }
+//  ignore should "create a view that contains a RDR" in {
+//    val viewPointedTo = ViewCreateDefinition(
+//      space = spaceName,
+//      externalId = viewExternalId,
+//      name = Some("first view"),
+//      description = Some("desc"),
+//      filter = None,
+//      implements = None,
+//      version = viewVersion1,
+//      properties = Map.empty
+//    )
+//
+//    val viewWithRevereseDirectRelationship = ViewCreateDefinition(
+//      space = spaceName,
+//      externalId = viewExternalId,
+//      name = Some("first view"),
+//      description = Some("desc"),
+//      filter = None,
+//      implements = None,
+//      version = viewVersion1,
+//      properties = Map.empty
+//    )
+//
+//    val properties = Map(
+//      f"has_$viewExternalId" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
+//    )
+//
+//    val view1 = testClient.views
+//      .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
+//      .unsafeRunSync()
+//      .headOption
+//    view1.map(_.space) shouldBe Some("extractor-bluefield-testing")
+//  }
 
-  ignore should "delete views" in {
+  it should "delete views" in {
     testClient.views
       .deleteItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
+    testClient.views
+      .deleteItems(Seq(DataModelReference(spaceName, view2ExternalId, Some(viewVersion1))))
+      .unsafeRunSync()
+
 
     val retrievedAfterDelete = testClient.views
       .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
