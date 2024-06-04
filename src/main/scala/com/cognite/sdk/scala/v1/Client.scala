@@ -389,7 +389,7 @@ object GenericClient {
 
   def parseResponse[T, R](uri: Uri, mapResult: T => R)(
       implicit decoder: Decoder[T]
-  ): ResponseAs[R, Any] = {
+  ): ResponseAs[R, Any] =
     asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) => {
       response match {
         case Left(DeserializationException(_, _))
@@ -414,9 +414,8 @@ object GenericClient {
           throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
         case Right(value) =>
           mapResult(value)
-      }}
+      }
     )
-  }
 }
 
 class Client(
