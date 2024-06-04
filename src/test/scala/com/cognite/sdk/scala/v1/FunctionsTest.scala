@@ -23,7 +23,7 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
 
   private val client = new GenericClient[IO](
     "scala-sdk-test",
-    project,
+    "extractor-bluefield-testing",
     "https://bluefield.cognitedata.com",
     authProvider,
     None,
