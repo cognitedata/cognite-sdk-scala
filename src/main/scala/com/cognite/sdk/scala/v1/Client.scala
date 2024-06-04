@@ -147,7 +147,6 @@ final case class RequestSession[F[_]: Monad: Trace](
       .send(sttpBackend)
       .map(_.body)
 
-
   def sendCdf[R](
       r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any],
       contentType: String = "application/json",

@@ -24,46 +24,46 @@ object PropertyDefinition {
   sealed trait ViewPropertyDefinition extends PropertyDefinition
 
   final case class ContainerPropertyDefinition(
-    nullable: Option[Boolean] = Some(true),
-    autoIncrement: Option[Boolean] = Some(false),
-    defaultValue: Option[PropertyDefaultValue],
-    description: Option[String],
-    name: Option[String],
-    `type`: PropertyType
+      nullable: Option[Boolean] = Some(true),
+      autoIncrement: Option[Boolean] = Some(false),
+      defaultValue: Option[PropertyDefaultValue],
+      description: Option[String],
+      name: Option[String],
+      `type`: PropertyType
   ) extends CorePropertyDefinition
 
   final case class ViewCorePropertyDefinition(
-    nullable: Option[Boolean] = Some(true),
-    autoIncrement: Option[Boolean] = Some(false),
-    defaultValue: Option[PropertyDefaultValue],
-    description: Option[String] = None,
-    name: Option[String] = None,
-    `type`: PropertyType,
-    container: Option[ContainerReference] = None,
-    containerPropertyIdentifier: Option[String] = None
+      nullable: Option[Boolean] = Some(true),
+      autoIncrement: Option[Boolean] = Some(false),
+      defaultValue: Option[PropertyDefaultValue],
+      description: Option[String] = None,
+      name: Option[String] = None,
+      `type`: PropertyType,
+      container: Option[ContainerReference] = None,
+      containerPropertyIdentifier: Option[String] = None
   ) extends ViewPropertyDefinition
-    with CorePropertyDefinition
+      with CorePropertyDefinition
 
   sealed trait ConnectionDefinition extends ViewPropertyDefinition
 
   final case class ReverseDirectRelationConnection(
-    name: Option[String],
-    description: Option[String],
-    connectionType: String,
-    source: ViewReference,
-    through: Option[ThroughConnection]
+      name: Option[String],
+      description: Option[String],
+      connectionType: String,
+      source: ViewReference,
+      through: Option[ThroughConnection]
   ) extends ConnectionDefinition
 
   final case class ThroughConnection(
-    identifier: String,
-    source: SourceReference,
+      identifier: String,
+      source: SourceReference
   )
   final case class EdgeConnection(
-    name: Option[String],
-    description: Option[String],
-    `type`: DirectRelationReference,
-    source: ViewReference,
-    direction: Option[ConnectionDirection]
+      name: Option[String],
+      description: Option[String],
+      `type`: DirectRelationReference,
+      source: ViewReference,
+      direction: Option[ConnectionDirection]
   ) extends ConnectionDefinition
 
   implicit val viewCorePropertyDefinitionEncoder: Encoder[ViewCorePropertyDefinition] =
@@ -73,10 +73,13 @@ object PropertyDefinition {
     deriveEncoder[ContainerPropertyDefinition]
 
   implicit val edgeConnectionEncoder: Encoder[EdgeConnection] = deriveEncoder[EdgeConnection]
-  implicit val throughConnectionEncoder: Encoder[ThroughConnection] = deriveEncoder[ThroughConnection]
-  implicit val throughConnectionDecoder: Decoder[ThroughConnection] = deriveDecoder[ThroughConnection]
+  implicit val throughConnectionEncoder: Encoder[ThroughConnection] =
+    deriveEncoder[ThroughConnection]
+  implicit val throughConnectionDecoder: Decoder[ThroughConnection] =
+    deriveDecoder[ThroughConnection]
 
-  implicit val reverseDirectRelationConnection: Encoder[ReverseDirectRelationConnection] = deriveEncoder[ReverseDirectRelationConnection]
+  implicit val reverseDirectRelationConnection: Encoder[ReverseDirectRelationConnection] =
+    deriveEncoder[ReverseDirectRelationConnection]
 
   implicit val connectionDefinitionEncoder: Encoder[ConnectionDefinition] = Encoder.instance {
     case e: EdgeConnection => e.asJson
@@ -94,7 +97,8 @@ object PropertyDefinition {
   }
 
   implicit val derivedEdgeConnectionDecoder: Decoder[EdgeConnection] = deriveDecoder[EdgeConnection]
-  implicit val derivedReverseDirectRelationConnectionDecoder: Decoder[ReverseDirectRelationConnection] = deriveDecoder[ReverseDirectRelationConnection]
+  implicit val derivedReverseDirectRelationConnectionDecoder
+      : Decoder[ReverseDirectRelationConnection] = deriveDecoder[ReverseDirectRelationConnection]
 
   private val derivedViewPropertyDefinitionDecoder: Decoder[ViewCorePropertyDefinition] =
     deriveDecoder[ViewCorePropertyDefinition]
@@ -170,12 +174,13 @@ object PropertyDefinition {
   }
   // scalastyle:on cyclomatic.complexity
 
-  implicit val connectionDefinitionDecoder: Decoder[ConnectionDefinition] = {
+  implicit val connectionDefinitionDecoder: Decoder[ConnectionDefinition] =
     List[Decoder[ConnectionDefinition]](
       Decoder[EdgeConnection].widen,
       Decoder[ReverseDirectRelationConnection].widen
     )
-  }.reduceLeftOption(_ or _).getOrElse(Decoder[EdgeConnection].widen)
+      .reduceLeftOption(_ or _)
+      .getOrElse(Decoder[EdgeConnection].widen)
 
   implicit val propertyDefinitionDecoder: Decoder[CorePropertyDefinition] =
     List[Decoder[CorePropertyDefinition]](
