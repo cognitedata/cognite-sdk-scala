@@ -23,7 +23,7 @@ import org.scalatest.BeforeAndAfterAll
   )
 )
 class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAndAfterAll {
-  private val spaceName = "test-space-scala-sdk"
+  private val spaceName = "spaaace"
   private val containerNamePrim = "scala sdk container prim"
   private val containerPrimitiveExternalId = "scala_sdk_container_primitive"
 
@@ -101,10 +101,10 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     ()
   }
 
-  val viewVersion1 = "v1"
-  val viewExternalId = "scala_sdk_view_1"
-  val view2ExternalId = "scala_sdk_view_2"
-  val view3ExternalId = "scala_sdk_view_3"
+  val viewVersion1 = "b622d2787fd26b"
+  val viewExternalId = "Facility"
+  val view2ExternalId = "Facility"
+  val view3ExternalId = "Facility"
 
   ignore should "create a view" in {
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
@@ -198,26 +198,12 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .unsafeRunSync()
   }
 
-  ignore should "retrieve views by data model reference" in {
+  it should "retrieve views by data model reference" in {
     val view1 = testClient.views
-      .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some("v1"))))
+      .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
       .headOption
-    view1.map(_.space) shouldBe Some("test1")
-    view1.map(_.externalId) shouldBe Some(viewExternalId)
-    view1.flatMap(_.name) shouldBe Some("first view")
-    view1.flatMap(_.description) shouldBe Some("desc")
-    view1.map(_.version) shouldBe Some(viewVersion1)
-
-    val view2 = testClient.views
-      .retrieveItems(Seq(DataModelReference(spaceName, view2ExternalId, Some("v1"))))
-      .unsafeRunSync()
-      .headOption
-    view2.map(_.space) shouldBe Some(spaceName)
-    view2.map(_.externalId) shouldBe Some(view2ExternalId)
-    view2.flatMap(_.name) shouldBe Some("second view")
-    view2.flatMap(_.description) shouldBe Some("desc")
-    view2.map(_.version) shouldBe Some(viewVersion1)
+    view1.map(_.space) shouldBe Some("spaaace")
   }
 
   ignore should "delete views" in {

@@ -14,10 +14,10 @@ import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.util.Random
 
 object Utils {
-  val SpaceExternalId = "testSpaceScalaSdk1"
+  val SpaceExternalId = "spaaace"
   val DirectNodeRelationContainerExtId = "sdkTestNodeContainerForDirectRelation6"
   val DirectNodeRelationViewExtId = "sdkTestNodeViewForDirectRelation6"
-  val ViewVersion = "v1"
+  val ViewVersion = "b622d2787fd26b"
 
   val AllContainerPropertyTypes: List[PropertyType] = List[PropertyType](
     TextProperty(),

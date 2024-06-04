@@ -98,11 +98,11 @@ class DataModelsTest extends CommonDataModelTestHelper {
       Seq(
         DataModelReference(
           space = space,
-          externalId = "testDataModelV3",
-          version = Some("v1")
+          externalId = "movies_and_actors",
+          version = Some("3")
         )
       )
-    ).unsafeRunSync().headOption
+    ).unsafeRunSync()
 
 
     dataModel.map(_.externalId) shouldBe Some("testDataModelV3")

@@ -108,13 +108,14 @@ final case class RequestSession[F[_]: Monad: Trace](
       contentType: String = "application/json",
       accept: String = "application/json"
   )(implicit decoder: Decoder[T]): F[R] =
-    sttpRequest
-      .contentType(contentType)
-      .header("accept", accept)
-      .get(uri)
-      .response(parseResponse(uri, mapResult))
-      .send(sttpBackend)
-      .map(_.body)
+      sttpRequest
+        .contentType(contentType)
+        .header("accept", accept)
+        .get(uri)
+        .response(parseResponse(uri, mapResult))
+        .send(sttpBackend)
+        .map(_.body)
+
 
   def postEmptyBody[R, T](
       uri: Uri,
@@ -137,7 +138,7 @@ final case class RequestSession[F[_]: Monad: Trace](
       mapResult: T => R,
       contentType: String = "application/json",
       accept: String = "application/json"
-  )(implicit serializer: BodySerializer[I], decoder: Decoder[T]): F[R] =
+  )(implicit serializer: BodySerializer[I], decoder: Decoder[T]): F[R] = {
     sttpRequest
       .contentType(contentType)
       .header("accept", accept)
@@ -146,6 +147,7 @@ final case class RequestSession[F[_]: Monad: Trace](
       .response(parseResponse(uri, mapResult))
       .send(sttpBackend)
       .map(_.body)
+  }
 
   def sendCdf[R](
       r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any],
@@ -388,8 +390,8 @@ object GenericClient {
 
   def parseResponse[T, R](uri: Uri, mapResult: T => R)(
       implicit decoder: Decoder[T]
-  ): ResponseAs[R, Any] =
-    asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
+  ): ResponseAs[R, Any] = {
+    asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) => {
       response match {
         case Left(DeserializationException(_, _))
             if metadata.code.code === StatusCode.TooManyRequests.code =>
@@ -413,8 +415,9 @@ object GenericClient {
           throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
         case Right(value) =>
           mapResult(value)
-      }
+      }}
     )
+  }
 }
 
 class Client(
