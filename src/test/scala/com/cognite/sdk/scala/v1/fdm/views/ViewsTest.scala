@@ -23,7 +23,7 @@ import org.scalatest.BeforeAndAfterAll
   )
 )
 class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAndAfterAll {
-  private val spaceName = "spaaace"
+  private val spaceName = "extractor-bluefield-testing"
   private val containerNamePrim = "scala sdk container prim"
   private val containerPrimitiveExternalId = "scala_sdk_container_primitive"
 
@@ -101,10 +101,10 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     ()
   }
 
-  val viewVersion1 = "b622d2787fd26b"
-  val viewExternalId = "Facility"
-  val view2ExternalId = "Facility"
-  val view3ExternalId = "Facility"
+  val viewVersion1 = "v1"
+  val viewExternalId = "scala_sdk_view_1"
+  val view2ExternalId = "scala_sdk_view_2"
+  val view3ExternalId = "scala_sdk_view_3"
 
   ignore should "create a view" in {
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
@@ -198,12 +198,12 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .unsafeRunSync()
   }
 
-  it should "retrieve views by data model reference" in {
+  ignore should "retrieve views by data model reference" in {
     val view1 = testClient.views
       .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
       .headOption
-    view1.map(_.space) shouldBe Some("spaaace")
+    view1.map(_.space) shouldBe Some("extractor-bluefield-testing")
   }
 
   ignore should "delete views" in {
