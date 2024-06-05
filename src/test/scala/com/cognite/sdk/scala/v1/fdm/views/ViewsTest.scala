@@ -27,7 +27,8 @@ import org.scalatest.BeforeAndAfterAll
     "org.wartremover.warts.NonUnitStatements",
     "org.wartremover.warts.JavaSerializable",
     "org.wartremover.warts.Serializable",
-    "org.wartremover.warts.Product"
+    "org.wartremover.warts.Product",
+    "org.wartremover.warts.AsInstanceOf"
   )
 )
 class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAndAfterAll {
@@ -201,7 +202,6 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         containerPropertyIdentifier = "prop_list_float64"
       )
     )
-
     val view2ToCreate = ViewCreateDefinition(
       space = spaceName,
       externalId = implementingViewExternalId,
@@ -215,9 +215,13 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     testClient.views
       .createItems(Seq(view2ToCreate))
       .unsafeRunSync()
+
+    testClient.views
+      .deleteItems(Seq(DataModelReference(spaceName, implementingViewExternalId, Some(viewVersion1))))
+      .unsafeRunSync()
   }
 
-  it should "create a view that contains a RDR" in {
+  it should "create and retrieve a view that contains a RDR" in {
 
     val viewWithDRExternalId = "scala_sdk_view_3"
     val viewWithRDRExternalId = "scala_sdk_view_4"
@@ -225,7 +229,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
     //connection property points to a container property that is a direct connection
     //reverse direct connections can only point to direct connections
-    val properties = Map(
+    val viewWithDRProperties = Map(
       "connection" -> CreateViewProperty(
         None,
         None,
@@ -241,17 +245,19 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       filter = None,
       implements = None,
       version = viewVersion1,
-      properties = properties
+      properties = viewWithDRProperties
     )
 
-    val reverseDirectRelationProperty = Map(
-      f"has_$viewWithDRExternalId" -> ReverseDirectRelationConnection(
-        Some("name"),
-        Some("desc"),
-        "multi_reverse_direct_relation",
-        ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
-        ThroughConnection("connection", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
-      )
+    val reverseDirectRelationProperty = ReverseDirectRelationConnection(
+      Some("name"),
+      Some("desc"),
+      "multi_reverse_direct_relation",
+      ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
+      ThroughConnection("connection", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
+    )
+
+    val viewWithRDRProperties = Map(
+      f"has_$viewWithDRExternalId" -> reverseDirectRelationProperty
     )
 
     val viewWithReverseDirectRelationship = ViewCreateDefinition(
@@ -262,20 +268,25 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       filter = None,
       implements = None,
       version = viewVersion1,
-      properties = reverseDirectRelationProperty
+      properties = viewWithRDRProperties
     )
 
     testClient.views
-      .createItems(Seq(viewPointedTo))
+      .createItems(Seq(viewPointedTo, viewWithReverseDirectRelationship))
       .unsafeRunSync()
-    testClient.views
-      .createItems(Seq(viewWithReverseDirectRelationship))
+
+    val retrievedViews = testClient.views
+      .retrieveItems(Seq(DataModelReference(spaceName, viewWithRDRExternalId, Some(viewVersion1))))
       .unsafeRunSync()
+    retrievedViews.headOption.map(_.externalId) shouldBe Some(viewWithRDRExternalId)
+    retrievedViews.headOption.flatMap(_.properties
+      .get(f"has_$viewWithDRExternalId")
+      .map(_.asInstanceOf[ReverseDirectRelationConnection].connectionType)) shouldBe Some("multi_reverse_direct_relation")
   }
 
   it should "delete views" in {
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
-    val viewExternalId = "scala_sdk_view_1"
+    val viewExternalId = "scala_sdk_view_5"
     val properties = Map(
       "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
       "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text"),
