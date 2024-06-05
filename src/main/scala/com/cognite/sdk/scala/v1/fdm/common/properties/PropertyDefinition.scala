@@ -42,7 +42,7 @@ object PropertyDefinition {
     container: Option[ContainerReference] = None,
     containerPropertyIdentifier: Option[String] = None
   ) extends ViewPropertyDefinition
-      with CorePropertyDefinition
+      with CorePropertyDefinition with ViewPropertyCreateDefinition
 
   sealed trait ConnectionDefinition extends ViewPropertyDefinition
 

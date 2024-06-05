@@ -33,6 +33,6 @@ object ViewPropertyCreateDefinition {
   implicit val viewPropertyDecoder: Decoder[ViewPropertyCreateDefinition] =
     List[Decoder[ViewPropertyCreateDefinition]](
       Decoder[ConnectionDefinition].widen,
-      Decoder[CreateViewProperty].widen
+      Decoder[CreateViewProperty].widen,
     ).reduceLeftOption(_ or _).getOrElse(Decoder[CreateViewProperty].widen)
 }

@@ -6,12 +6,14 @@ package com.cognite.sdk.scala.v1.fdm.views
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{Int32, TimeSeriesReference}
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ReverseDirectRelationConnection, ThroughConnection, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers._
+import com.cognite.sdk.scala.v1.fdm.views.ViewPropertyCreateDefinition.CreateViewProperty
 import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, SpaceCreateDefinition}
+import io.circe.Json
 import org.scalatest.BeforeAndAfterAll
 
 @SuppressWarnings(
@@ -52,6 +54,13 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     `type` = PropertyType.TimeSeriesReference()
   )
 
+  private val containerPropertyDirectRelation = ContainerPropertyDefinition(
+    defaultValue = Some(PropertyDefaultValue.Object(Json.Null)),
+    description = Some("Prop text"),
+    name = Some("Prop text"),
+    `type` = PropertyType.DirectNodeRelationProperty(None, None),
+  )
+
   private val containerPrimitive = ContainerCreateDefinition(
     space = spaceName,
     externalId = containerPrimitiveExternalId,
@@ -60,7 +69,8 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     usedFor = Some(Usage.All),
     properties = Map("prop_int32" -> containerPropertyInt,
       "prop_text" -> containerPropertyText,
-      "prop_timeseries" -> containerTimeSeriesProperty),
+      "prop_timeseries" -> containerTimeSeriesProperty,
+      "connection" -> containerPropertyDirectRelation),
     constraints = None,
     indexes = None
   )
@@ -203,62 +213,56 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   }
 
   it should "create a view that contains a RDR" in {
-//    val containerPrimReference = ContainerReference(spaceName, containerPrimitiveExternalId)
+    val containerPrimReference = ContainerReference(spaceName, containerPrimitiveExternalId)
 
-//    val properties = Map(
-//      "connection" -> ViewCorePropertyDefinition(
-//        None,
-//        None,
-//        None,
-//        None,
-//        None,
-//        PropertyType.TextProperty(),
-//        Some(
-//          ContainerReference(
-//            spaceName, view4ExternalId
-//          )
-//        ),
-//        Some("identifier")
-//      )
-//    )
-//    val viewPointedTo = ViewCreateDefinition(
-//      space = spaceName,
-//      externalId = view4ExternalId,
-//      name = Some("first view"),
-//      description = Some("desc"),
-//      filter = None,
-//      implements = None,
-//      version = viewVersion1,
-//      properties = properties
-//    )
-//
-//    val reverseDirectRelationProperty = Map(
-//      f"has_$view4ExternalId" -> ReverseDirectRelationConnection(
-//        Some("name"),
-//        Some("desc"),
-//        "multi_reverse_direct_relation",
-//        ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
-//        ThroughConnection("prop_int32", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
-//      ),
-//    )
-//
-//    val viewWithReverseDirectRelationship = ViewCreateDefinition(
-//      space = spaceName,
-//      externalId = view5ExternalId,
-//      name = Some("first view"),
-//      description = Some("desc"),
-//      filter = None,
-//      implements = None,
-//      version = viewVersion1,
-//      properties = reverseDirectRelationProperty
-//    )
-//
-//    testClient.views
-//      .createItems(Seq(viewPointedTo))
-//      .unsafeRunSync()
-//    testClient.views
-//      .createItems(Seq(viewWithReverseDirectRelationship))
-//      .unsafeRunSync()
+    //connection property points to a container property that is a direct connection
+    //reverse direct connections can only point to direct connections
+    val properties = Map(
+      "connection" -> CreateViewProperty(
+        None,
+        None,
+        containerPrimReference,
+        "connection"
+      )
+    )
+    val viewPointedTo = ViewCreateDefinition(
+      space = spaceName,
+      externalId = view4ExternalId,
+      name = Some("first view"),
+      description = Some("desc"),
+      filter = None,
+      implements = None,
+      version = viewVersion1,
+      properties = properties
+    )
+
+    val reverseDirectRelationProperty = Map(
+      f"has_$view4ExternalId" -> ReverseDirectRelationConnection(
+        Some("name"),
+        Some("desc"),
+        "multi_reverse_direct_relation",
+        ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
+        ThroughConnection("connection", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
+      ),
+    )
+
+    val viewWithReverseDirectRelationship = ViewCreateDefinition(
+      space = spaceName,
+      externalId = view5ExternalId,
+      name = Some("first view"),
+      description = Some("desc"),
+      filter = None,
+      implements = None,
+      version = viewVersion1,
+      properties = reverseDirectRelationProperty
+    )
+
+    testClient.views
+      .createItems(Seq(viewPointedTo))
+      .unsafeRunSync()
+    testClient.views
+      .createItems(Seq(viewWithReverseDirectRelationship))
+      .unsafeRunSync()
   }
 
   it should "delete views" in {
