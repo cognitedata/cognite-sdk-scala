@@ -4,12 +4,12 @@
 package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{Int32, TimeSeriesReference}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, SpaceCreateDefinition}
 import org.scalatest.BeforeAndAfterAll
@@ -106,6 +106,9 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   val viewExternalId = "scala_sdk_view_1"
   val view2ExternalId = "scala_sdk_view_2"
   val view3ExternalId = "scala_sdk_view_3"
+  val view4ExternalId = "scala_sdk_view_4"
+  val view5ExternalId = "scala_sdk_view_5"
+
 
   it should "create a view" in {
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
@@ -186,7 +189,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
     val view2ToCreate = ViewCreateDefinition(
       space = spaceName,
-      externalId = view2ExternalId,
+      externalId = view3ExternalId,
       name = Some("second view"),
       description = Some("some desc"),
       implements = Some(implements),
@@ -199,46 +202,76 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .unsafeRunSync()
   }
 
-//  ignore should "create a view that contains a RDR" in {
+  it should "create a view that contains a RDR" in {
+//    val containerPrimReference = ContainerReference(spaceName, containerPrimitiveExternalId)
+
+//    val properties = Map(
+//      "connection" -> ViewCorePropertyDefinition(
+//        None,
+//        None,
+//        None,
+//        None,
+//        None,
+//        PropertyType.TextProperty(),
+//        Some(
+//          ContainerReference(
+//            spaceName, view4ExternalId
+//          )
+//        ),
+//        Some("identifier")
+//      )
+//    )
 //    val viewPointedTo = ViewCreateDefinition(
 //      space = spaceName,
-//      externalId = viewExternalId,
+//      externalId = view4ExternalId,
 //      name = Some("first view"),
 //      description = Some("desc"),
 //      filter = None,
 //      implements = None,
 //      version = viewVersion1,
-//      properties = Map.empty
+//      properties = properties
 //    )
 //
-//    val viewWithRevereseDirectRelationship = ViewCreateDefinition(
+//    val reverseDirectRelationProperty = Map(
+//      f"has_$view4ExternalId" -> ReverseDirectRelationConnection(
+//        Some("name"),
+//        Some("desc"),
+//        "multi_reverse_direct_relation",
+//        ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
+//        ThroughConnection("prop_int32", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
+//      ),
+//    )
+//
+//    val viewWithReverseDirectRelationship = ViewCreateDefinition(
 //      space = spaceName,
-//      externalId = viewExternalId,
+//      externalId = view5ExternalId,
 //      name = Some("first view"),
 //      description = Some("desc"),
 //      filter = None,
 //      implements = None,
 //      version = viewVersion1,
-//      properties = Map.empty
+//      properties = reverseDirectRelationProperty
 //    )
 //
-//    val properties = Map(
-//      f"has_$viewExternalId" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
-//    )
-//
-//    val view1 = testClient.views
-//      .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
+//    testClient.views
+//      .createItems(Seq(viewPointedTo))
 //      .unsafeRunSync()
-//      .headOption
-//    view1.map(_.space) shouldBe Some("extractor-bluefield-testing")
-//  }
+//    testClient.views
+//      .createItems(Seq(viewWithReverseDirectRelationship))
+//      .unsafeRunSync()
+  }
 
   it should "delete views" in {
     testClient.views
       .deleteItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
     testClient.views
-      .deleteItems(Seq(DataModelReference(spaceName, view2ExternalId, Some(viewVersion1))))
+      .deleteItems(Seq(
+        DataModelReference(spaceName, view2ExternalId, Some(viewVersion1)),
+        DataModelReference(spaceName, view3ExternalId, Some(viewVersion1)),
+        DataModelReference(spaceName, view4ExternalId, Some(viewVersion1)),
+        DataModelReference(spaceName, view5ExternalId, Some(viewVersion1))
+      ))
       .unsafeRunSync()
 
 

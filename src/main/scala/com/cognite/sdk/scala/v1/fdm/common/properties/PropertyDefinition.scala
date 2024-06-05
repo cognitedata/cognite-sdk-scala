@@ -4,7 +4,7 @@ import cats.implicits.toFunctorOps
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
-import com.cognite.sdk.scala.v1.fdm.views.{ConnectionDirection, ViewReference}
+import com.cognite.sdk.scala.v1.fdm.views.{ConnectionDirection, ViewPropertyCreateDefinition, ViewReference}
 import io.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
@@ -21,49 +21,49 @@ object PropertyDefinition {
     val `type`: PropertyType
   }
 
-  sealed trait ViewPropertyDefinition extends PropertyDefinition
+  sealed trait ViewPropertyDefinition extends PropertyDefinition with ViewPropertyCreateDefinition
 
   final case class ContainerPropertyDefinition(
-      nullable: Option[Boolean] = Some(true),
-      autoIncrement: Option[Boolean] = Some(false),
-      defaultValue: Option[PropertyDefaultValue],
-      description: Option[String],
-      name: Option[String],
-      `type`: PropertyType
+    nullable: Option[Boolean] = Some(true),
+    autoIncrement: Option[Boolean] = Some(false),
+    defaultValue: Option[PropertyDefaultValue],
+    description: Option[String],
+    name: Option[String],
+    `type`: PropertyType
   ) extends CorePropertyDefinition
 
   final case class ViewCorePropertyDefinition(
-      nullable: Option[Boolean] = Some(true),
-      autoIncrement: Option[Boolean] = Some(false),
-      defaultValue: Option[PropertyDefaultValue],
-      description: Option[String] = None,
-      name: Option[String] = None,
-      `type`: PropertyType,
-      container: Option[ContainerReference] = None,
-      containerPropertyIdentifier: Option[String] = None
+    nullable: Option[Boolean] = Some(true),
+    autoIncrement: Option[Boolean] = Some(false),
+    defaultValue: Option[PropertyDefaultValue],
+    description: Option[String] = None,
+    name: Option[String] = None,
+    `type`: PropertyType,
+    container: Option[ContainerReference] = None,
+    containerPropertyIdentifier: Option[String] = None
   ) extends ViewPropertyDefinition
       with CorePropertyDefinition
 
   sealed trait ConnectionDefinition extends ViewPropertyDefinition
 
   final case class ReverseDirectRelationConnection(
-      name: Option[String],
-      description: Option[String],
-      connectionType: String,
-      source: ViewReference,
-      through: Option[ThroughConnection]
+    name: Option[String],
+    description: Option[String],
+    connectionType: String,
+    source: ViewReference,
+    through: ThroughConnection
   ) extends ConnectionDefinition
 
   final case class ThroughConnection(
-      identifier: String,
-      source: SourceReference
+    identifier: String,
+    source: SourceReference
   )
   final case class EdgeConnection(
-      name: Option[String],
-      description: Option[String],
-      `type`: DirectRelationReference,
-      source: ViewReference,
-      direction: Option[ConnectionDirection]
+    name: Option[String],
+    description: Option[String],
+    `type`: DirectRelationReference,
+    source: ViewReference,
+    direction: Option[ConnectionDirection]
   ) extends ConnectionDefinition
 
   implicit val viewCorePropertyDefinitionEncoder: Encoder[ViewCorePropertyDefinition] =
@@ -73,6 +73,7 @@ object PropertyDefinition {
     deriveEncoder[ContainerPropertyDefinition]
 
   implicit val edgeConnectionEncoder: Encoder[EdgeConnection] = deriveEncoder[EdgeConnection]
+
   implicit val throughConnectionEncoder: Encoder[ThroughConnection] =
     deriveEncoder[ThroughConnection]
   implicit val throughConnectionDecoder: Decoder[ThroughConnection] =

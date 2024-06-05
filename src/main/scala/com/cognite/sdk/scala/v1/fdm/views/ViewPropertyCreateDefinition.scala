@@ -1,13 +1,14 @@
 package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.implicits.toFunctorOps
-import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ConnectionDefinition, connectionDefinitionDecoder}
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Encoder}
 
-sealed trait ViewPropertyCreateDefinition
+
+trait ViewPropertyCreateDefinition
 
 object ViewPropertyCreateDefinition {
   final case class CreateViewProperty(
@@ -22,23 +23,13 @@ object ViewPropertyCreateDefinition {
   implicit val createViewPropertyDecoder: Decoder[CreateViewProperty] =
     deriveDecoder[CreateViewProperty]
 
-  final case class ConnectionDefinition(
-      name: Option[String],
-      description: Option[String],
-      `type`: DirectRelationReference,
-      source: ViewReference,
-      direction: Option[ConnectionDirection]
-  ) extends ViewPropertyCreateDefinition
-
-  implicit val connectionDefinitionEncoder: Encoder[ConnectionDefinition] =
-    deriveEncoder[ConnectionDefinition]
-  implicit val connectionDefinitionDecoder: Decoder[ConnectionDefinition] =
-    deriveDecoder[ConnectionDefinition]
 
   implicit val viewPropertyEncoder: Encoder[ViewPropertyCreateDefinition] = Encoder.instance {
     case p: CreateViewProperty => p.asJson
-    case p: ConnectionDefinition => p.asJson
+    case d: ConnectionDefinition => d.asJson
+    case _ => throw new IllegalStateException("could not encode property into CreateViewProperty or ConnectionDefinition")
   }
+
   implicit val viewPropertyDecoder: Decoder[ViewPropertyCreateDefinition] =
     List[Decoder[ViewPropertyCreateDefinition]](
       Decoder[ConnectionDefinition].widen,
