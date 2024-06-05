@@ -6,7 +6,11 @@ package com.cognite.sdk.scala.v1.fdm.views
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{Int32, TimeSeriesReference}
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ReverseDirectRelationConnection, ThroughConnection, ViewCorePropertyDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{
+  ContainerPropertyDefinition,
+  ReverseDirectRelationConnection,
+  ThroughConnection, ViewCorePropertyDefinition
+}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
@@ -58,7 +62,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     defaultValue = Some(PropertyDefaultValue.Object(Json.Null)),
     description = Some("Prop text"),
     name = Some("Prop text"),
-    `type` = PropertyType.DirectNodeRelationProperty(None, None),
+    `type` = PropertyType.DirectNodeRelationProperty(None, None)
   )
 
   private val containerPrimitive = ContainerCreateDefinition(
@@ -243,7 +247,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         "multi_reverse_direct_relation",
         ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
         ThroughConnection("connection", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
-      ),
+      )
     )
 
     val viewWithReverseDirectRelationship = ViewCreateDefinition(
@@ -269,6 +273,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     testClient.views
       .deleteItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
+
     testClient.views
       .deleteItems(Seq(
         DataModelReference(spaceName, view2ExternalId, Some(viewVersion1)),
