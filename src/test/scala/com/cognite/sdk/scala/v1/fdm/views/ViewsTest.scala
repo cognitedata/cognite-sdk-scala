@@ -9,7 +9,8 @@ import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{Int3
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{
   ContainerPropertyDefinition,
   ReverseDirectRelationConnection,
-  ThroughConnection, ViewCorePropertyDefinition
+  ThroughConnection,
+  ViewCorePropertyDefinition
 }
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
@@ -117,11 +118,6 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   }
 
   val viewVersion1 = "v1"
-  val viewExternalId = "scala_sdk_view_1"
-  val view2ExternalId = "scala_sdk_view_2"
-  val view3ExternalId = "scala_sdk_view_3"
-  val view4ExternalId = "scala_sdk_view_4"
-  val view5ExternalId = "scala_sdk_view_5"
 
 
   it should "create a view" in {
@@ -131,6 +127,8 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text"),
       "prop_timeseries" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_timeseries")
     )
+    val viewExternalId = "scala_sdk_view_1"
+
     val viewToCreate = ViewCreateDefinition(
       space = spaceName,
       externalId = viewExternalId,
@@ -184,12 +182,15 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   }
 
   it should "create a view that implement another view" in {
+    val implementedViewExternalId = "scala_sdk_view_1"
+    val implementingViewExternalId = "scala_sdk_view_2"
+
     val containerPrimReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val containerListReference = ContainerReference(spaceName, containerListExternalId)
 
     // Create a second view that reference to scala_sdk_test_view_1
     val implements =
-      Seq(ViewReference(space = spaceName, externalId = viewExternalId, version = "v1"))
+      Seq(ViewReference(space = spaceName, externalId = implementedViewExternalId, version = "v1"))
     val properties2 = Map(
       "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(
         container = containerPrimReference,
@@ -203,7 +204,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
     val view2ToCreate = ViewCreateDefinition(
       space = spaceName,
-      externalId = view3ExternalId,
+      externalId = implementingViewExternalId,
       name = Some("second view"),
       description = Some("some desc"),
       implements = Some(implements),
@@ -217,6 +218,9 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   }
 
   it should "create a view that contains a RDR" in {
+
+    val viewWithDRExternalId = "scala_sdk_view_3"
+    val viewWithRDRExternalId = "scala_sdk_view_4"
     val containerPrimReference = ContainerReference(spaceName, containerPrimitiveExternalId)
 
     //connection property points to a container property that is a direct connection
@@ -231,7 +235,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     )
     val viewPointedTo = ViewCreateDefinition(
       space = spaceName,
-      externalId = view4ExternalId,
+      externalId = viewWithDRExternalId,
       name = Some("first view"),
       description = Some("desc"),
       filter = None,
@@ -241,7 +245,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     )
 
     val reverseDirectRelationProperty = Map(
-      f"has_$view4ExternalId" -> ReverseDirectRelationConnection(
+      f"has_$viewWithDRExternalId" -> ReverseDirectRelationConnection(
         Some("name"),
         Some("desc"),
         "multi_reverse_direct_relation",
@@ -252,7 +256,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
     val viewWithReverseDirectRelationship = ViewCreateDefinition(
       space = spaceName,
-      externalId = view5ExternalId,
+      externalId = viewWithRDRExternalId,
       name = Some("first view"),
       description = Some("desc"),
       filter = None,
@@ -270,20 +274,30 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   }
 
   it should "delete views" in {
+    val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
+    val viewExternalId = "scala_sdk_view_1"
+    val properties = Map(
+      "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
+      "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text"),
+      "prop_timeseries" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_timeseries")
+    )
+    val viewToCreate = ViewCreateDefinition(
+      space = spaceName,
+      externalId = viewExternalId,
+      name = Some("first view"),
+      description = Some("desc"),
+      filter = None,
+      implements = None,
+      version = viewVersion1,
+      properties = properties
+    )
+    testClient.views
+      .createItems(Seq(viewToCreate))
+      .unsafeRunSync().headOption
+
     testClient.views
       .deleteItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
-
-    testClient.views
-      .deleteItems(Seq(
-        DataModelReference(spaceName, view2ExternalId, Some(viewVersion1)),
-        DataModelReference(spaceName, view3ExternalId, Some(viewVersion1)),
-        DataModelReference(spaceName, view4ExternalId, Some(viewVersion1)),
-        DataModelReference(spaceName, view5ExternalId, Some(viewVersion1))
-      ))
-      .unsafeRunSync()
-
-
     val retrievedAfterDelete = testClient.views
       .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
