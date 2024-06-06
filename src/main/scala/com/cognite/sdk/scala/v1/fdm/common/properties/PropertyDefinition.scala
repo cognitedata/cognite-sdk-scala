@@ -54,7 +54,7 @@ object PropertyDefinition {
   final case class ReverseDirectRelationConnection(
       name: Option[String],
       description: Option[String],
-      connectionType: String,
+      connectionType: ReverseDirectRelationConnectionType,
       source: ViewReference,
       through: ThroughConnection
   ) extends ConnectionDefinition
@@ -64,6 +64,7 @@ object PropertyDefinition {
       source: SourceReference
   )
   final case class EdgeConnection(
+      connectionType: Option[EdgeConnectionType],
       name: Option[String],
       description: Option[String],
       `type`: DirectRelationReference,
