@@ -47,7 +47,6 @@ object PropertyDefinition {
       containerPropertyIdentifier: Option[String] = None
   ) extends ViewPropertyDefinition
       with CorePropertyDefinition
-      with ViewPropertyCreateDefinition
 
   sealed trait ConnectionDefinition extends ViewPropertyDefinition with ViewPropertyCreateDefinition
 
