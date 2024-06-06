@@ -51,10 +51,10 @@ object PropertyDefinition {
       name: Option[String],
       description: Option[String],
       source: ViewReference,
-      through: ThroughConnection
+      through: ThroughReference
   ) extends ConnectionDefinition
 
-  final case class ThroughConnection(
+  final case class ThroughReference(
       identifier: String,
       source: SourceReference
   )
@@ -75,10 +75,10 @@ object PropertyDefinition {
 
   implicit val edgeConnectionEncoder: Encoder[EdgeConnection] = deriveEncoder[EdgeConnection]
 
-  implicit val throughConnectionEncoder: Encoder[ThroughConnection] =
-    deriveEncoder[ThroughConnection]
-  implicit val throughConnectionDecoder: Decoder[ThroughConnection] =
-    deriveDecoder[ThroughConnection]
+  implicit val throughConnectionEncoder: Encoder[ThroughReference] =
+    deriveEncoder[ThroughReference]
+  implicit val throughConnectionDecoder: Decoder[ThroughReference] =
+    deriveDecoder[ThroughReference]
 
   implicit val reverseDirectRelationConnection: Encoder[ReverseDirectRelationConnection] =
     deriveEncoder[ReverseDirectRelationConnection]

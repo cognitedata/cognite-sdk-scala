@@ -9,7 +9,7 @@ import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{Int3
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{
   ContainerPropertyDefinition,
   ReverseDirectRelationConnection,
-  ThroughConnection,
+  ThroughReference,
   ViewCorePropertyDefinition
 }
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
@@ -255,7 +255,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         Some("name"),
         Some("desc"),
         ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
-        ThroughConnection("connection", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
+        ThroughReference("connection", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
       )
     )
 
