@@ -6,7 +6,6 @@ import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.views.{
   ConnectionDirection,
-  ViewPropertyCreateDefinition,
   ViewReference
 }
 import io.circe._
@@ -48,7 +47,7 @@ object PropertyDefinition {
   ) extends ViewPropertyDefinition
       with CorePropertyDefinition
 
-  sealed trait ConnectionDefinition extends ViewPropertyDefinition with ViewPropertyCreateDefinition
+  sealed trait ConnectionDefinition extends ViewPropertyDefinition
 
   final case class ReverseDirectRelationConnection(
       name: Option[String],

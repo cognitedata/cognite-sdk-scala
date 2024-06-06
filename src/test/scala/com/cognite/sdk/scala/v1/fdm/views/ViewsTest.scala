@@ -12,7 +12,7 @@ import com.cognite.sdk.scala.v1.fdm.common.properties.ReverseDirectRelationConne
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers._
-import com.cognite.sdk.scala.v1.fdm.views.ViewPropertyCreateDefinition.CreateViewProperty
+import com.cognite.sdk.scala.v1.fdm.views.ViewPropertyCreateDefinition.{CreateConnectionDefinition, CreateViewProperty}
 import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, SpaceCreateDefinition}
 import io.circe.Json
 import org.scalatest.BeforeAndAfterAll
@@ -244,12 +244,14 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       properties = viewWithDRProperties
     )
 
-    val reverseDirectRelationProperty = ReverseDirectRelationConnection(
-      Some("name"),
-      Some("desc"),
-      MultiReverseDirectRelation,
-      ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
-      ThroughConnection("connection", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
+    val reverseDirectRelationProperty = CreateConnectionDefinition(
+      ReverseDirectRelationConnection(
+        Some("name"),
+        Some("desc"),
+        MultiReverseDirectRelation,
+        ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
+        ThroughConnection("connection", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
+      )
     )
 
     val viewWithRDRProperties = Map(
