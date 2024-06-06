@@ -47,9 +47,9 @@ object PropertyDefinition {
   sealed trait ConnectionDefinition extends ViewPropertyDefinition
 
   final case class ReverseDirectRelationConnection(
+      connectionType: ReverseDirectRelationConnectionType,
       name: Option[String],
       description: Option[String],
-      connectionType: ReverseDirectRelationConnectionType,
       source: ViewReference,
       through: ThroughConnection
   ) extends ConnectionDefinition
