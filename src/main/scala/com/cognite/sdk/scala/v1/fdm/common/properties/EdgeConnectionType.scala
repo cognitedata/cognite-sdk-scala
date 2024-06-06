@@ -13,7 +13,7 @@ object EdgeConnectionType {
   implicit val edgeConnectionTypeDecoder: Decoder[EdgeConnectionType] = Decoder[String].emap {
     case "multi_edge_connection" => Right(MultiEdgeConnection)
     case "single_edge_connection" => Right(SingleEdgeConnection)
-    case other => Left(s"Invalid Connection direction: $other")
+    case other => Left(s"Invalid Connection type: $other")
   }
 
   implicit val edgeConnectionTypeEncoder: Encoder[EdgeConnectionType] =
