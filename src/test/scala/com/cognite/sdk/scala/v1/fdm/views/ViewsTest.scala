@@ -251,9 +251,9 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
     val reverseDirectRelationProperty = CreateConnectionDefinition(
       ReverseDirectRelationConnection(
+        MultiReverseDirectRelation,
         Some("name"),
         Some("desc"),
-        MultiReverseDirectRelation,
         ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
         ThroughConnection("connection", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
       )
