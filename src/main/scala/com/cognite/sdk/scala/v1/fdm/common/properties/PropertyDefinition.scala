@@ -25,7 +25,7 @@ object PropertyDefinition {
     val `type`: PropertyType
   }
 
-  sealed trait ViewPropertyDefinition extends PropertyDefinition with ViewPropertyCreateDefinition
+  sealed trait ViewPropertyDefinition extends PropertyDefinition
 
   final case class ContainerPropertyDefinition(
       nullable: Option[Boolean] = Some(true),
@@ -49,7 +49,7 @@ object PropertyDefinition {
       with CorePropertyDefinition
       with ViewPropertyCreateDefinition
 
-  sealed trait ConnectionDefinition extends ViewPropertyDefinition
+  sealed trait ConnectionDefinition extends ViewPropertyDefinition with ViewPropertyCreateDefinition
 
   final case class ReverseDirectRelationConnection(
       name: Option[String],
