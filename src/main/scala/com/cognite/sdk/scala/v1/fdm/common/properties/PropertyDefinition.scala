@@ -4,10 +4,7 @@ import cats.implicits.toFunctorOps
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
-import com.cognite.sdk.scala.v1.fdm.views.{
-  ConnectionDirection,
-  ViewReference
-}
+import com.cognite.sdk.scala.v1.fdm.views.{ConnectionDirection, ViewReference}
 import io.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps

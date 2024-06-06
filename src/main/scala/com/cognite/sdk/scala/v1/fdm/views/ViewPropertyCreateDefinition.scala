@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.implicits.toFunctorOps
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ConnectionDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ConnectionDefinition
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
@@ -19,7 +19,7 @@ object ViewPropertyCreateDefinition {
   ) extends ViewPropertyCreateDefinition
 
   final case class CreateConnectionDefinition(connectionDefinition: ConnectionDefinition)
-    extends ViewPropertyCreateDefinition
+      extends ViewPropertyCreateDefinition
   implicit val createConnectionDefinitionEncoder: Encoder[CreateConnectionDefinition] =
     PropertyDefinition.connectionDefinitionEncoder.contramap(_.connectionDefinition)
   implicit val createConnectionDefinitionDecoder: Decoder[CreateConnectionDefinition] =
