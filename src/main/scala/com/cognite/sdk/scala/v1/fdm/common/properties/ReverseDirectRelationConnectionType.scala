@@ -14,7 +14,7 @@ object ReverseDirectRelationConnectionType {
       : Decoder[ReverseDirectRelationConnectionType] = Decoder[String].emap {
     case "multi_reverse_direct_relation" => Right(MultiReverseDirectRelation)
     case "single_reverse_direct_relation" => Right(SingleReverseDirectRelation)
-    case other => Left(s"Invalid Connection direction: $other")
+    case other => Left(s"Invalid Connection type: $other")
   }
 
   implicit val reverseDirectRelationConnectionTypeEncoder
