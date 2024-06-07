@@ -1,11 +1,12 @@
 package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.implicits.toFunctorOps
-import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ConnectionDefinition
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Encoder}
 
 sealed trait ViewPropertyCreateDefinition
 
@@ -17,31 +18,26 @@ object ViewPropertyCreateDefinition {
       containerPropertyIdentifier: String
   ) extends ViewPropertyCreateDefinition
 
+  final case class CreateConnectionDefinition(connectionDefinition: ConnectionDefinition)
+      extends ViewPropertyCreateDefinition
+  implicit val createConnectionDefinitionEncoder: Encoder[CreateConnectionDefinition] =
+    PropertyDefinition.connectionDefinitionEncoder.contramap(_.connectionDefinition)
+  implicit val createConnectionDefinitionDecoder: Decoder[CreateConnectionDefinition] =
+    PropertyDefinition.connectionDefinitionDecoder.map(CreateConnectionDefinition)
+
   implicit val createViewPropertyEncoder: Encoder[CreateViewProperty] =
     deriveEncoder[CreateViewProperty]
   implicit val createViewPropertyDecoder: Decoder[CreateViewProperty] =
     deriveDecoder[CreateViewProperty]
 
-  final case class ConnectionDefinition(
-      name: Option[String],
-      description: Option[String],
-      `type`: DirectRelationReference,
-      source: ViewReference,
-      direction: Option[ConnectionDirection]
-  ) extends ViewPropertyCreateDefinition
-
-  implicit val connectionDefinitionEncoder: Encoder[ConnectionDefinition] =
-    deriveEncoder[ConnectionDefinition]
-  implicit val connectionDefinitionDecoder: Decoder[ConnectionDefinition] =
-    deriveDecoder[ConnectionDefinition]
-
   implicit val viewPropertyEncoder: Encoder[ViewPropertyCreateDefinition] = Encoder.instance {
     case p: CreateViewProperty => p.asJson
-    case p: ConnectionDefinition => p.asJson
+    case d: CreateConnectionDefinition => d.asJson
   }
+
   implicit val viewPropertyDecoder: Decoder[ViewPropertyCreateDefinition] =
     List[Decoder[ViewPropertyCreateDefinition]](
-      Decoder[ConnectionDefinition].widen,
+      Decoder[CreateConnectionDefinition].widen,
       Decoder[CreateViewProperty].widen
     ).reduceLeftOption(_ or _).getOrElse(Decoder[CreateViewProperty].widen)
 }
