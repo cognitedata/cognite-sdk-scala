@@ -97,7 +97,7 @@ class ContainersTest extends CommonDataModelTestHelper {
       PropertyType.TextProperty(list = None),
       PropertyType.TextProperty(list = Some(true)),
       PropertyType.TextProperty(list = Some(false)),
-      PropertyType.DirectNodeRelationProperty(None, None),
+      PropertyType.DirectNodeRelationProperty(None, None, None),
       PropertyType.DirectNodeRelationProperty(Some(ContainerReference(space, "ext-id-1")), Some(ViewReference(space, "ext-id-1", "v1"))),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32, list = None),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),

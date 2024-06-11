@@ -61,6 +61,7 @@ object InstancePropertyValue {
   final case class SequenceReference(value: java.lang.String) extends InstancePropertyValue
   final case class ViewDirectNodeRelation(value: Option[DirectRelationReference])
       extends InstancePropertyValue
+  final case class ViewDirectNodeRelationList(value: List)
   final case class StringList(value: Seq[java.lang.String]) extends InstancePropertyValue
   final case class BooleanList(value: Seq[scala.Boolean]) extends InstancePropertyValue
   final case class Int32List(value: Seq[scala.Int]) extends InstancePropertyValue

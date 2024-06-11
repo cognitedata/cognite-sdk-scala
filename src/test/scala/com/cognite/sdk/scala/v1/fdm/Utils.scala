@@ -40,7 +40,8 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
     DirectNodeRelationProperty(
       container = None,
-      source = None),
+      source = None,
+      list = None),
     TimeSeriesReference(list = Some(false)),
     FileReference(list = Some(false)),
     SequenceReference(list = Some(false)),
@@ -184,7 +185,7 @@ object Utils {
                                                   containerPropType: PropertyType
                                                 ): InstancePropertyValue = {
     containerPropType match {
-      case DirectNodeRelationProperty(_, _) =>
+      case DirectNodeRelationProperty(_, _, _) =>
         val autoRef = DirectRelationReference(Utils.SpaceExternalId, s"$propName-Instance")
         InstancePropertyValue.ViewDirectNodeRelation(Some(autoRef))
       case p if p.isList => listContainerPropToInstanceProperty(propName, p)

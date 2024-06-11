@@ -32,11 +32,10 @@ object PropertyType {
 
   final case class DirectNodeRelationProperty(
       container: Option[ContainerReference],
-      source: Option[ViewReference]
+      source: Option[ViewReference],
+      list: Option[Boolean] = Some(false),
   ) extends PropertyType {
     val `type`: String = DirectNodeRelationProperty.Type
-
-    override def list: Option[Boolean] = None
   }
 
   object DirectNodeRelationProperty {
@@ -126,7 +125,8 @@ object PropertyType {
             for {
               containerRef <- c.downField("container").as[Option[ContainerReference]]
               source <- c.downField("source").as[Option[ViewReference]]
-            } yield DirectNodeRelationProperty(containerRef, source)
+              list <- c.downField("list").as[Option[Boolean]]
+            } yield DirectNodeRelationProperty(containerRef, source, list)
           case Right(typeVal) if typeVal === TimeSeriesReference.Type =>
             c.downField("list").as[Option[Boolean]].map(TimeSeriesReference(_))
           case Right(typeVal) if typeVal === FileReference.Type =>
