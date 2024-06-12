@@ -106,8 +106,8 @@ object InstancePropertyValue {
         }
         numericInstantPropType.map(Right(_))
       case v if v.isBoolean => v.asBoolean.map(s => Right(InstancePropertyValue.Boolean(s)))
-      case v if v.isObject && tryDecodeObject(v, c).isDefined =>
-        tryDecodeObject(v, c).map(x => x.map(y => InstancePropertyValue.ViewDirectNodeRelation(Some(y))))
+      case v if v.isObject && isDirectRelation(v) =>
+        Some(tryDecodeObject(v, c).map(Some(_)).map(InstancePropertyValue.ViewDirectNodeRelation(_)))
       case v if v.isObject =>
         Some(Right(InstancePropertyValue.Object(v)))
       case v if v.isArray =>
@@ -175,9 +175,9 @@ object InstancePropertyValue {
                     InstancePropertyValue.Float64List(arr.flatMap(_.asNumber).map(_.toDouble))
                 }
                 Right[DecodingFailure, InstancePropertyValue](matchingPropType)
-              case element if element.isObject && tryDecodeObject(element, c).nonEmpty => {
+              case element if element.isObject && isDirectRelation(element) => {
                 val directRelations = arr
-                  .map(tryDecodeObject(_, c).getOrElse(Left(DecodingFailure("List contains elements others than direct relations", c.history)))).toList
+                  .map(tryDecodeObject(_, c)).toList
                 val directRelationsEither: Either[DecodingFailure, List[DirectRelationReference]] = directRelations.partitionMap(identity) match {
                   case (Nil, rights) => Right(rights)
                   case (lefts, _)    => Left(lefts.headOption.getOrElse(DecodingFailure("List contains elements others than direct relations", c.history)))
@@ -207,9 +207,11 @@ object InstancePropertyValue {
     result.getOrElse(Left(DecodingFailure(s"Missing Instance Property Type", c.history)))
   }
 
-  private def tryDecodeObject(v: Json, c: HCursor): Option[Either[DecodingFailure, DirectRelationReference]] = {
+  private def isDirectRelation(v: Json) = {
+    v.asObject.exists(obj => obj.contains("externalId") && obj.contains("space") && obj.size === 2)
+  }
+  private def tryDecodeObject(v: Json, c: HCursor): Either[DecodingFailure, DirectRelationReference] = {
     v.asObject
-      .filter(obj => obj.contains("externalId") && obj.contains("space") && obj.size === 2)
       .map(obj =>
         for {
           spaceJson <- obj("space").toRight(DecodingFailure("missing space", c.history))
@@ -225,7 +227,7 @@ object InstancePropertyValue {
             space,
             externalId
           )
-    )
+     ).getOrElse(Left(DecodingFailure("could not deserialize into object", c.history)))
   }
 
   implicit val instancePropertyTypeEncoder: Encoder[InstancePropertyValue] =
