@@ -106,8 +106,10 @@ object InstancePropertyValue {
         }
         numericInstantPropType.map(Right(_))
       case v if v.isBoolean => v.asBoolean.map(s => Right(InstancePropertyValue.Boolean(s)))
-      case v if v.isObject =>
+      case v if v.isObject && tryDecodeObject(v, c).isDefined =>
         tryDecodeObject(v, c).map(x => x.map(y => InstancePropertyValue.ViewDirectNodeRelation(Some(y))))
+      case v if v.isObject =>
+        Some(Right(InstancePropertyValue.Object(v)))
       case v if v.isArray =>
         val objArrays = v.asArray match {
           case Some(arr) =>
