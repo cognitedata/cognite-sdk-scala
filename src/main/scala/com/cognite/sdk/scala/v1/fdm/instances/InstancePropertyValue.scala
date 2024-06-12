@@ -107,7 +107,10 @@ object InstancePropertyValue {
         numericInstantPropType.map(Right(_))
       case v if v.isBoolean => v.asBoolean.map(s => Right(InstancePropertyValue.Boolean(s)))
       case v if v.isObject && isDirectRelation(v) =>
-        Some(tryDecodeObject(v, c).map(Some(_)).map(InstancePropertyValue.ViewDirectNodeRelation(_)))
+        Some(decodeDirectRelation(v, c) match {
+          case Left(d) => Left(d)
+          case Right(d: DirectRelationReference) => Right(InstancePropertyValue.ViewDirectNodeRelation(Some(d)))
+        })
       case v if v.isObject =>
         Some(Right(InstancePropertyValue.Object(v)))
       case v if v.isArray =>
@@ -175,15 +178,11 @@ object InstancePropertyValue {
                     InstancePropertyValue.Float64List(arr.flatMap(_.asNumber).map(_.toDouble))
                 }
                 Right[DecodingFailure, InstancePropertyValue](matchingPropType)
-              case element if element.isObject && isDirectRelation(element) => {
-                val directRelations = arr
-                  .map(tryDecodeObject(_, c)).toList
-                val directRelationsEither: Either[DecodingFailure, List[DirectRelationReference]] = directRelations.partitionMap(identity) match {
-                  case (Nil, rights) => Right(rights)
+              case element if element.isObject && isDirectRelation(element) =>
+                arr.toList.partitionMap(decodeDirectRelation(_, c)) match {
+                  case (Nil, rights) => Right(InstancePropertyValue.ViewDirectNodeRelationList(rights))
                   case (lefts, _)    => Left(lefts.headOption.getOrElse(DecodingFailure("List contains elements others than direct relations", c.history)))
                 }
-                directRelationsEither.map(x => InstancePropertyValue.ViewDirectNodeRelationList(x))
-              }
               case _ =>
                 Right[DecodingFailure, InstancePropertyValue](
                   InstancePropertyValue.ObjectList(arr)
@@ -210,7 +209,7 @@ object InstancePropertyValue {
   private def isDirectRelation(v: Json) = {
     v.asObject.exists(obj => obj.contains("externalId") && obj.contains("space") && obj.size === 2)
   }
-  private def tryDecodeObject(v: Json, c: HCursor): Either[DecodingFailure, DirectRelationReference] = {
+  private def decodeDirectRelation(v: Json, c: HCursor): Either[DecodingFailure, DirectRelationReference] = {
     v.asObject
       .map(obj =>
         for {
