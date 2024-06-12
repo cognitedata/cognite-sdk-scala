@@ -9,12 +9,7 @@ import io.circe._
 import io.circe.syntax.EncoderOps
 
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
-import java.time.temporal.ChronoField.{
-  HOUR_OF_DAY,
-  MILLI_OF_SECOND,
-  MINUTE_OF_HOUR,
-  SECOND_OF_MINUTE
-}
+import java.time.temporal.ChronoField.{HOUR_OF_DAY, MILLI_OF_SECOND, MINUTE_OF_HOUR, SECOND_OF_MINUTE}
 import java.time.{LocalDate, ZonedDateTime}
 import scala.util.{Success, Try}
 
@@ -61,7 +56,7 @@ object InstancePropertyValue {
   final case class SequenceReference(value: java.lang.String) extends InstancePropertyValue
   final case class ViewDirectNodeRelation(value: Option[DirectRelationReference])
       extends InstancePropertyValue
-  final case class ViewDirectNodeRelationList(value: List)
+  final case class ViewDirectNodeRelationList(value: Seq[DirectRelationReference]) extends InstancePropertyValue
   final case class StringList(value: Seq[java.lang.String]) extends InstancePropertyValue
   final case class BooleanList(value: Seq[scala.Boolean]) extends InstancePropertyValue
   final case class Int32List(value: Seq[scala.Int]) extends InstancePropertyValue
@@ -112,31 +107,7 @@ object InstancePropertyValue {
         numericInstantPropType.map(Right(_))
       case v if v.isBoolean => v.asBoolean.map(s => Right(InstancePropertyValue.Boolean(s)))
       case v if v.isObject =>
-        val res: Option[Either[DecodingFailure, InstancePropertyValue]] = v.asObject.map(obj =>
-          if (obj.contains("externalId") && obj.contains("space") && obj.size === 2) {
-            for {
-              spaceJson <- obj("space").toRight(DecodingFailure("missing space", c.history))
-              space <- spaceJson.asString.toRight(DecodingFailure("space isn't string", c.history))
-              externalIdJson <- obj("externalId").toRight(
-                DecodingFailure("missing externalId", c.history)
-              )
-              externalId <- externalIdJson.asString.toRight(
-                DecodingFailure("externalId isn't string", c.history)
-              )
-            } yield InstancePropertyValue.ViewDirectNodeRelation(
-              Option(
-                DirectRelationReference(
-                  space,
-                  externalId
-                )
-              )
-            )
-          } else {
-            Right(InstancePropertyValue.Object(v))
-          }
-        )
-        res
-
+        tryDecodeObject(v, c).map(x => x.map(y => InstancePropertyValue.ViewDirectNodeRelation(Some(y))))
       case v if v.isArray =>
         val objArrays = v.asArray match {
           case Some(arr) =>
@@ -202,10 +173,15 @@ object InstancePropertyValue {
                     InstancePropertyValue.Float64List(arr.flatMap(_.asNumber).map(_.toDouble))
                 }
                 Right[DecodingFailure, InstancePropertyValue](matchingPropType)
-              case element if element.isObject =>
-                Right[DecodingFailure, InstancePropertyValue](
-                  InstancePropertyValue.ObjectList(arr)
-                )
+              case element if element.isObject && tryDecodeObject(element, c).nonEmpty => {
+                val directRelations = arr
+                  .map(tryDecodeObject(_, c).getOrElse(Left(DecodingFailure("List contains elements others than direct relations", c.history)))).toList
+                val directRelationsEither: Either[DecodingFailure, List[DirectRelationReference]] = directRelations.partitionMap(identity) match {
+                  case (Nil, rights) => Right(rights)
+                  case (lefts, _)    => Left(lefts.headOption.getOrElse(DecodingFailure("List contains elements others than direct relations", c.history)))
+                }
+                directRelationsEither.map(x => InstancePropertyValue.ViewDirectNodeRelationList(x))
+              }
               case _ =>
                 Right[DecodingFailure, InstancePropertyValue](
                   InstancePropertyValue.ObjectList(arr)
@@ -227,6 +203,27 @@ object InstancePropertyValue {
         )
     }
     result.getOrElse(Left(DecodingFailure(s"Missing Instance Property Type", c.history)))
+  }
+
+  private def tryDecodeObject(v: Json, c: HCursor): Option[Either[DecodingFailure, DirectRelationReference]] = {
+    v.asObject
+      .filter(obj => obj.contains("externalId") && obj.contains("space") && obj.size === 2)
+      .map(obj =>
+        for {
+          spaceJson <- obj("space").toRight(DecodingFailure("missing space", c.history))
+          space <- spaceJson.asString.toRight(DecodingFailure("space isn't string", c.history))
+          externalIdJson <- obj("externalId").toRight(
+            DecodingFailure("missing externalId", c.history)
+          )
+          externalId <- externalIdJson.asString.toRight(
+            DecodingFailure("externalId isn't string", c.history)
+          )
+        } yield
+          DirectRelationReference(
+            space,
+            externalId
+          )
+    )
   }
 
   implicit val instancePropertyTypeEncoder: Encoder[InstancePropertyValue] =
@@ -258,6 +255,10 @@ object InstancePropertyValue {
       case TimestampList(values) =>
         Json.arr(values =
           values.map(d => Json.fromString(d.format(InstancePropertyValue.Timestamp.formatter))): _*
+        )
+      case ViewDirectNodeRelationList(values) =>
+        Json.arr(values =
+          values.map(value => value.asJson): _*
         )
       case ObjectList(values) => Json.arr(values = values: _*)
       case TimeSeriesReferenceList(values) => Json.arr(values = values.map(Json.fromString): _*)
