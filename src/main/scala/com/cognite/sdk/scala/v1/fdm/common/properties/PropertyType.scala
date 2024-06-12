@@ -85,8 +85,8 @@ object PropertyType {
     deriveEncoder[PrimitiveProperty]
 
   implicit val directNodeRelationPropertyEncoder: Encoder[DirectNodeRelationProperty] =
-    Encoder.forProduct3("type", "container", "source")((d: DirectNodeRelationProperty) =>
-      (d.`type`, d.container, d.source)
+    Encoder.forProduct4("type", "container", "source", "list")((d: DirectNodeRelationProperty) =>
+      (d.`type`, d.container, d.source, d.list)
     )
 
   implicit val containerPropertyTypeEncoder: Encoder[PropertyType] = Encoder.instance {

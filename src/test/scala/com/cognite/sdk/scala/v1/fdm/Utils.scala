@@ -41,7 +41,11 @@ object Utils {
     DirectNodeRelationProperty(
       container = None,
       source = None,
-      list = None),
+      list = Some(false)),
+    DirectNodeRelationProperty(
+      container = None,
+      source = None,
+      list = Some(true)),
     TimeSeriesReference(list = Some(false)),
     FileReference(list = Some(false)),
     SequenceReference(list = Some(false)),
@@ -135,7 +139,7 @@ object Utils {
         defaultValue = defaultValue,
         description = Some(s"Test ${nameComponents.mkString(" ")} Description"),
         name = Some(s"Test-${nameComponents.mkString("-")}-Name"),
-        `type` = p
+        `type` = p,
       )
     }).toMap
   }
@@ -185,9 +189,12 @@ object Utils {
                                                   containerPropType: PropertyType
                                                 ): InstancePropertyValue = {
     containerPropType match {
-      case DirectNodeRelationProperty(_, _, _) =>
+      case DirectNodeRelationProperty(_, _, isList) if isList.contains(false) =>
         val autoRef = DirectRelationReference(Utils.SpaceExternalId, s"$propName-Instance")
         InstancePropertyValue.ViewDirectNodeRelation(Some(autoRef))
+      case DirectNodeRelationProperty(_, _, isList) if isList.contains(true) =>
+        val autoRef = DirectRelationReference(Utils.SpaceExternalId, s"$propName-Instance")
+        InstancePropertyValue.ViewDirectNodeRelationList(Seq(autoRef, autoRef))
       case p if p.isList => listContainerPropToInstanceProperty(propName, p)
       case p => nonListContainerPropToInstanceProperty(propName, p)
     }
