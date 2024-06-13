@@ -492,12 +492,10 @@ object Utils {
           Some(
             PropertyDefaultValue.Object(
               Json.fromJsonObject(
-                JsonObject.fromMap(
-                  Map(
-                    "a" -> Json.fromString("a"),
-                    "b" -> Json.fromInt(1)
-                  )
-                )
+                JsonObject.fromMap(Map(
+                  "a" -> Json.fromString("a"),
+                  "b" -> Json.fromInt(1)
+                ))
               )
             )
           )
