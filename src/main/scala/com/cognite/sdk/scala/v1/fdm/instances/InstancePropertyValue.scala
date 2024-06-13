@@ -230,20 +230,20 @@ object InstancePropertyValue {
     v.asObject
       .map(obj =>
         for {
-          spaceJson <- obj("space").toRight(DecodingFailure("missing space", c.history))
-          space <- spaceJson.asString.toRight(DecodingFailure("space isn't string", c.history))
+          spaceJson <- obj("space").toRight(DecodingFailure("Missing space property in direct relation object", c.history))
+          space <- spaceJson.asString.toRight(DecodingFailure("Space isn't string in direct relation object", c.history))
           externalIdJson <- obj("externalId").toRight(
-            DecodingFailure("missing externalId", c.history)
+            DecodingFailure("Missing externalId in direct relation object", c.history)
           )
           externalId <- externalIdJson.asString.toRight(
-            DecodingFailure("externalId isn't string", c.history)
+            DecodingFailure("ExternalId isn't string in direct relation object", c.history)
           )
         } yield DirectRelationReference(
           space,
           externalId
         )
       )
-      .getOrElse(Left(DecodingFailure("could not deserialize into object", c.history)))
+      .getOrElse(Left(DecodingFailure("Could not deserialize into direct relation object", c.history)))
 
   implicit val instancePropertyTypeEncoder: Encoder[InstancePropertyValue] =
     Encoder.instance[InstancePropertyValue] {

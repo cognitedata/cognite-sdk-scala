@@ -153,8 +153,8 @@ object Utils {
   // scalastyle:on cyclomatic.complexity method.length
 
   def createAllPossibleViewPropCombinations: Map[String, ViewCorePropertyDefinition] =
-    createAllPossibleContainerPropCombinations.map { case (key, prop) =>
-      key -> toViewPropertyDefinition(prop, None, None)
+    createAllPossibleContainerPropCombinations.map {
+      case (key, prop) => key -> toViewPropertyDefinition(prop, None, None)
     }
 
   def createTestContainer(
