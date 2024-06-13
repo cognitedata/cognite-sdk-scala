@@ -9,7 +9,12 @@ import io.circe._
 import io.circe.syntax.EncoderOps
 
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
-import java.time.temporal.ChronoField.{HOUR_OF_DAY, MILLI_OF_SECOND, MINUTE_OF_HOUR, SECOND_OF_MINUTE}
+import java.time.temporal.ChronoField.{
+  HOUR_OF_DAY,
+  MILLI_OF_SECOND,
+  MINUTE_OF_HOUR,
+  SECOND_OF_MINUTE
+}
 import java.time.{LocalDate, ZonedDateTime}
 import scala.util.{Success, Try}
 
@@ -56,7 +61,8 @@ object InstancePropertyValue {
   final case class SequenceReference(value: java.lang.String) extends InstancePropertyValue
   final case class ViewDirectNodeRelation(value: Option[DirectRelationReference])
       extends InstancePropertyValue
-  final case class ViewDirectNodeRelationList(value: Seq[DirectRelationReference]) extends InstancePropertyValue
+  final case class ViewDirectNodeRelationList(value: Seq[DirectRelationReference])
+      extends InstancePropertyValue
   final case class StringList(value: Seq[java.lang.String]) extends InstancePropertyValue
   final case class BooleanList(value: Seq[scala.Boolean]) extends InstancePropertyValue
   final case class Int32List(value: Seq[scala.Int]) extends InstancePropertyValue
@@ -109,7 +115,8 @@ object InstancePropertyValue {
       case v if v.isObject && isDirectRelation(v) =>
         Some(decodeDirectRelation(v, c) match {
           case Left(d) => Left(d)
-          case Right(d: DirectRelationReference) => Right(InstancePropertyValue.ViewDirectNodeRelation(Some(d)))
+          case Right(d: DirectRelationReference) =>
+            Right(InstancePropertyValue.ViewDirectNodeRelation(Some(d)))
         })
       case v if v.isObject =>
         Some(Right(InstancePropertyValue.Object(v)))
@@ -180,8 +187,18 @@ object InstancePropertyValue {
                 Right[DecodingFailure, InstancePropertyValue](matchingPropType)
               case element if element.isObject && isDirectRelation(element) =>
                 arr.toList.partitionMap(decodeDirectRelation(_, c)) match {
-                  case (Nil, rights) => Right(InstancePropertyValue.ViewDirectNodeRelationList(rights))
-                  case (lefts, _)    => Left(lefts.headOption.getOrElse(DecodingFailure("List contains elements others than direct relations", c.history)))
+                  case (Nil, rights) =>
+                    Right(InstancePropertyValue.ViewDirectNodeRelationList(rights))
+                  case (lefts, _) =>
+                    Left(
+                      lefts.headOption.getOrElse(
+                        DecodingFailure(
+                          f"List of direct relations contains elements that can't be serialized into direct relation. Errors: " +
+                            f"${lefts.map(_.message).mkString(", ")}",
+                          c.history
+                        )
+                      )
+                    )
                 }
               case _ =>
                 Right[DecodingFailure, InstancePropertyValue](
@@ -206,10 +223,12 @@ object InstancePropertyValue {
     result.getOrElse(Left(DecodingFailure(s"Missing Instance Property Type", c.history)))
   }
 
-  private def isDirectRelation(v: Json) = {
+  private def isDirectRelation(v: Json) =
     v.asObject.exists(obj => obj.contains("externalId") && obj.contains("space") && obj.size === 2)
-  }
-  private def decodeDirectRelation(v: Json, c: HCursor): Either[DecodingFailure, DirectRelationReference] = {
+  private def decodeDirectRelation(
+      v: Json,
+      c: HCursor
+  ): Either[DecodingFailure, DirectRelationReference] =
     v.asObject
       .map(obj =>
         for {
@@ -221,13 +240,12 @@ object InstancePropertyValue {
           externalId <- externalIdJson.asString.toRight(
             DecodingFailure("externalId isn't string", c.history)
           )
-        } yield
-          DirectRelationReference(
-            space,
-            externalId
-          )
-     ).getOrElse(Left(DecodingFailure("could not deserialize into object", c.history)))
-  }
+        } yield DirectRelationReference(
+          space,
+          externalId
+        )
+      )
+      .getOrElse(Left(DecodingFailure("could not deserialize into object", c.history)))
 
   implicit val instancePropertyTypeEncoder: Encoder[InstancePropertyValue] =
     Encoder.instance[InstancePropertyValue] {
@@ -260,9 +278,7 @@ object InstancePropertyValue {
           values.map(d => Json.fromString(d.format(InstancePropertyValue.Timestamp.formatter))): _*
         )
       case ViewDirectNodeRelationList(values) =>
-        Json.arr(values =
-          values.map(value => value.asJson): _*
-        )
+        Json.arr(values = values.map(value => value.asJson): _*)
       case ObjectList(values) => Json.arr(values = values: _*)
       case TimeSeriesReferenceList(values) => Json.arr(values = values.map(Json.fromString): _*)
       case FileReferenceList(values) => Json.arr(values = values.map(Json.fromString): _*)

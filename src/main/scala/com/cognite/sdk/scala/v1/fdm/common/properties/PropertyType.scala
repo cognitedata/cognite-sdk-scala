@@ -33,7 +33,7 @@ object PropertyType {
   final case class DirectNodeRelationProperty(
       container: Option[ContainerReference],
       source: Option[ViewReference],
-      list: Option[Boolean] = Some(false),
+      list: Option[Boolean] = Some(false)
   ) extends PropertyType {
     val `type`: String = DirectNodeRelationProperty.Type
   }
