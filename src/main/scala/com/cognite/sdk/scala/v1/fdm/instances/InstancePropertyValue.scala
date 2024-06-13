@@ -194,11 +194,11 @@ object InstancePropertyValue {
                     Right(InstancePropertyValue.ViewDirectNodeRelationList(rights))
                   case (lefts, _) =>
                     Left(
-                        DecodingFailure(
-                          f"List of direct relations contains elements that can't be serialized into direct relation. Errors: " +
-                            f"${lefts.map(_.message).mkString(", ")}",
-                          c.history
-                        )
+                      DecodingFailure(
+                        f"List of direct relations contains elements that can't be serialized into direct relation. Errors: " +
+                          f"${lefts.map(_.message).mkString(", ")}",
+                        c.history
+                      )
                     )
                 }
               case _ =>
@@ -233,8 +233,10 @@ object InstancePropertyValue {
     v.asObject
       .map(obj =>
         for {
-          spaceJson <- obj("space").toRight(DecodingFailure("Missing space property in direct relation object", c.history))
-          space <- spaceJson.asString.toRight(DecodingFailure("Space isn't string in direct relation object", c.history))
+          spaceJson <- obj("space")
+            .toRight(DecodingFailure("Missing space property in direct relation object", c.history))
+          space <- spaceJson.asString
+            .toRight(DecodingFailure("Space isn't string in direct relation object", c.history))
           externalIdJson <- obj("externalId").toRight(
             DecodingFailure("Missing externalId in direct relation object", c.history)
           )
@@ -246,7 +248,9 @@ object InstancePropertyValue {
           externalId
         )
       )
-      .getOrElse(Left(DecodingFailure("Could not deserialize into direct relation object", c.history)))
+      .getOrElse(
+        Left(DecodingFailure("Could not deserialize into direct relation object", c.history))
+      )
 
   implicit val instancePropertyTypeEncoder: Encoder[InstancePropertyValue] =
     Encoder.instance[InstancePropertyValue] {
