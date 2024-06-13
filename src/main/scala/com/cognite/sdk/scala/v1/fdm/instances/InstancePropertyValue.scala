@@ -191,13 +191,11 @@ object InstancePropertyValue {
                     Right(InstancePropertyValue.ViewDirectNodeRelationList(rights))
                   case (lefts, _) =>
                     Left(
-                      lefts.headOption.getOrElse(
                         DecodingFailure(
                           f"List of direct relations contains elements that can't be serialized into direct relation. Errors: " +
                             f"${lefts.map(_.message).mkString(", ")}",
                           c.history
                         )
-                      )
                     )
                 }
               case _ =>
