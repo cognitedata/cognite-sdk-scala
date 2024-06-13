@@ -454,7 +454,7 @@ object Utils {
   ) =
     EdgeOrNodeData(
       source = ref,
-      properties = Some(instancePropertyValues.view.mapValues(v => Some(v)).toMap)
+      properties = Some(instancePropertyValues.mapValues(v => Some(v)).toMap)
     )
 
   // scalastyle:off cyclomatic.complexity
