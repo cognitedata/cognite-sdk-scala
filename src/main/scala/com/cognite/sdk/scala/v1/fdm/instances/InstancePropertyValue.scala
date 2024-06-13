@@ -186,7 +186,17 @@ object InstancePropertyValue {
                 }
                 Right[DecodingFailure, InstancePropertyValue](matchingPropType)
               case element if element.isObject && isDirectRelation(element) =>
-                arr.toList.partitionMap(decodeDirectRelation(_, c)) match {
+                val eitherListIterator = arr.toList.map(decodeDirectRelation(_, c)).iterator
+
+                val successListBuilder = List.newBuilder[DirectRelationReference]
+                val errorListBuilder = List.newBuilder[DecodingFailure]
+
+                while (eitherListIterator.hasNext) eitherListIterator.next() match {
+                  case Left(a) => errorListBuilder += a
+                  case Right(b) => successListBuilder += b
+                }
+
+                (errorListBuilder.result(), successListBuilder.result()) match {
                   case (Nil, rights) =>
                     Right(InstancePropertyValue.ViewDirectNodeRelationList(rights))
                   case (lefts, _) =>
