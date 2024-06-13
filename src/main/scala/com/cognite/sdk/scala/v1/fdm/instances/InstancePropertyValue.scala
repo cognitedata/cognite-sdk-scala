@@ -113,11 +113,10 @@ object InstancePropertyValue {
         numericInstantPropType.map(Right(_))
       case v if v.isBoolean => v.asBoolean.map(s => Right(InstancePropertyValue.Boolean(s)))
       case v if v.isObject && isDirectRelation(v) =>
-        Some(decodeDirectRelation(v, c) match {
-          case Left(d) => Left(d)
-          case Right(d: DirectRelationReference) =>
-            Right(InstancePropertyValue.ViewDirectNodeRelation(Some(d)))
-        })
+        Some(
+            decodeDirectRelation(v, c)
+                .map(d => InstancePropertyValue.ViewDirectNodeRelation(Some(d))
+        )
       case v if v.isObject =>
         Some(Right(InstancePropertyValue.Object(v)))
       case v if v.isArray =>
