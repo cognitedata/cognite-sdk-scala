@@ -236,8 +236,9 @@ object InstanceDefinition {
       t: TypePropertyDefinition
   ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
-      case PropertyType.DirectNodeRelationProperty(_, _, Some(false)) | PropertyType.DirectNodeRelationProperty(_, _, None) =>
-      propValue
+      case PropertyType.DirectNodeRelationProperty(_, _, Some(false)) |
+          PropertyType.DirectNodeRelationProperty(_, _, None) =>
+        propValue
           .as[Option[DirectRelationReference]]
           .map(InstancePropertyValue.ViewDirectNodeRelation.apply)
       case t if t.isList => toInstancePropertyTypeOfList(propValue, t)
