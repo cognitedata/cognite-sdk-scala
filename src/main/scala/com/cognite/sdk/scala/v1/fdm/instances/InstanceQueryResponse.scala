@@ -9,7 +9,7 @@ final case class InstanceQueryResponse(
       None,
     nextCursor: Option[Map[String, String]] = None
 ) {
-  def getDataPart(): InstanceDataResponsePart = InstanceDataResponsePart(items, typing)
+  def getDataPart: InstanceDataResponsePart = InstanceDataResponsePart(items, typing)
 }
 
 object InstanceQueryResponse {

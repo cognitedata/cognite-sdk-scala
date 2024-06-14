@@ -65,7 +65,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     defaultValue = Some(PropertyDefaultValue.Object(Json.Null)),
     description = Some("Prop text"),
     name = Some("Prop text"),
-    `type` = PropertyType.DirectNodeRelationProperty(None, None)
+    `type` = PropertyType.DirectNodeRelationProperty(None, None, None)
   )
 
   private val containerPrimitive = ContainerCreateDefinition(
