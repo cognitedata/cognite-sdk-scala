@@ -112,7 +112,7 @@ object InstancePropertyValue {
         }
         numericInstantPropType.map(Right(_))
       case v if v.isBoolean => v.asBoolean.map(s => Right(InstancePropertyValue.Boolean(s)))
-      case v if v.isObject && isDirectRelation(v) =>
+      case v if isDirectRelation(v) =>
         Some(
           decodeDirectRelation(v, c)
             .map(d => InstancePropertyValue.ViewDirectNodeRelation(Some(d)))
@@ -184,7 +184,7 @@ object InstancePropertyValue {
                     InstancePropertyValue.Float64List(arr.flatMap(_.asNumber).map(_.toDouble))
                 }
                 Right[DecodingFailure, InstancePropertyValue](matchingPropType)
-              case element if element.isObject && isDirectRelation(element) =>
+              case element if isDirectRelation(element) =>
                 val eitherList = arr.toList.map(decodeDirectRelation(_, c))
                 val lefts = eitherList.filter(_.isLeft).flatMap(_.left.toOption)
                 val rights = eitherList.filter(_.isRight).flatMap(_.toOption)
@@ -200,6 +200,10 @@ object InstancePropertyValue {
                       )
                     )
                 }
+              case element if element.isObject =>
+                Right[DecodingFailure, InstancePropertyValue](
+                  InstancePropertyValue.ObjectList(arr)
+                )
               case _ =>
                 Right[DecodingFailure, InstancePropertyValue](
                   InstancePropertyValue.ObjectList(arr)
@@ -225,6 +229,7 @@ object InstancePropertyValue {
 
   private def isDirectRelation(v: Json) =
     v.asObject.exists(obj => obj.contains("externalId") && obj.contains("space") && obj.size === 2)
+
   private def decodeDirectRelation(
       v: Json,
       c: HCursor

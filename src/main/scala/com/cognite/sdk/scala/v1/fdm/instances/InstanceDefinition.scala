@@ -236,11 +236,6 @@ object InstanceDefinition {
       t: TypePropertyDefinition
   ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
-      case PropertyType.DirectNodeRelationProperty(_, _, Some(false)) |
-          PropertyType.DirectNodeRelationProperty(_, _, None) =>
-        propValue
-          .as[Option[DirectRelationReference]]
-          .map(InstancePropertyValue.ViewDirectNodeRelation.apply)
       case t if t.isList => toInstancePropertyTypeOfList(propValue, t)
       case t => toInstancePropertyTypeOfNonList(propValue, t)
     }
@@ -367,6 +362,11 @@ object InstanceDefinition {
         Decoder[String]
           .decodeJson(propValue)
           .map(InstancePropertyValue.SequenceReference.apply)
+      case PropertyType.DirectNodeRelationProperty(_, _, Some(false)) |
+          PropertyType.DirectNodeRelationProperty(_, _, None) =>
+        propValue
+          .as[Option[DirectRelationReference]]
+          .map(InstancePropertyValue.ViewDirectNodeRelation.apply)
       case _ =>
         Left[DecodingFailure, InstancePropertyValue](
           DecodingFailure(
