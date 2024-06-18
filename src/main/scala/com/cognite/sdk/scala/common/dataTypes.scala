@@ -11,7 +11,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import sttp.model.Uri
 
 import scala.annotation.nowarn
-// scalastyle:off number.of.types
+
 trait ResponseWithCursor {
   val nextCursor: Option[String]
 }
@@ -237,16 +237,16 @@ object Setter {
   @SuppressWarnings(Array("org.wartremover.warts.Null"))
   def fromOption[T](option: Option[T]): Option[Setter[T]] =
     option match {
-      case null => Some(SetNull()) // scalastyle:ignore null
+      case null => Some(SetNull())
       case None => None
-      case Some(null) => Some(SetNull()) // scalastyle:ignore null
+      case Some(null) => Some(SetNull())
       case Some(value) => Some(SetValue(value))
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Null"))
   def fromAny[T](optionValue: T): Option[Setter[T]] =
     optionValue match {
-      case null => Some(SetNull()) // scalastyle:ignore null
+      case null => Some(SetNull())
       case value => Some(SetValue(value))
     }
 
@@ -270,7 +270,7 @@ object NonNullableSetter {
       case None => None
       case Some(value) =>
         require(
-          value != null, // scalastyle:ignore null
+          value != null,
           "Invalid null value for non-nullable field update"
         )
         Some(SetValue(value))
