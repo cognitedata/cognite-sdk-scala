@@ -1,9 +1,7 @@
 package com.cognite.sdk.scala.sttp
 
-import cats.effect.IO
 import cats.effect.kernel.{GenConcurrent, MonadCancel}
 import cats.effect.std.Semaphore
-import cats.effect.unsafe.IORuntime
 import sttp.capabilities.Effect
 import sttp.client3.{Request, Response, SttpBackend}
 import sttp.monad.MonadError
@@ -30,15 +28,6 @@ class RateLimitingBackend[F[_], +P] private (
 }
 
 object RateLimitingBackend {
-  def apply[S](
-      delegate: SttpBackend[IO, S],
-      maxParallelRequests: Int
-  )(implicit ioRuntime: IORuntime): RateLimitingBackend[IO, S] =
-    new RateLimitingBackend[IO, S](
-      delegate,
-      Semaphore[IO](maxParallelRequests.toLong).unsafeRunSync()
-    )
-
   def apply[F[_], S](
       delegate: SttpBackend[F, S],
       maxParallelRequests: Int

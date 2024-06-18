@@ -205,6 +205,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
             createdTime,
             lastUpdatedTime,
             deletedTime = None,
+            version = None,
             properties = Some(
               Map(
                 "space-name-1" -> Map(
@@ -260,7 +261,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   None,
                   Some("property-identifier13"),
                   Some("property-identifier13"),
-                  PropertyType.DirectNodeRelationProperty(Some(ContainerReference("space-name-1", "extId1")), None)
+                  PropertyType.DirectNodeRelationProperty(Some(ContainerReference("space-name-1", "extId1")), None, None)
                 )
               ),
               "view-or-container-id-2" -> Map(

@@ -262,17 +262,6 @@ class GenericClient[F[_]: Trace](
   lazy val dataModelsV3 =
     new DataModelsV3[F](requestSession.withResourceType(DATAMODELS))
 
-  lazy val wdl = new WellDataLayer[F](
-    RequestSession(
-      applicationName,
-      uri"$uri/api/v1/projects/$projectName",
-      sttpBackend,
-      authProvider,
-      clientTag,
-      Some("20221206-beta")
-    ).withResourceType(WELLS)
-  )
-
   def project: F[Project] =
     requestSession
       .withResourceType(PROJECT)
@@ -306,7 +295,6 @@ object GenericClient {
   case object SESSIONS extends RESOURCE_TYPE
   case object TRANSFORMATIONS extends RESOURCE_TYPE
   case object DATAMODELS extends RESOURCE_TYPE
-  case object WELLS extends RESOURCE_TYPE
   case object PROJECT extends RESOURCE_TYPE
   case object GROUPS extends RESOURCE_TYPE
   case object SECURITY_CATEGORIES extends RESOURCE_TYPE

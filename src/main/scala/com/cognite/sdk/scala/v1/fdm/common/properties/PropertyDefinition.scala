@@ -2,6 +2,7 @@ package com.cognite.sdk.scala.v1.fdm.common.properties
 
 import cats.implicits.toFunctorOps
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
+import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.views.{ConnectionDirection, ViewReference}
 import io.circe._
@@ -43,13 +44,28 @@ object PropertyDefinition {
   ) extends ViewPropertyDefinition
       with CorePropertyDefinition
 
-  final case class ConnectionDefinition(
+  sealed trait ConnectionDefinition extends ViewPropertyDefinition
+
+  final case class ReverseDirectRelationConnection(
+      connectionType: ReverseDirectRelationConnectionType,
+      name: Option[String],
+      description: Option[String],
+      source: ViewReference,
+      through: ThroughReference
+  ) extends ConnectionDefinition
+
+  final case class ThroughReference(
+      identifier: String,
+      source: SourceReference
+  )
+  final case class EdgeConnection(
+      connectionType: Option[EdgeConnectionType],
       name: Option[String],
       description: Option[String],
       `type`: DirectRelationReference,
       source: ViewReference,
       direction: Option[ConnectionDirection]
-  ) extends ViewPropertyDefinition
+  ) extends ConnectionDefinition
 
   implicit val viewCorePropertyDefinitionEncoder: Encoder[ViewCorePropertyDefinition] =
     deriveEncoder[ViewCorePropertyDefinition]
@@ -57,8 +73,20 @@ object PropertyDefinition {
   implicit val containerPropertyDefinitionEncoder: Encoder[ContainerPropertyDefinition] =
     deriveEncoder[ContainerPropertyDefinition]
 
-  implicit val connectionDefinitionEncoder: Encoder[ConnectionDefinition] =
-    deriveEncoder[ConnectionDefinition]
+  implicit val edgeConnectionEncoder: Encoder[EdgeConnection] = deriveEncoder[EdgeConnection]
+
+  implicit val throughConnectionEncoder: Encoder[ThroughReference] =
+    deriveEncoder[ThroughReference]
+  implicit val throughConnectionDecoder: Decoder[ThroughReference] =
+    deriveDecoder[ThroughReference]
+
+  implicit val reverseDirectRelationConnection: Encoder[ReverseDirectRelationConnection] =
+    deriveEncoder[ReverseDirectRelationConnection]
+
+  implicit val connectionDefinitionEncoder: Encoder[ConnectionDefinition] = Encoder.instance {
+    case e: EdgeConnection => e.asJson
+    case r: ReverseDirectRelationConnection => r.asJson
+  }
 
   implicit val propertyDefinitionEncoder: Encoder[CorePropertyDefinition] = Encoder.instance {
     case c: ContainerPropertyDefinition => c.asJson
@@ -66,9 +94,13 @@ object PropertyDefinition {
   }
 
   implicit val viewPropertyDefinitionEncoder: Encoder[ViewPropertyDefinition] = Encoder.instance {
-    case c: ViewCorePropertyDefinition => c.asJson
-    case v: ConnectionDefinition => v.asJson
+    case v: ViewCorePropertyDefinition => v.asJson
+    case c: ConnectionDefinition => c.asJson
   }
+
+  implicit val derivedEdgeConnectionDecoder: Decoder[EdgeConnection] = deriveDecoder[EdgeConnection]
+  implicit val derivedReverseDirectRelationConnectionDecoder
+      : Decoder[ReverseDirectRelationConnection] = deriveDecoder[ReverseDirectRelationConnection]
 
   private val derivedViewPropertyDefinitionDecoder: Decoder[ViewCorePropertyDefinition] =
     deriveDecoder[ViewCorePropertyDefinition]
@@ -103,9 +135,6 @@ object PropertyDefinition {
           )
         }
   }
-
-  implicit val connectionDefinitionDecoder: Decoder[ConnectionDefinition] =
-    deriveDecoder[ConnectionDefinition]
 
   // scalastyle:off cyclomatic.complexity
   private def propertyTypeBasedPropertyDefaultValue(
@@ -146,6 +175,14 @@ object PropertyDefinition {
     defaultValue
   }
   // scalastyle:on cyclomatic.complexity
+
+  implicit val connectionDefinitionDecoder: Decoder[ConnectionDefinition] =
+    List[Decoder[ConnectionDefinition]](
+      Decoder[EdgeConnection].widen,
+      Decoder[ReverseDirectRelationConnection].widen
+    )
+      .reduceLeftOption(_ or _)
+      .getOrElse(Decoder[EdgeConnection].widen)
 
   implicit val propertyDefinitionDecoder: Decoder[CorePropertyDefinition] =
     List[Decoder[CorePropertyDefinition]](

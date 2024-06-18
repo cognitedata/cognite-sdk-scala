@@ -16,6 +16,7 @@ class SequencesResource[F[_]](val requestSession: RequestSession[F])
     with Create[Sequence, SequenceCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
+    with PartitionedFilter[Sequence, SequenceFilter, F]
     with Search[Sequence, SequenceQuery, F]
     with UpdateById[Sequence, SequenceUpdate, F]
     with UpdateByExternalId[Sequence, SequenceUpdate, F] {
@@ -78,6 +79,23 @@ class SequencesResource[F[_]](val requestSession: RequestSession[F])
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
 
+  override private[sdk] def filterWithCursor(
+      filter: SequenceFilter,
+      cursor: Option[String],
+      limit: Option[Int],
+      partition: Option[Partition],
+      aggregatedProperties: Option[Seq[String]]
+  ) =
+    Filter.filterWithCursor(
+      requestSession,
+      uri"$baseUrl/list",
+      filter,
+      cursor,
+      limit,
+      partition,
+      Constants.defaultBatchSize
+    )
+
   override def search(searchQuery: SequenceQuery): F[Seq[Sequence]] =
     Search.search(requestSession, baseUrl, searchQuery)
 }
@@ -108,4 +126,6 @@ object SequencesResource {
     deriveEncoder[SequenceSearch]
   implicit val sequenceQueryEncoder: Encoder[SequenceQuery] =
     deriveEncoder[SequenceQuery]
+  implicit val sequenceFilterRequestEncoder: Encoder[FilterRequest[SequenceFilter]] =
+    deriveEncoder[FilterRequest[SequenceFilter]]
 }

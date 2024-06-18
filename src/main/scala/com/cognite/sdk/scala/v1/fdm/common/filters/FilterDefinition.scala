@@ -166,10 +166,6 @@ object FilterDefinition {
         )
     }
 
-  implicit val andFilterDecoder: Decoder[FilterDefinition.And] = deriveDecoder
-  implicit val orFilterDecoder: Decoder[FilterDefinition.Or] = deriveDecoder
-  implicit val notFilterDecoder: Decoder[FilterDefinition.Not] = deriveDecoder
-
   implicit val equalsFilterDecoder: Decoder[FilterDefinition.Equals] = deriveDecoder
   implicit val inFilterDecoder: Decoder[FilterDefinition.In] = deriveDecoder
   implicit val rangeFilterDecoder: Decoder[FilterDefinition.Range] = deriveDecoder
@@ -221,4 +217,11 @@ object FilterDefinition {
     }
     result
   }
+  implicit val andFilterDecoder: Decoder[FilterDefinition.And] = Decoder[Seq[FilterDefinition]]
+    .map(FilterDefinition.And)
+  implicit val orFilterDecoder: Decoder[FilterDefinition.Or] = Decoder[Seq[FilterDefinition]]
+    .map(FilterDefinition.Or)
+  implicit val notFilterDecoder: Decoder[FilterDefinition.Not] = Decoder[FilterDefinition]
+    .map(FilterDefinition.Not)
+
 }
