@@ -23,7 +23,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   private val client = new GenericClient[IO](
     "scala-sdk-test",
     "extractor-bluefield-testing",
-    "https://bluefield.cognitedata.com",
+    baseUrl,
     authProvider,
     None,
     None,

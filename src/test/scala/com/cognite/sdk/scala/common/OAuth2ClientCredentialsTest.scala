@@ -23,9 +23,18 @@ import scala.concurrent.duration._
 @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.NonUnitStatements"))
 class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionValues with RetryWhile {
   import natchez.Trace.Implicits.noop
-  val tenant: String = sys.env("TEST_AAD_TENANT")
+
+  val tokenUri: String = sys.env.get("TEST_TOKEN_URL")
+    .orElse(
+      sys.env.get("TEST_AAD_TENANT")
+        .map(tenant => s"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token"))
+    .getOrElse("https://sometokenurl")
   val clientId: String = sys.env("TEST_CLIENT_ID")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
+  val baseUrl: String = GenericClient.defaultBaseUrl
+  val audience: Option[String] = Some(baseUrl)
+  val scopes: List[String] = List(baseUrl + "/.default")
+  val project: String = sys.env.getOrElse("TEST_PROJECT", "extractor-bluefield-testing")
 
   // Override sttpBackend because this doesn't work with the testing backend
   implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
@@ -33,11 +42,12 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
   it should "authenticate with Azure AD using OAuth2 in bluefield" in {
 
     val credentials = OAuth2.ClientCredentials(
-      tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
+      tokenUri = uri"${tokenUri}",
       clientId = clientId,
       clientSecret = clientSecret,
-      scopes = List("https://bluefield.cognitedata.com/.default"),
-      cdfProjectName = "extractor-bluefield-testing"
+      scopes = scopes,
+      audience = audience,
+      cdfProjectName = project
     )
 
     val authProvider =
@@ -53,40 +63,6 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       cdfVersion = None
     )
 
-//    Reenable this when login.status for tokens is fixed
-//    val loginStatus = client.login.status().unsafeRunTimed(10.seconds).get
-//    assert(loginStatus.loggedIn)
-
-    noException shouldBe thrownBy {
-      client.rawDatabases.list().compile.toVector.unsafeRunTimed(10.seconds).value
-    }
-  }
-
-  // Aize is moving to Azure so we don't have to test their Idp
-  // TODO Reactivated the test if we find new credential or remove the test completely
-  ignore should "authenticate with Aize using OAuth2" in {
-
-    val credentials = OAuth2.ClientCredentials(
-      tokenUri = uri"https://login.aize.io/oauth/token",
-      clientId = sys.env("AIZE_CLIENT_ID"),
-      clientSecret = sys.env("AIZE_CLIENT_SECRET"),
-      cdfProjectName = "aize",
-      audience = Some("https://twindata.io/cdf/T101014843")
-    )
-
-    val authProvider =
-      OAuth2.ClientCredentialsProvider[IO](credentials).unsafeRunTimed(1.second).value
-
-    val client = new GenericClient(
-      applicationName = "CogniteScalaSDK-OAuth-Test",
-      projectName = "aize",
-      baseUrl = "https://api.cognitedata.com",
-      authProvider = authProvider,
-      apiVersion = None,
-      clientTag = None,
-      cdfVersion = None
-    )
-
     noException shouldBe thrownBy {
       client.rawDatabases.list().compile.toVector.unsafeRunTimed(10.seconds).value
     }
@@ -94,11 +70,12 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
 
   it should "throw a valid error when authenticating with bad credentials" in {
     val credentials = OAuth2.ClientCredentials(
-      tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
+      tokenUri = uri"${tokenUri}",
       clientId = "clientId",
       clientSecret = "clientSecret",
-      scopes = List("https://bluefield.cognitedata.com/.default"),
-      cdfProjectName = "extractor-bluefield-testing"
+      scopes = scopes,
+      audience = audience,
+      cdfProjectName = project
     )
 
     an[SdkException] shouldBe thrownBy {

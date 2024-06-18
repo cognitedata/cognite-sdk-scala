@@ -4,8 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
-import com.cognite.sdk.scala.common.WithId
+import com.cognite.sdk.scala.common.{ToCreate, WithId}
 import io.circe.Json
 
 final case class ProjectAuthentication(
@@ -32,6 +31,20 @@ final case class Group(
     isDeleted: Boolean,
     deletedTime: Option[Instant]
 ) extends WithId[Long]
+    with ToCreate[GroupCreate] {
+  override def toCreate: GroupCreate =
+    GroupCreate(
+      name = name,
+      sourceId = sourceId,
+      capabilities = capabilities
+    )
+}
+
+final case class GroupCreate(
+    name: String,
+    sourceId: Option[String],
+    capabilities: Seq[Map[String, Capability]]
+) {}
 
 final case class SecurityCategory(
     name: String,

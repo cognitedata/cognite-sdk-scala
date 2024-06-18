@@ -6,6 +6,7 @@ import com.cognite.sdk.scala.common.CdpApiException
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.HasData
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, DirectRelationReference, Usage}
@@ -141,6 +142,35 @@ class InstancesTest extends CommonDataModelTestHelper {
 
     val readNodesMapOfNode1 = (IO.sleep(10.seconds) *> fetchNodeInstance(nodeView1.toSourceReference, node1WriteData.externalId)).unsafeRunSync()
     val readNodesMapOfNode2 = fetchNodeInstance(nodeView2.toSourceReference, node2WriteData.externalId).unsafeRunSync()
+    val syncNodesMapOfNodeView1: InstanceSyncResponse = syncNodeInstances(nodeView1.toSourceReference)
+      .unsafeRunSync()
+    val syncNodesMapOfNodeView2 = syncNodeInstances(nodeView2.toSourceReference).unsafeRunSync()
+
+    syncNodesMapOfNodeView1.nextCursor match { case map =>
+      map.size shouldBe 1
+      map.keys.exists("sync" === _) shouldBe true
+    }
+
+    syncNodesMapOfNodeView2.nextCursor match { case map =>
+      map.size shouldBe 1
+      map.keys.exists("sync" === _) shouldBe true
+    }
+
+    val queryNodesMapOfNodeView1: InstanceQueryResponse = queryNodeInstances(nodeView1.toSourceReference)
+      .unsafeRunSync()
+    val queryNodesMapOfNodeView2: InstanceQueryResponse = queryNodeInstances(nodeView2.toSourceReference)
+      .unsafeRunSync()
+
+    queryNodesMapOfNodeView1.nextCursor.map { map =>
+      map.size shouldBe 1
+      map.keys.exists("query" === _) shouldBe true
+    }
+
+    queryNodesMapOfNodeView2.nextCursor.map { map =>
+      map.size shouldBe 1
+      map.keys.exists("query" === _) shouldBe true
+    }
+
     val readEdgesMapOfEdge = fetchEdgeInstance(edgeView.toSourceReference, edgeWriteData.externalId).unsafeRunSync()
     val readEdgesMapOfAll = fetchEdgeInstance(allView.toSourceReference, nodeOrEdgeWriteData.head.externalId).unsafeRunSync()
     val readNodesMapOfAll = fetchNodeInstance(allView.toSourceReference, nodeOrEdgeWriteData(1).externalId).unsafeRunSync()
@@ -216,33 +246,33 @@ class InstancesTest extends CommonDataModelTestHelper {
   }).getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).flatMap {case (k, v) => v.map(k -> _)}.toMap
 
   private def createContainers(items: Seq[ContainerCreateDefinition]) = {
-    blueFieldClient.containers.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+    testClient.containers.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
   }
 
   private def deleteContainers(items: Seq[ContainerId]) = {
-    blueFieldClient.containers.delete(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    testClient.containers.delete(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
   }
 
   private def createViews(items: Seq[ViewCreateDefinition]) = {
-    blueFieldClient.views.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+    testClient.views.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
   }
 
   private def createInstance(writeData: Seq[NodeOrEdgeCreate]): IO[Seq[SlimNodeOrEdge]] = {
-    blueFieldClient.instances.createItems(
+    testClient.instances.createItems(
       InstanceCreate(items = writeData)
     ).flatTap(_ => IO.sleep(2.seconds))
   }
 
   private def deleteInstance(refs: Seq[InstanceDeletionRequest]): Seq[InstanceDeletionRequest] = {
-    blueFieldClient.instances.delete(instanceRefs = refs).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    testClient.instances.delete(instanceRefs = refs).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
   }
 
   private def deleteViews(items: Seq[DataModelReference]) = {
-    blueFieldClient.views.deleteItems(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    testClient.views.deleteItems(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
   }
 
   private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) = {
-    blueFieldClient.instances.retrieveByExternalIds(items = Seq(
+    testClient.instances.retrieveByExternalIds(items = Seq(
       InstanceRetrieve(InstanceType.Node, instanceExternalId, viewRef.space)),
       includeTyping = true,
       sources = Some(Seq(InstanceSource(viewRef)))
@@ -255,8 +285,34 @@ class InstancesTest extends CommonDataModelTestHelper {
     }
   }
 
+  private def syncNodeInstances(viewRef: ViewReference) = {
+    val hasData = HasData(Seq(viewRef))
+
+    testClient.instances.syncRequest(
+      InstanceSyncRequest(
+        `with` = Map("sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
+        cursors = None,
+        select = Map("sync" -> SelectExpression(sources =
+          List(SourceSelector(source = viewRef, properties = List("*")))))
+      )
+    )
+  }
+
+  private def queryNodeInstances(viewRef: ViewReference) = {
+    val hasData = HasData(Seq(viewRef))
+
+    testClient.instances.queryRequest(
+      InstanceQueryRequest(
+        `with` = Map("query" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
+        cursors = None,
+        select = Map("query" -> SelectExpression(sources =
+          List(SourceSelector(source = viewRef, properties = List("*")))))
+      )
+    )
+  }
+
   private def fetchEdgeInstance(viewRef: ViewReference, instanceExternalId: String) = {
-    blueFieldClient.instances.retrieveByExternalIds(items = Seq(
+    testClient.instances.retrieveByExternalIds(items = Seq(
       InstanceRetrieve(InstanceType.Edge, instanceExternalId, viewRef.space)),
       includeTyping = true,
       sources = Some(Seq(InstanceSource(viewRef)))

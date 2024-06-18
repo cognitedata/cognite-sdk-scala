@@ -43,7 +43,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
             req.uri.path.endsWith(
               Seq("api", "v1", "projects", session.cdfProjectName, "sessions", "token")
             ) &&
-            req.headers.contains(Header("Authorization", "Bearer tokenFromVault")) &&
+            req.headers.contains(Header("Authorization", "Bearer kubernetesServiceToken")) &&
             req.body === StringBody(
               """{"sessionId":123,"sessionKey":"sessionKey-value"}""",
               "utf-8",
@@ -62,7 +62,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
         session,
         refreshSecondsBeforeExpiration = 1,
         Some(IO("kubernetesServiceToken")),
-        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 5, "irrelevant")))
+        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 50, "irrelevant")))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- numTokenRequests.get.map(_ shouldBe 0)
       _ <- IO.sleep(3.seconds)
