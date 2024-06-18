@@ -21,10 +21,11 @@ ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0
 
 lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
 
-credentials += Credentials("Sonatype Nexus Repository Manager",
+credentials += Credentials(
+  "Sonatype Nexus Repository Manager",
   "oss.sonatype.org",
   System.getenv("SONATYPE_USERNAME"),
-  System.getenv("SONATYPE_PASSWORD"),
+  System.getenv("SONATYPE_PASSWORD")
 )
 
 lazy val commonSettings = Seq(
@@ -32,11 +33,13 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.21." + patchVersion,
+  version := "2.23." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
-  dependencyLockFile := { baseDirectory.value / s"build.scala-${CrossVersion.partialVersion(scalaVersion.value) match { case Some((2, n)) => s"2.$n" }}.sbt.lock" },
+  dependencyLockFile := baseDirectory.value /
+    s"build.scala-${CrossVersion
+        .partialVersion(scalaVersion.value) match { case Some((2, n)) => s"2.$n" }}.sbt.lock",
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,

@@ -4,13 +4,22 @@
 package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.common.RetryWhile
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{Int32, TimeSeriesReference}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{
+  ContainerPropertyDefinition,
+  ReverseDirectRelationConnection,
+  ThroughReference,
+  ViewCorePropertyDefinition
+}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
+import com.cognite.sdk.scala.v1.fdm.common.properties.ReverseDirectRelationConnectionType.MultiReverseDirectRelation
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers._
+import com.cognite.sdk.scala.v1.fdm.views.ViewPropertyCreateDefinition.{CreateConnectionDefinition, CreateViewProperty}
 import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, SpaceCreateDefinition}
+import io.circe.Json
 import org.scalatest.BeforeAndAfterAll
 
 @SuppressWarnings(
@@ -19,7 +28,8 @@ import org.scalatest.BeforeAndAfterAll
     "org.wartremover.warts.NonUnitStatements",
     "org.wartremover.warts.JavaSerializable",
     "org.wartremover.warts.Serializable",
-    "org.wartremover.warts.Product"
+    "org.wartremover.warts.Product",
+    "org.wartremover.warts.AsInstanceOf"
   )
 )
 class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAndAfterAll {
@@ -51,6 +61,13 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     `type` = PropertyType.TimeSeriesReference()
   )
 
+  private val containerPropertyDirectRelation = ContainerPropertyDefinition(
+    defaultValue = Some(PropertyDefaultValue.Object(Json.Null)),
+    description = Some("Prop text"),
+    name = Some("Prop text"),
+    `type` = PropertyType.DirectNodeRelationProperty(None, None, None)
+  )
+
   private val containerPrimitive = ContainerCreateDefinition(
     space = spaceName,
     externalId = containerPrimitiveExternalId,
@@ -59,7 +76,8 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     usedFor = Some(Usage.All),
     properties = Map("prop_int32" -> containerPropertyInt,
       "prop_text" -> containerPropertyText,
-      "prop_timeseries" -> containerTimeSeriesProperty),
+      "prop_timeseries" -> containerTimeSeriesProperty,
+      "connection" -> containerPropertyDirectRelation),
     constraints = None,
     indexes = None
   )
@@ -102,17 +120,17 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   }
 
   val viewVersion1 = "v1"
-  val viewExternalId = "scala_sdk_view_1"
-  val view2ExternalId = "scala_sdk_view_2"
-  val view3ExternalId = "scala_sdk_view_3"
 
-  ignore should "create a view" in {
+
+  it should "create a view" in {
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val properties = Map(
       "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
       "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text"),
       "prop_timeseries" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_timeseries")
     )
+    val viewExternalId = "scala_sdk_view_1"
+
     val viewToCreate = ViewCreateDefinition(
       space = spaceName,
       externalId = viewExternalId,
@@ -139,39 +157,42 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         "prop_int32" -> ViewCorePropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
-          defaultValue = None,
+          defaultValue = Some(Int32(1)),
           `type` = PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32),
           container = Some(containerReference),
-          containerPropertyIdentifier = None
+          containerPropertyIdentifier = Some("prop_int32")
         ),
         "prop_text" -> ViewCorePropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
-          defaultValue = None,
+          defaultValue = Some(PropertyDefaultValue.String("toto")),
           `type` = PropertyType.TextProperty(),
           container = Some(containerReference),
-          containerPropertyIdentifier = None
+          containerPropertyIdentifier = Some("prop_text")
         ),
         "prop_timeseries" -> ViewCorePropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
-          defaultValue = Some(PropertyDefaultValue.String("flux-capacitor-levels")),
-          `type` = PropertyType.TimeSeriesReference(),
+          defaultValue = Some(TimeSeriesReference("flux-capacitor-levels")),
+          `type` = PropertyType.TimeSeriesReference(Some(false)),
           container = Some(containerReference),
-          containerPropertyIdentifier = None
+          containerPropertyIdentifier = Some("prop_timeseries")
         )
       )
     )
 
   }
 
-  ignore should "create a view that implement another view" in {
+  it should "create a view that implement another view" in {
+    val implementedViewExternalId = "scala_sdk_view_1"
+    val implementingViewExternalId = "scala_sdk_view_2"
+
     val containerPrimReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val containerListReference = ContainerReference(spaceName, containerListExternalId)
 
     // Create a second view that reference to scala_sdk_test_view_1
     val implements =
-      Seq(ViewReference(space = spaceName, externalId = viewExternalId, version = "v1"))
+      Seq(ViewReference(space = spaceName, externalId = implementedViewExternalId, version = "v1"))
     val properties2 = Map(
       "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(
         container = containerPrimReference,
@@ -182,10 +203,9 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         containerPropertyIdentifier = "prop_list_float64"
       )
     )
-
     val view2ToCreate = ViewCreateDefinition(
       space = spaceName,
-      externalId = view2ExternalId,
+      externalId = implementingViewExternalId,
       name = Some("second view"),
       description = Some("some desc"),
       implements = Some(implements),
@@ -196,35 +216,102 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     testClient.views
       .createItems(Seq(view2ToCreate))
       .unsafeRunSync()
+
+    testClient.views
+      .deleteItems(Seq(DataModelReference(spaceName, implementingViewExternalId, Some(viewVersion1))))
+      .unsafeRunSync()
   }
 
-  ignore should "retrieve views by data model reference" in {
-    val view1 = testClient.views
-      .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some("v1"))))
-      .unsafeRunSync()
-      .headOption
-    view1.map(_.space) shouldBe Some("test1")
-    view1.map(_.externalId) shouldBe Some(viewExternalId)
-    view1.flatMap(_.name) shouldBe Some("first view")
-    view1.flatMap(_.description) shouldBe Some("desc")
-    view1.map(_.version) shouldBe Some(viewVersion1)
+  it should "create and retrieve a view that contains a RDR" in {
 
-    val view2 = testClient.views
-      .retrieveItems(Seq(DataModelReference(spaceName, view2ExternalId, Some("v1"))))
+    val viewWithDRExternalId = "scala_sdk_view_3"
+    val viewWithRDRExternalId = "scala_sdk_view_4"
+    val containerPrimReference = ContainerReference(spaceName, containerPrimitiveExternalId)
+
+    //connection property points to a container property that is a direct connection
+    //reverse direct connections can only point to direct connections
+    val viewWithDRProperties = Map(
+      "connection" -> CreateViewProperty(
+        None,
+        None,
+        containerPrimReference,
+        "connection"
+      )
+    )
+    val viewPointedTo = ViewCreateDefinition(
+      space = spaceName,
+      externalId = viewWithDRExternalId,
+      name = Some("first view"),
+      description = Some("desc"),
+      filter = None,
+      implements = None,
+      version = viewVersion1,
+      properties = viewWithDRProperties
+    )
+
+    val reverseDirectRelationProperty = CreateConnectionDefinition(
+      ReverseDirectRelationConnection(
+        MultiReverseDirectRelation,
+        Some("name"),
+        Some("desc"),
+        ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
+        ThroughReference("connection", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
+      )
+    )
+
+    val viewWithRDRProperties = Map(
+      f"has_$viewWithDRExternalId" -> reverseDirectRelationProperty
+    )
+
+    val viewWithReverseDirectRelationship = ViewCreateDefinition(
+      space = spaceName,
+      externalId = viewWithRDRExternalId,
+      name = Some("first view"),
+      description = Some("desc"),
+      filter = None,
+      implements = None,
+      version = viewVersion1,
+      properties = viewWithRDRProperties
+    )
+
+    testClient.views
+      .createItems(Seq(viewPointedTo, viewWithReverseDirectRelationship))
       .unsafeRunSync()
-      .headOption
-    view2.map(_.space) shouldBe Some(spaceName)
-    view2.map(_.externalId) shouldBe Some(view2ExternalId)
-    view2.flatMap(_.name) shouldBe Some("second view")
-    view2.flatMap(_.description) shouldBe Some("desc")
-    view2.map(_.version) shouldBe Some(viewVersion1)
+
+    val retrievedViews = testClient.views
+      .retrieveItems(Seq(DataModelReference(spaceName, viewWithRDRExternalId, Some(viewVersion1))))
+      .unsafeRunSync()
+    retrievedViews.headOption.map(_.externalId) shouldBe Some(viewWithRDRExternalId)
+    retrievedViews.headOption.flatMap(_.properties
+      .get(f"has_$viewWithDRExternalId")
+      .map(_.asInstanceOf[ReverseDirectRelationConnection].connectionType)) shouldBe Some(MultiReverseDirectRelation)
   }
 
-  ignore should "delete views" in {
+  it should "delete views" in {
+    val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
+    val viewExternalId = "scala_sdk_view_5"
+    val properties = Map(
+      "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
+      "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text"),
+      "prop_timeseries" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_timeseries")
+    )
+    val viewToCreate = ViewCreateDefinition(
+      space = spaceName,
+      externalId = viewExternalId,
+      name = Some("first view"),
+      description = Some("desc"),
+      filter = None,
+      implements = None,
+      version = viewVersion1,
+      properties = properties
+    )
+    testClient.views
+      .createItems(Seq(viewToCreate))
+      .unsafeRunSync().headOption
+
     testClient.views
       .deleteItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
-
     val retrievedAfterDelete = testClient.views
       .retrieveItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))
       .unsafeRunSync()
