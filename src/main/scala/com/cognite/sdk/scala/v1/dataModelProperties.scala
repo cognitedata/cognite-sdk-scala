@@ -7,8 +7,6 @@ import java.time.{LocalDate, ZonedDateTime}
 import io.circe.{ACursor, Decoder, Encoder, Json}
 import io.circe.syntax._
 
-// scalastyle:off number.of.types
-
 sealed abstract case class DataModelProperty[V](value: V)(implicit encoder: Encoder[V]) {
   import io.circe.parser._
   def encode: Json =
@@ -56,7 +54,6 @@ sealed abstract class ArrayPropertyType[V, P <: PrimitivePropertyType[V]](privat
 }
 
 // There are a lot of property types, but it can't be helped.
-// scalastyle:off number.of.types
 object PropertyType {
 
   val values: Seq[PropertyType[_]] = Seq[PropertyType[_]](
@@ -149,4 +146,3 @@ object PropertyType {
         extends ArrayPropertyType[String, PropertyType.Geography.type](PropertyType.Geography)
   }
 }
-// scalastyle:on number.of.types

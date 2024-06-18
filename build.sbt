@@ -1,8 +1,8 @@
-import wartremover.Wart
 import sbt.{Test, project}
+import wartremover.Wart
 
 //val scala3 = "3.2.0"
-val scala213 = "2.13.8"
+val scala213 = "2.13.11"
 val scala212 = "2.12.17"
 val supportedScalaVersions = List(scala212, scala213)
 
@@ -96,7 +96,9 @@ lazy val commonSettings = Seq(
           Wart.Throw,
           Wart.ImplicitParameter,
           Wart.ToString,
-          Wart.Overloading
+          Wart.Overloading,
+          Wart.SeqApply,
+          Wart.SeqUpdated
         )
     })
 )
@@ -193,16 +195,6 @@ scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
     List.empty[String]
 })
 
-scalastyleFailOnWarning := true
-
-lazy val mainScalastyle = taskKey[Unit]("mainScalastyle")
-lazy val testScalastyle = taskKey[Unit]("testScalastyle")
-
-mainScalastyle := (Compile / scalastyle).toTask("").value
-testScalastyle := (Test / scalastyle).toTask("").value
-
-Test / test := (Test / test).dependsOn(testScalastyle).value
-Test / test := (Test / test).dependsOn(mainScalastyle).value
 Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oD")
 
 // Scala 2.11 doesn't support mixed projects as ours, so just disable docs for that release.

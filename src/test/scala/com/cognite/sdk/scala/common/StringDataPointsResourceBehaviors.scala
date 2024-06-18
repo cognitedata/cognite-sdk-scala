@@ -25,7 +25,6 @@ trait StringDataPointsResourceBehaviors extends Matchers with OptionValues with 
 
   def withStringTimeSeries(testCode: TimeSeries => Any): Unit
 
-  // scalastyle:off
   def stringDataPointsResource(dataPoints: DataPointsResource[IO])(implicit ioRuntime: IORuntime): Unit = {
     it should "be possible to insert and delete string data points" in withStringTimeSeries {
       stringTimeSeries =>

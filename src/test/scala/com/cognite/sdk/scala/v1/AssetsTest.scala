@@ -188,7 +188,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     Asset(name = "scala-sdk-update-2", description = Some("description-2"), dataSetId = Some(testDataSet.id))
   )
   private val assetUpdates = Seq(
-    Asset(name = "scala-sdk-update-1-1", description = null, dataSetId = Some(testDataSet.id)), // scalastyle:ignore null
+    Asset(name = "scala-sdk-update-1-1", description = null, dataSetId = Some(testDataSet.id)),
     Asset(name = "scala-sdk-update-2-1")
   )
   it should behave like updatable(

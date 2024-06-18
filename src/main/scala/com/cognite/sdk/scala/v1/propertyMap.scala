@@ -92,7 +92,6 @@ object PropertyMap {
       case _ => dmp.`type`.decodeProperty(c.downField(prop))
     }
 
-  // scalastyle:off cyclomatic.complexity
   private def asStringValue(json: Json): Option[String] =
     json match {
       case js if js.isString => js.asString
@@ -102,5 +101,4 @@ object PropertyMap {
       case js if js.isArray => js.asArray.map(_.mkString(","))
       case js => Some(js.toString())
     }
-  // scalastyle:on cyclomatic.complexity
 }

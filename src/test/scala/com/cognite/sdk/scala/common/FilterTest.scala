@@ -36,7 +36,7 @@ class FilterTest extends SdkTestSpec with OptionValues {
 
   @SuppressWarnings(Array("org.wartremover.warts.Null", "org.wartremover.warts.Var", "org.wartremover.warts.AsInstanceOf"))
   def filterWithCursor(batchSize: Int, limit: Option[Int])(test: Int => Any): Any = {
-    var hijackedRequest: FilterRequest[DummyFilter] = null // scalastyle:ignore
+    var hijackedRequest: FilterRequest[DummyFilter] = null
     val requestHijacker = SttpBackendStub.synchronous.whenAnyRequest.thenRespondF(req => {
       hijackedRequest = decode[FilterRequest[DummyFilter]](req.body.asInstanceOf[StringBody].s) match {
         case Right(x) => x
