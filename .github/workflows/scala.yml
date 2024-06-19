@@ -185,6 +185,8 @@ jobs:
           gpg --import public.key
           echo "$GPG_PRIVATE_KEY" > private.key
           gpg --verbose --batch --import-options import-show --import private.key
+          
+          gpg --list-keys
 
           mkdir -p ~/.sbt/gpg
           echo "$GPG_PRIVATE_KEY_PASSPHRASE" | gpg --verbose --batch -a --export-secret-keys --pinentry-mode loopback --passphrase-fd 0 > ~/.sbt/gpg/secring.asc
