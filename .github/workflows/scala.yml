@@ -192,7 +192,7 @@ jobs:
       - name: Publish package
         env:
           GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
-          SONATYPE_TOKEN: ${{ secrets.SONATYPE_OSSRH_USER }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_OSSRH_USER }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
         run: |
           sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned +sonatypeReleaseAll
