@@ -186,23 +186,13 @@ jobs:
           echo "$GPG_PRIVATE_KEY" > private.key
           gpg --verbose --batch --import-options import-show --import private.key
           
-          gpg --list-keys
-
           mkdir -p ~/.sbt/gpg
           echo "$GPG_PRIVATE_KEY_PASSPHRASE" | gpg --verbose --batch -a --export-secret-keys --pinentry-mode loopback --passphrase-fd 0 > ~/.sbt/gpg/secring.asc
-          
-      - name: Test sonatype
-        env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_OSSRH_USER }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
-        run: |
-          sbt sonatypeOpen
-          sbt sonatypeDrop
 
       - name: Publish package
         env:
           GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_OSSRH_USER }}
+          SONATYPE_TOKEN: ${{ secrets.SONATYPE_OSSRH_USER }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
         run: |
           sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned +sonatypeReleaseAll
