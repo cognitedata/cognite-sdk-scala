@@ -94,7 +94,6 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
     }
   }
 
-  // scalastyle:off
   def readableWithRetrieve[R <: WithId[Long], W](
       readable: Readable[R, IO] with RetrieveByIds[R, IO],
       idsThatDoNotExist: Seq[Long],

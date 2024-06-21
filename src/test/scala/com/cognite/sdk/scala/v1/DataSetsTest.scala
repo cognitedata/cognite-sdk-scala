@@ -58,7 +58,7 @@ class DataSetsTest extends SdkTestSpec with ReadBehaviours with WritableBehavior
   )
 
   private val datasetUpdates = Seq(
-    DataSet(description = Some("desc-1-1"), name = null), // scalastyle:ignore null
+    DataSet(description = Some("desc-1-1"), name = null),
     DataSet(
       description = Some("desc-2-1"),
       metadata = Some(Map("a" -> "b"))
