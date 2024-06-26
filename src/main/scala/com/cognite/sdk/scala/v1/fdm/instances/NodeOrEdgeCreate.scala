@@ -19,7 +19,8 @@ object NodeOrEdgeCreate {
   final case class NodeWrite(
       space: String,
       externalId: String,
-      sources: Option[Seq[EdgeOrNodeData]]
+      sources: Option[Seq[EdgeOrNodeData]],
+      `type`: Option[DirectRelationReference],
   ) extends NodeOrEdgeCreate {
     val instanceType: InstanceType = Node
   }

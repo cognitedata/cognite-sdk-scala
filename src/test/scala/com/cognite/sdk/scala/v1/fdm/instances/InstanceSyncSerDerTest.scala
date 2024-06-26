@@ -243,7 +243,8 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
                 )
               )
             )
-          )
+          ),
+          `type`=None,
         )
       )
 
@@ -705,7 +706,8 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
                 )
               )
             )
-          )
+          ),
+          `type`=None,
         )
       )
 

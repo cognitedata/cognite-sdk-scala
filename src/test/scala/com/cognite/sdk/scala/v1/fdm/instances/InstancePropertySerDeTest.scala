@@ -232,7 +232,8 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   )
                 )
               )
-            )
+            ),
+            None,
           )
         ),
         typing = Some(

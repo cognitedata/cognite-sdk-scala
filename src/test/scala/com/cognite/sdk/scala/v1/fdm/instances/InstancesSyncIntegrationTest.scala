@@ -100,7 +100,9 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
       NodeWrite(
         space = Utils.SpaceExternalId,
         externalId = stringVal,
-        sources = Some(Seq(EdgeOrNodeData(source = viewReference, properties = Some(Map("stringProp1" -> Some(InstancePropertyValue.String(stringVal))))))))
+        sources = Some(Seq(EdgeOrNodeData(source = viewReference, properties = Some(Map("stringProp1" -> Some(InstancePropertyValue.String(stringVal))))))),
+        `type`=None,
+      )
     }
 
     testClient.instances.createItems(InstanceCreate(items = instances)).unsafeRunSync()

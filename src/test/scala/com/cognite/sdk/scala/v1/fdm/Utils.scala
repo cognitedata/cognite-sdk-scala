@@ -237,7 +237,8 @@ object Utils {
     NodeWrite(
       space,
       nodeExternalId,
-      Some(Seq(withAllProps))
+      Some(Seq(withAllProps)),
+      None,
     )
   }
 
