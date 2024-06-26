@@ -100,13 +100,15 @@ class InstancesTest extends CommonDataModelTestHelper {
       space,
       s"nodeExtId$nodeViewExternalId1",
       nodeView1.toSourceReference,
-      nodeView1.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p}
+      nodeView1.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
+      Some(DirectRelationReference(nodeView1.space, nodeView1.externalId))
     )
     val node2WriteData = createNodeWriteData(
       space,
       s"nodeExtId$nodeViewExternalId2",
       nodeView2.toSourceReference,
-      nodeView2.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p}
+      nodeView2.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
+      None
     )
     val startNode = DirectRelationReference(space, externalId = node1WriteData.externalId)
     val endNode = DirectRelationReference(space, externalId = node2WriteData.externalId)
@@ -131,7 +133,8 @@ class InstancesTest extends CommonDataModelTestHelper {
         space,
         s"nodesOrEdgesExtId${allViewExternalId}Nodes",
         allView.toSourceReference,
-        allView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p}
+        allView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
+        Some(DirectRelationReference(nodeView1.space, nodeView1.externalId))
       )
     )
 
@@ -373,7 +376,6 @@ class InstancesTest extends CommonDataModelTestHelper {
             case (actVal, expVal) => fail(s"Actual: ${actVal.toString}, Expected: ${expVal.toString}")
           }
         }
-
         keyEquals && valueEquals
     }
   }
@@ -411,7 +413,9 @@ class InstancesTest extends CommonDataModelTestHelper {
         space,
         s"${containerForDirectNodeRelationExtId}Instance",
         ViewReference(space = space, externalId = viewForDirectNodeRelationExtId, version = viewVersion),
-        viewsMap(viewForDirectNodeRelationExtId).properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p })
+        viewsMap(viewForDirectNodeRelationExtId).properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p },
+        None
+      )
       createInstance(Seq(instanceData))
     }) *> IO.sleep(2.seconds)
   }

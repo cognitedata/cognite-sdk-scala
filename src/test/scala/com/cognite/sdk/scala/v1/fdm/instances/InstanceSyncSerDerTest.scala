@@ -156,6 +156,10 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
           |                "createdTime": 100,
           |                "lastUpdatedTime": 1000,
           |                "version": 10,
+          |                "type": {
+          |                    "space": "space-name-1",
+          |                    "externalId": "extId1"
+          |                },
           |                "properties": {
           |                    "space-name-1": {
           |                        "view-or-container-id-1": {
@@ -243,7 +247,8 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
                 )
               )
             )
-          )
+          ),
+          `type` = Some(DirectRelationReference("space-name-1", "extId1"))
         )
       )
 
@@ -705,7 +710,8 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
                 )
               )
             )
-          )
+          ),
+          `type` = None
         )
       )
 
