@@ -30,7 +30,7 @@ object InstanceDefinition {
       deletedTime: Option[Long],
       version: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]],
-      `type`: Option[DirectRelationReference],
+      `type`: Option[DirectRelationReference]
   ) extends InstanceDefinition {
     override val instanceType: InstanceType = InstanceType.Node
   }

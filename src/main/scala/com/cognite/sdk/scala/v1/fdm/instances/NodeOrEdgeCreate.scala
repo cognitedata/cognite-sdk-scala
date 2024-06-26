@@ -20,7 +20,7 @@ object NodeOrEdgeCreate {
       space: String,
       externalId: String,
       sources: Option[Seq[EdgeOrNodeData]],
-      `type`: Option[DirectRelationReference],
+      `type`: Option[DirectRelationReference]
   ) extends NodeOrEdgeCreate {
     val instanceType: InstanceType = Node
   }
