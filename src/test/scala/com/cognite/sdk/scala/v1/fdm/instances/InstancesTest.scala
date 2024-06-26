@@ -118,7 +118,7 @@ class InstancesTest extends CommonDataModelTestHelper {
       edgeView.toSourceReference,
       edgeView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
       startNode = startNode,
-      endNode = endNode,
+      endNode = endNode
     )
     val nodeOrEdgeWriteData = Seq(
       createEdgeWriteData(
