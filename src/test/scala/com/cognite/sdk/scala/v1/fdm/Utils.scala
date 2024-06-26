@@ -154,7 +154,8 @@ object Utils {
 
   def createAllPossibleViewPropCombinations: Map[String, ViewCorePropertyDefinition] =
     createAllPossibleContainerPropCombinations.map {
-      case (key, prop) => key -> toViewPropertyDefinition(prop, None, None)
+      case (key, prop) =>
+        key -> toViewPropertyDefinition(prop, None, None)
     }
 
   def createTestContainer(
@@ -238,7 +239,7 @@ object Utils {
       space,
       nodeExternalId,
       Some(Seq(withAllProps)),
-      None,
+      None
     )
   }
 
@@ -493,10 +494,12 @@ object Utils {
           Some(
             PropertyDefaultValue.Object(
               Json.fromJsonObject(
-                JsonObject.fromMap(Map(
-                  "a" -> Json.fromString("a"),
-                  "b" -> Json.fromInt(1)
-                ))
+                JsonObject.fromMap(
+                  Map(
+                    "a" -> Json.fromString("a"),
+                    "b" -> Json.fromInt(1)
+                  )
+                )
               )
             )
           )

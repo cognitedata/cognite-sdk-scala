@@ -373,7 +373,6 @@ class InstancesTest extends CommonDataModelTestHelper {
             case (actVal, expVal) => fail(s"Actual: ${actVal.toString}, Expected: ${expVal.toString}")
           }
         }
-
         keyEquals && valueEquals
     }
   }
