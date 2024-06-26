@@ -459,7 +459,7 @@ object Utils {
       properties = Some(instancePropertyValues.mapValues(v => Some(v)).toMap)
     )
 
-  // scalastyle:off cyclomatic.complexity
+  // scalastyle:off cyclomatic.complexity method.length
   private def propertyDefaultValueForPropertyType(
       p: PropertyType,
       withDefault: Boolean

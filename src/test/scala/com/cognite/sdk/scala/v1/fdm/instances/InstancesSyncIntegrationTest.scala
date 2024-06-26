@@ -101,7 +101,7 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
         space = Utils.SpaceExternalId,
         externalId = stringVal,
         sources = Some(Seq(EdgeOrNodeData(source = viewReference, properties = Some(Map("stringProp1" -> Some(InstancePropertyValue.String(stringVal))))))),
-        `type`=None,
+        `type`=None
       )
     }
 
