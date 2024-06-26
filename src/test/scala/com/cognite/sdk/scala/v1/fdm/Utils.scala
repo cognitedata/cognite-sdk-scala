@@ -211,7 +211,8 @@ object Utils {
       space: String,
       nodeExternalId: String,
       sourceRef: SourceReference,
-      propsMap: Map[String, CorePropertyDefinition]
+      propsMap: Map[String, CorePropertyDefinition],
+      `type`: Option[DirectRelationReference]
   ): NodeWrite = {
     val instanceValuesForProps = propsMap.map { case (propName, prop) =>
       propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
@@ -239,7 +240,7 @@ object Utils {
       space,
       nodeExternalId,
       Some(Seq(withAllProps)),
-      None
+      `type`
     )
   }
 
