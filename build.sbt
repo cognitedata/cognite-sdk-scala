@@ -1,8 +1,8 @@
-import wartremover.Wart
 import sbt.{Test, project}
+import wartremover.Wart
 
 //val scala3 = "3.2.0"
-val scala213 = "2.13.8"
+val scala213 = "2.13.11"
 val scala212 = "2.12.17"
 val supportedScalaVersions = List(scala212, scala213)
 
@@ -96,7 +96,9 @@ lazy val commonSettings = Seq(
           Wart.Throw,
           Wart.ImplicitParameter,
           Wart.ToString,
-          Wart.Overloading
+          Wart.Overloading,
+          Wart.SeqApply,
+          Wart.SeqUpdated
         )
     })
 )
@@ -127,7 +129,8 @@ lazy val core = (project in file("."))
         List(
           // We use JavaConverters to remain backwards compatible with Scala 2.12,
           // and to avoid a dependency on scala-collection-compat
-          "-Wconf:cat=deprecation:i"
+          "-Wconf:cat=deprecation:i",
+          "-Wconf:cat=other-pure-statement:i"
         )
       case Some((2, minor)) if minor == 12 =>
         List(
