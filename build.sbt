@@ -129,7 +129,8 @@ lazy val core = (project in file("."))
         List(
           // We use JavaConverters to remain backwards compatible with Scala 2.12,
           // and to avoid a dependency on scala-collection-compat
-          "-Wconf:cat=deprecation:i"
+          "-Wconf:cat=deprecation:i",
+          "-Wconf:cat=other-pure-statement:i"
         )
       case Some((2, minor)) if minor == 12 =>
         List(
