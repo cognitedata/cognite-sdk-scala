@@ -156,7 +156,6 @@ object OAuth2 {
     def getAuth: F[Auth] = commonGetAuth(cache, refreshSecondsBeforeExpiration)
   }
 
-  // scalastyle:off method.length
   object ClientCredentialsProvider {
     def apply[F[_]](
         credentials: ClientCredentials,
@@ -169,7 +168,6 @@ object OAuth2 {
       ConcurrentCachedObject(credentials.getAuth, initialToken)
         .map(new ClientCredentialsProvider[F](_, refreshSecondsBeforeExpiration))
   }
-  // scalastyle:on method.length
 
   object SessionProvider {
     def apply[F[_]](
