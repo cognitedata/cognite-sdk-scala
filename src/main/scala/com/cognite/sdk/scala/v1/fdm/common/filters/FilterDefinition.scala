@@ -218,10 +218,10 @@ object FilterDefinition {
     result
   }
   implicit val andFilterDecoder: Decoder[FilterDefinition.And] = Decoder[Seq[FilterDefinition]]
-    .map(FilterDefinition.And)
+    .map(FilterDefinition.And.apply)
   implicit val orFilterDecoder: Decoder[FilterDefinition.Or] = Decoder[Seq[FilterDefinition]]
-    .map(FilterDefinition.Or)
+    .map(FilterDefinition.Or.apply)
   implicit val notFilterDecoder: Decoder[FilterDefinition.Not] = Decoder[FilterDefinition]
-    .map(FilterDefinition.Not)
+    .map(FilterDefinition.Not.apply)
 
 }

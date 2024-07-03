@@ -39,7 +39,10 @@ lazy val commonSettings = Seq(
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
   dependencyLockFile := baseDirectory.value /
     s"build.scala-${CrossVersion
-        .partialVersion(scalaVersion.value) match { case Some((2, n)) => s"2.$n" }}.sbt.lock",
+        .partialVersion(scalaVersion.value) match {
+      case Some((2, n)) => s"2.$n"
+      case Some((3, _)) => s"3"
+    }}.sbt.lock",
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
