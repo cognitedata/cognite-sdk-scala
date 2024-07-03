@@ -1,10 +1,10 @@
 import sbt.{Test, project}
 import wartremover.Wart
 
-//val scala3 = "3.2.0"
+val scala3 = "3.3.1"
 val scala213 = "2.13.11"
 val scala212 = "2.12.17"
-val supportedScalaVersions = List(scala212, scala213)
+val supportedScalaVersions = List(scala212, scala213, scala3)
 
 // This is used only for tests.
 val jettyTestVersion = "9.4.53.v20231009"
