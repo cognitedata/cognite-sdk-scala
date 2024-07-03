@@ -131,8 +131,8 @@ lazy val core = (project in file("."))
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) =>
         List(
-          "-Wconf:cat=other-pure-statement:i",
-          "-Wconf:origin=scala.collection.compat.*:s"
+          "-Wconf:any:warning-verbose",
+          "-Wconf:help"
         )
       case Some((2, minor)) if minor == 13 =>
         List(
