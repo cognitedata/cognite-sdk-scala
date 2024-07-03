@@ -83,7 +83,7 @@ object ProjectCapability {
   implicit val encoder: Encoder[ProjectCapability] = Encoder.instance {
     case ProjectCapability(acl, scope) =>
       Json.obj(
-        (Seq("projectScope" -> scope.asJson) ++ acl.mapValues(_.asJson).toList): _*
+        (Seq("projectScope" -> scope.asJson) ++ acl.view.mapValues(_.asJson).toList): _*
       )
   }
 }
