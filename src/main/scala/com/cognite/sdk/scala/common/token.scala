@@ -9,7 +9,7 @@ import sttp.client3._
 import io.circe.{Decoder, DecodingFailure, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
-import scala.jdk.CollectionConverters._
+import scala.collection.compat._
 
 final case class ProjectDetails(projectUrlName: String, groups: Seq[Long])
 
