@@ -69,7 +69,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     TimeSeries(name = Some("scala-sdk-write-example-2"))
   )
   private val timeSeriesUpdates = Seq(
-    TimeSeries(name = Some("scala-sdk-write-example-1-1"), description = Some(null)), // scalastyle:ignore null
+    TimeSeries(name = Some("scala-sdk-write-example-1-1"), description = Some(null)),
     TimeSeries(name = Some("scala-sdk-write-example-2-1"), description = Some("scala-sdk-write-example-2"), dataSetId = Some(testDataSet.id))
   )
   it should behave like updatable(
