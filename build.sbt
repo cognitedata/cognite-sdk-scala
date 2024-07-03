@@ -40,9 +40,9 @@ lazy val commonSettings = Seq(
   dependencyLockFile := baseDirectory.value /
     s"build.scala-${CrossVersion
         .partialVersion(scalaVersion.value) match {
-      case Some((2, n)) => s"2.$n"
-      case Some((3, _)) => s"3"
-    }}.sbt.lock",
+        case Some((2, n)) => s"2.$n"
+        case Some((3, _)) => s"3"
+      }}.sbt.lock",
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
@@ -131,8 +131,7 @@ lazy val core = (project in file("."))
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) =>
         List(
-          "-Wconf:any:warning-verbose",
-          "-Wconf:help"
+          "-Wconf:any:verbose"
         )
       case Some((2, minor)) if minor == 13 =>
         List(
