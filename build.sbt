@@ -133,6 +133,7 @@ lazy val core = (project in file("."))
           // We use JavaConverters to remain backwards compatible with Scala 2.12,
           // and to avoid a dependency on scala-collection-compat
           "-Wconf:cat=deprecation:i",
+          "-Wconf:cat=w-flag-value-discard&msg=discarded non-Unit value of type org\\.scalatest\\.Assertion:s",
 
           "-source:3.0-migration",
         )
