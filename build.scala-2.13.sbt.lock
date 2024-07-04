@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-04T12:35:44.011772Z",
+  "timestamp" : "2024-07-04T14:07:34.782615380Z",
   "configurations" : [
     "compile",
     "optional",
@@ -680,11 +680,11 @@
     {
       "org" : "org.scala-lang.modules",
       "name" : "scala-collection-compat_2.13",
-      "version" : "2.12.0",
+      "version" : "2.9.0",
       "artifacts" : [
         {
           "name" : "scala-collection-compat_2.13.jar",
-          "hash" : "sha1:d6f2b9188a96532e6bcee67841d1dae3c7b07468"
+          "hash" : "sha1:e84549f3c5af4f93dedc3c7088ecaeb4207d4d59"
         }
       ],
       "configurations" : [
