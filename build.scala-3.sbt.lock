@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-03T21:20:40.314285Z",
+  "timestamp" : "2024-07-04T13:09:45.989486Z",
   "configurations" : [
     "compile",
     "optional",
@@ -710,11 +710,11 @@
     {
       "org" : "org.scalacheck",
       "name" : "scalacheck_3",
-      "version" : "1.15.4",
+      "version" : "1.17.0",
       "artifacts" : [
         {
           "name" : "scalacheck_3.jar",
-          "hash" : "sha1:661abbaeb313ff25ba76398078f40a9975871010"
+          "hash" : "sha1:c574ec3a25cdb3c8c4d79adac2a36ecac4583b53"
         }
       ],
       "configurations" : [
@@ -1026,11 +1026,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel-testkit_3",
-      "version" : "3.3.14",
+      "version" : "3.5.4",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel-testkit_3.jar",
-          "hash" : "sha1:c48c50eaf7a1b4545faa0e902966be7e1b9be086"
+          "hash" : "sha1:3fede3d7329bb99e275aed5e8afed005116f3dda"
         }
       ],
       "configurations" : [
@@ -1040,11 +1040,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel_3",
-      "version" : "3.4.6",
+      "version" : "3.5.4",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel_3.jar",
-          "hash" : "sha1:baf2b59bc8385f9f761ff3fb179c97307454ac81"
+          "hash" : "sha1:6a1de40494d66e8a858a77c616783c2264b1d938"
         }
       ],
       "configurations" : [
@@ -1056,11 +1056,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-laws_3",
-      "version" : "3.3.14",
+      "version" : "3.5.4",
       "artifacts" : [
         {
           "name" : "cats-effect-laws_3.jar",
-          "hash" : "sha1:6cb7f54845631c1e19b70a56ad5b46b5974b6fdf"
+          "hash" : "sha1:6b5590da7fb56935049dc134e41faa1c68fbeed3"
         }
       ],
       "configurations" : [
@@ -1070,11 +1070,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-std_3",
-      "version" : "3.4.6",
+      "version" : "3.5.4",
       "artifacts" : [
         {
           "name" : "cats-effect-std_3.jar",
-          "hash" : "sha1:dd79c233a52ae658f7432323fab51ee3eca1404c"
+          "hash" : "sha1:45a43dc229ff76b0feaeae2f0665e0a7c7c091db"
         }
       ],
       "configurations" : [
@@ -1086,11 +1086,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-testkit_3",
-      "version" : "3.3.14",
+      "version" : "3.5.4",
       "artifacts" : [
         {
           "name" : "cats-effect-testkit_3.jar",
-          "hash" : "sha1:bc322a05809590d1924cc7bbeca3cd401dafc6fb"
+          "hash" : "sha1:590ca21aab478fb7754a39b0e4658c4898969ce3"
         }
       ],
       "configurations" : [
@@ -1100,11 +1100,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect_3",
-      "version" : "3.4.6",
+      "version" : "3.5.4",
       "artifacts" : [
         {
           "name" : "cats-effect_3.jar",
-          "hash" : "sha1:6e050d706882d3e402a854f8e33dae96ed4a0978"
+          "hash" : "sha1:50268b1c97dbd9ed99aa7810276f5b78704fec66"
         }
       ],
       "configurations" : [
@@ -1116,11 +1116,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-free_3",
-      "version" : "2.7.0",
+      "version" : "2.9.0",
       "artifacts" : [
         {
           "name" : "cats-free_3.jar",
-          "hash" : "sha1:4af5fd2637553f109b5cd206c8f01fa13e44308e"
+          "hash" : "sha1:e21ad368ea12fa4e0b2754cd690f10f7a8c6e72e"
         }
       ],
       "configurations" : [
@@ -1130,11 +1130,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-kernel-laws_3",
-      "version" : "2.7.0",
+      "version" : "2.9.0",
       "artifacts" : [
         {
           "name" : "cats-kernel-laws_3.jar",
-          "hash" : "sha1:a45d4b535832af313a39cffcb8515febd7a134b0"
+          "hash" : "sha1:a42f0b38b3167912266dfc84e6b3094450441fcd"
         }
       ],
       "configurations" : [
@@ -1160,11 +1160,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-laws_3",
-      "version" : "2.7.0",
+      "version" : "2.9.0",
       "artifacts" : [
         {
           "name" : "cats-laws_3.jar",
-          "hash" : "sha1:ba9d749d70b125df667b363ad90dcb25a72caec7"
+          "hash" : "sha1:401e563744ac11a4b5521ca46feb350dd91be013"
         }
       ],
       "configurations" : [
@@ -1174,11 +1174,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-mtl_3",
-      "version" : "1.2.1",
+      "version" : "1.3.0",
       "artifacts" : [
         {
           "name" : "cats-mtl_3.jar",
-          "hash" : "sha1:2aadf9a03cac439b5968ad2f9520fa76bb58c41c"
+          "hash" : "sha1:000f6ca0ca446718a7c8e45ea351aefeca7020ed"
         }
       ],
       "configurations" : [
@@ -1188,11 +1188,11 @@
     {
       "org" : "org.typelevel",
       "name" : "coop_3",
-      "version" : "1.1.1",
+      "version" : "1.2.0",
       "artifacts" : [
         {
           "name" : "coop_3.jar",
-          "hash" : "sha1:0480fdc0cbd9c13eb8fc09c8950c9f931329611e"
+          "hash" : "sha1:2ea92a92d002a67f7eaac9166fab5f4591b04d59"
         }
       ],
       "configurations" : [
@@ -1202,11 +1202,11 @@
     {
       "org" : "org.typelevel",
       "name" : "discipline-core_3",
-      "version" : "1.2.0",
+      "version" : "1.5.1",
       "artifacts" : [
         {
           "name" : "discipline-core_3.jar",
-          "hash" : "sha1:a810be2ce89d6a4f14814dbb4fcb201ff0c1b400"
+          "hash" : "sha1:8112ba3b03bb321bc7d013f9cd2e58f4b1aff9c5"
         }
       ],
       "configurations" : [
@@ -1242,20 +1242,6 @@
       "configurations" : [
         "compile",
         "runtime",
-        "test"
-      ]
-    },
-    {
-      "org" : "org.typelevel",
-      "name" : "simulacrum-scalafix-annotations_3",
-      "version" : "0.5.4",
-      "artifacts" : [
-        {
-          "name" : "simulacrum-scalafix-annotations_3.jar",
-          "hash" : "sha1:e7ac3b68838b3905c9bdc4a870ec54a4bee2cf88"
-        }
-      ],
-      "configurations" : [
         "test"
       ]
     }
