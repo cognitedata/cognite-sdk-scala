@@ -9,7 +9,8 @@ import sttp.capabilities.Effect
 import sttp.client3.{Request, Response, SttpBackend}
 import sttp.monad.MonadError
 
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.util.Random
 
 /** When 429 Too many requests or 503 Service Unavailable error is encountered, new requests are
   * blocked for the specified duration
@@ -17,6 +18,9 @@ import scala.concurrent.duration.FiniteDuration
   * @param queueOf1
   *   must be a queue with one element already placed in the queue
   */
+// TODO: is this really needed compared to RetryingBackend?
+// here it can be applied across multiple services and request streams
+// which could be good or could be not so good.
 class BackpressureThrottleBackend[F[_]: Temporal, +S](
     delegate: SttpBackend[F, S],
     queueOf1: Queue[F, Unit],
@@ -31,7 +35,10 @@ class BackpressureThrottleBackend[F[_]: Temporal, +S](
       permit.tryTake.flatMap {
         case None => Applicative[F].unit
         case Some(_) =>
-          Temporal[F].sleep(delay) *>
+          val constantDelay = delay / 2
+          val randomDelayScale = delay / 2
+          val randomDelay = Random.nextInt(randomDelayScale.toMillis.toInt).millis
+          Temporal[F].sleep(constantDelay + randomDelay) *>
             permit.tryOffer(()).void
       }
     } else {

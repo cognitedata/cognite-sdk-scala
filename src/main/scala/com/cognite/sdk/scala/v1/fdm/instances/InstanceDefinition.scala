@@ -15,6 +15,7 @@ sealed trait InstanceDefinition {
   def createdTime: Long
   def lastUpdatedTime: Long
   def deletedTime: Option[Long]
+  def version: Option[Long]
   def properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
 
   val instanceType: InstanceType
@@ -27,6 +28,7 @@ object InstanceDefinition {
       createdTime: Long,
       lastUpdatedTime: Long,
       deletedTime: Option[Long],
+      version: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
   ) extends InstanceDefinition {
     override val instanceType: InstanceType = InstanceType.Node
@@ -39,6 +41,7 @@ object InstanceDefinition {
       createdTime: Long,
       lastUpdatedTime: Long,
       deletedTime: Option[Long],
+      version: Option[Long],
       properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]],
       startNode: DirectRelationReference,
       endNode: DirectRelationReference
@@ -46,24 +49,37 @@ object InstanceDefinition {
     override val instanceType: InstanceType = InstanceType.Edge
   }
 
-  implicit val nodeDefinitionEncoder: Encoder[NodeDefinition] = Encoder.forProduct6(
+  implicit val nodeDefinitionEncoder: Encoder[NodeDefinition] = Encoder.forProduct8(
     "instanceType",
     "space",
     "externalId",
     "createdTime",
     "lastUpdatedTime",
+    "deletedTime",
+    "version",
     "properties"
   )((e: NodeDefinition) =>
-    (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime, e.properties)
+    (
+      e.instanceType,
+      e.space,
+      e.externalId,
+      e.createdTime,
+      e.lastUpdatedTime,
+      e.deletedTime,
+      e.version,
+      e.properties
+    )
   )
 
-  implicit val edgeDefinitionEncoder: Encoder[EdgeDefinition] = Encoder.forProduct7(
+  implicit val edgeDefinitionEncoder: Encoder[EdgeDefinition] = Encoder.forProduct9(
     "instanceType",
     "type",
     "space",
     "externalId",
     "createdTime",
     "lastUpdatedTime",
+    "deletedTime",
+    "version",
     "properties"
   )((e: EdgeDefinition) =>
     (
@@ -73,6 +89,8 @@ object InstanceDefinition {
       e.externalId,
       e.createdTime,
       e.lastUpdatedTime,
+      e.deletedTime,
+      e.version,
       e.properties
     )
   )
@@ -109,7 +127,7 @@ object InstanceDefinition {
         }
     }
 
-  private def instancePropertyDefinitionBasedInstancePropertyTypeDecoder(
+  def instancePropertyDefinitionBasedInstancePropertyTypeDecoder(
       types: Map[String, Map[String, Map[String, TypePropertyDefinition]]]
   ): Decoder[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]] = (c: HCursor) =>
     {
@@ -166,6 +184,7 @@ object InstanceDefinition {
       createdTime <- c.downField("createdTime").as[Long]
       lastUpdatedTime <- c.downField("lastUpdatedTime").as[Long]
       deletedTime <- c.downField("deletedTime").as[Option[Long]]
+      version <- c.downField("version").as[Option[Long]]
       properties <- c
         .downField("properties")
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
@@ -177,6 +196,7 @@ object InstanceDefinition {
       createdTime = createdTime,
       lastUpdatedTime = lastUpdatedTime,
       deletedTime = deletedTime,
+      version = version,
       properties = properties
     )
 
@@ -190,6 +210,7 @@ object InstanceDefinition {
       createdTime <- c.downField("createdTime").as[Long]
       lastUpdatedTime <- c.downField("lastUpdatedTime").as[Long]
       deletedTime <- c.downField("deletedTime").as[Option[Long]]
+      version <- c.downField("version").as[Option[Long]]
       properties <- c
         .downField("properties")
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
@@ -204,6 +225,7 @@ object InstanceDefinition {
       createdTime = createdTime,
       lastUpdatedTime = lastUpdatedTime,
       deletedTime = deletedTime,
+      version = version,
       properties = properties,
       startNode = startNode,
       endNode = endNode
@@ -214,38 +236,10 @@ object InstanceDefinition {
       t: TypePropertyDefinition
   ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
-      case _: PropertyType.DirectNodeRelationProperty =>
-        propValue
-          .as[Option[DirectRelationReference]]
-          .map(InstancePropertyValue.ViewDirectNodeRelation.apply)
-          .orElse {
-            // TODO: Remove this once this is fixed
-            // https://cognitedata.slack.com/archives/C031G8Y19HP/p1676895220201609
-            propValue.as[Option[List[String]]].flatMap {
-              case Some(space :: extId :: Nil) =>
-                Right(
-                  InstancePropertyValue.ViewDirectNodeRelation(
-                    Some(DirectRelationReference(space = space, externalId = extId))
-                  )
-                )
-              case Some(_) =>
-                Right(
-                  InstancePropertyValue.ViewDirectNodeRelation(None)
-                )
-              case None =>
-                Left(
-                  DecodingFailure(
-                    s"Expecting DirectRelation properties as an array, but got: ${propValue.noSpaces}",
-                    List.empty
-                  )
-                )
-            }
-          }
       case t if t.isList => toInstancePropertyTypeOfList(propValue, t)
       case t => toInstancePropertyTypeOfNonList(propValue, t)
     }
 
-  // scalastyle:off cyclomatic.complexity method.length
   private def toInstancePropertyTypeOfList(
       propValue: Json,
       t: PropertyType
@@ -299,6 +293,10 @@ object InstanceDefinition {
         Decoder[Seq[String]]
           .decodeJson(propValue)
           .map(InstancePropertyValue.SequenceReferenceList.apply)
+      case PropertyType.DirectNodeRelationProperty(_, _, Some(true)) =>
+        Decoder[Seq[DirectRelationReference]]
+          .decodeJson(propValue)
+          .map(InstancePropertyValue.ViewDirectNodeRelationList.apply)
       case _ =>
         Left[DecodingFailure, InstancePropertyValue](
           DecodingFailure(
@@ -307,9 +305,7 @@ object InstanceDefinition {
           )
         )
     }
-  // scalastyle:on cyclomatic.complexity method.length
 
-  // scalastyle:off cyclomatic.complexity method.length
   private def toInstancePropertyTypeOfNonList(
       propValue: Json,
       t: PropertyType
@@ -363,6 +359,11 @@ object InstanceDefinition {
         Decoder[String]
           .decodeJson(propValue)
           .map(InstancePropertyValue.SequenceReference.apply)
+      case PropertyType.DirectNodeRelationProperty(_, _, Some(false)) |
+          PropertyType.DirectNodeRelationProperty(_, _, None) =>
+        propValue
+          .as[Option[DirectRelationReference]]
+          .map(InstancePropertyValue.ViewDirectNodeRelation.apply)
       case _ =>
         Left[DecodingFailure, InstancePropertyValue](
           DecodingFailure(
@@ -371,5 +372,4 @@ object InstanceDefinition {
           )
         )
     }
-  // scalastyle:on cyclomatic.complexity method.length
 }

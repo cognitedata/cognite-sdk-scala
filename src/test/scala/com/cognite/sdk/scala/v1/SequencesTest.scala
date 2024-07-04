@@ -133,7 +133,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
   private val sequencesUpdates = Seq(
     Sequence(
       name = Some("scala-sdk-write-example-1-1"),
-      description = Some(null), // scalastyle:ignore null
+      description = Some(null),
       columns = NonEmptyList.of(SequenceColumn(name = Some("string-column"), externalId = Some(s"string-column-$eid")))
     ),
     Sequence(

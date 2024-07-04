@@ -1,9 +1,11 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition.StringList
+import com.cognite.sdk.scala.v1.fdm.common.filters.{FilterDefinition, FilterValueDefinition}
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
-import io.circe.Printer
+import io.circe.literal.JsonStringContext
+import io.circe.{Decoder, Json, Printer}
 import io.circe.parser._
 import io.circe.syntax._
 import org.scalatest.matchers.should.Matchers
@@ -22,7 +24,74 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
   import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition._
   implicit val nullDroppingPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
+  private def checkPair(filter: FilterDefinition, json: Json) = {
+    val filterJson = filter.asJson
+    filterJson shouldBe json
+    val jsonFilter = Decoder[FilterDefinition].decodeJson(json)
+    jsonFilter shouldBe Right(filter)
+  }
+
   "FilterDefinition Ser/de" when {
+    "AndFilter" should {
+      "encode-decode" in {
+        checkPair(
+          And(Seq(
+            In(
+              Seq("some_domain_model", "EntityTypeGroup", "entityType"),
+              StringList(Seq("CFIHOS_00000003"))
+            )
+          )),
+          json"""
+          {
+            "and": [{
+              "in": {
+                "property": [
+                  "some_domain_model",
+                  "EntityTypeGroup",
+                  "entityType"
+                ],
+                "values": [
+                  "CFIHOS_00000003"
+                ]
+              }
+            }]
+          }
+        """
+        )
+      }
+    }
+
+    "NotFilter" should {
+      "encode-decode" in {
+        checkPair(
+          Not(Not(
+            In(
+              Seq("some_domain_model", "EntityTypeGroup", "entityType"),
+              StringList(Seq("CFIHOS_00000003"))
+            )
+          )),
+          json"""
+        {
+          "not": {
+            "not": {
+              "in": {
+                "property": [
+                  "some_domain_model",
+                  "EntityTypeGroup",
+                  "entityType"
+                ],
+                "values": [
+                  "CFIHOS_00000003"
+                ]
+              }
+            }
+          }
+        }
+      """
+        )
+      }
+    }
+
     "LeafFilters" should {
       "work for equals filter" in {
         val equalInt = Equals(Seq("name", "tag"), FilterValueDefinition.Integer(1)).asJson

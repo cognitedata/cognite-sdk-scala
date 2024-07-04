@@ -18,7 +18,6 @@ import java.time.Instant
 import scala.collection.JavaConverters._ // Avoid scala.jdk to keep 2.12 compatibility without scala-collection-compat
 import scala.util.control.NonFatal
 
-// scalastyle:off number.of.methods
 class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {

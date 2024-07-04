@@ -1,8 +1,8 @@
-import wartremover.Wart
 import sbt.{Test, project}
+import wartremover.Wart
 
 //val scala3 = "3.2.0"
-val scala213 = "2.13.8"
+val scala213 = "2.13.14"
 val scala212 = "2.12.17"
 val supportedScalaVersions = List(scala212, scala213)
 
@@ -10,8 +10,8 @@ val supportedScalaVersions = List(scala212, scala213)
 val jettyTestVersion = "9.4.53.v20231009"
 
 val sttpVersion = "3.5.2"
-val circeVersion = "0.14.6"
-val catsEffectVersion = "3.3.14"
+val circeVersion = "0.14.8"
+val catsEffectVersion = "3.5.4"
 val fs2Version = "3.3.0"
 val natchezVersion = "0.3.5"
 
@@ -21,14 +21,25 @@ ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0
 
 lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
 
+credentials += Credentials(
+  "Sonatype Nexus Repository Manager",
+  "oss.sonatype.org",
+  System.getenv("SONATYPE_USERNAME"),
+  System.getenv("SONATYPE_PASSWORD")
+)
+
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.15." + patchVersion,
+  version := "2.23." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
+  // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
+  dependencyLockFile := baseDirectory.value /
+    s"build.scala-${CrossVersion
+        .partialVersion(scalaVersion.value) match { case Some((2, n)) => s"2.$n" }}.sbt.lock",
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
@@ -85,7 +96,9 @@ lazy val commonSettings = Seq(
           Wart.Throw,
           Wart.ImplicitParameter,
           Wart.ToString,
-          Wart.Overloading
+          Wart.Overloading,
+          Wart.SeqApply,
+          Wart.SeqUpdated
         )
     })
 )
@@ -116,7 +129,8 @@ lazy val core = (project in file("."))
         List(
           // We use JavaConverters to remain backwards compatible with Scala 2.12,
           // and to avoid a dependency on scala-collection-compat
-          "-Wconf:cat=deprecation:i"
+          "-Wconf:cat=deprecation:i",
+          "-Wconf:cat=other-pure-statement:i"
         )
       case Some((2, minor)) if minor == 12 =>
         List(
@@ -182,16 +196,6 @@ scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
     List.empty[String]
 })
 
-scalastyleFailOnWarning := true
-
-lazy val mainScalastyle = taskKey[Unit]("mainScalastyle")
-lazy val testScalastyle = taskKey[Unit]("testScalastyle")
-
-mainScalastyle := (Compile / scalastyle).toTask("").value
-testScalastyle := (Test / scalastyle).toTask("").value
-
-Test / test := (Test / test).dependsOn(testScalastyle).value
-Test / test := (Test / test).dependsOn(mainScalastyle).value
 Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oD")
 
 // Scala 2.11 doesn't support mixed projects as ours, so just disable docs for that release.
