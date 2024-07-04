@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-06-18T18:04:38.907512Z",
+  "timestamp" : "2024-07-04T12:37:48.485578Z",
   "configurations" : [
     "compile",
     "optional",
@@ -94,11 +94,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "async-http-client-backend-cats_2.12",
-      "version" : "3.5.2",
+      "version" : "3.9.7",
       "artifacts" : [
         {
           "name" : "async-http-client-backend-cats_2.12.jar",
-          "hash" : "sha1:c32dd8df1ede62e710312266a57b26fae7bf8b86"
+          "hash" : "sha1:7b8963d59bcce794e0d61456d09e4dc2ca359d73"
         }
       ],
       "configurations" : [
@@ -108,11 +108,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "async-http-client-backend_2.12",
-      "version" : "3.5.2",
+      "version" : "3.9.7",
       "artifacts" : [
         {
           "name" : "async-http-client-backend_2.12.jar",
-          "hash" : "sha1:59b7740ed98e783b3b6bfd096edefaa0b7d458ec"
+          "hash" : "sha1:57e495374d4d924b9810c998c5718a4c45d696ed"
         }
       ],
       "configurations" : [
@@ -122,11 +122,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "cats_2.12",
-      "version" : "3.5.2",
+      "version" : "3.9.7",
       "artifacts" : [
         {
           "name" : "cats_2.12.jar",
-          "hash" : "sha1:a859ae377bfdbb1d7e16f58890b84d163f12d646"
+          "hash" : "sha1:d0a3e52e705f232d27762134beb1a63162811f47"
         }
       ],
       "configurations" : [
@@ -136,11 +136,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "circe_2.12",
-      "version" : "3.5.2",
+      "version" : "3.9.7",
       "artifacts" : [
         {
           "name" : "circe_2.12.jar",
-          "hash" : "sha1:6e7629e4472a797186f0df00f339f5f708dbca8d"
+          "hash" : "sha1:566aeddd01a5827fc029674c851f006dd7484941"
         }
       ],
       "configurations" : [
@@ -152,11 +152,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "core_2.12",
-      "version" : "3.5.2",
+      "version" : "3.9.7",
       "artifacts" : [
         {
           "name" : "core_2.12.jar",
-          "hash" : "sha1:999f1ed7549feadcf0fac88cbbd39cd43b8d51bc"
+          "hash" : "sha1:582e900c56d2e0ff9bab726f6e4224675b5c5f1f"
         }
       ],
       "configurations" : [
@@ -168,11 +168,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "json-common_2.12",
-      "version" : "3.5.2",
+      "version" : "3.9.7",
       "artifacts" : [
         {
           "name" : "json-common_2.12.jar",
-          "hash" : "sha1:7035102dd88992d7cf938ae45d704dcd8714af9e"
+          "hash" : "sha1:51470911f131bbd391e4329bf33afb704fc1f6ff"
         }
       ],
       "configurations" : [
@@ -184,11 +184,11 @@
     {
       "org" : "com.softwaremill.sttp.model",
       "name" : "core_2.12",
-      "version" : "1.4.25",
+      "version" : "1.7.9",
       "artifacts" : [
         {
           "name" : "core_2.12.jar",
-          "hash" : "sha1:c35b7c3664304713dee397db6001226a9afb651f"
+          "hash" : "sha1:d43483b578e3b063c49174be2596527c67b09f1e"
         }
       ],
       "configurations" : [
@@ -200,11 +200,11 @@
     {
       "org" : "com.softwaremill.sttp.shared",
       "name" : "core_2.12",
-      "version" : "1.3.4",
+      "version" : "1.3.16",
       "artifacts" : [
         {
           "name" : "core_2.12.jar",
-          "hash" : "sha1:d4003b8040b518e05d1e122fb3da9c24c585f3d5"
+          "hash" : "sha1:b4cf2106495c675b4d1207acddb7823a34692e22"
         }
       ],
       "configurations" : [
@@ -216,11 +216,11 @@
     {
       "org" : "com.softwaremill.sttp.shared",
       "name" : "ws_2.12",
-      "version" : "1.3.4",
+      "version" : "1.3.16",
       "artifacts" : [
         {
           "name" : "ws_2.12.jar",
-          "hash" : "sha1:60650da91689e95760cd837bb13732dc94fe6d18"
+          "hash" : "sha1:814a9922edff5b438ca579e1b294c2d34ec61fa5"
         }
       ],
       "configurations" : [
@@ -1063,7 +1063,20 @@
       ],
       "configurations" : [
         "compile",
-        "runtime",
+        "runtime"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-effect-kernel_2.12",
+      "version" : "3.5.1",
+      "artifacts" : [
+        {
+          "name" : "cats-effect-kernel_2.12.jar",
+          "hash" : "sha1:c073cf204ea3929199f9c1f96dcdc971e2f4652a"
+        }
+      ],
+      "configurations" : [
         "test"
       ]
     },
@@ -1093,7 +1106,20 @@
       ],
       "configurations" : [
         "compile",
-        "runtime",
+        "runtime"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-effect-std_2.12",
+      "version" : "3.5.1",
+      "artifacts" : [
+        {
+          "name" : "cats-effect-std_2.12.jar",
+          "hash" : "sha1:f0856be8d88970552c8e56d2c30423d620c26bd6"
+        }
+      ],
+      "configurations" : [
         "test"
       ]
     },
