@@ -10,8 +10,6 @@ import io.circe.{Decoder, Encoder, Json, JsonObject, KeyEncoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import sttp.model.Uri
 
-import scala.annotation.nowarn
-
 trait ResponseWithCursor {
   val nextCursor: Option[String]
 }
