@@ -134,7 +134,9 @@ lazy val core = (project in file("."))
           // and to avoid a dependency on scala-collection-compat
           "-Wconf:cat=deprecation:i",
           "-Wconf:cat=other-pure-statement:i",
-          "-Wconf:origin=scala.collection.compat.*:s"
+          "-Wconf:origin=scala.collection.compat.*:s",
+
+          "-source:3.0-migration",
         )
       case Some((2, minor)) if minor == 13 =>
         List(
@@ -150,9 +152,6 @@ lazy val core = (project in file("."))
           // and doesn't seem to like @deprecated case class fields with default values.
           "-Wconf:src=src/main/scala/com/cognite/sdk/scala/v1/resources/assets.scala&cat=deprecation:i"
         )
-      case Some((3, _)) => List(
-        "-source:3.0-migration"
-      )
       case _ =>
         List.empty[String]
     }),
