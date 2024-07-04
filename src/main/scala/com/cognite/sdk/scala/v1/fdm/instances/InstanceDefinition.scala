@@ -236,38 +236,10 @@ object InstanceDefinition {
       t: TypePropertyDefinition
   ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
-      case _: PropertyType.DirectNodeRelationProperty =>
-        propValue
-          .as[Option[DirectRelationReference]]
-          .map(InstancePropertyValue.ViewDirectNodeRelation.apply)
-          .orElse {
-            // TODO: Remove this once this is fixed
-            // https://cognitedata.slack.com/archives/C031G8Y19HP/p1676895220201609
-            propValue.as[Option[List[String]]].flatMap {
-              case Some(space :: extId :: Nil) =>
-                Right(
-                  InstancePropertyValue.ViewDirectNodeRelation(
-                    Some(DirectRelationReference(space = space, externalId = extId))
-                  )
-                )
-              case Some(_) =>
-                Right(
-                  InstancePropertyValue.ViewDirectNodeRelation(None)
-                )
-              case None =>
-                Left(
-                  DecodingFailure(
-                    s"Expecting DirectRelation properties as an array, but got: ${propValue.noSpaces}",
-                    List.empty
-                  )
-                )
-            }
-          }
       case t if t.isList => toInstancePropertyTypeOfList(propValue, t)
       case t => toInstancePropertyTypeOfNonList(propValue, t)
     }
 
-  // scalastyle:off cyclomatic.complexity method.length
   private def toInstancePropertyTypeOfList(
       propValue: Json,
       t: PropertyType
@@ -321,6 +293,10 @@ object InstanceDefinition {
         Decoder[Seq[String]]
           .decodeJson(propValue)
           .map(InstancePropertyValue.SequenceReferenceList.apply)
+      case PropertyType.DirectNodeRelationProperty(_, _, Some(true)) =>
+        Decoder[Seq[DirectRelationReference]]
+          .decodeJson(propValue)
+          .map(InstancePropertyValue.ViewDirectNodeRelationList.apply)
       case _ =>
         Left[DecodingFailure, InstancePropertyValue](
           DecodingFailure(
@@ -329,9 +305,7 @@ object InstanceDefinition {
           )
         )
     }
-  // scalastyle:on cyclomatic.complexity method.length
 
-  // scalastyle:off cyclomatic.complexity method.length
   private def toInstancePropertyTypeOfNonList(
       propValue: Json,
       t: PropertyType
@@ -385,6 +359,11 @@ object InstanceDefinition {
         Decoder[String]
           .decodeJson(propValue)
           .map(InstancePropertyValue.SequenceReference.apply)
+      case PropertyType.DirectNodeRelationProperty(_, _, Some(false)) |
+          PropertyType.DirectNodeRelationProperty(_, _, None) =>
+        propValue
+          .as[Option[DirectRelationReference]]
+          .map(InstancePropertyValue.ViewDirectNodeRelation.apply)
       case _ =>
         Left[DecodingFailure, InstancePropertyValue](
           DecodingFailure(
@@ -393,5 +372,4 @@ object InstanceDefinition {
           )
         )
     }
-  // scalastyle:on cyclomatic.complexity method.length
 }
