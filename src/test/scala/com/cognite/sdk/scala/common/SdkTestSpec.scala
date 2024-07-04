@@ -28,20 +28,20 @@ class LoggingSttpBackend[F[_], +P](delegate: SttpBackend[F, P]) extends SttpBack
     responseMonad.map(try {
       responseMonad.handleError(delegate.send(request)) {
         case e: Exception =>
-          println(s"Exception when sending request: ${request.toString}, ${e.toString}") // scalastyle:ignore
+          println(s"Exception when sending request: ${request.toString}, ${e.toString}")
           responseMonad.error(e)
       }
     } catch {
       case NonFatal(e) =>
-        println(s"Exception when sending request: ${request.toString}, ${e.toString}") // scalastyle:ignore
+        println(s"Exception when sending request: ${request.toString}, ${e.toString}")
         throw e
     }) { response =>
-      println(s"request ${request.body.toString}") // scalastyle:ignore
-      println(s"response ${response.toString}") // scalastyle:ignore
+      println(s"request ${request.body.toString}")
+      println(s"response ${response.toString}")
       if (response.isSuccess) {
-        println(s"For request: ${request.toString} got response: ${response.toString}") // scalastyle:ignore
+        println(s"For request: ${request.toString} got response: ${response.toString}")
       } else {
-        println(s"For request: ${request.toString} got response: ${response.toString}") // scalastyle:ignore
+        println(s"For request: ${request.toString} got response: ${response.toString}")
       }
       response
     }
@@ -67,18 +67,24 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
   )
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
-  lazy val projectName: String = "playground"
-  lazy val baseUrl: String = GenericClient.defaultBaseUrl
-  private lazy val tenant: String = sys.env("TEST_AAD_TENANT")
-  private lazy val clientId: String = sys.env("TEST_CLIENT_ID")
-  private lazy val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
-  private lazy val scopes: List[String] = List(baseUrl + "/.default")
+  lazy val projectName: String = sys.env.getOrElse("TEST_PROJECT2", "playground")
+  lazy val baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL2", GenericClient.defaultBaseUrl)
+  lazy val audience = Some(baseUrl)
+  lazy val tokenUri = sys.env.get("TEST_TOKEN_URL2")
+    .orElse(
+      sys.env.get("TEST_AAD_TENANT2")
+        .map(tenant => s"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token"))
+    .getOrElse("https://sometokenurl")
+  lazy val clientId: String = sys.env("TEST_CLIENT_ID2")
+  lazy val clientSecret: String = sys.env("TEST_CLIENT_SECRET2")
+  lazy val scopes: List[String] = List(baseUrl + "/.default")
 
   lazy val credentials = OAuth2.ClientCredentials(
-      tokenUri = uri"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token",
+      tokenUri = uri"${tokenUri}",
       clientId = clientId,
       clientSecret = clientSecret,
       scopes = scopes,
+      audience = audience,
       cdfProjectName = projectName
     )
 

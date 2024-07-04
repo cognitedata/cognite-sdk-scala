@@ -2,8 +2,7 @@ package com.cognite.sdk.scala.v1
 
 import cats.implicits.catsSyntaxEq
 import com.cognite.sdk.scala.common.DomainSpecificLanguageFilter.propEncoder
-import com.cognite.sdk.scala.common.{DomainSpecificLanguageFilter, EmptyFilter, SdkException}
-import com.cognite.sdk.scala.v1.resources.DataModels
+import com.cognite.sdk.scala.common.SdkException
 import io.circe.CursorOp.DownField
 import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json, KeyEncoder}
 
@@ -93,7 +92,6 @@ object PropertyMap {
       case _ => dmp.`type`.decodeProperty(c.downField(prop))
     }
 
-  // scalastyle:off cyclomatic.complexity
   private def asStringValue(json: Json): Option[String] =
     json match {
       case js if js.isString => js.asString
@@ -103,110 +101,4 @@ object PropertyMap {
       case js if js.isArray => js.asArray.map(_.mkString(","))
       case js => Some(js.toString())
     }
-  // scalastyle:on cyclomatic.complexity
 }
-
-@deprecated("message", since = "0")
-final case class Node(
-    override val externalId: String,
-    properties: Option[Map[String, DataModelProperty[_]]] = None
-) extends PropertyMap(
-      {
-        val propsToAdd: Map[String, DataModelProperty[_]] =
-          Map("externalId" -> PropertyType.Text.Property(externalId))
-
-        properties.map(_ ++ propsToAdd).getOrElse(propsToAdd)
-      }
-    )
-
-@deprecated("message", since = "0")
-final case class DataModelNodeCreate(
-    spaceExternalId: String,
-    model: DataModelIdentifier,
-    overwrite: Boolean = false,
-    items: Seq[PropertyMap]
-)
-
-@deprecated("message", since = "0")
-final case class DataModelInstanceQuery(
-    model: DataModelIdentifier,
-    spaceExternalId: String,
-    filter: DomainSpecificLanguageFilter = EmptyFilter,
-    sort: Option[Seq[String]] = None,
-    limit: Option[Int] = None,
-    cursor: Option[String] = None
-)
-
-@deprecated("message", since = "0")
-final case class DataModelInstanceQueryResponse(
-    items: Seq[PropertyMap],
-    modelProperties: Option[Map[String, DataModelPropertyDefinition]] = None,
-    nextCursor: Option[String] = None
-)
-@deprecated("message", since = "0")
-object DataModelInstanceQueryResponse {
-  def createDecoderForQueryResponse(): Decoder[DataModelInstanceQueryResponse] = {
-    import DataModels.dataModelPropertyDefinitionDecoder
-
-    (c: HCursor) =>
-      for {
-        modelProperties <- c
-          .downField("modelProperties")
-          .as[Map[String, DataModelPropertyDefinition]]
-
-        seqDecoder: Decoder[Seq[PropertyMap]] =
-          Decoder.decodeIterable[PropertyMap, Seq](
-            PropertyMap.createDynamicPropertyDecoder(modelProperties),
-            implicitly
-          )
-
-        items <- seqDecoder.tryDecode(c.downField("items"))
-        nextCursor <- c.downField("nextCursor").as[Option[String]]
-      } yield DataModelInstanceQueryResponse(items, Some(modelProperties), nextCursor)
-  }
-}
-
-@deprecated("message", since = "0")
-final case class DataModelInstanceByExternalId(
-    spaceExternalId: String,
-    items: Seq[CogniteExternalId],
-    model: DataModelIdentifier
-)
-
-@deprecated("message", since = "0")
-final case class Edge(
-    override val externalId: String,
-    `type`: DirectRelationIdentifier,
-    startNode: DirectRelationIdentifier,
-    endNode: DirectRelationIdentifier,
-    properties: Option[Map[String, DataModelProperty[_]]] = None
-) extends PropertyMap(
-      {
-        def relationIdentifierToPropertyArrayText(
-            dri: DirectRelationIdentifier
-        ): com.cognite.sdk.scala.v1.PropertyType.Array.Text.Property =
-          PropertyType.Array.Text.Property(
-            dri.spaceExternalId.map(List(_)).getOrElse(List.empty[String]) ++ List(
-              dri.externalId
-            )
-          )
-        val propsToAdd: Map[String, DataModelProperty[_]] = Map[String, DataModelProperty[_]](
-          "externalId" -> PropertyType.Text.Property(externalId),
-          "type" -> relationIdentifierToPropertyArrayText(`type`),
-          "startNode" -> relationIdentifierToPropertyArrayText(startNode),
-          "endNode" -> relationIdentifierToPropertyArrayText(endNode)
-        )
-
-        properties.map(_ ++ propsToAdd).getOrElse(propsToAdd)
-      }
-    )
-
-@deprecated("message", since = "0")
-final case class EdgeCreate(
-    spaceExternalId: String,
-    model: DataModelIdentifier,
-    autoCreateStartNodes: Boolean = false,
-    autoCreateEndNodes: Boolean = false,
-    overwrite: Boolean = false,
-    items: Seq[PropertyMap]
-)

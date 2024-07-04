@@ -31,7 +31,8 @@ class ClientTest extends SdkTestSpec with OptionValues {
     s"""
        |{
        |  "subject": "123",
-       |  "projects": [{"projectUrlName": "111", "groups": []}]
+       |  "projects": [{"projectUrlName": "111", "groups": []}],
+       |  "capabilities": []
        |}
        |""".stripMargin, StatusCode.Ok, "OK",
     Seq(Header("x-request-id", "test-request-header"), Header("content-type", "application/json; charset=utf-8")))
@@ -89,7 +90,8 @@ class ClientTest extends SdkTestSpec with OptionValues {
     )(
       implicitly,
       implicitly,
-      RateLimitingBackend[Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5)
+      RateLimitingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5)
+        .unsafeRunSync()
     ).token.inspect().unsafeRunSync().projects should not be empty
   }
 

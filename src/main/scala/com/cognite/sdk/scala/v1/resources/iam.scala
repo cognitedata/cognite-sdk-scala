@@ -5,11 +5,14 @@ package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
-import io.circe.Decoder
-import io.circe.generic.semiauto.deriveDecoder
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import sttp.client3._
 
-class Groups[F[_]](val requestSession: RequestSession[F]) extends Readable[Group, F] {
+class Groups[F[_]](val requestSession: RequestSession[F])
+    extends Readable[Group, F]
+    with Create[Group, GroupCreate, F]
+    with DeleteByIds[F, Long] {
   import Groups._
   override val baseUrl = uri"${requestSession.baseUrl}/groups"
 
@@ -22,6 +25,18 @@ class Groups[F[_]](val requestSession: RequestSession[F]) extends Readable[Group
       requestSession,
       baseUrl
     )
+
+  override def createItems(items: Items[GroupCreate]): F[Seq[Group]] =
+    Create.createItems[F, Group, GroupCreate](requestSession, baseUrl, items)
+
+  override def deleteByIds(ids: Seq[Long]): F[Unit] = {
+    import sttp.client3.circe._
+    requestSession.post[Unit, Unit, Items[Long]](
+      Items(ids),
+      uri"$baseUrl/delete",
+      _ => ()
+    )
+  }
 }
 
 object Groups {
@@ -30,6 +45,10 @@ object Groups {
   implicit val groupDecoder: Decoder[Group] = deriveDecoder[Group]
   implicit val groupItemsWithCursorDecoder: Decoder[ItemsWithCursor[Group]] =
     deriveDecoder[ItemsWithCursor[Group]]
+
+  implicit val capabilitiesEncoder: Encoder[Capability] = deriveEncoder
+  implicit val groupEncoder: Encoder[GroupCreate] = deriveEncoder
+  implicit val groupItemsEncoder: Encoder[Items[GroupCreate]] = deriveEncoder
 }
 
 class SecurityCategories[F[_]](val requestSession: RequestSession[F])

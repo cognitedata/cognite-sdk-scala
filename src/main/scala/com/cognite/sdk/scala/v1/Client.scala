@@ -164,7 +164,6 @@ final case class RequestSession[F[_]: Monad: Trace](
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
-// scalastyle:off parameter.number
 class GenericClient[F[_]: Trace](
     applicationName: String,
     val projectName: String,
@@ -192,7 +191,6 @@ class GenericClient[F[_]: Trace](
       clientTag,
       cdfVersion
     )
-  // scalastyle:on parameter.number
 
   import GenericClient._
 
@@ -253,17 +251,6 @@ class GenericClient[F[_]: Trace](
   lazy val sessions = new Sessions[F](requestSession.withResourceType(SESSIONS))
   lazy val transformations =
     new Transformations[F](requestSession.withResourceType(TRANSFORMATIONS))
-  @deprecated("message", since = "0")
-  lazy val dataModels =
-    new DataModels[F](requestSession.withResourceType(OLD_DATAMODELS))
-  @deprecated("message", since = "0")
-  lazy val nodes =
-    new Nodes[F](requestSession.withResourceType(OLD_DATAMODELS), dataModels)
-  @deprecated("message", since = "0")
-  lazy val spaces = new Spaces[F](requestSession.withResourceType(OLD_DATAMODELS))
-  @deprecated("message", since = "0")
-  lazy val edges =
-    new Edges[F](requestSession.withResourceType(OLD_DATAMODELS), dataModels)
   lazy val containers =
     new Containers[F](requestSession.withResourceType(DATAMODELS))
   lazy val instances =
@@ -272,17 +259,6 @@ class GenericClient[F[_]: Trace](
   lazy val spacesv3 = new SpacesV3[F](requestSession.withResourceType(DATAMODELS))
   lazy val dataModelsV3 =
     new DataModelsV3[F](requestSession.withResourceType(DATAMODELS))
-
-  lazy val wdl = new WellDataLayer[F](
-    RequestSession(
-      applicationName,
-      uri"$uri/api/v1/projects/$projectName",
-      sttpBackend,
-      authProvider,
-      clientTag,
-      Some("20221206-beta")
-    ).withResourceType(WELLS)
-  )
 
   def project: F[Project] =
     requestSession
@@ -316,10 +292,7 @@ object GenericClient {
   case object FUNCTIONS extends RESOURCE_TYPE
   case object SESSIONS extends RESOURCE_TYPE
   case object TRANSFORMATIONS extends RESOURCE_TYPE
-  @deprecated("message", since = "0")
-  case object OLD_DATAMODELS extends RESOURCE_TYPE
   case object DATAMODELS extends RESOURCE_TYPE
-  case object WELLS extends RESOURCE_TYPE
   case object PROJECT extends RESOURCE_TYPE
   case object GROUPS extends RESOURCE_TYPE
   case object SECURITY_CATEGORIES extends RESOURCE_TYPE

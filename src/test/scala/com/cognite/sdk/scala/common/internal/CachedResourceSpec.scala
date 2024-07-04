@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 // From https://gist.github.com/Daenyth/28243952f1fcfac6e8ef838040e8638e/9167a51f41322c53de492186c7bfab609fe78f8d
 
-// scalastyle:off
-
 package com.cognite.sdk.scala.common.internal
 
 import cats.effect.kernel.Outcome

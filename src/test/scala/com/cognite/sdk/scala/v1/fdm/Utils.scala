@@ -1,13 +1,25 @@
 package com.cognite.sdk.scala.v1.fdm
 
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, CorePropertyDefinition, ViewCorePropertyDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{
+  ContainerPropertyDefinition,
+  CorePropertyDefinition,
+  ViewCorePropertyDefinition
+}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType._
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{
+  PrimitivePropType,
+  PropertyDefaultValue,
+  PropertyType
+}
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.{EdgeWrite, NodeWrite}
-import com.cognite.sdk.scala.v1.fdm.instances.{EdgeOrNodeData, InstancePropertyValue, NodeOrEdgeCreate}
+import com.cognite.sdk.scala.v1.fdm.instances.{
+  EdgeOrNodeData,
+  InstancePropertyValue,
+  NodeOrEdgeCreate
+}
 import io.circe.{Json, JsonObject}
 
 import java.time.{LocalDate, LocalDateTime, ZoneId}
@@ -38,9 +50,8 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Timestamp, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(true)),
     PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
-    DirectNodeRelationProperty(
-      container = Some(ContainerReference(space = SpaceExternalId, externalId = DirectNodeRelationContainerExtId)),
-      source = None),
+    DirectNodeRelationProperty(container = None, source = None, list = Some(false)),
+    DirectNodeRelationProperty(container = None, source = None, list = Some(true)),
     TimeSeriesReference(list = Some(false)),
     FileReference(list = Some(false)),
     SequenceReference(list = Some(false)),
@@ -73,9 +84,10 @@ object Utils {
   )
 
   def toViewPropertyDefinition(
-                                containerPropDef: ContainerPropertyDefinition,
-                                containerRef: Option[ContainerReference],
-                                containerPropertyIdentifier: Option[String]): ViewCorePropertyDefinition =
+      containerPropDef: ContainerPropertyDefinition,
+      containerRef: Option[ContainerReference],
+      containerPropertyIdentifier: Option[String]
+  ): ViewCorePropertyDefinition =
     ViewCorePropertyDefinition(
       nullable = containerPropDef.nullable,
       autoIncrement = containerPropDef.autoIncrement,
@@ -87,7 +99,6 @@ object Utils {
       containerPropertyIdentifier = containerPropertyIdentifier
     )
 
-  // scalastyle:off cyclomatic.complexity method.length
   def createAllPossibleContainerPropCombinations: Map[String, ContainerPropertyDefinition] = {
     val boolOptions = List(
       true,
@@ -138,7 +149,6 @@ object Utils {
       )
     }).toMap
   }
-  // scalastyle:on cyclomatic.complexity method.length
 
   def createAllPossibleViewPropCombinations: Map[String, ViewCorePropertyDefinition] =
     createAllPossibleContainerPropCombinations.map {
@@ -146,10 +156,10 @@ object Utils {
     }
 
   def createTestContainer(
-                           space: String,
-                           containerExternalId: String,
-                           usage: Usage
-                         ): ContainerCreateDefinition = {
+      space: String,
+      containerExternalId: String,
+      usage: Usage
+  ): ContainerCreateDefinition = {
     val allPossibleProperties: Map[String, ContainerPropertyDefinition] =
       createAllPossibleContainerPropCombinations
 //    val allPossiblePropertyKeys = allPossibleProperties.keys.toList
@@ -180,25 +190,28 @@ object Utils {
   }
 
   def createInstancePropertyForContainerProperty(
-                                                  propName: String,
-                                                  containerPropType: PropertyType
-                                                ): InstancePropertyValue = {
+      propName: String,
+      containerPropType: PropertyType
+  ): InstancePropertyValue =
     containerPropType match {
-      case DirectNodeRelationProperty(container, _) =>
-        val ref = container.map(r => DirectRelationReference(r.space, s"${r.externalId}Instance"))
-        InstancePropertyValue.ViewDirectNodeRelation(ref)
+      case DirectNodeRelationProperty(_, _, isList) if isList.contains(false) =>
+        val autoRef = DirectRelationReference(Utils.SpaceExternalId, s"$propName-Instance")
+        InstancePropertyValue.ViewDirectNodeRelation(Some(autoRef))
+      case DirectNodeRelationProperty(_, _, isList) if isList.contains(true) =>
+        val autoRef = DirectRelationReference(Utils.SpaceExternalId, s"$propName-Instance")
+        InstancePropertyValue.ViewDirectNodeRelationList(Seq(autoRef, autoRef))
       case p if p.isList => listContainerPropToInstanceProperty(propName, p)
       case p => nonListContainerPropToInstanceProperty(propName, p)
     }
-  }
 
-  def createNodeWriteData(space: String,
-                          nodeExternalId: String,
-                          sourceRef: SourceReference,
-                          propsMap: Map[String, CorePropertyDefinition]): NodeWrite = {
-    val instanceValuesForProps = propsMap.map {
-      case (propName, prop) =>
-        propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+  def createNodeWriteData(
+      space: String,
+      nodeExternalId: String,
+      sourceRef: SourceReference,
+      propsMap: Map[String, CorePropertyDefinition]
+  ): NodeWrite = {
+    val instanceValuesForProps = propsMap.map { case (propName, prop) =>
+      propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
     }
 //    val (nullables, nonNullables) = instanceValuesForProps.partition {
 //      case (propName, _) =>
@@ -209,7 +222,7 @@ object Utils {
 //      List(toInstanceData(sourceRef, nonNullables))
 //    } else
 //    {
-      val withAllProps = toInstanceData(sourceRef, instanceValuesForProps)
+    val withAllProps = toInstanceData(sourceRef, instanceValuesForProps)
 //      val withRequiredProps = toInstanceData(sourceRef, nonNullables)
 //      val withEachNonRequired = nullables.map {
 //        case (propName, propVal) =>
@@ -226,20 +239,19 @@ object Utils {
     )
   }
 
-  def createEdgeWriteData(space: String,
-                          edgeExternalId: String,
-                          sourceRef: SourceReference,
-                          propsMap: Map[String, CorePropertyDefinition],
-                          startNode: DirectRelationReference,
-                          endNode: DirectRelationReference
-                         ): EdgeWrite = {
-    val instanceValuesForProps = propsMap.map {
-      case (propName, prop) =>
-        propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+  def createEdgeWriteData(
+      space: String,
+      edgeExternalId: String,
+      sourceRef: SourceReference,
+      propsMap: Map[String, CorePropertyDefinition],
+      startNode: DirectRelationReference,
+      endNode: DirectRelationReference
+  ): EdgeWrite = {
+    val instanceValuesForProps = propsMap.map { case (propName, prop) =>
+      propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
     }
-    val (nullables, nonNullables) = instanceValuesForProps.partition {
-      case (propName, _) =>
-        propsMap(propName).nullable.getOrElse(true)
+    val (nullables, nonNullables) = instanceValuesForProps.partition { case (propName, _) =>
+      propsMap(propName).nullable.getOrElse(true)
     }
 
     val nodeData = if (nullables.isEmpty) {
@@ -247,11 +259,19 @@ object Utils {
     } else {
       val withAllProps = toInstanceData(sourceRef, instanceValuesForProps)
       val withRequiredProps = toInstanceData(sourceRef, nonNullables)
-      val withEachNonRequired = nullables.map {
-        case (propName, propVal) =>
-          toInstanceData(sourceRef, nonNullables + (propName -> propVal))
+      val withEachNonRequired = nullables.map { case (propName, propVal) =>
+        toInstanceData(sourceRef, nonNullables + (propName -> propVal))
       }
-      List(withAllProps, withRequiredProps) ++ withEachNonRequired
+      val allPropsMaps =
+        withAllProps.properties.toList ++
+          withRequiredProps.properties.toList ++
+          withEachNonRequired.flatMap(_.properties.toList)
+      List(
+        EdgeOrNodeData(
+          source = sourceRef,
+          properties = Some(allPropsMaps.flatMap(_.toList).toMap).filterNot(_.isEmpty)
+        )
+      )
     }
 
     EdgeWrite(
@@ -265,25 +285,25 @@ object Utils {
   }
 
   def createEdgeOrNodeWriteData(
-                                 space: String,
-                                 nodeOrEdgeExternalId: String,
-                                 usage: Usage,
-                                 sourceRef: SourceReference,
-                                 propsMap: Map[String, CorePropertyDefinition],
-                                 startNode: DirectRelationReference,
-                                 endNode: DirectRelationReference
-                         ): NodeOrEdgeCreate =
+      space: String,
+      nodeOrEdgeExternalId: String,
+      usage: Usage,
+      sourceRef: SourceReference,
+      propsMap: Map[String, CorePropertyDefinition],
+      startNode: DirectRelationReference,
+      endNode: DirectRelationReference
+  ): NodeOrEdgeCreate =
     usage match {
-      case u@(Usage.Node | Usage.Edge) =>
-        throw new IllegalArgumentException(s"${sourceRef.toString} supports only: ${u.productPrefix}s. Should support both nodes & edges!")
+      case u @ (Usage.Node | Usage.Edge) =>
+        throw new IllegalArgumentException(
+          s"${sourceRef.toString} supports only: ${u.productPrefix}s. Should support both nodes & edges!"
+        )
       case _ =>
-        val instanceValuesForProps = propsMap.map {
-          case (propName, prop) =>
-            propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+        val instanceValuesForProps = propsMap.map { case (propName, prop) =>
+          propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
         }
-        val (nullables, nonNullables) = instanceValuesForProps.partition {
-          case (propName, _) =>
-            propsMap(propName).nullable.getOrElse(true)
+        val (nullables, nonNullables) = instanceValuesForProps.partition { case (propName, _) =>
+          propsMap(propName).nullable.getOrElse(true)
         }
 
         val nodeData = if (nullables.isEmpty) {
@@ -291,11 +311,19 @@ object Utils {
         } else {
           val withAllProps = toInstanceData(sourceRef, instanceValuesForProps)
           val withRequiredProps = toInstanceData(sourceRef, nonNullables)
-          val withEachNonRequired = nullables.map {
-            case (propName, propVal) =>
-              toInstanceData(sourceRef, nonNullables + (propName -> propVal))
+          val withEachNonRequired = nullables.map { case (propName, propVal) =>
+            toInstanceData(sourceRef, nonNullables + (propName -> propVal))
           }
-          List(withAllProps, withRequiredProps) ++ withEachNonRequired
+          val allPropsMaps =
+            withAllProps.properties.toList ++
+              withRequiredProps.properties.toList ++
+              withEachNonRequired.flatMap(_.properties.toList)
+          List(
+            EdgeOrNodeData(
+              source = sourceRef,
+              properties = Some(allPropsMaps.flatMap(_.toList).toMap).filterNot(_.isEmpty)
+            )
+          )
         }
 
         EdgeWrite(
@@ -332,11 +360,10 @@ object Utils {
     )
   )
 
-  // scalastyle:off cyclomatic.complexity
   private def listContainerPropToInstanceProperty(
-                                                   propName: String,
-                                                   propertyType: PropertyType
-                                                 ): InstancePropertyValue =
+      propName: String,
+      propertyType: PropertyType
+  ): InstancePropertyValue =
     propertyType match {
       case PropertyType.TextProperty(Some(true), _) =>
         InstancePropertyValue.StringList(List(s"${propName}Value1", s"${propName}Value2"))
@@ -356,7 +383,9 @@ object Utils {
         )
       case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, Some(true)) =>
         InstancePropertyValue.TimestampList(
-          (1 to 10).toList.map(i => LocalDateTime.now().minusDays(i.toLong).atZone(ZoneId.of("UTC")))
+          (1 to 10).toList.map(i =>
+            LocalDateTime.now().minusDays(i.toLong).atZone(ZoneId.of("UTC"))
+          )
         )
       case PropertyType.PrimitiveProperty(PrimitivePropType.Json, Some(true)) =>
         jsonListExamle
@@ -368,13 +397,11 @@ object Utils {
         InstancePropertyValue.TimeSeriesReferenceList(List("ts1", "ts2", "ts3", "ts4"))
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
-  // scalastyle:on cyclomatic.complexity
 
-  // scalastyle:off cyclomatic.complexity
   private def nonListContainerPropToInstanceProperty(
-                                                      propName: String,
-                                                      propertyType: PropertyType
-                                                    ): InstancePropertyValue =
+      propName: String,
+      propertyType: PropertyType
+  ): InstancePropertyValue =
     propertyType match {
       case PropertyType.TextProperty(None | Some(false), _) =>
         InstancePropertyValue.String(s"${propName}Value")
@@ -391,7 +418,9 @@ object Utils {
       case PropertyType.PrimitiveProperty(PrimitivePropType.Date, None | Some(false)) =>
         InstancePropertyValue.Date(LocalDate.now().minusDays(Random.nextInt(30).toLong))
       case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, None | Some(false)) =>
-        InstancePropertyValue.Timestamp(LocalDateTime.now().minusDays(Random.nextInt(30).toLong).atZone(ZoneId.of("UTC")))
+        InstancePropertyValue.Timestamp(
+          LocalDateTime.now().minusDays(Random.nextInt(30).toLong).atZone(ZoneId.of("UTC"))
+        )
       case PropertyType.PrimitiveProperty(PrimitivePropType.Json, None | Some(false)) =>
         InstancePropertyValue.Object(
           Json.fromJsonObject(
@@ -404,24 +433,28 @@ object Utils {
             )
           )
         )
-      case _: PropertyType.TimeSeriesReference => InstancePropertyValue.TimeSeriesReference(s"$propName-reference")
-      case _: PropertyType.FileReference => InstancePropertyValue.FileReference(s"$propName-reference")
-      case _: PropertyType.SequenceReference => InstancePropertyValue.SequenceReference(s"$propName-reference")
+      case _: PropertyType.TimeSeriesReference =>
+        InstancePropertyValue.TimeSeriesReference(s"$propName-reference")
+      case _: PropertyType.FileReference =>
+        InstancePropertyValue.FileReference(s"$propName-reference")
+      case _: PropertyType.SequenceReference =>
+        InstancePropertyValue.SequenceReference(s"$propName-reference")
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
-  // scalastyle:on cyclomatic.complexity
 
-  private def toInstanceData(ref: SourceReference, instancePropertyValues: Map[String, InstancePropertyValue]) =
+  private def toInstanceData(
+      ref: SourceReference,
+      instancePropertyValues: Map[String, InstancePropertyValue]
+  ) =
     EdgeOrNodeData(
       source = ref,
       properties = Some(instancePropertyValues.mapValues(v => Some(v)).toMap)
     )
 
-  // scalastyle:off cyclomatic.complexity
   private def propertyDefaultValueForPropertyType(
-                                                   p: PropertyType,
-                                                   withDefault: Boolean
-                                                 ): Option[PropertyDefaultValue] =
+      p: PropertyType,
+      withDefault: Boolean
+  ): Option[PropertyDefaultValue] =
     if (withDefault && !p.isList) {
       p match {
         case TextProperty(_, _) => Some(PropertyDefaultValue.String("defaultTextValue"))
@@ -452,23 +485,21 @@ object Utils {
           Some(
             PropertyDefaultValue.Object(
               Json.fromJsonObject(
-                JsonObject.fromMap(
-                  Map(
-                    "a" -> Json.fromString("a"),
-                    "b" -> Json.fromInt(1)
-                  )
-                )
+                JsonObject.fromMap(Map(
+                  "a" -> Json.fromString("a"),
+                  "b" -> Json.fromInt(1)
+                ))
               )
             )
           )
         case _: DirectNodeRelationProperty => None
-        case _: TimeSeriesReference => Some(PropertyDefaultValue.TimeSeriesReference("defaultTimeSeriesExternalId"))
+        case _: TimeSeriesReference =>
+          Some(PropertyDefaultValue.TimeSeriesReference("defaultTimeSeriesExternalId"))
         case _: FileReference => Some(PropertyDefaultValue.FileReference("defaultFileExternalId"))
-        case _: SequenceReference => Some(PropertyDefaultValue.SequenceReference("defaultSequenceExternalId"))
+        case _: SequenceReference =>
+          Some(PropertyDefaultValue.SequenceReference("defaultSequenceExternalId"))
       }
     } else {
       None
     }
-  // scalastyle:on cyclomatic.complexity
-
 }
