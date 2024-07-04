@@ -124,7 +124,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
   }
 
   it should "not throw an exception if the authentication is invalid and project is specified" in {
-    implicit val auth: Auth = BearerTokenAuth("invalid-key", project = Some("random-project"))
+    implicit val auth: Auth = BearerTokenAuth("invalid-key")
     noException should be thrownBy new GenericClient[Id](
       "scala-sdk-test", projectName, auth = auth)(
       implicitly,
