@@ -136,7 +136,6 @@ object PropertyDefinition {
         }
   }
 
-  // scalastyle:off cyclomatic.complexity
   private def propertyTypeBasedPropertyDefaultValue(
       propType: PropertyType,
       defaultValueJson: Option[Json]
@@ -174,7 +173,6 @@ object PropertyDefinition {
     }
     defaultValue
   }
-  // scalastyle:on cyclomatic.complexity
 
   implicit val connectionDefinitionDecoder: Decoder[ConnectionDefinition] =
     List[Decoder[ConnectionDefinition]](

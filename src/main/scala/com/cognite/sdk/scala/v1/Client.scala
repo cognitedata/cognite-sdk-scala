@@ -164,7 +164,6 @@ final case class RequestSession[F[_]: Monad: Trace](
   def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
-// scalastyle:off parameter.number
 class GenericClient[F[_]: Trace](
     applicationName: String,
     val projectName: String,
@@ -192,7 +191,6 @@ class GenericClient[F[_]: Trace](
       clientTag,
       cdfVersion
     )
-  // scalastyle:on parameter.number
 
   import GenericClient._
 
