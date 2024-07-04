@@ -146,7 +146,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     Event(description = Some("scala-sdk-update-3"), `type` = Some("test"), dataSetId = Some(testDataSet.id))
   )
   private val eventUpdates = Seq(
-    Event(description = Some("scala-sdk-update-1-1"), `type` = Some("testA"), subtype = Some(null)), // scalastyle:ignore null
+    Event(description = Some("scala-sdk-update-1-1"), `type` = Some("testA"), subtype = Some(null)),
     Event(
       description = Some("scala-sdk-update-2-1"),
       `type` = Some("testA"),
