@@ -713,8 +713,8 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
       val cursors = Map[String, String]("sync1" -> "cursor-101")
 
       val actual: Either[circe.Error, InstanceSyncResponse] = parse(encoded).flatMap(Decoder[InstanceSyncResponse].decodeJson)
-      Right(cursors) shouldBe actual.map(_.nextCursor)
-      Right(Some(items)) shouldBe actual.map(_.items)
+      actual.map(_.nextCursor) shouldBe Right(cursors)
+      actual.map(_.items) shouldBe Right(Some(items))
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-02-28T10:42:39.443956618Z",
+  "timestamp" : "2024-07-04T12:12:35.304405Z",
   "configurations" : [
     "compile",
     "optional",
@@ -46,11 +46,11 @@
     {
       "org" : "com.chuusai",
       "name" : "shapeless_2.13",
-      "version" : "2.3.10",
+      "version" : "2.3.11",
       "artifacts" : [
         {
           "name" : "shapeless_2.13.jar",
-          "hash" : "sha1:3feda6c411178b4a94180546fad927f66919d765"
+          "hash" : "sha1:61ace0241b473e91614259b2bfc774d31b44b74c"
         }
       ],
       "configurations" : [
@@ -276,11 +276,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-core_2.13",
-      "version" : "0.14.6",
+      "version" : "0.14.8",
       "artifacts" : [
         {
           "name" : "circe-core_2.13.jar",
-          "hash" : "sha1:ed85bc1a8081f425aa3a4fbd0dae62242c3ebff8"
+          "hash" : "sha1:ba09b00a350c8c3c16a8528bac6249e4fbca2411"
         }
       ],
       "configurations" : [
@@ -292,11 +292,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-generic_2.13",
-      "version" : "0.14.6",
+      "version" : "0.14.8",
       "artifacts" : [
         {
           "name" : "circe-generic_2.13.jar",
-          "hash" : "sha1:416c0185afc84c243a236ab29fb84a7cd53afcd1"
+          "hash" : "sha1:56b77cc6788db246ce84a42ea371f263aeb70ed9"
         }
       ],
       "configurations" : [
@@ -308,11 +308,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-jawn_2.13",
-      "version" : "0.14.6",
+      "version" : "0.14.8",
       "artifacts" : [
         {
           "name" : "circe-jawn_2.13.jar",
-          "hash" : "sha1:c2e38c4dff1ca409a0d0b0370067ca20fd88f449"
+          "hash" : "sha1:7c050feb7f6bcd4ff261b64aa214b144d9de896b"
         }
       ],
       "configurations" : [
@@ -324,11 +324,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-literal_2.13",
-      "version" : "0.14.6",
+      "version" : "0.14.8",
       "artifacts" : [
         {
           "name" : "circe-literal_2.13.jar",
-          "hash" : "sha1:d83852d0955540f744735d55b542a1ebbe654798"
+          "hash" : "sha1:36ceb93372e235947a44ee31a782ea6af4a0e8a6"
         }
       ],
       "configurations" : [
@@ -338,11 +338,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-numbers_2.13",
-      "version" : "0.14.6",
+      "version" : "0.14.8",
       "artifacts" : [
         {
           "name" : "circe-numbers_2.13.jar",
-          "hash" : "sha1:4764fb26cee059f2bf878e8891b100ab9d6f2d01"
+          "hash" : "sha1:515bf38ca47d3840081a2d380a33cf4652693506"
         }
       ],
       "configurations" : [
@@ -354,11 +354,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-parser_2.13",
-      "version" : "0.14.6",
+      "version" : "0.14.8",
       "artifacts" : [
         {
           "name" : "circe-parser_2.13.jar",
-          "hash" : "sha1:cc65e4803d5712526163776aa7973035d799532f"
+          "hash" : "sha1:c289e195818a0a8c404ae97c48887a9aab4418a1"
         }
       ],
       "configurations" : [
@@ -650,11 +650,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala-library",
-      "version" : "2.13.8",
+      "version" : "2.13.14",
       "artifacts" : [
         {
           "name" : "scala-library.jar",
-          "hash" : "sha1:5a865f03a794b27e6491740c4c419a19e4511a3d"
+          "hash" : "sha1:f8b4afe89abe48ca670f620c7da89b71f93e6546"
         }
       ],
       "configurations" : [
@@ -666,11 +666,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala-reflect",
-      "version" : "2.13.8",
+      "version" : "2.13.14",
       "artifacts" : [
         {
           "name" : "scala-reflect.jar",
-          "hash" : "sha1:994b004d041b18724ec298a135c37e7817d369ec"
+          "hash" : "sha1:8e275fefb2a01e178db2cdfebb2181062a790b82"
         }
       ],
       "configurations" : [
@@ -1230,11 +1230,11 @@
     {
       "org" : "org.typelevel",
       "name" : "jawn-parser_2.13",
-      "version" : "1.4.0",
+      "version" : "1.5.1",
       "artifacts" : [
         {
           "name" : "jawn-parser_2.13.jar",
-          "hash" : "sha1:528eb9384bf76a11693d81de93d0290a19e446ef"
+          "hash" : "sha1:09b1f7e52a186493c2cb1fe0d8d0220f0c266d9f"
         }
       ],
       "configurations" : [
