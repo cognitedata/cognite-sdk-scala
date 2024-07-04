@@ -9,7 +9,8 @@ import sttp.client3._
 import io.circe.{Decoder, DecodingFailure, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
-import scala.collection.compat._
+
+import scala.annotation.nowarn
 
 final case class ProjectDetails(projectUrlName: String, groups: Seq[Long])
 
@@ -81,10 +82,11 @@ object ProjectCapability {
       )
     } yield new ProjectCapability(acls, projectScope)
   }
+  @nowarn("cat=deprecation")
   implicit val encoder: Encoder[ProjectCapability] = Encoder.instance {
     case ProjectCapability(acl, scope) =>
       Json.obj(
-        (Seq("projectScope" -> scope.asJson) ++ acl.view.mapValues(_.asJson).toList): _*
+        (Seq("projectScope" -> scope.asJson) ++ acl.mapValues(_.asJson).toList): _*
       )
   }
 }

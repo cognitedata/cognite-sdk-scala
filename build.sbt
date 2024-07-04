@@ -129,10 +129,6 @@ lazy val core = (project in file("."))
       "org.scala-lang.modules" %% "scala-collection-compat" % "2.12.0"
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) =>
-        List(
-          "-Wconf:origin=scala.collection.compat.*:s"
-        )
       case Some((2, minor)) if minor == 13 =>
         List(
           // We use JavaConverters to remain backwards compatible with Scala 2.12,
