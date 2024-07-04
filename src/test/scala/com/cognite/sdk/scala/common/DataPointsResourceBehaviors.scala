@@ -24,7 +24,6 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
 
   def withTimeSeries(testCode: TimeSeries => Any): Unit
 
-   // scalastyle:off
   def dataPointsResource(dataPoints: DataPointsResource[IO])(implicit IORuntime: IORuntime): Unit = {
     it should "be possible to insert and delete numerical data points" in withTimeSeries {
       timeSeries =>

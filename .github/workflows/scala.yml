@@ -143,7 +143,7 @@ jobs:
       # run: sbt test
       run: |
         cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalastyle test:scalastyle scalafmtCheck coverage test coverageReport
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalafmtCheck coverage test coverageReport
 
     - name: Upload test coverage report
       uses: codecov/codecov-action@v3
@@ -185,7 +185,7 @@ jobs:
           gpg --import public.key
           echo "$GPG_PRIVATE_KEY" > private.key
           gpg --verbose --batch --import-options import-show --import private.key
-
+          
           mkdir -p ~/.sbt/gpg
           echo "$GPG_PRIVATE_KEY_PASSPHRASE" | gpg --verbose --batch -a --export-secret-keys --pinentry-mode loopback --passphrase-fd 0 > ~/.sbt/gpg/secring.asc
 
