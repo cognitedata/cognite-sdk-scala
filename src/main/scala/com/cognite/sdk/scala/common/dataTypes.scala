@@ -10,26 +10,20 @@ import io.circe.{Decoder, Encoder, Json, JsonObject, KeyEncoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import sttp.model.Uri
 
-import scala.annotation.nowarn
-
 trait ResponseWithCursor {
   val nextCursor: Option[String]
 }
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
     extends ResponseWithCursor
 object ItemsWithCursor {
-  @nowarn
   implicit def itemsWithCursorEncoder[A: Encoder]: Encoder[ItemsWithCursor[A]] =
     deriveEncoder[ItemsWithCursor[A]]
-  @nowarn
   implicit def itemsWithCursorDecoder[A: Decoder]: Decoder[ItemsWithCursor[A]] =
     deriveDecoder[ItemsWithCursor[A]]
 }
 final case class Items[A](items: Seq[A])
 object Items {
-  @nowarn
   implicit def itemsEncoder[A: Encoder]: Encoder[Items[A]] = deriveEncoder[Items[A]]
-  @nowarn
   implicit def itemsDecoder[A: Decoder]: Decoder[Items[A]] = deriveDecoder[Items[A]]
 }
 final case class ItemsWithIgnoreUnknownIds[A](items: Seq[A], ignoreUnknownIds: Boolean)
