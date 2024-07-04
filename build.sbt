@@ -2,7 +2,7 @@ import sbt.{Test, project}
 import wartremover.Wart
 
 //val scala3 = "3.2.0"
-val scala213 = "2.13.11"
+val scala213 = "2.13.14"
 val scala212 = "2.12.17"
 val supportedScalaVersions = List(scala212, scala213)
 
@@ -11,7 +11,7 @@ val jettyTestVersion = "12.0.11"
 
 val sttpVersion = "3.5.2"
 val circeVersion = "0.14.8"
-val catsEffectVersion = "3.3.14"
+val catsEffectVersion = "3.5.4"
 val fs2Version = "3.3.0"
 val natchezVersion = "0.3.1"
 
