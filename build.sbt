@@ -144,7 +144,7 @@ lazy val core = (project in file("."))
           "-Wconf:src=src/main/scala/com/cognite/sdk/scala/v1/resources/assets.scala&cat=deprecation:i"
         )
       case Some((3, _)) => List(
-        "-Wconf:cat=other-pure-statement:i",
+        "-Wconf:cat=nonunit-statement:i",
         "-source:3.0-migration"
       )
       case _ =>
