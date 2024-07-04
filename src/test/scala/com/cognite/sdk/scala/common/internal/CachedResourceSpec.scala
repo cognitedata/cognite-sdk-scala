@@ -239,7 +239,7 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
         } yield {
           all(results) shouldBe Symbol("right")
           if (withCleanup) {
-            forAll(objects.values) { obj =>
+            val _ = forAll(objects.values) { obj =>
               obj.alive shouldBe false
             }
           }
@@ -306,7 +306,7 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
           _ <- cr.invalidate
           objects <- pool.get
         } yield {
-          if (withCleanup) { forAll(objects.values)(_.alive shouldBe false) }
+          if (withCleanup) { val _ = forAll(objects.values)(_.alive shouldBe false) }
           results.foreach { case (taskId, result) =>
             withClue(taskId) {
               result shouldBe Right(())
