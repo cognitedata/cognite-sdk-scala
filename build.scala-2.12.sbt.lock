@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-04T12:35:21.672805Z",
+  "timestamp" : "2024-07-04T13:08:15.443966Z",
   "configurations" : [
     "compile",
     "optional",
@@ -14,11 +14,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-core_2.12",
-      "version" : "3.6.1",
+      "version" : "3.9.3",
       "artifacts" : [
         {
           "name" : "fs2-core_2.12.jar",
-          "hash" : "sha1:e20dd115333be346f9926a6f04db1daaddea29fa"
+          "hash" : "sha1:f3bcf8ea0e053c8b86744b870f3b4c1aa50b4a39"
         }
       ],
       "configurations" : [
@@ -30,11 +30,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-io_2.12",
-      "version" : "3.6.1",
+      "version" : "3.9.3",
       "artifacts" : [
         {
           "name" : "fs2-io_2.12.jar",
-          "hash" : "sha1:8b3ac38ebf5f4d69c19a11601131c5b916f69583"
+          "hash" : "sha1:5d87a4c34b1b26a246cd01fb3f2af0546f8c05da"
         }
       ],
       "configurations" : [
@@ -62,11 +62,11 @@
     {
       "org" : "com.comcast",
       "name" : "ip4s-core_2.12",
-      "version" : "3.2.0",
+      "version" : "3.4.0",
       "artifacts" : [
         {
           "name" : "ip4s-core_2.12.jar",
-          "hash" : "sha1:8ae877810ae84e6e73cf8d3bdbfaa8389c1f4f0a"
+          "hash" : "sha1:bfeae766245114c16ebd0b45a69e359951a70683"
         }
       ],
       "configurations" : [
@@ -680,11 +680,11 @@
     {
       "org" : "org.scala-lang.modules",
       "name" : "scala-collection-compat_2.12",
-      "version" : "2.9.0",
+      "version" : "2.11.0",
       "artifacts" : [
         {
           "name" : "scala-collection-compat_2.12.jar",
-          "hash" : "sha1:ff06706d7baaad4405ca4fe985aa167396414a25"
+          "hash" : "sha1:965bfcb4ca7f821113b4877154457f9a4fae2328"
         }
       ],
       "configurations" : [
@@ -962,11 +962,11 @@
     {
       "org" : "org.scodec",
       "name" : "scodec-bits_2.12",
-      "version" : "1.1.35",
+      "version" : "1.1.38",
       "artifacts" : [
         {
           "name" : "scodec-bits_2.12.jar",
-          "hash" : "sha1:007bcd191452d1c311806b086fe143e60da97d4b"
+          "hash" : "sha1:6d253d78dae3642fc225dbea6970edde5b54a927"
         }
       ],
       "configurations" : [
@@ -992,11 +992,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_2.12",
-      "version" : "0.3.1",
+      "version" : "0.3.5",
       "artifacts" : [
         {
           "name" : "natchez-core_2.12.jar",
-          "hash" : "sha1:c5d6619236b2382a6e0289aeae9742e863b7084b"
+          "hash" : "sha1:fbb1e4d392e3b0e0bb255cf79e94286f062943ce"
         }
       ],
       "configurations" : [
@@ -1008,11 +1008,11 @@
     {
       "org" : "org.typelevel",
       "name" : "case-insensitive_2.12",
-      "version" : "1.3.0",
+      "version" : "1.4.0",
       "artifacts" : [
         {
           "name" : "case-insensitive_2.12.jar",
-          "hash" : "sha1:194997ae8ccab715c93ff657fc2fe35b272ec709"
+          "hash" : "sha1:cf318fd2cf687883ec48a6c76f497cf3871750a7"
         }
       ],
       "configurations" : [
@@ -1024,11 +1024,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-core_2.12",
-      "version" : "2.9.0",
+      "version" : "2.10.0",
       "artifacts" : [
         {
           "name" : "cats-core_2.12.jar",
-          "hash" : "sha1:844f21541d1809008586fbc1172dc02c96476639"
+          "hash" : "sha1:100bc0d103c5bd9ddcd4e2b5c24e88483e2a77d5"
         }
       ],
       "configurations" : [
@@ -1158,11 +1158,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-kernel_2.12",
-      "version" : "2.9.0",
+      "version" : "2.10.0",
       "artifacts" : [
         {
           "name" : "cats-kernel_2.12.jar",
-          "hash" : "sha1:9974ee89be2d39074a756a3ff3b94eb32b5fbaaf"
+          "hash" : "sha1:94b372f873e763186c3cccc9e76492553d01350e"
         }
       ],
       "configurations" : [
