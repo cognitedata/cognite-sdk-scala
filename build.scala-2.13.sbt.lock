@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-04T12:35:44.011772Z",
+  "timestamp" : "2024-07-04T18:20:42.440615Z",
   "configurations" : [
     "compile",
     "optional",
@@ -538,11 +538,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-http",
-      "version" : "9.4.53.v20231009",
+      "version" : "9.4.55.v20240627",
       "artifacts" : [
         {
           "name" : "jetty-http.jar",
-          "hash" : "sha1:87faf21eb322753f0527bcb88c43e67044786369"
+          "hash" : "sha1:ef807d867948042293487c025f953fb8e7d77622"
         }
       ],
       "configurations" : [
@@ -552,11 +552,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-io",
-      "version" : "9.4.53.v20231009",
+      "version" : "9.4.55.v20240627",
       "artifacts" : [
         {
           "name" : "jetty-io.jar",
-          "hash" : "sha1:70cf7649b27c964ad29bfddf58f3bfe0d30346cf"
+          "hash" : "sha1:fbb259fe460c0f299341b8c1ff7b401095b21cab"
         }
       ],
       "configurations" : [
@@ -566,11 +566,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-security",
-      "version" : "9.4.53.v20231009",
+      "version" : "9.4.55.v20240627",
       "artifacts" : [
         {
           "name" : "jetty-security.jar",
-          "hash" : "sha1:6fbc8ebe9046954dc2f51d4ba69c8f8344b05f7f"
+          "hash" : "sha1:72c5a25f0abedad7b7d25b012539398380a91984"
         }
       ],
       "configurations" : [
@@ -580,11 +580,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-server",
-      "version" : "9.4.53.v20231009",
+      "version" : "9.4.55.v20240627",
       "artifacts" : [
         {
           "name" : "jetty-server.jar",
-          "hash" : "sha1:8b0e761a0b359db59dae77c00b4213b0586cb994"
+          "hash" : "sha1:6acd4d3dba5c237cc4315e68f9a602d6d175992a"
         }
       ],
       "configurations" : [
@@ -594,11 +594,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-servlet",
-      "version" : "9.4.53.v20231009",
+      "version" : "9.4.55.v20240627",
       "artifacts" : [
         {
           "name" : "jetty-servlet.jar",
-          "hash" : "sha1:6670d6a54cdcaedd8090e8cf420fd5dd7d08e859"
+          "hash" : "sha1:0c836f9a675bf3b3eb20659de178edd4dcc8b468"
         }
       ],
       "configurations" : [
@@ -608,11 +608,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-util",
-      "version" : "9.4.53.v20231009",
+      "version" : "9.4.55.v20240627",
       "artifacts" : [
         {
           "name" : "jetty-util.jar",
-          "hash" : "sha1:f72bb4f687b4454052c6f06528ba9910714df947"
+          "hash" : "sha1:f08e418ce72a2fadcb256ad8a3c9e5ccb2dbe797"
         }
       ],
       "configurations" : [
@@ -622,11 +622,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-util-ajax",
-      "version" : "9.4.53.v20231009",
+      "version" : "9.4.55.v20240627",
       "artifacts" : [
         {
           "name" : "jetty-util-ajax.jar",
-          "hash" : "sha1:4d20f6206eb7747293697c5f64c2dc5bf4bd54a4"
+          "hash" : "sha1:d4820f654c3728b1c989bdfc34fd3ecc30f231ac"
         }
       ],
       "configurations" : [
