@@ -10,8 +10,6 @@ import io.circe.{Decoder, DecodingFailure, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 
-import scala.annotation.nowarn
-
 final case class ProjectDetails(projectUrlName: String, groups: Seq[Long])
 
 object ProjectDetails {
@@ -82,7 +80,6 @@ object ProjectCapability {
       )
     } yield new ProjectCapability(acls, projectScope)
   }
-  @nowarn("cat=deprecation")
   implicit val encoder: Encoder[ProjectCapability] = Encoder.instance {
     case ProjectCapability(acl, scope) =>
       Json.obj(
