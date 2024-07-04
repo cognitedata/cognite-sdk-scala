@@ -169,7 +169,7 @@ jobs:
         path: ~/.ivy2/cache
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
-    - name: Run tests
+    - name: Run tests for Scala 2.13
       env:
         COGNITE_BASE_URL: "https://bluefield.cognitedata.com"
         TEST_AAD_TENANT: "b86328db-09aa-4f0e-9a03-0136f604d20a"
@@ -185,6 +185,22 @@ jobs:
       run: |
         cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalafmtCheck coverage test coverageReport
+
+    - name: Run tests for Scala 3
+      env:
+        COGNITE_BASE_URL: "https://bluefield.cognitedata.com"
+        TEST_AAD_TENANT: "b86328db-09aa-4f0e-9a03-0136f604d20a"
+        TEST_CLIENT_ID: ${{ secrets.BLUEFIELD_CLIENT_ID }}
+        TEST_CLIENT_SECRET: ${{ secrets.BLUEFIELD_CLIENT_SECRET }}
+        TEST_PROJECT: "extractor-bluefield-testing"
+        COGNITE_BASE_URL2: "https://api.cognitedata.com"
+        TEST_AAD_TENANT2: "b86328db-09aa-4f0e-9a03-0136f604d20a"
+        TEST_CLIENT_ID2: ${{ secrets.BLUEFIELD_CLIENT_ID }}
+        TEST_CLIENT_SECRET2: ${{ secrets.BLUEFIELD_CLIENT_SECRET }}
+        TEST_PROJECT2: "playground"
+      # run: sbt test
+      run: |
+        cat /dev/null | sbt -Dsbt.log.noformat=true ++3.3 dependencyLockCheck
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 scalafmtCheck test
 
     - name: Upload test coverage report
