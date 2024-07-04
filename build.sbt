@@ -132,7 +132,7 @@ lazy val core = (project in file("."))
         List(
           // We use JavaConverters to remain backwards compatible with Scala 2.12,
           // and to avoid a dependency on scala-collection-compat
-          "-Wconf:cat=deprecation:i" + ",msg=discarded non-Unit value of type org.scalatest.Assertion:s" + ",msg=object JavaConverters in package scala.collection is deprecated.*:s" + ",msg=method mapValues in trait MapOps is deprecated.*:s",
+          "-Wconf:cat=deprecation:i" + ",msg=discarded non-Unit value of type org.scalatest.Assertion:s" + ",msg=discarded non-Unit value of type org.scalatest.compatible.Assertion:s" + ",msg=object JavaConverters in package scala.collection is deprecated.*:s" + ",msg=method mapValues in trait MapOps is deprecated.*:s",
 
           "-source:3.0-migration",
         )
