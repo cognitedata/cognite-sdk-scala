@@ -39,7 +39,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
         val first2Length = readable.list(limit = Some(2)).compile.toList.unsafeRunSync().length
         first2Length should be(Math.min(listLength, 2))
         val allLength = readable.list(limit = Some(3)).compile.toList.unsafeRunSync().length
-        val _ = allLength should be(Math.min(listLength, 3))
+        allLength should be(Math.min(listLength, 3))
       }
     }
   }
@@ -117,7 +117,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
         val notFoundIds =
           itemsNotFound.value.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
         notFoundIds should have size idsThatDoNotExist.size.toLong
-        val _ = notFoundIds should contain theSameElementsAs idsThatDoNotExist
+        notFoundIds should contain theSameElementsAs idsThatDoNotExist
       }
 
       val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
@@ -131,13 +131,13 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
             // it's a bit funny that the same missing ids are returned duplicated,
             // but that's how it works as of 2019-06-02.
             //sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
-            val _ = sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+            sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           case None =>
             val duplicatedNotFoundIds = sameIdsThrown.duplicated.value
               .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
               .toSet
             //duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
-            val _ = duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+            duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
         }
       }
     }
@@ -180,7 +180,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
         val notFoundIds =
           itemsNotFound.value.map(jsonObj => jsonObj("externalId").value.asString.value)
         notFoundIds should have size idsThatDoNotExist.size.toLong
-        val _ = notFoundIds should contain theSameElementsAs idsThatDoNotExist
+        notFoundIds should contain theSameElementsAs idsThatDoNotExist
       }
     }
   }
@@ -224,7 +224,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
         val notFoundIds =
           itemsNotFound.value.map(jsonObj => jsonObj("externalId").value.asString.value)
         notFoundIds should have size idsThatDoNotExist.size.toLong
-        val _ = notFoundIds should contain theSameElementsAs idsThatDoNotExist
+        notFoundIds should contain theSameElementsAs idsThatDoNotExist
       }
 
       val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
@@ -238,13 +238,13 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
             // it's a bit funny that the same missing ids are returned duplicated,
             // but that's how it works as of 2019-06-02.
             //sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
-            val _ = sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+            sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           case None =>
             val duplicatedNotFoundIds = sameIdsThrown.duplicated.value
               .map(jsonObj => jsonObj("externalId").value.asString.value)
               .toSet
             //duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
-            val _ = duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+            duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
         }
       }
     }

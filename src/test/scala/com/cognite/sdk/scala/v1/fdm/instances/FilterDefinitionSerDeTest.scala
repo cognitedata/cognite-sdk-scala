@@ -4,7 +4,7 @@ import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition.StringL
 import com.cognite.sdk.scala.v1.fdm.common.filters.{FilterDefinition, FilterValueDefinition}
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
-import io.circe.literal._
+import io.circe.literal.JsonStringContext
 import io.circe.{Decoder, Json, Printer}
 import io.circe.parser._
 import io.circe.syntax._

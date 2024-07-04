@@ -23,7 +23,6 @@ import com.cognite.sdk.scala.v1.fdm.instances.{
 import io.circe.{Json, JsonObject}
 
 import java.time.{LocalDate, LocalDateTime, ZoneId}
-import scala.annotation.nowarn
 import scala.util.Random
 
 object Utils {
@@ -443,7 +442,6 @@ object Utils {
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
 
-  @nowarn("cat=deprecation")
   private def toInstanceData(
       ref: SourceReference,
       instancePropertyValues: Map[String, InstancePropertyValue]
