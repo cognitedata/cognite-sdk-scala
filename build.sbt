@@ -11,7 +11,7 @@ val jettyTestVersion = "9.4.53.v20231009"
 
 val sttpVersion = "3.9.7"
 val circeVersion = "0.14.8"
-val catsEffectVersion = "3.3.14"
+val catsEffectVersion = "3.5.4"
 val fs2Version = "3.3.0"
 val natchezVersion = "0.3.1"
 
