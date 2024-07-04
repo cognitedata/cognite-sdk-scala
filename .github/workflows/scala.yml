@@ -131,7 +131,7 @@ jobs:
       - name: Compile
         run: |
           cat /dev/null | sbt -Dsbt.log.noformat=true ++3.3 dependencyLockCheck
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++3.3 Test/compile
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 Test/compile
 
   test:
     runs-on: ubuntu-latest
@@ -185,7 +185,7 @@ jobs:
       run: |
         cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalafmtCheck coverage test coverageReport
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++3.3 scalafmtCheck test
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 scalafmtCheck test
 
     - name: Upload test coverage report
       uses: codecov/codecov-action@v3
