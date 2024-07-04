@@ -20,13 +20,6 @@ object Auth {
   }
 }
 
-final case class NoAuthentication() extends Auth {
-  def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
-    throw new SdkException(
-      s"Authentication not provided"
-    )
-}
-
 final case class BearerTokenAuth(bearerToken: String, override val project: Option[String] = None)
     extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
