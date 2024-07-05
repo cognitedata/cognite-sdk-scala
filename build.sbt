@@ -135,6 +135,8 @@ lazy val core = (project in file("."))
           // and to avoid a dependency on scala-collection-compat
           "-Wconf:msg=object JavaConverters in package scala.collection is deprecated.*:s",
           "-Wconf:msg=method mapValues in trait MapOps is deprecated.*:s",
+          "-Wconf:msg=discarded non-Unit value of type org.scalatest.Assertion:s",
+          "-Wconf:msg=discarded non-Unit value of type org.scalatest.compatible.Assertion:s",
 
           "-source:3.0-migration",
         )
