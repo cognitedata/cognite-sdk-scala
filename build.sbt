@@ -1,10 +1,10 @@
 import sbt.{Test, project}
 import wartremover.Wart
 
-//val scala3 = "3.2.0"
+val scala3 = "3.4.2"
 val scala213 = "2.13.14"
 val scala212 = "2.12.17"
-val supportedScalaVersions = List(scala212, scala213)
+val supportedScalaVersions = List(scala212, scala213, scala3)
 
 // This is used only for tests.
 val jettyTestVersion = "9.4.53.v20231009"
@@ -17,7 +17,7 @@ val natchezVersion = "0.3.1"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
-ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.2.0"
+ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.3.1"
 
 lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
 
@@ -39,7 +39,10 @@ lazy val commonSettings = Seq(
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
   dependencyLockFile := baseDirectory.value /
     s"build.scala-${CrossVersion
-        .partialVersion(scalaVersion.value) match { case Some((2, n)) => s"2.$n" }}.sbt.lock",
+        .partialVersion(scalaVersion.value) match {
+        case Some((2, n)) => s"2.$n"
+        case Some((3, _)) => s"3"
+      }}.sbt.lock",
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
@@ -122,15 +125,28 @@ lazy val core = (project in file("."))
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
       "com.google.protobuf" % "protobuf-java" % "3.25.1",
-      "org.tpolecat" %% "natchez-core" % natchezVersion
+      "org.tpolecat" %% "natchez-core" % natchezVersion,
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, minor)) if minor == 13 =>
+      case Some((3, _)) =>
         List(
+          "-Wconf:cat=deprecation:i",
           // We use JavaConverters to remain backwards compatible with Scala 2.12,
           // and to avoid a dependency on scala-collection-compat
+          "-Wconf:msg=object JavaConverters in package scala.collection is deprecated.*:s",
+          "-Wconf:msg=method mapValues in trait MapOps is deprecated.*:s",
+          "-Wconf:msg=discarded non-Unit value of type org.scalatest.Assertion:s",
+          "-Wconf:msg=discarded non-Unit value of type org.scalatest.compatible.Assertion:s",
+
+          "-source:3.0-migration",
+        )
+      case Some((2, minor)) if minor == 13 =>
+        List(
           "-Wconf:cat=deprecation:i",
-          "-Wconf:cat=other-pure-statement:i"
+          "-Wconf:cat=other-pure-statement:i",
+          // We use JavaConverters to remain backwards compatible with Scala 2.12,
+          // and to avoid a dependency on scala-collection-compat
+          "-Wconf:origin=scala.collection.compat.*:s"
         )
       case Some((2, minor)) if minor == 12 =>
         List(
@@ -138,7 +154,6 @@ lazy val core = (project in file("."))
           // and doesn't seem to like @deprecated case class fields with default values.
           "-Wconf:src=src/main/scala/com/cognite/sdk/scala/v1/resources/assets.scala&cat=deprecation:i"
         )
-      case Some((3, _)) => List("-source:3.0-migration")
       case _ =>
         List.empty[String]
     }),
@@ -197,11 +212,3 @@ scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
 })
 
 Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oD")
-
-// Scala 2.11 doesn't support mixed projects as ours, so just disable docs for that release.
-Compile / doc / sources := (CrossVersion.partialVersion(scalaVersion.value) match {
-  case Some((2, minor)) if minor == 11 =>
-    Seq.empty
-  case _ =>
-    (Compile / doc / sources).value
-})

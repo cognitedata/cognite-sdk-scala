@@ -23,7 +23,7 @@ object ViewPropertyCreateDefinition {
   implicit val createConnectionDefinitionEncoder: Encoder[CreateConnectionDefinition] =
     PropertyDefinition.connectionDefinitionEncoder.contramap(_.connectionDefinition)
   implicit val createConnectionDefinitionDecoder: Decoder[CreateConnectionDefinition] =
-    PropertyDefinition.connectionDefinitionDecoder.map(CreateConnectionDefinition)
+    PropertyDefinition.connectionDefinitionDecoder.map(CreateConnectionDefinition.apply)
 
   implicit val createViewPropertyEncoder: Encoder[CreateViewProperty] =
     deriveEncoder[CreateViewProperty]

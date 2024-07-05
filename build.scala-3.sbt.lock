@@ -1,0 +1,1249 @@
+{
+  "lockVersion" : 1,
+  "timestamp" : "2024-07-05T08:34:17.839615019Z",
+  "configurations" : [
+    "compile",
+    "optional",
+    "protobuf",
+    "provided",
+    "runtime",
+    "scalafix",
+    "test"
+  ],
+  "dependencies" : [
+    {
+      "org" : "co.fs2",
+      "name" : "fs2-core_3",
+      "version" : "3.6.1",
+      "artifacts" : [
+        {
+          "name" : "fs2-core_3.jar",
+          "hash" : "sha1:adb973197a3ad0914442ee59f0c308d930370d4c"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "co.fs2",
+      "name" : "fs2-io_3",
+      "version" : "3.6.1",
+      "artifacts" : [
+        {
+          "name" : "fs2-io_3.jar",
+          "hash" : "sha1:2215ce3c20301ebea09fc47fe18cf83e54185418"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "com.comcast",
+      "name" : "ip4s-core_3",
+      "version" : "3.2.0",
+      "artifacts" : [
+        {
+          "name" : "ip4s-core_3.jar",
+          "hash" : "sha1:a91cf664c1f3cd923122dae1641df63ab79054e3"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "com.google.protobuf",
+      "name" : "protobuf-java",
+      "version" : "3.25.1",
+      "artifacts" : [
+        {
+          "name" : "protobuf-java.jar",
+          "hash" : "sha1:2933a5c3f022456d8842323fe0d7fb2d25a7e3c7"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "com.softwaremill.sttp.client3",
+      "name" : "async-http-client-backend-cats_3",
+      "version" : "3.5.2",
+      "artifacts" : [
+        {
+          "name" : "async-http-client-backend-cats_3.jar",
+          "hash" : "sha1:fa2d0e379281c7c03535d3f76e385df7708458f5"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "com.softwaremill.sttp.client3",
+      "name" : "async-http-client-backend_3",
+      "version" : "3.5.2",
+      "artifacts" : [
+        {
+          "name" : "async-http-client-backend_3.jar",
+          "hash" : "sha1:77b83fd573c73d245786bd6de062aa61fa205bbf"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "com.softwaremill.sttp.client3",
+      "name" : "cats_3",
+      "version" : "3.5.2",
+      "artifacts" : [
+        {
+          "name" : "cats_3.jar",
+          "hash" : "sha1:3a32c66453ccf274d7c9affd7402de2c75e4ef01"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "com.softwaremill.sttp.client3",
+      "name" : "circe_3",
+      "version" : "3.5.2",
+      "artifacts" : [
+        {
+          "name" : "circe_3.jar",
+          "hash" : "sha1:ae220994383a40788148acaa2ec907a46df8cd7a"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "com.softwaremill.sttp.client3",
+      "name" : "core_3",
+      "version" : "3.5.2",
+      "artifacts" : [
+        {
+          "name" : "core_3.jar",
+          "hash" : "sha1:30f9d5bda8b0073caa20e8e9ef21fbc93ba3ad9f"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "com.softwaremill.sttp.client3",
+      "name" : "json-common_3",
+      "version" : "3.5.2",
+      "artifacts" : [
+        {
+          "name" : "json-common_3.jar",
+          "hash" : "sha1:bde278f034bff6b79087428acf3f3e777075b7a6"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "com.softwaremill.sttp.model",
+      "name" : "core_3",
+      "version" : "1.4.25",
+      "artifacts" : [
+        {
+          "name" : "core_3.jar",
+          "hash" : "sha1:cb6bced9d5fd98ca1a91e6c1f60ce9162920be57"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "com.softwaremill.sttp.shared",
+      "name" : "core_3",
+      "version" : "1.3.4",
+      "artifacts" : [
+        {
+          "name" : "core_3.jar",
+          "hash" : "sha1:2ca7fe281da9d2ab2e80fefa020e1b14e823538d"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "com.softwaremill.sttp.shared",
+      "name" : "ws_3",
+      "version" : "1.3.4",
+      "artifacts" : [
+        {
+          "name" : "ws_3.jar",
+          "hash" : "sha1:4b6842fa1b487d34b6e8dfc529a9f7c3b402339b"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "com.sun.activation",
+      "name" : "jakarta.activation",
+      "version" : "1.2.2",
+      "artifacts" : [
+        {
+          "name" : "jakarta.activation.jar",
+          "hash" : "sha1:74548703f9851017ce2f556066659438019e7eb5"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "com.typesafe.netty",
+      "name" : "netty-reactive-streams",
+      "version" : "2.0.4",
+      "artifacts" : [
+        {
+          "name" : "netty-reactive-streams.jar",
+          "hash" : "sha1:0f77c8eaa7d5e2f2160b6d21ba385cf726f164b2"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "commons-io",
+      "name" : "commons-io",
+      "version" : "2.15.0",
+      "artifacts" : [
+        {
+          "name" : "commons-io.jar",
+          "hash" : "sha1:5c3c2db10f6f797430a7f9c696b4d1273768c924"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "io.circe",
+      "name" : "circe-core_3",
+      "version" : "0.14.8",
+      "artifacts" : [
+        {
+          "name" : "circe-core_3.jar",
+          "hash" : "sha1:8786971ecf61127fad1f7b5e15a082dcfdab4b51"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "io.circe",
+      "name" : "circe-generic_3",
+      "version" : "0.14.8",
+      "artifacts" : [
+        {
+          "name" : "circe-generic_3.jar",
+          "hash" : "sha1:b33bbdcb1eabe0baa6a11c9d1864fdc4b2423482"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "io.circe",
+      "name" : "circe-jawn_3",
+      "version" : "0.14.8",
+      "artifacts" : [
+        {
+          "name" : "circe-jawn_3.jar",
+          "hash" : "sha1:df0330633098944ae2af8f67d6d2d26e27519625"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "io.circe",
+      "name" : "circe-literal_3",
+      "version" : "0.14.8",
+      "artifacts" : [
+        {
+          "name" : "circe-literal_3.jar",
+          "hash" : "sha1:ed4bc1a80dcd7cb380e10cc337991631f009fa93"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.circe",
+      "name" : "circe-numbers_3",
+      "version" : "0.14.8",
+      "artifacts" : [
+        {
+          "name" : "circe-numbers_3.jar",
+          "hash" : "sha1:329de0d08b1be9d41d8c211c42efda0e6fec7d46"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "io.circe",
+      "name" : "circe-parser_3",
+      "version" : "0.14.8",
+      "artifacts" : [
+        {
+          "name" : "circe-parser_3.jar",
+          "hash" : "sha1:67b5fb95cedc3a9be8e8f75695895779042c92a7"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-buffer",
+      "version" : "4.1.60.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-buffer.jar",
+          "hash" : "sha1:9d213d090deeca2541ad6827eb3345bcd6e1e701"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-codec",
+      "version" : "4.1.60.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-codec.jar",
+          "hash" : "sha1:b740d51babe3312a33b505cd8b62c02f3731b2e3"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-codec-http",
+      "version" : "4.1.60.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-codec-http.jar",
+          "hash" : "sha1:354ca712f909fcd9d8a22e16bf84afcfdc44ec8d"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-codec-socks",
+      "version" : "4.1.60.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-codec-socks.jar",
+          "hash" : "sha1:6f4573281df659265bd709fd10471c3e00ef6c70"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-common",
+      "version" : "4.1.60.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-common.jar",
+          "hash" : "sha1:44540113f7148f1014be879663501db8da1c37b0"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-handler",
+      "version" : "4.1.60.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-handler.jar",
+          "hash" : "sha1:14e28bab0173be10c9631a85069636a0d0221dfe"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-handler-proxy",
+      "version" : "4.1.60.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-handler-proxy.jar",
+          "hash" : "sha1:2352f12826400e5db64b36fd951508ce9a61c196"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-resolver",
+      "version" : "4.1.60.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-resolver.jar",
+          "hash" : "sha1:caba5004618d27386ee9d5ee8b23b09b6548fb0b"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-transport",
+      "version" : "4.1.60.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-transport.jar",
+          "hash" : "sha1:94350c81cc7a78212fb0f52a500f22d1aa9c44d8"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "javax.servlet",
+      "name" : "javax.servlet-api",
+      "version" : "3.1.0",
+      "artifacts" : [
+        {
+          "name" : "javax.servlet-api.jar",
+          "hash" : "sha1:3cd63d075497751784b2fa84be59432f4905bf7c"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.asynchttpclient",
+      "name" : "async-http-client",
+      "version" : "2.12.3",
+      "artifacts" : [
+        {
+          "name" : "async-http-client.jar",
+          "hash" : "sha1:6dfc91814cc8b3bc3327246d0e5df36911b9a623"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.asynchttpclient",
+      "name" : "async-http-client-netty-utils",
+      "version" : "2.12.3",
+      "artifacts" : [
+        {
+          "name" : "async-http-client-netty-utils.jar",
+          "hash" : "sha1:ad99d8622931ed31367d0fef7fa17eb62e033fb3"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.eclipse.jetty",
+      "name" : "jetty-http",
+      "version" : "9.4.53.v20231009",
+      "artifacts" : [
+        {
+          "name" : "jetty-http.jar",
+          "hash" : "sha1:87faf21eb322753f0527bcb88c43e67044786369"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.eclipse.jetty",
+      "name" : "jetty-io",
+      "version" : "9.4.53.v20231009",
+      "artifacts" : [
+        {
+          "name" : "jetty-io.jar",
+          "hash" : "sha1:70cf7649b27c964ad29bfddf58f3bfe0d30346cf"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.eclipse.jetty",
+      "name" : "jetty-security",
+      "version" : "9.4.53.v20231009",
+      "artifacts" : [
+        {
+          "name" : "jetty-security.jar",
+          "hash" : "sha1:6fbc8ebe9046954dc2f51d4ba69c8f8344b05f7f"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.eclipse.jetty",
+      "name" : "jetty-server",
+      "version" : "9.4.53.v20231009",
+      "artifacts" : [
+        {
+          "name" : "jetty-server.jar",
+          "hash" : "sha1:8b0e761a0b359db59dae77c00b4213b0586cb994"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.eclipse.jetty",
+      "name" : "jetty-servlet",
+      "version" : "9.4.53.v20231009",
+      "artifacts" : [
+        {
+          "name" : "jetty-servlet.jar",
+          "hash" : "sha1:6670d6a54cdcaedd8090e8cf420fd5dd7d08e859"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.eclipse.jetty",
+      "name" : "jetty-util",
+      "version" : "9.4.53.v20231009",
+      "artifacts" : [
+        {
+          "name" : "jetty-util.jar",
+          "hash" : "sha1:f72bb4f687b4454052c6f06528ba9910714df947"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.eclipse.jetty",
+      "name" : "jetty-util-ajax",
+      "version" : "9.4.53.v20231009",
+      "artifacts" : [
+        {
+          "name" : "jetty-util-ajax.jar",
+          "hash" : "sha1:4d20f6206eb7747293697c5f64c2dc5bf4bd54a4"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.reactivestreams",
+      "name" : "reactive-streams",
+      "version" : "1.0.3",
+      "artifacts" : [
+        {
+          "name" : "reactive-streams.jar",
+          "hash" : "sha1:d9fb7a7926ffa635b3dcaa5049fb2bfa25b3e7d0"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scala-lang",
+      "name" : "scala-library",
+      "version" : "2.13.12",
+      "artifacts" : [
+        {
+          "name" : "scala-library.jar",
+          "hash" : "sha1:3c51da898af4ebfac356fcde11388afb2ae8ee82"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scala-lang",
+      "name" : "scala3-library_3",
+      "version" : "3.4.2",
+      "artifacts" : [
+        {
+          "name" : "scala3-library_3.jar",
+          "hash" : "sha1:0c1ce7f324cfb933ca8ce291dbe585a9b3d94a71"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scala-lang.modules",
+      "name" : "scala-collection-compat_3",
+      "version" : "2.9.0",
+      "artifacts" : [
+        {
+          "name" : "scala-collection-compat_3.jar",
+          "hash" : "sha1:ef569b9a2020bab98bbc25ffaf7a0508fe10fd2d"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scala-lang.modules",
+      "name" : "scala-xml_3",
+      "version" : "2.1.0",
+      "artifacts" : [
+        {
+          "name" : "scala-xml_3.jar",
+          "hash" : "sha1:08825dfc740fdf5b0b3900ee7b62cdbfea3483b8"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scala-sbt",
+      "name" : "test-interface",
+      "version" : "1.0",
+      "artifacts" : [
+        {
+          "name" : "test-interface.jar",
+          "hash" : "sha1:0a3f14d010c4cb32071f863d97291df31603b521"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalacheck",
+      "name" : "scalacheck_3",
+      "version" : "1.17.0",
+      "artifacts" : [
+        {
+          "name" : "scalacheck_3.jar",
+          "hash" : "sha1:c574ec3a25cdb3c8c4d79adac2a36ecac4583b53"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalactic",
+      "name" : "scalactic_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalactic_3.jar",
+          "hash" : "sha1:149d0693fe4c2965b600fff9fa513ee06156c0de"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-compatible",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-compatible.jar",
+          "hash" : "sha1:ff884c350e9e4389ff37653d83083405025f5f57"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-core_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-core_3.jar",
+          "hash" : "sha1:bf824f40cc745122ca8adf71b0046251224c7967"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-diagrams_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-diagrams_3.jar",
+          "hash" : "sha1:31c5b76d116621f5dbee6d510b98a73202af78f3"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-featurespec_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-featurespec_3.jar",
+          "hash" : "sha1:b657145152376e13ec78b1d5e52a0bc1a599a829"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-flatspec_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-flatspec_3.jar",
+          "hash" : "sha1:55f2ec5362e88bdcd2fab94144abe40fe3514381"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-freespec_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-freespec_3.jar",
+          "hash" : "sha1:6ba838aa63a4eb4de0488a5b98853c920e59a2d2"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-funspec_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-funspec_3.jar",
+          "hash" : "sha1:37ce02f26c624b40fbd166d8d319f5c279e98879"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-funsuite_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-funsuite_3.jar",
+          "hash" : "sha1:b235fc14833dbd748b239ee17e6b0085047d1c4a"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-matchers-core_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-matchers-core_3.jar",
+          "hash" : "sha1:1637ba7390eba764ed112ba9c1af242547fb636a"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-mustmatchers_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-mustmatchers_3.jar",
+          "hash" : "sha1:2170250c5207b3a2a8468a588bba59706b46427f"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-propspec_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-propspec_3.jar",
+          "hash" : "sha1:9dc149ac637cd3201f6d68ae3adfca10ad30eb91"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-refspec_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-refspec_3.jar",
+          "hash" : "sha1:ae07be9abd2595bd0b76738bde891b5699c6ab65"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-shouldmatchers_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-shouldmatchers_3.jar",
+          "hash" : "sha1:7f482f9621d0bb3b65ceb4314244ab2afc7f36e9"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest-wordspec_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest-wordspec_3.jar",
+          "hash" : "sha1:2129e735736010c16bb7eb709d6394e68afbd253"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalatest",
+      "name" : "scalatest_3",
+      "version" : "3.2.17",
+      "artifacts" : [
+        {
+          "name" : "scalatest_3.jar",
+          "hash" : "sha1:6420917db4a1ff387bef5436da2a1f0a77cdeb69"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scodec",
+      "name" : "scodec-bits_3",
+      "version" : "1.1.35",
+      "artifacts" : [
+        {
+          "name" : "scodec-bits_3.jar",
+          "hash" : "sha1:3d3142b28a4008d1bbc8f07c5e1522532c0271f4"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.slf4j",
+      "name" : "slf4j-api",
+      "version" : "1.7.30",
+      "artifacts" : [
+        {
+          "name" : "slf4j-api.jar",
+          "hash" : "sha1:b5a4b6d16ab13e34a88fae84c35cd5d68cac922c"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.tpolecat",
+      "name" : "natchez-core_3",
+      "version" : "0.3.1",
+      "artifacts" : [
+        {
+          "name" : "natchez-core_3.jar",
+          "hash" : "sha1:d4becbaf958d9aed831a221410455f3928c15af7"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "case-insensitive_3",
+      "version" : "1.3.0",
+      "artifacts" : [
+        {
+          "name" : "case-insensitive_3.jar",
+          "hash" : "sha1:f2f2c803b3980fc28e27090b53609e93b73acfe7"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-core_3",
+      "version" : "2.10.0",
+      "artifacts" : [
+        {
+          "name" : "cats-core_3.jar",
+          "hash" : "sha1:0282dcf8cc6e194f09ba1820931bf082395c50ce"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-effect-kernel-testkit_3",
+      "version" : "3.5.4",
+      "artifacts" : [
+        {
+          "name" : "cats-effect-kernel-testkit_3.jar",
+          "hash" : "sha1:3fede3d7329bb99e275aed5e8afed005116f3dda"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-effect-kernel_3",
+      "version" : "3.5.4",
+      "artifacts" : [
+        {
+          "name" : "cats-effect-kernel_3.jar",
+          "hash" : "sha1:6a1de40494d66e8a858a77c616783c2264b1d938"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-effect-laws_3",
+      "version" : "3.5.4",
+      "artifacts" : [
+        {
+          "name" : "cats-effect-laws_3.jar",
+          "hash" : "sha1:6b5590da7fb56935049dc134e41faa1c68fbeed3"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-effect-std_3",
+      "version" : "3.5.4",
+      "artifacts" : [
+        {
+          "name" : "cats-effect-std_3.jar",
+          "hash" : "sha1:45a43dc229ff76b0feaeae2f0665e0a7c7c091db"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-effect-testkit_3",
+      "version" : "3.5.4",
+      "artifacts" : [
+        {
+          "name" : "cats-effect-testkit_3.jar",
+          "hash" : "sha1:590ca21aab478fb7754a39b0e4658c4898969ce3"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-effect_3",
+      "version" : "3.5.4",
+      "artifacts" : [
+        {
+          "name" : "cats-effect_3.jar",
+          "hash" : "sha1:50268b1c97dbd9ed99aa7810276f5b78704fec66"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-free_3",
+      "version" : "2.9.0",
+      "artifacts" : [
+        {
+          "name" : "cats-free_3.jar",
+          "hash" : "sha1:e21ad368ea12fa4e0b2754cd690f10f7a8c6e72e"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-kernel-laws_3",
+      "version" : "2.9.0",
+      "artifacts" : [
+        {
+          "name" : "cats-kernel-laws_3.jar",
+          "hash" : "sha1:a42f0b38b3167912266dfc84e6b3094450441fcd"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-kernel_3",
+      "version" : "2.10.0",
+      "artifacts" : [
+        {
+          "name" : "cats-kernel_3.jar",
+          "hash" : "sha1:c3addcacdef86f1ebefbe82464d5485c24e94a3e"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-laws_3",
+      "version" : "2.9.0",
+      "artifacts" : [
+        {
+          "name" : "cats-laws_3.jar",
+          "hash" : "sha1:401e563744ac11a4b5521ca46feb350dd91be013"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-mtl_3",
+      "version" : "1.3.0",
+      "artifacts" : [
+        {
+          "name" : "cats-mtl_3.jar",
+          "hash" : "sha1:000f6ca0ca446718a7c8e45ea351aefeca7020ed"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "coop_3",
+      "version" : "1.2.0",
+      "artifacts" : [
+        {
+          "name" : "coop_3.jar",
+          "hash" : "sha1:2ea92a92d002a67f7eaac9166fab5f4591b04d59"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "discipline-core_3",
+      "version" : "1.5.1",
+      "artifacts" : [
+        {
+          "name" : "discipline-core_3.jar",
+          "hash" : "sha1:8112ba3b03bb321bc7d013f9cd2e58f4b1aff9c5"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "jawn-parser_3",
+      "version" : "1.5.1",
+      "artifacts" : [
+        {
+          "name" : "jawn-parser_3.jar",
+          "hash" : "sha1:c1bf59b9de01bc9479c3d8b5420a8edaab6fa261"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "literally_3",
+      "version" : "1.1.0",
+      "artifacts" : [
+        {
+          "name" : "literally_3.jar",
+          "hash" : "sha1:14eb53559df5119d79b721449519c7b683b3eb50"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    }
+  ]
+}
