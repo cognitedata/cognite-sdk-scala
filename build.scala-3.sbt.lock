@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-05T08:34:17.839615019Z",
+  "timestamp" : "2024-07-05T12:09:47.075517Z",
   "configurations" : [
     "compile",
     "optional",
@@ -260,11 +260,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-core_3",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-core_3.jar",
-          "hash" : "sha1:8786971ecf61127fad1f7b5e15a082dcfdab4b51"
+          "hash" : "sha1:77ba51c80a56844d5f7f85be374b09c66ff9c6fb"
         }
       ],
       "configurations" : [
@@ -276,11 +276,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-generic_3",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-generic_3.jar",
-          "hash" : "sha1:b33bbdcb1eabe0baa6a11c9d1864fdc4b2423482"
+          "hash" : "sha1:ef4152196009a86c0362613745cc9d5a22b25450"
         }
       ],
       "configurations" : [
@@ -292,11 +292,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-jawn_3",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-jawn_3.jar",
-          "hash" : "sha1:df0330633098944ae2af8f67d6d2d26e27519625"
+          "hash" : "sha1:87a6540ee2b329c6951f400ba230b1b39069c622"
         }
       ],
       "configurations" : [
@@ -308,11 +308,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-literal_3",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-literal_3.jar",
-          "hash" : "sha1:ed4bc1a80dcd7cb380e10cc337991631f009fa93"
+          "hash" : "sha1:4a55fe1241bf8c143b5752f6f9329713389ea59f"
         }
       ],
       "configurations" : [
@@ -322,11 +322,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-numbers_3",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-numbers_3.jar",
-          "hash" : "sha1:329de0d08b1be9d41d8c211c42efda0e6fec7d46"
+          "hash" : "sha1:28424edcf3b0806fa659395dfdfedf3b2b784041"
         }
       ],
       "configurations" : [
@@ -338,11 +338,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-parser_3",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-parser_3.jar",
-          "hash" : "sha1:67b5fb95cedc3a9be8e8f75695895779042c92a7"
+          "hash" : "sha1:5676013d1642b757d0108e8e2ffe2226d6d00d06"
         }
       ],
       "configurations" : [
@@ -1010,11 +1010,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-core_3",
-      "version" : "2.10.0",
+      "version" : "2.12.0",
       "artifacts" : [
         {
           "name" : "cats-core_3.jar",
-          "hash" : "sha1:0282dcf8cc6e194f09ba1820931bf082395c50ce"
+          "hash" : "sha1:b253dca30971fd04a4ee5e3f5e9f6e623257656b"
         }
       ],
       "configurations" : [
@@ -1144,11 +1144,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-kernel_3",
-      "version" : "2.10.0",
+      "version" : "2.12.0",
       "artifacts" : [
         {
           "name" : "cats-kernel_3.jar",
-          "hash" : "sha1:c3addcacdef86f1ebefbe82464d5485c24e94a3e"
+          "hash" : "sha1:6839388dbf6385fabceff4e8927c0b79562c4e42"
         }
       ],
       "configurations" : [
@@ -1216,11 +1216,11 @@
     {
       "org" : "org.typelevel",
       "name" : "jawn-parser_3",
-      "version" : "1.5.1",
+      "version" : "1.6.0",
       "artifacts" : [
         {
           "name" : "jawn-parser_3.jar",
-          "hash" : "sha1:c1bf59b9de01bc9479c3d8b5420a8edaab6fa261"
+          "hash" : "sha1:a89f3e40146a2afb775baafa89c7493506403856"
         }
       ],
       "configurations" : [
