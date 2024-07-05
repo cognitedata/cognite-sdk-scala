@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-04T14:07:37.804468097Z",
+  "timestamp" : "2024-07-05T08:34:17.839615019Z",
   "configurations" : [
     "compile",
     "optional",
@@ -650,11 +650,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala3-library_3",
-      "version" : "3.3.3",
+      "version" : "3.4.2",
       "artifacts" : [
         {
           "name" : "scala3-library_3.jar",
-          "hash" : "sha1:8717a89f7030fde424b4ba44608fb2583b5ed159"
+          "hash" : "sha1:0c1ce7f324cfb933ca8ce291dbe585a9b3d94a71"
         }
       ],
       "configurations" : [
