@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-06T13:10:50.977866Z",
+  "timestamp" : "2024-07-06T18:08:43.479312Z",
   "configurations" : [
     "compile",
     "optional",
@@ -244,11 +244,11 @@
     {
       "org" : "commons-io",
       "name" : "commons-io",
-      "version" : "2.15.0",
+      "version" : "2.16.1",
       "artifacts" : [
         {
           "name" : "commons-io.jar",
-          "hash" : "sha1:5c3c2db10f6f797430a7f9c696b4d1273768c924"
+          "hash" : "sha1:377d592e740dc77124e0901291dbfaa6810a200e"
         }
       ],
       "configurations" : [
