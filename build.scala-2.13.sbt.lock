@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-04T18:23:22.931470Z",
+  "timestamp" : "2024-07-06T11:39:08.115907Z",
   "configurations" : [
     "compile",
     "optional",
@@ -46,11 +46,11 @@
     {
       "org" : "com.chuusai",
       "name" : "shapeless_2.13",
-      "version" : "2.3.11",
+      "version" : "2.3.12",
       "artifacts" : [
         {
           "name" : "shapeless_2.13.jar",
-          "hash" : "sha1:61ace0241b473e91614259b2bfc774d31b44b74c"
+          "hash" : "sha1:95fad9c171019294e0a0b7de12d5e892f95e764a"
         }
       ],
       "configurations" : [
@@ -276,11 +276,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-core_2.13",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-core_2.13.jar",
-          "hash" : "sha1:ba09b00a350c8c3c16a8528bac6249e4fbca2411"
+          "hash" : "sha1:7f569014f391ab5e280b0264a6d78c9d2c014fbd"
         }
       ],
       "configurations" : [
@@ -292,11 +292,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-generic_2.13",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-generic_2.13.jar",
-          "hash" : "sha1:56b77cc6788db246ce84a42ea371f263aeb70ed9"
+          "hash" : "sha1:2a4808ad4ca221315704f6c6e5fda70fd475f572"
         }
       ],
       "configurations" : [
@@ -308,11 +308,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-jawn_2.13",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-jawn_2.13.jar",
-          "hash" : "sha1:7c050feb7f6bcd4ff261b64aa214b144d9de896b"
+          "hash" : "sha1:b7b6320dfdf2e1d029509de8af486008f16f62f4"
         }
       ],
       "configurations" : [
@@ -324,11 +324,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-literal_2.13",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-literal_2.13.jar",
-          "hash" : "sha1:36ceb93372e235947a44ee31a782ea6af4a0e8a6"
+          "hash" : "sha1:ac16c7b4ef7ea867ca1e7328ae813c6dd8bea0ef"
         }
       ],
       "configurations" : [
@@ -338,11 +338,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-numbers_2.13",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-numbers_2.13.jar",
-          "hash" : "sha1:515bf38ca47d3840081a2d380a33cf4652693506"
+          "hash" : "sha1:f4e4406d9d2dd7c32ebcc8813d06725114353089"
         }
       ],
       "configurations" : [
@@ -354,11 +354,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-parser_2.13",
-      "version" : "0.14.8",
+      "version" : "0.14.9",
       "artifacts" : [
         {
           "name" : "circe-parser_2.13.jar",
-          "hash" : "sha1:c289e195818a0a8c404ae97c48887a9aab4418a1"
+          "hash" : "sha1:95f4e783f9090ed56edc20935aabfd191a2a8282"
         }
       ],
       "configurations" : [
@@ -738,11 +738,11 @@
     {
       "org" : "org.scalactic",
       "name" : "scalactic_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalactic_2.13.jar",
-          "hash" : "sha1:e3bbe2719524882700939dd24ee2dc6de1685821"
+          "hash" : "sha1:0afa3b540f0d63342d8be3aa946c4dbfff3bb7cd"
         }
       ],
       "configurations" : [
@@ -752,11 +752,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-compatible",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-compatible.jar",
-          "hash" : "sha1:ff884c350e9e4389ff37653d83083405025f5f57"
+          "hash" : "sha1:609bc82cc06a1322f60039a81fc003ee81d7064f"
         }
       ],
       "configurations" : [
@@ -766,11 +766,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-core_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-core_2.13.jar",
-          "hash" : "sha1:116ca7c3a1a6a37b9d980a09504b8b22872aaba7"
+          "hash" : "sha1:b39ebf9182d014bd9e0c6391b0677b90acc6dce4"
         }
       ],
       "configurations" : [
@@ -780,11 +780,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-diagrams_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-diagrams_2.13.jar",
-          "hash" : "sha1:b68eb36fd2529b25b45aa99d03319702e3ac427d"
+          "hash" : "sha1:627ce69bcab1472c163537d8183506c02340bf71"
         }
       ],
       "configurations" : [
@@ -794,11 +794,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-featurespec_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-featurespec_2.13.jar",
-          "hash" : "sha1:f701703d8a1eecc476197288b81d6da37e937075"
+          "hash" : "sha1:3732488eb1e6c7a1f164c9373f7cb4688161e60e"
         }
       ],
       "configurations" : [
@@ -808,11 +808,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-flatspec_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-flatspec_2.13.jar",
-          "hash" : "sha1:3805e4b91cfa886fd090efcc97dae7e7f7586de2"
+          "hash" : "sha1:8f5472ac09054656b578c6c57d780b547c88c9f7"
         }
       ],
       "configurations" : [
@@ -822,11 +822,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-freespec_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-freespec_2.13.jar",
-          "hash" : "sha1:21780262cf6b96ffe550778754e25a6e56d57364"
+          "hash" : "sha1:a656612babdeeecb83bc45de091344b800a1d011"
         }
       ],
       "configurations" : [
@@ -836,11 +836,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-funspec_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-funspec_2.13.jar",
-          "hash" : "sha1:a879c8b0ede86145f069fe6e52cf24e29d349c3e"
+          "hash" : "sha1:295dae100ffa67e7d12f99296b07d062dce0baf9"
         }
       ],
       "configurations" : [
@@ -850,11 +850,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-funsuite_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-funsuite_2.13.jar",
-          "hash" : "sha1:0c36faacf2cf3d03fb19637ee1e10fb856324caf"
+          "hash" : "sha1:b10b4b432147a94747ccbcc2bc31fffd094ba43e"
         }
       ],
       "configurations" : [
@@ -864,11 +864,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-matchers-core_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-matchers-core_2.13.jar",
-          "hash" : "sha1:9981a5a24c893fe6314c28bcfef602d0a03d2f1c"
+          "hash" : "sha1:a1a6243b90957ddc718ab6e390b4a32e9122936e"
         }
       ],
       "configurations" : [
@@ -878,11 +878,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-mustmatchers_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-mustmatchers_2.13.jar",
-          "hash" : "sha1:02b7170f948936ce06b78e557ab93616649e6caf"
+          "hash" : "sha1:0b6604e85a24b401e7e3ea6a896bd17f0e52af15"
         }
       ],
       "configurations" : [
@@ -892,11 +892,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-propspec_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-propspec_2.13.jar",
-          "hash" : "sha1:5e378191532c3d145afe56b31cf89d14fdb9d747"
+          "hash" : "sha1:2d38d275d74f547a3388f1ed9e149b2124f0fc66"
         }
       ],
       "configurations" : [
@@ -906,11 +906,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-refspec_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-refspec_2.13.jar",
-          "hash" : "sha1:3282eb286cc22bd1ab00cc942334b7737a8ae5e6"
+          "hash" : "sha1:57eef43635589a398eaef6651ca1181e714a5686"
         }
       ],
       "configurations" : [
@@ -920,11 +920,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-shouldmatchers_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-shouldmatchers_2.13.jar",
-          "hash" : "sha1:61c428d9c282673a225ca7e1d514a267d3065964"
+          "hash" : "sha1:acdabf60d810ebede4263e7182893078c5fa1114"
         }
       ],
       "configurations" : [
@@ -934,11 +934,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-wordspec_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-wordspec_2.13.jar",
-          "hash" : "sha1:5dc95d654d047f7ca6ae9ef723c017e951494df9"
+          "hash" : "sha1:8408dbc887b65932c42389d4af15ad231078baf6"
         }
       ],
       "configurations" : [
@@ -948,11 +948,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest_2.13",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest_2.13.jar",
-          "hash" : "sha1:4791a3aaeaa6103c345d3a334dc6ecdf05308c81"
+          "hash" : "sha1:7635de1f38369f1c46df062bb475e0d3d60bf152"
         }
       ],
       "configurations" : [
@@ -1230,11 +1230,11 @@
     {
       "org" : "org.typelevel",
       "name" : "jawn-parser_2.13",
-      "version" : "1.5.1",
+      "version" : "1.6.0",
       "artifacts" : [
         {
           "name" : "jawn-parser_2.13.jar",
-          "hash" : "sha1:09b1f7e52a186493c2cb1fe0d8d0220f0c266d9f"
+          "hash" : "sha1:b47cfc6b652fec2fd295c8608e7a9a84633c724f"
         }
       ],
       "configurations" : [

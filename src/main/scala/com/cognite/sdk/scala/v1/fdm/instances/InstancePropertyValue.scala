@@ -279,13 +279,9 @@ object InstancePropertyValue {
       case Float32List(values) => Json.arr(values = values.map(Json.fromFloatOrString): _*)
       case Float64List(values) => Json.arr(values = values.map(Json.fromDoubleOrString): _*)
       case DateList(values) =>
-        Json.arr(values =
-          values.map(d => Json.fromString(d.format(InstancePropertyValue.Date.formatter))): _*
-        )
+        Json.arr(values = values.map(d => Json.fromString(d.format(Date.formatter))): _*)
       case TimestampList(values) =>
-        Json.arr(values =
-          values.map(d => Json.fromString(d.format(InstancePropertyValue.Timestamp.formatter))): _*
-        )
+        Json.arr(values = values.map(d => Json.fromString(d.format(Timestamp.formatter))): _*)
       case ViewDirectNodeRelationList(values) =>
         Json.arr(values = values.map(value => value.asJson): _*)
       case ObjectList(values) => Json.arr(values = values: _*)
