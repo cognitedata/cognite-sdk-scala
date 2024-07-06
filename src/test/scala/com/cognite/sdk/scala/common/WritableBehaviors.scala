@@ -50,7 +50,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
                   .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
             }
             sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
-            sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+            // TODO: remove when we get rid of the warning
+            val _ = sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           }
         }
       }
@@ -61,7 +62,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       maybeDeletable.map { deletable =>
         if (deleteMissingThrows) {
           val caught = intercept[CdpApiException](deletable.deleteByIds(idsThatDoNotExist).unsafeRunSync())
-          assert(caught.requestId.isDefined)
+          // TODO: remove when we get rid of the warning
+          val _ = assert(caught.requestId.isDefined)
         }
       }
     }
@@ -164,7 +166,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
             .getOrElse(Seq.empty)
             .map(jsonObj => jsonObj("externalId").value.asString.value)
           missingIds should have size externalIdsThatDoNotExist.size.toLong
-          missingIds should contain theSameElementsAs externalIdsThatDoNotExist
+          // TODO: remove when we get rid of the warning
+          val _ = missingIds should contain theSameElementsAs externalIdsThatDoNotExist
         }
         if (trySameIdsThatDoNotExist) {
           // Relationships do not return the items in "missing" if we query for the same missing items within the same request.
@@ -193,7 +196,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
                   .map(jsonObj => jsonObj("externalId").value.asString.value)
             }
             sameMissingIds should have size sameIdsThatDoNotExist.toSet.size.toLong
-            sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+            // TODO: remove when we get rid of the warning
+            val _ = sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           }
         }
       }
