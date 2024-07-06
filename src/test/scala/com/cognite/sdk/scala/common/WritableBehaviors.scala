@@ -31,7 +31,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
               .getOrElse(Seq.empty)
               .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
             missingIds should have size idsThatDoNotExist.size.toLong
-            missingIds should contain theSameElementsAs idsThatDoNotExist
+            // TODO: remove when we get rid of the warning
+            val _ = missingIds should contain theSameElementsAs idsThatDoNotExist
           }
 
           val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
