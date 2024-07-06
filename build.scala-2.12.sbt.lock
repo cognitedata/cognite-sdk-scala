@@ -738,11 +738,11 @@
     {
       "org" : "org.scalactic",
       "name" : "scalactic_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalactic_2.12.jar",
-          "hash" : "sha1:bfc7204dd382eb4c10e2e4a73c371446b8e70ae1"
+          "hash" : "sha1:f44c38dc8c1bf32e8b62ce6f2646f2ee654ad908"
         }
       ],
       "configurations" : [
@@ -752,11 +752,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-compatible",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-compatible.jar",
-          "hash" : "sha1:ff884c350e9e4389ff37653d83083405025f5f57"
+          "hash" : "sha1:609bc82cc06a1322f60039a81fc003ee81d7064f"
         }
       ],
       "configurations" : [
@@ -766,11 +766,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-core_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-core_2.12.jar",
-          "hash" : "sha1:73b716168783a0636d83c9f1c5577f7b7644ff90"
+          "hash" : "sha1:ccd92be9917fc31dfc1ad715b0db7ee099f031d4"
         }
       ],
       "configurations" : [
@@ -780,11 +780,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-diagrams_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-diagrams_2.12.jar",
-          "hash" : "sha1:670beedabee52c57f2b1a5db32840bdb836e374c"
+          "hash" : "sha1:06024107797b8388e7567c0ddbb82f5d7ff090cc"
         }
       ],
       "configurations" : [
@@ -794,11 +794,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-featurespec_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-featurespec_2.12.jar",
-          "hash" : "sha1:8663bc7a6dba4c19d152f9a78cf12ce752620154"
+          "hash" : "sha1:e266f8e4c3f90170ed1c8c4bf03747674d65a62c"
         }
       ],
       "configurations" : [
@@ -808,11 +808,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-flatspec_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-flatspec_2.12.jar",
-          "hash" : "sha1:1ccf91fb61b113d1c9c97d2fe4291dc1f23791a7"
+          "hash" : "sha1:22123639591feca40655c889849feef989367569"
         }
       ],
       "configurations" : [
@@ -822,11 +822,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-freespec_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-freespec_2.12.jar",
-          "hash" : "sha1:8b4feaf0cf33b048a69186cedd59978bacefb404"
+          "hash" : "sha1:49b8a3c33106f79c2ca237127c8a09bf493259f1"
         }
       ],
       "configurations" : [
@@ -836,11 +836,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-funspec_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-funspec_2.12.jar",
-          "hash" : "sha1:493192a404649f40a8b185661f1b0bbcf7831a83"
+          "hash" : "sha1:31f487e45fe268b0705c7e1eac357ac39231ff53"
         }
       ],
       "configurations" : [
@@ -850,11 +850,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-funsuite_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-funsuite_2.12.jar",
-          "hash" : "sha1:1b71bacd2e052e1b8fcb732cec9b0bc7ac34c25d"
+          "hash" : "sha1:8451d0c1864697ed33ea2738bd16a64cd2d6c5d8"
         }
       ],
       "configurations" : [
@@ -864,11 +864,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-matchers-core_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-matchers-core_2.12.jar",
-          "hash" : "sha1:4ed2f9bf7205267d32fe0d8408bc0356dd895b5b"
+          "hash" : "sha1:f5eb4d0b700b73432288d39405d52d1720d6bdee"
         }
       ],
       "configurations" : [
@@ -878,11 +878,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-mustmatchers_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-mustmatchers_2.12.jar",
-          "hash" : "sha1:456a066b2e11581865d4581cb75e70d2dae3c6d9"
+          "hash" : "sha1:6e6e5e6518b3a18d1a66e6cea79aa98246df390e"
         }
       ],
       "configurations" : [
@@ -892,11 +892,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-propspec_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-propspec_2.12.jar",
-          "hash" : "sha1:fe613aa3ee58cc389df5c9eb16e2a4c6ba58f146"
+          "hash" : "sha1:7f2c5373fcc96f8622bbbd72171f2f20399103ab"
         }
       ],
       "configurations" : [
@@ -906,11 +906,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-refspec_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-refspec_2.12.jar",
-          "hash" : "sha1:de403046f3b8aeb3d13beef76bb404c41a534b4c"
+          "hash" : "sha1:7e175a1ce600be58a5e4319593095d24b7fd6ef0"
         }
       ],
       "configurations" : [
@@ -920,11 +920,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-shouldmatchers_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-shouldmatchers_2.12.jar",
-          "hash" : "sha1:f1c1ad4cf489c5e115a12a286a368051e147f9ff"
+          "hash" : "sha1:58f47a6e4042b29c41efad05c7b854d38ceece22"
         }
       ],
       "configurations" : [
@@ -934,11 +934,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest-wordspec_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest-wordspec_2.12.jar",
-          "hash" : "sha1:e0936b2aa11b975b6d07eede04ed2162843608b9"
+          "hash" : "sha1:811995e80bfb55b144c4ec9ff22306cdf1d28ee2"
         }
       ],
       "configurations" : [
@@ -948,11 +948,11 @@
     {
       "org" : "org.scalatest",
       "name" : "scalatest_2.12",
-      "version" : "3.2.17",
+      "version" : "3.2.19",
       "artifacts" : [
         {
           "name" : "scalatest_2.12.jar",
-          "hash" : "sha1:76f998ef1cdfea398571374da962b3901ee4e625"
+          "hash" : "sha1:80000a6b338f8107c67948323704e1cd44747647"
         }
       ],
       "configurations" : [
