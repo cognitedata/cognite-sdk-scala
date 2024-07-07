@@ -116,7 +116,7 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "commons-io" % "commons-io" % "2.15.0",
+      "commons-io" % "commons-io" % "2.16.1",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
