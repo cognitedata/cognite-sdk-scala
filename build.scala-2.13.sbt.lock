@@ -78,11 +78,11 @@
     {
       "org" : "com.google.protobuf",
       "name" : "protobuf-java",
-      "version" : "3.25.1",
+      "version" : "3.25.3",
       "artifacts" : [
         {
           "name" : "protobuf-java.jar",
-          "hash" : "sha1:2933a5c3f022456d8842323fe0d7fb2d25a7e3c7"
+          "hash" : "sha1:d3200261955f3298e0d85c9892201e70492ce8eb"
         }
       ],
       "configurations" : [
@@ -260,11 +260,11 @@
     {
       "org" : "commons-io",
       "name" : "commons-io",
-      "version" : "2.15.0",
+      "version" : "2.16.1",
       "artifacts" : [
         {
           "name" : "commons-io.jar",
-          "hash" : "sha1:5c3c2db10f6f797430a7f9c696b4d1273768c924"
+          "hash" : "sha1:377d592e740dc77124e0901291dbfaa6810a200e"
         }
       ],
       "configurations" : [

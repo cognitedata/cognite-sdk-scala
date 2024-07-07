@@ -116,7 +116,7 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "commons-io" % "commons-io" % "2.15.0",
+      "commons-io" % "commons-io" % "2.16.1",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
@@ -124,7 +124,7 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "3.25.1",
+      "com.google.protobuf" % "protobuf-java" % "3.25.3",
       "org.tpolecat" %% "natchez-core" % natchezVersion,
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
