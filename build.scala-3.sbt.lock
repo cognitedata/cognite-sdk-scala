@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-06T18:08:43.479312Z",
+  "timestamp" : "2024-07-07T06:52:08.985657Z",
   "configurations" : [
     "compile",
     "optional",
@@ -14,11 +14,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-core_3",
-      "version" : "3.6.1",
+      "version" : "3.10.2",
       "artifacts" : [
         {
           "name" : "fs2-core_3.jar",
-          "hash" : "sha1:adb973197a3ad0914442ee59f0c308d930370d4c"
+          "hash" : "sha1:d0993296535929e1190036ca5e5f750c285460cb"
         }
       ],
       "configurations" : [
@@ -30,11 +30,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-io_3",
-      "version" : "3.6.1",
+      "version" : "3.10.2",
       "artifacts" : [
         {
           "name" : "fs2-io_3.jar",
-          "hash" : "sha1:2215ce3c20301ebea09fc47fe18cf83e54185418"
+          "hash" : "sha1:b86de0250e1ad9e4c1dc9972469a76b632325703"
         }
       ],
       "configurations" : [
@@ -46,11 +46,11 @@
     {
       "org" : "com.comcast",
       "name" : "ip4s-core_3",
-      "version" : "3.2.0",
+      "version" : "3.5.0",
       "artifacts" : [
         {
           "name" : "ip4s-core_3.jar",
-          "hash" : "sha1:a91cf664c1f3cd923122dae1641df63ab79054e3"
+          "hash" : "sha1:7ed193dc579a8def12110bc6cb90e95a215a2091"
         }
       ],
       "configurations" : [
@@ -948,11 +948,11 @@
     {
       "org" : "org.scodec",
       "name" : "scodec-bits_3",
-      "version" : "1.1.35",
+      "version" : "1.1.38",
       "artifacts" : [
         {
           "name" : "scodec-bits_3.jar",
-          "hash" : "sha1:3d3142b28a4008d1bbc8f07c5e1522532c0271f4"
+          "hash" : "sha1:3b2b8b0e757ee6fa6ec2cadc5e0e4c5b55bdc798"
         }
       ],
       "configurations" : [
