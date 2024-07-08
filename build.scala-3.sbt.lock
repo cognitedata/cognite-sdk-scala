@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-07T06:52:08.985657Z",
+  "timestamp" : "2024-07-08T16:02:39.904618Z",
   "configurations" : [
     "compile",
     "optional",
@@ -666,11 +666,11 @@
     {
       "org" : "org.scala-lang.modules",
       "name" : "scala-collection-compat_3",
-      "version" : "2.9.0",
+      "version" : "2.11.0",
       "artifacts" : [
         {
           "name" : "scala-collection-compat_3.jar",
-          "hash" : "sha1:ef569b9a2020bab98bbc25ffaf7a0508fe10fd2d"
+          "hash" : "sha1:dccc0fe9416577811b2c43a042040d5eb62bfa6e"
         }
       ],
       "configurations" : [
@@ -978,11 +978,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_3",
-      "version" : "0.3.1",
+      "version" : "0.3.5",
       "artifacts" : [
         {
           "name" : "natchez-core_3.jar",
-          "hash" : "sha1:d4becbaf958d9aed831a221410455f3928c15af7"
+          "hash" : "sha1:d7e41aff8fa3075b0ff509e918dda3f4eca73846"
         }
       ],
       "configurations" : [
@@ -994,11 +994,11 @@
     {
       "org" : "org.typelevel",
       "name" : "case-insensitive_3",
-      "version" : "1.3.0",
+      "version" : "1.4.0",
       "artifacts" : [
         {
           "name" : "case-insensitive_3.jar",
-          "hash" : "sha1:f2f2c803b3980fc28e27090b53609e93b73acfe7"
+          "hash" : "sha1:a8e3647147be0b7e5709a2d6f7ea378671dd7309"
         }
       ],
       "configurations" : [
