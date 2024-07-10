@@ -65,6 +65,10 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |            "property-identifier42": ["a", "b", "c"]
            |          }
            |        }
+           |      },
+           |      "type": {
+           |        "space": "space-name-1",
+           |        "externalId": "extId1"
            |      }
            |    }
            |  ],
@@ -232,7 +236,8 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   )
                 )
               )
-            )
+            ),
+            Some(DirectRelationReference(space = "space-name-1", externalId = "extId1"))
           )
         ),
         typing = Some(

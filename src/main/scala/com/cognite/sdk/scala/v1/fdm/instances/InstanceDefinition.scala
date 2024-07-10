@@ -29,7 +29,8 @@ object InstanceDefinition {
       lastUpdatedTime: Long,
       deletedTime: Option[Long],
       version: Option[Long],
-      properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
+      properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]],
+      `type`: Option[DirectRelationReference]
   ) extends InstanceDefinition {
     override val instanceType: InstanceType = InstanceType.Node
   }
@@ -190,6 +191,7 @@ object InstanceDefinition {
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
           instancePropertyDefinitionBasedInstancePropertyTypeDecoder(instPropDefMap)
         )
+      relation <- c.downField("type").as[Option[DirectRelationReference]]
     } yield NodeDefinition(
       space = space,
       externalId = externalId,
@@ -197,7 +199,8 @@ object InstanceDefinition {
       lastUpdatedTime = lastUpdatedTime,
       deletedTime = deletedTime,
       version = version,
-      properties = properties
+      properties = properties,
+      `type` = relation
     )
 
   private def instancePropertyDefinitionBasedEdgeDefinitionDecoder(
