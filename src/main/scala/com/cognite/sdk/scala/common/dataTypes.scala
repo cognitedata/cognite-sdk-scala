@@ -10,26 +10,20 @@ import io.circe.{Decoder, Encoder, Json, JsonObject, KeyEncoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import sttp.model.Uri
 
-import scala.annotation.nowarn
-// scalastyle:off number.of.types
 trait ResponseWithCursor {
   val nextCursor: Option[String]
 }
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
     extends ResponseWithCursor
 object ItemsWithCursor {
-  @nowarn
   implicit def itemsWithCursorEncoder[A: Encoder]: Encoder[ItemsWithCursor[A]] =
     deriveEncoder[ItemsWithCursor[A]]
-  @nowarn
   implicit def itemsWithCursorDecoder[A: Decoder]: Decoder[ItemsWithCursor[A]] =
     deriveDecoder[ItemsWithCursor[A]]
 }
 final case class Items[A](items: Seq[A])
 object Items {
-  @nowarn
   implicit def itemsEncoder[A: Encoder]: Encoder[Items[A]] = deriveEncoder[Items[A]]
-  @nowarn
   implicit def itemsDecoder[A: Decoder]: Decoder[Items[A]] = deriveDecoder[Items[A]]
 }
 final case class ItemsWithIgnoreUnknownIds[A](items: Seq[A], ignoreUnknownIds: Boolean)
@@ -237,16 +231,16 @@ object Setter {
   @SuppressWarnings(Array("org.wartremover.warts.Null"))
   def fromOption[T](option: Option[T]): Option[Setter[T]] =
     option match {
-      case null => Some(SetNull()) // scalastyle:ignore null
+      case null => Some(SetNull())
       case None => None
-      case Some(null) => Some(SetNull()) // scalastyle:ignore null
+      case Some(null) => Some(SetNull())
       case Some(value) => Some(SetValue(value))
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Null"))
   def fromAny[T](optionValue: T): Option[Setter[T]] =
     optionValue match {
-      case null => Some(SetNull()) // scalastyle:ignore null
+      case null => Some(SetNull())
       case value => Some(SetValue(value))
     }
 
@@ -270,7 +264,7 @@ object NonNullableSetter {
       case None => None
       case Some(value) =>
         require(
-          value != null, // scalastyle:ignore null
+          value != null,
           "Invalid null value for non-nullable field update"
         )
         Some(SetValue(value))

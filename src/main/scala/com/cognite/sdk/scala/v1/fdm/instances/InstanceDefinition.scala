@@ -243,7 +243,6 @@ object InstanceDefinition {
       case t => toInstancePropertyTypeOfNonList(propValue, t)
     }
 
-  // scalastyle:off cyclomatic.complexity method.length
   private def toInstancePropertyTypeOfList(
       propValue: Json,
       t: PropertyType
@@ -309,9 +308,7 @@ object InstanceDefinition {
           )
         )
     }
-  // scalastyle:on cyclomatic.complexity method.length
 
-  // scalastyle:off cyclomatic.complexity method.length
   private def toInstancePropertyTypeOfNonList(
       propValue: Json,
       t: PropertyType
@@ -378,5 +375,4 @@ object InstanceDefinition {
           )
         )
     }
-  // scalastyle:on cyclomatic.complexity method.length
 }

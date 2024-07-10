@@ -86,7 +86,8 @@ object OAuth2 {
     /** Only use for SessionProvider to interact with Cognite internal SessionAPI */
     private def getKubernetesJwt[F[_]](implicit F: Async[F]): F[String] = {
       val serviceAccountTokenPath = Path("/var/run/secrets/tokens/cdf_token")
-      Files[F]
+      Files
+        .forAsync[F]
         .readAll(serviceAccountTokenPath)
         .through(fs2.text.utf8.decode)
         .compile
@@ -156,7 +157,6 @@ object OAuth2 {
     def getAuth: F[Auth] = commonGetAuth(cache, refreshSecondsBeforeExpiration)
   }
 
-  // scalastyle:off method.length
   object ClientCredentialsProvider {
     def apply[F[_]](
         credentials: ClientCredentials,
@@ -169,7 +169,6 @@ object OAuth2 {
       ConcurrentCachedObject(credentials.getAuth, initialToken)
         .map(new ClientCredentialsProvider[F](_, refreshSecondsBeforeExpiration))
   }
-  // scalastyle:on method.length
 
   object SessionProvider {
     def apply[F[_]](

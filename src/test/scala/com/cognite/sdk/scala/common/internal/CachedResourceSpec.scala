@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 // From https://gist.github.com/Daenyth/28243952f1fcfac6e8ef838040e8638e/9167a51f41322c53de492186c7bfab609fe78f8d
 
-// scalastyle:off
-
 package com.cognite.sdk.scala.common.internal
 
 import cats.effect.kernel.Outcome
@@ -241,7 +239,8 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
         } yield {
           all(results) shouldBe Symbol("right")
           if (withCleanup) {
-            forAll(objects.values) { obj =>
+            // TODO: remove when we get rid of the warning
+            val _ = forAll(objects.values) { obj =>
               obj.alive shouldBe false
             }
           }
@@ -308,7 +307,10 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
           _ <- cr.invalidate
           objects <- pool.get
         } yield {
-          if (withCleanup) { forAll(objects.values)(_.alive shouldBe false) }
+          if (withCleanup) {
+            // TODO: remove when we get rid of the warning
+            val _ = forAll(objects.values)(_.alive shouldBe false)
+          }
           results.foreach { case (taskId, result) =>
             withClue(taskId) {
               result shouldBe Right(())

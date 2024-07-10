@@ -99,7 +99,6 @@ object Utils {
       containerPropertyIdentifier = containerPropertyIdentifier
     )
 
-  // scalastyle:off cyclomatic.complexity method.length
   def createAllPossibleContainerPropCombinations: Map[String, ContainerPropertyDefinition] = {
     val boolOptions = List(
       true,
@@ -150,7 +149,6 @@ object Utils {
       )
     }).toMap
   }
-  // scalastyle:on cyclomatic.complexity method.length
 
   def createAllPossibleViewPropCombinations: Map[String, ViewCorePropertyDefinition] =
     createAllPossibleContainerPropCombinations.map {
@@ -365,7 +363,6 @@ object Utils {
     )
   )
 
-  // scalastyle:off cyclomatic.complexity
   private def listContainerPropToInstanceProperty(
       propName: String,
       propertyType: PropertyType
@@ -403,9 +400,7 @@ object Utils {
         InstancePropertyValue.TimeSeriesReferenceList(List("ts1", "ts2", "ts3", "ts4"))
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
-  // scalastyle:on cyclomatic.complexity
 
-  // scalastyle:off cyclomatic.complexity
   private def nonListContainerPropToInstanceProperty(
       propName: String,
       propertyType: PropertyType
@@ -449,7 +444,6 @@ object Utils {
         InstancePropertyValue.SequenceReference(s"$propName-reference")
       case other => throw new IllegalArgumentException(s"Unknown value :${other.toString}")
     }
-  // scalastyle:on cyclomatic.complexity
 
   private def toInstanceData(
       ref: SourceReference,
@@ -514,6 +508,4 @@ object Utils {
     } else {
       None
     }
-  // scalastyle:on cyclomatic.complexity
-
 }
