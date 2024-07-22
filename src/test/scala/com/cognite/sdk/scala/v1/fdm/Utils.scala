@@ -152,7 +152,8 @@ object Utils {
 
   def createAllPossibleViewPropCombinations: Map[String, ViewCorePropertyDefinition] =
     createAllPossibleContainerPropCombinations.map {
-      case (key, prop) => key -> toViewPropertyDefinition(prop, None, None)
+      case (key, prop) =>
+        key -> toViewPropertyDefinition(prop, None, None)
     }
 
   def createTestContainer(
@@ -208,7 +209,8 @@ object Utils {
       space: String,
       nodeExternalId: String,
       sourceRef: SourceReference,
-      propsMap: Map[String, CorePropertyDefinition]
+      propsMap: Map[String, CorePropertyDefinition],
+      `type`: Option[DirectRelationReference]
   ): NodeWrite = {
     val instanceValuesForProps = propsMap.map { case (propName, prop) =>
       propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
@@ -235,7 +237,8 @@ object Utils {
     NodeWrite(
       space,
       nodeExternalId,
-      Some(Seq(withAllProps))
+      Some(Seq(withAllProps)),
+      `type`
     )
   }
 
@@ -451,6 +454,7 @@ object Utils {
       properties = Some(instancePropertyValues.mapValues(v => Some(v)).toMap)
     )
 
+  // scalastyle:off cyclomatic.complexity method.length
   private def propertyDefaultValueForPropertyType(
       p: PropertyType,
       withDefault: Boolean
@@ -485,10 +489,12 @@ object Utils {
           Some(
             PropertyDefaultValue.Object(
               Json.fromJsonObject(
-                JsonObject.fromMap(Map(
-                  "a" -> Json.fromString("a"),
-                  "b" -> Json.fromInt(1)
-                ))
+                JsonObject.fromMap(
+                  Map(
+                    "a" -> Json.fromString("a"),
+                    "b" -> Json.fromInt(1)
+                  )
+                )
               )
             )
           )

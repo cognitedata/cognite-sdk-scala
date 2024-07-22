@@ -69,7 +69,7 @@ object Readable {
         Pull
           .eval(get(cursor, remaining, partition))
           .flatMap(res =>
-            Pull.output(Chunk.seq(res.items)) >> Pull.pure(
+            Pull.output(Chunk.from(res.items)) >> Pull.pure(
               res.nextCursor.map(nc => (Some(nc), remaining.map(_ - res.items.size)))
             )
           )
