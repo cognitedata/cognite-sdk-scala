@@ -43,8 +43,8 @@ object NodeOrEdgeCreate {
   import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances._
 
   implicit val nodeWriteEncoder: Encoder[NodeWrite] =
-    Encoder.forProduct4("instanceType", "space", "externalId", "sources")((e: NodeWrite) =>
-      (e.instanceType, e.space, e.externalId, e.sources)
+    Encoder.forProduct5("instanceType", "type", "space", "externalId", "sources")((e: NodeWrite) =>
+      (e.instanceType, e.`type`, e.space, e.externalId, e.sources)
     )
 
   implicit val edgeWriteEncoder: Encoder[EdgeWrite] =
