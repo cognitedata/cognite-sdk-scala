@@ -5,9 +5,8 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceType._
-import io.circe.generic.semiauto.deriveDecoder
+import io.circe.Encoder
 import io.circe.syntax.EncoderOps
-import io.circe.{Decoder, DecodingFailure, Encoder, HCursor}
 
 sealed abstract class NodeOrEdgeCreate extends Product with Serializable {
   val space: String
@@ -64,17 +63,6 @@ object NodeOrEdgeCreate {
     Encoder.instance[NodeOrEdgeCreate] {
       case e: NodeWrite => e.asJson
       case e: EdgeWrite => e.asJson
-    }
-
-  implicit val nodeWriteDecoder: Decoder[NodeWrite] = deriveDecoder
-
-  implicit val edgeWriteDecoder: Decoder[EdgeWrite] = deriveDecoder
-
-  implicit val instanceTypeWriteItemDecoder: Decoder[NodeOrEdgeCreate] = (c: HCursor) =>
-    c.downField("instanceType").as[InstanceType] match {
-      case Left(err) => Left[DecodingFailure, NodeOrEdgeCreate](err)
-      case Right(InstanceType.Node) => nodeWriteDecoder.apply(c)
-      case Right(InstanceType.Edge) => edgeWriteDecoder.apply(c)
     }
 
 }

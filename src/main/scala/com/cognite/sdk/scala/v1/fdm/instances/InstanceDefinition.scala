@@ -4,7 +4,6 @@ import cats.implicits._
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyType}
 import io.circe._
-import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
 
 import java.time.{LocalDate, ZonedDateTime}
@@ -102,10 +101,6 @@ object InstanceDefinition {
       case e: EdgeDefinition => e.asJson
     }
 
-  private val nodeDefinitionDecoder: Decoder[NodeDefinition] = deriveDecoder
-
-  private val edgeDefinitionDecoder: Decoder[EdgeDefinition] = deriveDecoder
-
   def instancePropertyDefinitionBasedInstanceDecoder(
       propertyTypeDefinitionsMap: Option[
         Map[String, Map[String, Map[String, TypePropertyDefinition]]]
@@ -121,11 +116,13 @@ object InstanceDefinition {
             instancePropertyDefinitionBasedEdgeDefinitionDecoder(propDefMap).apply(c)
         }
       case None =>
-        c.downField("instanceType").as[InstanceType] match {
-          case Left(err) => Left[DecodingFailure, InstanceDefinition](err)
-          case Right(InstanceType.Node) => nodeDefinitionDecoder.apply(c)
-          case Right(InstanceType.Edge) => edgeDefinitionDecoder.apply(c)
-        }
+        Left[DecodingFailure, InstanceDefinition](
+          DecodingFailure(
+            """Decoding without typing is not supported,
+            |resend the request with includeTyping set to true""".stripMargin,
+            c.history
+          )
+        )
     }
 
   def instancePropertyDefinitionBasedInstancePropertyTypeDecoder(
