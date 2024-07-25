@@ -116,7 +116,9 @@ object InstanceDefinition {
             instancePropertyDefinitionBasedEdgeDefinitionDecoder(propDefMap).apply(c)
         }
       case None =>
-        Left[DecodingFailure, InstanceDefinition](DecodingFailure("error", c.history))
+        Left[DecodingFailure, InstanceDefinition](DecodingFailure(
+          """Decoding without typing is not supported,
+            |resend the request with includeTyping set to true""".stripMargin, c.history))
     }
 
   def instancePropertyDefinitionBasedInstancePropertyTypeDecoder(

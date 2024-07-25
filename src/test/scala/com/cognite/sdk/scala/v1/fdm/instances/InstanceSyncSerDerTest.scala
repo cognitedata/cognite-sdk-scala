@@ -64,7 +64,8 @@ class InstanceSyncSerDerTest extends AnyWordSpec with Matchers {
           |        }
           |      ]
           |    }
-          |  }
+          |  },
+          |  "includeTyping" : true
           |}""".stripMargin
 
       requestAsJson.toString() should (be(expectedJson))
