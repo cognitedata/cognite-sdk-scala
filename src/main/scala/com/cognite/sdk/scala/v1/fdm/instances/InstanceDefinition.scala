@@ -101,7 +101,6 @@ object InstanceDefinition {
       case e: EdgeDefinition => e.asJson
     }
 
-
   def instancePropertyDefinitionBasedInstanceDecoder(
       propertyTypeDefinitionsMap: Option[
         Map[String, Map[String, Map[String, TypePropertyDefinition]]]
@@ -117,7 +116,7 @@ object InstanceDefinition {
             instancePropertyDefinitionBasedEdgeDefinitionDecoder(propDefMap).apply(c)
         }
       case None =>
-          Left[DecodingFailure, InstanceDefinition](DecodingFailure("error", c.history))
+        Left[DecodingFailure, InstanceDefinition](DecodingFailure("error", c.history))
     }
 
   def instancePropertyDefinitionBasedInstancePropertyTypeDecoder(

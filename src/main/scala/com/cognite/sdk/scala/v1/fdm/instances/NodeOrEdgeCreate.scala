@@ -65,5 +65,4 @@ object NodeOrEdgeCreate {
       case e: EdgeWrite => e.asJson
     }
 
-
 }
