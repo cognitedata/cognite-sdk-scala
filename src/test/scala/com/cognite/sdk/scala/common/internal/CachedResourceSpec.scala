@@ -336,27 +336,31 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
         )
       )
 
-    TestControl.execute(test).flatMap { control =>
-      for {
-        _ <- control.tickAll
-        result <- control.results
-      } yield result match {
-        case Some(value) => value match {
-          case Outcome.Succeeded(assertion) => assertion
-          case Outcome.Errored(e) => throw e
-          case Outcome.Canceled() =>
-            throw new IllegalStateException(
-              s"""Test canceled, probably deadlocked.
+    TestControl
+      .execute(test)
+      .flatMap { control =>
+        for {
+          _ <- control.tickAll
+          result <- control.results
+        } yield result match {
+          case Some(value) =>
+            value match {
+              case Outcome.Succeeded(assertion) => assertion
+              case Outcome.Errored(e) => throw e
+              case Outcome.Canceled() =>
+                throw new IllegalStateException(
+                  s"""Test canceled, probably deadlocked.
                  | pos=${pos.toString}""".stripMargin
+                )
+            }
+          case None =>
+            throw new IllegalStateException(
+              s"""Test still not finished, probably deadlocked.
+               | pos=${pos.toString}""".stripMargin
             )
         }
-        case None =>
-          throw new IllegalStateException(
-            s"""Test still not finished, probably deadlocked.
-               | pos=${pos.toString}""".stripMargin
-          )
       }
-    }.unsafeToFuture()
+      .unsafeToFuture()
   }
 
 }

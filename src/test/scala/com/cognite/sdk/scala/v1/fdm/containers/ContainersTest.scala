@@ -10,7 +10,11 @@ import com.cognite.sdk.scala.v1.fdm.Utils._
 import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{
+  PrimitivePropType,
+  PropertyDefaultValue,
+  PropertyType
+}
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 import com.cognite.sdk.scala.v1.{CogniteExternalId, CommonDataModelTestHelper}
 import io.circe.{Decoder, Encoder}
@@ -79,9 +83,11 @@ class ContainersTest extends CommonDataModelTestHelper {
       PropertyDefaultValue.Boolean(true),
       PropertyDefaultValue.Int32(101),
       PropertyDefaultValue.Int64(Long.MaxValue),
-      PropertyDefaultValue.Float32(101.1F),
+      PropertyDefaultValue.Float32(101.1f),
       PropertyDefaultValue.Float64(Double.MaxValue),
-      PropertyDefaultValue.Object(Encoder[CogniteExternalId].apply(CogniteExternalId("test-ext-id")))
+      PropertyDefaultValue.Object(
+        Encoder[CogniteExternalId].apply(CogniteExternalId("test-ext-id"))
+      )
     )
 
     val afterEncodedAndDecoded = values
@@ -98,8 +104,16 @@ class ContainersTest extends CommonDataModelTestHelper {
       PropertyType.TextProperty(list = Some(true)),
       PropertyType.TextProperty(list = Some(false)),
       PropertyType.DirectNodeRelationProperty(None, None, None),
-      PropertyType.DirectNodeRelationProperty(Some(ContainerReference(space, "ext-id-1")), Some(ViewReference(space, "ext-id-1", "v1")), Some(true)),
-      PropertyType.DirectNodeRelationProperty(Some(ContainerReference(space, "ext-id-1")), Some(ViewReference(space, "ext-id-1", "v1")), Some(false)),
+      PropertyType.DirectNodeRelationProperty(
+        Some(ContainerReference(space, "ext-id-1")),
+        Some(ViewReference(space, "ext-id-1", "v1")),
+        Some(true)
+      ),
+      PropertyType.DirectNodeRelationProperty(
+        Some(ContainerReference(space, "ext-id-1")),
+        Some(ViewReference(space, "ext-id-1", "v1")),
+        Some(false)
+      ),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int32, list = None),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Int64, list = Some(true)),
       PropertyType.PrimitiveProperty(`type` = PrimitivePropType.Date, list = Some(false)),
@@ -124,14 +138,15 @@ class ContainersTest extends CommonDataModelTestHelper {
 
   it should "serialize & deserialize ContainerPropertyDefinition" in {
     val containerProperty = ContainerPropertyDefinition(
-      defaultValue = Some(PropertyDefaultValue.Float32(1.0F)),
+      defaultValue = Some(PropertyDefaultValue.Float32(1.0f)),
       description = Some("Test numeric property"),
       name = Some("numeric-property-prop-1"),
       `type` = PrimitiveProperty(`type` = PrimitivePropType.Float32)
     )
 
     val jsonStr = Encoder[ContainerPropertyDefinition].apply(containerProperty).noSpaces
-    val decodedContainerProperty = io.circe.parser.parse(jsonStr).flatMap(Decoder[ContainerPropertyDefinition].decodeJson)
+    val decodedContainerProperty =
+      io.circe.parser.parse(jsonStr).flatMap(Decoder[ContainerPropertyDefinition].decodeJson)
 
     Some(containerProperty) shouldBe decodedContainerProperty.toOption
   }
@@ -206,17 +221,25 @@ class ContainersTest extends CommonDataModelTestHelper {
        |]
        |""".stripMargin
 
-    val propTypesAndDefaultValues = io.circe.parser.parse(json)
+    val propTypesAndDefaultValues = io.circe.parser
+      .parse(json)
       .flatMap(Decoder[List[ContainerPropertyDefinition]].decodeJson)
-      .toOption.getOrElse(List.empty)
+      .toOption
+      .getOrElse(List.empty)
       .map(p => (p.`type`, p.defaultValue))
 
     propTypesAndDefaultValues.length shouldBe 6
     propTypesAndDefaultValues.contains(
-      (PropertyType.PrimitiveProperty(PrimitivePropType.Float32), Some(PropertyDefaultValue.Float32(1.1F)))
+      (
+        PropertyType.PrimitiveProperty(PrimitivePropType.Float32),
+        Some(PropertyDefaultValue.Float32(1.1f))
+      )
     ) shouldBe true
     propTypesAndDefaultValues.contains(
-      (PropertyType.PrimitiveProperty(PrimitivePropType.Float64), Some(PropertyDefaultValue.Float64(1.2)))
+      (
+        PropertyType.PrimitiveProperty(PrimitivePropType.Float64),
+        Some(PropertyDefaultValue.Float64(1.2))
+      )
     ) shouldBe true
     propTypesAndDefaultValues.contains(
       (PropertyType.PrimitiveProperty(PrimitivePropType.Int32), Some(PropertyDefaultValue.Int32(1)))
@@ -225,22 +248,26 @@ class ContainersTest extends CommonDataModelTestHelper {
       (PropertyType.PrimitiveProperty(PrimitivePropType.Int32), None)
     ) shouldBe true
     propTypesAndDefaultValues.contains(
-      (PropertyType.PrimitiveProperty(PrimitivePropType.Int64), Some(PropertyDefaultValue.Int64(2L)))
+      (
+        PropertyType.PrimitiveProperty(PrimitivePropType.Int64),
+        Some(PropertyDefaultValue.Int64(2L))
+      )
     ) shouldBe true
     propTypesAndDefaultValues.contains(
       (PropertyType.PrimitiveProperty(PrimitivePropType.Int64), None)
     ) shouldBe true
   }
 
-
   it should "CRUD a container with all possible props" in {
     val containerExternalId = s"testContainer88"
-    val allPossibleProperties: Map[String, ContainerPropertyDefinition] = createAllPossibleContainerPropCombinations.map {
-      case (n, p) => p.`type` match {
-        case t: PropertyType.DirectNodeRelationProperty => n -> p.copy(`type` = t.copy(container = None))
-        case _ => n -> p
+    val allPossibleProperties: Map[String, ContainerPropertyDefinition] =
+      createAllPossibleContainerPropCombinations.map { case (n, p) =>
+        p.`type` match {
+          case t: PropertyType.DirectNodeRelationProperty =>
+            n -> p.copy(`type` = t.copy(container = None))
+          case _ => n -> p
+        }
       }
-    }
     allPossibleProperties.size should be <= 100 // limit on service side
     val allPossiblePropertyKeys = allPossibleProperties.keys.toList
 
@@ -266,12 +293,12 @@ class ContainersTest extends CommonDataModelTestHelper {
       indexes = Some(indexes)
     )
 
-    val createdResponse = testClient.containers.createItems(containers = Seq(containerToCreate)).unsafeRunSync()
+    val createdResponse =
+      testClient.containers.createItems(containers = Seq(containerToCreate)).unsafeRunSync()
     createdResponse.isEmpty shouldBe false
 
     // TODO: Check update reflection delay and remove 5 seconds sleep
-    val readAfterCreateContainers = (IO.sleep(5.seconds) *> testClient
-      .containers
+    val readAfterCreateContainers = (IO.sleep(5.seconds) *> testClient.containers
       .retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))))
       .unsafeRunSync()
     val insertedContainer = readAfterCreateContainers.find(_.externalId === containerExternalId)
@@ -281,24 +308,23 @@ class ContainersTest extends CommonDataModelTestHelper {
     insertedContainer.get.properties.keys.toList should contain theSameElementsAs allPossibleProperties.keys.toList
     insertedContainer.get.properties.values.toList should contain theSameElementsAs allPossibleProperties.values.toList
 
-    val allPossiblePropertiesToUpdate = allPossibleProperties.map {
-      case (k, v) =>
-        k -> (v.`type` match {
-          case _: PropertyType.DirectNodeRelationProperty =>
-            v.copy(
-              defaultValue = None,
-              nullable = Some(true),
-              description = v.description.map(d => s"$d Updated"),
-              name = v.name.map(n => s"$n-Updated")
-            )
-          case _ =>
-            v.copy(
-              defaultValue = None,
-              nullable = Some(false),
-              description = v.description.map(d => s"$d Updated"),
-              name = v.name.map(n => s"$n-Updated")
-            )
-        })
+    val allPossiblePropertiesToUpdate = allPossibleProperties.map { case (k, v) =>
+      k -> (v.`type` match {
+        case _: PropertyType.DirectNodeRelationProperty =>
+          v.copy(
+            defaultValue = None,
+            nullable = Some(true),
+            description = v.description.map(d => s"$d Updated"),
+            name = v.name.map(n => s"$n-Updated")
+          )
+        case _ =>
+          v.copy(
+            defaultValue = None,
+            nullable = Some(false),
+            description = v.description.map(d => s"$d Updated"),
+            name = v.name.map(n => s"$n-Updated")
+          )
+      })
     }
     val containerToUpdate = ContainerCreateDefinition(
       space = space,
@@ -311,12 +337,12 @@ class ContainersTest extends CommonDataModelTestHelper {
       indexes = Some(indexes)
     )
 
-    val updatedResponse = testClient.containers.createItems(containers = Seq(containerToUpdate)).unsafeRunSync()
+    val updatedResponse =
+      testClient.containers.createItems(containers = Seq(containerToUpdate)).unsafeRunSync()
     updatedResponse.isEmpty shouldBe false
 
     // TODO: Check update reflection delay and remove 10.seconds sleep
-    val readAfterUpdateContainers = (IO.sleep(5.seconds) *> testClient
-      .containers
+    val readAfterUpdateContainers = (IO.sleep(5.seconds) *> testClient.containers
       .retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))))
       .unsafeRunSync()
     val updatedContainer = readAfterUpdateContainers.find(_.externalId === containerExternalId).get
@@ -326,7 +352,8 @@ class ContainersTest extends CommonDataModelTestHelper {
     updatedContainer.name.get.endsWith("Updated") shouldBe true
     updatedContainer.description.get.endsWith("Updated") shouldBe true
 
-    val deletedContainer = testClient.containers.delete(Seq(ContainerId(space, containerExternalId))).unsafeRunSync()
+    val deletedContainer =
+      testClient.containers.delete(Seq(ContainerId(space, containerExternalId))).unsafeRunSync()
     deletedContainer.length shouldBe 1
   }
 }

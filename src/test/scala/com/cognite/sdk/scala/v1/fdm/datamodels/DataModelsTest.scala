@@ -35,8 +35,8 @@ class DataModelsTest extends CommonDataModelTestHelper {
   )
   private val container = testClient.containers
     .createItems(containers =
-        Seq(
-          ContainerCreateDefinition(
+      Seq(
+        ContainerCreateDefinition(
           space = space,
           externalId = "testDataModelV3Container",
           name = Some(s"Test-Container-Scala-Sdk"),
@@ -47,7 +47,9 @@ class DataModelsTest extends CommonDataModelTestHelper {
           indexes = None
         )
       )
-    ).unsafeRunSync().headOption
+    )
+    .unsafeRunSync()
+    .headOption
 
   private val view = testClient.views
     .createItems(items =
@@ -59,51 +61,58 @@ class DataModelsTest extends CommonDataModelTestHelper {
           name = Some(s"Test-View-Scala-SDK"),
           description = Some("Test View For Scala SDK"),
           filter = None,
-          properties = container.map {c =>
-            c.properties.map {
-              case (pName, _) =>
+          properties = container
+            .map { c =>
+              c.properties.map { case (pName, _) =>
                 pName -> ViewPropertyCreateDefinition.CreateViewProperty(
                   name = Some(pName),
                   container = c.toSourceReference,
-                  containerPropertyIdentifier = pName)
+                  containerPropertyIdentifier = pName
+                )
+              }
             }
-          }.getOrElse(Map.empty),
+            .getOrElse(Map.empty),
           implements = None
         )
       )
-    ).unsafeRunSync().headOption
-
+    )
+    .unsafeRunSync()
+    .headOption
 
   "Datamodels" should "create models" in {
-      val dataModel = testClient.dataModelsV3.createItems(items =
-          Seq(
-            DataModelCreate(
-              space = space,
-              externalId = "testDataModelV3",
-              name = Some("testDataModelV3"),
-              description = Some("testDataModelV3"),
-              version = "v1",
-              views = view.map(v => Vector(v.toSourceReference))
-            )
+    val dataModel = testClient.dataModelsV3
+      .createItems(items =
+        Seq(
+          DataModelCreate(
+            space = space,
+            externalId = "testDataModelV3",
+            name = Some("testDataModelV3"),
+            description = Some("testDataModelV3"),
+            version = "v1",
+            views = view.map(v => Vector(v.toSourceReference))
+          )
         )
-      ).unsafeRunSync().headOption
-
+      )
+      .unsafeRunSync()
+      .headOption
 
     dataModel.map(_.externalId) shouldBe Some("testDataModelV3")
     dataModel.flatMap(_.views.flatMap(_.headOption)) shouldBe view.map(_.toSourceReference)
   }
 
   "Datamodels" should "retrieve models" in {
-    val dataModel = testClient.dataModelsV3.retrieveItems(items =
-      Seq(
-        DataModelReference(
-          space = space,
-          externalId = "testDataModelV3",
-          version = Some("v1")
+    val dataModel = testClient.dataModelsV3
+      .retrieveItems(items =
+        Seq(
+          DataModelReference(
+            space = space,
+            externalId = "testDataModelV3",
+            version = Some("v1")
+          )
         )
       )
-    ).unsafeRunSync().headOption
-
+      .unsafeRunSync()
+      .headOption
 
     dataModel.map(_.externalId) shouldBe Some("testDataModelV3")
     dataModel.flatMap(_.views.flatMap(_.headOption)) shouldBe view.map(_.toSourceReference)

@@ -39,16 +39,16 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
       SttpBackendStub(implicitly[MonadError[IO]])
         .whenRequestMatches { req =>
           req.method === Method.POST && req.uri.scheme.contains("https") &&
-            req.uri.host.contains("bluefield.cognitedata.com") &&
-            req.uri.path.endsWith(
-              Seq("api", "v1", "projects", session.cdfProjectName, "sessions", "token")
-            ) &&
-            req.headers.contains(Header("Authorization", "Bearer kubernetesServiceToken")) &&
-            req.body === StringBody(
-              """{"sessionId":123,"sessionKey":"sessionKey-value"}""",
-              "utf-8",
-              MediaType.ApplicationJson
-            )
+          req.uri.host.contains("bluefield.cognitedata.com") &&
+          req.uri.path.endsWith(
+            Seq("api", "v1", "projects", session.cdfProjectName, "sessions", "token")
+          ) &&
+          req.headers.contains(Header("Authorization", "Bearer kubernetesServiceToken")) &&
+          req.body === StringBody(
+            """{"sessionId":123,"sessionKey":"sessionKey-value"}""",
+            "utf-8",
+            MediaType.ApplicationJson
+          )
         }
         .thenRespondF {
           for {
@@ -62,7 +62,14 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
         session,
         refreshSecondsBeforeExpiration = 1,
         Some(IO("kubernetesServiceToken")),
-        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 50, "irrelevant")))
+        Some(
+          TokenState(
+            "firstToken",
+            Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 50,
+            "irrelevant"
+          )
+        )
+      )
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       _ <- numTokenRequests.get.map(_ shouldBe 0)
       _ <- IO.sleep(3.seconds)
@@ -118,9 +125,16 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
         session,
         refreshSecondsBeforeExpiration = 2,
         Some(IO("kubernetesServiceToken")),
-        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
+        Some(
+          TokenState(
+            "firstToken",
+            Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4,
+            "irrelevant"
+          )
+        )
+      )
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      noNewToken <- numTokenRequests.get  // original token is still valid
+      noNewToken <- numTokenRequests.get // original token is still valid
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       oneRequestedToken <- numTokenRequests.get // original token is expired
@@ -129,7 +143,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
       twoRequestedToken <- numTokenRequests.get // first renew token is expired
     } yield (noNewToken, oneRequestedToken, twoRequestedToken)
 
-    retryWithExpectedResult[(Int,Int,Int)](
+    retryWithExpectedResult[(Int, Int, Int)](
       io.unsafeRunTimed(10.seconds).value,
       r => r shouldBe ((0, 1, 2))
     )
@@ -143,7 +157,8 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
       "irrelevant"
     )
 
-    implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
+    implicit val sttpBackend: SttpBackend[IO, Any] =
+      AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
 
     val cdpApiException = the[CdpApiException] thrownBy {
       OAuth2
@@ -207,11 +222,15 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
       "irrelevant"
     )
 
-    implicit val mockSttpBackend: SttpBackendStub[IO, Any] = SttpBackendStub(implicitly[MonadError[IO]])
+    implicit val mockSttpBackend: SttpBackendStub[IO, Any] =
+      SttpBackendStub(implicitly[MonadError[IO]])
 
     val sdkException = the[SdkException] thrownBy {
       OAuth2
-        .SessionProvider[IO](session, getToken = Some(IO.raiseError(new SdkException("Could not get Kubernetes JWT"))))
+        .SessionProvider[IO](
+          session,
+          getToken = Some(IO.raiseError(new SdkException("Could not get Kubernetes JWT")))
+        )
         .unsafeRunTimed(1.second)
         .value
         .getAuth

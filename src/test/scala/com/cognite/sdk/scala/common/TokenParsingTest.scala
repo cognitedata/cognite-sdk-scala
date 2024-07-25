@@ -49,10 +49,12 @@ class TokenParsingTest extends AnyFlatSpec with Matchers {
         "projectScope": {"allProjects": {}}
       }
     """)
-    r shouldBe Right(ProjectCapability(
-      resourceAcl = Map("AssetsAcl" -> Capability(Seq(), Map())),
-      projectScope = AllProjectsScope()
-    ))
+    r shouldBe Right(
+      ProjectCapability(
+        resourceAcl = Map("AssetsAcl" -> Capability(Seq(), Map())),
+        projectScope = AllProjectsScope()
+      )
+    )
   }
   it should "decode projectsList capability" in {
     val r = ProjectCapability.decoder.decodeJson(json"""
@@ -61,12 +63,14 @@ class TokenParsingTest extends AnyFlatSpec with Matchers {
           "projectScope": {"projects": ["a", "b"]}
       }
     """)
-    r shouldBe Right(ProjectCapability(
-      resourceAcl = Map("AssetsAcl" -> Capability(Seq(), Map())),
-      projectScope = ProjectsListScope(
-        Seq("a", "b")
+    r shouldBe Right(
+      ProjectCapability(
+        resourceAcl = Map("AssetsAcl" -> Capability(Seq(), Map())),
+        projectScope = ProjectsListScope(
+          Seq("a", "b")
+        )
       )
-    ))
+    )
   }
   it should "decode short inspect() result" in {
     val r = TokenInspectResponse.decoder.decodeJson(json"""
@@ -99,33 +103,38 @@ class TokenParsingTest extends AnyFlatSpec with Matchers {
         ]
       }
     """)
-    r shouldBe Right(TokenInspectResponse(
-      subject = "s",
-      projects = Seq(
-        ProjectDetails("a", Seq(1)), ProjectDetails("b", Seq(2))
-      ),
-      capabilities = Seq(ProjectCapability(
-        resourceAcl = Map("assetsAcl" -> Capability(
-          actions = Seq("READ"),
-          scope = Map("all" -> Map.empty))
+    r shouldBe Right(
+      TokenInspectResponse(
+        subject = "s",
+        projects = Seq(
+          ProjectDetails("a", Seq(1)),
+          ProjectDetails("b", Seq(2))
         ),
-        projectScope = ProjectsListScope(Seq("b"))
-      ))
-    ))
+        capabilities = Seq(
+          ProjectCapability(
+            resourceAcl = Map(
+              "assetsAcl" -> Capability(actions = Seq("READ"), scope = Map("all" -> Map.empty))
+            ),
+            projectScope = ProjectsListScope(Seq("b"))
+          )
+        )
+      )
+    )
   }
   it should "encode full inspect() result" in {
     val value = TokenInspectResponse(
       subject = "s",
       projects = Seq(
-        ProjectDetails("a", Seq(1)), ProjectDetails("b", Seq(2))
+        ProjectDetails("a", Seq(1)),
+        ProjectDetails("b", Seq(2))
       ),
-      capabilities = Seq(ProjectCapability(
-        resourceAcl = Map("assetsAcl" -> Capability(
-          actions = Seq("READ"),
-          scope = Map("all" -> Map.empty))
-        ),
-        projectScope = ProjectsListScope(Seq("b"))
-      ))
+      capabilities = Seq(
+        ProjectCapability(
+          resourceAcl =
+            Map("assetsAcl" -> Capability(actions = Seq("READ"), scope = Map("all" -> Map.empty))),
+          projectScope = ProjectsListScope(Seq("b"))
+        )
+      )
     )
     val r = TokenInspectResponse.decoder.decodeJson(
       TokenInspectResponse.encoder.apply(value)

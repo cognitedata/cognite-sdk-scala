@@ -21,13 +21,20 @@ import scala.collection.immutable.Seq
 import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.NonUnitStatements"))
-class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionValues with RetryWhile {
+class OAuth2ClientCredentialsTest
+    extends AnyFlatSpec
+    with Matchers
+    with OptionValues
+    with RetryWhile {
   import natchez.Trace.Implicits.noop
 
-  val tokenUri: String = sys.env.get("TEST_TOKEN_URL")
+  val tokenUri: String = sys.env
+    .get("TEST_TOKEN_URL")
     .orElse(
-      sys.env.get("TEST_AAD_TENANT")
-        .map(tenant => s"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token"))
+      sys.env
+        .get("TEST_AAD_TENANT")
+        .map(tenant => s"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token")
+    )
     .getOrElse("https://sometokenurl")
   val clientId: String = sys.env("TEST_CLIENT_ID")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET")
@@ -121,11 +128,19 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
 
     val io = for {
       _ <- numTokenRequests.update(_ => 0)
-      authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials,
+      authProvider <- OAuth2.ClientCredentialsProvider[IO](
+        credentials,
         refreshSecondsBeforeExpiration = 2,
-        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
+        Some(
+          TokenState(
+            "firstToken",
+            Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4,
+            "irrelevant"
+          )
+        )
+      )
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
-      noNewToken <- numTokenRequests.get  // original token is still valid
+      noNewToken <- numTokenRequests.get // original token is still valid
       _ <- IO.sleep(4.seconds)
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       oneRequestedToken <- numTokenRequests.get // original token is expired
@@ -134,7 +149,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       twoRequestedToken <- numTokenRequests.get // first renew token is expired
     } yield (noNewToken, oneRequestedToken, twoRequestedToken)
 
-    retryWithExpectedResult[(Int,Int,Int)](
+    retryWithExpectedResult[(Int, Int, Int)](
       io.unsafeRunTimed(10.seconds).value,
       r => r shouldBe ((0, 1, 2))
     )

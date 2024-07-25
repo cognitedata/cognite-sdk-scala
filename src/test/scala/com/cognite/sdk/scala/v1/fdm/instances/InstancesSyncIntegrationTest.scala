@@ -11,8 +11,12 @@ import com.cognite.sdk.scala.v1.fdm.containers.ContainerCreateDefinition
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDefinition.NodeDefinition
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.NodeDeletionRequest
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.NodeWrite
-import com.cognite.sdk.scala.v1.fdm.views.{ViewCreateDefinition, ViewDefinition, ViewPropertyCreateDefinition, ViewReference}
-
+import com.cognite.sdk.scala.v1.fdm.views.{
+  ViewCreateDefinition,
+  ViewDefinition,
+  ViewPropertyCreateDefinition,
+  ViewReference
+}
 
 @SuppressWarnings(
   Array(
@@ -34,7 +38,7 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
     )
   )
 
-  private val nodeContainer = {
+  private val nodeContainer =
     testClient.containers
       .createItems(containers =
         Seq(
@@ -49,10 +53,11 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
             indexes = None
           )
         )
-      ).unsafeRunSync().headOption
-  }
+      )
+      .unsafeRunSync()
+      .headOption
 
-  private val nodeView: Option[ViewDefinition] = {
+  private val nodeView: Option[ViewDefinition] =
     testClient.views
       .createItems(items =
         Seq(
@@ -63,33 +68,41 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
             name = Some(s"Test-View-Scala-SDK"),
             description = Some("Test View For Scala SDK"),
             filter = None,
-            properties = nodeContainer.map { c =>
-              c.properties.map {
-                case (pName, _) =>
+            properties = nodeContainer
+              .map { c =>
+                c.properties.map { case (pName, _) =>
                   pName -> ViewPropertyCreateDefinition.CreateViewProperty(
                     name = Some(pName),
                     container = c.toSourceReference,
-                    containerPropertyIdentifier = pName)
+                    containerPropertyIdentifier = pName
+                  )
+                }
               }
-            }.getOrElse(Map.empty),
+              .getOrElse(Map.empty),
             implements = None
           )
         )
-      ).unsafeRunSync().headOption
-  }
+      )
+      .unsafeRunSync()
+      .headOption
 
-  private val viewReference = nodeView.map(v => ViewReference(
-    externalId = v.externalId, space = v.space, version = v.version)
-  ).getOrElse(throw new Exception("View not found"))
+  private val viewReference = nodeView
+    .map(v => ViewReference(externalId = v.externalId, space = v.space, version = v.version))
+    .getOrElse(throw new Exception("View not found"))
 
   private def syncNodeInstances(viewRef: ViewReference, cursors: Option[Map[String, String]]) = {
     val hasData = HasData(Seq(viewRef))
     testClient.instances.syncRequest(
       InstanceSyncRequest(
-        `with` = Map("sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
+        `with` = Map(
+          "sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))
+        ),
         cursors = cursors,
-        select = Map("sync" -> SelectExpression(sources =
-          List(SourceSelector(source = viewRef, properties = List("*"))))),
+        select = Map(
+          "sync" -> SelectExpression(sources =
+            List(SourceSelector(source = viewRef, properties = List("*")))
+          )
+        ),
         includeTyping = Some(true)
       )
     )
@@ -100,8 +113,15 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
       NodeWrite(
         space = Utils.SpaceExternalId,
         externalId = stringVal,
-        sources = Some(Seq(EdgeOrNodeData(source = viewReference, properties = Some(Map("stringProp1" -> Some(InstancePropertyValue.String(stringVal))))))),
-        `type`=None
+        sources = Some(
+          Seq(
+            EdgeOrNodeData(
+              source = viewReference,
+              properties = Some(Map("stringProp1" -> Some(InstancePropertyValue.String(stringVal))))
+            )
+          )
+        ),
+        `type` = None
       )
     }
 
@@ -119,20 +139,29 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
     testClient.instances.delete(nodesToDelete).unsafeRunSync()
   }
 
-  private def syncAndValidate(viewRef: ViewReference, expected: Seq[String], cursor: Map[String, String], deleted: Boolean = false) = {
+  private def syncAndValidate(
+      viewRef: ViewReference,
+      expected: Seq[String],
+      cursor: Map[String, String],
+      deleted: Boolean = false
+  ) = {
     val syncResponse = syncNodeInstances(viewRef, Some(cursor)).unsafeRunSync()
-    val nodes: Seq[NodeDefinition] = syncResponse.items.get("sync").asInstanceOf[Seq[NodeDefinition]]
+    val nodes: Seq[NodeDefinition] =
+      syncResponse.items.get("sync").asInstanceOf[Seq[NodeDefinition]]
     nodes.size shouldBe expected.size
     nodes.map(_.externalId) should contain theSameElementsAs expected
-    nodes.map(_.deletedTime.isDefined) should be (Seq.fill(expected.size)(deleted))
+    nodes.map(_.deletedTime.isDefined) should be(Seq.fill(expected.size)(deleted))
     syncResponse.nextCursor
   }
 
   @scala.annotation.tailrec
-  private def syncToHead(viewRef: ViewReference, cursor: Option[Map[String, String]] = None)
-  : Map[String, String] = {
+  private def syncToHead(
+      viewRef: ViewReference,
+      cursor: Option[Map[String, String]] = None
+  ): Map[String, String] = {
     val syncResponse = syncNodeInstances(viewRef, cursor).unsafeRunSync()
-    val nodes: Seq[NodeDefinition] = syncResponse.items.get("sync").asInstanceOf[Seq[NodeDefinition]]
+    val nodes: Seq[NodeDefinition] =
+      syncResponse.items.get("sync").asInstanceOf[Seq[NodeDefinition]]
     if (nodes.nonEmpty) {
       syncToHead(viewRef, Some(syncResponse.nextCursor))
     } else {

@@ -1,7 +1,11 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{
+  PrimitivePropType,
+  PropertyDefaultValue,
+  PropertyType
+}
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDefinition.NodeDefinition
 import io.circe
@@ -26,7 +30,7 @@ import java.time.temporal.ChronoUnit
 )
 class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
 
-  "InstanceFilterResponse" should  {
+  "InstanceFilterResponse" should {
     "ser/de" in {
       val createdTime: Long = Instant.now().minus(100, ChronoUnit.DAYS).toEpochMilli
       val lastUpdatedTime: Long = Instant.now().minus(100, ChronoUnit.DAYS).toEpochMilli
@@ -266,7 +270,11 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   None,
                   Some("property-identifier13"),
                   Some("property-identifier13"),
-                  PropertyType.DirectNodeRelationProperty(Some(ContainerReference("space-name-1", "extId1")), None, None)
+                  PropertyType.DirectNodeRelationProperty(
+                    Some(ContainerReference("space-name-1", "extId1")),
+                    None,
+                    None
+                  )
                 )
               ),
               "view-or-container-id-2" -> Map(
@@ -339,7 +347,8 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
         Some("cursor-101")
       )
 
-      val actual: Either[circe.Error, InstanceFilterResponse] = parse(json).flatMap(Decoder[InstanceFilterResponse].decodeJson)
+      val actual: Either[circe.Error, InstanceFilterResponse] =
+        parse(json).flatMap(Decoder[InstanceFilterResponse].decodeJson)
 
       actual shouldBe Right(instanceFilterResponse)
     }
