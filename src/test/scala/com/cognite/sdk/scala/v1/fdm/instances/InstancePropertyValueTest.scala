@@ -19,11 +19,12 @@ import scala.util.Try
 )
 class InstancePropertyValueTest extends AnyWordSpec with Matchers {
 
-  "InstanceFilterValue" should  {
+  "InstanceFilterValue" should {
 
     "format UTC timestamps as YYYY-MM-DDTHH:MM:SS[.millis][Z|time zone]" in {
       val formatter = InstancePropertyValue.Timestamp.formatter
-      val timestamp = LocalDateTime.of(2023, 1, 1, 1, 1, 1, 1000000)
+      val timestamp = LocalDateTime
+        .of(2023, 1, 1, 1, 1, 1, 1000000)
         .atZone(ZoneId.of("UTC"))
       val formattedStr = formatter.format(timestamp)
 
@@ -32,7 +33,8 @@ class InstancePropertyValueTest extends AnyWordSpec with Matchers {
 
     "format non UTC timestamps as YYYY-MM-DDTHH:MM:SS[.millis][Z|time zone]" in {
       val formatter = InstancePropertyValue.Timestamp.formatter
-      val timestamp = LocalDateTime.of(2023, 1, 1, 1, 1, 1, 1000000)
+      val timestamp = LocalDateTime
+        .of(2023, 1, 1, 1, 1, 1, 1000000)
         .atZone(ZoneId.of("Asia/Colombo"))
       val formattedStr = formatter.format(timestamp)
       formattedStr shouldBe "2023-01-01T01:01:01.001+05:30"
@@ -42,7 +44,8 @@ class InstancePropertyValueTest extends AnyWordSpec with Matchers {
       val formatter = InstancePropertyValue.Timestamp.formatter
       val formattedStr = "2023-01-01T01:01:01.001Z"
       val parsedTs = ZonedDateTime.parse(formattedStr, formatter)
-      val expectedTs = LocalDateTime.of(2023, 1, 1, 1, 1, 1, 1000000)
+      val expectedTs = LocalDateTime
+        .of(2023, 1, 1, 1, 1, 1, 1000000)
         .atZone(ZoneId.of("UTC"))
 
       parsedTs.getZone shouldBe ZoneId.of("Z")
@@ -54,7 +57,8 @@ class InstancePropertyValueTest extends AnyWordSpec with Matchers {
       val formatter = InstancePropertyValue.Timestamp.formatter
       val formattedStr = "2023-01-01T01:01:01.001+05:30"
       val parsedTs = ZonedDateTime.parse(formattedStr, formatter)
-      val expectedTs = LocalDateTime.of(2023, 1, 1, 1, 1, 1, 1000000)
+      val expectedTs = LocalDateTime
+        .of(2023, 1, 1, 1, 1, 1, 1000000)
         .atZone(ZoneId.of("Asia/Colombo"))
 
       parsedTs.getZone.toString shouldBe ZoneOffset.of("+05:30").toString

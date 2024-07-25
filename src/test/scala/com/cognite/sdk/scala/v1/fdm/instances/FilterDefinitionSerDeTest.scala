@@ -35,12 +35,14 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
     "AndFilter" should {
       "encode-decode" in {
         checkPair(
-          And(Seq(
-            In(
-              Seq("some_domain_model", "EntityTypeGroup", "entityType"),
-              StringList(Seq("CFIHOS_00000003"))
+          And(
+            Seq(
+              In(
+                Seq("some_domain_model", "EntityTypeGroup", "entityType"),
+                StringList(Seq("CFIHOS_00000003"))
+              )
             )
-          )),
+          ),
           json"""
           {
             "and": [{
@@ -64,12 +66,14 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
     "NotFilter" should {
       "encode-decode" in {
         checkPair(
-          Not(Not(
-            In(
-              Seq("some_domain_model", "EntityTypeGroup", "entityType"),
-              StringList(Seq("CFIHOS_00000003"))
+          Not(
+            Not(
+              In(
+                Seq("some_domain_model", "EntityTypeGroup", "entityType"),
+                StringList(Seq("CFIHOS_00000003"))
+              )
             )
-          )),
+          ),
           json"""
         {
           "not": {
@@ -195,7 +199,10 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
       }
 
       "work for containsAny filter" in {
-        val containsAny = ContainsAny(Seq("name", "tag"), FilterValueDefinition.StringList(Seq("abcdef", "pqrs"))).asJson
+        val containsAny = ContainsAny(
+          Seq("name", "tag"),
+          FilterValueDefinition.StringList(Seq("abcdef", "pqrs"))
+        ).asJson
         containsAny.toString() shouldBe """{
                                           |  "property" : [
                                           |    "name",
@@ -209,7 +216,8 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
       }
 
       "work for containsAll filter" in {
-        val containsAll = ContainsAll(Seq("name", "tag"), FilterValueDefinition.IntegerList(Seq(123, 456))).asJson
+        val containsAll =
+          ContainsAll(Seq("name", "tag"), FilterValueDefinition.IntegerList(Seq(123, 456))).asJson
         containsAll.toString() shouldBe """{
                                           |  "property" : [
                                           |    "name",
@@ -264,7 +272,12 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
       }
 
       "work for hasData filter" in {
-        val hasData = HasData(Seq(ContainerReference("space-1", "space-ext-id-1"), ViewReference("space-1", "view-ext-id-1", "v1"))).asJson
+        val hasData = HasData(
+          Seq(
+            ContainerReference("space-1", "space-ext-id-1"),
+            ViewReference("space-1", "view-ext-id-1", "v1")
+          )
+        ).asJson
         hasData.toString() shouldBe """[
                                       |  {
                                       |    "type" : "container",
@@ -357,7 +370,8 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
                                  |}""".stripMargin
       }
       "work for not filter" in {
-        val containsAny = ContainsAny(Seq("name", "tag"), FilterValueDefinition.StringList(Seq("abcdef", "pqrs")))
+        val containsAny =
+          ContainsAny(Seq("name", "tag"), FilterValueDefinition.StringList(Seq("abcdef", "pqrs")))
 
         val not = Not(containsAny).asJson
         not.toString() shouldBe """{
@@ -382,7 +396,8 @@ class FilterDefinitionSerDeTest extends AnyWordSpec with Matchers {
         val equalInt =
           Equals(Seq("name", "tag"), FilterValueDefinition.Integer(9223372036854775L))
         val in = In(Seq("name", "tag"), FilterValueDefinition.DoubleList(Seq(2.64, 1.23)))
-        val containsAny = ContainsAny(Seq("name", "tag"), FilterValueDefinition.IntegerList(Seq(264, 123)))
+        val containsAny =
+          ContainsAny(Seq("name", "tag"), FilterValueDefinition.IntegerList(Seq(264, 123)))
         val orEqual = Or(Seq(equalInt))
         val orInContainsAny = Or(Seq(in, containsAny))
 

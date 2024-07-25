@@ -7,24 +7,34 @@ import cats.effect.IO
 import cats.effect.unsafe.IORuntime
 
 import java.time.Instant
-import com.cognite.sdk.scala.v1.{CogniteExternalId, CogniteInternalId, DataPointsByExternalIdResponse, DataPointsByIdResponse, TimeSeries}
+import com.cognite.sdk.scala.v1.{
+  CogniteExternalId,
+  CogniteInternalId,
+  DataPointsByExternalIdResponse,
+  DataPointsByIdResponse,
+  TimeSeries
+}
 import com.cognite.sdk.scala.v1.resources.DataPointsResource
 import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
-trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryWhile { this: AnyFlatSpec =>
+trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryWhile {
+  this: AnyFlatSpec =>
   private val startTime = System.currentTimeMillis()
   private val start = Instant.ofEpochMilli(startTime)
-  private val endTime = startTime + 20*1000
+  private val endTime = startTime + 20 * 1000
   private val end = Instant.ofEpochMilli(endTime)
   private val testDataPoints = (startTime to endTime by 1000).map(t =>
-    DataPoint(Instant.ofEpochMilli(t), java.lang.Math.random()))
+    DataPoint(Instant.ofEpochMilli(t), java.lang.Math.random())
+  )
 
   def withTimeSeries(testCode: TimeSeries => Any): Unit
 
-  def dataPointsResource(dataPoints: DataPointsResource[IO])(implicit IORuntime: IORuntime): Unit = {
+  def dataPointsResource(
+      dataPoints: DataPointsResource[IO]
+  )(implicit IORuntime: IORuntime): Unit = {
     it should "be possible to insert and delete numerical data points" in withTimeSeries {
       timeSeries =>
         val timeSeriesId = timeSeries.id
@@ -49,17 +59,21 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
           }
         )
 
-        val latestStartDp = dataPoints.getLatestDataPoint(
-          CogniteInternalId(timeSeriesId),
-          start.plusMillis(1).toEpochMilli.toString
-        ).unsafeRunSync()
+        val latestStartDp = dataPoints
+          .getLatestDataPoint(
+            CogniteInternalId(timeSeriesId),
+            start.plusMillis(1).toEpochMilli.toString
+          )
+          .unsafeRunSync()
         latestStartDp.isDefined shouldBe true
         testDataPoints.headOption.map(_.value) shouldBe latestStartDp.map(_.value)
 
-        val latestEndDp = dataPoints.getLatestDataPoint(
-          CogniteInternalId(timeSeriesId),
-          end.plusMillis(1).toEpochMilli.toString
-        ).unsafeRunSync()
+        val latestEndDp = dataPoints
+          .getLatestDataPoint(
+            CogniteInternalId(timeSeriesId),
+            end.plusMillis(1).toEpochMilli.toString
+          )
+          .unsafeRunSync()
         latestEndDp.isDefined shouldBe true
         testDataPoints.lastOption.map(_.value) shouldBe latestEndDp.map(_.value)
 
@@ -71,12 +85,16 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
 
         dataPoints.insert(CogniteExternalId(timeSeriesExternalId), testDataPoints).unsafeRunSync()
         retryWithExpectedResult[DataPointsByExternalIdResponse](
-          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)).unsafeRunSync(),
+          dataPoints
+            .queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
+            .unsafeRunSync(),
           p2 => p2.datapoints should have size testDataPoints.size.toLong
         )
 
         retryWithExpectedResult[DataPointsByExternalIdResponse](
-          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1), Some(5)).unsafeRunSync(),
+          dataPoints
+            .queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1), Some(5))
+            .unsafeRunSync(),
           p2 => p2.datapoints should have size 5
         )
 
@@ -88,23 +106,31 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
           }
         )
 
-        val latestStartDataPoint = dataPoints.getLatestDataPoint(
-          CogniteExternalId(timeSeriesExternalId),
-          start.plusMillis(1).toEpochMilli.toString
-        ).unsafeRunSync()
+        val latestStartDataPoint = dataPoints
+          .getLatestDataPoint(
+            CogniteExternalId(timeSeriesExternalId),
+            start.plusMillis(1).toEpochMilli.toString
+          )
+          .unsafeRunSync()
         latestStartDataPoint.isDefined shouldBe true
         testDataPoints.headOption.map(_.value) shouldBe latestStartDataPoint.map(_.value)
 
-        val latestEndDataPoint = dataPoints.getLatestDataPoint(
-          CogniteExternalId(timeSeriesExternalId),
-          end.plusMillis(1).toEpochMilli.toString
-        ).unsafeRunSync()
+        val latestEndDataPoint = dataPoints
+          .getLatestDataPoint(
+            CogniteExternalId(timeSeriesExternalId),
+            end.plusMillis(1).toEpochMilli.toString
+          )
+          .unsafeRunSync()
         latestEndDataPoint.isDefined shouldBe true
         testDataPoints.lastOption.map(_.value) shouldBe latestEndDataPoint.map(_.value)
 
-        dataPoints.deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1)).unsafeRunSync()
+        dataPoints
+          .deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
+          .unsafeRunSync()
         retryWithExpectedResult[DataPointsByExternalIdResponse](
-          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)).unsafeRunSync(),
+          dataPoints
+            .queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
+            .unsafeRunSync(),
           pad => pad.datapoints should have size 0,
           retriesRemaining = 20
         )
@@ -129,25 +155,35 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
 
         dataPoints.insertByExternalId(timeSeriesExternalId, testDataPoints).unsafeRunSync()
         retryWithExpectedResult[DataPointsByExternalIdResponse](
-          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)).unsafeRunSync(),
+          dataPoints
+            .queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
+            .unsafeRunSync(),
           p2 => p2.datapoints should have size testDataPoints.size.toLong
         )
 
         retryWithExpectedResult[DataPointsByExternalIdResponse](
-          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1), Some(5)).unsafeRunSync(),
+          dataPoints
+            .queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1), Some(5))
+            .unsafeRunSync(),
           p2 => p2.datapoints should have size 5
         )
 
-        dataPoints.deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1)).unsafeRunSync()
+        dataPoints
+          .deleteRangeByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
+          .unsafeRunSync()
         retryWithExpectedResult[DataPointsByExternalIdResponse](
-          dataPoints.queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1)).unsafeRunSync(),
+          dataPoints
+            .queryByExternalId(timeSeriesExternalId, start, end.plusMillis(1))
+            .unsafeRunSync(),
           pad => pad.datapoints should have size 0
         )
     }
 
     it should "be an error to insert numerical data points for non-existing time series" in {
       val unknownId = 991919L
-      val thrown = the[CdpApiException] thrownBy dataPoints.insert(CogniteInternalId(unknownId), testDataPoints).unsafeRunSync()
+      val thrown = the[CdpApiException] thrownBy dataPoints
+        .insert(CogniteInternalId(unknownId), testDataPoints)
+        .unsafeRunSync()
 
       val itemsNotFound = thrown.missing.value
       val notFoundIds =
@@ -158,7 +194,9 @@ trait DataPointsResourceBehaviors extends Matchers with OptionValues with RetryW
 
     it should "be an error to delete numerical data points for non-existing time series" in {
       val unknownId = 991999L
-      val thrown = the[CdpApiException] thrownBy dataPoints.deleteRangeById(unknownId, start, end).unsafeRunSync()
+      val thrown = the[CdpApiException] thrownBy dataPoints
+        .deleteRangeById(unknownId, start, end)
+        .unsafeRunSync()
       val itemsNotFound = thrown.missing.value
       val notFoundIds =
         itemsNotFound.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)

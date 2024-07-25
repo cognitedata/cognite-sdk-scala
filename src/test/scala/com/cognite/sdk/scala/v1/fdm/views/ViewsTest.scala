@@ -5,7 +5,10 @@ package com.cognite.sdk.scala.v1.fdm.views
 
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{Int32, TimeSeriesReference}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{
+  Int32,
+  TimeSeriesReference
+}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{
   ContainerPropertyDefinition,
   ReverseDirectRelationConnection,
@@ -14,10 +17,17 @@ import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{
 }
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
 import com.cognite.sdk.scala.v1.fdm.common.properties.ReverseDirectRelationConnectionType.MultiReverseDirectRelation
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{
+  PrimitivePropType,
+  PropertyDefaultValue,
+  PropertyType
+}
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers._
-import com.cognite.sdk.scala.v1.fdm.views.ViewPropertyCreateDefinition.{CreateConnectionDefinition, CreateViewProperty}
+import com.cognite.sdk.scala.v1.fdm.views.ViewPropertyCreateDefinition.{
+  CreateConnectionDefinition,
+  CreateViewProperty
+}
 import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, SpaceCreateDefinition}
 import io.circe.Json
 import org.scalatest.BeforeAndAfterAll
@@ -74,10 +84,12 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     name = Some(containerNamePrim),
     description = Some("this is a container of primitive types"),
     usedFor = Some(Usage.All),
-    properties = Map("prop_int32" -> containerPropertyInt,
+    properties = Map(
+      "prop_int32" -> containerPropertyInt,
       "prop_text" -> containerPropertyText,
       "prop_timeseries" -> containerTimeSeriesProperty,
-      "connection" -> containerPropertyDirectRelation),
+      "connection" -> containerPropertyDirectRelation
+    ),
     constraints = None,
     indexes = None
   )
@@ -121,13 +133,21 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
   val viewVersion1 = "v1"
 
-
   it should "create a view" in {
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val properties = Map(
-      "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
-      "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text"),
-      "prop_timeseries" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_timeseries")
+      "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(
+        container = containerReference,
+        containerPropertyIdentifier = "prop_int32"
+      ),
+      "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(
+        container = containerReference,
+        containerPropertyIdentifier = "prop_text"
+      ),
+      "prop_timeseries" -> ViewPropertyCreateDefinition.CreateViewProperty(
+        container = containerReference,
+        containerPropertyIdentifier = "prop_timeseries"
+      )
     )
     val viewExternalId = "scala_sdk_view_1"
 
@@ -144,7 +164,8 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
     val created = testClient.views
       .createItems(Seq(viewToCreate))
-      .unsafeRunSync().headOption
+      .unsafeRunSync()
+      .headOption
 
     created.map(_.space) shouldBe Some(spaceName)
     created.map(_.externalId) shouldBe Some(viewExternalId)
@@ -218,7 +239,9 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .unsafeRunSync()
 
     testClient.views
-      .deleteItems(Seq(DataModelReference(spaceName, implementingViewExternalId, Some(viewVersion1))))
+      .deleteItems(
+        Seq(DataModelReference(spaceName, implementingViewExternalId, Some(viewVersion1)))
+      )
       .unsafeRunSync()
   }
 
@@ -228,8 +251,8 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     val viewWithRDRExternalId = "scala_sdk_view_4"
     val containerPrimReference = ContainerReference(spaceName, containerPrimitiveExternalId)
 
-    //connection property points to a container property that is a direct connection
-    //reverse direct connections can only point to direct connections
+    // connection property points to a container property that is a direct connection
+    // reverse direct connections can only point to direct connections
     val viewWithDRProperties = Map(
       "connection" -> CreateViewProperty(
         None,
@@ -255,7 +278,10 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
         Some("name"),
         Some("desc"),
         ViewReference(spaceName, viewPointedTo.externalId, viewVersion1),
-        ThroughReference("connection", ViewReference(spaceName, viewPointedTo.externalId, viewVersion1))
+        ThroughReference(
+          "connection",
+          ViewReference(spaceName, viewPointedTo.externalId, viewVersion1)
+        )
       )
     )
 
@@ -282,18 +308,29 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
       .retrieveItems(Seq(DataModelReference(spaceName, viewWithRDRExternalId, Some(viewVersion1))))
       .unsafeRunSync()
     retrievedViews.headOption.map(_.externalId) shouldBe Some(viewWithRDRExternalId)
-    retrievedViews.headOption.flatMap(_.properties
-      .get(f"has_$viewWithDRExternalId")
-      .map(_.asInstanceOf[ReverseDirectRelationConnection].connectionType)) shouldBe Some(MultiReverseDirectRelation)
+    retrievedViews.headOption.flatMap(
+      _.properties
+        .get(f"has_$viewWithDRExternalId")
+        .map(_.asInstanceOf[ReverseDirectRelationConnection].connectionType)
+    ) shouldBe Some(MultiReverseDirectRelation)
   }
 
   it should "delete views" in {
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val viewExternalId = "scala_sdk_view_5"
     val properties = Map(
-      "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
-      "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text"),
-      "prop_timeseries" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_timeseries")
+      "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(
+        container = containerReference,
+        containerPropertyIdentifier = "prop_int32"
+      ),
+      "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(
+        container = containerReference,
+        containerPropertyIdentifier = "prop_text"
+      ),
+      "prop_timeseries" -> ViewPropertyCreateDefinition.CreateViewProperty(
+        container = containerReference,
+        containerPropertyIdentifier = "prop_timeseries"
+      )
     )
     val viewToCreate = ViewCreateDefinition(
       space = spaceName,
@@ -307,7 +344,8 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     )
     testClient.views
       .createItems(Seq(viewToCreate))
-      .unsafeRunSync().headOption
+      .unsafeRunSync()
+      .headOption
 
     testClient.views
       .deleteItems(Seq(DataModelReference(spaceName, viewExternalId, Some(viewVersion1))))

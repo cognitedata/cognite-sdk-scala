@@ -19,20 +19,22 @@ import org.scalatest.OptionValues
 class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with OptionValues {
   private val idsThatDoNotExist = Seq("nodatabase", "randomdatabase")
 
-  it should behave like readable(client.rawDatabases)
-  it should behave like writable(
-    client.rawDatabases,
-    Some(client.rawDatabases),
-    Seq(
-      RawDatabase(name = s"scala-sdk-${shortRandom()}"),
-      RawDatabase(name = s"scala-sdk-${shortRandom()}")
-    ),
-    Seq(
-      RawDatabase(name = s"scala-sdk-${shortRandom()}"),
-      RawDatabase(name = s"scala-sdk-${shortRandom()}")
-    ),
-    idsThatDoNotExist,
-    supportsMissingAndThrown = false
+  (it should behave).like(readable(client.rawDatabases))
+  (it should behave).like(
+    writable(
+      client.rawDatabases,
+      Some(client.rawDatabases),
+      Seq(
+        RawDatabase(name = s"scala-sdk-${shortRandom()}"),
+        RawDatabase(name = s"scala-sdk-${shortRandom()}")
+      ),
+      Seq(
+        RawDatabase(name = s"scala-sdk-${shortRandom()}"),
+        RawDatabase(name = s"scala-sdk-${shortRandom()}")
+      ),
+      idsThatDoNotExist,
+      supportsMissingAndThrown = false
+    )
   )
 
   def withDatabaseTables(testCode: (String, Seq[String]) => Any): Unit = {
@@ -52,13 +54,11 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
       val _ = testCode(database, tables)
     } catch {
       case t: Throwable => throw t
-    } finally {
-      try {
+    } finally
+      try
         client.rawTables(database).deleteByIds(tables).unsafeRunSync()
-      } finally {
+      finally
         client.rawDatabases.deleteByIds(Seq(database)).unsafeRunSync()
-      }
-    }
   }
 
   it should "allow creation and deletion of database tables" in withDatabaseTables {
@@ -68,12 +68,14 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
 
       client.rawTables(database).deleteByIds(tables.take(1)).unsafeRunSync()
 
-      val tablesResponseAfterDelete = client.rawTables(database).list().compile.toList.unsafeRunSync()
+      val tablesResponseAfterDelete =
+        client.rawTables(database).list().compile.toList.unsafeRunSync()
       assert(tablesResponseAfterDelete.size === tables.size - 1)
 
       client.rawTables(database).create(Seq(RawTable(name = tables.head))).unsafeRunSync()
 
-      val tablesResponseAfterCreate = client.rawTables(database).list().compile.toList.unsafeRunSync()
+      val tablesResponseAfterCreate =
+        client.rawTables(database).list().compile.toList.unsafeRunSync()
       assert(tablesResponseAfterCreate.size === tables.size)
   }
 
@@ -84,12 +86,14 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
     val rowsResponse = rows.list().compile.toList.unsafeRunSync()
     assert(rowsResponse.isEmpty)
 
-    rows.create(
-      Seq(
-        RawRow("123", Map("abc" -> "foo".asJson)),
-        RawRow("abc", Map("abc" -> Map("cde" -> 1).asJson))
+    rows
+      .create(
+        Seq(
+          RawRow("123", Map("abc" -> "foo".asJson)),
+          RawRow("abc", Map("abc" -> Map("cde" -> 1).asJson))
+        )
       )
-    ).unsafeRunSync()
+      .unsafeRunSync()
 
     // we need cats.syntax.either._ to make this backwards compatible with Scala 2.11
     // while avoiding deprecation warnings on Scala 2.13, which does not need that import.
@@ -120,17 +124,20 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
 
   it should "ensure parent" in {
     val database = s"raw-test-ensureParent-${shortRandom()}"
-    val table =  s"raw-test-${shortRandom()}"
+    val table = s"raw-test-${shortRandom()}"
     try {
-      client.rawRows(database, table).createItems(Items(Seq(RawRow("something", Map()))), ensureParent = true).unsafeRunSync()
-      assert(client.rawTables(database).list().compile.toList.unsafeRunSync().map(_.id).contains(table))
-    } finally {
-      try {
+      client
+        .rawRows(database, table)
+        .createItems(Items(Seq(RawRow("something", Map()))), ensureParent = true)
+        .unsafeRunSync()
+      assert(
+        client.rawTables(database).list().compile.toList.unsafeRunSync().map(_.id).contains(table)
+      )
+    } finally
+      try
         client.rawTables(database).deleteByIds(Seq(table)).unsafeRunSync()
-      } finally {
+      finally
         client.rawDatabases.deleteByIds(Seq(database)).unsafeRunSync()
-      }
-    }
   }
 
   it should "allow partition read and filtering of rows" in withDatabaseTables {
@@ -138,34 +145,38 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
       val rows = client
         .rawRows(database, tables.head)
 
-      rows.create(
-        Seq(
-          RawRow("123", Map("a" -> "3".asJson, "abc" -> "foo".asJson)),
-          RawRow("abc", Map("a" -> "0".asJson, "abc" -> Map("cde" -> 1).asJson))
+      rows
+        .create(
+          Seq(
+            RawRow("123", Map("a" -> "3".asJson, "abc" -> "foo".asJson)),
+            RawRow("abc", Map("a" -> "0".asJson, "abc" -> Map("cde" -> 1).asJson))
+          )
         )
-      ).unsafeRunSync()
+        .unsafeRunSync()
 
       val partitions = rows.filterPartitionsF(RawRowFilter(), 20, Some(10)).unsafeRunSync()
       assert(partitions.length === 20)
       assert(partitions.fold(Stream.empty)(_ ++ _).compile.toVector.unsafeRunSync().nonEmpty)
 
       val columns = rows
-          .filter(RawRowFilter(columns = Some(Seq("abc"))))
-          .compile
-          .toList
-          .unsafeRunSync()
-          .head
-          .columns
-          .keySet
+        .filter(RawRowFilter(columns = Some(Seq("abc"))))
+        .compile
+        .toList
+        .unsafeRunSync()
+        .head
+        .columns
+        .keySet
       columns should contain only "abc"
 
       val prevRows = rows.list().compile.toList.unsafeRunSync()
-      rows.create(
-        Seq(
-          RawRow("a", Map("a" -> "3".asJson, "abc" -> "foo".asJson)),
-          RawRow("c", Map("a" -> "3".asJson, "abc" -> "foo".asJson))
+      rows
+        .create(
+          Seq(
+            RawRow("a", Map("a" -> "3".asJson, "abc" -> "foo".asJson)),
+            RawRow("c", Map("a" -> "3".asJson, "abc" -> "foo".asJson))
+          )
         )
-      ).unsafeRunSync()
+        .unsafeRunSync()
       val currentRows = rows.list().compile.toList.unsafeRunSync()
       assert(currentRows.length === 4)
 
@@ -189,27 +200,27 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
       )
 
       rows.retrieveByKey("abc").unsafeRunSync() match {
-        case RawRow(key, columns, _) => {
+        case RawRow(key, columns, _) =>
           assert(key === "abc")
           assert(columns === Map("a" -> "0".asJson, "abc" -> Map("cde" -> 1).asJson))
-          }
       }
   }
 
-  it should "get partition cursor" in withDatabaseTables {
-    (database, tables) =>
-      val rows = client
-        .rawRows(database, tables.head)
+  it should "get partition cursor" in withDatabaseTables { (database, tables) =>
+    val rows = client
+      .rawRows(database, tables.head)
 
-      rows.create(
+    rows
+      .create(
         Seq(
           RawRow("123", Map("a" -> "3".asJson, "abc" -> "foo".asJson)),
           RawRow("abc", Map("a" -> "0".asJson, "abc" -> Map("cde" -> 1).asJson))
         )
-      ).unsafeRunSync()
+      )
+      .unsafeRunSync()
 
-      val pCursors = rows.getPartitionCursors(RawRowFilter(), 15).unsafeRunSync()
-      pCursors.size shouldBe 15
+    val pCursors = rows.getPartitionCursors(RawRowFilter(), 15).unsafeRunSync()
+    pCursors.size shouldBe 15
 
   }
 }

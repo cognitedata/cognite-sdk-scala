@@ -27,8 +27,10 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
 
     if (supportsLimit) {
       it should "read items with limit" in {
-        readable.read(limit = Some(1)).unsafeRunSync().items should have length Math.min(listLength.toLong, 1)
-        readable.read(limit = Some(2)).unsafeRunSync().items should have length Math.min(listLength.toLong, 2)
+        (readable.read(limit = Some(1)).unsafeRunSync().items should have)
+          .length(Math.min(listLength.toLong, 1))
+        (readable.read(limit = Some(2)).unsafeRunSync().items should have)
+          .length(Math.min(listLength.toLong, 2))
       }
     }
 
@@ -78,20 +80,24 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
       allLength should be(3)
       // We wrap this in retryWithExpectedResult, as some resource types have eventual consistency
       // on those operations (sequences, for example).
-      retryWithExpectedResult[(Int, Int)]({
-        // Limit to 50k as we have a silly number of items for some resource types in our test project.
-        val unlimitedLength = readable.list().take(50000).map(_ => 1).compile.toList.unsafeRunSync().length
-        val partitionsLength = readable
-          .listPartitions(10)
-          .fold(fs2.Stream.empty)(_ ++ _)
-          .map(_ => 1)
-          .take(50000)
-          .compile
-          .toList
-          .unsafeRunSync()
-          .length
-        (unlimitedLength, partitionsLength)
-      }, { case (unlimitedLength, partitionsLength) => assert(unlimitedLength === partitionsLength) })
+      retryWithExpectedResult[(Int, Int)](
+        {
+          // Limit to 50k as we have a silly number of items for some resource types in our test project.
+          val unlimitedLength =
+            readable.list().take(50000).map(_ => 1).compile.toList.unsafeRunSync().length
+          val partitionsLength = readable
+            .listPartitions(10)
+            .fold(fs2.Stream.empty)(_ ++ _)
+            .map(_ => 1)
+            .take(50000)
+            .compile
+            .toList
+            .unsafeRunSync()
+            .length
+          (unlimitedLength, partitionsLength)
+        },
+        { case (unlimitedLength, partitionsLength) => assert(unlimitedLength === partitionsLength) }
+      )
     }
   }
 
@@ -111,7 +117,8 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
 
     it should "return information about missing ids" in {
       val thrown = the[CdpApiException] thrownBy readable
-        .retrieveByIds(idsThatDoNotExist).unsafeRunSync()
+        .retrieveByIds(idsThatDoNotExist)
+        .unsafeRunSync()
       if (supportsMissingAndThrown) {
         val itemsNotFound = thrown.missing
 
@@ -124,7 +131,8 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
 
       val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
       val sameIdsThrown = the[CdpApiException] thrownBy readable
-        .retrieveByIds(sameIdsThatDoNotExist).unsafeRunSync()
+        .retrieveByIds(sameIdsThatDoNotExist)
+        .unsafeRunSync()
       if (supportsMissingAndThrown) {
         sameIdsThrown.missing match {
           case Some(missingItems) =>
@@ -132,22 +140,25 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
               missingItems.map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value).toSet
             // it's a bit funny that the same missing ids are returned duplicated,
             // but that's how it works as of 2019-06-02.
-            //sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
+            // sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
             // TODO: remove when we get rid of the warning
             val _ = sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           case None =>
             val duplicatedNotFoundIds = sameIdsThrown.duplicated.value
               .map(jsonObj => jsonObj("id").value.asNumber.value.toLong.value)
               .toSet
-            //duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+            // duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
             // TODO: remove when we get rid of the warning
-            val _ = duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+            val _ =
+              duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
         }
       }
     }
   }
 
-  private def fetchTestItemsWithRequiredExternalIds[R <: WithRequiredExternalId with WithCreatedTime](readable: Readable[R, IO])(implicit ioRuntime: IORuntime): List[R] = {
+  private def fetchTestItemsWithRequiredExternalIds[
+      R <: WithRequiredExternalId with WithCreatedTime
+  ](readable: Readable[R, IO])(implicit ioRuntime: IORuntime): List[R] = {
     // only use rows older than 10 minutes, to exclude items created by concurrently running tests which might be deleted quickly
     val minAge = Instant.now().minus(10, ChronoUnit.MINUTES)
     readable
@@ -160,10 +171,10 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   }
 
   def readableWithRetrieveByRequiredExternalId[R <: WithRequiredExternalId with WithCreatedTime, W](
-     readable: Readable[R, IO] with RetrieveByExternalIds[R, IO],
-     idsThatDoNotExist: Seq[String],
-     supportsMissingAndThrown: Boolean
-   )(implicit ioRuntime: IORuntime): Unit = {
+      readable: Readable[R, IO] with RetrieveByExternalIds[R, IO],
+      idsThatDoNotExist: Seq[String],
+      supportsMissingAndThrown: Boolean
+  )(implicit ioRuntime: IORuntime): Unit = {
     it should "support retrieving items by external id" in {
       // TODO: this test is not very stable as the fetched item may be deleted before it is fetched again by the external id
       val firstTwoItemIds = fetchTestItemsWithRequiredExternalIds(readable).map(_.externalId)
@@ -177,7 +188,8 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
 
     it should "return information about missing external ids" in {
       val thrown = the[CdpApiException] thrownBy readable
-        .retrieveByExternalIds(idsThatDoNotExist).unsafeRunSync()
+        .retrieveByExternalIds(idsThatDoNotExist)
+        .unsafeRunSync()
       if (supportsMissingAndThrown) {
         val itemsNotFound = thrown.missing
 
@@ -190,8 +202,9 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
     }
   }
 
-
-  private def fetchTestItems[R <: WithExternalId with WithCreatedTime](readable: Readable[R, IO])(implicit ioRuntime: IORuntime): List[R] = {
+  private def fetchTestItems[R <: WithExternalId with WithCreatedTime](
+      readable: Readable[R, IO]
+  )(implicit ioRuntime: IORuntime): List[R] = {
     // only use rows older than 10 minutes, to exclude items created by concurrently running tests which might be deleted quickly
     val minAge = Instant.now().minus(10, ChronoUnit.MINUTES)
     readable
@@ -222,7 +235,8 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
 
     it should "return information about missing external ids" in {
       val thrown = the[CdpApiException] thrownBy readable
-        .retrieveByExternalIds(idsThatDoNotExist).unsafeRunSync()
+        .retrieveByExternalIds(idsThatDoNotExist)
+        .unsafeRunSync()
       if (supportsMissingAndThrown) {
         val itemsNotFound = thrown.missing
 
@@ -235,7 +249,8 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
 
       val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
       val sameIdsThrown = the[CdpApiException] thrownBy readable
-        .retrieveByExternalIds(sameIdsThatDoNotExist).unsafeRunSync()
+        .retrieveByExternalIds(sameIdsThatDoNotExist)
+        .unsafeRunSync()
       if (supportsMissingAndThrown) {
         sameIdsThrown.missing match {
           case Some(missingItems) =>
@@ -243,16 +258,17 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
               missingItems.map(jsonObj => jsonObj("externalId").value.asString.value).toSet
             // it's a bit funny that the same missing ids are returned duplicated,
             // but that's how it works as of 2019-06-02.
-            //sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
+            // sameNotFoundIds should have size sameIdsThatDoNotExist.size.toLong
             // TODO: remove when we get rid of the warning
             val _ = sameNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
           case None =>
             val duplicatedNotFoundIds = sameIdsThrown.duplicated.value
               .map(jsonObj => jsonObj("externalId").value.asString.value)
               .toSet
-            //duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
+            // duplicatedNotFoundIds should have size sameIdsThatDoNotExist.toSet.size.toLong
             // TODO: remove when we get rid of the warning
-            val _ = duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
+            val _ =
+              duplicatedNotFoundIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
         }
       }
     }
@@ -271,10 +287,12 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
 
     it should "support retrieving items by external id with ignoreUnknownIds=true" in {
       firstTwoExternalIds should have size 2
-      val maybeItemsRead = readable.retrieveByExternalIds(
-        firstTwoExternalIds ++ Seq(nonExistentExternalId),
-        ignoreUnknownIds = true
-      ).unsafeRunSync()
+      val maybeItemsRead = readable
+        .retrieveByExternalIds(
+          firstTwoExternalIds ++ Seq(nonExistentExternalId),
+          ignoreUnknownIds = true
+        )
+        .unsafeRunSync()
       val itemsReadIds = maybeItemsRead.map(_.externalId.value)
       itemsReadIds should contain theSameElementsAs firstTwoExternalIds
       itemsReadIds should have size firstTwoExternalIds.size.toLong
@@ -282,23 +300,29 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
 
     it should "allow retrieving empty items with ignoreUnknownIds=true" in {
       val maybeItemsRead =
-        readable.retrieveByExternalIds(Seq(nonExistentExternalId), ignoreUnknownIds = true).unsafeRunSync()
+        readable
+          .retrieveByExternalIds(Seq(nonExistentExternalId), ignoreUnknownIds = true)
+          .unsafeRunSync()
       maybeItemsRead shouldBe empty
     }
 
     it should "throw when retrieving items by external id with ignoreUnknownIds=false" in {
       val exception = intercept[CdpApiException] {
-        readable.retrieveByExternalIds(
-          firstTwoExternalIds ++ Seq(nonExistentExternalId),
-          ignoreUnknownIds = false
-        ).unsafeRunSync()
+        readable
+          .retrieveByExternalIds(
+            firstTwoExternalIds ++ Seq(nonExistentExternalId),
+            ignoreUnknownIds = false
+          )
+          .unsafeRunSync()
       }
       exception.message should include("ids not found")
     }
 
     it should "support retrieving items by id with ignoreUnknownIds=true" in {
       val maybeItemsRead =
-        readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = true).unsafeRunSync()
+        readable
+          .retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = true)
+          .unsafeRunSync()
       val itemsReadIds = maybeItemsRead.map(_.externalId.value)
       itemsReadIds should contain theSameElementsAs firstTwoExternalIds
       itemsReadIds should have size firstTwoExternalIds.size.toLong
@@ -306,7 +330,9 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
 
     it should "throw when retrieving items by id with ignoreUnknownIds=false" in {
       val exception = intercept[CdpApiException] {
-        readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = false).unsafeRunSync()
+        readable
+          .retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = false)
+          .unsafeRunSync()
       }
       exception.message should include("ids not found")
     }

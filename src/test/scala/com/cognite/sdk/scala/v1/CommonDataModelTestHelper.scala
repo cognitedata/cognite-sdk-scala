@@ -22,10 +22,13 @@ import natchez.Trace
 )
 trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
   implicit val trace: Trace[IO] = natchez.Trace.Implicits.noop
-  val tokenUri: String = sys.env.get("TEST_TOKEN_URL")
+  val tokenUri: String = sys.env
+    .get("TEST_TOKEN_URL")
     .orElse(
-      sys.env.get("TEST_AAD_TENANT")
-        .map(tenant => s"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token"))
+      sys.env
+        .get("TEST_AAD_TENANT")
+        .map(tenant => s"https://login.microsoftonline.com/$tenant/oauth2/v2.0/token")
+    )
     .getOrElse("https://sometokenurl")
   val clientId: String = sys.env("TEST_CLIENT_ID")
   val clientSecret: String = sys.env("TEST_CLIENT_SECRET")

@@ -6,21 +6,25 @@ package com.cognite.sdk.scala.v1
 import java.util.UUID
 import com.cognite.sdk.scala.common.{SdkTestSpec, StringDataPointsResourceBehaviors}
 
-@SuppressWarnings(Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.IterableOps"))
+@SuppressWarnings(
+  Array("org.wartremover.warts.TraversableOps", "org.wartremover.warts.IterableOps")
+)
 class StringDataPointsTest extends SdkTestSpec with StringDataPointsResourceBehaviors {
   override def withStringTimeSeries(testCode: TimeSeries => Any): Unit = {
     val name = Some(s"string-data-points-test-${UUID.randomUUID().toString}")
-    val timeSeries = client.timeSeries.createFromRead(
-      Seq(TimeSeries(name = name, externalId = name, isString = true))
-    ).unsafeRunSync().head
+    val timeSeries = client.timeSeries
+      .createFromRead(
+        Seq(TimeSeries(name = name, externalId = name, isString = true))
+      )
+      .unsafeRunSync()
+      .head
     try {
       val _ = testCode(timeSeries)
     } catch {
       case t: Throwable => throw t
-    } finally {
+    } finally
       client.timeSeries.deleteByIds(Seq(timeSeries.id)).unsafeRunSync()
-    }
   }
 
-  it should behave like stringDataPointsResource(client.dataPoints)
+  (it should behave).like(stringDataPointsResource(client.dataPoints))
 }

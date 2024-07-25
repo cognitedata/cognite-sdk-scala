@@ -13,7 +13,7 @@ import org.scalatest.BeforeAndAfterAll
     "org.wartremover.warts.SizeIs"
   )
 )
-class SpacesV3Test extends CommonDataModelTestHelper with BeforeAndAfterAll{
+class SpacesV3Test extends CommonDataModelTestHelper with BeforeAndAfterAll {
   private val spaceNamePrefix = "test-space-scala-sdk-spacetest"
 
   override def beforeAll(): Unit = {
@@ -26,7 +26,7 @@ class SpacesV3Test extends CommonDataModelTestHelper with BeforeAndAfterAll{
     testClient.spacesv3.createItems(spacesToCreate).unsafeRunSync()
     ()
   }
-    ignore should "create spaces" in {
+  ignore should "create spaces" in {
     val spacesToCreate = Seq(
       SpaceCreateDefinition(space = s"$spaceNamePrefix-11"),
       SpaceCreateDefinition(space = s"$spaceNamePrefix-22"),
@@ -43,11 +43,16 @@ class SpacesV3Test extends CommonDataModelTestHelper with BeforeAndAfterAll{
   }
 
   ignore should "retrieve spaces" in {
-    val spaces = testClient.spacesv3.retrieveItems(Seq(
+    val spaces = testClient.spacesv3
+      .retrieveItems(
+        Seq(
           SpaceById(space = s"$spaceNamePrefix-1"),
-         SpaceById(space = s"$spaceNamePrefix-2"),
-        SpaceById(space = s"$spaceNamePrefix-3"),
-        SpaceById(space = s"$spaceNamePrefix-4"))).unsafeRunSync()
+          SpaceById(space = s"$spaceNamePrefix-2"),
+          SpaceById(space = s"$spaceNamePrefix-3"),
+          SpaceById(space = s"$spaceNamePrefix-4")
+        )
+      )
+      .unsafeRunSync()
     spaces.size shouldBe 4
   }
 
@@ -57,9 +62,15 @@ class SpacesV3Test extends CommonDataModelTestHelper with BeforeAndAfterAll{
     val createdSpaces = testClient.spacesv3.createItems(manySpaces).unsafeRunSync()
     createdSpaces.size shouldBe 200
 
-    val spaces = testClient.spacesv3.listWithCursor(cursor = None, limit = Some(1), includeGlobal = None).unsafeRunSync()
+    val spaces = testClient.spacesv3
+      .listWithCursor(cursor = None, limit = Some(1), includeGlobal = None)
+      .unsafeRunSync()
     spaces.items.size shouldBe 1
-    val allSpaces = testClient.spacesv3.listStream(limit = None, includeGlobal = Some(true)).compile.toVector.unsafeRunSync()
+    val allSpaces = testClient.spacesv3
+      .listStream(limit = None, includeGlobal = Some(true))
+      .compile
+      .toVector
+      .unsafeRunSync()
     assert(allSpaces.size >= 200)
   }
 }

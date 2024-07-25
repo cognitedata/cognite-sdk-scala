@@ -15,13 +15,15 @@ class TokenTest extends SdkTestSpec with OptionValues {
   implicit val sttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
 
   it should "read token inspect result" in {
-    val authProvider = OAuth2.ClientCredentialsProvider[IO](credentials)
+    val authProvider = OAuth2
+      .ClientCredentialsProvider[IO](credentials)
       .unsafeRunTimed(1.second)
       .value
 
     val token =
-      new Token(RequestSession[IO]("CogniteScalaSDK-OAuth-Test", uri"${baseUrl}", sttpBackend,
-        authProvider))
+      new Token(
+        RequestSession[IO]("CogniteScalaSDK-OAuth-Test", uri"${baseUrl}", sttpBackend, authProvider)
+      )
     val status = token.inspect().unsafeRunTimed(10.seconds).value
     assert(status.subject !== "")
   }

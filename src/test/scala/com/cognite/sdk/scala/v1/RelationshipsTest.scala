@@ -10,104 +10,136 @@ import java.time.Instant
 @SuppressWarnings(
   Array("org.wartremover.warts.SizeIs")
 )
-class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
+class RelationshipsTest
+    extends SdkTestSpec
+    with ReadBehaviours
+    with WritableBehaviors
+    with RetryWhile {
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
-  it should behave like partitionedReadable(client.relationships)
+  (it should behave).like(partitionedReadable(client.relationships))
 
-  it should behave like readableWithRetrieveByRequiredExternalId(client.relationships, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
+  (it should behave).like(
+    readableWithRetrieveByRequiredExternalId(
+      client.relationships,
+      externalIdsThatDoNotExist,
+      supportsMissingAndThrown = true
+    )
+  )
 
-  it should behave like writableWithRequiredExternalId(
-    client.relationships,
-    Some(client.relationships),
-    Seq(
-      Relationship(
-        sourceExternalId = "scala-sdk-relationships-test-event1",
-        sourceType = "event",
-        targetExternalId = "scala-sdk-relationships-test-event2",
-        targetType = "event",
-        externalId = shortRandom()
+  (it should behave).like(
+    writableWithRequiredExternalId(
+      client.relationships,
+      Some(client.relationships),
+      Seq(
+        Relationship(
+          sourceExternalId = "scala-sdk-relationships-test-event1",
+          sourceType = "event",
+          targetExternalId = "scala-sdk-relationships-test-event2",
+          targetType = "event",
+          externalId = shortRandom()
+        ),
+        Relationship(
+          sourceExternalId = "scala-sdk-relationships-test-event1",
+          sourceType = "event",
+          targetExternalId = "scala-sdk-relationships-test-event2",
+          targetType = "event",
+          externalId = shortRandom()
+        )
       ),
-      Relationship(
-        sourceExternalId = "scala-sdk-relationships-test-event1",
-        sourceType = "event",
-        targetExternalId = "scala-sdk-relationships-test-event2",
-        targetType = "event",
-        externalId = shortRandom()
-      )
-    ),
-    Seq(
-      RelationshipCreate(
-        sourceExternalId = "scala-sdk-relationships-test-event1",
-        sourceType = "event",
-        targetExternalId = "scala-sdk-relationships-test-event2",
-        targetType = "event",
-        externalId = shortRandom()
+      Seq(
+        RelationshipCreate(
+          sourceExternalId = "scala-sdk-relationships-test-event1",
+          sourceType = "event",
+          targetExternalId = "scala-sdk-relationships-test-event2",
+          targetType = "event",
+          externalId = shortRandom()
+        ),
+        RelationshipCreate(
+          sourceExternalId = "scala-sdk-relationships-test-event1",
+          sourceType = "event",
+          targetExternalId = "scala-sdk-relationships-test-event2",
+          targetType = "event",
+          externalId = shortRandom()
+        )
       ),
-      RelationshipCreate(
-        sourceExternalId = "scala-sdk-relationships-test-event1",
-        sourceType = "event",
-        targetExternalId = "scala-sdk-relationships-test-event2",
-        targetType = "event",
-        externalId = shortRandom()
-      )
-    ),
-    externalIdsThatDoNotExist,
-    supportsMissingAndThrown = true,
-    trySameIdsThatDoNotExist = false
+      externalIdsThatDoNotExist,
+      supportsMissingAndThrown = true,
+      trySameIdsThatDoNotExist = false
+    )
   )
 
   private val randomExternalId = shortRandom()
 
-  it should behave like updatableByRequiredExternalId(
-    client.relationships,
-    Some(client.relationships),
-    Seq(
-      Relationship(
-        sourceExternalId = "relationships-update-test-1",
-        sourceType = "sequence",
-        targetExternalId = "scala-sdk-relationships-update-test-asset2",
-        targetType = "sequence",
-        startTime = Some(Instant.now().minus(10, ChronoUnit.DAYS)),
-        endTime = Some(Instant.now().minus(9, ChronoUnit.DAYS)),
-        labels = Some(Seq(CogniteExternalId("scala-sdk-relationships-test-label1"))),
-        externalId = s"update-1-externalId-$randomExternalId",
-        dataSetId = Some(2694232156565845L)
-      ),
-      Relationship(
-        sourceExternalId = "relationships-update-test-2",
-        sourceType = "file",
-        targetExternalId = "scala-sdk-relationships-update-test-event2",
-        targetType = "file",
-        confidence = Some(0.6),
-        labels = Some(Seq(
-          CogniteExternalId("scala-sdk-relationships-test-label1"),
-          CogniteExternalId("scala-sdk-relationships-test-label2"))
+  (it should behave).like(
+    updatableByRequiredExternalId(
+      client.relationships,
+      Some(client.relationships),
+      Seq(
+        Relationship(
+          sourceExternalId = "relationships-update-test-1",
+          sourceType = "sequence",
+          targetExternalId = "scala-sdk-relationships-update-test-asset2",
+          targetType = "sequence",
+          startTime = Some(Instant.now().minus(10, ChronoUnit.DAYS)),
+          endTime = Some(Instant.now().minus(9, ChronoUnit.DAYS)),
+          labels = Some(Seq(CogniteExternalId("scala-sdk-relationships-test-label1"))),
+          externalId = s"update-1-externalId-$randomExternalId",
+          dataSetId = Some(2694232156565845L)
         ),
-        startTime = Some(Instant.now().minus(10, ChronoUnit.DAYS)),
-        endTime = Some(Instant.now().minus(9, ChronoUnit.DAYS)),
-        externalId = s"update-2-externalId-$randomExternalId",
-        dataSetId = Some(2694232156565845L)
-      )
-    ),
-    Map(s"update-1-externalId-$randomExternalId" -> RelationshipUpdate(sourceExternalId = Some(SetValue(s"relationships-update-test-1-1"))),
-      s"update-2-externalId-$randomExternalId" -> RelationshipUpdate(sourceExternalId = Some(SetValue(s"relationships-update-test-2-1")))),
-    (readRelationships: Seq[Relationship], updatedRelationships: Seq[Relationship]) => {
-      assert(readRelationships.size == updatedRelationships.size)
-      assert(updatedRelationships.zip(readRelationships).forall { case (updated, read) =>
-        updated.sourceExternalId === s"${read.sourceExternalId}-1" })
-      ()
-    }
+        Relationship(
+          sourceExternalId = "relationships-update-test-2",
+          sourceType = "file",
+          targetExternalId = "scala-sdk-relationships-update-test-event2",
+          targetType = "file",
+          confidence = Some(0.6),
+          labels = Some(
+            Seq(
+              CogniteExternalId("scala-sdk-relationships-test-label1"),
+              CogniteExternalId("scala-sdk-relationships-test-label2")
+            )
+          ),
+          startTime = Some(Instant.now().minus(10, ChronoUnit.DAYS)),
+          endTime = Some(Instant.now().minus(9, ChronoUnit.DAYS)),
+          externalId = s"update-2-externalId-$randomExternalId",
+          dataSetId = Some(2694232156565845L)
+        )
+      ),
+      Map(
+        s"update-1-externalId-$randomExternalId" -> RelationshipUpdate(sourceExternalId =
+          Some(SetValue(s"relationships-update-test-1-1"))
+        ),
+        s"update-2-externalId-$randomExternalId" -> RelationshipUpdate(sourceExternalId =
+          Some(SetValue(s"relationships-update-test-2-1"))
+        )
+      ),
+      (readRelationships: Seq[Relationship], updatedRelationships: Seq[Relationship]) => {
+        assert(readRelationships.size == updatedRelationships.size)
+        assert(updatedRelationships.zip(readRelationships).forall { case (updated, read) =>
+          updated.sourceExternalId === s"${read.sourceExternalId}-1"
+        })
+        ()
+      }
+    )
   )
 
   it should "support filter" in {
 
     val existingItems = client.relationships
-      .filterWithCursor(RelationshipsFilter(dataSetIds = Some(Seq(CogniteInternalId(2694232156565845L)))), None, None, None, None)
+      .filterWithCursor(
+        RelationshipsFilter(dataSetIds = Some(Seq(CogniteInternalId(2694232156565845L)))),
+        None,
+        None,
+        None,
+        None
+      )
       .unsafeRunSync()
-      .items.map(_.externalId)
+      .items
+      .map(_.externalId)
 
-    client.relationships.deleteByExternalIds(externalIds = existingItems, ignoreUnknownIds = true).unsafeRunSync()
+    client.relationships
+      .deleteByExternalIds(externalIds = existingItems, ignoreUnknownIds = true)
+      .unsafeRunSync()
     val randomItems = Seq(
       RelationshipCreate(
         sourceExternalId = "scala-sdk-relationships-test-asset1",
@@ -120,21 +152,25 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
         externalId = "scala-sdk-relationships-test-example-1",
         dataSetId = Some(2694232156565845L)
       ),
-      RelationshipCreate(sourceExternalId = "scala-sdk-relationships-test-event1",
+      RelationshipCreate(
+        sourceExternalId = "scala-sdk-relationships-test-event1",
         sourceType = "event",
         targetExternalId = "scala-sdk-relationships-test-event2",
         targetType = "event",
         confidence = Some(0.6),
-        labels = Some(Seq(
-          CogniteExternalId("scala-sdk-relationships-test-label1"),
-          CogniteExternalId("scala-sdk-relationships-test-label2"))
+        labels = Some(
+          Seq(
+            CogniteExternalId("scala-sdk-relationships-test-label1"),
+            CogniteExternalId("scala-sdk-relationships-test-label2")
+          )
         ),
         startTime = Some(Instant.ofEpochMilli(1602354975000L)),
         endTime = Some(Instant.ofEpochMilli(1602527775000L)),
         externalId = "scala-sdk-relationships-test-example-2",
         dataSetId = Some(2694232156565845L)
       ),
-      RelationshipCreate(sourceExternalId = "scala-sdk-relationships-test-event1",
+      RelationshipCreate(
+        sourceExternalId = "scala-sdk-relationships-test-event1",
         sourceType = "event",
         targetExternalId = "scala-sdk-relationships-test-event2",
         targetType = "event",
@@ -211,7 +247,10 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
           createdTime = createdTimeRange,
           dataSetIds = dataSetIds,
           startTime = Some(
-            TimeRange(min = Some(Instant.ofEpochMilli(1605866626000L)), max = Some(Instant.ofEpochMilli(1605866626010L)))
+            TimeRange(
+              min = Some(Instant.ofEpochMilli(1605866626000L)),
+              max = Some(Instant.ofEpochMilli(1605866626010L))
+            )
           )
         )
       )

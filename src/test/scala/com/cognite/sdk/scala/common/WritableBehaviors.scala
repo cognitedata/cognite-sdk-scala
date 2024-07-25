@@ -25,7 +25,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
     it should "be an error to delete using ids that does not exist" in {
       maybeDeletable.map { deletable =>
         if (deleteMissingThrows) {
-          val thrown = the[CdpApiException] thrownBy deletable.deleteByIds(idsThatDoNotExist).unsafeRunSync()
+          val thrown =
+            the[CdpApiException] thrownBy deletable.deleteByIds(idsThatDoNotExist).unsafeRunSync()
           if (supportsMissingAndThrown) {
             val missingIds = thrown.missing
               .getOrElse(Seq.empty)
@@ -36,9 +37,11 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
           }
 
           val sameIdsThatDoNotExist = Seq.fill(2)(idsThatDoNotExist(0))
-          val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByIds(
-            sameIdsThatDoNotExist
-          ).unsafeRunSync()
+          val sameIdsThrown = the[CdpApiException] thrownBy deletable
+            .deleteByIds(
+              sameIdsThatDoNotExist
+            )
+            .unsafeRunSync()
           if (supportsMissingAndThrown) {
             // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
             // if duplicated ids that do not exist are specified.
@@ -62,7 +65,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
     it should "include the request id in all cdp api exceptions" in {
       maybeDeletable.map { deletable =>
         if (deleteMissingThrows) {
-          val caught = intercept[CdpApiException](deletable.deleteByIds(idsThatDoNotExist).unsafeRunSync())
+          val caught =
+            intercept[CdpApiException](deletable.deleteByIds(idsThatDoNotExist).unsafeRunSync())
           // TODO: remove when we get rid of the warning
           val _ = assert(caught.requestId.isDefined)
         }
@@ -106,7 +110,9 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
     //       id in the same api call for V1
   }
 
-  def writableWithExternalId[R <: ToCreate[W] with WithExternalIdGeneric[Option], W <: WithExternalIdGeneric[
+  def writableWithExternalId[R <: ToCreate[W] with WithExternalIdGeneric[
+    Option
+  ], W <: WithExternalIdGeneric[
     Option
   ]](
       writable: Create[R, W, IO],
@@ -125,7 +131,9 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       supportsMissingAndThrown
     )
 
-  def writableWithRequiredExternalId[R <: ToCreate[W] with WithExternalIdGeneric[Id], W <: WithExternalIdGeneric[
+  def writableWithRequiredExternalId[R <: ToCreate[W] with WithExternalIdGeneric[
+    Id
+  ], W <: WithExternalIdGeneric[
     Id
   ]](
       writable: Create[R, W, IO],
@@ -144,9 +152,11 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       externalIdsThatDoNotExist,
       supportsMissingAndThrown,
       trySameIdsThatDoNotExist
-  )
+    )
 
-  def writableWithExternalIdGeneric[A[_], R <: ToCreate[W] with WithExternalIdGeneric[A], W <: WithExternalIdGeneric[
+  def writableWithExternalIdGeneric[A[_], R <: ToCreate[W] with WithExternalIdGeneric[
+    A
+  ], W <: WithExternalIdGeneric[
     A
   ]](
       writable: Create[R, W, IO],
@@ -159,9 +169,11 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   )(implicit ioRuntime: IORuntime): Unit = {
     it should "be an error to delete using external ids that does not exist" in {
       maybeDeletable.map { deletable =>
-        val thrown = the[CdpApiException] thrownBy deletable.deleteByExternalIds(
-          externalIdsThatDoNotExist
-        ).unsafeRunSync()
+        val thrown = the[CdpApiException] thrownBy deletable
+          .deleteByExternalIds(
+            externalIdsThatDoNotExist
+          )
+          .unsafeRunSync()
         if (supportsMissingAndThrown) {
           val missingIds = thrown.missing
             .getOrElse(Seq.empty)
@@ -180,11 +192,13 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
           //        "message": "Request had 1 item(s) with one or more constraint violations:
           //        [items is not a distinct set; duplicates: [{\"externalId\":\"AT_Matzen a469\"}]]"
           //    }
-          //}
+          // }
           val sameIdsThatDoNotExist = Seq.fill(2)(externalIdsThatDoNotExist(0))
-          val sameIdsThrown = the[CdpApiException] thrownBy deletable.deleteByExternalIds(
-            sameIdsThatDoNotExist
-          ).unsafeRunSync()
+          val sameIdsThrown = the[CdpApiException] thrownBy deletable
+            .deleteByExternalIds(
+              sameIdsThatDoNotExist
+            )
+            .unsafeRunSync()
           if (supportsMissingAndThrown) {
             // as of 2019-06-03 we're inconsistent about our use of duplicated vs missing
             // if duplicated ids that do not exist are specified.
@@ -244,9 +258,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       // update the item to current values
       val unchangedUpdatedItems = updatable.updateFromRead(readItems).unsafeRunSync()
       assert(unchangedUpdatedItems.size == readItems.size)
-      assert(unchangedUpdatedItems.zip(readItems).forall {
-        case (updated, read) =>
-          compareItems(updated, read)
+      assert(unchangedUpdatedItems.zip(readItems).forall { case (updated, read) =>
+        compareItems(updated, read)
       })
 
       // update the item with new values
@@ -272,7 +285,9 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       val updatedItems = resource.updateByExternalId(updatesToMake).unsafeRunSync()
       expectedBehaviors(createdItems, updatedItems)
 
-      maybeDeletable.map(_.deleteByExternalIds(updatedItems.map(_.externalId.value)).unsafeRunSync())
+      maybeDeletable.map(
+        _.deleteByExternalIds(updatedItems.map(_.externalId.value)).unsafeRunSync()
+      )
     }
 
   def updatableByRequiredExternalId[R <: ToCreate[W] with WithRequiredExternalId, W, U](
@@ -318,7 +333,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       val createdIds = createdItems.unsafeRunSync().map(_.id)
       val createdAndSomeNonExistingIds = createdIds ++ idsThatDoNotExist
       writable.deleteByIds(createdAndSomeNonExistingIds, ignoreUnknownIds = true).unsafeRunSync()
-      val retrieveDeletedException = intercept[CdpApiException](writable.retrieveByIds(createdIds).unsafeRunSync())
+      val retrieveDeletedException =
+        intercept[CdpApiException](writable.retrieveByIds(createdIds).unsafeRunSync())
       assert(retrieveDeletedException.code === 400)
       val doNotIgnoreException = intercept[CdpApiException](
         writable.deleteByIds(idsThatDoNotExist).unsafeRunSync()
