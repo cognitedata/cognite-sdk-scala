@@ -49,21 +49,21 @@ final case class InstanceFilterRequest(
     limit: Option[Int] = None,
     sort: Option[Seq[PropertySortV3]] = None,
     filter: Option[FilterDefinition] = None,
-    includeTyping: Option[Boolean]
+    includeTyping: Option[Boolean] = Some(true)
 )
 
 final case class InstanceQueryRequest(
     `with`: Map[String, TableExpression] = Map.empty,
     cursors: Option[Map[String, String]] = None,
     select: Map[String, SelectExpression] = Map.empty,
-    includeTyping: Option[Boolean] = None
+    includeTyping: Option[Boolean] = Some(true)
 )
 
 final case class InstanceSyncRequest(
     `with`: Map[String, TableExpression] = Map.empty,
     cursors: Option[Map[String, String]] = None,
     select: Map[String, SelectExpression] = Map.empty,
-    includeTyping: Option[Boolean] = None
+    includeTyping: Option[Boolean] = Some(true)
 )
 
 final case class TableExpression(

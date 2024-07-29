@@ -27,12 +27,21 @@ credentials += Credentials(
   System.getenv("SONATYPE_USERNAME"),
   System.getenv("SONATYPE_PASSWORD")
 )
+credentials += Credentials("Artifactory Realm",
+  "cognite.jfrog.io",
+  System.getenv("JFROG_USERNAME"),
+  System.getenv("JFROG_PASSWORD"),
+)
+
+val artifactory = "https://cognite.jfrog.io/cognite"
 
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
+  version := "2.26." + patchVersion,
+  isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
   dependencyLockFile := baseDirectory.value /
@@ -65,11 +74,16 @@ lazy val commonSettings = Seq(
   pomIncludeRepository := { _ =>
     false
   },
-  publishTo := {
+  publishTo := (if (System.getenv("PUBLISH_TO_JFROG") == "true") {
+    if (isSnapshot.value)
+      Some("snapshots".at(s"$artifactory/libs-snapshot-local/"))
+    else
+      Some("local-releases".at(s"$artifactory/libs-release-local/"))
+  } else {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value) Some("snapshots".at(nexus + "content/repositories/snapshots"))
     else Some("releases".at(nexus + "service/local/staging/deploy/maven2"))
-  },
+  }),
   publishMavenStyle := true,
   pgpPassphrase := {
     if (gpgPass.isDefined) gpgPass.map(_.toCharArray)
