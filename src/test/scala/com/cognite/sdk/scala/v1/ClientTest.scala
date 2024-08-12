@@ -124,7 +124,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
   }
 
   it should "not throw an exception if the authentication is invalid and project is specified" in {
-    implicit val auth: Auth = BearerTokenAuth("invalid-key", project = Some("random-project"))
+    implicit val auth: Auth = BearerTokenAuth("invalid-key")
     noException should be thrownBy new GenericClient[Id](
       "scala-sdk-test", projectName, auth = auth)(
       implicitly,
@@ -213,7 +213,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     new GenericClient[F]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
-      BearerTokenAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant")
     )(natchez.Trace.Implicits.noop,
       implicitly,
       new RetryingBackend[F, Any](backend,
@@ -242,7 +242,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
-      BearerTokenAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant")
 
     )(
       implicitly,
@@ -322,7 +322,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
-      BearerTokenAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant")
     )(
       implicitly,
       implicitly,
@@ -361,7 +361,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val client2 = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
-      BearerTokenAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant")
     )(
       implicitly,
       implicitly,
