@@ -314,7 +314,7 @@ object InstanceDefinition {
       case PropertyType.EnumProperty(_, _) =>
         Decoder[String]
           .decodeJson(propValue)
-          .map(InstancePropertyValue.String.apply)
+          .map(InstancePropertyValue.Enum.apply)
       case PropertyType.TextProperty(None | Some(false), _) =>
         Decoder[String]
           .decodeJson(propValue)
