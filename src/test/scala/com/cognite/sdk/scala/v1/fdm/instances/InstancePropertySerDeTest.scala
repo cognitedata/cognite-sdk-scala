@@ -293,10 +293,13 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   None,
                   Some("property-identifier14"),
                   Some("property-identifier14"),
-                  PropertyType.EnumProperty(values = Map(
-                    "VAL1" -> EnumValueMetadata(Some("value1"), Some("value 1")),
-                    "VAL2" -> EnumValueMetadata(None, None)
-                    ), unknownValue = Some("VAL1"))
+                  PropertyType.EnumProperty(
+                    values = Map(
+                      "VAL1" -> EnumValueMetadata(Some("value1"), Some("value 1")),
+                      "VAL2" -> EnumValueMetadata(None, None)
+                    ),
+                    unknownValue = Some("VAL1")
+                  )
                 )
               ),
               "view-or-container-id-2" -> Map(

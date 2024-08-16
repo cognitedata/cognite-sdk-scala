@@ -6,13 +6,8 @@ package com.cognite.sdk.scala.v1.fdm.views
 import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{Int32, TimeSeriesReference}
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{
-  ContainerPropertyDefinition,
-  ReverseDirectRelationConnection,
-  ThroughReference,
-  ViewCorePropertyDefinition
-}
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ReverseDirectRelationConnection, ThroughReference, ViewCorePropertyDefinition}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{EnumValueMetadata, PrimitiveProperty}
 import com.cognite.sdk.scala.v1.fdm.common.properties.ReverseDirectRelationConnectionType.MultiReverseDirectRelation
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
@@ -39,6 +34,19 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
   private val containerNameList = "scala sdk container list"
   private val containerListExternalId = "scala_sdk_container_list"
+
+  private val containerPropertyEnum = ContainerPropertyDefinition(
+    defaultValue = None,
+    description = Some("Prop enum"),
+    name = Some("Prop enum"),
+    `type` = PropertyType.EnumProperty(
+        values = Map(
+          "VAL1" -> EnumValueMetadata(Some("value1"), Some("value 1")),
+          "VAL2" -> EnumValueMetadata(None, None)
+        ),
+        unknownValue = Some("VAL1")
+      )
+  )
 
   private val containerPropertyInt = ContainerPropertyDefinition(
     defaultValue = Some(PropertyDefaultValue.Int32(1)),
@@ -74,7 +82,9 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     name = Some(containerNamePrim),
     description = Some("this is a container of primitive types"),
     usedFor = Some(Usage.All),
-    properties = Map("prop_int32" -> containerPropertyInt,
+    properties = Map(
+      "prop_enum" -> containerPropertyEnum,
+      "prop_int32" -> containerPropertyInt,
       "prop_text" -> containerPropertyText,
       "prop_timeseries" -> containerTimeSeriesProperty,
       "connection" -> containerPropertyDirectRelation),
@@ -125,6 +135,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
   it should "create a view" in {
     val containerReference = ContainerReference(spaceName, containerPrimitiveExternalId)
     val properties = Map(
+      "prop_enum" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_enum"),
       "prop_int32" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_int32"),
       "prop_text" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_text"),
       "prop_timeseries" -> ViewPropertyCreateDefinition.CreateViewProperty(container = containerReference, containerPropertyIdentifier = "prop_timeseries")
@@ -154,6 +165,20 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
 
     created.map(_.properties) shouldBe Some(
       Map(
+        "prop_enum" -> ViewCorePropertyDefinition(
+          nullable = Some(true),
+          autoIncrement = Some(false),
+          defaultValue = None,
+          `type` = PropertyType.EnumProperty(
+            values = Map(
+              "VAL1" -> EnumValueMetadata(Some("value1"), Some("value 1")),
+              "VAL2" -> EnumValueMetadata(None, None)
+            ),
+            unknownValue = Some("VAL1")
+          ),
+          container = Some(containerReference),
+          containerPropertyIdentifier = Some("prop_enum")
+        ),
         "prop_int32" -> ViewCorePropertyDefinition(
           nullable = Some(true),
           autoIncrement = Some(false),
