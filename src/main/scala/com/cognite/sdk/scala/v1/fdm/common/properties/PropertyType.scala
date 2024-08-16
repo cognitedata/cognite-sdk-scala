@@ -10,31 +10,34 @@ import io.circe._
 import io.circe.generic.semiauto._
 import io.circe.syntax.EncoderOps
 
-sealed trait PropertyType {
+sealed trait ListablePropertyType extends PropertyType {
   def list: Option[Boolean]
   def isList: Boolean = list.getOrElse(false)
 }
+
+sealed trait PropertyType
 
 object PropertyType {
 
   final case class TextProperty(
       list: Option[Boolean] = Some(false),
       collation: Option[String] = Some("ucs_basic")
-  ) extends PropertyType {
+  ) extends ListablePropertyType {
     val `type`: String = TextProperty.Type
   }
+
   object TextProperty {
     val Type = "text"
   }
 
   final case class PrimitiveProperty(`type`: PrimitivePropType, list: Option[Boolean] = Some(false))
-      extends PropertyType
+      extends ListablePropertyType
 
   final case class DirectNodeRelationProperty(
       container: Option[ContainerReference],
       source: Option[ViewReference],
       list: Option[Boolean] = Some(false)
-  ) extends PropertyType {
+  ) extends ListablePropertyType {
     val `type`: String = DirectNodeRelationProperty.Type
   }
 
@@ -42,7 +45,23 @@ object PropertyType {
     val Type = "direct"
   }
 
-  sealed abstract class CDFExternalIdReference extends PropertyType {
+  final case class EnumProperty(
+    values: Map[String, EnumValueMetadata],
+    unknownValue: Option[String]
+   ) extends PropertyType {
+    val `type`: String = EnumProperty.Type
+  }
+
+  final case class EnumValueMetadata(
+    name: Option[String],
+    description: Option[String]
+  )
+
+  object EnumProperty {
+    val Type = "enum"
+  }
+
+  sealed abstract class CDFExternalIdReference extends ListablePropertyType {
     val `type`: String
   }
 
@@ -89,12 +108,28 @@ object PropertyType {
       (d.`type`, d.container, d.source, d.list)
     )
 
+  implicit val enumValueMetadataEncoder: Encoder[EnumValueMetadata] =
+    Encoder.forProduct2("name", "description")((e: EnumValueMetadata) =>
+      (e.name, e.description)
+    )
+
+  implicit val enumPropertyEncoder: Encoder[EnumProperty] =
+    Encoder.forProduct3("type", "unknownValue", "values")((e: EnumProperty) =>
+      (e.`type`, e.unknownValue, e.values)
+    )
+
   implicit val containerPropertyTypeEncoder: Encoder[PropertyType] = Encoder.instance {
     case t: TextProperty => t.asJson
     case p: PrimitiveProperty => p.asJson
     case d: DirectNodeRelationProperty => d.asJson
     case ts: CDFExternalIdReference => ts.asJson
+    case e: EnumProperty => e.asJson
   }
+
+  implicit val enumPropertyDecoder: Decoder[EnumProperty] =
+    deriveDecoder[EnumProperty]
+
+  implicit val enumValueMetadataDecoder: Decoder[EnumValueMetadata] = deriveDecoder[EnumValueMetadata]
 
   implicit val primitivePropertyDecoder: Decoder[PrimitiveProperty] =
     deriveDecoder[PrimitiveProperty]
@@ -116,6 +151,11 @@ object PropertyType {
       val nonPrimitiveProperty =
         c.downField("type").as[String] match {
           case Left(err) => Left[DecodingFailure, PropertyType](err)
+          case Right(typeVal) if typeVal === EnumProperty.Type =>
+            for {
+              values <- c.downField("values").as[Map[String, EnumValueMetadata]]
+              unknownValue <- c.downField("unknownValue").as[Option[String]]
+            } yield EnumProperty(values, unknownValue)
           case Right(typeVal) if typeVal === TextProperty.Type =>
             for {
               list <- c.downField("list").as[Option[Boolean]]

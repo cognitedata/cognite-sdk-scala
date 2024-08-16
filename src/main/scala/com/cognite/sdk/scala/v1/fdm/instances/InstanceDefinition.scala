@@ -2,7 +2,7 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.implicits._
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{ListablePropertyType, PrimitivePropType, PropertyType}
 import io.circe._
 import io.circe.syntax.EncoderOps
 
@@ -236,7 +236,7 @@ object InstanceDefinition {
       t: TypePropertyDefinition
   ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
-      case t if t.isList => toInstancePropertyTypeOfList(propValue, t)
+      case t: ListablePropertyType if t.isList => toInstancePropertyTypeOfList(propValue, t)
       case t => toInstancePropertyTypeOfNonList(propValue, t)
     }
 
@@ -311,6 +311,10 @@ object InstanceDefinition {
       t: PropertyType
   ): Either[DecodingFailure, InstancePropertyValue] =
     t match {
+      case PropertyType.EnumProperty(_, _) =>
+        Decoder[String]
+          .decodeJson(propValue)
+          .map(InstancePropertyValue.String.apply)
       case PropertyType.TextProperty(None | Some(false), _) =>
         Decoder[String]
           .decodeJson(propValue)

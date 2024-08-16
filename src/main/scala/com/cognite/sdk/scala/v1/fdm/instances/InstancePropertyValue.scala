@@ -20,6 +20,7 @@ sealed abstract class InstancePropertyValue extends Product with Serializable
 
 object InstancePropertyValue {
   final case class String(value: java.lang.String) extends InstancePropertyValue
+  final case class Enum(value: java.lang.String) extends InstancePropertyValue
   final case class Int32(value: scala.Int) extends InstancePropertyValue
   final case class Int64(value: scala.Long) extends InstancePropertyValue
   final case class Float32(value: scala.Float) extends InstancePropertyValue
@@ -77,6 +78,7 @@ object InstancePropertyValue {
 
   implicit val instancePropertyTypeEncoder: Encoder[InstancePropertyValue] =
     Encoder.instance[InstancePropertyValue] {
+      case Enum(value) => Json.fromString(value)
       case String(value) => Json.fromString(value)
       case Int32(value) => Json.fromInt(value)
       case Int64(value) => Json.fromLong(value)
