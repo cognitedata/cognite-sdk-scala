@@ -397,6 +397,8 @@ object Utils {
       propertyType: PropertyType
   ): InstancePropertyValue =
     propertyType match {
+      case PropertyType.EnumProperty(_, _) =>
+        InstancePropertyValue.Enum("VAL1")
       case PropertyType.TextProperty(None | Some(false), _) =>
         InstancePropertyValue.String(s"${propName}Value")
       case PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, _) =>
@@ -453,7 +455,7 @@ object Utils {
     p match {
       case p: ListablePropertyType if p.isList || !withDefault =>
         None
-      case EnumProperty(_, _) => None //TODO maybe unknownValue as default?
+      case EnumProperty(_, _) => None
       case TextProperty(_, _) => Some(PropertyDefaultValue.String("defaultTextValue"))
       case PrimitiveProperty(PrimitivePropType.Boolean, _) =>
         Some(PropertyDefaultValue.Boolean(false))

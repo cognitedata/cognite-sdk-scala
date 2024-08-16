@@ -46,15 +46,15 @@ object PropertyType {
   }
 
   final case class EnumProperty(
-    values: Map[String, EnumValueMetadata],
-    unknownValue: Option[String]
-   ) extends PropertyType {
+      values: Map[String, EnumValueMetadata],
+      unknownValue: Option[String]
+  ) extends PropertyType {
     val `type`: String = EnumProperty.Type
   }
 
   final case class EnumValueMetadata(
-    name: Option[String],
-    description: Option[String]
+      name: Option[String],
+      description: Option[String]
   )
 
   object EnumProperty {
@@ -109,9 +109,7 @@ object PropertyType {
     )
 
   implicit val enumValueMetadataEncoder: Encoder[EnumValueMetadata] =
-    Encoder.forProduct2("name", "description")((e: EnumValueMetadata) =>
-      (e.name, e.description)
-    )
+    Encoder.forProduct2("name", "description")((e: EnumValueMetadata) => (e.name, e.description))
 
   implicit val enumPropertyEncoder: Encoder[EnumProperty] =
     Encoder.forProduct3("type", "unknownValue", "values")((e: EnumProperty) =>
@@ -129,7 +127,8 @@ object PropertyType {
   implicit val enumPropertyDecoder: Decoder[EnumProperty] =
     deriveDecoder[EnumProperty]
 
-  implicit val enumValueMetadataDecoder: Decoder[EnumValueMetadata] = deriveDecoder[EnumValueMetadata]
+  implicit val enumValueMetadataDecoder: Decoder[EnumValueMetadata] =
+    deriveDecoder[EnumValueMetadata]
 
   implicit val primitivePropertyDecoder: Decoder[PrimitiveProperty] =
     deriveDecoder[PrimitiveProperty]

@@ -2,7 +2,11 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.implicits._
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
-import com.cognite.sdk.scala.v1.fdm.common.properties.{ListablePropertyType, PrimitivePropType, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{
+  ListablePropertyType,
+  PrimitivePropType,
+  PropertyType
+}
 import io.circe._
 import io.circe.syntax.EncoderOps
 
