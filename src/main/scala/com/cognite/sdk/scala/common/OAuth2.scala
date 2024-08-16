@@ -72,7 +72,7 @@ object OAuth2 {
             }
         }
         expiresAt = acquiredLowerBound + payload.expires_in
-      } yield TokenState(payload.access_token, expiresAt, cdfProjectName)
+      } yield TokenState(payload.access_token, expiresAt)
     }
   }
 
@@ -86,7 +86,8 @@ object OAuth2 {
     /** Only use for SessionProvider to interact with Cognite internal SessionAPI */
     private def getKubernetesJwt[F[_]](implicit F: Async[F]): F[String] = {
       val serviceAccountTokenPath = Path("/var/run/secrets/tokens/cdf_token")
-      Files[F]
+      Files
+        .forAsync[F]
         .readAll(serviceAccountTokenPath)
         .through(fs2.text.utf8.decode)
         .compile
@@ -119,7 +120,7 @@ object OAuth2 {
           .send(sttpBackend)
           .map(_.body)
         expiresAt = acquiredLowerBound + payload.expiresIn
-      } yield TokenState(payload.accessToken, expiresAt, cdfProjectName)
+      } yield TokenState(payload.accessToken, expiresAt)
     }
   }
 
@@ -133,7 +134,7 @@ object OAuth2 {
     for {
       now <- clock.realTime.map(_.toSeconds)
       _ <- cache.invalidateIfNeeded(_.expiresAt - refreshSecondsBeforeExpiration <= now)
-      auth <- cache.run(state => F.pure(OidcTokenAuth(state.token, state.cdfProjectName)))
+      auth <- cache.run(state => F.pure(OidcTokenAuth(state.token)))
     } yield auth
 
   class ClientCredentialsProvider[F[_]] private (
@@ -188,5 +189,5 @@ object OAuth2 {
     implicit val decoder: Decoder[ClientCredentialsResponse] = deriveDecoder
   }
 
-  final case class TokenState(token: String, expiresAt: Long, cdfProjectName: String)
+  final case class TokenState(token: String, expiresAt: Long)
 }
