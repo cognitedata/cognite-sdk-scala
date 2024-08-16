@@ -119,7 +119,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |          "name": "property-identifier14",
            |          "type": {
            |            "type": "enum",
-           |            "unknownValue": "VAL1",
+           |            "unknownValue": "VAL2",
            |            "values": {
            |              "VAL1": {
            |                "name": "value1",
@@ -298,7 +298,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                       "VAL1" -> EnumValueMetadata(Some("value1"), Some("value 1")),
                       "VAL2" -> EnumValueMetadata(None, None)
                     ),
-                    unknownValue = Some("VAL1")
+                    unknownValue = Some("VAL2")
                   )
                 )
               ),

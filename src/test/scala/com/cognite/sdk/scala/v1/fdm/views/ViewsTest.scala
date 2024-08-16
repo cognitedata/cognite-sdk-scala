@@ -44,7 +44,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
           "VAL1" -> EnumValueMetadata(Some("value1"), Some("value 1")),
           "VAL2" -> EnumValueMetadata(None, None)
         ),
-        unknownValue = Some("VAL1")
+        unknownValue = Some("VAL2")
       )
   )
 
@@ -174,7 +174,7 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
               "VAL1" -> EnumValueMetadata(Some("value1"), Some("value 1")),
               "VAL2" -> EnumValueMetadata(None, None)
             ),
-            unknownValue = Some("VAL1")
+            unknownValue = Some("VAL2")
           ),
           container = Some(containerReference),
           containerPropertyIdentifier = Some("prop_enum")

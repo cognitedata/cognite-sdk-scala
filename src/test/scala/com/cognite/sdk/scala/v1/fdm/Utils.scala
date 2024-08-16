@@ -40,6 +40,13 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
     DirectNodeRelationProperty(container = None, source = None, list = Some(false)),
     DirectNodeRelationProperty(container = None, source = None, list = Some(true)),
+    PropertyType.EnumProperty(
+      values = Map(
+        "VAL1" -> EnumValueMetadata(Some("value1"), Some("value 1")),
+        "VAL2" -> EnumValueMetadata(None, None)
+      ),
+      unknownValue = Some("VAL2")
+    ),
     TimeSeriesReference(list = Some(false)),
     FileReference(list = Some(false)),
     SequenceReference(list = Some(false)),
