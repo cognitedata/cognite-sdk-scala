@@ -123,7 +123,7 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       _ <- numTokenRequests.update(_ => 0)
       authProvider <- OAuth2.ClientCredentialsProvider[IO](credentials,
         refreshSecondsBeforeExpiration = 2,
-        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4, "irrelevant")))
+        Some(TokenState("firstToken", Clock[IO].realTime.map(_.toSeconds).unsafeRunSync() + 4)))
       _ <- List.fill(5)(authProvider.getAuth).parUnorderedSequence
       noNewToken <- numTokenRequests.get  // original token is still valid
       _ <- IO.sleep(4.seconds)
