@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-19T12:13:17.473949767Z",
+  "timestamp" : "2024-09-23T08:55:18.816945Z",
   "configurations" : [
     "compile",
     "optional",
@@ -276,11 +276,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-core_2.12",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-core_2.12.jar",
-          "hash" : "sha1:9f5a1f80cf69a7388637aea8abc018f9576a0db9"
+          "hash" : "sha1:63a0b82aa142b78440a426ee58df39b05a1d2bc3"
         }
       ],
       "configurations" : [
@@ -292,11 +292,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-generic_2.12",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-generic_2.12.jar",
-          "hash" : "sha1:68ac9321613451e2b8184bbbc4ad0b38067de244"
+          "hash" : "sha1:76da921ffe690fb2c6fa8cdaaf92813c332b9e01"
         }
       ],
       "configurations" : [
@@ -308,11 +308,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-jawn_2.12",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-jawn_2.12.jar",
-          "hash" : "sha1:31d65a9d6796f589017859396f08499dd4c55029"
+          "hash" : "sha1:c7064820473ead80d1eebe8c6abe820af96804f7"
         }
       ],
       "configurations" : [
@@ -324,11 +324,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-literal_2.12",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-literal_2.12.jar",
-          "hash" : "sha1:697814f89889a49002059585e8338913d00be7f3"
+          "hash" : "sha1:17afe5544562e4bbebe6be754c44fe675ef2847b"
         }
       ],
       "configurations" : [
@@ -338,11 +338,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-numbers_2.12",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-numbers_2.12.jar",
-          "hash" : "sha1:410901d0a79878d2ee24feb5295b6809fff04a52"
+          "hash" : "sha1:89271883278756d155b301589a9ba75a8f69ef77"
         }
       ],
       "configurations" : [
@@ -354,11 +354,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-parser_2.12",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-parser_2.12.jar",
-          "hash" : "sha1:389b0d3cc3e08b7997ad696132cb90caa6a0390c"
+          "hash" : "sha1:636999bf628e73b0bd57103ae42f9fc8d9b121ab"
         }
       ],
       "configurations" : [
