@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-06T11:39:08.115907Z",
+  "timestamp" : "2024-09-23T08:56:55.553884Z",
   "configurations" : [
     "compile",
     "optional",
@@ -992,11 +992,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_2.13",
-      "version" : "0.3.5",
+      "version" : "0.3.6",
       "artifacts" : [
         {
           "name" : "natchez-core_2.13.jar",
-          "hash" : "sha1:c8616b07885b6b574a3d241f81f3e524ebcc536c"
+          "hash" : "sha1:3c9b427684f1ce9aefec3132677de31089b43504"
         }
       ],
       "configurations" : [
@@ -1024,11 +1024,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-core_2.13",
-      "version" : "2.10.0",
+      "version" : "2.11.0",
       "artifacts" : [
         {
           "name" : "cats-core_2.13.jar",
-          "hash" : "sha1:f333233487bff425196019aed0443acdfbc80dae"
+          "hash" : "sha1:bf17f0927b59f990241657fd9ed7e37a40395f53"
         }
       ],
       "configurations" : [
@@ -1158,11 +1158,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-kernel_2.13",
-      "version" : "2.10.0",
+      "version" : "2.11.0",
       "artifacts" : [
         {
           "name" : "cats-kernel_2.13.jar",
-          "hash" : "sha1:6e9fbc99fa5a88a00ac55afc2540247f7f4ce04d"
+          "hash" : "sha1:9f46f77ebad492c1abeb6ca27df78ba1fa05eb65"
         }
       ],
       "configurations" : [

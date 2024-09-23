@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-07-08T16:02:39.904618Z",
+  "timestamp" : "2024-09-23T08:56:57.371263Z",
   "configurations" : [
     "compile",
     "optional",
@@ -978,11 +978,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_3",
-      "version" : "0.3.5",
+      "version" : "0.3.6",
       "artifacts" : [
         {
           "name" : "natchez-core_3.jar",
-          "hash" : "sha1:d7e41aff8fa3075b0ff509e918dda3f4eca73846"
+          "hash" : "sha1:b3ab6ede400d3fdaae74555b8b0f1bb04d6311d6"
         }
       ],
       "configurations" : [
