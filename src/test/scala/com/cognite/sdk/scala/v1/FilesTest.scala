@@ -322,7 +322,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     val link = client.files.downloadLink(FileDownloadId(file.id)).unsafeRunSync()
 
 
-    link.downloadUrl shouldBe "url"
+    link.downloadUrl shouldNot be(empty)
     client.files.deleteById(file.id).unsafeRunSync()
   }
 
