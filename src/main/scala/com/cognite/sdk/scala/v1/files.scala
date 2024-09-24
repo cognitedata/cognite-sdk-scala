@@ -141,7 +141,6 @@ final case class FileDownloadExternalId(externalId: String) extends FileDownload
 sealed trait FileDownloadLink {
   def downloadUrl: String
 }
-
 final case class FileDownloadLinkId(
     id: Long,
     downloadUrl: String
