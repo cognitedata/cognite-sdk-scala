@@ -299,6 +299,33 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     client.files.deleteById(file.id).unsafeRunSync()
   }
 
+  it should "support returning download link" in {
+    val file =
+      client.files.upload(
+        new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
+      ).unsafeRunSync()
+
+
+    var uploadedFile = client.files.retrieveByIds(Seq(file.id)).unsafeRunSync()
+    var retryCount = 0
+    while (!uploadedFile.headOption
+      .getOrElse(throw new RuntimeException("File was not uploaded in test"))
+      .uploaded) {
+      retryCount += 1
+      Thread.sleep(500)
+      uploadedFile = client.files.retrieveByIds(Seq(file.id)).unsafeRunSync()
+      if (retryCount > 10) {
+        throw new RuntimeException("File is not uploaded after 10 retries in test")
+      }
+    }
+
+    val link = client.files.downloadLink(FileDownloadId(file.id)).unsafeRunSync()
+
+
+    link.downloadUrl shouldBe "url"
+    client.files.deleteById(file.id).unsafeRunSync()
+  }
+
   it should "support search with dataSetIds" in {
     val created = filesToCreate.map(f => client.files.createOneFromRead(f).unsafeRunSync())
     try {
