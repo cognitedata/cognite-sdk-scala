@@ -1,25 +1,13 @@
 package com.cognite.sdk.scala.v1.fdm
 
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{
-  ContainerPropertyDefinition,
-  CorePropertyDefinition,
-  ViewCorePropertyDefinition
-}
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, CorePropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType._
-import com.cognite.sdk.scala.v1.fdm.common.properties.{
-  PrimitivePropType,
-  PropertyDefaultValue,
-  PropertyType
-}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{ListablePropertyType, PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.common.sources.SourceReference
 import com.cognite.sdk.scala.v1.fdm.common.{DirectRelationReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.{EdgeWrite, NodeWrite}
-import com.cognite.sdk.scala.v1.fdm.instances.{
-  EdgeOrNodeData,
-  InstancePropertyValue,
-  NodeOrEdgeCreate
-}
+import com.cognite.sdk.scala.v1.fdm.instances.{EdgeOrNodeData, InstancePropertyValue, NodeOrEdgeCreate}
 import io.circe.{Json, JsonObject}
 
 import java.time.{LocalDate, LocalDateTime, ZoneId}
@@ -52,6 +40,13 @@ object Utils {
     PrimitiveProperty(`type` = PrimitivePropType.Json, list = Some(true)),
     DirectNodeRelationProperty(container = None, source = None, list = Some(false)),
     DirectNodeRelationProperty(container = None, source = None, list = Some(true)),
+    PropertyType.EnumProperty(
+      values = Map(
+        "VAL1" -> EnumValueMetadata(Some("value1"), Some("value 1")),
+        "VAL2" -> EnumValueMetadata(None, None)
+      ),
+      unknownValue = Some("VAL2")
+    ),
     TimeSeriesReference(list = Some(false)),
     FileReference(list = Some(false)),
     SequenceReference(list = Some(false)),
@@ -131,7 +126,10 @@ object Utils {
           case p: PrimitiveProperty => p.`type`.productPrefix
           case _ => p.getClass.getSimpleName
         },
-        if (p.isList) "List" else "NonList",
+        p match {
+          case p: ListablePropertyType if p.isList => "List"
+          case _ => "NonList"
+        },
         if (autoIncrementApplicableProp) {
           if (autoIncrement) "WithAutoIncrement" else "WithoutAutoIncrement"
         } else { "" },
@@ -152,7 +150,8 @@ object Utils {
 
   def createAllPossibleViewPropCombinations: Map[String, ViewCorePropertyDefinition] =
     createAllPossibleContainerPropCombinations.map {
-      case (key, prop) => key -> toViewPropertyDefinition(prop, None, None)
+      case (key, prop) =>
+        key -> toViewPropertyDefinition(prop, None, None)
     }
 
   def createTestContainer(
@@ -200,7 +199,7 @@ object Utils {
       case DirectNodeRelationProperty(_, _, isList) if isList.contains(true) =>
         val autoRef = DirectRelationReference(Utils.SpaceExternalId, s"$propName-Instance")
         InstancePropertyValue.ViewDirectNodeRelationList(Seq(autoRef, autoRef))
-      case p if p.isList => listContainerPropToInstanceProperty(propName, p)
+      case p: ListablePropertyType if p.isList => listContainerPropToInstanceProperty(propName, p)
       case p => nonListContainerPropToInstanceProperty(propName, p)
     }
 
@@ -208,7 +207,8 @@ object Utils {
       space: String,
       nodeExternalId: String,
       sourceRef: SourceReference,
-      propsMap: Map[String, CorePropertyDefinition]
+      propsMap: Map[String, CorePropertyDefinition],
+      `type`: Option[DirectRelationReference]
   ): NodeWrite = {
     val instanceValuesForProps = propsMap.map { case (propName, prop) =>
       propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
@@ -235,7 +235,8 @@ object Utils {
     NodeWrite(
       space,
       nodeExternalId,
-      Some(Seq(withAllProps))
+      Some(Seq(withAllProps)),
+      `type`
     )
   }
 
@@ -403,6 +404,8 @@ object Utils {
       propertyType: PropertyType
   ): InstancePropertyValue =
     propertyType match {
+      case PropertyType.EnumProperty(_, _) =>
+        InstancePropertyValue.Enum("VAL1")
       case PropertyType.TextProperty(None | Some(false), _) =>
         InstancePropertyValue.String(s"${propName}Value")
       case PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, _) =>
@@ -451,55 +454,59 @@ object Utils {
       properties = Some(instancePropertyValues.mapValues(v => Some(v)).toMap)
     )
 
+  // scalastyle:off cyclomatic.complexity method.length
   private def propertyDefaultValueForPropertyType(
       p: PropertyType,
       withDefault: Boolean
-  ): Option[PropertyDefaultValue] =
-    if (withDefault && !p.isList) {
-      p match {
-        case TextProperty(_, _) => Some(PropertyDefaultValue.String("defaultTextValue"))
-        case PrimitiveProperty(PrimitivePropType.Boolean, _) =>
-          Some(PropertyDefaultValue.Boolean(false))
-        case PrimitiveProperty(PrimitivePropType.Float32, _) =>
-          Some(PropertyDefaultValue.Float32(1.2f))
-        case PrimitiveProperty(PrimitivePropType.Float64, _) =>
-          Some(PropertyDefaultValue.Float64(1.21))
-        case PrimitiveProperty(PrimitivePropType.Int32, _) => Some(PropertyDefaultValue.Int32(1))
-        case PrimitiveProperty(PrimitivePropType.Int64, _) => Some(PropertyDefaultValue.Int64(12L))
-        case PrimitiveProperty(PrimitivePropType.Timestamp, _) =>
-          Some(
-            PropertyDefaultValue.String(
-              LocalDateTime
-                .now()
-                .atZone(ZoneId.of("UTC"))
-                .format(InstancePropertyValue.Timestamp.formatter)
-            )
+  ): Option[PropertyDefaultValue] = {
+    p match {
+      case p: ListablePropertyType if p.isList || !withDefault =>
+        None
+      case EnumProperty(_, _) => None
+      case TextProperty(_, _) => Some(PropertyDefaultValue.String("defaultTextValue"))
+      case PrimitiveProperty(PrimitivePropType.Boolean, _) =>
+        Some(PropertyDefaultValue.Boolean(false))
+      case PrimitiveProperty(PrimitivePropType.Float32, _) =>
+        Some(PropertyDefaultValue.Float32(1.2f))
+      case PrimitiveProperty(PrimitivePropType.Float64, _) =>
+        Some(PropertyDefaultValue.Float64(1.21))
+      case PrimitiveProperty(PrimitivePropType.Int32, _) => Some(PropertyDefaultValue.Int32(1))
+      case PrimitiveProperty(PrimitivePropType.Int64, _) => Some(PropertyDefaultValue.Int64(12L))
+      case PrimitiveProperty(PrimitivePropType.Timestamp, _) =>
+        Some(
+          PropertyDefaultValue.String(
+            LocalDateTime
+              .now()
+              .atZone(ZoneId.of("UTC"))
+              .format(InstancePropertyValue.Timestamp.formatter)
           )
-        case PrimitiveProperty(PrimitivePropType.Date, _) =>
-          Some(
-            PropertyDefaultValue.String(
-              LocalDate.now().format(InstancePropertyValue.Date.formatter)
-            )
+        )
+      case PrimitiveProperty(PrimitivePropType.Date, _) =>
+        Some(
+          PropertyDefaultValue.String(
+            LocalDate.now().format(InstancePropertyValue.Date.formatter)
           )
-        case PrimitiveProperty(PrimitivePropType.Json, _) =>
-          Some(
-            PropertyDefaultValue.Object(
-              Json.fromJsonObject(
-                JsonObject.fromMap(Map(
+        )
+      case PrimitiveProperty(PrimitivePropType.Json, _) =>
+        Some(
+          PropertyDefaultValue.Object(
+            Json.fromJsonObject(
+              JsonObject.fromMap(
+                Map(
                   "a" -> Json.fromString("a"),
                   "b" -> Json.fromInt(1)
-                ))
+                )
               )
             )
           )
-        case _: DirectNodeRelationProperty => None
-        case _: TimeSeriesReference =>
-          Some(PropertyDefaultValue.TimeSeriesReference("defaultTimeSeriesExternalId"))
-        case _: FileReference => Some(PropertyDefaultValue.FileReference("defaultFileExternalId"))
-        case _: SequenceReference =>
-          Some(PropertyDefaultValue.SequenceReference("defaultSequenceExternalId"))
-      }
-    } else {
-      None
+        )
+      case _: DirectNodeRelationProperty => None
+      case _: TimeSeriesReference =>
+        Some(PropertyDefaultValue.TimeSeriesReference("defaultTimeSeriesExternalId"))
+      case _: FileReference => Some(PropertyDefaultValue.FileReference("defaultFileExternalId"))
+      case _: SequenceReference =>
+        Some(PropertyDefaultValue.SequenceReference("defaultSequenceExternalId"))
+
     }
+  }
 }

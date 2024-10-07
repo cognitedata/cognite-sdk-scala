@@ -2,9 +2,12 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.implicits._
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
-import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyType}
+import com.cognite.sdk.scala.v1.fdm.common.properties.{
+  ListablePropertyType,
+  PrimitivePropType,
+  PropertyType
+}
 import io.circe._
-import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.EncoderOps
 
 import java.time.{LocalDate, ZonedDateTime}
@@ -29,7 +32,8 @@ object InstanceDefinition {
       lastUpdatedTime: Long,
       deletedTime: Option[Long],
       version: Option[Long],
-      properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]
+      properties: Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]],
+      `type`: Option[DirectRelationReference]
   ) extends InstanceDefinition {
     override val instanceType: InstanceType = InstanceType.Node
   }
@@ -101,10 +105,6 @@ object InstanceDefinition {
       case e: EdgeDefinition => e.asJson
     }
 
-  private val nodeDefinitionDecoder: Decoder[NodeDefinition] = deriveDecoder
-
-  private val edgeDefinitionDecoder: Decoder[EdgeDefinition] = deriveDecoder
-
   def instancePropertyDefinitionBasedInstanceDecoder(
       propertyTypeDefinitionsMap: Option[
         Map[String, Map[String, Map[String, TypePropertyDefinition]]]
@@ -120,11 +120,13 @@ object InstanceDefinition {
             instancePropertyDefinitionBasedEdgeDefinitionDecoder(propDefMap).apply(c)
         }
       case None =>
-        c.downField("instanceType").as[InstanceType] match {
-          case Left(err) => Left[DecodingFailure, InstanceDefinition](err)
-          case Right(InstanceType.Node) => nodeDefinitionDecoder.apply(c)
-          case Right(InstanceType.Edge) => edgeDefinitionDecoder.apply(c)
-        }
+        Left[DecodingFailure, InstanceDefinition](
+          DecodingFailure(
+            """Decoding without typing is not supported,
+            |resend the request with includeTyping set to true""".stripMargin,
+            c.history
+          )
+        )
     }
 
   def instancePropertyDefinitionBasedInstancePropertyTypeDecoder(
@@ -190,6 +192,7 @@ object InstanceDefinition {
         .as[Option[Map[String, Map[String, Map[String, InstancePropertyValue]]]]](
           instancePropertyDefinitionBasedInstancePropertyTypeDecoder(instPropDefMap)
         )
+      relation <- c.downField("type").as[Option[DirectRelationReference]]
     } yield NodeDefinition(
       space = space,
       externalId = externalId,
@@ -197,7 +200,8 @@ object InstanceDefinition {
       lastUpdatedTime = lastUpdatedTime,
       deletedTime = deletedTime,
       version = version,
-      properties = properties
+      properties = properties,
+      `type` = relation
     )
 
   private def instancePropertyDefinitionBasedEdgeDefinitionDecoder(
@@ -236,7 +240,7 @@ object InstanceDefinition {
       t: TypePropertyDefinition
   ): Either[DecodingFailure, InstancePropertyValue] =
     t.`type` match {
-      case t if t.isList => toInstancePropertyTypeOfList(propValue, t)
+      case t: ListablePropertyType if t.isList => toInstancePropertyTypeOfList(propValue, t)
       case t => toInstancePropertyTypeOfNonList(propValue, t)
     }
 
@@ -311,6 +315,10 @@ object InstanceDefinition {
       t: PropertyType
   ): Either[DecodingFailure, InstancePropertyValue] =
     t match {
+      case PropertyType.EnumProperty(_, _) =>
+        Decoder[String]
+          .decodeJson(propValue)
+          .map(InstancePropertyValue.Enum.apply)
       case PropertyType.TextProperty(None | Some(false), _) =>
         Decoder[String]
           .decodeJson(propValue)

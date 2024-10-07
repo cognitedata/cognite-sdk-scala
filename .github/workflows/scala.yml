@@ -91,6 +91,47 @@ jobs:
           cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
           cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 Test/compile
 
+  compile_scala_3:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/master'
+    environment: CI
+
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          git rev-list --count --first-parent HEAD > patch_version.txt
+
+      - name: Set up JDK 8
+        uses: coursier/setup-action@v1
+        with:
+          jvm: adopt:8
+
+      # Caching dependencies in Pull Requests based on branch name and build.sbt.
+      # Can we do something better here?
+      - name: Cache Coursier dependencies
+        uses: actions/cache@v4
+        env:
+          cache-name: coursier-cache
+        with:
+          path: ~/.cache/coursier/v1
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
+
+      - name: Cache Ivy 2 cache
+        uses: actions/cache@v4
+        env:
+          cache-name: sbt-ivy2-cache
+        with:
+          path: ~/.ivy2/cache
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
+
+      - name: Compile
+        run: |
+          cat /dev/null | sbt -Dsbt.log.noformat=true ++3.3 dependencyLockCheck
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 Test/compile
 
   test:
     runs-on: ubuntu-latest
@@ -128,7 +169,7 @@ jobs:
         path: ~/.ivy2/cache
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
-    - name: Run tests
+    - name: Run tests for Scala 2.13
       env:
         COGNITE_BASE_URL: "https://bluefield.cognitedata.com"
         TEST_AAD_TENANT: "b86328db-09aa-4f0e-9a03-0136f604d20a"
@@ -145,12 +186,76 @@ jobs:
         cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalafmtCheck coverage test coverageReport
 
+    - name: Run tests for Scala 3
+      env:
+        COGNITE_BASE_URL: "https://bluefield.cognitedata.com"
+        TEST_AAD_TENANT: "b86328db-09aa-4f0e-9a03-0136f604d20a"
+        TEST_CLIENT_ID: ${{ secrets.BLUEFIELD_CLIENT_ID }}
+        TEST_CLIENT_SECRET: ${{ secrets.BLUEFIELD_CLIENT_SECRET }}
+        TEST_PROJECT: "extractor-bluefield-testing"
+        COGNITE_BASE_URL2: "https://api.cognitedata.com"
+        TEST_AAD_TENANT2: "b86328db-09aa-4f0e-9a03-0136f604d20a"
+        TEST_CLIENT_ID2: ${{ secrets.BLUEFIELD_CLIENT_ID }}
+        TEST_CLIENT_SECRET2: ${{ secrets.BLUEFIELD_CLIENT_SECRET }}
+        TEST_PROJECT2: "playground"
+      # run: sbt test
+      run: |
+        cat /dev/null | sbt -Dsbt.log.noformat=true ++3.3 dependencyLockCheck
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 scalafmtCheck test
+
     - name: Upload test coverage report
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.codecov_token }}
 
-  publish:
+  publish_jfrog:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/master'
+    environment: CD
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          git rev-list --count --first-parent HEAD > patch_version.txt
+
+      - name: Set up JDK 8
+        uses: coursier/setup-action@v1
+        with:
+          jvm: adopt:8
+
+      - name: Build JAR file
+        run: |
+          cat /dev/null | sbt -Dsbt.log.noformat=true +dependencyLockCheck
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}" "set compile/skip := true" +package
+
+      - name: Install GPG & Sonatype credentials for SBT
+        env:
+          GPG_PUBLIC_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PUBLIC_KEY }}
+          GPG_PRIVATE_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+        run: |
+          set -x
+
+          echo "$GPG_PUBLIC_KEY" > public.key
+          gpg --import public.key
+          echo "$GPG_PRIVATE_KEY" > private.key
+          gpg --verbose --batch --import-options import-show --import private.key
+          
+          mkdir -p ~/.sbt/gpg
+          echo "$GPG_PRIVATE_KEY_PASSPHRASE" | gpg --verbose --batch -a --export-secret-keys --pinentry-mode loopback --passphrase-fd 0 > ~/.sbt/gpg/secring.asc
+
+      - name: Publish package
+        env:
+          GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+          JFROG_USERNAME: ${{ secrets.ARTIFACTORY_PUBLISH_TOKEN_USER }}
+          JFROG_PASSWORD: ${{ secrets.ARTIFACTORY_PUBLISH_TOKEN }}
+          PUBLISH_TO_JFROG: "true"
+        run: |
+          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned
+  publish_sonatype:
     runs-on: ubuntu-latest
     needs: test
     if: github.ref == 'refs/heads/master'

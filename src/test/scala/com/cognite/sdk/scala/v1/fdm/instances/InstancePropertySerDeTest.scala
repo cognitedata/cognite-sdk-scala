@@ -1,6 +1,7 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
 import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.EnumValueMetadata
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDefinition.NodeDefinition
@@ -48,7 +49,8 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |            "property-identifier13": {
            |              "space": "space-name-1",
            |              "externalId": "extId1"
-           |            }
+           |            },
+           |            "property-identifier14": "VAL1"
            |          },
            |          "view-or-container-id-2": {
            |            "property-identifier21": true,
@@ -65,6 +67,10 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |            "property-identifier42": ["a", "b", "c"]
            |          }
            |        }
+           |      },
+           |      "type": {
+           |        "space": "space-name-1",
+           |        "externalId": "extId1"
            |      }
            |    }
            |  ],
@@ -104,6 +110,22 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |              "type": "container",
            |              "space": "space-name-1",
            |              "externalId": "extId1"
+           |            }
+           |          }
+           |        },
+           |        "property-identifier14": {
+           |          "nullable": true,
+           |          "description": "property-identifier14",
+           |          "name": "property-identifier14",
+           |          "type": {
+           |            "type": "enum",
+           |            "unknownValue": "VAL2",
+           |            "values": {
+           |              "VAL1": {
+           |                "name": "value1",
+           |                "description": "value 1"
+           |              },
+           |              "VAL2": {}
            |            }
            |          }
            |        }
@@ -198,7 +220,7 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
            |}""".stripMargin
 
       val instanceFilterResponse: InstanceFilterResponse = InstanceFilterResponse(
-        Vector(
+        Seq(
           NodeDefinition(
             "space-name-1",
             "space-ext-id-1",
@@ -214,7 +236,8 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                     "property-identifier12" -> InstancePropertyValue.Int64(102),
                     "property-identifier13" -> InstancePropertyValue.ViewDirectNodeRelation(
                       Some(DirectRelationReference(space = "space-name-1", externalId = "extId1"))
-                    )
+                    ),
+                    "property-identifier14" -> InstancePropertyValue.Enum("VAL1")
                   ),
                   "view-or-container-id-2" -> Map(
                     "property-identifier21" -> InstancePropertyValue.Boolean(true),
@@ -232,7 +255,8 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   )
                 )
               )
-            )
+            ),
+            Some(DirectRelationReference(space = "space-name-1", externalId = "extId1"))
           )
         ),
         typing = Some(
@@ -262,6 +286,20 @@ class InstancePropertySerDeTest extends AnyWordSpec with Matchers {
                   Some("property-identifier13"),
                   Some("property-identifier13"),
                   PropertyType.DirectNodeRelationProperty(Some(ContainerReference("space-name-1", "extId1")), None, None)
+                ),
+                "property-identifier14" -> TypePropertyDefinition(
+                  Some(true),
+                  None,
+                  None,
+                  Some("property-identifier14"),
+                  Some("property-identifier14"),
+                  PropertyType.EnumProperty(
+                    values = Map(
+                      "VAL1" -> EnumValueMetadata(Some("value1"), Some("value 1")),
+                      "VAL2" -> EnumValueMetadata(None, None)
+                    ),
+                    unknownValue = Some("VAL2")
+                  )
                 )
               ),
               "view-or-container-id-2" -> Map(
