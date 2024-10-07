@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-09-23T08:54:16.035829Z",
+  "timestamp" : "2024-10-07T07:18:51.599166Z",
   "configurations" : [
     "compile",
     "optional",
@@ -62,11 +62,11 @@
     {
       "org" : "com.google.protobuf",
       "name" : "protobuf-java",
-      "version" : "3.25.3",
+      "version" : "3.25.5",
       "artifacts" : [
         {
           "name" : "protobuf-java.jar",
-          "hash" : "sha1:d3200261955f3298e0d85c9892201e70492ce8eb"
+          "hash" : "sha1:5ae5c9ec39930ae9b5a61b32b93288818ec05ec1"
         }
       ],
       "configurations" : [
