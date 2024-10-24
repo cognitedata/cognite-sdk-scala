@@ -149,7 +149,7 @@ final case class RequestSession[F[_]: Monad: Trace](
 
   def head(
       uri: Uri
-  )(): F[Seq[Header]] =
+  ): F[Seq[Header]] =
     sttpRequest
       .head(uri)
       .send(sttpBackend)

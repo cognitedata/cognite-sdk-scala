@@ -417,7 +417,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
   }
 
   it should "send a head request and return the headers" in {
-    client.requestSession.head(uri"https://www.cognite.com/")().unsafeRunSync() should not be(empty)
+    client.requestSession.head(uri"https://www.cognite.com/").unsafeRunSync() should not be(empty)
   }
 
 }
