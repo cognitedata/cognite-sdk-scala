@@ -3,14 +3,10 @@
 
 package com.cognite.sdk.scala.v1
 
-import com.cognite.scala_sdk.BuildInfo
-
-import java.net.{ConnectException, UnknownHostException}
-import java.time.Instant
-import java.util.Base64
-import cats.effect._
 import cats.Id
+import cats.effect._
 import cats.effect.std.Queue
+import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.sttp.{BackpressureThrottleBackend, RateLimitingBackend, RetryingBackend}
 import org.scalatest.OptionValues
@@ -21,11 +17,18 @@ import sttp.client3.{Response, SttpBackend, SttpClientException, UriContext, bas
 import sttp.model.{Header, StatusCode}
 import sttp.monad.MonadAsyncError
 
-import scala.collection.immutable.Seq
+import java.net.{ConnectException, UnknownHostException}
+import java.time.Instant
+import java.util.Base64
 import scala.concurrent.TimeoutException
 import scala.concurrent.duration._
 
-@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
+@SuppressWarnings(Array(
+  "org.wartremover.warts.NonUnitStatements",
+  "org.wartremover.warts.Var",
+  "org.wartremover.warts.ThreadSleep",
+  "org.wartremover.warts.While")
+)
 class ClientTest extends SdkTestSpec with OptionValues {
   private val tokenInspectResponse = Response(
     s"""
@@ -414,6 +417,43 @@ class ClientTest extends SdkTestSpec with OptionValues {
         makeTestingBackend()
       ).threeDModels.list().compile.toList.unsafeRunSync()
     }
+  }
+
+  it should "send a head request and return the headers" in {
+    client.requestSession.head(uri"https://www.cognite.com/").unsafeRunSync() should not be(empty)
+  }
+
+
+  it should "send a head request and return the headers with header" in {
+    //we create a file and send it in order to be able to check content encoding on the file upload link side of things
+    val file =
+      client.files.upload(
+        new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
+      ).unsafeRunSync()
+
+
+    var uploadedFile = client.files.retrieveByIds(Seq(file.id)).unsafeRunSync()
+    var retryCount = 0
+    while (!uploadedFile.headOption
+      .getOrElse(throw new RuntimeException("File was not uploaded in test"))
+      .uploaded) {
+      retryCount += 1
+      Thread.sleep(500)
+      uploadedFile = client.files.retrieveByIds(Seq(file.id)).unsafeRunSync()
+      if (retryCount > 10) {
+        throw new RuntimeException("File is not uploaded after 10 retries in test")
+      }
+    }
+
+    val link = client.files.downloadLink(FileDownloadId(file.id)).unsafeRunSync()
+
+    val headers = client.requestSession.head(uri"$link", Seq(Header("Accept-Encoding", "gzip"))).unsafeRunSync()
+    val headers2 = client.requestSession.head(uri"$link").unsafeRunSync()
+    headers should contain(headers2)
+
+    link.downloadUrl shouldNot be(empty)
+    client.files.deleteById(file.id).unsafeRunSync()
+
   }
 
 }

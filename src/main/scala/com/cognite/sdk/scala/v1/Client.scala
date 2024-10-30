@@ -3,18 +3,19 @@
 
 package com.cognite.sdk.scala.v1
 
-import com.cognite.scala_sdk.BuildInfo
 import cats.implicits._
 import cats.{Id, Monad}
+import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.resources._
-import com.cognite.sdk.scala.v1.resources.fdm.datamodels.{DataModels => DataModelsV3}
 import com.cognite.sdk.scala.v1.resources.fdm.containers.Containers
+import com.cognite.sdk.scala.v1.resources.fdm.datamodels.{DataModels => DataModelsV3}
 import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances
 import com.cognite.sdk.scala.v1.resources.fdm.views.Views
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
+import natchez.Trace
 import sttp.capabilities.Effect
 import sttp.client3._
 import sttp.client3.circe.asJsonEither
@@ -24,7 +25,6 @@ import sttp.monad.MonadError
 import java.net.{InetAddress, UnknownHostException}
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
-import natchez.Trace
 
 class TraceSttpBackend[F[_]: Trace, +P](delegate: SttpBackend[F, P]) extends SttpBackend[F, P] {
 
@@ -146,6 +146,16 @@ final case class RequestSession[F[_]: Monad: Trace](
       .response(parseResponse(uri, mapResult))
       .send(sttpBackend)
       .map(_.body)
+
+  def head(
+      uri: Uri,
+      headers: Seq[Header] = Seq()
+  ): F[Seq[Header]] =
+    sttpRequest
+      .headers(headers: _*)
+      .head(uri)
+      .send(sttpBackend)
+      .map(_.headers)
 
   def sendCdf[R](
       r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any],
