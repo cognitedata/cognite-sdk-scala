@@ -426,6 +426,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
 
   it should "send a head request and return the headers with header" in {
     //we create a file and send it in order to be able to check content encoding on the file upload link side of things
+    //what we want to check is that this header, which is set by default, can be overriden to empty
     val file =
       client.files.upload(
         new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
@@ -447,8 +448,8 @@ class ClientTest extends SdkTestSpec with OptionValues {
 
     val link = client.files.downloadLink(FileDownloadId(file.id)).unsafeRunSync()
 
-    val headers = client.requestSession.head(uri"$link", Seq(Header("Accept-Encoding", ""))).unsafeRunSync()
-    val headers2 = client.requestSession.head(uri"$link").unsafeRunSync()
+    val headers = client.requestSession.head(uri"${link.downloadUrl}", Seq(Header("Accept-Encoding", ""))).unsafeRunSync()
+    val headers2 = client.requestSession.head(uri"${link.downloadUrl}").unsafeRunSync()
     headers should contain(headers2)
 
     link.downloadUrl shouldNot be(empty)
