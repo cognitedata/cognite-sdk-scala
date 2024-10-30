@@ -22,6 +22,7 @@ import java.time.Instant
 import java.util.Base64
 import scala.concurrent.TimeoutException
 import scala.concurrent.duration._
+import scala.collection.immutable.Seq
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
 class ClientTest extends SdkTestSpec with OptionValues {
