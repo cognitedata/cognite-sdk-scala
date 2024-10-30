@@ -448,7 +448,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
 
     val link = client.files.downloadLink(FileDownloadId(file.id)).unsafeRunSync()
 
-    val headers = client.requestSession.head(uri"${link.downloadUrl}", Seq(Header("Accept-Encoding", ""))).unsafeRunSync()
+    val headers = client.requestSession.head(uri"${link.downloadUrl}", Seq(Header("Accept-Encoding", "deflate, identity;q=0"))).unsafeRunSync()
     val headers2 = client.requestSession.head(uri"${link.downloadUrl}").unsafeRunSync()
 
     headers.filter(_.name.equalsIgnoreCase("Content-Encoding")) should contain theSameElementsAs headers2.filter(_.name.equalsIgnoreCase("Content-Encoding"))
