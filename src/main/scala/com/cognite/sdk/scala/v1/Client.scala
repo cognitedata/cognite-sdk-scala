@@ -150,12 +150,13 @@ final case class RequestSession[F[_]: Monad: Trace](
   def head(
       uri: Uri,
       headers: Seq[Header] = Seq()
-  ): F[Seq[Header]] =
+  ): F[Any] =
     sttpRequest
       .headers(headers: _*)
-      .head(uri)
+      .get(uri)
       .send(sttpBackend)
-      .map(_.headers)
+      .map(_.body)
+
 
   def sendCdf[R](
       r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any],

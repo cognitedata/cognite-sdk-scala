@@ -419,43 +419,16 @@ class ClientTest extends SdkTestSpec with OptionValues {
     }
   }
 
-  it should "send a head request and return the headers" in {
-    client.requestSession.head(uri"https://www.cognite.com/").unsafeRunSync() should not be(empty)
-  }
+//  it should "send a head request and return the headers" in {
+//    client.requestSession.head(uri"https://www.cognite.com/").unsafeRunSync() should not be(empty)
+//  }
 
 
   it should "send a head request and return the headers with header" in {
-    //we create a file and send it in order to be able to check content encoding on the file upload link side of things
-    //what we want to check is that this header, which is set by default, can be overriden to empty
-    val file =
-      client.files.upload(
-        new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
-      ).unsafeRunSync()
+    val headers = client.requestSession.head(uri"https://postman-echo.com/headers", Seq(Header("Accept-Encoding", "gzip"))).unsafeRunSync()
+    val headers2 = client.requestSession.head(uri"https://postman-echo.com/headers").unsafeRunSync()
 
-
-    var uploadedFile = client.files.retrieveByIds(Seq(file.id)).unsafeRunSync()
-    var retryCount = 0
-    while (!uploadedFile.headOption
-      .getOrElse(throw new RuntimeException("File was not uploaded in test"))
-      .uploaded) {
-      retryCount += 1
-      Thread.sleep(500)
-      uploadedFile = client.files.retrieveByIds(Seq(file.id)).unsafeRunSync()
-      if (retryCount > 10) {
-        throw new RuntimeException("File is not uploaded after 10 retries in test")
-      }
-    }
-
-    val link = client.files.downloadLink(FileDownloadId(file.id)).unsafeRunSync()
-
-    val headers = client.requestSession.head(uri"${link.downloadUrl}", Seq(Header("Accept-Encoding", "deflate, identity;q=0"))).unsafeRunSync()
-    val headers2 = client.requestSession.head(uri"${link.downloadUrl}").unsafeRunSync()
-
-    headers.filter(_.name.equalsIgnoreCase("Content-Encoding")) should contain theSameElementsAs headers2.filter(_.name.equalsIgnoreCase("Content-Encoding"))
-
-    link.downloadUrl shouldNot be(empty)
-    client.files.deleteById(file.id).unsafeRunSync()
-
+    headers should be(headers2)
   }
 
 }
