@@ -23,12 +23,7 @@ import java.util.Base64
 import scala.concurrent.TimeoutException
 import scala.concurrent.duration._
 
-@SuppressWarnings(Array(
-  "org.wartremover.warts.NonUnitStatements",
-  "org.wartremover.warts.Var",
-  "org.wartremover.warts.ThreadSleep",
-  "org.wartremover.warts.While")
-)
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
 class ClientTest extends SdkTestSpec with OptionValues {
   private val tokenInspectResponse = Response(
     s"""
