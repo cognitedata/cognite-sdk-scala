@@ -149,10 +149,10 @@ final case class RequestSession[F[_]: Monad: Trace](
 
   def head(
       uri: Uri,
-      headers: Seq[Header] = Seq()
+      overrideHeaders: Seq[Header] = Seq()
   ): F[Seq[Header]] =
     sttpRequest
-      .headers(headers: _*)
+      .headers(overrideHeaders: _*)
       .head(uri)
       .send(sttpBackend)
       .map(_.headers)
