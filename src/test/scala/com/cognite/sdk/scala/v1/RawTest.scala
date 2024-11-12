@@ -15,7 +15,8 @@ import sttp.client3.UriContext
   Array(
     "org.wartremover.warts.TraversableOps",
     "org.wartremover.warts.NonUnitStatements",
-    "org.wartremover.warts.IterableOps"
+    "org.wartremover.warts.IterableOps",
+    "org.wartremover.warts.SizeIs"
   )
 )
 class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with OptionValues {
