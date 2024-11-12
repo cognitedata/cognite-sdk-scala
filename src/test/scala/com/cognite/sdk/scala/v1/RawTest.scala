@@ -6,8 +6,10 @@ package com.cognite.sdk.scala.v1
 import cats.syntax.either._
 import com.cognite.sdk.scala.common.{Items, ReadBehaviours, SdkTestSpec, WritableBehaviors}
 import fs2.Stream
+import io.circe.Json
 import io.circe.syntax._
 import org.scalatest.OptionValues
+import sttp.client3.UriContext
 
 @SuppressWarnings(
   Array(
@@ -132,6 +134,62 @@ class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors wit
       }
     }
   }
+
+  it should "allow controlling filtering of field with null value" in withDatabaseTables { (database, tables) =>
+    val table = tables.head
+    val rows = client.rawRows(database, table, filterNullFields = true)
+
+    val relevantKeys = List("withNullFields", "normal")
+    rows.create(
+      Seq(
+        RawRow(relevantKeys.head, Map("a" -> "3".asJson, "notthere" -> None.asJson)),
+        RawRow(relevantKeys.last, Map("a" -> "0".asJson, "abc" -> "".asJson))
+      )
+    ).unsafeRunSync()
+
+    // We cannot test using a key filter here, as this is translated into a getRowByKey request, which does not
+    // currently support filtering out null fields.
+
+    val listedRowsWithNullFilter: Map[String, Map[String, Json]] = rows.list()
+      .compile
+      .toList
+      .unsafeRunSync()
+      .filter(row => relevantKeys.contains(row.key)).map(r => (r.key -> r.columns))
+      .toMap
+
+    assert(listedRowsWithNullFilter.size == 2)
+    val values = listedRowsWithNullFilter.get("withNullFields").toList.head
+    assert(values.size == 1)
+    values.get("a").toList.head shouldBe "3".asJson
+    assert(listedRowsWithNullFilter.get("normal").toList.head.size == 2)
+
+    val filteredWithNullFilter: Map[String, Map[String, Json]] =
+      rows.filterWithCursor(RawRowFilter(), None, None, None)
+        .unsafeRunSync()
+        .items
+        .filter(row => relevantKeys.contains(row.key))
+        .map(r => (r.key -> r.columns))
+        .toMap
+
+    assert(filteredWithNullFilter.size == 2)
+    val filteredValues = filteredWithNullFilter.get("withNullFields").toList.head
+    assert(filteredValues.size == 1)
+    filteredValues.get("a").toList.head shouldBe "3".asJson
+    assert(listedRowsWithNullFilter.get("normal").toList.head.size == 2)
+  }
+
+  it should "add correct option when filtering out null fields" in withDatabaseTables { (database, tables) =>
+    val table = tables.head
+    val unfilteredRows = client.rawRows(database, table)
+    val filteredRows = client.rawRows(database, table, filterNullFields = true)
+
+    val modifiedFilteredUrl = filteredRows.filterFieldsWithNull(uri"http://localhost/testQuery")
+    assert(modifiedFilteredUrl.params.toMap.get("filterNullFields").contains("true"))
+
+    val modifiedUnfilteredUrl = unfilteredRows.filterFieldsWithNull(uri"http://localhost/testQuery")
+    assert(modifiedUnfilteredUrl.params.toMap.get("filterNullFields").contains("false"))
+  }
+
 
   it should "allow partition read and filtering of rows" in withDatabaseTables {
     (database, tables) =>
