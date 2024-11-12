@@ -237,8 +237,8 @@ class GenericClient[F[_]: Trace](
     new RawDatabases[F](requestSession.withResourceType(RAW_METADATA))
   def rawTables(database: String): RawTables[F] =
     new RawTables(requestSession.withResourceType(RAW_METADATA), database)
-  def rawRows(database: String, table: String): RawRows[F] =
-    new RawRows(requestSession.withResourceType(RAW_ROWS), database, table)
+  def rawRows(database: String, table: String, filterNullFields: Boolean = false): RawRows[F] =
+    new RawRows(requestSession.withResourceType(RAW_ROWS), database, table, filterNullFields)
 
   lazy val threeDModels = new ThreeDModels[F](requestSession.withResourceType(THREED))
   def threeDRevisions(modelId: Long): ThreeDRevisions[F] =
