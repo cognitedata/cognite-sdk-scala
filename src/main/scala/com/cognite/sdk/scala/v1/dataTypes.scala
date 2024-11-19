@@ -9,10 +9,12 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 import java.time.Instant
 
-sealed trait CogniteId
+sealed trait CogniteIdOrInstance
+sealed trait CogniteId extends CogniteIdOrInstance
 
 final case class CogniteExternalId(externalId: String) extends CogniteId
 final case class CogniteInternalId(id: Long) extends CogniteId
+final case class InstanceId(space: String, externalId: String) extends CogniteIdOrInstance
 
 object CogniteExternalId {
   implicit val encoder: Encoder[CogniteExternalId] = deriveEncoder
@@ -22,10 +24,31 @@ object CogniteInternalId {
   implicit val encoder: Encoder[CogniteInternalId] = deriveEncoder
   implicit val decoder: Decoder[CogniteInternalId] = deriveDecoder
 }
+
+object InstanceId {
+  implicit val encoder: Encoder[InstanceId] = deriveEncoder
+  implicit val decoder: Decoder[InstanceId] = deriveDecoder
+}
+
+object CogniteIdOrInstance {
+  implicit val encoder: Encoder[CogniteIdOrInstance] = Encoder.instance {
+    case id: CogniteId => CogniteId.encoder(id)
+    case id: InstanceId => InstanceId.encoder(id)
+  }
+  @SuppressWarnings(
+    Array("org.wartremover.warts.TraversableOps")
+  )
+  implicit val decoder: Decoder[CogniteIdOrInstance] =
+    List[Decoder[CogniteIdOrInstance]](
+      Decoder[CogniteId].widen,
+      Decoder[InstanceId].widen
+    ).reduceLeftOption(_ or _).getOrElse(Decoder[CogniteId].widen)
+}
+
 object CogniteId {
   implicit val encoder: Encoder[CogniteId] = Encoder.instance {
-    case id @ CogniteExternalId(_) => CogniteExternalId.encoder(id)
-    case id @ CogniteInternalId(_) => CogniteInternalId.encoder(id)
+    case id: CogniteExternalId => CogniteExternalId.encoder(id)
+    case id: CogniteInternalId => CogniteInternalId.encoder(id)
   }
   @SuppressWarnings(
     Array("org.wartremover.warts.TraversableOps")
@@ -33,7 +56,7 @@ object CogniteId {
   implicit val decoder: Decoder[CogniteId] =
     List[Decoder[CogniteId]](
       Decoder[CogniteInternalId].widen,
-      Decoder[CogniteExternalId].widen
+      Decoder[CogniteExternalId].widen,
     ).reduceLeftOption(_ or _).getOrElse(Decoder[CogniteExternalId].widen)
 }
 

@@ -208,3 +208,44 @@ object RetrieveByExternalIdsWithIgnoreUnknownIds {
       value => value.items
     )
 }
+
+
+trait RetrieveByInstanceIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
+  def retrieveByInstanceIds(instanceIds: Seq[InstanceId]): F[Seq[R]]
+  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
+  def retrieveByInstanceId(instanceId: InstanceId): F[R] =
+    // The API returns an error causing an exception to be thrown if the item isn't found,
+    // so .head is safe here.
+    requestSession.map(retrieveByInstanceIds(Seq(instanceId)), (r1: Seq[R]) => r1.head)
+}
+
+object RetrieveByInstanceIds {
+  def retrieveByInstanceIds[F[_], R](requestSession: RequestSession[F], baseUrl: Uri, instanceIds: Seq[CogniteIdOrInstance])(
+    implicit itemsDecoder: Decoder[Items[R]]
+  ): F[Seq[R]] =
+    requestSession.post[Seq[R], Items[R], Items[CogniteIdOrInstance]](
+      Items(instanceIds),
+      uri"$baseUrl/byids",
+      value => value.items
+    )
+}
+
+trait RetrieveByInstanceIdsWithIgnoreUnknownIds[R, F[_]] extends RetrieveByInstanceIds[R, F] {
+  override def retrieveByInstanceIds(ids: Seq[InstanceId]): F[Seq[R]] =
+    retrieveByInstanceIds(ids, ignoreUnknownIds = false)
+  def retrieveByInstanceIds(ids: Seq[InstanceId], ignoreUnknownIds: Boolean): F[Seq[R]]
+}
+
+object RetrieveByInstanceIdsWithIgnoreUnknownIds {
+  def retrieveByInstanceIds[F[_], R](
+    requestSession: RequestSession[F],
+    baseUrl: Uri,
+    cogniteIds: Seq[CogniteId],
+    ignoreUnknownIds: Boolean
+  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
+    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteIdOrInstance]](
+      ItemsWithIgnoreUnknownIds(cogniteIds, ignoreUnknownIds),
+      uri"$baseUrl/byids",
+      value => value.items
+    )
+}
