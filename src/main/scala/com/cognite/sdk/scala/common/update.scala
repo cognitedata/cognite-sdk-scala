@@ -13,6 +13,7 @@ import sttp.model.Uri
 
 final case class UpdateRequest(update: Json, id: Long)
 final case class UpdateRequestExternalId(update: Json, externalId: String)
+final case class UpdateRequestInstanceId(update: Json, instanceId: InstanceId)
 
 trait UpdateById[R <: ToUpdate[U] with WithId[Long], U, F[_]]
     extends WithRequestSession[F]
@@ -96,6 +97,41 @@ object UpdateByExternalId {
       .post[Seq[R], Items[R], Items[UpdateRequestExternalId]](
         Items(updates.map { case (id, update) =>
           UpdateRequestExternalId(update.asJson, id)
+        }.toSeq),
+        uri"$baseUrl/update",
+        value => value.items
+      )
+  }
+}
+
+trait UpdateByInstanceId[R, U, F[_]] extends WithRequestSession[F] with BaseUrl {
+  def updateByInstanceId(items: Map[InstanceId, U]): F[Seq[R]]
+
+  def updateOneByInstanceId(id: InstanceId, item: U): F[R] =
+    requestSession.map(
+      updateByInstanceId(Map(id -> item)),
+      (r1: Seq[R]) =>
+        r1.headOption match {
+          case Some(value) => value
+          case None => throw SdkException("Unexpected empty response when updating item")
+        }
+    )
+}
+
+object UpdateByInstanceId {
+  implicit val updateRequestExternalIdEncoder: Encoder[UpdateRequestInstanceId] = deriveEncoder
+  implicit val updateRequestExternalIdItemsEncoder: Encoder[Items[UpdateRequestInstanceId]] =
+    deriveEncoder
+  def updateByInstanceId[F[_], R, U: Encoder](
+                                               requestSession: RequestSession[F],
+                                               baseUrl: Uri,
+                                               updates: Map[InstanceId, U]
+                                             )(implicit decodeReadItems: Decoder[Items[R]]): F[Seq[R]] = {
+    implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
+    requestSession
+      .post[Seq[R], Items[R], Items[UpdateRequestInstanceId]](
+        Items(updates.map { case (id, update) =>
+          UpdateRequestInstanceId(update.asJson, id)
         }.toSeq),
         uri"$baseUrl/update",
         value => value.items

@@ -43,6 +43,12 @@ trait DeleteByExternalIds[F[_]] {
   def deleteByExternalId(externalId: String): F[Unit] = deleteByExternalIds(Seq(externalId))
 }
 
+trait DeleteByInstanceIds[F[_]] {
+  def deleteByInstanceIds(instanceIds: Seq[InstanceId]): F[Unit]
+
+  def deleteByInstanceId(instanceId: InstanceId): F[Unit] = deleteByInstanceIds(Seq(instanceId))
+}
+
 trait DeleteByExternalIdsWithIgnoreUnknownIds[F[_]] extends DeleteByExternalIds[F] {
   def deleteByExternalIds(externalIds: Seq[String], ignoreUnknownIds: Boolean = false): F[Unit]
 
@@ -66,6 +72,26 @@ object DeleteByExternalIds {
       uri"$baseUrl/delete",
       _ => ()
     )
+}
+
+//todo generify using CogniteId/CogniteIdWithInstanceId?
+object DeleteByInstanceIds {
+  //TODO generify?
+  implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
+    EitherDecoder.eitherDecoder[CdpApiError, Unit]
+
+  def deleteByInstanceIds[F[_]](
+      requestSession: RequestSession[F],
+      baseUrl: Uri,
+      instanceIds: Seq[InstanceId]
+  ): F[Unit] =
+  // TODO: group deletes by max deletion request size
+  //       or assert that length of `ids` is less than max deletion request size
+  requestSession.post[Unit, Unit, Items[InstanceId]](
+    Items(instanceIds),
+    uri"$baseUrl/delete",
+    _ => ()
+  )
 }
 
 trait DeleteByCogniteIds[F[_]]

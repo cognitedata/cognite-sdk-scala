@@ -19,14 +19,19 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
     with PartitionedReadable[File, F]
     with RetrieveByIdsWithIgnoreUnknownIds[File, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[File, F]
+    with RetrieveByInstanceIdsWithIgnoreUnknownIds[File, F]
     with Create[File, FileCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
+    with DeleteByInstanceIds[F]
     with PartitionedFilter[File, FilesFilter, F]
     with Search[File, FilesQuery, F]
     with UpdateById[File, FileUpdate, F]
-    with UpdateByExternalId[File, FileUpdate, F] {
+    with UpdateByExternalId[File, FileUpdate, F]
+    with UpdateByInstanceId[File, FileUpdate, F] {
+
   import Files._
+
   override val baseUrl = uri"${requestSession.baseUrl}/files"
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
@@ -80,10 +85,10 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
   }
 
   override private[sdk] def readWithCursor(
-      cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition]
-  ): F[ItemsWithCursor[File]] =
+                                            cursor: Option[String],
+                                            limit: Option[Int],
+                                            partition: Option[Partition]
+                                          ): F[ItemsWithCursor[File]] =
     Readable.readWithCursor(
       requestSession,
       baseUrl,
@@ -102,9 +107,9 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
     )
 
   override def retrieveByExternalIds(
-      externalIds: Seq[String],
-      ignoreUnknownIds: Boolean
-  ): F[Seq[File]] =
+                                      externalIds: Seq[String],
+                                      ignoreUnknownIds: Boolean
+                                    ): F[Seq[File]] =
     RetrieveByExternalIdsWithIgnoreUnknownIds.retrieveByExternalIds(
       requestSession,
       baseUrl,
@@ -112,11 +117,23 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
       ignoreUnknownIds
     )
 
+  override def retrieveByInstanceIds(ids: Seq[InstanceId], ignoreUnknownIds: Boolean): F[Seq[File]] =
+    RetrieveByInstanceIdsWithIgnoreUnknownIds.retrieveByInstanceIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
+    )
+
+
   override def updateById(items: Map[Long, FileUpdate]): F[Seq[File]] =
     UpdateById.updateById[F, File, FileUpdate](requestSession, baseUrl, items)
 
   override def updateByExternalId(items: Map[String, FileUpdate]): F[Seq[File]] =
     UpdateByExternalId.updateByExternalId[F, File, FileUpdate](requestSession, baseUrl, items)
+
+  override def updateByInstanceId(items: Map[InstanceId, FileUpdate]): F[Seq[File]] =
+    UpdateByInstanceId.updateByInstanceId[F, File, FileUpdate](requestSession, baseUrl, items)
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUrl, ids)
@@ -124,13 +141,17 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
 
+  override def deleteByInstanceIds(instanceIds: Seq[InstanceId]): F[Unit] =
+    DeleteByInstanceIds.deleteByInstanceIds(requestSession, baseUrl, instanceIds)
+
+
   private[sdk] def filterWithCursor(
-      filter: FilesFilter,
-      cursor: Option[String],
-      limit: Option[Int],
-      partition: Option[Partition],
-      aggregatedProperties: Option[Seq[String]] = None
-  ): F[ItemsWithCursor[File]] =
+                                     filter: FilesFilter,
+                                     cursor: Option[String],
+                                     limit: Option[Int],
+                                     partition: Option[Partition],
+                                     aggregatedProperties: Option[Seq[String]] = None
+                                   ): F[ItemsWithCursor[File]] =
     Filter.filterWithCursor(
       requestSession,
       uri"$baseUrl/list",

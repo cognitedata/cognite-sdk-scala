@@ -23,6 +23,7 @@ final case class File(
     directory: Option[String] = None,
     source: Option[String] = None,
     externalId: Option[String] = None,
+    instanceId: Option[InstanceId] = None,
     mimeType: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
     assetIds: Option[Seq[Long]] = None,
@@ -61,6 +62,7 @@ final case class File(
   override def toUpdate: FileUpdate =
     FileUpdate(
       Setter.fromOption(externalId),
+      Setter.fromOption(instanceId),
       Setter.fromOption(source),
       Setter.fromOption(directory),
       Setter.fromOption(mimeType),
@@ -91,6 +93,7 @@ final case class FileCreate(
 
 final case class FileUpdate(
     externalId: Option[Setter[String]] = None,
+    instanceId: Option[Setter[InstanceId]] = None,
     source: Option[Setter[String]] = None,
     directory: Option[Setter[String]] = None,
     mimeType: Option[Setter[String]] = None,
