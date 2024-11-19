@@ -76,7 +76,7 @@ object DeleteByExternalIds {
 
 //todo generify using CogniteId/CogniteIdWithInstanceId?
 object DeleteByInstanceIds {
-  //TODO generify?
+  // TODO generify?
   implicit val errorOrUnitDecoder: Decoder[Either[CdpApiError, Unit]] =
     EitherDecoder.eitherDecoder[CdpApiError, Unit]
 
@@ -85,13 +85,13 @@ object DeleteByInstanceIds {
       baseUrl: Uri,
       instanceIds: Seq[InstanceId]
   ): F[Unit] =
-  // TODO: group deletes by max deletion request size
-  //       or assert that length of `ids` is less than max deletion request size
-  requestSession.post[Unit, Unit, Items[InstanceId]](
-    Items(instanceIds),
-    uri"$baseUrl/delete",
-    _ => ()
-  )
+    // TODO: group deletes by max deletion request size
+    //       or assert that length of `ids` is less than max deletion request size
+    requestSession.post[Unit, Unit, Items[InstanceId]](
+      Items(instanceIds),
+      uri"$baseUrl/delete",
+      _ => ()
+    )
 }
 
 trait DeleteByCogniteIds[F[_]]

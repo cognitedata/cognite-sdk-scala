@@ -123,10 +123,10 @@ object UpdateByInstanceId {
   implicit val updateRequestExternalIdItemsEncoder: Encoder[Items[UpdateRequestInstanceId]] =
     deriveEncoder
   def updateByInstanceId[F[_], R, U: Encoder](
-                                               requestSession: RequestSession[F],
-                                               baseUrl: Uri,
-                                               updates: Map[InstanceId, U]
-                                             )(implicit decodeReadItems: Decoder[Items[R]]): F[Seq[R]] = {
+      requestSession: RequestSession[F],
+      baseUrl: Uri,
+      updates: Map[InstanceId, U]
+  )(implicit decodeReadItems: Decoder[Items[R]]): F[Seq[R]] = {
     implicit val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
     requestSession
       .post[Seq[R], Items[R], Items[UpdateRequestInstanceId]](

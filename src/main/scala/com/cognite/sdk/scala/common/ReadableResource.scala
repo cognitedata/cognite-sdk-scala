@@ -209,7 +209,6 @@ object RetrieveByExternalIdsWithIgnoreUnknownIds {
     )
 }
 
-
 trait RetrieveByInstanceIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByInstanceIds(instanceIds: Seq[InstanceId]): F[Seq[R]]
   @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
@@ -220,8 +219,12 @@ trait RetrieveByInstanceIds[R, F[_]] extends WithRequestSession[F] with BaseUrl 
 }
 
 object RetrieveByInstanceIds {
-  def retrieveByInstanceIds[F[_], R](requestSession: RequestSession[F], baseUrl: Uri, instanceIds: Seq[CogniteIdOrInstance])(
-    implicit itemsDecoder: Decoder[Items[R]]
+  def retrieveByInstanceIds[F[_], R](
+      requestSession: RequestSession[F],
+      baseUrl: Uri,
+      instanceIds: Seq[CogniteIdOrInstance]
+  )(
+      implicit itemsDecoder: Decoder[Items[R]]
   ): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], Items[CogniteIdOrInstance]](
       Items(instanceIds),
@@ -238,10 +241,10 @@ trait RetrieveByInstanceIdsWithIgnoreUnknownIds[R, F[_]] extends RetrieveByInsta
 
 object RetrieveByInstanceIdsWithIgnoreUnknownIds {
   def retrieveByInstanceIds[F[_], R](
-    requestSession: RequestSession[F],
-    baseUrl: Uri,
-    cogniteIds: Seq[CogniteIdOrInstance],
-    ignoreUnknownIds: Boolean
+      requestSession: RequestSession[F],
+      baseUrl: Uri,
+      cogniteIds: Seq[CogniteIdOrInstance],
+      ignoreUnknownIds: Boolean
   )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteIdOrInstance]](
       ItemsWithIgnoreUnknownIds(cogniteIds, ignoreUnknownIds),

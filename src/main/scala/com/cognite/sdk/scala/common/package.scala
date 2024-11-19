@@ -4,7 +4,17 @@
 package com.cognite.sdk.scala
 
 import java.time.Instant
-import com.cognite.sdk.scala.v1.{CogniteExternalId, CogniteId, CogniteIdOrInstance, CogniteInternalId, ContainsAll, ContainsAny, InstanceId, LabelContainsFilter, TimeRange}
+import com.cognite.sdk.scala.v1.{
+  CogniteExternalId,
+  CogniteId,
+  CogniteIdOrInstance,
+  CogniteInternalId,
+  ContainsAll,
+  ContainsAny,
+  InstanceId,
+  LabelContainsFilter,
+  TimeRange
+}
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.deriveEncoder
 
@@ -12,7 +22,16 @@ package object common {
 
   implicit val cogniteIdOrInstanceEncoder: Encoder[CogniteIdOrInstance] = {
     case cogniteId: CogniteId => cogniteIdEncoder.apply(cogniteId)
-    case instance: InstanceId => Json.obj(("instanceId", Json.obj(("space", Json.fromString(instance.space)), ("externalId", Json.fromString(instance.externalId)))))
+    case instance: InstanceId =>
+      Json.obj(
+        (
+          "instanceId",
+          Json.obj(
+            ("space", Json.fromString(instance.space)),
+            ("externalId", Json.fromString(instance.externalId))
+          )
+        )
+      )
   }
 
   implicit val cogniteIdEncoder: Encoder[CogniteId] = (i: CogniteId) =>
@@ -52,5 +71,6 @@ package object common {
 
   implicit val itemsWithIgnoreUnknownIdsEncoder: Encoder[ItemsWithIgnoreUnknownIds[CogniteId]] =
     deriveEncoder
-  implicit val itemsWithIgnoreUnknownIdsOrInstanceIdsEncoder: Encoder[ItemsWithIgnoreUnknownIds[CogniteIdOrInstance]] = deriveEncoder
+  implicit val itemsWithIgnoreUnknownIdsOrInstanceIdsEncoder
+      : Encoder[ItemsWithIgnoreUnknownIds[CogniteIdOrInstance]] = deriveEncoder
 }

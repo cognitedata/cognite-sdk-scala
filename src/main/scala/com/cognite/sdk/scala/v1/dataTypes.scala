@@ -56,7 +56,7 @@ object CogniteId {
   implicit val decoder: Decoder[CogniteId] =
     List[Decoder[CogniteId]](
       Decoder[CogniteInternalId].widen,
-      Decoder[CogniteExternalId].widen,
+      Decoder[CogniteExternalId].widen
     ).reduceLeftOption(_ or _).getOrElse(Decoder[CogniteExternalId].widen)
 }
 
