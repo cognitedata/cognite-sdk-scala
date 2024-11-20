@@ -12,7 +12,7 @@ val jettyTestVersion = "9.4.55.v20240627"
 val sttpVersion = "3.5.2"
 val circeVersion = "0.14.10"
 val catsEffectVersion = "3.5.4"
-val fs2Version = "3.10.2"
+val fs2Version = "3.11.0"
 val natchezVersion = "0.3.5"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
@@ -40,7 +40,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.29." + patchVersion,
+  version := "2.31." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13

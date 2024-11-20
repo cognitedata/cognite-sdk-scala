@@ -144,25 +144,29 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
   override def search(searchQuery: FilesQuery): F[Seq[File]] =
     Search.search(requestSession, baseUrl, searchQuery)
 
-  def download(item: FileDownload, out: java.io.OutputStream): F[Unit] = {
-    val request =
-      requestSession
-        .post[Items[FileDownloadLink], Items[FileDownloadLink], Items[FileDownload]](
-          Items(Seq(item)),
-          uri"${baseUrl.toString}/downloadlink",
-          values => values
+  def downloadLink(item: FileDownload): F[FileDownloadLink] =
+    requestSession
+      .post[Items[FileDownloadLink], Items[FileDownloadLink], Items[FileDownload]](
+        Items(Seq(item)),
+        uri"${baseUrl.toString}/downloadlink",
+        values => values
+      )
+      .map(
+        _.items.headOption.getOrElse(
+          throw SdkException(s"File download of ${item.toString} did not return download url")
         )
+      )
+
+  def download(item: FileDownload, out: java.io.OutputStream): F[Unit] = {
+    val link: F[FileDownloadLink] = downloadLink(item)
 
     requestSession.flatMap(
-      request,
-      (files: Items[FileDownloadLink]) => {
+      link,
+      (link: FileDownloadLink) => {
         val response = requestSession.send { request =>
           request
             .get(
-              uri"${files.items
-                  .map(_.downloadUrl)
-                  .headOption
-                  .getOrElse(throw SdkException(s"File download of ${item.toString} did not return download url"))}"
+              uri"${link.downloadUrl}"
             )
             .response(asByteArray)
         }

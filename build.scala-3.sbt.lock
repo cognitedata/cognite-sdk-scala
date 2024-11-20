@@ -14,11 +14,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-core_3",
-      "version" : "3.10.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "fs2-core_3.jar",
-          "hash" : "sha1:d0993296535929e1190036ca5e5f750c285460cb"
+          "hash" : "sha1:329c2b8bc537d770dbff80b774fdd1d247f99bc8"
         }
       ],
       "configurations" : [
@@ -30,11 +30,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-io_3",
-      "version" : "3.10.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "fs2-io_3.jar",
-          "hash" : "sha1:b86de0250e1ad9e4c1dc9972469a76b632325703"
+          "hash" : "sha1:5509f848735e39277dff96668ceb2f253cf6017a"
         }
       ],
       "configurations" : [
@@ -46,11 +46,11 @@
     {
       "org" : "com.comcast",
       "name" : "ip4s-core_3",
-      "version" : "3.5.0",
+      "version" : "3.6.0",
       "artifacts" : [
         {
           "name" : "ip4s-core_3.jar",
-          "hash" : "sha1:7ed193dc579a8def12110bc6cb90e95a215a2091"
+          "hash" : "sha1:a10a19c26ca4cb065f79c315f1b9724a039c98eb"
         }
       ],
       "configurations" : [
