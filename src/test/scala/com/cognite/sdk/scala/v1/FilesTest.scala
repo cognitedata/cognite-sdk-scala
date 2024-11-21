@@ -106,7 +106,6 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
   }
 
-  //TODO WTF?
   it should "create and delete items using the read class" in {
     // create a single item
     val testFile = File(name = "scala-sdk-read-example-1")

@@ -104,20 +104,6 @@ object UpdateByExternalId {
   }
 }
 
-trait UpdateByInstanceId[R, U, F[_]] extends WithRequestSession[F] with BaseUrl {
-  def updateByInstanceId(items: Map[InstanceId, U]): F[Seq[R]]
-
-  def updateOneByInstanceId(id: InstanceId, item: U): F[R] =
-    requestSession.map(
-      updateByInstanceId(Map(id -> item)),
-      (r1: Seq[R]) =>
-        r1.headOption match {
-          case Some(value) => value
-          case None => throw SdkException("Unexpected empty response when updating item")
-        }
-    )
-}
-
 object UpdateByInstanceId {
   implicit val updateRequestExternalIdEncoder: Encoder[UpdateRequestInstanceId] = deriveEncoder
   implicit val updateRequestExternalIdItemsEncoder: Encoder[Items[UpdateRequestInstanceId]] =

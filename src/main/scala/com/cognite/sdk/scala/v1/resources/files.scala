@@ -26,8 +26,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
     with PartitionedFilter[File, FilesFilter, F]
     with Search[File, FilesQuery, F]
     with UpdateById[File, FileUpdate, F]
-    with UpdateByExternalId[File, FileUpdate, F]
-    with UpdateByInstanceId[File, FileUpdate, F] {
+    with UpdateByExternalId[File, FileUpdate, F] {
 
   import Files._
 
@@ -132,9 +131,6 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
 
   override def updateByExternalId(items: Map[String, FileUpdate]): F[Seq[File]] =
     UpdateByExternalId.updateByExternalId[F, File, FileUpdate](requestSession, baseUrl, items)
-
-  override def updateByInstanceId(items: Map[InstanceId, FileUpdate]): F[Seq[File]] =
-    UpdateByInstanceId.updateByInstanceId[F, File, FileUpdate](requestSession, baseUrl, items)
 
   override def deleteByIds(ids: Seq[Long]): F[Unit] =
     DeleteByIds.deleteByIds(requestSession, baseUrl, ids)
