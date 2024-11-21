@@ -3,13 +3,14 @@
 
 package com.cognite.sdk.scala.v1
 
+import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
+import fs2.Stream
+import org.scalatest.matchers.should.Matchers
+
 import java.io.{BufferedInputStream, ByteArrayOutputStream, FileInputStream}
 import java.nio.file.{Files, Paths}
 import java.time.Instant
 import java.util.UUID
-import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
-import fs2.Stream
-import org.scalatest.matchers.should.Matchers
 
 @SuppressWarnings(
   Array(
@@ -105,6 +106,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     sameMissingIds should contain theSameElementsAs sameIdsThatDoNotExist.toSet
   }
 
+  //TODO WTF?
   it should "create and delete items using the read class" in {
     // create a single item
     val testFile = File(name = "scala-sdk-read-example-1")

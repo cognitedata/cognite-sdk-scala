@@ -4,7 +4,6 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
 import com.cognite.sdk.scala.common.{
   NonNullableSetter,
   SearchQuery,

@@ -190,10 +190,6 @@ trait WithExternalId extends WithExternalIdGeneric[Option] {
   def getExternalId: Option[String] = externalId
 }
 
-trait WithInstanceId extends WithInstanceIdGeneric[Option] {
-  def getInstanceId: Option[InstanceId] = instanceId
-}
-
 trait WithRequiredExternalId extends WithExternalIdGeneric[Id] {
   def getExternalId: Option[String] = Some(externalId)
 }

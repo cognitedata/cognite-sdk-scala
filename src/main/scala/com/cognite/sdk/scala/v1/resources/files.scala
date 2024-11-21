@@ -23,7 +23,6 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
     with Create[File, FileCreate, F]
     with DeleteByIds[F, Long]
     with DeleteByExternalIds[F]
-    with DeleteByInstanceIds[F]
     with PartitionedFilter[File, FilesFilter, F]
     with Search[File, FilesQuery, F]
     with UpdateById[File, FileUpdate, F]
@@ -142,9 +141,6 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
 
   override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
     DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
-
-  override def deleteByInstanceIds(instanceIds: Seq[InstanceId]): F[Unit] =
-    DeleteByInstanceIds.deleteByInstanceIds(requestSession, baseUrl, instanceIds)
 
   private[sdk] def filterWithCursor(
       filter: FilesFilter,
