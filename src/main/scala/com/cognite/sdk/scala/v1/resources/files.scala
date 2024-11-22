@@ -171,6 +171,19 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
         )
       )
 
+  def uploadLink(item: FileUpload): F[File] =
+    requestSession
+      .post[Items[File], Items[File], Items[FileUpload]](
+        Items(Seq(item)),
+        uri"${baseUrl.toString}/uploadlink",
+        values => values
+      )
+      .map(
+        _.items.headOption.getOrElse(
+          throw SdkException(s"File upload of ${item.toString} did not return upload url")
+        )
+      )
+
   def download(item: FileDownload, out: java.io.OutputStream): F[Unit] = {
     val link: F[FileDownloadLink] = downloadLink(item)
 
@@ -230,10 +243,23 @@ object Files {
     deriveEncoder[FileDownloadId]
   implicit val fileDownloadExternalIdEncoder: Encoder[FileDownloadExternalId] =
     deriveEncoder[FileDownloadExternalId]
+  implicit val fileDownloadInstanceIdEncoder: Encoder[FileDownloadInstanceId] =
+    deriveEncoder[FileDownloadInstanceId]
+
   implicit val fileDownloadEncoder: Encoder[FileDownload] = Encoder.instance {
-    case downloadId @ FileDownloadId(_) => fileDownloadIdEncoder(downloadId)
-    case downloadExternalId @ FileDownloadExternalId(_) =>
+    case downloadId: FileDownloadId => fileDownloadIdEncoder(downloadId)
+    case downloadExternalId: FileDownloadExternalId =>
       fileDownloadExternalIdEncoder(downloadExternalId)
+    case downloadInstanceId: FileDownloadInstanceId =>
+      fileDownloadInstanceIdEncoder(downloadInstanceId)
+  }
+  implicit val fileUploadExternalIdEncoder: Encoder[FileUploadExternalId] =
+    deriveEncoder[FileUploadExternalId]
+  implicit val fileUploadInstanceIdEncoder: Encoder[FileUploadInstanceId] =
+    deriveEncoder[FileUploadInstanceId]
+  implicit val fileUploadEncoder: Encoder[FileUpload] = Encoder.instance {
+    case uploadExternalId: FileUploadExternalId => fileUploadExternalIdEncoder(uploadExternalId)
+    case uploadInstanceId: FileUploadInstanceId => fileUploadInstanceIdEncoder(uploadInstanceId)
   }
   implicit val fileDownloadLinkDecoder: Decoder[FileDownloadLink] =
     fileDownloadLinkIdDecoder.widen.or(fileDownloadLinkExternalIdDecoder.widen)

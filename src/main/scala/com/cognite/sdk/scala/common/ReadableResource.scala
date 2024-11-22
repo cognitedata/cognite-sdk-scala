@@ -129,11 +129,14 @@ object Readable {
 
 trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByIds(ids: Seq[Long]): F[Seq[R]]
-  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def retrieveById(id: Long): F[R] =
-    // The API returns an error causing an exception to be thrown if the item isn't found,
-    // so .head is safe here.
-    requestSession.map(retrieveByIds(Seq(id)), (r1: Seq[R]) => r1.head)
+    requestSession.map(
+      retrieveByIds(Seq(id)),
+      (r1: Seq[R]) =>
+        r1.headOption.getOrElse(
+          throw new SdkException("Unexpected empty response when retrieving item by Id")
+        )
+    )
 }
 
 object RetrieveByIds {
@@ -171,9 +174,13 @@ trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUrl 
   def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[R]]
   @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def retrieveByExternalId(externalId: String): F[R] =
-    // The API returns an error causing an exception to be thrown if the item isn't found,
-    // so .head is safe here.
-    requestSession.map(retrieveByExternalIds(Seq(externalId)), (r1: Seq[R]) => r1.head)
+    requestSession.map(
+      retrieveByExternalIds(Seq(externalId)),
+      (r1: Seq[R]) =>
+        r1.headOption.getOrElse(
+          throw new SdkException("Unexpected empty response when retrieving item by ExternalId")
+        )
+    )
 }
 
 object RetrieveByExternalIds {
@@ -211,11 +218,14 @@ object RetrieveByExternalIdsWithIgnoreUnknownIds {
 
 trait RetrieveByInstanceIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByInstanceIds(instanceIds: Seq[InstanceId]): F[Seq[R]]
-  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def retrieveByInstanceId(instanceId: InstanceId): F[R] =
-    // The API returns an error causing an exception to be thrown if the item isn't found,
-    // so .head is safe here.
-    requestSession.map(retrieveByInstanceIds(Seq(instanceId)), (r1: Seq[R]) => r1.head)
+    requestSession.map(
+      retrieveByInstanceIds(Seq(instanceId)),
+      (r1: Seq[R]) =>
+        r1.headOption.getOrElse(
+          throw new SdkException("Unexpected empty response when retrieving item by InstanceId")
+        )
+    )
 }
 
 object RetrieveByInstanceIds {

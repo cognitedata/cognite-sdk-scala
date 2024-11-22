@@ -139,6 +139,11 @@ final case class FilesQuery(
 sealed trait FileDownload
 final case class FileDownloadId(id: Long) extends FileDownload
 final case class FileDownloadExternalId(externalId: String) extends FileDownload
+final case class FileDownloadInstanceId(instanceId: InstanceId) extends FileDownload
+
+sealed trait FileUpload
+final case class FileUploadExternalId(externalId: String) extends FileUpload
+final case class FileUploadInstanceId(instanceId: InstanceId) extends FileUpload
 
 sealed trait FileDownloadLink {
   def downloadUrl: String

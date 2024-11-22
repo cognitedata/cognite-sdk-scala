@@ -5,7 +5,7 @@ import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.NodeDeletionRequest
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.NodeWrite
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
-import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, InstanceId}
+import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, FileUploadInstanceId, InstanceId}
 
 @SuppressWarnings(
   Array(
@@ -24,8 +24,12 @@ class CogniteAssetsTest extends CommonDataModelTestHelper {
       None
     )
     val createdItem = testClient.instances.createItems(testFile).unsafeRunSync()
+    val uploadLinkFile = testClient.files.uploadLink(FileUploadInstanceId(instanceId)).unsafeRunSync()
+    uploadLinkFile.uploadUrl shouldNot be(empty)
     val retrievedItem = testClient.files.retrieveByInstanceIds(Seq(instanceId)).unsafeRunSync()
+    val retrievedSingleItem = testClient.files.retrieveByInstanceId(instanceId).unsafeRunSync()
     createdItem.headOption.flatMap(_.createdTime) shouldNot be(empty)
+    retrievedSingleItem.uploaded should be(false)
     retrievedItem.headOption.map(_.createdTime) shouldNot be(empty)
 
     testClient.instances.delete(Seq(NodeDeletionRequest(instanceId.space, instanceId.externalId))).unsafeRunSync()
