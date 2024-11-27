@@ -58,7 +58,6 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
           case Some(uploadUrl) =>
             val response = requestSession.send { request =>
               request
-                .header("Transfer-Encoding", None)
                 .body(input)
                 .put(uri"$uploadUrl")
             }
