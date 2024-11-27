@@ -6,7 +6,6 @@ package com.cognite.sdk.scala.v1
 import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
 import fs2.Stream
 import org.scalatest.matchers.should.Matchers
-import sttp.model.UriInterpolator.Tokenizer.Path
 
 import java.io.{BufferedInputStream, ByteArrayInputStream, ByteArrayOutputStream}
 import java.nio.file.{Files, Paths}
