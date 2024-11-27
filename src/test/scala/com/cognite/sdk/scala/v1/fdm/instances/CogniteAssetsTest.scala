@@ -9,7 +9,6 @@ import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, File, FileDownloadInstanceId, FileDownloadLink, FileUploadInstanceId, InstanceId}
 import sttp.client3.UriContext
 
-import java.io.{BufferedInputStream, FileInputStream}
 
 @SuppressWarnings(
   Array(
@@ -48,13 +47,10 @@ class CogniteAssetsTest extends CommonDataModelTestHelper with RetryWhile {
     val uploadLinkFile =
       retry[File](testClient.files.uploadLink(FileUploadInstanceId(instanceId)).unsafeRunSync())
 
-    val file = new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
-    val inputStream = new BufferedInputStream(
-      new FileInputStream(
-        file
-      )
-    )
-    val fileSize = file.length()
+    val inputStream = getClass.getResourceAsStream("/uploadTest.txt")
+    val fileSize = new java.io.File(getClass.getResource("/uploadTest.txt").getPath).length()
+
+
     uploadLinkFile.uploadUrl match {
       case Some(uploadUrl) =>
         testClient.requestSession.send { request =>
