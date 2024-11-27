@@ -293,7 +293,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
 
     val expected = Files.readAllBytes(Paths.get(getClass.getResource("/uploadTest.txt").toURI))
 
-    assert(new ByteArrayInputStream(out.toByteArray) === expected)
+    assert(out.toByteArray === expected)
     client.files.deleteById(file.id).unsafeRunSync()
   }
 
