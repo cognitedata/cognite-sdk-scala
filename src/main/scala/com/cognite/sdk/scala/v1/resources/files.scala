@@ -48,6 +48,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
   override def createItems(items: Items[FileCreate]): F[Seq[File]] =
     items.items.toList.traverse(createOne).map(_.toSeq)
 
+  //TODO: this method does not work in azure. Fix or delete.
   def uploadWithName(input: java.io.InputStream, name: String): F[File] = {
     val item = FileCreate(name = name)
     requestSession.flatMap(
