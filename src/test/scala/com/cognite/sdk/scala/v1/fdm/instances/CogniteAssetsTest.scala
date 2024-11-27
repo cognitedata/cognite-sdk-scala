@@ -43,13 +43,13 @@ class CogniteAssetsTest extends CommonDataModelTestHelper {
     )
     val createdItem = testClient.instances.createItems(testFile).unsafeRunSync()
     val retrievedItem =
-      retry[Seq[File]](() => testClient.files.retrieveByInstanceIds(Seq(instanceId)), files => files.headOption.map(_.createdTime).nonEmpty, defaultAttemptCount, "created time is null")
+      retry[Seq[File]](() => testClient.files.retrieveByInstanceIds(Seq(instanceId)), defaultAttemptCount)
 
     val retrievedSingleItem =
-      retry[File](() => testClient.files.retrieveByInstanceId(instanceId), _ => true, defaultAttemptCount, "")
+      retry[File](() => testClient.files.retrieveByInstanceId(instanceId), defaultAttemptCount)
 
     val uploadLinkFile =
-      retry[File](() => testClient.files.uploadLink(FileUploadInstanceId(instanceId)), file => file.uploadUrl.nonEmpty, defaultAttemptCount, "upload link returned an empty upload url")
+      retry[File](() => testClient.files.uploadLink(FileUploadInstanceId(instanceId)), defaultAttemptCount)
 
     val file = new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
     val inputStream = new BufferedInputStream(
@@ -66,10 +66,11 @@ class CogniteAssetsTest extends CommonDataModelTestHelper {
             .body(inputStream)
             .put(uri"$uploadUrl")
         }.unsafeRunSync()
-      case _ => fail("No upload link received for tile")
+      case Right(None) => fail("no upload url returned by uploadLink")
+      case Left(e) => fail(e.getMessage)
     }
 
-    retry[FileDownloadLink](() => testClient.files.downloadLink(FileDownloadInstanceId(instanceId)), downloadLink => downloadLink.downloadUrl.nonEmpty, defaultAttemptCount, "empty download link")
+    retryWithTest[FileDownloadLink](() => testClient.files.downloadLink(FileDownloadInstanceId(instanceId)), downloadLink => downloadLink.downloadUrl.nonEmpty, defaultAttemptCount, "empty download link")
 
     createdItem.headOption.flatMap(_.createdTime) shouldNot be(empty)
     retrievedSingleItem.map(_.instanceId) should be(Right(Some(instanceId)))
@@ -80,17 +81,21 @@ class CogniteAssetsTest extends CommonDataModelTestHelper {
 
   //Retries a request until it succeeds and the test passes or there is no attempt left
   @tailrec
-  private final def retry[T](requestToAttempt: () => IO[T], test: T => Boolean, attemptsLeft: Int, testFailedMessage: String): Either[Throwable, T] = {
+  private final def retryWithTest[T](requestToAttempt: () => IO[T], test: T => Boolean, attemptsLeft: Int, testFailedMessage: String): Either[Throwable, T] = {
     val result = Try(requestToAttempt().unsafeRunSync()).toEither
 
     result match {
       case Right(value) if test(value) => Right(value) // Successful test
       case _ if attemptsLeft > 0 =>
         Thread.sleep(500)
-        retry(requestToAttempt, test, attemptsLeft - 1, testFailedMessage) // Retry on failure
+        retryWithTest(requestToAttempt, test, attemptsLeft - 1, testFailedMessage) // Retry on failure
       case Left(error) => Left(new IllegalStateException("Request still fails after exhausting retries", error))
       case Right(_)    => Left(new IllegalStateException(s"Request still fails test after exhausting retries, test failed message: $testFailedMessage"))
     }
+  }
+
+  private def retry[T](requestToAttempt: () => IO[T], attemptsLeft: Int): Either[Throwable, T] = {
+    retryWithTest[T](requestToAttempt, _ => true, attemptsLeft, "")
   }
 
 
