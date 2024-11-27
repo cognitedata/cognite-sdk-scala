@@ -7,7 +7,7 @@ import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile
 import fs2.Stream
 import org.scalatest.matchers.should.Matchers
 
-import java.io.{BufferedInputStream, ByteArrayInputStream, ByteArrayOutputStream}
+import java.io.{BufferedInputStream, ByteArrayOutputStream}
 import java.nio.file.{Files, Paths}
 import java.time.Instant
 import java.util.UUID
