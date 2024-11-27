@@ -6,8 +6,10 @@ package com.cognite.sdk.scala.v1
 import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
 import fs2.Stream
 import org.scalatest.matchers.should.Matchers
+import sttp.model.UriInterpolator.Tokenizer.Path
 
 import java.io.{BufferedInputStream, ByteArrayInputStream, ByteArrayOutputStream}
+import java.nio.file.{Files, Paths}
 import java.time.Instant
 import java.util.UUID
 
@@ -290,7 +292,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     val out = new ByteArrayOutputStream()
     client.files.download(FileDownloadId(file.id), out).unsafeRunSync()
 
-    val expected = getClass.getResourceAsStream("/uploadTest.txt")
+    val expected = Files.readAllBytes(Paths.get(getClass.getResource("/uploadTest.txt").toURI))
 
     assert(new ByteArrayInputStream(out.toByteArray) === expected)
     client.files.deleteById(file.id).unsafeRunSync()
