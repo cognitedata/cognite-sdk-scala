@@ -69,13 +69,8 @@ class CogniteAssetsTest extends CommonDataModelTestHelper {
       case _ => fail("No upload link received for tile")
     }
 
-    val downloadLink: Either[Throwable, FileDownloadLink] =
-      retry[FileDownloadLink](() => testClient.files.downloadLink(FileDownloadInstanceId(instanceId)), downloadLink => downloadLink.downloadUrl.nonEmpty, defaultAttemptCount, "empty download link")
+    retry[FileDownloadLink](() => testClient.files.downloadLink(FileDownloadInstanceId(instanceId)), downloadLink => downloadLink.downloadUrl.nonEmpty, defaultAttemptCount, "empty download link")
 
-    downloadLink.map(_.downloadUrl) match {
-      case Right(value) => value should not be empty // Checks presence in `Right`
-      case _            => fail("Could not get download link")
-    }
     createdItem.headOption.flatMap(_.createdTime) shouldNot be(empty)
     retrievedSingleItem.map(_.instanceId) should be(Right(Some(instanceId)))
     retrievedItem.map(_.headOption.flatMap(_.instanceId)) should be(Right(Some(instanceId)))
