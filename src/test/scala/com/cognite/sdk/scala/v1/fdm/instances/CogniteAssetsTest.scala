@@ -21,7 +21,7 @@ import scala.util.Try
   )
 )
 class CogniteAssetsTest extends CommonDataModelTestHelper {
-  val defaultAttemptCount = 7
+  private val defaultAttemptCount: Int = 7
 
   it should "make it possible to retrieve file and associated upload link and download link using instance id" in {
 
@@ -85,7 +85,7 @@ class CogniteAssetsTest extends CommonDataModelTestHelper {
     testClient.instances.delete(Seq(NodeDeletionRequest(instanceId.space, instanceId.externalId))).unsafeRunSync()
   }
 
-  //Retries a request until the test passes or there is no attempt left
+  //Retries a request until it succeeds and the test passes or there is no attempt left
   @tailrec
   private final def retry[T](requestToAttempt: () => IO[T], test: T => Boolean, attemptsLeft: Int): Either[Throwable, T] = {
     val result = Try(requestToAttempt().unsafeRunSync())
