@@ -66,7 +66,7 @@ class CogniteAssetsTest extends CommonDataModelTestHelper with RetryWhile {
       case None => fail("no upload url returned by uploadLink")
     }
 
-    retryWithExpectedResult[FileDownloadLink](testClient.files.downloadLink(FileDownloadInstanceId(instanceId)).unsafeRunSync(), downloadLink => downloadLink.downloadUrl should not be(empty))
+    retryWithExpectedResult[FileDownloadLink](testClient.files.downloadLink(FileDownloadInstanceId(instanceId)).unsafeRunSync(), downloadLink => downloadLink.downloadUrl should not be(empty), retryOnException = true)
 
     createdItem.headOption.flatMap(_.createdTime) shouldNot be(empty)
     retrievedSingleItem.instanceId should be(Some(instanceId))
@@ -76,7 +76,7 @@ class CogniteAssetsTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   private def retry[A](action: => A): A = {
-    retryWithExpectedResult[A](action, _ => succeed)
+    retryWithExpectedResult[A](action, _ => succeed, retryOnException = true)
   }
 
 }
