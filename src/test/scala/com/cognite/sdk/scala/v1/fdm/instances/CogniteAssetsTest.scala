@@ -16,7 +16,8 @@ import java.io.{BufferedInputStream, FileInputStream}
 @SuppressWarnings(
   Array(
     "org.wartremover.warts.NonUnitStatements",
-    "org.wartremover.warts.ThreadSleep"
+    "org.wartremover.warts.ThreadSleep",
+    "org.wartremover.warts.Equals"
   )
 )
 class CogniteAssetsTest extends CommonDataModelTestHelper {
@@ -82,27 +83,29 @@ class CogniteAssetsTest extends CommonDataModelTestHelper {
     val retrievedSingleItem = testClient.files.retrieveByInstanceId(instanceId).unsafeRunSync()
     val uploadLinkFile = testClient.files.uploadLink(FileUploadInstanceId(instanceId)).unsafeRunSync()
     uploadLinkFile.uploadUrl shouldNot be(empty)
+    val file = new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
     val inputStream = new BufferedInputStream(
       new FileInputStream(
-        new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
+        file
       )
     )
+    val fileSize = file.length()
     uploadLinkFile.uploadUrl match {
       case Some(uploadUrl) =>
-        val uploadResponse = client.requestSession.send { request =>
+        client.requestSession.send { request =>
           request
+            .contentLength(fileSize)
             .body(inputStream)
             .put(uri"$uploadUrl")
         }.unsafeRunSync()
-        print(uploadResponse.body)
       case _ => fail("No upload link received for tile")
     }
-    Thread.sleep(10000)
+    Thread.sleep(1000)
 
     val downloadLink: FileDownloadLink = testClient.files.downloadLink(FileDownloadInstanceId(instanceId)).unsafeRunSync()
     downloadLink.downloadUrl shouldNot be(empty)
     createdItem.headOption.flatMap(_.createdTime) shouldNot be(empty)
-    retrievedSingleItem.uploaded should be(true)
+    retrievedSingleItem.instanceId should be(Some(instanceId))
     retrievedItem.headOption.map(_.createdTime) shouldNot be(empty)
 
     testClient.instances.delete(Seq(NodeDeletionRequest(instanceId.space, instanceId.externalId))).unsafeRunSync()

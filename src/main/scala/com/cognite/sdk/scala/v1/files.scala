@@ -157,3 +157,8 @@ final case class FileDownloadLinkExternalId(
     externalId: String,
     downloadUrl: String
 ) extends FileDownloadLink
+
+final case class FileDownloadLinkInstanceId(
+    instanceId: InstanceId,
+    downloadUrl: String
+) extends FileDownloadLink

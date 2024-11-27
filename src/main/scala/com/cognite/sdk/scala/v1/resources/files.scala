@@ -56,7 +56,8 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
         file.uploadUrl match {
           case Some(uploadUrl) =>
             val response = requestSession.send { request =>
-              request
+              request.
+                header("Transfer-Encoding", None)
                 .body(input)
                 .put(uri"$uploadUrl")
             }
@@ -239,6 +240,9 @@ object Files {
     deriveDecoder[FileDownloadLinkId]
   implicit val fileDownloadLinkExternalIdDecoder: Decoder[FileDownloadLinkExternalId] =
     deriveDecoder[FileDownloadLinkExternalId]
+  implicit val fileDownloadLinkInstanceId: Decoder[FileDownloadLinkInstanceId] =
+    deriveDecoder[FileDownloadLinkInstanceId]
+
   implicit val fileDownloadIdEncoder: Encoder[FileDownloadId] =
     deriveEncoder[FileDownloadId]
   implicit val fileDownloadExternalIdEncoder: Encoder[FileDownloadExternalId] =
@@ -262,7 +266,7 @@ object Files {
     case uploadInstanceId: FileUploadInstanceId => fileUploadInstanceIdEncoder(uploadInstanceId)
   }
   implicit val fileDownloadLinkDecoder: Decoder[FileDownloadLink] =
-    fileDownloadLinkIdDecoder.widen.or(fileDownloadLinkExternalIdDecoder.widen)
+    fileDownloadLinkIdDecoder.widen.or(fileDownloadLinkExternalIdDecoder.widen.or(fileDownloadLinkInstanceId.widen))
   implicit val fileDownloadItemsEncoder: Encoder[Items[FileDownload]] =
     deriveEncoder[Items[FileDownload]]
   implicit val fileDownloadItemsDecoder: Decoder[Items[FileDownloadLink]] =
