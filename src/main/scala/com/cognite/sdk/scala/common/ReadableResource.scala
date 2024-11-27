@@ -172,7 +172,6 @@ object RetrieveByIdsWithIgnoreUnknownIds {
 
 trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[R]]
-  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def retrieveByExternalId(externalId: String): F[R] =
     requestSession.map(
       retrieveByExternalIds(Seq(externalId)),
