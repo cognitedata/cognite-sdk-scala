@@ -48,7 +48,7 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
   override def createItems(items: Items[FileCreate]): F[Seq[File]] =
     items.items.toList.traverse(createOne).map(_.toSeq)
 
-  //TODO: this method does not work in azure. Fix or delete.
+  // TODO: this method does not work in azure. Fix or delete.
   def uploadWithName(input: java.io.InputStream, name: String): F[File] = {
     val item = FileCreate(name = name)
     requestSession.flatMap(
@@ -57,8 +57,8 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
         file.uploadUrl match {
           case Some(uploadUrl) =>
             val response = requestSession.send { request =>
-              request.
-                header("Transfer-Encoding", None)
+              request
+                .header("Transfer-Encoding", None)
                 .body(input)
                 .put(uri"$uploadUrl")
             }
@@ -267,7 +267,9 @@ object Files {
     case uploadInstanceId: FileUploadInstanceId => fileUploadInstanceIdEncoder(uploadInstanceId)
   }
   implicit val fileDownloadLinkDecoder: Decoder[FileDownloadLink] =
-    fileDownloadLinkIdDecoder.widen.or(fileDownloadLinkExternalIdDecoder.widen.or(fileDownloadLinkInstanceId.widen))
+    fileDownloadLinkIdDecoder.widen.or(
+      fileDownloadLinkExternalIdDecoder.widen.or(fileDownloadLinkInstanceId.widen)
+    )
   implicit val fileDownloadItemsEncoder: Encoder[Items[FileDownload]] =
     deriveEncoder[Items[FileDownload]]
   implicit val fileDownloadItemsDecoder: Decoder[Items[FileDownloadLink]] =
