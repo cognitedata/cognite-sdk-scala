@@ -117,11 +117,13 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
   override def updateByExternalId(items: Map[String, FileUpdate]): F[Seq[File]] =
     UpdateByExternalId.updateByExternalId[F, File, FileUpdate](requestSession, baseUrl, items)
 
-  override def deleteByIds(ids: Seq[Long]): F[Unit] =
-    DeleteByIds.deleteByIds(requestSession, baseUrl, ids)
-
-  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
-    DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
+  override def delete(ids: Seq[CogniteId], ignoreUnknownIds: Boolean = false): F[Unit] =
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
+    )
 
   private[sdk] def filterWithCursor(
       filter: FilesFilter,
