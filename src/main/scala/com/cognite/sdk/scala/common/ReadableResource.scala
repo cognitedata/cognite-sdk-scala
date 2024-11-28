@@ -237,10 +237,10 @@ object RetrieveByInstanceIdsWithIgnoreUnknownIds {
   def retrieveByInstanceIds[F[_], R](
       requestSession: RequestSession[F],
       baseUrl: Uri,
-      cogniteIds: Seq[InstanceId],
+      cogniteIds: Seq[CogniteIdOrInstanceId],
       ignoreUnknownIds: Boolean
   )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
-    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[InstanceId]](
+    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteIdOrInstanceId]](
       ItemsWithIgnoreUnknownIds(cogniteIds, ignoreUnknownIds),
       uri"$baseUrl/byids",
       value => value.items
