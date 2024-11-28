@@ -74,4 +74,6 @@ package object common {
     deriveEncoder
   implicit val itemsWithIgnoreUnknownIdsOrInstanceIdsEncoder
       : Encoder[ItemsWithIgnoreUnknownIds[CogniteIdOrInstanceId]] = deriveEncoder
+  implicit val itemsWithIgnoreUnknownInstanceIdsEncoder
+      : Encoder[ItemsWithIgnoreUnknownIds[InstanceId]] = deriveEncoder
 }
