@@ -235,12 +235,12 @@ trait RetrieveByInstanceIdsWithIgnoreUnknownIds[R, F[_]] extends RetrieveByInsta
 
 object RetrieveByInstanceIdsWithIgnoreUnknownIds {
   def retrieveByInstanceIds[F[_], R](
-      requestSession: RequestSession[F],
-      baseUrl: Uri,
-      cogniteIds: Seq[CogniteIdOrInstance],
-      ignoreUnknownIds: Boolean
+                                      requestSession: RequestSession[F],
+                                      baseUrl: Uri,
+                                      cogniteIds: Seq[CogniteIdOrInstanceId],
+                                      ignoreUnknownIds: Boolean
   )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
-    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteIdOrInstance]](
+    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteIdOrInstanceId]](
       ItemsWithIgnoreUnknownIds(cogniteIds, ignoreUnknownIds),
       uri"$baseUrl/byids",
       value => value.items

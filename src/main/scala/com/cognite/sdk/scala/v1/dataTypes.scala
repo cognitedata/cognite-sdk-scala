@@ -9,12 +9,12 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 import java.time.Instant
 
-sealed trait CogniteIdOrInstance
-sealed trait CogniteId extends CogniteIdOrInstance
+sealed trait CogniteIdOrInstanceId
+sealed trait CogniteId extends CogniteIdOrInstanceId
 
 final case class CogniteExternalId(externalId: String) extends CogniteId
 final case class CogniteInternalId(id: Long) extends CogniteId
-final case class InstanceId(space: String, externalId: String) extends CogniteIdOrInstance
+final case class InstanceId(space: String, externalId: String) extends CogniteIdOrInstanceId
 
 object CogniteExternalId {
   implicit val encoder: Encoder[CogniteExternalId] = deriveEncoder
@@ -30,16 +30,16 @@ object InstanceId {
   implicit val decoder: Decoder[InstanceId] = deriveDecoder
 }
 
-object CogniteIdOrInstance {
-  implicit val encoder: Encoder[CogniteIdOrInstance] = Encoder.instance {
+object CogniteIdOrInstanceId {
+  implicit val encoder: Encoder[CogniteIdOrInstanceId] = Encoder.instance {
     case id: CogniteId => CogniteId.encoder(id)
     case id: InstanceId => InstanceId.encoder(id)
   }
   @SuppressWarnings(
     Array("org.wartremover.warts.TraversableOps")
   )
-  implicit val decoder: Decoder[CogniteIdOrInstance] =
-    List[Decoder[CogniteIdOrInstance]](
+  implicit val decoder: Decoder[CogniteIdOrInstanceId] =
+    List[Decoder[CogniteIdOrInstanceId]](
       Decoder[CogniteId].widen,
       Decoder[InstanceId].widen
     ).reduceLeftOption(_ or _).getOrElse(Decoder[CogniteId].widen)
