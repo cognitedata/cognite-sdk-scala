@@ -240,7 +240,7 @@ object Files {
     deriveDecoder[FileDownloadLinkId]
   implicit val fileDownloadLinkExternalIdDecoder: Decoder[FileDownloadLinkExternalId] =
     deriveDecoder[FileDownloadLinkExternalId]
-  implicit val fileDownloadLinkInstanceId: Decoder[FileDownloadLinkInstanceId] =
+  implicit val fileDownloadLinkInstanceIdDecoder: Decoder[FileDownloadLinkInstanceId] =
     deriveDecoder[FileDownloadLinkInstanceId]
 
   implicit val fileDownloadIdEncoder: Encoder[FileDownloadId] =
