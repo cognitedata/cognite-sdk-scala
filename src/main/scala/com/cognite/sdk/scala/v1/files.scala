@@ -92,7 +92,6 @@ final case class FileCreate(
 
 final case class FileUpdate(
     externalId: Option[Setter[String]] = None,
-    instanceId: Option[Setter[InstanceId]] = None,
     source: Option[Setter[String]] = None,
     directory: Option[Setter[String]] = None,
     mimeType: Option[Setter[String]] = None,
