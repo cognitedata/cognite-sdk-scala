@@ -41,7 +41,8 @@ package object common {
         case e: CogniteExternalId => ("externalId", Json.fromString(e.externalId))
       }
     )
-  implicit val cogniteIdOrInstanceIdItemsEncoder: Encoder[Items[CogniteIdOrInstanceId]] = deriveEncoder
+  implicit val cogniteIdOrInstanceIdItemsEncoder: Encoder[Items[CogniteIdOrInstanceId]] =
+    deriveEncoder
   implicit val cogniteIdItemsEncoder: Encoder[Items[CogniteId]] = deriveEncoder
   implicit val cogniteInternalIdEncoder: Encoder[CogniteInternalId] = deriveEncoder
   implicit val cogniteInternalIdItemsEncoder: Encoder[Items[CogniteInternalId]] = deriveEncoder
