@@ -227,21 +227,6 @@ trait RetrieveByInstanceIds[R, F[_]] extends WithRequestSession[F] with BaseUrl 
     )
 }
 
-object RetrieveByInstanceIds {
-  def retrieveByInstanceIds[F[_], R](
-      requestSession: RequestSession[F],
-      baseUrl: Uri,
-      instanceIds: Seq[CogniteIdOrInstance]
-  )(
-      implicit itemsDecoder: Decoder[Items[R]]
-  ): F[Seq[R]] =
-    requestSession.post[Seq[R], Items[R], Items[CogniteIdOrInstance]](
-      Items(instanceIds),
-      uri"$baseUrl/byids",
-      value => value.items
-    )
-}
-
 trait RetrieveByInstanceIdsWithIgnoreUnknownIds[R, F[_]] extends RetrieveByInstanceIds[R, F] {
   override def retrieveByInstanceIds(ids: Seq[InstanceId]): F[Seq[R]] =
     retrieveByInstanceIds(ids, ignoreUnknownIds = false)
