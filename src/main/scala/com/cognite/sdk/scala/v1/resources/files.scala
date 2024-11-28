@@ -267,7 +267,7 @@ object Files {
   }
   implicit val fileDownloadLinkDecoder: Decoder[FileDownloadLink] =
     fileDownloadLinkIdDecoder.widen.or(
-      fileDownloadLinkExternalIdDecoder.widen.or(fileDownloadLinkInstanceId.widen)
+      fileDownloadLinkExternalIdDecoder.widen.or(fileDownloadLinkInstanceIdDecoder.widen)
     )
   implicit val fileDownloadItemsEncoder: Encoder[Items[FileDownload]] =
     deriveEncoder[Items[FileDownload]]
