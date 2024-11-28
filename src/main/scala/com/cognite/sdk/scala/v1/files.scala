@@ -61,7 +61,6 @@ final case class File(
   override def toUpdate: FileUpdate =
     FileUpdate(
       Setter.fromOption(externalId),
-      Setter.fromOption(instanceId),
       Setter.fromOption(source),
       Setter.fromOption(directory),
       Setter.fromOption(mimeType),
