@@ -3,14 +3,10 @@
 
 package com.cognite.sdk.scala.v1
 
-import com.cognite.scala_sdk.BuildInfo
-
-import java.net.{ConnectException, UnknownHostException}
-import java.time.Instant
-import java.util.Base64
-import cats.effect._
 import cats.Id
+import cats.effect._
 import cats.effect.std.Queue
+import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.sttp.{BackpressureThrottleBackend, RateLimitingBackend, RetryingBackend}
 import org.scalatest.OptionValues
@@ -21,9 +17,12 @@ import sttp.client3.{Response, SttpBackend, SttpClientException, UriContext, bas
 import sttp.model.{Header, StatusCode}
 import sttp.monad.MonadAsyncError
 
-import scala.collection.immutable.Seq
+import java.net.{ConnectException, UnknownHostException}
+import java.time.Instant
+import java.util.Base64
 import scala.concurrent.TimeoutException
 import scala.concurrent.duration._
+import scala.collection.immutable.Seq
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
 class ClientTest extends SdkTestSpec with OptionValues {
@@ -124,7 +123,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
   }
 
   it should "not throw an exception if the authentication is invalid and project is specified" in {
-    implicit val auth: Auth = BearerTokenAuth("invalid-key", project = Some("random-project"))
+    implicit val auth: Auth = BearerTokenAuth("invalid-key")
     noException should be thrownBy new GenericClient[Id](
       "scala-sdk-test", projectName, auth = auth)(
       implicitly,
@@ -213,7 +212,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     new GenericClient[F]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
-      BearerTokenAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant")
     )(natchez.Trace.Implicits.noop,
       implicitly,
       new RetryingBackend[F, Any](backend,
@@ -242,7 +241,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
-      BearerTokenAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant")
 
     )(
       implicitly,
@@ -322,7 +321,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
-      BearerTokenAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant")
     )(
       implicitly,
       implicitly,
@@ -361,7 +360,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     val client2 = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
-      BearerTokenAuth("irrelevant", Some("randomproject"))
+      BearerTokenAuth("irrelevant")
     )(
       implicitly,
       implicitly,
@@ -416,4 +415,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
     }
   }
 
+  it should "send a head request and return the headers" in {
+    client.requestSession.head(uri"https://www.cognite.com/").unsafeRunSync() should not be(empty)
+  }
 }

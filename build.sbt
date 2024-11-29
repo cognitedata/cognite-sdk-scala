@@ -2,18 +2,18 @@ import sbt.{Test, project}
 import wartremover.Wart
 
 val scala3 = "3.3.3"
-val scala213 = "2.13.14"
-val scala212 = "2.12.17"
+val scala213 = "2.13.15"
+val scala212 = "2.12.19"
 val supportedScalaVersions = List(scala212, scala213, scala3)
 
 // This is used only for tests.
-val jettyTestVersion = "9.4.55.v20240627"
+val jettyTestVersion = "9.4.56.v20240826"
 
 val sttpVersion = "3.5.2"
-val circeVersion = "0.14.9"
-val catsEffectVersion = "3.5.4"
-val fs2Version = "3.10.2"
-val natchezVersion = "0.3.5"
+val circeVersion = "0.14.10"
+val catsEffectVersion = "3.5.6"
+val fs2Version = "3.11.0"
+val natchezVersion = "0.3.6"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -27,13 +27,20 @@ credentials += Credentials(
   System.getenv("SONATYPE_USERNAME"),
   System.getenv("SONATYPE_PASSWORD")
 )
+credentials += Credentials("Artifactory Realm",
+  "cognite.jfrog.io",
+  System.getenv("JFROG_USERNAME"),
+  System.getenv("JFROG_PASSWORD"),
+)
+
+val artifactory = "https://cognite.jfrog.io/cognite"
 
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.25." + patchVersion,
+  version := "2.31." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
@@ -67,11 +74,16 @@ lazy val commonSettings = Seq(
   pomIncludeRepository := { _ =>
     false
   },
-  publishTo := {
+  publishTo := (if (System.getenv("PUBLISH_TO_JFROG") == "true") {
+    if (isSnapshot.value)
+      Some("snapshots".at(s"$artifactory/libs-snapshot-local/"))
+    else
+      Some("local-releases".at(s"$artifactory/libs-release-local/"))
+  } else {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value) Some("snapshots".at(nexus + "content/repositories/snapshots"))
     else Some("releases".at(nexus + "service/local/staging/deploy/maven2"))
-  },
+  }),
   publishMavenStyle := true,
   pgpPassphrase := {
     if (gpgPass.isDefined) gpgPass.map(_.toCharArray)
@@ -116,7 +128,7 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "commons-io" % "commons-io" % "2.16.1",
+      "commons-io" % "commons-io" % "2.18.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,

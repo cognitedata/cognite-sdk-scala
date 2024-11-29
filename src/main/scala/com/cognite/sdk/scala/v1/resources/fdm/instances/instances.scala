@@ -84,7 +84,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
   def retrieveByExternalIds(
       items: Seq[InstanceRetrieve],
       sources: Option[Seq[InstanceSource]],
-      includeTyping: Boolean = false
+      includeTyping: Boolean = true
   ): F[InstanceFilterResponse] =
     requestSession
       .post[InstanceFilterResponse, InstanceFilterResponse, InstanceRetrieveRequest](
@@ -135,7 +135,6 @@ object Instances {
 
   implicit val instanceRetrieveRequestEncoder: Encoder[InstanceRetrieveRequest] = deriveEncoder
 
-  implicit val edgeOrNodeDataDecoder: Decoder[EdgeOrNodeData] = deriveDecoder
   implicit val InstanceSourceDecoder: Decoder[InstanceSource] = deriveDecoder
   implicit val instanceRetrieveDecoder: Decoder[InstanceRetrieve] = deriveDecoder
   implicit val slimNodeOrEdgeItemsDecoder: Decoder[Items[SlimNodeOrEdge]] = deriveDecoder

@@ -204,11 +204,58 @@ jobs:
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 scalafmtCheck test
 
     - name: Upload test coverage report
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.codecov_token }}
 
-  publish:
+  publish_jfrog:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/master'
+    environment: CD
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          git rev-list --count --first-parent HEAD > patch_version.txt
+
+      - name: Set up JDK 8
+        uses: coursier/setup-action@v1
+        with:
+          jvm: adopt:8
+
+      - name: Build JAR file
+        run: |
+          cat /dev/null | sbt -Dsbt.log.noformat=true +dependencyLockCheck
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}" "set compile/skip := true" +package
+
+      - name: Install GPG & Sonatype credentials for SBT
+        env:
+          GPG_PUBLIC_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PUBLIC_KEY }}
+          GPG_PRIVATE_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+        run: |
+          set -x
+
+          echo "$GPG_PUBLIC_KEY" > public.key
+          gpg --import public.key
+          echo "$GPG_PRIVATE_KEY" > private.key
+          gpg --verbose --batch --import-options import-show --import private.key
+          
+          mkdir -p ~/.sbt/gpg
+          echo "$GPG_PRIVATE_KEY_PASSPHRASE" | gpg --verbose --batch -a --export-secret-keys --pinentry-mode loopback --passphrase-fd 0 > ~/.sbt/gpg/secring.asc
+
+      - name: Publish package
+        env:
+          GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+          JFROG_USERNAME: ${{ secrets.ARTIFACTORY_PUBLISH_TOKEN_USER }}
+          JFROG_PASSWORD: ${{ secrets.ARTIFACTORY_PUBLISH_TOKEN }}
+          PUBLISH_TO_JFROG: "true"
+        run: |
+          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned
+  publish_sonatype:
     runs-on: ubuntu-latest
     needs: test
     if: github.ref == 'refs/heads/master'
