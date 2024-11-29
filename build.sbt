@@ -2,7 +2,7 @@ import sbt.{Test, project}
 import wartremover.Wart
 
 val scala3 = "3.3.3"
-val scala213 = "2.13.14"
+val scala213 = "2.13.15"
 val scala212 = "2.12.19"
 val supportedScalaVersions = List(scala212, scala213, scala3)
 
@@ -10,9 +10,9 @@ val supportedScalaVersions = List(scala212, scala213, scala3)
 val jettyTestVersion = "9.4.55.v20240627"
 
 val sttpVersion = "3.5.2"
-val circeVersion = "0.14.9"
-val catsEffectVersion = "3.5.4"
-val fs2Version = "3.10.2"
+val circeVersion = "0.14.10"
+val catsEffectVersion = "3.5.5"
+val fs2Version = "3.11.0"
 val natchezVersion = "0.3.6"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
@@ -40,7 +40,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.29." + patchVersion,
+  version := "2.31." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
@@ -128,7 +128,7 @@ lazy val core = (project in file("."))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "commons-io" % "commons-io" % "2.17.0",
+      "commons-io" % "commons-io" % "2.18.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
