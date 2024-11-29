@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-09-23T08:56:11.218973Z",
+  "timestamp" : "2024-11-29T09:49:23.173494Z",
   "configurations" : [
     "compile",
     "optional",
@@ -1026,11 +1026,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel-testkit_3",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel-testkit_3.jar",
-          "hash" : "sha1:8f6a712e84d4044830476bb85f306907a3ec720a"
+          "hash" : "sha1:6be1b5459ee67654af87f53c6006ce4bf7963d42"
         }
       ],
       "configurations" : [
@@ -1040,11 +1040,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel_3",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel_3.jar",
-          "hash" : "sha1:9690c4dee1e5b65fa08d07f716cf49c5cdc257a6"
+          "hash" : "sha1:abcc766d1302d0d478e633adbb3dd7c913c4e021"
         }
       ],
       "configurations" : [
@@ -1056,11 +1056,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-laws_3",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-laws_3.jar",
-          "hash" : "sha1:281c2116d47bceea7d7a43060db915e5669a5bef"
+          "hash" : "sha1:aea22172e60d117a7ee32c99b9933c64a5ff97db"
         }
       ],
       "configurations" : [
@@ -1070,11 +1070,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-std_3",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-std_3.jar",
-          "hash" : "sha1:d84fac8f897c1c339e1083c8ee8afd9a1771c89b"
+          "hash" : "sha1:f0fa85e41025894484b031e8680128169e54a07e"
         }
       ],
       "configurations" : [
@@ -1086,11 +1086,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-testkit_3",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-testkit_3.jar",
-          "hash" : "sha1:56db7ccf37da463a1e82292f2881488d670c8576"
+          "hash" : "sha1:161f847012489b2936350d4b989972ea8c04b788"
         }
       ],
       "configurations" : [
@@ -1100,11 +1100,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect_3",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect_3.jar",
-          "hash" : "sha1:acf3f9773187614d43101610bdaf46428c198e39"
+          "hash" : "sha1:faa3bf2e3a91c0fc3358990ed4149a714c24c900"
         }
       ],
       "configurations" : [
