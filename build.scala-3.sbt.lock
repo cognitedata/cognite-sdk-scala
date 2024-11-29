@@ -14,11 +14,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-core_3",
-      "version" : "3.10.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "fs2-core_3.jar",
-          "hash" : "sha1:d0993296535929e1190036ca5e5f750c285460cb"
+          "hash" : "sha1:329c2b8bc537d770dbff80b774fdd1d247f99bc8"
         }
       ],
       "configurations" : [
@@ -30,11 +30,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-io_3",
-      "version" : "3.10.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "fs2-io_3.jar",
-          "hash" : "sha1:b86de0250e1ad9e4c1dc9972469a76b632325703"
+          "hash" : "sha1:5509f848735e39277dff96668ceb2f253cf6017a"
         }
       ],
       "configurations" : [
@@ -46,11 +46,11 @@
     {
       "org" : "com.comcast",
       "name" : "ip4s-core_3",
-      "version" : "3.5.0",
+      "version" : "3.6.0",
       "artifacts" : [
         {
           "name" : "ip4s-core_3.jar",
-          "hash" : "sha1:7ed193dc579a8def12110bc6cb90e95a215a2091"
+          "hash" : "sha1:a10a19c26ca4cb065f79c315f1b9724a039c98eb"
         }
       ],
       "configurations" : [
@@ -244,11 +244,11 @@
     {
       "org" : "commons-io",
       "name" : "commons-io",
-      "version" : "2.17.0",
+      "version" : "2.18.0",
       "artifacts" : [
         {
           "name" : "commons-io.jar",
-          "hash" : "sha1:ddcc8433eb019fb48fe25207c0278143f3e1d7e2"
+          "hash" : "sha1:44084ef756763795b31c578403dd028ff4a22950"
         }
       ],
       "configurations" : [
@@ -260,11 +260,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-core_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-core_3.jar",
-          "hash" : "sha1:77ba51c80a56844d5f7f85be374b09c66ff9c6fb"
+          "hash" : "sha1:21c1e59454882ab49838ebc7d74d16f0c9a435c1"
         }
       ],
       "configurations" : [
@@ -276,11 +276,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-generic_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-generic_3.jar",
-          "hash" : "sha1:ef4152196009a86c0362613745cc9d5a22b25450"
+          "hash" : "sha1:659311966c58ea1ed59afcffddd0cc8a819ad51e"
         }
       ],
       "configurations" : [
@@ -292,11 +292,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-jawn_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-jawn_3.jar",
-          "hash" : "sha1:87a6540ee2b329c6951f400ba230b1b39069c622"
+          "hash" : "sha1:a441165f6f151694ec294a2a318102886daa2bcd"
         }
       ],
       "configurations" : [
@@ -308,11 +308,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-literal_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-literal_3.jar",
-          "hash" : "sha1:4a55fe1241bf8c143b5752f6f9329713389ea59f"
+          "hash" : "sha1:41a80b7b7b85c8828172e169dcd0083e424c27b1"
         }
       ],
       "configurations" : [
@@ -322,11 +322,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-numbers_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-numbers_3.jar",
-          "hash" : "sha1:28424edcf3b0806fa659395dfdfedf3b2b784041"
+          "hash" : "sha1:5e15f5e38135614e4d0e1d54b2c4103fce337705"
         }
       ],
       "configurations" : [
@@ -338,11 +338,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-parser_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-parser_3.jar",
-          "hash" : "sha1:5676013d1642b757d0108e8e2ffe2226d6d00d06"
+          "hash" : "sha1:1e47c1604484c184f3e6a8d2ce45599280219a75"
         }
       ],
       "configurations" : [
