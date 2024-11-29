@@ -992,11 +992,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_2.13",
-      "version" : "0.3.5",
+      "version" : "0.3.6",
       "artifacts" : [
         {
           "name" : "natchez-core_2.13.jar",
-          "hash" : "sha1:c8616b07885b6b574a3d241f81f3e524ebcc536c"
+          "hash" : "sha1:3c9b427684f1ce9aefec3132677de31089b43504"
         }
       ],
       "configurations" : [
