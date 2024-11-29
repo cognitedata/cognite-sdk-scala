@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-09-23T08:56:06.902210Z",
+  "timestamp" : "2024-11-29T10:26:15.900208Z",
   "configurations" : [
     "compile",
     "optional",
@@ -992,11 +992,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_2.12",
-      "version" : "0.3.6",
+      "version" : "0.3.7",
       "artifacts" : [
         {
           "name" : "natchez-core_2.12.jar",
-          "hash" : "sha1:733ab9753615d013bd31751b36be5ec641fc8857"
+          "hash" : "sha1:c0b083b5b1d4a800ac6ed5a4b409820d8c341820"
         }
       ],
       "configurations" : [
@@ -1008,11 +1008,11 @@
     {
       "org" : "org.typelevel",
       "name" : "case-insensitive_2.12",
-      "version" : "1.4.0",
+      "version" : "1.4.2",
       "artifacts" : [
         {
           "name" : "case-insensitive_2.12.jar",
-          "hash" : "sha1:cf318fd2cf687883ec48a6c76f497cf3871750a7"
+          "hash" : "sha1:a18331b1658f6fcbc8816ffcd5d1ad20a8f7943c"
         }
       ],
       "configurations" : [
