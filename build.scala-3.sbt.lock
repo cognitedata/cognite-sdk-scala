@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-09-23T08:54:16.035829Z",
+  "timestamp" : "2024-11-29T09:49:23.173494Z",
   "configurations" : [
     "compile",
     "optional",
@@ -14,11 +14,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-core_3",
-      "version" : "3.10.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "fs2-core_3.jar",
-          "hash" : "sha1:d0993296535929e1190036ca5e5f750c285460cb"
+          "hash" : "sha1:329c2b8bc537d770dbff80b774fdd1d247f99bc8"
         }
       ],
       "configurations" : [
@@ -30,11 +30,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-io_3",
-      "version" : "3.10.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "fs2-io_3.jar",
-          "hash" : "sha1:b86de0250e1ad9e4c1dc9972469a76b632325703"
+          "hash" : "sha1:5509f848735e39277dff96668ceb2f253cf6017a"
         }
       ],
       "configurations" : [
@@ -46,11 +46,11 @@
     {
       "org" : "com.comcast",
       "name" : "ip4s-core_3",
-      "version" : "3.5.0",
+      "version" : "3.6.0",
       "artifacts" : [
         {
           "name" : "ip4s-core_3.jar",
-          "hash" : "sha1:7ed193dc579a8def12110bc6cb90e95a215a2091"
+          "hash" : "sha1:a10a19c26ca4cb065f79c315f1b9724a039c98eb"
         }
       ],
       "configurations" : [
@@ -244,11 +244,11 @@
     {
       "org" : "commons-io",
       "name" : "commons-io",
-      "version" : "2.17.0",
+      "version" : "2.18.0",
       "artifacts" : [
         {
           "name" : "commons-io.jar",
-          "hash" : "sha1:ddcc8433eb019fb48fe25207c0278143f3e1d7e2"
+          "hash" : "sha1:44084ef756763795b31c578403dd028ff4a22950"
         }
       ],
       "configurations" : [
@@ -260,11 +260,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-core_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-core_3.jar",
-          "hash" : "sha1:77ba51c80a56844d5f7f85be374b09c66ff9c6fb"
+          "hash" : "sha1:21c1e59454882ab49838ebc7d74d16f0c9a435c1"
         }
       ],
       "configurations" : [
@@ -276,11 +276,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-generic_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-generic_3.jar",
-          "hash" : "sha1:ef4152196009a86c0362613745cc9d5a22b25450"
+          "hash" : "sha1:659311966c58ea1ed59afcffddd0cc8a819ad51e"
         }
       ],
       "configurations" : [
@@ -292,11 +292,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-jawn_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-jawn_3.jar",
-          "hash" : "sha1:87a6540ee2b329c6951f400ba230b1b39069c622"
+          "hash" : "sha1:a441165f6f151694ec294a2a318102886daa2bcd"
         }
       ],
       "configurations" : [
@@ -308,11 +308,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-literal_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-literal_3.jar",
-          "hash" : "sha1:4a55fe1241bf8c143b5752f6f9329713389ea59f"
+          "hash" : "sha1:41a80b7b7b85c8828172e169dcd0083e424c27b1"
         }
       ],
       "configurations" : [
@@ -322,11 +322,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-numbers_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-numbers_3.jar",
-          "hash" : "sha1:28424edcf3b0806fa659395dfdfedf3b2b784041"
+          "hash" : "sha1:5e15f5e38135614e4d0e1d54b2c4103fce337705"
         }
       ],
       "configurations" : [
@@ -338,11 +338,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-parser_3",
-      "version" : "0.14.9",
+      "version" : "0.14.10",
       "artifacts" : [
         {
           "name" : "circe-parser_3.jar",
-          "hash" : "sha1:5676013d1642b757d0108e8e2ffe2226d6d00d06"
+          "hash" : "sha1:1e47c1604484c184f3e6a8d2ce45599280219a75"
         }
       ],
       "configurations" : [
@@ -522,11 +522,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-http",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-http.jar",
-          "hash" : "sha1:ef807d867948042293487c025f953fb8e7d77622"
+          "hash" : "sha1:e522a857d234e5ade679abfae807bcf4ecdd6f2e"
         }
       ],
       "configurations" : [
@@ -536,11 +536,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-io",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-io.jar",
-          "hash" : "sha1:fbb259fe460c0f299341b8c1ff7b401095b21cab"
+          "hash" : "sha1:533e7cbc5efc1d58d14cefb68904cd3af47fc316"
         }
       ],
       "configurations" : [
@@ -550,11 +550,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-security",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-security.jar",
-          "hash" : "sha1:72c5a25f0abedad7b7d25b012539398380a91984"
+          "hash" : "sha1:b22ab0397e893d9c092ade34a8e826ef576b285c"
         }
       ],
       "configurations" : [
@@ -564,11 +564,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-server",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-server.jar",
-          "hash" : "sha1:6acd4d3dba5c237cc4315e68f9a602d6d175992a"
+          "hash" : "sha1:65ce500f7cad946ce0e172c6ce90319caa29e787"
         }
       ],
       "configurations" : [
@@ -578,11 +578,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-servlet",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-servlet.jar",
-          "hash" : "sha1:0c836f9a675bf3b3eb20659de178edd4dcc8b468"
+          "hash" : "sha1:c8645a939af24f227e4123b89af14264176f7c60"
         }
       ],
       "configurations" : [
@@ -592,11 +592,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-util",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-util.jar",
-          "hash" : "sha1:f08e418ce72a2fadcb256ad8a3c9e5ccb2dbe797"
+          "hash" : "sha1:696cf9f9160e3a0ff208db614af118915cbdcf2d"
         }
       ],
       "configurations" : [
@@ -606,11 +606,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-util-ajax",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-util-ajax.jar",
-          "hash" : "sha1:d4820f654c3728b1c989bdfc34fd3ecc30f231ac"
+          "hash" : "sha1:2f2695de1ae62d84ca8336c7e6ddedc80aa2e521"
         }
       ],
       "configurations" : [
@@ -978,11 +978,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_3",
-      "version" : "0.3.5",
+      "version" : "0.3.6",
       "artifacts" : [
         {
           "name" : "natchez-core_3.jar",
-          "hash" : "sha1:d7e41aff8fa3075b0ff509e918dda3f4eca73846"
+          "hash" : "sha1:b3ab6ede400d3fdaae74555b8b0f1bb04d6311d6"
         }
       ],
       "configurations" : [
@@ -1026,11 +1026,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel-testkit_3",
-      "version" : "3.5.4",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel-testkit_3.jar",
-          "hash" : "sha1:3fede3d7329bb99e275aed5e8afed005116f3dda"
+          "hash" : "sha1:6be1b5459ee67654af87f53c6006ce4bf7963d42"
         }
       ],
       "configurations" : [
@@ -1040,11 +1040,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel_3",
-      "version" : "3.5.4",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel_3.jar",
-          "hash" : "sha1:6a1de40494d66e8a858a77c616783c2264b1d938"
+          "hash" : "sha1:abcc766d1302d0d478e633adbb3dd7c913c4e021"
         }
       ],
       "configurations" : [
@@ -1056,11 +1056,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-laws_3",
-      "version" : "3.5.4",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-laws_3.jar",
-          "hash" : "sha1:6b5590da7fb56935049dc134e41faa1c68fbeed3"
+          "hash" : "sha1:aea22172e60d117a7ee32c99b9933c64a5ff97db"
         }
       ],
       "configurations" : [
@@ -1070,11 +1070,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-std_3",
-      "version" : "3.5.4",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-std_3.jar",
-          "hash" : "sha1:45a43dc229ff76b0feaeae2f0665e0a7c7c091db"
+          "hash" : "sha1:f0fa85e41025894484b031e8680128169e54a07e"
         }
       ],
       "configurations" : [
@@ -1086,11 +1086,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-testkit_3",
-      "version" : "3.5.4",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-testkit_3.jar",
-          "hash" : "sha1:590ca21aab478fb7754a39b0e4658c4898969ce3"
+          "hash" : "sha1:161f847012489b2936350d4b989972ea8c04b788"
         }
       ],
       "configurations" : [
@@ -1100,11 +1100,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect_3",
-      "version" : "3.5.4",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect_3.jar",
-          "hash" : "sha1:50268b1c97dbd9ed99aa7810276f5b78704fec66"
+          "hash" : "sha1:faa3bf2e3a91c0fc3358990ed4149a714c24c900"
         }
       ],
       "configurations" : [
