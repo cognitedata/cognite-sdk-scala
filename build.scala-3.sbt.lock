@@ -634,11 +634,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala-library",
-      "version" : "2.13.12",
+      "version" : "2.13.14",
       "artifacts" : [
         {
           "name" : "scala-library.jar",
-          "hash" : "sha1:3c51da898af4ebfac356fcde11388afb2ae8ee82"
+          "hash" : "sha1:f8b4afe89abe48ca670f620c7da89b71f93e6546"
         }
       ],
       "configurations" : [
@@ -650,11 +650,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala3-library_3",
-      "version" : "3.3.3",
+      "version" : "3.3.4",
       "artifacts" : [
         {
           "name" : "scala3-library_3.jar",
-          "hash" : "sha1:8717a89f7030fde424b4ba44608fb2583b5ed159"
+          "hash" : "sha1:c219bdf4dbd177dd2f9e89ea05af7b600c74840f"
         }
       ],
       "configurations" : [
@@ -978,11 +978,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_3",
-      "version" : "0.3.6",
+      "version" : "0.3.7",
       "artifacts" : [
         {
           "name" : "natchez-core_3.jar",
-          "hash" : "sha1:b3ab6ede400d3fdaae74555b8b0f1bb04d6311d6"
+          "hash" : "sha1:dd253ab63c238718635d575f0ab03045bde2d66d"
         }
       ],
       "configurations" : [
@@ -994,11 +994,11 @@
     {
       "org" : "org.typelevel",
       "name" : "case-insensitive_3",
-      "version" : "1.4.0",
+      "version" : "1.4.2",
       "artifacts" : [
         {
           "name" : "case-insensitive_3.jar",
-          "hash" : "sha1:a8e3647147be0b7e5709a2d6f7ea378671dd7309"
+          "hash" : "sha1:fe70a06a40e7f65bb885c3bae7c97e6c93f0bfda"
         }
       ],
       "configurations" : [

@@ -992,11 +992,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_2.13",
-      "version" : "0.3.6",
+      "version" : "0.3.7",
       "artifacts" : [
         {
           "name" : "natchez-core_2.13.jar",
-          "hash" : "sha1:3c9b427684f1ce9aefec3132677de31089b43504"
+          "hash" : "sha1:593d890614467ca4e29f0bfd70e70a65ae414dae"
         }
       ],
       "configurations" : [
@@ -1008,11 +1008,11 @@
     {
       "org" : "org.typelevel",
       "name" : "case-insensitive_2.13",
-      "version" : "1.4.0",
+      "version" : "1.4.2",
       "artifacts" : [
         {
           "name" : "case-insensitive_2.13.jar",
-          "hash" : "sha1:d6974ef3ebe84385592e0e7ee3ebd4dcad9ab667"
+          "hash" : "sha1:690c34beb2359abd4154a72dc41ce1ee39095865"
         }
       ],
       "configurations" : [
