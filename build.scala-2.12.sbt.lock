@@ -1040,11 +1040,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel-testkit_2.12",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel-testkit_2.12.jar",
-          "hash" : "sha1:1fb951e3ba23fd6e8bdf3f6aed0cc948e08ec2ec"
+          "hash" : "sha1:c2162c85e7e454a582ebebe47163adabb65ac283"
         }
       ],
       "configurations" : [
@@ -1054,11 +1054,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel_2.12",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel_2.12.jar",
-          "hash" : "sha1:80466be3dc9c5250dd1b86a61652e43536f6df99"
+          "hash" : "sha1:b51f54948ae5dc1ff593eb690fae9710bc66cf12"
         }
       ],
       "configurations" : [
@@ -1070,11 +1070,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-laws_2.12",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-laws_2.12.jar",
-          "hash" : "sha1:507fbcc4f6c8147dafcda2ef9ae3c92283283f55"
+          "hash" : "sha1:613a0b09758e86422fc4e690f883476d3aad1ed8"
         }
       ],
       "configurations" : [
@@ -1084,11 +1084,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-std_2.12",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-std_2.12.jar",
-          "hash" : "sha1:9e7e5c34249df6355ff6feed40c369e90c39d226"
+          "hash" : "sha1:674e2b6b49ac316d80713906ba4aca37bd4950b2"
         }
       ],
       "configurations" : [
@@ -1100,11 +1100,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-testkit_2.12",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect-testkit_2.12.jar",
-          "hash" : "sha1:e4b586130cd4d541166c0f17eb9f1bd52198241b"
+          "hash" : "sha1:801b6f3ada0a2ad8c75ac8e96628d121aecec04f"
         }
       ],
       "configurations" : [
@@ -1114,11 +1114,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect_2.12",
-      "version" : "3.5.5",
+      "version" : "3.5.6",
       "artifacts" : [
         {
           "name" : "cats-effect_2.12.jar",
-          "hash" : "sha1:94daa07a76ef7051f6287cbb7b91f37b85287efd"
+          "hash" : "sha1:510bc00f286b9e9a5c5a65c17aa98ce9f412faec"
         }
       ],
       "configurations" : [
