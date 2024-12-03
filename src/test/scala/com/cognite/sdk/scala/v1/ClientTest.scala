@@ -60,7 +60,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         IO.pure(Response.ok(tokenInspectResponse).copy(headers = req.headers))
       }
     new GenericClient[IO]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, implicitly, saveHeadersStub)
-      .token.inspect()
+      .token.inspect().unsafeRunSync()
     headers should contain (Header("x-cdp-clienttag", "client-test"))
     headers should contain (Header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}"))
     headers should contain (Header("x-cdp-app", "scala-sdk-test"))
