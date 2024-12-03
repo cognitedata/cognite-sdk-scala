@@ -46,7 +46,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
   def uploadWithName(input: java.io.InputStream, name: String): F[File] =
     for {
       file <- createOne(FileCreate(name = name))
-      url <- FMonad.fromOption(
+      url <- F.fromOption(
         file.uploadUrl,
         SdkException(s"File upload of file ${file.name} did not return uploadUrl")
       )
@@ -55,7 +55,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
           .body(input)
           .put(uri"${url}")
       }
-      _ <- FMonad.raiseUnless(response.isSuccess) {
+      _ <- F.raiseUnless(response.isSuccess) {
         SdkException(
           s"File upload of file ${file.name} failed with error code ${response.code.toString}"
         )
@@ -155,7 +155,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
           .get(uri"${link.downloadUrl}")
           .response(asByteArray)
       }
-      bytes <- FMonad.fromOption(
+      bytes <- F.fromOption(
         res.body.toOption,
         SdkException(
           s"File download of file ${item.toString} failed with error code ${res.code.toString}"

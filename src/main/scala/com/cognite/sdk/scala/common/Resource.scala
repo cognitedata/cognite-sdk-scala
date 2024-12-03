@@ -18,6 +18,6 @@ trait BaseUrl {
 
 trait WithRequestSession[F[_]] {
   val requestSession: RequestSession[F]
-  implicit val FMonad: MonadError[F, Throwable] = requestSession.implicits.FMonad
+  implicit val F: MonadError[F, Throwable] = requestSession.implicits.FMonad
   implicit val FTrace: Trace[F] = requestSession.implicits.FTrace
 }

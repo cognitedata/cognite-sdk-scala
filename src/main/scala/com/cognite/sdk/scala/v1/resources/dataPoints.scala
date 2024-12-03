@@ -350,17 +350,14 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
 
   def getLatestDataPoint(id: CogniteId, before: String = "now"): F[Option[DataPoint]] =
     getLatestDataPoints(Seq(id), before = before)
-      .flatMap(
-        _.get(id) match {
-          case Some(latest) => FMonad.pure(latest)
-          case None =>
-            FMonad.raiseError(
-              SdkException(
-                s"Unexpected missing ${id.toString} when retrieving latest data point"
-              )
-            )
-        }
-      )
+      .flatMap { latest =>
+        F.fromOption(
+          latest.get(id),
+          SdkException(
+            s"Unexpected missing ${id.toString} when retrieving latest data point"
+          )
+        )
+      }
 
   def getLatestDataPoints(
       ids: Seq[CogniteId],
@@ -374,15 +371,14 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       before: String = "now"
   ): F[Option[StringDataPoint]] =
     getLatestStringDataPoints(Seq(id), before = before)
-      .flatMap(_.get(id) match {
-        case Some(latest) => FMonad.pure(latest)
-        case None =>
-          FMonad.raiseError(
-            SdkException(
-              s"Unexpected missing ${id.toString} when retrieving latest data point"
-            )
+      .flatMap { latest =>
+        F.fromOption(
+          latest.get(id),
+          SdkException(
+            s"Unexpected missing ${id.toString} when retrieving latest data point"
           )
-      })
+        )
+      }
 
   def getLatestStringDataPoints(
       ids: Seq[CogniteId],

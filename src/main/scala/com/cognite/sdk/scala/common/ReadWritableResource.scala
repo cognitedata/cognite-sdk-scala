@@ -113,11 +113,11 @@ trait Create[R <: ToCreate[W], W, F[_]]
     createItems(Items(items.map(_.toCreate)))
 
   def createOne(item: W): F[R] =
-    create(Seq(item)).flatMap {
-      _.headOption match {
-        case Some(value) => FMonad.pure(value)
-        case None => FMonad.raiseError(SdkException("Unexpected empty response when creating item"))
-      }
+    create(Seq(item)).flatMap { items =>
+      F.fromOption(
+        items.headOption,
+        SdkException("Unexpected empty response when creating item")
+      )
     }
 }
 

@@ -75,7 +75,7 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])
       query.limit,
       (cursor: Option[String], limit: Option[Int]) =>
         if (limit.exists(_ <= 0)) {
-          FMonad.pure(Option.empty)
+          F.pure(Option.empty)
         } else {
           sendQuery(query.withCursorAndLimit(cursor, limit), batchSize)
             .map(r => Some((r, limit.map(_ - r.rows.length))))

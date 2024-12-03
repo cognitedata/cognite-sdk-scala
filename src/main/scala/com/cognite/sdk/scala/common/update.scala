@@ -24,19 +24,13 @@ trait UpdateById[R <: ToUpdate[U] with WithId[Long], U, F[_]]
     updateById(items.map(a => a.id -> a.toUpdate).toMap)
 
   def updateOneById(id: Long, item: U): F[R] =
-    updateById(Map(id -> item)).flatMap {
-      _.headOption match {
-        case Some(value) => FMonad.pure(value)
-        case None => FMonad.raiseError(SdkException("Unexpected empty response when updating item"))
-      }
+    updateById(Map(id -> item)).flatMap { items =>
+      F.fromOption(items.headOption, SdkException("Unexpected empty response when updating item"))
     }
 
   def updateOneFromRead(item: R): F[R] =
-    updateFromRead(Seq(item)).flatMap {
-      _.headOption match {
-        case Some(value) => FMonad.pure(value)
-        case None => FMonad.raiseError(SdkException("Unexpected empty response when updating item"))
-      }
+    updateFromRead(Seq(item)).flatMap { items =>
+      F.fromOption(items.headOption, SdkException("Unexpected empty response when updating item"))
     }
 }
 
@@ -65,11 +59,8 @@ trait UpdateByExternalId[R, U, F[_]] extends WithRequestSession[F] with BaseUrl 
   def updateByExternalId(items: Map[String, U]): F[Seq[R]]
 
   def updateOneByExternalId(id: String, item: U): F[R] =
-    updateByExternalId(Map(id -> item)).flatMap {
-      _.headOption match {
-        case Some(value) => FMonad.pure(value)
-        case None => FMonad.raiseError(SdkException("Unexpected empty response when updating item"))
-      }
+    updateByExternalId(Map(id -> item)).flatMap { items =>
+      F.fromOption(items.headOption, SdkException("Unexpected empty response when updating item"))
     }
 }
 
