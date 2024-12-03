@@ -53,7 +53,7 @@ class ReadTest extends SdkTestSpec with OptionValues {
       limit,
       None,
       batchSize
-    )
+    ).unsafeRunSync()
     test(totalLimit)
   }
 }

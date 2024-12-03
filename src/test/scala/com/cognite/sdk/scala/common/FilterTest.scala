@@ -62,7 +62,7 @@ class FilterTest extends SdkTestSpec with OptionValues {
       None,
       batchSize,
       None
-    )
+    ).unsafeRunSync()
     test(hijackedRequest.limit.value)
   }
 }
