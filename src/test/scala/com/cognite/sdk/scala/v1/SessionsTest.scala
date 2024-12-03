@@ -22,7 +22,8 @@ import io.circe.generic.semiauto.deriveEncoder
 )
 class SessionsTest extends SdkTestSpec with ReadBehaviours {
   "Sessions" should "create a new session with credential flow" in {
-    val expectedResponse = Seq(Session(0, Some("CLIENT_CREDENTIALS"), "READY", "nonce", Some("clientId")))
+    val expectedResponse =
+      Seq(Session(0, Some("CLIENT_CREDENTIALS"), "READY", "nonce", Some("clientId")))
     val responseForSessionCreated = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
@@ -46,11 +47,13 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionCreated)
 
-    val resCreate = client.sessions.createWithClientCredentialFlow(
-      Items[SessionCreateWithCredential](
-        Seq(SessionCreateWithCredential("clientId", "clientSecret"))
+    val resCreate = client.sessions
+      .createWithClientCredentialFlow(
+        Items[SessionCreateWithCredential](
+          Seq(SessionCreateWithCredential("clientId", "clientSecret"))
+        )
       )
-    ).unsafeRunSync()
+      .unsafeRunSync()
     resCreate shouldBe expectedResponse
   }
 
@@ -115,11 +118,13 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionCreated)
 
-    val error = the[CdpApiException] thrownBy client.sessions.createWithClientCredentialFlow(
-      Items[SessionCreateWithCredential](
-        Seq[SessionCreateWithCredential]()
+    val error = the[CdpApiException] thrownBy client.sessions
+      .createWithClientCredentialFlow(
+        Items[SessionCreateWithCredential](
+          Seq[SessionCreateWithCredential]()
+        )
       )
-    ).unsafeRunSync()
+      .unsafeRunSync()
     error.message shouldBe s"Request must contain exactly 1 item in request body"
   }
 
@@ -155,11 +160,13 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionCreated)
 
-    val error = the[CdpApiException] thrownBy client.sessions.createWithClientCredentialFlow(
-      Items[SessionCreateWithCredential](
-        Seq(SessionCreateWithCredential("clientId", "clientSecret"))
+    val error = the[CdpApiException] thrownBy client.sessions
+      .createWithClientCredentialFlow(
+        Items[SessionCreateWithCredential](
+          Seq(SessionCreateWithCredential("clientId", "clientSecret"))
+        )
       )
-    ).unsafeRunSync()
+      .unsafeRunSync()
     error.message shouldBe s"Resource not found. This may also be due to insufficient access rights."
   }
 
@@ -274,7 +281,9 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionBound)
 
-    val error = the[CdpApiException] thrownBy client.sessions.bind(BindSessionRequest("expired-nonce")).unsafeRunSync()
+    val error = the[CdpApiException] thrownBy client.sessions
+      .bind(BindSessionRequest("expired-nonce"))
+      .unsafeRunSync()
     error.message shouldBe "Nonce has expired"
   }
 
@@ -311,7 +320,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionRefresh)
 
-    val responseBind = client.sessions.refresh(RefreshSessionRequest(123, "sessionKey-value")).unsafeRunSync()
+    val responseBind =
+      client.sessions.refresh(RefreshSessionRequest(123, "sessionKey-value")).unsafeRunSync()
     responseBind shouldBe expectedResponse
   }
 
@@ -349,18 +359,24 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionRefresh)
 
-    val error = the[CdpApiException] thrownBy client.sessions.refresh(RefreshSessionRequest(123, "invalid-sessionKey"))
+    val error = the[CdpApiException] thrownBy client.sessions
+      .refresh(
+        RefreshSessionRequest(123, "invalid-sessionKey")
+      )
+      .unsafeRunSync()
     error.message shouldBe "Session not found"
   }
 
   it should "revoke a session" in {
     val expectedIds = Seq(
-        CogniteInternalId(1),
-        CogniteInternalId(2)
-      )
+      CogniteInternalId(1),
+      CogniteInternalId(2)
+    )
 
     val responseForSessionRevoke = SttpBackendStub(asyncMonadError[IO])
-      .whenRequestMatches(r => r.method === Method.POST && r.uri.path.endsWith(List("sessions", "revoke")))
+      .whenRequestMatches(r =>
+        r.method === Method.POST && r.uri.path.endsWith(List("sessions", "revoke"))
+      )
       .thenRespond(
         Response(
           expectedIds,
@@ -384,9 +400,9 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
   implicit val sessionListEncoder: Encoder[SessionList] = deriveEncoder
   it should "parse ids from sessionsList" in {
     val expectedIds = Seq(
-        CogniteInternalId(1),
-        CogniteInternalId(2)
-      )
+      CogniteInternalId(1),
+      CogniteInternalId(2)
+    )
 
     val parsed = Seq(
       SessionList(
@@ -405,7 +421,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         Instant.now().minusSeconds(60).toEpochMilli
       )
     ).asJson
-    .as[Seq[CogniteInternalId]]
+      .as[Seq[CogniteInternalId]]
 
     parsed shouldBe Right(expectedIds)
   }

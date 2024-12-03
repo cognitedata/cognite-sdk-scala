@@ -32,10 +32,13 @@ class ReadTest extends SdkTestSpec with OptionValues {
     var totalLimit = 0
     val requestHijacker = SttpBackendStub(new CatsMonadError[IO]())
     .whenAnyRequest.thenRespondF(req => {
-      totalLimit += req.uri.querySegments.collectFirst {
-        case q @ QuerySegment.KeyValue("limit", _, _, _) => q.v.toInt
-      }.value
-      IO.pure(Response.ok(0))
+      for {
+        _ <- IO.delay {
+          totalLimit += req.uri.querySegments.collectFirst {
+              case q @ QuerySegment.KeyValue("limit", _, _, _) => q.v.toInt
+          }.value
+        }
+      } yield Response.ok(0)
     })
     lazy val dummyClient = Client("foo",
       projectName,

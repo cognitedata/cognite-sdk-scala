@@ -41,11 +41,11 @@ class FilterTest extends SdkTestSpec with OptionValues {
     var hijackedRequest: FilterRequest[DummyFilter] = null
     val requestHijacker = SttpBackendStub(new CatsMonadError[IO]())
       .whenAnyRequest.thenRespondF(req => {
-      hijackedRequest = decode[FilterRequest[DummyFilter]](req.body.asInstanceOf[StringBody].s) match {
-        case Right(x) => x
-        case Left(e) => throw e
-      }
-      IO.pure(Response(ItemsWithCursor(Seq(0, 1, 2), None), StatusCode.Ok, "OK"))
+        for {
+          req <- IO.fromEither(decode[FilterRequest[DummyFilter]](req.body.asInstanceOf[StringBody].s))
+          _ <- IO.delay{ hijackedRequest = req}
+        } yield Response(ItemsWithCursor(Seq(0, 1, 2), None), StatusCode.Ok, "OK")
+        
     })
     lazy val dummyClient = Client("foo",
       projectName,
