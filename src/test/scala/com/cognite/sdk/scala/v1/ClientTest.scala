@@ -3,7 +3,6 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.Id
 import cats.effect._
 import cats.effect.std.Queue
 import com.cognite.scala_sdk.BuildInfo
@@ -54,13 +53,13 @@ class ClientTest extends SdkTestSpec with OptionValues {
 
   it should "set x-cdp headers" in {
     var headers = Seq.empty[Header]
-    val saveHeadersStub = SttpBackendStub.synchronous
+    val saveHeadersStub = SttpBackendStub(asyncMonadError[IO])
       .whenAnyRequest
       .thenRespondF { req =>
         headers = req.headers
-        Response.ok(tokenInspectResponse).copy(headers = req.headers)
+        IO.pure(Response.ok(tokenInspectResponse).copy(headers = req.headers))
       }
-    new GenericClient[Id]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, implicitly, saveHeadersStub)
+    new GenericClient[IO]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, implicitly, saveHeadersStub)
       .token.inspect()
     headers should contain (Header("x-cdp-clienttag", "client-test"))
     headers should contain (Header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}"))
@@ -114,21 +113,21 @@ class ClientTest extends SdkTestSpec with OptionValues {
 
   it should "throw an exception if the authentication is invalid and project is not specified" in {
     implicit val auth: Auth = BearerTokenAuth("invalid-key")
-    an[InvalidAuthentication] should be thrownBy GenericClient.forAuth[Id](
+    an[InvalidAuthentication] should be thrownBy GenericClient.forAuth[IO](
       "scala-sdk-test", "", auth)(
       implicitly,
       implicitly,
-      sttpBackend
-    ).assets.list(Some(1)).compile.toList
+      authSttpBackend
+    ).unsafeRunSync().assets.list(Some(1)).compile.toList
   }
 
   it should "not throw an exception if the authentication is invalid and project is specified" in {
     implicit val auth: Auth = BearerTokenAuth("invalid-key")
-    noException should be thrownBy new GenericClient[Id](
+    noException should be thrownBy new GenericClient[IO](
       "scala-sdk-test", projectName, auth = auth)(
       implicitly,
       implicitly,
-      sttpBackend
+      authSttpBackend
     )
   }
 
@@ -139,7 +138,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "",
         auth
-      )(implicitly, new LoggingSttpBackend[Id, Any](sttpBackend)).token.inspect()
+      )(implicitly, new LoggingSttpBackend[IO, Any](authSttpBackend)).token.inspect().unsafeRunSync()
     }
     assertThrows[UnknownHostException] {
       Client(
@@ -147,7 +146,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "thisShouldThrowAnUnknownHostException:)",
         auth
-      )(implicitly, sttpBackend).token.inspect()
+      )(implicitly, authSttpBackend).token.inspect().unsafeRunSync()
     }
   }
 
@@ -158,7 +157,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "http://api.cognitedata.com",
         auth
-      )(implicitly, sttpBackend).token.inspect()
+      )(implicitly, authSttpBackend).token.inspect().unsafeRunSync()
     }
   }
 

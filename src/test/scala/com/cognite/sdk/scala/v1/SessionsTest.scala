@@ -3,10 +3,11 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.Id
+import cats.effect.IO
 import com.cognite.sdk.scala.common._
 import sttp.client3._
 import sttp.client3.testing.SttpBackendStub
+import sttp.client3.impl.cats.implicits.asyncMonadError
 import sttp.model.{Header, MediaType, Method, StatusCode}
 
 import java.time.Instant
@@ -22,7 +23,7 @@ import io.circe.generic.semiauto.deriveEncoder
 class SessionsTest extends SdkTestSpec with ReadBehaviours {
   "Sessions" should "create a new session with credential flow" in {
     val expectedResponse = Seq(Session(0, Some("CLIENT_CREDENTIALS"), "READY", "nonce", Some("clientId")))
-    val responseForSessionCreated = SttpBackendStub.synchronous
+    val responseForSessionCreated = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
           """{"items":[{"clientId":"clientId","clientSecret":"clientSecret"}]}""",
@@ -39,7 +40,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         )
       )
 
-    val client = new GenericClient[Id](
+    val client = new GenericClient[IO](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
@@ -55,7 +56,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
 
   it should "create a new session with token exchange flow" in {
     val expectedResponse = Seq(Session(0, Some("TOKEN_EXCHANGE"), "READY", "nonce", None))
-    val responseForSessionCreated = SttpBackendStub.synchronous
+    val responseForSessionCreated = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
           """{"items":[{"tokenExchange":true}]}""",
@@ -72,7 +73,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         )
       )
 
-    val client = new GenericClient[Id](
+    val client = new GenericClient[IO](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
@@ -91,7 +92,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
             }
         }
         """
-    val responseForSessionCreated = SttpBackendStub.synchronous
+    val responseForSessionCreated = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
           """{"items":[]}""",
@@ -108,7 +109,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         )
       )
 
-    val client = new GenericClient[Id](
+    val client = new GenericClient[IO](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
@@ -131,7 +132,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
             }
         }
         """
-    val responseForSessionCreated = SttpBackendStub.synchronous
+    val responseForSessionCreated = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
           """{"items":[{"clientId":"clientId","clientSecret":"clientSecret"}]}""",
@@ -148,7 +149,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         )
       )
 
-    val client = new GenericClient[Id](
+    val client = new GenericClient[IO](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
@@ -180,7 +181,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         Instant.now().minusSeconds(60).toEpochMilli
       )
     )
-    val responseForSessionList = SttpBackendStub.synchronous
+    val responseForSessionList = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches(r => r.method === Method.GET && r.uri.path.endsWith(List("sessions")))
       .thenRespond(
         Response(
@@ -191,13 +192,13 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         )
       )
 
-    val client = new GenericClient[Id](
+    val client = new GenericClient[IO](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionList)
 
-    val responseList = client.sessions.list()
+    val responseList = client.sessions.list().unsafeRunSync()
     responseList.size shouldBe 2
     responseList shouldBe expectedResponse
   }
@@ -210,7 +211,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       None,
       Some("sessionKey")
     )
-    val responseForSessionBound = SttpBackendStub.synchronous
+    val responseForSessionBound = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
@@ -229,7 +230,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         )
       )
 
-    val client = new GenericClient[Id](
+    val client = new GenericClient[IO](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
@@ -248,7 +249,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
             }
         }
         """
-    val responseForSessionBound = SttpBackendStub.synchronous
+    val responseForSessionBound = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
@@ -267,7 +268,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         )
       )
 
-    val client = new GenericClient[Id](
+    val client = new GenericClient[IO](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
@@ -285,7 +286,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       None,
       None
     )
-    val responseForSessionRefresh = SttpBackendStub.synchronous
+    val responseForSessionRefresh = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
@@ -304,7 +305,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         )
       )
 
-    val client = new GenericClient[Id](
+    val client = new GenericClient[IO](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
@@ -323,7 +324,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
             }
         }
         """
-    val responseForSessionRefresh = SttpBackendStub.synchronous
+    val responseForSessionRefresh = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
@@ -342,7 +343,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         )
       )
 
-    val client = new GenericClient[Id](
+    val client = new GenericClient[IO](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
@@ -358,7 +359,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         CogniteInternalId(2)
       )
 
-    val responseForSessionRevoke = SttpBackendStub.synchronous
+    val responseForSessionRevoke = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches(r => r.method === Method.POST && r.uri.path.endsWith(List("sessions", "revoke")))
       .thenRespond(
         Response(
@@ -369,13 +370,13 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
         )
       )
 
-    val client = new GenericClient[Id](
+    val client = new GenericClient[IO](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionRevoke)
 
-    val responseDelete = client.sessions.revoke(Items(expectedIds))
+    val responseDelete = client.sessions.revoke(Items(expectedIds)).unsafeRunSync()
     responseDelete.size shouldBe 2
     responseDelete shouldBe expectedIds
   }

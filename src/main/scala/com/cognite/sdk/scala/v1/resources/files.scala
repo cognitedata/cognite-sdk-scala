@@ -6,7 +6,6 @@ package com.cognite.sdk.scala.v1.resources
 import java.io.{BufferedInputStream, FileInputStream}
 
 import cats.implicits._
-import cats.Applicative
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import sttp.client3._
@@ -14,7 +13,7 @@ import sttp.client3.circe._
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-class Files[F[_]: Applicative](val requestSession: RequestSession[F])
+class Files[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[File, F]
     with RetrieveByIdsWithIgnoreUnknownIds[File, F]
@@ -44,34 +43,24 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
   override def createItems(items: Items[FileCreate]): F[Seq[File]] =
     items.items.toList.traverse(createOne).map(_.toSeq)
 
-  def uploadWithName(input: java.io.InputStream, name: String): F[File] = {
-    val item = FileCreate(name = name)
-    requestSession.flatMap(
-      createOne(item),
-      (file: File) =>
-        file.uploadUrl match {
-          case Some(uploadUrl) =>
-            val response = requestSession.send { request =>
-              request
-                .body(input)
-                .put(uri"$uploadUrl")
-            }
-            requestSession.map(
-              response,
-              (res: Response[Either[String, String]]) =>
-                if (res.isSuccess) {
-                  file
-                } else {
-                  throw SdkException(
-                    s"File upload of file ${file.name} failed with error code ${res.code.toString}"
-                  )
-                }
-            )
-          case None =>
-            throw SdkException(s"File upload of file ${file.name} did not return uploadUrl")
-        }
-    )
-  }
+  def uploadWithName(input: java.io.InputStream, name: String): F[File] =
+    for {
+      file <- createOne(FileCreate(name = name))
+      url <- FMonad.fromOption(
+        file.uploadUrl,
+        SdkException(s"File upload of file ${file.name} did not return uploadUrl")
+      )
+      response <- requestSession.send { request =>
+        request
+          .body(input)
+          .put(uri"${url}")
+      }
+      _ <- FMonad.raiseUnless(response.isSuccess) {
+        SdkException(
+          s"File upload of file ${file.name} failed with error code ${response.code.toString}"
+        )
+      }
+    } yield file
 
   def upload(file: java.io.File): F[File] = {
     val inputStream = new BufferedInputStream(new FileInputStream(file))
@@ -158,33 +147,21 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
         )
       )
 
-  def download(item: FileDownload, out: java.io.OutputStream): F[Unit] = {
-    val link: F[FileDownloadLink] = downloadLink(item)
-
-    requestSession.flatMap(
-      link,
-      (link: FileDownloadLink) => {
-        val response = requestSession.send { request =>
-          request
-            .get(
-              uri"${link.downloadUrl}"
-            )
-            .response(asByteArray)
-        }
-        requestSession.map(
-          response,
-          (res: Response[Either[String, Array[Byte]]]) =>
-            res.body match {
-              case Right(bytes) => out.write(bytes)
-              case Left(_) =>
-                throw SdkException(
-                  s"File download of file ${item.toString} failed with error code ${res.code.toString}"
-                )
-            }
-        )
+  def download(item: FileDownload, out: java.io.OutputStream): F[Unit] =
+    for {
+      link <- downloadLink(item)
+      res <- requestSession.send { request =>
+        request
+          .get(uri"${link.downloadUrl}")
+          .response(asByteArray)
       }
-    )
-  }
+      bytes <- FMonad.fromOption(
+        res.body.toOption,
+        SdkException(
+          s"File download of file ${item.toString} failed with error code ${res.code.toString}"
+        )
+      )
+    } yield out.write(bytes)
 }
 
 object Files {

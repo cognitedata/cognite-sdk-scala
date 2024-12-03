@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.common
 
+import cats.effect.IO
 import com.cognite.sdk.scala.v1.Client
 import io.circe.Decoder
 import sttp.client3._
@@ -10,6 +11,7 @@ import sttp.client3.testing.SttpBackendStub
 import io.circe.generic.semiauto.deriveDecoder
 import org.scalatest.OptionValues
 import sttp.model.Uri.QuerySegment
+import sttp.client3.impl.cats.CatsMonadError
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
 class ReadTest extends SdkTestSpec with OptionValues {
@@ -28,11 +30,12 @@ class ReadTest extends SdkTestSpec with OptionValues {
 
   def readWithCursor(batchSize: Int, limit: Option[Int])(test: Int => Any): Any = {
     var totalLimit = 0
-    val requestHijacker = SttpBackendStub.synchronous.whenAnyRequest.thenRespondF(req => {
+    val requestHijacker = SttpBackendStub(new CatsMonadError[IO]())
+    .whenAnyRequest.thenRespondF(req => {
       totalLimit += req.uri.querySegments.collectFirst {
         case q @ QuerySegment.KeyValue("limit", _, _, _) => q.v.toInt
       }.value
-      Response.ok(0)
+      IO.pure(Response.ok(0))
     })
     lazy val dummyClient = Client("foo",
       projectName,

@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.common
 
+import cats.effect.IO
 import com.cognite.sdk.scala.v1.Client
 import io.circe.{Codec, Decoder, Encoder}
 import sttp.client3._
@@ -11,6 +12,7 @@ import io.circe.parser.decode
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 import org.scalatest.OptionValues
 import sttp.model.StatusCode
+import sttp.client3.impl.cats.CatsMonadError
 
 final case class DummyFilter()
 object DummyFilter {
@@ -37,12 +39,13 @@ class FilterTest extends SdkTestSpec with OptionValues {
   @SuppressWarnings(Array("org.wartremover.warts.Null", "org.wartremover.warts.Var", "org.wartremover.warts.AsInstanceOf"))
   def filterWithCursor(batchSize: Int, limit: Option[Int])(test: Int => Any): Any = {
     var hijackedRequest: FilterRequest[DummyFilter] = null
-    val requestHijacker = SttpBackendStub.synchronous.whenAnyRequest.thenRespondF(req => {
+    val requestHijacker = SttpBackendStub(new CatsMonadError[IO]())
+      .whenAnyRequest.thenRespondF(req => {
       hijackedRequest = decode[FilterRequest[DummyFilter]](req.body.asInstanceOf[StringBody].s) match {
         case Right(x) => x
         case Left(e) => throw e
       }
-      Response(ItemsWithCursor(Seq(0, 1, 2), None), StatusCode.Ok, "OK")
+      IO.pure(Response(ItemsWithCursor(Seq(0, 1, 2), None), StatusCode.Ok, "OK"))
     })
     lazy val dummyClient = Client("foo",
       projectName,

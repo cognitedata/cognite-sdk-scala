@@ -3,8 +3,9 @@
 
 package com.cognite.sdk.scala.v1
 
+import cats.effect.IO
 import cats.implicits._
-import cats.{Id, Monad}
+import cats.{Id, Monad, MonadError => CMonadError}
 import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
@@ -67,7 +68,11 @@ class AuthSttpBackend[F[_], +P](delegate: SttpBackend[F, P], authProvider: AuthP
   override def responseMonad: MonadError[F] = delegate.responseMonad
 }
 
-final case class RequestSession[F[_]: Monad: Trace](
+class RequestSessionImplicits[F[_]](
+    implicit val FMonad: CMonadError[F, Throwable],
+    val FTrace: Trace[F]
+)
+final case class RequestSession[F[_]: Trace](
     applicationName: String,
     baseUrl: Uri,
     baseSttpBackend: SttpBackend[F, _],
@@ -75,7 +80,8 @@ final case class RequestSession[F[_]: Monad: Trace](
     clientTag: Option[String] = None,
     cdfVersion: Option[String] = None,
     tags: Map[String, Any] = Map.empty
-) {
+)(implicit F: CMonadError[F, Throwable]) {
+  val implicits: RequestSessionImplicits[F] = new RequestSessionImplicits[F]
   def withResourceType(resourceType: GenericClient.RESOURCE_TYPE): RequestSession[F] =
     this.copy(tags = this.tags + (GenericClient.RESOURCE_TYPE_TAG -> resourceType))
 
@@ -169,9 +175,6 @@ final case class RequestSession[F[_]: Monad: Trace](
     )
       .send(sttpBackend)
       .map(_.body)
-
-  def map[R, R1](r: F[R], f: R => R1): F[R1] = r.map(f)
-  def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
 class GenericClient[F[_]: Trace](
@@ -182,7 +185,7 @@ class GenericClient[F[_]: Trace](
     apiVersion: Option[String],
     clientTag: Option[String],
     cdfVersion: Option[String]
-)(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Any]) {
+)(implicit monad: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]) {
   def this(
       applicationName: String,
       projectName: String,
@@ -191,7 +194,7 @@ class GenericClient[F[_]: Trace](
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
-  )(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Any]) =
+  )(implicit monad: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]) =
     this(
       applicationName,
       projectName,
@@ -315,12 +318,12 @@ object GenericClient {
   val defaultBaseUrl: String = Option(System.getenv("COGNITE_BASE_URL"))
     .getOrElse("https://api.cognitedata.com")
 
-  def apply[F[_]: Monad: Trace](
+  def apply[F[_]: Trace](
       applicationName: String,
       projectName: String,
       baseUrl: String,
       auth: Auth
-  )(implicit sttpBackend: SttpBackend[F, Any]): GenericClient[F] =
+  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): GenericClient[F] =
     new GenericClient(applicationName, projectName, baseUrl, auth)
 
   def parseBaseUrlOrThrow(baseUrl: String): Uri =
@@ -350,7 +353,7 @@ object GenericClient {
         )
     }
 
-  def forAuth[F[_]: Monad: Trace](
+  def forAuth[F[_]: Trace](
       applicationName: String,
       projectName: String,
       auth: Auth,
@@ -358,7 +361,7 @@ object GenericClient {
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
-  )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
     forAuthProvider(
       applicationName,
       projectName,
@@ -369,7 +372,7 @@ object GenericClient {
       cdfVersion
     )
 
-  def forAuthProvider[F[_]: Monad: Trace](
+  def forAuthProvider[F[_]: Trace](
       applicationName: String,
       projectName: String,
       authProvider: AuthProvider[F],
@@ -377,7 +380,7 @@ object GenericClient {
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
-  )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
     if (projectName.isEmpty) {
       throw InvalidAuthentication()
     } else {
@@ -431,8 +434,8 @@ class Client(
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
     auth: Auth
-)(implicit trace: Trace[Id], sttpBackend: SttpBackend[Id, Any])
-    extends GenericClient[Id](applicationName, projectName, baseUrl, auth)
+)(implicit trace: Trace[IO], sttpBackend: SttpBackend[IO, Any])
+    extends GenericClient[IO](applicationName, projectName, baseUrl, auth)
 
 object Client {
   def apply(
@@ -441,7 +444,7 @@ object Client {
       baseUrl: String,
       auth: Auth
   )(
-      implicit trace: Trace[Id],
-      sttpBackend: SttpBackend[Id, Any]
+      implicit trace: Trace[IO],
+      sttpBackend: SttpBackend[IO, Any]
   ): Client = new Client(applicationName, projectName, baseUrl, auth)
 }

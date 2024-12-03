@@ -147,10 +147,8 @@ class RawRows[F[_]](
 
   // ... and since RAW doesn't return the created rows, we just return the one we sent here.
   override def createOne(item: RawRow): F[RawRow] =
-    requestSession.map(
-      create(Seq(item)),
-      (_: Seq[RawRow]) => item
-    )
+    create(Seq(item))
+      .map(_ => item)
 
   def retrieveByKey(key: String): F[RawRow] =
     requestSession.get[RawRow, RawRow](

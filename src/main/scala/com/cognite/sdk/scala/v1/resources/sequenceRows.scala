@@ -3,7 +3,6 @@
 
 package com.cognite.sdk.scala.v1.resources
 
-import cats.Monad
 import cats.implicits._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
@@ -12,7 +11,7 @@ import sttp.client3.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
-class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Monad[F])
+class SequenceRows[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
   import SequenceRows._
@@ -76,7 +75,7 @@ class SequenceRows[F[_]](val requestSession: RequestSession[F])(implicit F: Mona
       query.limit,
       (cursor: Option[String], limit: Option[Int]) =>
         if (limit.exists(_ <= 0)) {
-          F.pure(Option.empty)
+          FMonad.pure(Option.empty)
         } else {
           sendQuery(query.withCursorAndLimit(cursor, limit), batchSize)
             .map(r => Some((r, limit.map(_ - r.rows.length))))
