@@ -124,12 +124,12 @@ class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
 
   it should "not throw an exception if the authentication is invalid and project is specified" in {
     implicit val auth: Auth = BearerTokenAuth("invalid-key")
-    new GenericClient[OrError](
+    noException should be thrownBy new GenericClient[OrError](
       "scala-sdk-test", projectName, auth = auth)(
       implicitly,
       implicitly,
       sttpBackend
-    ) shouldBe Symbol("right")
+    )
   }
 
   it should "give a friendly error message when using a malformed base url" in {
@@ -152,14 +152,15 @@ class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
   }
 
   it should "throw an SttpClientException when using plain http" in {
-    assertThrows[SttpClientException] {
+    val error = {
       Client(
         "url-test-2",
         projectName,
         "http://api.cognitedata.com",
         auth
       )(implicitly, sttpBackend).token.inspect()
-    }
+    }.left.value
+    error shouldBe a [SttpClientException]
   }
 
   it should "retry certain failed requests" in {
