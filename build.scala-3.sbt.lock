@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-11-20T14:11:29.829314Z",
+  "timestamp" : "2024-12-01T21:11:43.214140Z",
   "configurations" : [
     "compile",
     "optional",
@@ -62,11 +62,11 @@
     {
       "org" : "com.google.protobuf",
       "name" : "protobuf-java",
-      "version" : "3.25.3",
+      "version" : "4.29.0",
       "artifacts" : [
         {
           "name" : "protobuf-java.jar",
-          "hash" : "sha1:d3200261955f3298e0d85c9892201e70492ce8eb"
+          "hash" : "sha1:ffea90ab158435d68de76951857ef5f8b0f98365"
         }
       ],
       "configurations" : [
@@ -522,11 +522,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-http",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-http.jar",
-          "hash" : "sha1:ef807d867948042293487c025f953fb8e7d77622"
+          "hash" : "sha1:e522a857d234e5ade679abfae807bcf4ecdd6f2e"
         }
       ],
       "configurations" : [
@@ -536,11 +536,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-io",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-io.jar",
-          "hash" : "sha1:fbb259fe460c0f299341b8c1ff7b401095b21cab"
+          "hash" : "sha1:533e7cbc5efc1d58d14cefb68904cd3af47fc316"
         }
       ],
       "configurations" : [
@@ -550,11 +550,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-security",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-security.jar",
-          "hash" : "sha1:72c5a25f0abedad7b7d25b012539398380a91984"
+          "hash" : "sha1:b22ab0397e893d9c092ade34a8e826ef576b285c"
         }
       ],
       "configurations" : [
@@ -564,11 +564,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-server",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-server.jar",
-          "hash" : "sha1:6acd4d3dba5c237cc4315e68f9a602d6d175992a"
+          "hash" : "sha1:65ce500f7cad946ce0e172c6ce90319caa29e787"
         }
       ],
       "configurations" : [
@@ -578,11 +578,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-servlet",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-servlet.jar",
-          "hash" : "sha1:0c836f9a675bf3b3eb20659de178edd4dcc8b468"
+          "hash" : "sha1:c8645a939af24f227e4123b89af14264176f7c60"
         }
       ],
       "configurations" : [
@@ -592,11 +592,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-util",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-util.jar",
-          "hash" : "sha1:f08e418ce72a2fadcb256ad8a3c9e5ccb2dbe797"
+          "hash" : "sha1:696cf9f9160e3a0ff208db614af118915cbdcf2d"
         }
       ],
       "configurations" : [
@@ -606,11 +606,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-util-ajax",
-      "version" : "9.4.55.v20240627",
+      "version" : "9.4.56.v20240826",
       "artifacts" : [
         {
           "name" : "jetty-util-ajax.jar",
-          "hash" : "sha1:d4820f654c3728b1c989bdfc34fd3ecc30f231ac"
+          "hash" : "sha1:2f2695de1ae62d84ca8336c7e6ddedc80aa2e521"
         }
       ],
       "configurations" : [
@@ -634,11 +634,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala-library",
-      "version" : "2.13.12",
+      "version" : "2.13.14",
       "artifacts" : [
         {
           "name" : "scala-library.jar",
-          "hash" : "sha1:3c51da898af4ebfac356fcde11388afb2ae8ee82"
+          "hash" : "sha1:f8b4afe89abe48ca670f620c7da89b71f93e6546"
         }
       ],
       "configurations" : [
@@ -650,11 +650,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala3-library_3",
-      "version" : "3.3.3",
+      "version" : "3.3.4",
       "artifacts" : [
         {
           "name" : "scala3-library_3.jar",
-          "hash" : "sha1:8717a89f7030fde424b4ba44608fb2583b5ed159"
+          "hash" : "sha1:c219bdf4dbd177dd2f9e89ea05af7b600c74840f"
         }
       ],
       "configurations" : [
@@ -978,11 +978,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_3",
-      "version" : "0.3.5",
+      "version" : "0.3.7",
       "artifacts" : [
         {
           "name" : "natchez-core_3.jar",
-          "hash" : "sha1:d7e41aff8fa3075b0ff509e918dda3f4eca73846"
+          "hash" : "sha1:dd253ab63c238718635d575f0ab03045bde2d66d"
         }
       ],
       "configurations" : [
@@ -994,11 +994,11 @@
     {
       "org" : "org.typelevel",
       "name" : "case-insensitive_3",
-      "version" : "1.4.0",
+      "version" : "1.4.2",
       "artifacts" : [
         {
           "name" : "case-insensitive_3.jar",
-          "hash" : "sha1:a8e3647147be0b7e5709a2d6f7ea378671dd7309"
+          "hash" : "sha1:fe70a06a40e7f65bb885c3bae7c97e6c93f0bfda"
         }
       ],
       "configurations" : [
@@ -1026,11 +1026,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel-testkit_3",
-      "version" : "3.5.4",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel-testkit_3.jar",
-          "hash" : "sha1:3fede3d7329bb99e275aed5e8afed005116f3dda"
+          "hash" : "sha1:e8e664771a9ce8db25e37177c3940c6d1e48979e"
         }
       ],
       "configurations" : [
@@ -1040,11 +1040,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel_3",
-      "version" : "3.5.4",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel_3.jar",
-          "hash" : "sha1:6a1de40494d66e8a858a77c616783c2264b1d938"
+          "hash" : "sha1:bd7b864c544e6ca93e891002342fce9a487c31c8"
         }
       ],
       "configurations" : [
@@ -1056,11 +1056,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-laws_3",
-      "version" : "3.5.4",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect-laws_3.jar",
-          "hash" : "sha1:6b5590da7fb56935049dc134e41faa1c68fbeed3"
+          "hash" : "sha1:8fb18bc78e04f6d7ae14376db68b39e2e9d5d30d"
         }
       ],
       "configurations" : [
@@ -1070,11 +1070,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-std_3",
-      "version" : "3.5.4",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect-std_3.jar",
-          "hash" : "sha1:45a43dc229ff76b0feaeae2f0665e0a7c7c091db"
+          "hash" : "sha1:d9864d7037668c9f49b0d5d3de4d0f3ad1e30f8e"
         }
       ],
       "configurations" : [
@@ -1086,11 +1086,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-testkit_3",
-      "version" : "3.5.4",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect-testkit_3.jar",
-          "hash" : "sha1:590ca21aab478fb7754a39b0e4658c4898969ce3"
+          "hash" : "sha1:8f4bf5f1f3e2b60e14f810e3e2058b299df955f0"
         }
       ],
       "configurations" : [
@@ -1100,11 +1100,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect_3",
-      "version" : "3.5.4",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect_3.jar",
-          "hash" : "sha1:50268b1c97dbd9ed99aa7810276f5b78704fec66"
+          "hash" : "sha1:53db8a115d7989280446403d9fcbd6b7536f00e4"
         }
       ],
       "configurations" : [
