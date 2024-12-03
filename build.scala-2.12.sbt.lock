@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2024-11-29T09:49:18.661798Z",
+  "timestamp" : "2024-12-01T21:11:38.711996Z",
   "configurations" : [
     "compile",
     "optional",
@@ -78,11 +78,11 @@
     {
       "org" : "com.google.protobuf",
       "name" : "protobuf-java",
-      "version" : "3.25.3",
+      "version" : "4.29.0",
       "artifacts" : [
         {
           "name" : "protobuf-java.jar",
-          "hash" : "sha1:d3200261955f3298e0d85c9892201e70492ce8eb"
+          "hash" : "sha1:ffea90ab158435d68de76951857ef5f8b0f98365"
         }
       ],
       "configurations" : [
@@ -992,11 +992,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_2.12",
-      "version" : "0.3.6",
+      "version" : "0.3.7",
       "artifacts" : [
         {
           "name" : "natchez-core_2.12.jar",
-          "hash" : "sha1:733ab9753615d013bd31751b36be5ec641fc8857"
+          "hash" : "sha1:c0b083b5b1d4a800ac6ed5a4b409820d8c341820"
         }
       ],
       "configurations" : [
@@ -1008,11 +1008,11 @@
     {
       "org" : "org.typelevel",
       "name" : "case-insensitive_2.12",
-      "version" : "1.4.0",
+      "version" : "1.4.2",
       "artifacts" : [
         {
           "name" : "case-insensitive_2.12.jar",
-          "hash" : "sha1:cf318fd2cf687883ec48a6c76f497cf3871750a7"
+          "hash" : "sha1:a18331b1658f6fcbc8816ffcd5d1ad20a8f7943c"
         }
       ],
       "configurations" : [
@@ -1040,11 +1040,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel-testkit_2.12",
-      "version" : "3.5.6",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel-testkit_2.12.jar",
-          "hash" : "sha1:c2162c85e7e454a582ebebe47163adabb65ac283"
+          "hash" : "sha1:f8f666fd6bfda0674a8c5a2faee2af52c9a9b918"
         }
       ],
       "configurations" : [
@@ -1054,11 +1054,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel_2.12",
-      "version" : "3.5.6",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel_2.12.jar",
-          "hash" : "sha1:b51f54948ae5dc1ff593eb690fae9710bc66cf12"
+          "hash" : "sha1:8e6ab83cee8e5c1a5a6480e32934b845fc60ea01"
         }
       ],
       "configurations" : [
@@ -1070,11 +1070,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-laws_2.12",
-      "version" : "3.5.6",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect-laws_2.12.jar",
-          "hash" : "sha1:613a0b09758e86422fc4e690f883476d3aad1ed8"
+          "hash" : "sha1:9f73187cdec4aa3af22eebe0aa38dca8ef26f9cc"
         }
       ],
       "configurations" : [
@@ -1084,11 +1084,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-std_2.12",
-      "version" : "3.5.6",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect-std_2.12.jar",
-          "hash" : "sha1:674e2b6b49ac316d80713906ba4aca37bd4950b2"
+          "hash" : "sha1:ddf9fc842ab8ef12d564b896362854bcdb8f6deb"
         }
       ],
       "configurations" : [
@@ -1100,11 +1100,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-testkit_2.12",
-      "version" : "3.5.6",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect-testkit_2.12.jar",
-          "hash" : "sha1:801b6f3ada0a2ad8c75ac8e96628d121aecec04f"
+          "hash" : "sha1:b90db8bb861b00ea9f567a5d884b062667c3d245"
         }
       ],
       "configurations" : [
@@ -1114,11 +1114,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect_2.12",
-      "version" : "3.5.6",
+      "version" : "3.5.7",
       "artifacts" : [
         {
           "name" : "cats-effect_2.12.jar",
-          "hash" : "sha1:510bc00f286b9e9a5c5a65c17aa98ce9f412faec"
+          "hash" : "sha1:6bec3ae9c9fa892ec8cb3069ad399cfa9b934ce7"
         }
       ],
       "configurations" : [
