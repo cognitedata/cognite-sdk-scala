@@ -3,7 +3,6 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.effect.IO
 import cats.implicits._
 import cats.{Id, Monad, MonadError => CMonadError}
 import com.cognite.scala_sdk.BuildInfo
@@ -434,8 +433,8 @@ class Client(
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
     auth: Auth
-)(implicit trace: Trace[IO], sttpBackend: SttpBackend[IO, Any])
-    extends GenericClient[IO](applicationName, projectName, baseUrl, auth)
+)(implicit trace: Trace[OrError], sttpBackend: SttpBackend[OrError, Any])
+    extends GenericClient[OrError](applicationName, projectName, baseUrl, auth)
 
 object Client {
   def apply(
@@ -444,7 +443,7 @@ object Client {
       baseUrl: String,
       auth: Auth
   )(
-      implicit trace: Trace[IO],
-      sttpBackend: SttpBackend[IO, Any]
+      implicit trace: Trace[OrError],
+      sttpBackend: SttpBackend[OrError, Any]
   ): Client = new Client(applicationName, projectName, baseUrl, auth)
 }

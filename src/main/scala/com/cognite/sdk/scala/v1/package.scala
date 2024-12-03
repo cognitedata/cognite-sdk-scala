@@ -3,11 +3,11 @@
 
 package com.cognite.sdk.scala
 
-import cats.Id
 import com.cognite.sdk.scala.sttp.GzipBackend
-import _root_.sttp.client3.{HttpURLConnectionBackend, SttpBackend}
+import _root_.sttp.client3.{EitherBackend, HttpURLConnectionBackend, SttpBackend}
 
 package object v1 {
-  implicit val sttpBackend: SttpBackend[Id, Any] =
-    new GzipBackend[Id, Any](HttpURLConnectionBackend())
+  type OrError[T] = Either[Throwable, T]
+  implicit val sttpBackend: SttpBackend[OrError, Any] =
+    new GzipBackend[OrError, Any](new EitherBackend(HttpURLConnectionBackend()))
 }

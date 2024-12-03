@@ -8,7 +8,8 @@ import cats.effect.std.Queue
 import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.sttp.{BackpressureThrottleBackend, RateLimitingBackend, RetryingBackend}
-import org.scalatest.OptionValues
+import com.cognite.sdk.scala.v1.sttpBackend
+import org.scalatest.{EitherValues, OptionValues}
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.impl.cats.implicits.asyncMonadError
 import sttp.client3.testing.SttpBackendStub
@@ -24,7 +25,7 @@ import scala.concurrent.duration._
 import scala.collection.immutable.Seq
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
-class ClientTest extends SdkTestSpec with OptionValues {
+class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
   private val tokenInspectResponse = Response(
     s"""
        |{
@@ -113,22 +114,22 @@ class ClientTest extends SdkTestSpec with OptionValues {
 
   it should "throw an exception if the authentication is invalid and project is not specified" in {
     implicit val auth: Auth = BearerTokenAuth("invalid-key")
-    an[InvalidAuthentication] should be thrownBy GenericClient.forAuth[IO](
+    GenericClient.forAuth[OrError](
       "scala-sdk-test", "", auth)(
       implicitly,
       implicitly,
-      authSttpBackend
-    ).unsafeRunSync().assets.list(Some(1)).compile.toList
+      sttpBackend
+    ).map(_.token.inspect()).left.value shouldBe a [InvalidAuthentication] 
   }
 
   it should "not throw an exception if the authentication is invalid and project is specified" in {
     implicit val auth: Auth = BearerTokenAuth("invalid-key")
-    noException should be thrownBy new GenericClient[IO](
+    new GenericClient[OrError](
       "scala-sdk-test", projectName, auth = auth)(
       implicitly,
       implicitly,
-      authSttpBackend
-    )
+      sttpBackend
+    ) shouldBe Symbol("right")
   }
 
   it should "give a friendly error message when using a malformed base url" in {
@@ -138,7 +139,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "",
         auth
-      )(implicitly, new LoggingSttpBackend[IO, Any](authSttpBackend)).token.inspect().unsafeRunSync()
+      )(implicitly, new LoggingSttpBackend[OrError, Any](sttpBackend)).token.inspect()
     }
     assertThrows[UnknownHostException] {
       Client(
@@ -146,7 +147,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "thisShouldThrowAnUnknownHostException:)",
         auth
-      )(implicitly, authSttpBackend).token.inspect().unsafeRunSync()
+      )(implicitly, sttpBackend).token.inspect()
     }
   }
 
@@ -157,7 +158,7 @@ class ClientTest extends SdkTestSpec with OptionValues {
         projectName,
         "http://api.cognitedata.com",
         auth
-      )(implicitly, authSttpBackend).token.inspect().unsafeRunSync()
+      )(implicitly, sttpBackend).token.inspect()
     }
   }
 
