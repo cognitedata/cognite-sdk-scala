@@ -15,7 +15,7 @@ import sttp.client3.impl.cats.implicits.asyncMonadError
 import sttp.client3.testing.SttpBackendStub
 import sttp.client3.{Response, SttpBackend, SttpClientException, UriContext, basicRequest}
 import sttp.model.{Header, StatusCode}
-import sttp.monad.MonadAsyncError
+import sttp.monad.{EitherMonad, MonadAsyncError}
 
 import java.net.{ConnectException, UnknownHostException}
 import java.time.Instant
@@ -54,14 +54,14 @@ class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
 
   it should "set x-cdp headers" in {
     var headers = Seq.empty[Header]
-    val saveHeadersStub = SttpBackendStub(asyncMonadError[IO])
+    val saveHeadersStub = SttpBackendStub(EitherMonad)
       .whenAnyRequest
       .thenRespondF { req =>
         headers = req.headers
-        IO.pure(Response.ok(tokenInspectResponse).copy(headers = req.headers))
+        Right(Response.ok(tokenInspectResponse).copy(headers = req.headers))
       }
-    new GenericClient[IO]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, implicitly, saveHeadersStub)
-      .token.inspect().unsafeRunSync()
+    new GenericClient[OrError]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, implicitly, saveHeadersStub)
+      .token.inspect()
     headers should contain (Header("x-cdp-clienttag", "client-test"))
     headers should contain (Header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}"))
     headers should contain (Header("x-cdp-app", "scala-sdk-test"))
