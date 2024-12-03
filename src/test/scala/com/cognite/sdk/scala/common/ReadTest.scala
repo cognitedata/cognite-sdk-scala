@@ -35,7 +35,7 @@ class ReadTest extends SdkTestSpec with OptionValues {
           case q @ QuerySegment.KeyValue("limit", _, _, _) => 
             q.v.toInt
         }.value
-        Right(Response.ok(0))
+        Right(Response.ok(Right(0)))
       }
     lazy val dummyClient =
       Client("foo", projectName, "https://api.cognitedata.com", auth)(implicitly, requestHijacker)
