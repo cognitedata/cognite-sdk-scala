@@ -18,13 +18,16 @@ class Files[F[_]](val requestSession: RequestSession[F])
     with PartitionedReadable[File, F]
     with RetrieveByIdsWithIgnoreUnknownIds[File, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[File, F]
+    with RetrieveByInstanceIdsWithIgnoreUnknownIds[File, F]
     with Create[File, FileCreate, F]
     with DeleteByCogniteIds[F]
     with PartitionedFilter[File, FilesFilter, F]
     with Search[File, FilesQuery, F]
     with UpdateById[File, FileUpdate, F]
     with UpdateByExternalId[File, FileUpdate, F] {
+
   import Files._
+
   override val baseUrl = uri"${requestSession.baseUrl}/files"
 
   implicit val errorOrFileDecoder: Decoder[Either[CdpApiError, File]] =
@@ -100,6 +103,17 @@ class Files[F[_]](val requestSession: RequestSession[F])
       ignoreUnknownIds
     )
 
+  override def retrieveByInstanceIds(
+      ids: Seq[InstanceId],
+      ignoreUnknownIds: Boolean
+  ): F[Seq[File]] =
+    RetrieveByInstanceIdsWithIgnoreUnknownIds.retrieveByInstanceIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
+    )
+
   override def updateById(items: Map[Long, FileUpdate]): F[Seq[File]] =
     UpdateById.updateById[F, File, FileUpdate](requestSession, baseUrl, items)
 
@@ -147,6 +161,20 @@ class Files[F[_]](val requestSession: RequestSession[F])
         )
       )
 
+  def uploadLink(item: FileUpload): F[File] =
+    requestSession
+      .post[Items[File], Items[File], Items[FileUpload]](
+        Items(Seq(item)),
+        uri"${baseUrl.toString}/uploadlink",
+        values => values
+      )
+      .flatMap(
+        FMonad.fromOption(
+          _.items.headOption,
+          SdkException(s"File upload of ${item.toString} did not return upload url")
+        )
+      )
+
   def download(item: FileDownload, out: java.io.OutputStream): F[Unit] =
     for {
       link <- downloadLink(item)
@@ -190,17 +218,35 @@ object Files {
     deriveDecoder[FileDownloadLinkId]
   implicit val fileDownloadLinkExternalIdDecoder: Decoder[FileDownloadLinkExternalId] =
     deriveDecoder[FileDownloadLinkExternalId]
+  implicit val fileDownloadLinkInstanceIdDecoder: Decoder[FileDownloadLinkInstanceId] =
+    deriveDecoder[FileDownloadLinkInstanceId]
+
   implicit val fileDownloadIdEncoder: Encoder[FileDownloadId] =
     deriveEncoder[FileDownloadId]
   implicit val fileDownloadExternalIdEncoder: Encoder[FileDownloadExternalId] =
     deriveEncoder[FileDownloadExternalId]
+  implicit val fileDownloadInstanceIdEncoder: Encoder[FileDownloadInstanceId] =
+    deriveEncoder[FileDownloadInstanceId]
+
   implicit val fileDownloadEncoder: Encoder[FileDownload] = Encoder.instance {
-    case downloadId @ FileDownloadId(_) => fileDownloadIdEncoder(downloadId)
-    case downloadExternalId @ FileDownloadExternalId(_) =>
+    case downloadId: FileDownloadId => fileDownloadIdEncoder(downloadId)
+    case downloadExternalId: FileDownloadExternalId =>
       fileDownloadExternalIdEncoder(downloadExternalId)
+    case downloadInstanceId: FileDownloadInstanceId =>
+      fileDownloadInstanceIdEncoder(downloadInstanceId)
+  }
+  implicit val fileUploadExternalIdEncoder: Encoder[FileUploadExternalId] =
+    deriveEncoder[FileUploadExternalId]
+  implicit val fileUploadInstanceIdEncoder: Encoder[FileUploadInstanceId] =
+    deriveEncoder[FileUploadInstanceId]
+  implicit val fileUploadEncoder: Encoder[FileUpload] = Encoder.instance {
+    case uploadExternalId: FileUploadExternalId => fileUploadExternalIdEncoder(uploadExternalId)
+    case uploadInstanceId: FileUploadInstanceId => fileUploadInstanceIdEncoder(uploadInstanceId)
   }
   implicit val fileDownloadLinkDecoder: Decoder[FileDownloadLink] =
-    fileDownloadLinkIdDecoder.widen.or(fileDownloadLinkExternalIdDecoder.widen)
+    fileDownloadLinkIdDecoder.widen.or(
+      fileDownloadLinkExternalIdDecoder.widen.or(fileDownloadLinkInstanceIdDecoder.widen)
+    )
   implicit val fileDownloadItemsEncoder: Encoder[Items[FileDownload]] =
     deriveEncoder[Items[FileDownload]]
   implicit val fileDownloadItemsDecoder: Decoder[Items[FileDownloadLink]] =

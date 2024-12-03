@@ -130,11 +130,14 @@ object Readable {
 
 trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByIds(ids: Seq[Long]): F[Seq[R]]
-  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def retrieveById(id: Long): F[R] =
-    // The API returns an error causing an exception to be thrown if the item isn't found,
-    // so .head is safe here.
-    retrieveByIds(Seq(id)).map(_.head)
+    retrieveByIds(Seq(id))
+      .flatMap(
+        FMonad.fromOption(
+          _.head,
+          throw new SdkException("Unexpected empty response when retrieving item by Id")
+        )
+      )
 }
 
 object RetrieveByIds {
@@ -170,12 +173,22 @@ object RetrieveByIdsWithIgnoreUnknownIds {
 
 trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[R]]
-  @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def retrieveByExternalId(externalId: String): F[R] =
-    // The API returns an error causing an exception to be thrown if the item isn't found,
-    // so .head is safe here.
-    retrieveByExternalIds(Seq(externalId))
-      .map(_.head)
+    <<<<<<<.HEAD(
+      // The API returns an error causing an exception to be thrown if the item isn't found,
+      // so .head is safe here.
+      retrieveByExternalIds(Seq(externalId))
+        .map(_.head)
+    )
+  =======
+  requestSession.map(
+    retrieveByExternalIds(Seq(externalId)),
+    (r1: Seq[R]) =>
+      r1.headOption.getOrElse(
+        throw new SdkException("Unexpected empty response when retrieving item by ExternalId")
+      )
+  )
+  >>>>>>>.use(-instance - id - as - alternative - to - external - id)
 }
 
 object RetrieveByExternalIds {
@@ -206,6 +219,38 @@ object RetrieveByExternalIdsWithIgnoreUnknownIds {
   )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
     requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteId]](
       ItemsWithIgnoreUnknownIds(externalIds.map(CogniteExternalId.apply), ignoreUnknownIds),
+      uri"$baseUrl/byids",
+      value => value.items
+    )
+}
+
+trait RetrieveByInstanceIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
+  def retrieveByInstanceIds(instanceIds: Seq[InstanceId]): F[Seq[R]]
+  def retrieveByInstanceId(instanceId: InstanceId): F[R] =
+    requestSession.map(
+      retrieveByInstanceIds(Seq(instanceId)),
+      (r1: Seq[R]) =>
+        r1.headOption.getOrElse(
+          throw new SdkException("Unexpected empty response when retrieving item by InstanceId")
+        )
+    )
+}
+
+trait RetrieveByInstanceIdsWithIgnoreUnknownIds[R, F[_]] extends RetrieveByInstanceIds[R, F] {
+  override def retrieveByInstanceIds(ids: Seq[InstanceId]): F[Seq[R]] =
+    retrieveByInstanceIds(ids, ignoreUnknownIds = false)
+  def retrieveByInstanceIds(ids: Seq[InstanceId], ignoreUnknownIds: Boolean): F[Seq[R]]
+}
+
+object RetrieveByInstanceIdsWithIgnoreUnknownIds {
+  def retrieveByInstanceIds[F[_], R](
+      requestSession: RequestSession[F],
+      baseUrl: Uri,
+      cogniteIds: Seq[CogniteIdOrInstanceId],
+      ignoreUnknownIds: Boolean
+  )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
+    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteIdOrInstanceId]](
+      ItemsWithIgnoreUnknownIds(cogniteIds, ignoreUnknownIds),
       uri"$baseUrl/byids",
       value => value.items
     )
