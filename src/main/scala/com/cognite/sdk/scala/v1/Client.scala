@@ -119,7 +119,7 @@ final case class RequestSession[F[_]: Trace](
       .get(uri)
       .response(parseResponse(uri, mapResult))
       .send(sttpBackend)
-      .map(_.body)
+      .flatMap(r => F.fromEither(r.body))
 
   def postEmptyBody[R, T](
       uri: Uri,
@@ -134,7 +134,7 @@ final case class RequestSession[F[_]: Trace](
       .post(uri)
       .response(parseResponse(uri, mapResult))
       .send(sttpBackend)
-      .map(_.body)
+      .flatMap(r => F.fromEither(r.body))
 
   def post[R, T, I](
       body: I,
@@ -150,7 +150,7 @@ final case class RequestSession[F[_]: Trace](
       .body(body)
       .response(parseResponse(uri, mapResult))
       .send(sttpBackend)
-      .map(_.body)
+      .flatMap(r => F.fromEither(r.body))
 
   def head(
       uri: Uri,
@@ -398,32 +398,32 @@ object GenericClient {
 
   def parseResponse[T, R](uri: Uri, mapResult: T => R)(
       implicit decoder: Decoder[T]
-  ): ResponseAs[R, Any] =
+  ): ResponseAs[Either[Throwable, R], Any] =
     asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
-      response match {
-        case Left(DeserializationException(_, _))
-            if metadata.code.code === StatusCode.TooManyRequests.code =>
-          throw CdpApiException(
-            url = uri"$uri",
-            code = StatusCode.TooManyRequests.code,
-            missing = None,
-            duplicated = None,
-            missingFields = None,
-            message = "Too many requests.",
-            requestId = metadata.header("x-request-id")
-          )
-        case Left(DeserializationException(_, error)) =>
-          throw SdkException(
-            s"Failed to parse response, reason: ${error.getMessage}",
-            Some(uri),
-            metadata.header("x-request-id"),
-            Some(metadata.code.code)
-          )
-        case Left(HttpError(cdpApiError, _)) =>
-          throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
-        case Right(value) =>
-          mapResult(value)
-      }
+      response
+        .leftMap[Throwable] {
+          case DeserializationException(_, _)
+              if metadata.code.code === StatusCode.TooManyRequests.code =>
+            CdpApiException(
+              url = uri"$uri",
+              code = StatusCode.TooManyRequests.code,
+              missing = None,
+              duplicated = None,
+              missingFields = None,
+              message = "Too many requests.",
+              requestId = metadata.header("x-request-id")
+            )
+          case DeserializationException(_, error) =>
+            SdkException(
+              s"Failed to parse response, reason: ${error.getMessage}",
+              Some(uri),
+              metadata.header("x-request-id"),
+              Some(metadata.code.code)
+            )
+          case HttpError(cdpApiError, _) =>
+            cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
+        }
+        .map(mapResult)
     )
 }
 
