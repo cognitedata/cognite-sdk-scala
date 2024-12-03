@@ -386,7 +386,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
       )
       .thenRespond(
         Response(
-          expectedIds,
+          Right(expectedIds),
           StatusCode.Ok,
           "OK",
           Seq(Header("content-type", "application/json; charset=utf-8"))
