@@ -57,7 +57,7 @@ class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
       .whenAnyRequest
       .thenRespondF { req =>
         headers = req.headers
-        Right(Response.ok(tokenInspectResponse).copy(headers = req.headers))
+        Right(tokenInspectResponse.copy(headers = req.headers))
       }
     new GenericClient[OrError]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, implicitly, saveHeadersStub)
       .token.inspect()
