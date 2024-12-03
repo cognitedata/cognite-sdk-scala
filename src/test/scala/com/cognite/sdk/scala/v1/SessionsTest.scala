@@ -50,7 +50,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       Items[SessionCreateWithCredential](
         Seq(SessionCreateWithCredential("clientId", "clientSecret"))
       )
-    )
+    ).unsafeRunSync()
     resCreate shouldBe expectedResponse
   }
 
@@ -79,7 +79,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionCreated)
 
-    val resCreate = client.sessions.createWithTokenExchangeFlow()
+    val resCreate = client.sessions.createWithTokenExchangeFlow().unsafeRunSync()
     resCreate shouldBe expectedResponse
   }
 
@@ -119,7 +119,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       Items[SessionCreateWithCredential](
         Seq[SessionCreateWithCredential]()
       )
-    )
+    ).unsafeRunSync()
     error.message shouldBe s"Request must contain exactly 1 item in request body"
   }
 
@@ -159,7 +159,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       Items[SessionCreateWithCredential](
         Seq(SessionCreateWithCredential("clientId", "clientSecret"))
       )
-    )
+    ).unsafeRunSync()
     error.message shouldBe s"Resource not found. This may also be due to insufficient access rights."
   }
 
@@ -236,7 +236,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionBound)
 
-    val responseBind = client.sessions.bind(BindSessionRequest("nonce-value"))
+    val responseBind = client.sessions.bind(BindSessionRequest("nonce-value")).unsafeRunSync()
     responseBind shouldBe expectedResponse
   }
 
@@ -274,7 +274,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionBound)
 
-    val error = the[CdpApiException] thrownBy client.sessions.bind(BindSessionRequest("expired-nonce"))
+    val error = the[CdpApiException] thrownBy client.sessions.bind(BindSessionRequest("expired-nonce")).unsafeRunSync()
     error.message shouldBe "Nonce has expired"
   }
 
@@ -311,7 +311,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours {
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionRefresh)
 
-    val responseBind = client.sessions.refresh(RefreshSessionRequest(123, "sessionKey-value"))
+    val responseBind = client.sessions.refresh(RefreshSessionRequest(123, "sessionKey-value")).unsafeRunSync()
     responseBind shouldBe expectedResponse
   }
 
