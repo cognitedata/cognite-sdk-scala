@@ -8,7 +8,6 @@ import cats.effect.std.Queue
 import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.sttp.{BackpressureThrottleBackend, RateLimitingBackend, RetryingBackend}
-import com.cognite.sdk.scala.v1.sttpBackend
 import org.scalatest.{EitherValues, OptionValues}
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.impl.cats.implicits.asyncMonadError
