@@ -4,10 +4,11 @@
 package com.cognite.sdk.scala
 
 import com.cognite.sdk.scala.sttp.GzipBackend
+import cats.Id
 import _root_.sttp.client3.{EitherBackend, HttpURLConnectionBackend, SttpBackend}
 
 package object v1 {
   type OrError[T] = Either[Throwable, T]
   implicit val sttpBackend: SttpBackend[OrError, Any] =
-    new GzipBackend[OrError, Any](new EitherBackend(HttpURLConnectionBackend()))
+    new EitherBackend(new GzipBackend[Id, Any](HttpURLConnectionBackend()))
 }

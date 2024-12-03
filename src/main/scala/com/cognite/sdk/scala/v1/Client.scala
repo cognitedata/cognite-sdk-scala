@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import cats.implicits._
-import cats.{Id, Monad, MonadError => CMonadError}
+import cats.{Id, MonadError => CMonadError}
 import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
@@ -381,9 +381,9 @@ object GenericClient {
       cdfVersion: Option[String] = None
   )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
     if (projectName.isEmpty) {
-      throw InvalidAuthentication()
+      F.raiseError(InvalidAuthentication())
     } else {
-      Monad[F].pure(
+      F.pure(
         new GenericClient[F](
           applicationName,
           projectName,
