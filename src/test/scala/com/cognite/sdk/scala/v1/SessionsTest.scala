@@ -55,7 +55,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
           Seq(SessionCreateWithCredential("clientId", "clientSecret"))
         )
       )
-    resCreate shouldBe Right(expectedResponse)
+    resCreate shouldBe expectedResponse
   }
 
   it should "create a new session with token exchange flow" in {
@@ -84,7 +84,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
     )(implicitly, implicitly, responseForSessionCreated)
 
     val resCreate = client.sessions.createWithTokenExchangeFlow()
-    resCreate shouldBe Right(expectedResponse)
+    resCreate shouldBe expectedResponse
   }
 
   it should "fail to create a new session if input items is empty" in {
@@ -218,13 +218,13 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
   }
 
   it should "bind a session" in {
-    val expectedResponse = Right(SessionTokenResponse(
+    val expectedResponse = SessionTokenResponse(
       1,
       "accessToken",
       Instant.now().toEpochMilli,
       None,
       Some("sessionKey")
-    ))
+    )
     val responseForSessionBound = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
@@ -237,7 +237,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
       }
       .thenRespond(
         Response(
-          expectedResponse,
+          Right(expectedResponse),
           StatusCode.Ok,
           "OK",
           Seq(Header("content-type", "application/json; charset=utf-8"))
@@ -295,13 +295,13 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
   }
 
   it should "refresh a session" in {
-    val expectedResponse = Right(SessionTokenResponse(
+    val expectedResponse = SessionTokenResponse(
       1,
       "accessToken",
       Instant.now().toEpochMilli,
       None,
       None
-    ))
+    )
     val responseForSessionRefresh = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
@@ -314,7 +314,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
       }
       .thenRespond(
         Response(
-          expectedResponse,
+          Right(expectedResponse),
           StatusCode.Ok,
           "OK",
           Seq(Header("content-type", "application/json; charset=utf-8"))
