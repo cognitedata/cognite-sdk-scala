@@ -25,7 +25,7 @@ import org.scalatest.{EitherValues, Inside}
 class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues with Inside {
   "Sessions" should "create a new session with credential flow" in {
     val expectedResponse =
-      Seq(Session(0, Some("CLIENT_CREDENTIALS"), "READY", "nonce", Some("clientId")))
+      Right(Seq(Session(0, Some("CLIENT_CREDENTIALS"), "READY", "nonce", Some("clientId"))))
     val responseForSessionCreated = SttpBackendStub(EitherMonad)
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
@@ -59,7 +59,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
   }
 
   it should "create a new session with token exchange flow" in {
-    val expectedResponse = Seq(Session(0, Some("TOKEN_EXCHANGE"), "READY", "nonce", None))
+    val expectedResponse = Right(Seq(Session(0, Some("TOKEN_EXCHANGE"), "READY", "nonce", None)))
     val responseForSessionCreated = SttpBackendStub(EitherMonad)
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(List("sessions")) && r.body === StringBody(
@@ -178,7 +178,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
   }
 
   it should "list all the sessions" in {
-    val expectedResponse = Seq(
+    val expectedResponse = Right(Seq(
       SessionList(
         1,
         "CLIENT_CREDENTIALS",
@@ -194,7 +194,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
         Instant.now().minusSeconds(120).toEpochMilli,
         Instant.now().minusSeconds(60).toEpochMilli
       )
-    )
+    ))
     val responseForSessionList = SttpBackendStub(EitherMonad)
       .whenRequestMatches(r => r.method === Method.GET && r.uri.path.endsWith(List("sessions")))
       .thenRespond(
@@ -218,13 +218,13 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
   }
 
   it should "bind a session" in {
-    val expectedResponse = SessionTokenResponse(
+    val expectedResponse = Right(SessionTokenResponse(
       1,
       "accessToken",
       Instant.now().toEpochMilli,
       None,
       Some("sessionKey")
-    )
+    ))
     val responseForSessionBound = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
@@ -295,13 +295,13 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
   }
 
   it should "refresh a session" in {
-    val expectedResponse = SessionTokenResponse(
+    val expectedResponse = Right(SessionTokenResponse(
       1,
       "accessToken",
       Instant.now().toEpochMilli,
       None,
       None
-    )
+    ))
     val responseForSessionRefresh = SttpBackendStub(asyncMonadError[IO])
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
