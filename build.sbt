@@ -40,7 +40,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.31." + patchVersion,
+  version := "2.32." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
@@ -192,7 +192,7 @@ val sttpDeps = Seq(
     .exclude("io.circe", "circe-parser_2.11")
     .exclude("io.circe", "circe-parser_2.12")
     .exclude("io.circe", "circe-parser_2.13"),
-  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test
+  "com.softwaremill.sttp.client3" %% "fs2" % sttpVersion
 )
 
 def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
