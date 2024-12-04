@@ -378,7 +378,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
       CogniteInternalId(2)
     )
 
-    val responseForSessionRevoke = SttpBackendStub(asyncMonadError[IO])
+    val responseForSessionRevoke = SttpBackendStub(EitherMonad)
       .whenRequestMatches(r =>
         r.method === Method.POST && r.uri.path.endsWith(List("sessions", "revoke"))
       )
@@ -391,13 +391,13 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
         )
       )
 
-    val client = new GenericClient[IO](
+    val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionRevoke)
 
-    val responseDelete = client.sessions.revoke(Items(expectedIds)).unsafeRunSync()
+    val responseDelete = client.sessions.revoke(Items(expectedIds)).value
     responseDelete.size shouldBe 2
     responseDelete shouldBe expectedIds
   }
