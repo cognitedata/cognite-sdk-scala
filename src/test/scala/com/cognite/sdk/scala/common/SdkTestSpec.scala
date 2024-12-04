@@ -17,7 +17,6 @@ import sttp.monad.MonadError
 
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
-import cats.Id
 import cats.effect.IO
 import cats.effect.unsafe.IORuntime
 
@@ -52,7 +51,7 @@ class LoggingSttpBackend[F[_], +P](delegate: SttpBackend[F, P]) extends SttpBack
 abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
   implicit val ioRuntime: IORuntime = IORuntime.global
   implicit val trace: Trace[IO] = natchez.Trace.Implicits.noop
-  implicit val traceId: Trace[Id] = natchez.Trace.Implicits.noop
+  implicit val traceEither: Trace[OrError] = natchez.Trace.Implicits.noop
   implicit val authSttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
   // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
   lazy val client: GenericClient[IO] = GenericClient[IO](

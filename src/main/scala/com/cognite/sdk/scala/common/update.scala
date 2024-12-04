@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.common
 
+import cats.implicits._
 import com.cognite.sdk.scala.v1._
 import sttp.client3._
 import sttp.client3.circe._
@@ -23,24 +24,14 @@ trait UpdateById[R <: ToUpdate[U] with WithId[Long], U, F[_]]
     updateById(items.map(a => a.id -> a.toUpdate).toMap)
 
   def updateOneById(id: Long, item: U): F[R] =
-    requestSession.map(
-      updateById(Map(id -> item)),
-      (r1: Seq[R]) =>
-        r1.headOption match {
-          case Some(value) => value
-          case None => throw SdkException("Unexpected empty response when updating item")
-        }
-    )
+    updateById(Map(id -> item)).flatMap { items =>
+      F.fromOption(items.headOption, SdkException("Unexpected empty response when updating item"))
+    }
 
   def updateOneFromRead(item: R): F[R] =
-    requestSession.map(
-      updateFromRead(Seq(item)),
-      (r1: Seq[R]) =>
-        r1.headOption match {
-          case Some(value) => value
-          case None => throw SdkException("Unexpected empty response when updating item")
-        }
-    )
+    updateFromRead(Seq(item)).flatMap { items =>
+      F.fromOption(items.headOption, SdkException("Unexpected empty response when updating item"))
+    }
 }
 
 object UpdateById {
@@ -68,14 +59,9 @@ trait UpdateByExternalId[R, U, F[_]] extends WithRequestSession[F] with BaseUrl 
   def updateByExternalId(items: Map[String, U]): F[Seq[R]]
 
   def updateOneByExternalId(id: String, item: U): F[R] =
-    requestSession.map(
-      updateByExternalId(Map(id -> item)),
-      (r1: Seq[R]) =>
-        r1.headOption match {
-          case Some(value) => value
-          case None => throw SdkException("Unexpected empty response when updating item")
-        }
-    )
+    updateByExternalId(Map(id -> item)).flatMap { items =>
+      F.fromOption(items.headOption, SdkException("Unexpected empty response when updating item"))
+    }
 }
 
 object UpdateByExternalId {

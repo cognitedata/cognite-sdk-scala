@@ -10,6 +10,7 @@ import sttp.client3.testing.SttpBackendStub
 import io.circe.generic.semiauto.deriveDecoder
 import org.scalatest.OptionValues
 import sttp.model.Uri.QuerySegment
+import sttp.monad.EitherMonad
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
 class ReadTest extends SdkTestSpec with OptionValues {
@@ -28,16 +29,16 @@ class ReadTest extends SdkTestSpec with OptionValues {
 
   def readWithCursor(batchSize: Int, limit: Option[Int])(test: Int => Any): Any = {
     var totalLimit = 0
-    val requestHijacker = SttpBackendStub.synchronous.whenAnyRequest.thenRespondF(req => {
-      totalLimit += req.uri.querySegments.collectFirst {
-        case q @ QuerySegment.KeyValue("limit", _, _, _) => q.v.toInt
-      }.value
-      Response.ok(0)
-    })
-    lazy val dummyClient = Client("foo",
-      projectName,
-      "https://api.cognitedata.com",
-      auth)(implicitly, requestHijacker)
+    val requestHijacker = SttpBackendStub(EitherMonad)
+      .whenAnyRequest.thenRespondF { req => 
+        totalLimit += req.uri.querySegments.collectFirst {
+          case q @ QuerySegment.KeyValue("limit", _, _, _) => 
+            q.v.toInt
+        }.value
+        Right(Response.ok(Right(0)))
+      }
+    lazy val dummyClient =
+      Client("foo", projectName, "https://api.cognitedata.com", auth)(implicitly, requestHijacker)
     val dummyRequestSession = dummyClient.requestSession
 
     Readable.readWithCursor(
