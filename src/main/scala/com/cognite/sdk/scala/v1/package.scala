@@ -3,8 +3,8 @@
 
 package com.cognite.sdk.scala
 
-import com.cognite.sdk.scala.sttp.GzipBackend
 import cats.Id
+import com.cognite.sdk.scala.sttp.GzipBackend
 import _root_.sttp.client3.{EitherBackend, HttpURLConnectionBackend, SttpBackend}
 
 package object v1 {

@@ -124,9 +124,11 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
         Items[SessionCreateWithCredential](
           Seq[SessionCreateWithCredential]()
         )
-      ).left.value
+      )
+      .left
+      .value
 
-    error shouldBe a [CdpApiException]
+    error shouldBe a[CdpApiException]
     inside(error) { case e: CdpApiException =>
       e.message shouldBe s"Request must contain exactly 1 item in request body"
     }
@@ -170,31 +172,34 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
           Seq(SessionCreateWithCredential("clientId", "clientSecret"))
         )
       )
-      .left.value
-    
+      .left
+      .value
+
     inside(error) { case e: CdpApiException =>
       e.message shouldBe s"Resource not found. This may also be due to insufficient access rights."
     }
   }
 
   it should "list all the sessions" in {
-    val expectedResponse = Right(Seq(
-      SessionList(
-        1,
-        "CLIENT_CREDENTIALS",
-        "READY",
-        Instant.now().toEpochMilli,
-        Instant.now().plusSeconds(60).toEpochMilli,
-        Some("clientId")
-      ),
-      SessionList(
-        2,
-        "TOKEN_EXCHANGE",
-        "CANCELLED",
-        Instant.now().minusSeconds(120).toEpochMilli,
-        Instant.now().minusSeconds(60).toEpochMilli
+    val expectedResponse = Right(
+      Seq(
+        SessionList(
+          1,
+          "CLIENT_CREDENTIALS",
+          "READY",
+          Instant.now().toEpochMilli,
+          Instant.now().plusSeconds(60).toEpochMilli,
+          Some("clientId")
+        ),
+        SessionList(
+          2,
+          "TOKEN_EXCHANGE",
+          "CANCELLED",
+          Instant.now().minusSeconds(120).toEpochMilli,
+          Instant.now().minusSeconds(60).toEpochMilli
+        )
       )
-    ))
+    )
     val responseForSessionList = SttpBackendStub(EitherMonad)
       .whenRequestMatches(r => r.method === Method.GET && r.uri.path.endsWith(List("sessions")))
       .thenRespond(
@@ -216,14 +221,16 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
   }
 
   it should "bind a session" in {
-    val expectedResponse = SessionTokenResponse(
-      1,
-      "accessToken",
-      Instant.now().toEpochMilli,
-      None,
-      Some("sessionKey")
+    val expectedResponse = Right(
+      SessionTokenResponse(
+        1,
+        "accessToken",
+        Instant.now().toEpochMilli,
+        None,
+        Some("sessionKey")
+      )
     )
-    val responseForSessionBound = SttpBackendStub(asyncMonadError[IO])
+    val responseForSessionBound = SttpBackendStub(EitherMonad)
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
@@ -235,20 +242,20 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
       }
       .thenRespond(
         Response(
-          Right(expectedResponse),
+          expectedResponse,
           StatusCode.Ok,
           "OK",
           Seq(Header("content-type", "application/json; charset=utf-8"))
         )
       )
 
-    val client = new GenericClient[IO](
+    val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionBound)
 
-    val responseBind = client.sessions.bind(BindSessionRequest("nonce-value")).unsafeRunSync()
+    val responseBind = client.sessions.bind(BindSessionRequest("nonce-value"))
     responseBind shouldBe expectedResponse
   }
 
@@ -261,7 +268,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
             }
         }
         """
-    val responseForSessionBound = SttpBackendStub(asyncMonadError[IO])
+    val responseForSessionBound = SttpBackendStub(EitherMonad)
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
@@ -280,27 +287,33 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
         )
       )
 
-    val client = new GenericClient[IO](
+    val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionBound)
 
-    val error = the[CdpApiException] thrownBy client.sessions
+    val error = client.sessions
       .bind(BindSessionRequest("expired-nonce"))
-      .unsafeRunSync()
-    error.message shouldBe "Nonce has expired"
+      .left
+      .value
+
+    inside(error) { case e: CdpApiException =>
+      e.message shouldBe "Nonce has expired"
+    }
   }
 
   it should "refresh a session" in {
-    val expectedResponse = SessionTokenResponse(
-      1,
-      "accessToken",
-      Instant.now().toEpochMilli,
-      None,
-      None
+    val expectedResponse = Right(
+      SessionTokenResponse(
+        1,
+        "accessToken",
+        Instant.now().toEpochMilli,
+        None,
+        None
+      )
     )
-    val responseForSessionRefresh = SttpBackendStub(asyncMonadError[IO])
+    val responseForSessionRefresh = SttpBackendStub(EitherMonad)
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
@@ -312,21 +325,21 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
       }
       .thenRespond(
         Response(
-          Right(expectedResponse),
+          expectedResponse,
           StatusCode.Ok,
           "OK",
           Seq(Header("content-type", "application/json; charset=utf-8"))
         )
       )
 
-    val client = new GenericClient[IO](
+    val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionRefresh)
 
     val responseBind =
-      client.sessions.refresh(RefreshSessionRequest(123, "sessionKey-value")).unsafeRunSync()
+      client.sessions.refresh(RefreshSessionRequest(123, "sessionKey-value"))
     responseBind shouldBe expectedResponse
   }
 
@@ -339,7 +352,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
             }
         }
         """
-    val responseForSessionRefresh = SttpBackendStub(asyncMonadError[IO])
+    val responseForSessionRefresh = SttpBackendStub(EitherMonaad)
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
@@ -358,18 +371,22 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
         )
       )
 
-    val client = new GenericClient[IO](
+    val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
       auth = BearerTokenAuth("bearer Token")
     )(implicitly, implicitly, responseForSessionRefresh)
 
-    val error = the[CdpApiException] thrownBy client.sessions
+    val error = client.sessions
       .refresh(
         RefreshSessionRequest(123, "invalid-sessionKey")
       )
-      .unsafeRunSync()
-    error.message shouldBe "Session not found"
+      .left
+      .value
+
+    inside(error) { case e: CdpApiException =>
+      e.message shouldBe "Session not found"
+    }
   }
 
   it should "revoke a session" in {

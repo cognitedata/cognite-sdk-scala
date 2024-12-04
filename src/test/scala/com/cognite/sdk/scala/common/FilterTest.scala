@@ -44,7 +44,6 @@ class FilterTest extends SdkTestSpec with OptionValues {
           req <- decode[FilterRequest[DummyFilter]](req.body.asInstanceOf[StringBody].s)
           _ = { hijackedRequest = req }
         } yield Response(Right(ItemsWithCursor(Seq(0, 1, 2), None)), StatusCode.Ok, "OK")
-        
     })
     lazy val dummyClient = Client("foo",
       projectName,
