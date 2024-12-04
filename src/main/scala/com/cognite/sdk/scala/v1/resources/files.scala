@@ -6,6 +6,7 @@ package com.cognite.sdk.scala.v1.resources
 import java.io.{BufferedInputStream, FileInputStream}
 
 import cats.implicits._
+import cats.effect.Sync
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import sttp.client3._
@@ -147,7 +148,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
         )
       )
 
-  def download(item: FileDownload, out: java.io.OutputStream): F[Unit] =
+  def download(item: FileDownload, out: java.io.OutputStream)(implicit F: Sync[F]): F[Unit] =
     for {
       link <- downloadLink(item)
       res <- requestSession.send { request =>
@@ -161,7 +162,8 @@ class Files[F[_]](val requestSession: RequestSession[F])
           s"File download of file ${item.toString} failed with error code ${res.code.toString}"
         )
       )
-    } yield out.write(bytes)
+      r <- F.blocking(out.write(bytes))
+    } yield r
 }
 
 object Files {
