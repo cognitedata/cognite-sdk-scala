@@ -8,7 +8,7 @@ import java.nio.file.{Files, Paths}
 import java.time.Instant
 import java.util.UUID
 import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
-import fs2.Stream
+import fs2.{Collector, Stream}
 import org.scalatest.matchers.should.Matchers
 
 @SuppressWarnings(
@@ -289,13 +289,14 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
       }
     }
 
-    val out = new ByteArrayOutputStream()
-    client.files.download(FileDownloadId(file.id), out).unsafeRunSync()
+    val out = client.files.download(FileDownloadId(file.id)).flatMap(_.compile.toVector)
+      .map(_.toArray)
+      .unsafeRunSync()
 
     val expected =
       Files.readAllBytes(Paths.get("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt"))
 
-    assert(out.toByteArray.sameElements(expected))
+    assert(out.sameElements(expected))
     client.files.deleteById(file.id).unsafeRunSync()
   }
 

@@ -4,15 +4,17 @@
 package com.cognite.sdk.scala.v1.resources
 
 import java.io.{BufferedInputStream, FileInputStream}
-
 import cats.implicits._
 import cats.effect.Sync
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
+import fs2.Stream
 import sttp.client3._
 import sttp.client3.circe._
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import sttp.capabilities.fs2.Fs2Streams
+import sttp.client3.internal.NoStreams.BinaryStream
 
 class Files[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
@@ -148,22 +150,21 @@ class Files[F[_]](val requestSession: RequestSession[F])
         )
       )
 
-  def download(item: FileDownload, out: java.io.OutputStream)(implicit F: Sync[F]): F[Unit] =
+  def download(item: FileDownload): F[Stream[F, Byte]] =
     for {
       link <- downloadLink(item)
       res <- requestSession.send { request =>
         request
           .get(uri"${link.downloadUrl}")
-          .response(asByteArray)
+          .response(asStreamUnsafe(Fs2Streams[F]))
       }
-      bytes <- F.fromOption(
+      bytesStream <- F.fromOption(
         res.body.toOption,
         SdkException(
           s"File download of file ${item.toString} failed with error code ${res.code.toString}"
         )
       )
-      r <- F.blocking(out.write(bytes))
-    } yield r
+    } yield bytesStream
 }
 
 object Files {
