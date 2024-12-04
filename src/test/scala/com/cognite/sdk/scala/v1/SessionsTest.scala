@@ -3,11 +3,9 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.effect.IO
 import com.cognite.sdk.scala.common._
 import sttp.client3._
 import sttp.client3.testing.SttpBackendStub
-import sttp.client3.impl.cats.implicits.asyncMonadError
 import sttp.model.{Header, MediaType, Method, StatusCode}
 import sttp.monad.EitherMonad
 
@@ -352,7 +350,7 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
             }
         }
         """
-    val responseForSessionRefresh = SttpBackendStub(EitherMonaad)
+    val responseForSessionRefresh = SttpBackendStub(EitherMonad)
       .whenRequestMatches { r =>
         r.method === Method.POST && r.uri.path.endsWith(
           List("sessions", "token")
