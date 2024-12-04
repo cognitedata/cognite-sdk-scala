@@ -118,7 +118,7 @@ object OAuth2 {
             parseResponse[SessionTokenResponse, SessionTokenResponse](uri, value => value)
           )
           .send(sttpBackend)
-          .map(_.body)
+          .flatMap(r => F.fromEither(r.body))
         expiresAt = acquiredLowerBound + payload.expiresIn
       } yield TokenState(payload.accessToken, expiresAt)
     }

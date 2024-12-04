@@ -105,7 +105,7 @@ class OAuth2SessionTest extends AnyFlatSpec with Matchers with OptionValues with
             _ <- numTokenRequests.modify(x => (x + 1, x))
             body = SessionTokenResponse(1, "newAccessToken", 5, None, None)
           } yield Response(
-            body,
+            Right(body),
             StatusCode.Ok,
             "OK",
             Seq(Header("content-type", "application/json"))

@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.common
 
+import cats.implicits._
 import cats.effect.Concurrent
 import com.cognite.sdk.scala.v1._
 import io.circe.Decoder
@@ -130,12 +131,11 @@ object Readable {
 trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByIds(ids: Seq[Long]): F[Seq[R]]
   def retrieveById(id: Long): F[R] =
-    requestSession.map(
-      retrieveByIds(Seq(id)),
-      (r1: Seq[R]) =>
-        r1.headOption.getOrElse(
-          throw new SdkException("Unexpected empty response when retrieving item by Id")
-        )
+    retrieveByIds(Seq(id)).flatMap(items =>
+      F.fromOption(
+        items.headOption,
+        SdkException("Unexpected empty response when retrieving item by Id")
+      )
     )
 }
 
@@ -173,13 +173,13 @@ object RetrieveByIdsWithIgnoreUnknownIds {
 trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByExternalIds(externalIds: Seq[String]): F[Seq[R]]
   def retrieveByExternalId(externalId: String): F[R] =
-    requestSession.map(
-      retrieveByExternalIds(Seq(externalId)),
-      (r1: Seq[R]) =>
-        r1.headOption.getOrElse(
-          throw new SdkException("Unexpected empty response when retrieving item by ExternalId")
+    retrieveByExternalIds(Seq(externalId))
+      .flatMap(items =>
+        F.fromOption(
+          items.headOption,
+          SdkException("Unexpected empty response when retrieving item by ExternalId")
         )
-    )
+      )
 }
 
 object RetrieveByExternalIds {
@@ -218,13 +218,13 @@ object RetrieveByExternalIdsWithIgnoreUnknownIds {
 trait RetrieveByInstanceIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveByInstanceIds(instanceIds: Seq[InstanceId]): F[Seq[R]]
   def retrieveByInstanceId(instanceId: InstanceId): F[R] =
-    requestSession.map(
-      retrieveByInstanceIds(Seq(instanceId)),
-      (r1: Seq[R]) =>
-        r1.headOption.getOrElse(
-          throw new SdkException("Unexpected empty response when retrieving item by InstanceId")
+    retrieveByInstanceIds(Seq(instanceId))
+      .flatMap(items =>
+        F.fromOption(
+          items.headOption,
+          SdkException("Unexpected empty response when retrieving item by InstanceId")
         )
-    )
+      )
 }
 
 trait RetrieveByInstanceIdsWithIgnoreUnknownIds[R, F[_]] extends RetrieveByInstanceIds[R, F] {
