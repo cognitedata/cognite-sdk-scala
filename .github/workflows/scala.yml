@@ -22,9 +22,10 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: coursier/setup-action@v1
+        uses: coursier/setup-action@v1.3.9
         with:
           jvm: adopt:8
+          apps: sbt
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
@@ -64,9 +65,10 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: coursier/setup-action@v1
+        uses: coursier/setup-action@v1.3.9
         with:
           jvm: adopt:8
+          apps: sbt
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
@@ -106,9 +108,10 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: coursier/setup-action@v1
+        uses: coursier/setup-action@v1.3.9
         with:
           jvm: adopt:8
+          apps: sbt
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
@@ -147,9 +150,10 @@ jobs:
         git rev-list --count --first-parent HEAD > patch_version.txt
 
     - name: Set up JDK 8
-      uses: coursier/setup-action@v1
+      uses: coursier/setup-action@v1.3.9
       with:
         jvm: adopt:8
+        apps: sbt
 
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
     # Can we do something better here?
@@ -222,9 +226,10 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: coursier/setup-action@v1
+        uses: coursier/setup-action@v1.3.9
         with:
           jvm: adopt:8
+          apps: sbt
 
       - name: Build JAR file
         run: |
@@ -269,9 +274,10 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: coursier/setup-action@v1
+        uses: coursier/setup-action@v1.3.9
         with:
           jvm: adopt:8
+          apps: sbt
 
       - name: Build JAR file
         run: |
