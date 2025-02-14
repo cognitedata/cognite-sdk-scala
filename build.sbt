@@ -3,8 +3,7 @@ import wartremover.Wart
 
 val scala3 = "3.3.3"
 val scala213 = "2.13.16"
-val scala212 = "2.12.19"
-val supportedScalaVersions = List(scala212, scala213, scala3)
+val supportedScalaVersions = List(scala213, scala3)
 
 // This is used only for tests.
 val jettyTestVersion = "9.4.57.v20241219"
@@ -99,10 +98,6 @@ lazy val commonSettings = Seq(
   },
   Compile / wartremoverErrors :=
     (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 12)) =>
-        // We do this to make IntelliJ happy, as it doesn't understand Wartremover properly.
-        // Since we currently put 2.12 first in cross version, that's what IntelliJ is using.
-        Seq.empty[wartremover.Wart]
       case _ =>
         Warts.allBut(
           Wart.DefaultArguments,
@@ -160,12 +155,6 @@ lazy val core = (project in file("."))
           // and to avoid a dependency on scala-collection-compat
           "-Wconf:origin=scala.collection.compat.*:s"
         )
-      case Some((2, minor)) if minor == 12 =>
-        List(
-          // Scala 2.12 doesn't always handle @nowarn correctly,
-          // and doesn't seem to like @deprecated case class fields with default values.
-          "-Wconf:src=src/main/scala/com/cognite/sdk/scala/v1/resources/assets.scala&cat=deprecation:i"
-        )
       case _ =>
         List.empty[String]
     }),
@@ -186,11 +175,7 @@ val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
   ("com.softwaremill.sttp.client3" %% "circe" % sttpVersion)
     // We specify our own version of circe.
-    .exclude("io.circe", "circe-core_2.11")
-    .exclude("io.circe", "circe-core_2.12")
     .exclude("io.circe", "circe-core_2.13")
-    .exclude("io.circe", "circe-parser_2.11")
-    .exclude("io.circe", "circe-parser_2.12")
     .exclude("io.circe", "circe-parser_2.13"),
   "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test
 )
@@ -199,26 +184,16 @@ def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
   Seq(
     // We use the cats version included in the cats-effect version we specify.
     ("io.circe" %% "circe-core" % circeVersion)
-      .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13"),
     ("io.circe" %% "circe-generic" % circeVersion)
-      .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13"),
     ("io.circe" %% "circe-parser" % circeVersion)
-      .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13"),
     ("io.circe" %% "circe-literal" % circeVersion % Test)
-      .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13")
   )
 
 scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
-  case Some((2, minor)) if minor == 12 =>
-    // disable those in 2.12 due to invalid warnings
-    List(
-      "-Ywarn-unused:implicits",
-      "-Ywarn-unused:params"
-    )
   case _ =>
     List.empty[String]
 })
