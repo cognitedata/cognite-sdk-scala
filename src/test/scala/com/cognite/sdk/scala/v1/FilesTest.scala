@@ -3,13 +3,14 @@
 
 package com.cognite.sdk.scala.v1
 
-import java.io.{BufferedInputStream, ByteArrayOutputStream, FileInputStream}
-import java.nio.file.{Files, Paths}
-import java.time.Instant
-import java.util.UUID
 import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
 import fs2.Stream
 import org.scalatest.matchers.should.Matchers
+
+import java.io.{BufferedInputStream, ByteArrayOutputStream}
+import java.nio.file.{Files, Paths}
+import java.time.Instant
+import java.util.UUID
 
 @SuppressWarnings(
   Array(
@@ -255,9 +256,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
 
   it should "support upload" in {
     val inputStream = new BufferedInputStream(
-      new FileInputStream(
-        new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
-      )
+      getClass.getResourceAsStream("/uploadTest.txt")
     )
     val file =
       client.files.uploadWithName(
@@ -273,7 +272,7 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
   it should "support download" in {
     val file =
       client.files.upload(
-        new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
+        new java.io.File(getClass.getResource("/uploadTest.txt").getPath)
       ).unsafeRunSync()
 
     var uploadedFile = client.files.retrieveByIds(Seq(file.id)).unsafeRunSync()
@@ -292,17 +291,16 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
     val out = new ByteArrayOutputStream()
     client.files.download(FileDownloadId(file.id), out).unsafeRunSync()
 
-    val expected =
-      Files.readAllBytes(Paths.get("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt"))
+    val expected = Files.readAllBytes(Paths.get(getClass.getResource("/uploadTest.txt").toURI))
 
-    assert(out.toByteArray.sameElements(expected))
+    assert(out.toByteArray === expected)
     client.files.deleteById(file.id).unsafeRunSync()
   }
 
   it should "support returning download link" in {
     val file =
       client.files.upload(
-        new java.io.File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt")
+        new java.io.File(getClass.getResource("/uploadTest.txt").getPath)
       ).unsafeRunSync()
 
 
