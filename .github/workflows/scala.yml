@@ -15,14 +15,14 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: coursier/setup-action@v1.3.9
+        uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
           jvm: adopt:8
           apps: sbt
@@ -30,7 +30,7 @@ jobs:
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
       - name: Cache Coursier dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         env:
           cache-name: coursier-cache
         with:
@@ -38,7 +38,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
       - name: Cache Ivy 2 cache
-        uses: actions/cache@v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         env:
           cache-name: sbt-ivy2-cache
         with:
@@ -58,14 +58,14 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: coursier/setup-action@v1.3.9
+        uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
           jvm: adopt:8
           apps: sbt
@@ -73,7 +73,7 @@ jobs:
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
       - name: Cache Coursier dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         env:
           cache-name: coursier-cache
         with:
@@ -81,7 +81,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
       - name: Cache Ivy 2 cache
-        uses: actions/cache@v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         env:
           cache-name: sbt-ivy2-cache
         with:
@@ -101,14 +101,14 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: coursier/setup-action@v1.3.9
+        uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
           jvm: adopt:8
           apps: sbt
@@ -116,7 +116,7 @@ jobs:
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
       - name: Cache Coursier dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         env:
           cache-name: coursier-cache
         with:
@@ -124,7 +124,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
       - name: Cache Ivy 2 cache
-        uses: actions/cache@v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         env:
           cache-name: sbt-ivy2-cache
         with:
@@ -143,14 +143,14 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       with:
         fetch-depth: 0
     - run: |
         git rev-list --count --first-parent HEAD > patch_version.txt
 
     - name: Set up JDK 8
-      uses: coursier/setup-action@v1.3.9
+      uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
       with:
         jvm: adopt:8
         apps: sbt
@@ -158,7 +158,7 @@ jobs:
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
     # Can we do something better here?
     - name: Cache Coursier dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
       env:
         cache-name: coursier-cache
       with:
@@ -166,7 +166,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
     - name: Cache Ivy 2 cache
-      uses: actions/cache@v4
+      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
       env:
         cache-name: sbt-ivy2-cache
       with:
@@ -208,7 +208,7 @@ jobs:
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 scalafmtCheck test
 
     - name: Upload test coverage report
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5
       with:
         token: ${{ secrets.codecov_token }}
 
@@ -219,14 +219,14 @@ jobs:
     environment: CD
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: coursier/setup-action@v1.3.9
+        uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
           jvm: adopt:8
           apps: sbt
@@ -267,14 +267,14 @@ jobs:
     environment: CD
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 8
-        uses: coursier/setup-action@v1.3.9
+        uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
           jvm: adopt:8
           apps: sbt
