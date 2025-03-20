@@ -5,7 +5,7 @@ package com.cognite.sdk.scala.common
 
 import java.time.Instant
 import cats.Id
-import com.cognite.sdk.scala.v1.CogniteId
+import com.cognite.sdk.scala.v1.{CogniteId, InstanceId}
 import io.circe.{Decoder, Encoder, Json, JsonObject, KeyEncoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import sttp.model.Uri
@@ -174,8 +174,16 @@ trait WithGetExternalId {
   def getExternalId: Option[String]
 }
 
+trait WithGetInstanceId {
+  def getInstanceId: Option[InstanceId]
+}
+
 trait WithExternalIdGeneric[F[_]] extends WithGetExternalId {
   val externalId: F[String]
+}
+
+trait WithInstanceIdGeneric[F[_]] extends WithGetInstanceId {
+  val instanceId: F[InstanceId]
 }
 
 trait WithExternalId extends WithExternalIdGeneric[Option] {
