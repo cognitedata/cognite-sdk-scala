@@ -13,6 +13,7 @@ sealed abstract class SlimNodeOrEdge extends Product with Serializable {
   val instanceType: InstanceType
   val createdTime: Option[Instant]
   val lastUpdatedTime: Option[Instant]
+  val wasModified: Boolean
 }
 
 object SlimNodeOrEdge {
@@ -20,7 +21,8 @@ object SlimNodeOrEdge {
       space: String,
       externalId: String,
       createdTime: Option[Instant],
-      lastUpdatedTime: Option[Instant]
+      lastUpdatedTime: Option[Instant],
+      wasModified: Boolean
   ) extends SlimNodeOrEdge {
     override val instanceType: InstanceType = InstanceType.Node
   }
@@ -29,21 +31,34 @@ object SlimNodeOrEdge {
       space: String,
       externalId: String,
       createdTime: Option[Instant],
-      lastUpdatedTime: Option[Instant]
+      lastUpdatedTime: Option[Instant],
+      wasModified: Boolean
   ) extends SlimNodeOrEdge {
     override val instanceType: InstanceType = InstanceType.Edge
   }
 
   implicit val slimNodeDefinitionEncoder: Encoder[SlimNodeDefinition] =
-    Encoder.forProduct5("instanceType", "space", "externalId", "createdTime", "lastUpdatedTime")(
-      (e: SlimNodeDefinition) =>
-        (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime)
+    Encoder.forProduct6(
+      "instanceType",
+      "space",
+      "externalId",
+      "createdTime",
+      "lastUpdatedTime",
+      "wasModified"
+    )((e: SlimNodeDefinition) =>
+      (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime, e.wasModified)
     )
 
   implicit val slimEdgeDefinitionEncoder: Encoder[SlimEdgeDefinition] =
-    Encoder.forProduct5("instanceType", "space", "externalId", "createdTime", "lastUpdatedTime")(
-      (e: SlimEdgeDefinition) =>
-        (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime)
+    Encoder.forProduct6(
+      "instanceType",
+      "space",
+      "externalId",
+      "createdTime",
+      "lastUpdatedTime",
+      "wasModified"
+    )((e: SlimEdgeDefinition) =>
+      (e.instanceType, e.space, e.externalId, e.createdTime, e.lastUpdatedTime, e.wasModified)
     )
 
   implicit val slimNodeOrEdgeEncoder: Encoder[SlimNodeOrEdge] = Encoder.instance {
