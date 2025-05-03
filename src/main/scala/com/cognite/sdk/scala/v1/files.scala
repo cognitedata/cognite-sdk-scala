@@ -4,7 +4,6 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-
 import com.cognite.sdk.scala.common.{
   NonNullableSetter,
   SearchQuery,
@@ -23,6 +22,7 @@ final case class File(
     directory: Option[String] = None,
     source: Option[String] = None,
     externalId: Option[String] = None,
+    instanceId: Option[InstanceId] = None,
     mimeType: Option[String] = None,
     metadata: Option[Map[String, String]] = None,
     assetIds: Option[Seq[Long]] = None,
@@ -137,6 +137,11 @@ final case class FilesQuery(
 sealed trait FileDownload
 final case class FileDownloadId(id: Long) extends FileDownload
 final case class FileDownloadExternalId(externalId: String) extends FileDownload
+final case class FileDownloadInstanceId(instanceId: InstanceId) extends FileDownload
+
+sealed trait FileUpload
+final case class FileUploadExternalId(externalId: String) extends FileUpload
+final case class FileUploadInstanceId(instanceId: InstanceId) extends FileUpload
 
 sealed trait FileDownloadLink {
   def downloadUrl: String
@@ -148,5 +153,10 @@ final case class FileDownloadLinkId(
 
 final case class FileDownloadLinkExternalId(
     externalId: String,
+    downloadUrl: String
+) extends FileDownloadLink
+
+final case class FileDownloadLinkInstanceId(
+    instanceId: InstanceId,
     downloadUrl: String
 ) extends FileDownloadLink
