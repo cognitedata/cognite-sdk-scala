@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import cats.implicits._
+import com.cognite.sdk.scala.common.{Items, ItemsWithIgnoreUnknownIds}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
@@ -28,21 +29,10 @@ object CogniteInternalId {
 object InstanceId {
   implicit val encoder: Encoder[InstanceId] = deriveEncoder
   implicit val decoder: Decoder[InstanceId] = deriveDecoder
-}
-
-object CogniteIdOrInstanceId {
-  implicit val encoder: Encoder[CogniteIdOrInstanceId] = Encoder.instance {
-    case id: CogniteId => CogniteId.encoder(id)
-    case id: InstanceId => InstanceId.encoder(id)
-  }
-  @SuppressWarnings(
-    Array("org.wartremover.warts.TraversableOps")
-  )
-  implicit val decoder: Decoder[CogniteIdOrInstanceId] =
-    List[Decoder[CogniteIdOrInstanceId]](
-      Decoder[CogniteId].widen,
-      Decoder[InstanceId].widen
-    ).reduceLeftOption(_ or _).getOrElse(Decoder[CogniteId].widen)
+  implicit val instanceIdItemsEncoder: Encoder[Items[InstanceId]] =
+    deriveEncoder
+  implicit val instanceIdItemsIgnoreIdsEncoder: Encoder[ItemsWithIgnoreUnknownIds[InstanceId]] =
+    deriveEncoder
 }
 
 object CogniteId {
