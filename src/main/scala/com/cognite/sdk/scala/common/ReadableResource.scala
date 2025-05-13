@@ -216,8 +216,8 @@ object RetrieveByExternalIdsWithIgnoreUnknownIds {
 }
 
 trait RetrieveByInstanceIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
-  def retrieveByInstanceIds(instanceIds: Seq[InstanceId]): F[Seq[R]]
-  def retrieveByInstanceId(instanceId: InstanceId): F[R] =
+  def retrieveByInstanceIds(instanceIds: Seq[CogniteInstanceId]): F[Seq[R]]
+  def retrieveByInstanceId(instanceId: CogniteInstanceId): F[R] =
     retrieveByInstanceIds(Seq(instanceId))
       .flatMap(items =>
         F.fromOption(
@@ -228,19 +228,19 @@ trait RetrieveByInstanceIds[R, F[_]] extends WithRequestSession[F] with BaseUrl 
 }
 
 trait RetrieveByInstanceIdsWithIgnoreUnknownIds[R, F[_]] extends RetrieveByInstanceIds[R, F] {
-  override def retrieveByInstanceIds(ids: Seq[InstanceId]): F[Seq[R]] =
+  override def retrieveByInstanceIds(ids: Seq[CogniteInstanceId]): F[Seq[R]] =
     retrieveByInstanceIds(ids, ignoreUnknownIds = false)
-  def retrieveByInstanceIds(ids: Seq[InstanceId], ignoreUnknownIds: Boolean): F[Seq[R]]
+  def retrieveByInstanceIds(ids: Seq[CogniteInstanceId], ignoreUnknownIds: Boolean): F[Seq[R]]
 }
 
 object RetrieveByInstanceIdsWithIgnoreUnknownIds {
   def retrieveByInstanceIds[F[_], R](
-      requestSession: RequestSession[F],
-      baseUrl: Uri,
-      cogniteIds: Seq[InstanceId],
-      ignoreUnknownIds: Boolean
+                                      requestSession: RequestSession[F],
+                                      baseUrl: Uri,
+                                      cogniteIds: Seq[CogniteInstanceId],
+                                      ignoreUnknownIds: Boolean
   )(implicit itemsDecoder: Decoder[Items[R]]): F[Seq[R]] =
-    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[InstanceId]](
+    requestSession.post[Seq[R], Items[R], ItemsWithIgnoreUnknownIds[CogniteInstanceId]](
       ItemsWithIgnoreUnknownIds(cogniteIds, ignoreUnknownIds),
       uri"$baseUrl/byids",
       value => value.items

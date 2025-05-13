@@ -11,7 +11,7 @@ import com.cognite.sdk.scala.v1.{
   CogniteInternalId,
   ContainsAll,
   ContainsAny,
-  InstanceId,
+  CogniteInstanceId,
   LabelContainsFilter,
   TimeRange
 }
@@ -22,13 +22,13 @@ package object common {
 
   implicit val cogniteIdOrInstanceIdEncoder: Encoder[CogniteIdOrInstanceId] = {
     case cogniteId: CogniteId => cogniteIdEncoder.apply(cogniteId)
-    case instance: InstanceId =>
+    case instance: CogniteInstanceId =>
       Json.obj(
         (
           "instanceId",
           Json.obj(
-            ("space", Json.fromString(instance.space)),
-            ("externalId", Json.fromString(instance.externalId))
+            ("space", Json.fromString(instance.instanceId.space)),
+            ("externalId", Json.fromString(instance.instanceId.externalId))
           )
         )
       )

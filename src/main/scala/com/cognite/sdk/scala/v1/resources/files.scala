@@ -106,8 +106,8 @@ class Files[F[_]](val requestSession: RequestSession[F])
     )
 
   override def retrieveByInstanceIds(
-      ids: Seq[InstanceId],
-      ignoreUnknownIds: Boolean
+                                      ids: Seq[CogniteInstanceId],
+                                      ignoreUnknownIds: Boolean
   ): F[Seq[File]] =
     RetrieveByInstanceIdsWithIgnoreUnknownIds.retrieveByInstanceIds(
       requestSession,

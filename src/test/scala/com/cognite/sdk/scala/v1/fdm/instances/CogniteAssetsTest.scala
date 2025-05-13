@@ -6,7 +6,7 @@ import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.NodeDeletionRequest
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.NodeWrite
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
-import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, File, FileDownloadInstanceId, FileDownloadLink, FileUploadInstanceId, InstanceId}
+import com.cognite.sdk.scala.v1.{CogniteInstanceId, CommonDataModelTestHelper, File, FileDownloadInstanceId, FileDownloadLink, FileUploadInstanceId, InstanceId}
 import sttp.client3.UriContext
 
 
@@ -22,6 +22,7 @@ class CogniteAssetsTest extends CommonDataModelTestHelper with RetryWhile {
   it should "make it possible to retrieve file and associated upload link and download link using instance id" in {
 
     val instanceId: InstanceId = InstanceId(space = Utils.SpaceExternalId, externalId = "file_instance_ext_id2")
+    val cogniteInstanceId: CogniteInstanceId = CogniteInstanceId(InstanceId(space = Utils.SpaceExternalId, externalId = "file_instance_ext_id2"))
 
     val testFile = InstanceCreate(
       items = Seq(
@@ -39,10 +40,10 @@ class CogniteAssetsTest extends CommonDataModelTestHelper with RetryWhile {
     )
     val createdItem = testClient.instances.createItems(testFile).unsafeRunSync()
     val retrievedItem =
-      retry[Seq[File]](testClient.files.retrieveByInstanceIds(Seq(instanceId)).unsafeRunSync())
+      retry[Seq[File]](testClient.files.retrieveByInstanceIds(Seq(cogniteInstanceId)).unsafeRunSync())
 
     val retrievedSingleItem =
-      retry[File](testClient.files.retrieveByInstanceId(instanceId).unsafeRunSync())
+      retry[File](testClient.files.retrieveByInstanceId(cogniteInstanceId).unsafeRunSync())
 
     val uploadLinkFile =
       retry[File](testClient.files.uploadLink(FileUploadInstanceId(instanceId)).unsafeRunSync())

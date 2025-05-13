@@ -15,7 +15,8 @@ sealed trait CogniteId extends CogniteIdOrInstanceId
 
 final case class CogniteExternalId(externalId: String) extends CogniteId
 final case class CogniteInternalId(id: Long) extends CogniteId
-final case class InstanceId(space: String, externalId: String) extends CogniteIdOrInstanceId
+final case class CogniteInstanceId(instanceId: InstanceId) extends CogniteIdOrInstanceId
+final case class InstanceId(space: String, externalId: String)
 
 object CogniteExternalId {
   implicit val encoder: Encoder[CogniteExternalId] = deriveEncoder
@@ -29,9 +30,14 @@ object CogniteInternalId {
 object InstanceId {
   implicit val encoder: Encoder[InstanceId] = deriveEncoder
   implicit val decoder: Decoder[InstanceId] = deriveDecoder
-  implicit val instanceIdItemsEncoder: Encoder[Items[InstanceId]] =
+}
+
+object CogniteInstanceId {
+  implicit val encoder: Encoder[CogniteInstanceId] = deriveEncoder
+  implicit val decoder: Decoder[CogniteInstanceId] = deriveDecoder
+  implicit val instanceIdItemsEncoder: Encoder[Items[CogniteInstanceId]] =
     deriveEncoder
-  implicit val instanceIdItemsIgnoreIdsEncoder: Encoder[ItemsWithIgnoreUnknownIds[InstanceId]] =
+  implicit val instanceIdItemsIgnoreIdsEncoder: Encoder[ItemsWithIgnoreUnknownIds[CogniteInstanceId]] =
     deriveEncoder
 }
 
