@@ -17,26 +17,26 @@ import com.cognite.sdk.scala.common.{
 }
 
 final case class File(
-                       id: Long = 0,
-                       name: String,
-                       directory: Option[String] = None,
-                       source: Option[String] = None,
-                       externalId: Option[String] = None,
-                       instanceId: Option[InstanceId] = None,
-                       mimeType: Option[String] = None,
-                       metadata: Option[Map[String, String]] = None,
-                       assetIds: Option[Seq[Long]] = None,
-                       uploaded: Boolean = false,
-                       uploadedTime: Option[Instant] = None,
-                       createdTime: Instant = Instant.ofEpochMilli(0),
-                       lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
-                       dataSetId: Option[Long] = None,
-                       labels: Option[Seq[CogniteExternalId]] = None,
-                       sourceCreatedTime: Option[Instant] = None,
-                       sourceModifiedTime: Option[Instant] = None,
-                       securityCategories: Option[Seq[Long]] = None,
-                       uploadUrl: Option[String] = None
-                       // TODO: geoLocation object
+    id: Long = 0,
+    name: String,
+    directory: Option[String] = None,
+    source: Option[String] = None,
+    externalId: Option[String] = None,
+    instanceId: Option[InstanceId] = None,
+    mimeType: Option[String] = None,
+    metadata: Option[Map[String, String]] = None,
+    assetIds: Option[Seq[Long]] = None,
+    uploaded: Boolean = false,
+    uploadedTime: Option[Instant] = None,
+    createdTime: Instant = Instant.ofEpochMilli(0),
+    lastUpdatedTime: Instant = Instant.ofEpochMilli(0),
+    dataSetId: Option[Long] = None,
+    labels: Option[Seq[CogniteExternalId]] = None,
+    sourceCreatedTime: Option[Instant] = None,
+    sourceModifiedTime: Option[Instant] = None,
+    securityCategories: Option[Seq[Long]] = None,
+    uploadUrl: Option[String] = None
+    // TODO: geoLocation object
 ) extends WithId[Long]
     with WithExternalId
     with WithCreatedTime
@@ -157,6 +157,6 @@ final case class FileDownloadLinkExternalId(
 ) extends FileDownloadLink
 
 final case class FileDownloadLinkInstanceId(
-                                             instanceId: InstanceId,
-                                             downloadUrl: String
+    instanceId: InstanceId,
+    downloadUrl: String
 ) extends FileDownloadLink

@@ -8,10 +8,10 @@ import com.cognite.sdk.scala.v1.{
   CogniteExternalId,
   CogniteId,
   CogniteIdOrInstanceId,
+  CogniteInstanceId,
   CogniteInternalId,
   ContainsAll,
   ContainsAny,
-  CogniteInstanceId,
   LabelContainsFilter,
   TimeRange
 }

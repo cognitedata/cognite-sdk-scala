@@ -37,7 +37,8 @@ object CogniteInstanceId {
   implicit val decoder: Decoder[CogniteInstanceId] = deriveDecoder
   implicit val instanceIdItemsEncoder: Encoder[Items[CogniteInstanceId]] =
     deriveEncoder
-  implicit val instanceIdItemsIgnoreIdsEncoder: Encoder[ItemsWithIgnoreUnknownIds[CogniteInstanceId]] =
+  implicit val instanceIdItemsIgnoreIdsEncoder
+      : Encoder[ItemsWithIgnoreUnknownIds[CogniteInstanceId]] =
     deriveEncoder
 }
 
