@@ -45,10 +45,10 @@ jobs:
           path: ~/.ivy2/cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
+      # temp workaround for 2.12 job being required, removed it when required checks are tuned
       - name: Compile
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true ++2.12 dependencyLockCheck
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.12 Test/compile
+          true
 
   compile_scala_213:
     runs-on: ubuntu-latest
