@@ -138,10 +138,6 @@ lazy val core = (project in file("."))
       case Some((3, _)) =>
         List(
           "-Wconf:cat=deprecation:i",
-          // We use JavaConverters to remain backwards compatible with Scala 2.12,
-          // and to avoid a dependency on scala-collection-compat
-          "-Wconf:msg=object JavaConverters in package scala.collection is deprecated.*:s",
-          "-Wconf:msg=method mapValues in trait MapOps is deprecated.*:s",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.Assertion:s",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.compatible.Assertion:s",
 
@@ -151,9 +147,6 @@ lazy val core = (project in file("."))
         List(
           "-Wconf:cat=deprecation:i",
           "-Wconf:cat=other-pure-statement:i",
-          // We use JavaConverters to remain backwards compatible with Scala 2.12,
-          // and to avoid a dependency on scala-collection-compat
-          "-Wconf:origin=scala.collection.compat.*:s"
         )
       case _ =>
         List.empty[String]
