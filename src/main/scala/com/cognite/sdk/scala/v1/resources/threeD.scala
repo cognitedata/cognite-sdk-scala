@@ -178,7 +178,7 @@ class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long
     requestSession.get[ThreeDRevision, ThreeDRevision](uri"$baseUrl/$id", value => value)
 
   override def retrieveByIds(ids: Seq[Long]): F[Seq[ThreeDRevision]] =
-    ids.toList.traverse(retrieveById).map(_.toSeq)
+    ids.toList.traverse(retrieveById).map(x => x)
 
   override def createItems(items: Items[ThreeDRevisionCreate]): F[Seq[ThreeDRevision]] =
     Create.createItems[F, ThreeDRevision, ThreeDRevisionCreate](requestSession, baseUrl, items)
