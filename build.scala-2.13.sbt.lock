@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2025-01-16T13:07:45.082825Z",
+  "timestamp" : "2025-06-19T13:00:50.720532Z",
   "configurations" : [
     "compile",
     "optional",
@@ -494,13 +494,13 @@
       ]
     },
     {
-      "org" : "javax.servlet",
-      "name" : "javax.servlet-api",
-      "version" : "3.1.0",
+      "org" : "jakarta.servlet",
+      "name" : "jakarta.servlet-api",
+      "version" : "6.0.0",
       "artifacts" : [
         {
-          "name" : "javax.servlet-api.jar",
-          "hash" : "sha1:3cd63d075497751784b2fa84be59432f4905bf7c"
+          "name" : "jakarta.servlet-api.jar",
+          "hash" : "sha1:abecc699286e65035ebba9844c03931357a6a963"
         }
       ],
       "configurations" : [
@@ -538,11 +538,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-http",
-      "version" : "9.4.57.v20241219",
+      "version" : "12.0.22",
       "artifacts" : [
         {
           "name" : "jetty-http.jar",
-          "hash" : "sha1:c7a3a9c599346708894cf355e03105937f45f427"
+          "hash" : "sha1:dc59a0f4156c94b6a7949c0a775ce51642db0395"
         }
       ],
       "configurations" : [
@@ -552,11 +552,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-io",
-      "version" : "9.4.57.v20241219",
+      "version" : "12.0.22",
       "artifacts" : [
         {
           "name" : "jetty-io.jar",
-          "hash" : "sha1:bd0ca6e5c4314972cd91f427fa09dedfe3b84ff5"
+          "hash" : "sha1:6a1f61ddde45854b34e046ed5070b24029b99f84"
         }
       ],
       "configurations" : [
@@ -566,11 +566,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-security",
-      "version" : "9.4.57.v20241219",
+      "version" : "12.0.22",
       "artifacts" : [
         {
           "name" : "jetty-security.jar",
-          "hash" : "sha1:2b545f68d45b947fdc6e279a0e8ae3630ec10e05"
+          "hash" : "sha1:5eb766e070cf926588ec67d12f33d0da42f57237"
         }
       ],
       "configurations" : [
@@ -580,11 +580,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-server",
-      "version" : "9.4.57.v20241219",
+      "version" : "12.0.22",
       "artifacts" : [
         {
           "name" : "jetty-server.jar",
-          "hash" : "sha1:ad3baf52b98b4a32f5714fe2e58ac0e502b4e4d8"
+          "hash" : "sha1:03871dbb3c7f4b4e6c6ecfd2e5f91fd1d33442e6"
         }
       ],
       "configurations" : [
@@ -593,12 +593,12 @@
     },
     {
       "org" : "org.eclipse.jetty",
-      "name" : "jetty-servlet",
-      "version" : "9.4.57.v20241219",
+      "name" : "jetty-session",
+      "version" : "12.0.22",
       "artifacts" : [
         {
-          "name" : "jetty-servlet.jar",
-          "hash" : "sha1:3e648eebddbf5ad0c0f7698e50c6a69c4a77fd95"
+          "name" : "jetty-session.jar",
+          "hash" : "sha1:ac34e8197f5306526fdaf6cf80d73ba13e7a8a3c"
         }
       ],
       "configurations" : [
@@ -608,11 +608,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-util",
-      "version" : "9.4.57.v20241219",
+      "version" : "12.0.22",
       "artifacts" : [
         {
           "name" : "jetty-util.jar",
-          "hash" : "sha1:7bf7ea75644ac064199e1e32c66ccd312239f2dc"
+          "hash" : "sha1:a57e10e3c01996fd376de4a42f1e06b4676a1bae"
         }
       ],
       "configurations" : [
@@ -620,13 +620,13 @@
       ]
     },
     {
-      "org" : "org.eclipse.jetty",
-      "name" : "jetty-util-ajax",
-      "version" : "9.4.57.v20241219",
+      "org" : "org.eclipse.jetty.ee10",
+      "name" : "jetty-ee10-servlet",
+      "version" : "12.0.22",
       "artifacts" : [
         {
-          "name" : "jetty-util-ajax.jar",
-          "hash" : "sha1:7b5f144a3d0cbfcac62f2fcb9e14ffa765048f0e"
+          "name" : "jetty-ee10-servlet.jar",
+          "hash" : "sha1:da4f1f1887944fe781b789f5a1340280cac04fc0"
         }
       ],
       "configurations" : [
@@ -978,11 +978,11 @@
     {
       "org" : "org.slf4j",
       "name" : "slf4j-api",
-      "version" : "1.7.30",
+      "version" : "2.0.17",
       "artifacts" : [
         {
           "name" : "slf4j-api.jar",
-          "hash" : "sha1:b5a4b6d16ab13e34a88fae84c35cd5d68cac922c"
+          "hash" : "sha1:d9e58ac9c7779ba3bf8142aff6c830617a7fe60f"
         }
       ],
       "configurations" : [
