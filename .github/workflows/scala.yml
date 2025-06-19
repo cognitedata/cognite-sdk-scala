@@ -21,10 +21,10 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 8
+      - name: Set up JDK 11
         uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
-          jvm: adopt:8
+          jvm: temurin:11
           apps: sbt
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
@@ -64,10 +64,10 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 8
+      - name: Set up JDK 11
         uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
-          jvm: adopt:8
+          jvm: temurin:11
           apps: sbt
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
@@ -106,10 +106,10 @@ jobs:
     - run: |
         git rev-list --count --first-parent HEAD > patch_version.txt
 
-    - name: Set up JDK 8
+    - name: Set up JDK 11
       uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
       with:
-        jvm: adopt:8
+        jvm: temurin:11
         apps: sbt
 
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
@@ -182,10 +182,10 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 8
+      - name: Set up JDK 11
         uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
-          jvm: adopt:8
+          jvm: temurin:11
           apps: sbt
 
       - name: Build JAR file
@@ -230,10 +230,10 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 8
+      - name: Set up JDK 11
         uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
-          jvm: adopt:8
+          jvm: temurin:11
           apps: sbt
 
       - name: Build JAR file
