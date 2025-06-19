@@ -130,7 +130,7 @@ lazy val core = (project in file("."))
     libraryDependencies ++= Seq(
       "commons-io" % "commons-io" % "2.18.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
-      "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
+      "org.eclipse.jetty.ee10" % "jetty-ee10-servlet" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
