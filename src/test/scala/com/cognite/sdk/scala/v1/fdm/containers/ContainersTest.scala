@@ -9,7 +9,7 @@ import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils._
 import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
-import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.PrimitiveProperty
+import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{EnumValueMetadata, PrimitiveProperty}
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 import com.cognite.sdk.scala.v1.{CogniteExternalId, CommonDataModelTestHelper}
@@ -94,6 +94,13 @@ class ContainersTest extends CommonDataModelTestHelper {
 
   it should "serialize & deserialize ContainerPropertyType" in {
     val values = Seq(
+      PropertyType.EnumProperty(
+        values = Map(
+          "VAL1" -> EnumValueMetadata(Some("value1"), Some("value 1")),
+          "VAL2" -> EnumValueMetadata(None, None)
+        ),
+        unknownValue = Some("VAL2")
+      ),
       PropertyType.TextProperty(list = None),
       PropertyType.TextProperty(list = Some(true)),
       PropertyType.TextProperty(list = Some(false)),

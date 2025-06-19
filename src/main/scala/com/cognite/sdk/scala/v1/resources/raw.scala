@@ -106,8 +106,12 @@ object RawTables {
   implicit val rawTableDecoder: Decoder[RawTable] = deriveDecoder[RawTable]
 }
 
-class RawRows[F[_]](val requestSession: RequestSession[F], database: String, table: String)
-    extends WithRequestSession[F]
+class RawRows[F[_]](
+    val requestSession: RequestSession[F],
+    database: String,
+    table: String,
+    filterNullFields: Boolean = false
+) extends WithRequestSession[F]
     with Readable[RawRow, F]
     with Create[RawRow, RawRow, F]
     with DeleteByIds[F, String]
@@ -143,10 +147,8 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
 
   // ... and since RAW doesn't return the created rows, we just return the one we sent here.
   override def createOne(item: RawRow): F[RawRow] =
-    requestSession.map(
-      create(Seq(item)),
-      (_: Seq[RawRow]) => item
-    )
+    create(Seq(item))
+      .map(_ => item)
 
   def retrieveByKey(key: String): F[RawRow] =
     requestSession.get[RawRow, RawRow](
@@ -159,7 +161,14 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
       limit: Option[Int],
       partition: Option[Partition]
   ): F[ItemsWithCursor[RawRow]] =
-    Readable.readWithCursor(requestSession, baseUrl, cursor, limit, None, Constants.rowsBatchSize)
+    Readable.readWithCursor(
+      requestSession,
+      filterFieldsWithNull(baseUrl),
+      cursor,
+      limit,
+      None,
+      Constants.rowsBatchSize
+    )
 
   override def deleteByIds(ids: Seq[String]): F[Unit] =
     RawResource.deleteByIds(requestSession, baseUrl, ids.map(RawRowKey.apply))
@@ -173,7 +182,7 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
   ): F[ItemsWithCursor[RawRow]] =
     Readable.readWithCursor(
       requestSession,
-      baseUrl.addParams(filterToParams(filter)),
+      filterFieldsWithNull(baseUrl.addParams(filterToParams(filter))),
       cursor,
       limit,
       None,
@@ -230,6 +239,9 @@ class RawRows[F[_]](val requestSession: RequestSession[F], database: String, tab
     ).collect { case (key, Some(value)) =>
       key -> value
     }
+
+  def filterFieldsWithNull(url: Uri): Uri =
+    url.addParam("filterNullFields", filterNullFields.toString)
 }
 
 object RawRows {

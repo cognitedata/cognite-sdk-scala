@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.common
 
+import cats.implicits._
 import cats.effect.Concurrent
 import com.cognite.sdk.scala.v1._
 import io.circe.Decoder
@@ -133,7 +134,7 @@ trait RetrieveByIds[R, F[_]] extends WithRequestSession[F] with BaseUrl {
   def retrieveById(id: Long): F[R] =
     // The API returns an error causing an exception to be thrown if the item isn't found,
     // so .head is safe here.
-    requestSession.map(retrieveByIds(Seq(id)), (r1: Seq[R]) => r1.head)
+    retrieveByIds(Seq(id)).map(_.head)
 }
 
 object RetrieveByIds {
@@ -173,7 +174,8 @@ trait RetrieveByExternalIds[R, F[_]] extends WithRequestSession[F] with BaseUrl 
   def retrieveByExternalId(externalId: String): F[R] =
     // The API returns an error causing an exception to be thrown if the item isn't found,
     // so .head is safe here.
-    requestSession.map(retrieveByExternalIds(Seq(externalId)), (r1: Seq[R]) => r1.head)
+    retrieveByExternalIds(Seq(externalId))
+      .map(_.head)
 }
 
 object RetrieveByExternalIds {

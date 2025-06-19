@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.common
 
+import cats.implicits._
 import com.cognite.sdk.scala.v1._
 import sttp.client3._
 import sttp.client3.circe._
@@ -112,14 +113,12 @@ trait Create[R <: ToCreate[W], W, F[_]]
     createItems(Items(items.map(_.toCreate)))
 
   def createOne(item: W): F[R] =
-    requestSession.map(
-      create(Seq(item)),
-      (r1: Seq[R]) =>
-        r1.headOption match {
-          case Some(value) => value
-          case None => throw SdkException("Unexpected empty response when creating item")
-        }
-    )
+    create(Seq(item)).flatMap { items =>
+      F.fromOption(
+        items.headOption,
+        SdkException("Unexpected empty response when creating item")
+      )
+    }
 }
 
 object Create {

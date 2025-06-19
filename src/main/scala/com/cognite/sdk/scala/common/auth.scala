@@ -19,13 +19,6 @@ object Auth {
   }
 }
 
-final case class NoAuthentication() extends Auth {
-  def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
-    throw new SdkException(
-      s"Authentication not provided"
-    )
-}
-
 final case class BearerTokenAuth(bearerToken: String) extends Auth {
   def auth[U[_], T, S](r: RequestT[U, T, S]): RequestT[U, T, S] =
     r.header("Authorization", s"Bearer $bearerToken")

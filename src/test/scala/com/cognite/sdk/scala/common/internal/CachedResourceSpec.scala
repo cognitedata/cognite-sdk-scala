@@ -221,10 +221,10 @@ trait ConcurrentCachedResourceBehavior extends CachedResourceBehavior[IO] {
 
     (it should "race run and invalidate without failing or leaking").inIO {
       create.flatMap { case (pool, cr) =>
+        val parLimit = 8 // arbitrary
+        val tasks = 100 // arbitrary
         for {
           _ <- cr.run(_ => IO.unit) // warmup allocate
-          parLimit = 8 // arbitrary
-          tasks = 100 // arbitrary
           results <- Stream(
             cr.run(r => IO.sleep(r.id.millis) *> r.assertLive[F]).attempt,
             cr.invalidate.attempt

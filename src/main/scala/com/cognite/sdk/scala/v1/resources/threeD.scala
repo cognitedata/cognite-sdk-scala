@@ -3,7 +3,6 @@
 
 package com.cognite.sdk.scala.v1.resources
 
-import cats.Applicative
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import sttp.client3._
@@ -140,7 +139,7 @@ object ThreeDNodes {
   implicit val threeDNodeItemsDecoder: Decoder[Items[ThreeDNode]] = deriveDecoder[Items[ThreeDNode]]
 }
 
-class ThreeDRevisions[F[_]: Applicative](val requestSession: RequestSession[F], modelId: Long)
+class ThreeDRevisions[F[_]](val requestSession: RequestSession[F], modelId: Long)
     extends Create[ThreeDRevision, ThreeDRevisionCreate, F]
     with RetrieveByIds[ThreeDRevision, F]
     with Readable[ThreeDRevision, F]

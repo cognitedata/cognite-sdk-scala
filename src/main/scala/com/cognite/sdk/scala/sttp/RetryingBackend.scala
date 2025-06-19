@@ -78,7 +78,7 @@ object RetryingBackend {
   val DefaultShouldRetryPredicate: ShouldRetryPredicate = new ShouldRetryPredicate {
     override def shouldRetry[T, R](request: Request[T, R], statusCode: StatusCode): Boolean =
       statusCode.code match {
-        case 429 | 500 | 502 | 503 | 504 => true
+        case 408 | 429 | 500 | 502 | 503 | 504 => true
         case 409
             // 409 in dms can be transient and retriable
             if request.tag(GenericClient.RESOURCE_TYPE_TAG).contains(GenericClient.DATAMODELS) =>
