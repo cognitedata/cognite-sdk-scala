@@ -1,3 +1,4 @@
+import sbt.Keys.javacOptions
 import sbt.{Test, project}
 import wartremover.Wart
 
@@ -5,8 +6,10 @@ val scala3 = "3.3.3"
 val scala213 = "2.13.16"
 val supportedScalaVersions = List(scala213, scala3)
 
+val javaVersion = "11"
+
 // This is used only for tests.
-val jettyTestVersion = "9.4.57.v20241219"
+val jettyTestVersion = "11.0.25"
 
 val sttpVersion = "3.5.2"
 val circeVersion = "0.14.10"
@@ -34,12 +37,14 @@ credentials += Credentials("Artifactory Realm",
 
 val artifactory = "https://cognite.jfrog.io/cognite"
 
+javacOptions ++= Seq("-source", javaVersion, "-target", javaVersion)
+
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.31." + patchVersion,
+  version := "2.32." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
