@@ -40,7 +40,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
       )
 
   override def createItems(items: Items[FileCreate]): F[Seq[File]] =
-    items.items.toList.traverse(createOne)
+    items.items.toList.traverse(createOne).map(_.toSeq)
 
   def uploadWithName(input: java.io.InputStream, name: String): F[File] =
     for {

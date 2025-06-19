@@ -16,6 +16,7 @@ import sttp.model.{MediaType, Uri}
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
+import scala.jdk.CollectionConverters.{ListHasAsScala, SeqHasAsJava}
 import scala.util.control.NonFatal
 
 class DataPointsResource[F[_]](val requestSession: RequestSession[F])
