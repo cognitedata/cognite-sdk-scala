@@ -32,16 +32,16 @@ import scala.concurrent.duration.DurationInt
 class InstancesTest extends CommonDataModelTestHelper {
   private val space = Utils.SpaceExternalId
 
-  private val edgeNodeContainerExtId = "sdkTest12EdgeNodeContainer2"
-  private val edgeContainerExtId = "sdkTest12EdgeContainer2"
-  private val nodeContainer1ExtId = "sdkTest12NodeContainer3"
-  private val nodeContainer2ExtId = "sdkTest12NodeContainer4"
+  private val edgeNodeContainerExtId = "sdkTest15EdgeNodeContainer2"
+  private val edgeContainerExtId = "sdkTest15EdgeContainer2"
+  private val nodeContainer1ExtId = "sdkTest15NodeContainer3"
+  private val nodeContainer2ExtId = "sdkTest15NodeContainer4"
   private val containerForDirectNodeRelationExtId = Utils.DirectNodeRelationContainerExtId
 
-  private val edgeNodeViewExtId = "sdkTest12EdgeNodeView2"
-  private val edgeViewExtId = "sdkTest12EdgeView3"
-  private val nodeView1ExtId = "sdkTest12NodeView4"
-  private val nodeView2ExtId = "sdkTest12NodeView5"
+  private val edgeNodeViewExtId = "sdkTest15EdgeNodeView2"
+  private val edgeViewExtId = "sdkTest15EdgeView3"
+  private val nodeView1ExtId = "sdkTest15NodeView4"
+  private val nodeView2ExtId = "sdkTest15NodeView5"
   private val viewForDirectNodeRelationExtId = Utils.DirectNodeRelationViewExtId
 
   private val viewVersion = Utils.ViewVersion
@@ -100,13 +100,15 @@ class InstancesTest extends CommonDataModelTestHelper {
       space,
       s"nodeExtId$nodeViewExternalId1",
       nodeView1.toSourceReference,
-      nodeView1.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p}
+      nodeView1.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
+      Some(DirectRelationReference(nodeView1.space, nodeView1.externalId))
     )
     val node2WriteData = createNodeWriteData(
       space,
       s"nodeExtId$nodeViewExternalId2",
       nodeView2.toSourceReference,
-      nodeView2.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p}
+      nodeView2.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
+      None
     )
     val startNode = DirectRelationReference(space, externalId = node1WriteData.externalId)
     val endNode = DirectRelationReference(space, externalId = node2WriteData.externalId)
@@ -131,7 +133,8 @@ class InstancesTest extends CommonDataModelTestHelper {
         space,
         s"nodesOrEdgesExtId${allViewExternalId}Nodes",
         allView.toSourceReference,
-        allView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p}
+        allView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
+        Some(DirectRelationReference(nodeView1.space, nodeView1.externalId))
       )
     )
 
@@ -373,7 +376,6 @@ class InstancesTest extends CommonDataModelTestHelper {
             case (actVal, expVal) => fail(s"Actual: ${actVal.toString}, Expected: ${expVal.toString}")
           }
         }
-
         keyEquals && valueEquals
     }
   }
@@ -411,7 +413,9 @@ class InstancesTest extends CommonDataModelTestHelper {
         space,
         s"${containerForDirectNodeRelationExtId}Instance",
         ViewReference(space = space, externalId = viewForDirectNodeRelationExtId, version = viewVersion),
-        viewsMap(viewForDirectNodeRelationExtId).properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p })
+        viewsMap(viewForDirectNodeRelationExtId).properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p },
+        None
+      )
       createInstance(Seq(instanceData))
     }) *> IO.sleep(2.seconds)
   }

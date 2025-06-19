@@ -3,6 +3,7 @@
 
 package com.cognite.sdk.scala.v1.resources
 
+import cats.implicits._
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import com.cognite.v1.timeseries.proto._
@@ -18,7 +19,6 @@ import java.time.Instant
 import scala.collection.JavaConverters._ // Avoid scala.jdk to keep 2.12 compatibility without scala-collection-compat
 import scala.util.control.NonFatal
 
-// scalastyle:off number.of.methods
 class DataPointsResource[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with BaseUrl {
@@ -153,12 +153,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       exclusiveEnd: Instant,
       limit: Option[Int] = None
   ): F[DataPointsByIdResponse] =
-    // The API returns an error causing an exception to be thrown if the item isn't found,
-    // so .head is safe here.
-    requestSession.map(
-      query(Seq(id), inclusiveStart, exclusiveEnd, limit),
-      (r1: Seq[DataPointsByIdResponse]) => r1.head
-    )
+    query(Seq(id), inclusiveStart, exclusiveEnd, limit)
+      .map(_.head)
 
   def query(
       ids: Seq[CogniteId],
@@ -189,10 +185,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
   ): F[DataPointsByExternalIdResponse] =
     // The API returns an error causing an exception to be thrown if the item isn't found,
     // so .head is safe here.
-    requestSession.map(
-      queryByExternalIds(Seq(externalId), inclusiveStart, exclusiveEnd, limit),
-      (r1: Seq[DataPointsByExternalIdResponse]) => r1.head
-    )
+    queryByExternalIds(Seq(externalId), inclusiveStart, exclusiveEnd, limit)
+      .map(_.head)
 
   def queryByExternalIds(
       externalIds: Seq[String],
@@ -300,10 +294,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
   ): F[StringDataPointsByIdResponse] =
     // The API returns an error causing an exception to be thrown if the item isn't found,
     // so .head is safe here.
-    requestSession.map(
-      queryStrings(Seq(CogniteInternalId(id)), inclusiveStart, exclusiveEnd, limit),
-      (r: Seq[StringDataPointsByIdResponse]) => r.head
-    )
+    queryStrings(Seq(CogniteInternalId(id)), inclusiveStart, exclusiveEnd, limit)
+      .map(_.head)
 
   @SuppressWarnings(Array("org.wartremover.warts.IterableOps"))
   def queryStringsByExternalId(
@@ -314,10 +306,8 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
   ): F[StringDataPointsByExternalIdResponse] =
     // The API returns an error causing an exception to be thrown if the item isn't found,
     // so .head is safe here.
-    requestSession.map(
-      queryStringsByExternalIds(Seq(externalId), inclusiveStart, exclusiveEnd, limit),
-      (r: Seq[StringDataPointsByExternalIdResponse]) => r.head
-    )
+    queryStringsByExternalIds(Seq(externalId), inclusiveStart, exclusiveEnd, limit)
+      .map(_.head)
 
   def queryStrings(
       ids: Seq[CogniteId],
@@ -359,17 +349,15 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
   }
 
   def getLatestDataPoint(id: CogniteId, before: String = "now"): F[Option[DataPoint]] =
-    requestSession.map(
-      getLatestDataPoints(Seq(id), before = before),
-      (idToLatest: Map[CogniteId, Option[DataPoint]]) =>
-        idToLatest.get(id) match {
-          case Some(latest) => latest
-          case None =>
-            throw SdkException(
-              s"Unexpected missing ${id.toString} when retrieving latest data point"
-            )
-        }
-    )
+    getLatestDataPoints(Seq(id), before = before)
+      .flatMap { latest =>
+        F.fromOption(
+          latest.get(id),
+          SdkException(
+            s"Unexpected missing ${id.toString} when retrieving latest data point"
+          )
+        )
+      }
 
   def getLatestDataPoints(
       ids: Seq[CogniteId],
@@ -382,17 +370,15 @@ class DataPointsResource[F[_]](val requestSession: RequestSession[F])
       id: CogniteId,
       before: String = "now"
   ): F[Option[StringDataPoint]] =
-    requestSession.map(
-      getLatestStringDataPoints(Seq(id), before = before),
-      (idToLatest: Map[CogniteId, Option[StringDataPoint]]) =>
-        idToLatest.get(id) match {
-          case Some(latest) => latest
-          case None =>
-            throw SdkException(
-              s"Unexpected missing ${id.toString} when retrieving latest data point"
-            )
-        }
-    )
+    getLatestStringDataPoints(Seq(id), before = before)
+      .flatMap { latest =>
+        F.fromOption(
+          latest.get(id),
+          SdkException(
+            s"Unexpected missing ${id.toString} when retrieving latest data point"
+          )
+        )
+      }
 
   def getLatestStringDataPoints(
       ids: Seq[CogniteId],

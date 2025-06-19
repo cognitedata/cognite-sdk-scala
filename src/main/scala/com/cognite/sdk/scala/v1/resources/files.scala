@@ -6,7 +6,7 @@ package com.cognite.sdk.scala.v1.resources
 import java.io.{BufferedInputStream, FileInputStream}
 
 import cats.implicits._
-import cats.Applicative
+import cats.effect.Sync
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1._
 import sttp.client3._
@@ -14,14 +14,13 @@ import sttp.client3.circe._
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-class Files[F[_]: Applicative](val requestSession: RequestSession[F])
+class Files[F[_]](val requestSession: RequestSession[F])
     extends WithRequestSession[F]
     with PartitionedReadable[File, F]
     with RetrieveByIdsWithIgnoreUnknownIds[File, F]
     with RetrieveByExternalIdsWithIgnoreUnknownIds[File, F]
     with Create[File, FileCreate, F]
-    with DeleteByIds[F, Long]
-    with DeleteByExternalIds[F]
+    with DeleteByCogniteIds[F]
     with PartitionedFilter[File, FilesFilter, F]
     with Search[File, FilesQuery, F]
     with UpdateById[File, FileUpdate, F]
@@ -45,34 +44,24 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
   override def createItems(items: Items[FileCreate]): F[Seq[File]] =
     items.items.toList.traverse(createOne).map(_.toSeq)
 
-  def uploadWithName(input: java.io.InputStream, name: String): F[File] = {
-    val item = FileCreate(name = name)
-    requestSession.flatMap(
-      createOne(item),
-      (file: File) =>
-        file.uploadUrl match {
-          case Some(uploadUrl) =>
-            val response = requestSession.send { request =>
-              request
-                .body(input)
-                .put(uri"$uploadUrl")
-            }
-            requestSession.map(
-              response,
-              (res: Response[Either[String, String]]) =>
-                if (res.isSuccess) {
-                  file
-                } else {
-                  throw SdkException(
-                    s"File upload of file ${file.name} failed with error code ${res.code.toString}"
-                  )
-                }
-            )
-          case None =>
-            throw SdkException(s"File upload of file ${file.name} did not return uploadUrl")
-        }
-    )
-  }
+  def uploadWithName(input: java.io.InputStream, name: String): F[File] =
+    for {
+      file <- createOne(FileCreate(name = name))
+      url <- F.fromOption(
+        file.uploadUrl,
+        SdkException(s"File upload of file ${file.name} did not return uploadUrl")
+      )
+      response <- requestSession.send { request =>
+        request
+          .body(input)
+          .put(uri"${url}")
+      }
+      _ <- F.raiseUnless(response.isSuccess) {
+        SdkException(
+          s"File upload of file ${file.name} failed with error code ${response.code.toString}"
+        )
+      }
+    } yield file
 
   def upload(file: java.io.File): F[File] = {
     val inputStream = new BufferedInputStream(new FileInputStream(file))
@@ -118,11 +107,13 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
   override def updateByExternalId(items: Map[String, FileUpdate]): F[Seq[File]] =
     UpdateByExternalId.updateByExternalId[F, File, FileUpdate](requestSession, baseUrl, items)
 
-  override def deleteByIds(ids: Seq[Long]): F[Unit] =
-    DeleteByIds.deleteByIds(requestSession, baseUrl, ids)
-
-  override def deleteByExternalIds(externalIds: Seq[String]): F[Unit] =
-    DeleteByExternalIds.deleteByExternalIds(requestSession, baseUrl, externalIds)
+  override def delete(ids: Seq[CogniteId], ignoreUnknownIds: Boolean = false): F[Unit] =
+    DeleteByCogniteIds.deleteWithIgnoreUnknownIds(
+      requestSession,
+      baseUrl,
+      ids,
+      ignoreUnknownIds
+    )
 
   private[sdk] def filterWithCursor(
       filter: FilesFilter,
@@ -144,42 +135,35 @@ class Files[F[_]: Applicative](val requestSession: RequestSession[F])
   override def search(searchQuery: FilesQuery): F[Seq[File]] =
     Search.search(requestSession, baseUrl, searchQuery)
 
-  def download(item: FileDownload, out: java.io.OutputStream): F[Unit] = {
-    val request =
-      requestSession
-        .post[Items[FileDownloadLink], Items[FileDownloadLink], Items[FileDownload]](
-          Items(Seq(item)),
-          uri"${baseUrl.toString}/downloadlink",
-          values => values
+  def downloadLink(item: FileDownload): F[FileDownloadLink] =
+    requestSession
+      .post[Items[FileDownloadLink], Items[FileDownloadLink], Items[FileDownload]](
+        Items(Seq(item)),
+        uri"${baseUrl.toString}/downloadlink",
+        values => values
+      )
+      .map(
+        _.items.headOption.getOrElse(
+          throw SdkException(s"File download of ${item.toString} did not return download url")
         )
+      )
 
-    requestSession.flatMap(
-      request,
-      (files: Items[FileDownloadLink]) => {
-        val response = requestSession.send { request =>
-          request
-            .get(
-              uri"${files.items
-                  .map(_.downloadUrl)
-                  .headOption
-                  .getOrElse(throw SdkException(s"File download of ${item.toString} did not return download url"))}"
-            )
-            .response(asByteArray)
-        }
-        requestSession.map(
-          response,
-          (res: Response[Either[String, Array[Byte]]]) =>
-            res.body match {
-              case Right(bytes) => out.write(bytes)
-              case Left(_) =>
-                throw SdkException(
-                  s"File download of file ${item.toString} failed with error code ${res.code.toString}"
-                )
-            }
-        )
+  def download(item: FileDownload, out: java.io.OutputStream)(implicit F: Sync[F]): F[Unit] =
+    for {
+      link <- downloadLink(item)
+      res <- requestSession.send { request =>
+        request
+          .get(uri"${link.downloadUrl}")
+          .response(asByteArray)
       }
-    )
-  }
+      bytes <- F.fromOption(
+        res.body.toOption,
+        SdkException(
+          s"File download of file ${item.toString} failed with error code ${res.code.toString}"
+        )
+      )
+      r <- F.blocking(out.write(bytes))
+    } yield r
 }
 
 object Files {

@@ -11,6 +11,7 @@ import io.circe.parser.decode
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 import org.scalatest.OptionValues
 import sttp.model.StatusCode
+import sttp.monad.EitherMonad
 
 final case class DummyFilter()
 object DummyFilter {
@@ -36,13 +37,13 @@ class FilterTest extends SdkTestSpec with OptionValues {
 
   @SuppressWarnings(Array("org.wartremover.warts.Null", "org.wartremover.warts.Var", "org.wartremover.warts.AsInstanceOf"))
   def filterWithCursor(batchSize: Int, limit: Option[Int])(test: Int => Any): Any = {
-    var hijackedRequest: FilterRequest[DummyFilter] = null // scalastyle:ignore
-    val requestHijacker = SttpBackendStub.synchronous.whenAnyRequest.thenRespondF(req => {
-      hijackedRequest = decode[FilterRequest[DummyFilter]](req.body.asInstanceOf[StringBody].s) match {
-        case Right(x) => x
-        case Left(e) => throw e
-      }
-      Response(ItemsWithCursor(Seq(0, 1, 2), None), StatusCode.Ok, "OK")
+    var hijackedRequest: FilterRequest[DummyFilter] = null
+    val requestHijacker = SttpBackendStub(EitherMonad)
+      .whenAnyRequest.thenRespondF(req => {
+        for {
+          req <- decode[FilterRequest[DummyFilter]](req.body.asInstanceOf[StringBody].s)
+          _ = { hijackedRequest = req }
+        } yield Response(Right(ItemsWithCursor(Seq(0, 1, 2), None)), StatusCode.Ok, "OK")
     })
     lazy val dummyClient = Client("foo",
       projectName,

@@ -3,18 +3,19 @@
 
 package com.cognite.sdk.scala.v1
 
-import com.cognite.scala_sdk.BuildInfo
 import cats.implicits._
-import cats.{Id, Monad}
+import cats.{Id, MonadError => CMonadError}
+import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common._
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.resources._
-import com.cognite.sdk.scala.v1.resources.fdm.datamodels.{DataModels => DataModelsV3}
 import com.cognite.sdk.scala.v1.resources.fdm.containers.Containers
+import com.cognite.sdk.scala.v1.resources.fdm.datamodels.{DataModels => DataModelsV3}
 import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances
 import com.cognite.sdk.scala.v1.resources.fdm.views.Views
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
+import natchez.Trace
 import sttp.capabilities.Effect
 import sttp.client3._
 import sttp.client3.circe.asJsonEither
@@ -24,7 +25,6 @@ import sttp.monad.MonadError
 import java.net.{InetAddress, UnknownHostException}
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
-import natchez.Trace
 
 class TraceSttpBackend[F[_]: Trace, +P](delegate: SttpBackend[F, P]) extends SttpBackend[F, P] {
 
@@ -67,7 +67,11 @@ class AuthSttpBackend[F[_], +P](delegate: SttpBackend[F, P], authProvider: AuthP
   override def responseMonad: MonadError[F] = delegate.responseMonad
 }
 
-final case class RequestSession[F[_]: Monad: Trace](
+class RequestSessionImplicits[F[_]](
+    implicit val FMonad: CMonadError[F, Throwable],
+    val FTrace: Trace[F]
+)
+final case class RequestSession[F[_]: Trace](
     applicationName: String,
     baseUrl: Uri,
     baseSttpBackend: SttpBackend[F, _],
@@ -75,7 +79,8 @@ final case class RequestSession[F[_]: Monad: Trace](
     clientTag: Option[String] = None,
     cdfVersion: Option[String] = None,
     tags: Map[String, Any] = Map.empty
-) {
+)(implicit F: CMonadError[F, Throwable]) {
+  val implicits: RequestSessionImplicits[F] = new RequestSessionImplicits[F]
   def withResourceType(resourceType: GenericClient.RESOURCE_TYPE): RequestSession[F] =
     this.copy(tags = this.tags + (GenericClient.RESOURCE_TYPE_TAG -> resourceType))
 
@@ -114,7 +119,7 @@ final case class RequestSession[F[_]: Monad: Trace](
       .get(uri)
       .response(parseResponse(uri, mapResult))
       .send(sttpBackend)
-      .map(_.body)
+      .flatMap(r => F.fromEither(r.body))
 
   def postEmptyBody[R, T](
       uri: Uri,
@@ -129,7 +134,7 @@ final case class RequestSession[F[_]: Monad: Trace](
       .post(uri)
       .response(parseResponse(uri, mapResult))
       .send(sttpBackend)
-      .map(_.body)
+      .flatMap(r => F.fromEither(r.body))
 
   def post[R, T, I](
       body: I,
@@ -145,7 +150,17 @@ final case class RequestSession[F[_]: Monad: Trace](
       .body(body)
       .response(parseResponse(uri, mapResult))
       .send(sttpBackend)
-      .map(_.body)
+      .flatMap(r => F.fromEither(r.body))
+
+  def head(
+      uri: Uri,
+      overrideHeaders: Seq[Header] = Seq()
+  ): F[Seq[Header]] =
+    sttpRequest
+      .headers(overrideHeaders: _*)
+      .head(uri)
+      .send(sttpBackend)
+      .map(_.headers)
 
   def sendCdf[R](
       r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any],
@@ -159,12 +174,8 @@ final case class RequestSession[F[_]: Monad: Trace](
     )
       .send(sttpBackend)
       .map(_.body)
-
-  def map[R, R1](r: F[R], f: R => R1): F[R1] = r.map(f)
-  def flatMap[R, R1](r: F[R], f: R => F[R1]): F[R1] = r.flatMap(f)
 }
 
-// scalastyle:off parameter.number
 class GenericClient[F[_]: Trace](
     applicationName: String,
     val projectName: String,
@@ -173,7 +184,7 @@ class GenericClient[F[_]: Trace](
     apiVersion: Option[String],
     clientTag: Option[String],
     cdfVersion: Option[String]
-)(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Any]) {
+)(implicit monad: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]) {
   def this(
       applicationName: String,
       projectName: String,
@@ -182,7 +193,7 @@ class GenericClient[F[_]: Trace](
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
-  )(implicit monad: Monad[F], sttpBackend: SttpBackend[F, Any]) =
+  )(implicit monad: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]) =
     this(
       applicationName,
       projectName,
@@ -192,7 +203,6 @@ class GenericClient[F[_]: Trace](
       clientTag,
       cdfVersion
     )
-  // scalastyle:on parameter.number
 
   import GenericClient._
 
@@ -229,8 +239,8 @@ class GenericClient[F[_]: Trace](
     new RawDatabases[F](requestSession.withResourceType(RAW_METADATA))
   def rawTables(database: String): RawTables[F] =
     new RawTables(requestSession.withResourceType(RAW_METADATA), database)
-  def rawRows(database: String, table: String): RawRows[F] =
-    new RawRows(requestSession.withResourceType(RAW_ROWS), database, table)
+  def rawRows(database: String, table: String, filterNullFields: Boolean = false): RawRows[F] =
+    new RawRows(requestSession.withResourceType(RAW_ROWS), database, table, filterNullFields)
 
   lazy val threeDModels = new ThreeDModels[F](requestSession.withResourceType(THREED))
   def threeDRevisions(modelId: Long): ThreeDRevisions[F] =
@@ -307,12 +317,12 @@ object GenericClient {
   val defaultBaseUrl: String = Option(System.getenv("COGNITE_BASE_URL"))
     .getOrElse("https://api.cognitedata.com")
 
-  def apply[F[_]: Monad: Trace](
+  def apply[F[_]: Trace](
       applicationName: String,
       projectName: String,
       baseUrl: String,
       auth: Auth
-  )(implicit sttpBackend: SttpBackend[F, Any]): GenericClient[F] =
+  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): GenericClient[F] =
     new GenericClient(applicationName, projectName, baseUrl, auth)
 
   def parseBaseUrlOrThrow(baseUrl: String): Uri =
@@ -342,7 +352,7 @@ object GenericClient {
         )
     }
 
-  def forAuth[F[_]: Monad: Trace](
+  def forAuth[F[_]: Trace](
       applicationName: String,
       projectName: String,
       auth: Auth,
@@ -350,7 +360,7 @@ object GenericClient {
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
-  )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
     forAuthProvider(
       applicationName,
       projectName,
@@ -361,7 +371,7 @@ object GenericClient {
       cdfVersion
     )
 
-  def forAuthProvider[F[_]: Monad: Trace](
+  def forAuthProvider[F[_]: Trace](
       applicationName: String,
       projectName: String,
       authProvider: AuthProvider[F],
@@ -369,11 +379,11 @@ object GenericClient {
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
-  )(implicit sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
     if (projectName.isEmpty) {
-      throw InvalidAuthentication()
+      F.raiseError(InvalidAuthentication())
     } else {
-      Monad[F].pure(
+      F.pure(
         new GenericClient[F](
           applicationName,
           projectName,
@@ -388,32 +398,32 @@ object GenericClient {
 
   def parseResponse[T, R](uri: Uri, mapResult: T => R)(
       implicit decoder: Decoder[T]
-  ): ResponseAs[R, Any] =
+  ): ResponseAs[Either[Throwable, R], Any] =
     asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
-      response match {
-        case Left(DeserializationException(_, _))
-            if metadata.code.code === StatusCode.TooManyRequests.code =>
-          throw CdpApiException(
-            url = uri"$uri",
-            code = StatusCode.TooManyRequests.code,
-            missing = None,
-            duplicated = None,
-            missingFields = None,
-            message = "Too many requests.",
-            requestId = metadata.header("x-request-id")
-          )
-        case Left(DeserializationException(_, error)) =>
-          throw SdkException(
-            s"Failed to parse response, reason: ${error.getMessage}",
-            Some(uri),
-            metadata.header("x-request-id"),
-            Some(metadata.code.code)
-          )
-        case Left(HttpError(cdpApiError, _)) =>
-          throw cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
-        case Right(value) =>
-          mapResult(value)
-      }
+      response
+        .leftMap[Throwable] {
+          case DeserializationException(_, _)
+              if metadata.code.code === StatusCode.TooManyRequests.code =>
+            CdpApiException(
+              url = uri"$uri",
+              code = StatusCode.TooManyRequests.code,
+              missing = None,
+              duplicated = None,
+              missingFields = None,
+              message = "Too many requests.",
+              requestId = metadata.header("x-request-id")
+            )
+          case DeserializationException(_, error) =>
+            SdkException(
+              s"Failed to parse response, reason: ${error.getMessage}",
+              Some(uri),
+              metadata.header("x-request-id"),
+              Some(metadata.code.code)
+            )
+          case HttpError(cdpApiError, _) =>
+            cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
+        }
+        .map(mapResult)
     )
 }
 
@@ -423,8 +433,8 @@ class Client(
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
     auth: Auth
-)(implicit trace: Trace[Id], sttpBackend: SttpBackend[Id, Any])
-    extends GenericClient[Id](applicationName, projectName, baseUrl, auth)
+)(implicit trace: Trace[OrError], sttpBackend: SttpBackend[OrError, Any])
+    extends GenericClient[OrError](applicationName, projectName, baseUrl, auth)
 
 object Client {
   def apply(
@@ -433,7 +443,7 @@ object Client {
       baseUrl: String,
       auth: Auth
   )(
-      implicit trace: Trace[Id],
-      sttpBackend: SttpBackend[Id, Any]
+      implicit trace: Trace[OrError],
+      sttpBackend: SttpBackend[OrError, Any]
   ): Client = new Client(applicationName, projectName, baseUrl, auth)
 }

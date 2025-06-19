@@ -17,7 +17,6 @@ import sttp.monad.MonadError
 
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
-import cats.Id
 import cats.effect.IO
 import cats.effect.unsafe.IORuntime
 
@@ -28,20 +27,20 @@ class LoggingSttpBackend[F[_], +P](delegate: SttpBackend[F, P]) extends SttpBack
     responseMonad.map(try {
       responseMonad.handleError(delegate.send(request)) {
         case e: Exception =>
-          println(s"Exception when sending request: ${request.toString}, ${e.toString}") // scalastyle:ignore
+          println(s"Exception when sending request: ${request.toString}, ${e.toString}")
           responseMonad.error(e)
       }
     } catch {
       case NonFatal(e) =>
-        println(s"Exception when sending request: ${request.toString}, ${e.toString}") // scalastyle:ignore
+        println(s"Exception when sending request: ${request.toString}, ${e.toString}")
         throw e
     }) { response =>
-      println(s"request ${request.body.toString}") // scalastyle:ignore
-      println(s"response ${response.toString}") // scalastyle:ignore
+      println(s"request ${request.body.toString}")
+      println(s"response ${response.toString}")
       if (response.isSuccess) {
-        println(s"For request: ${request.toString} got response: ${response.toString}") // scalastyle:ignore
+        println(s"For request: ${request.toString} got response: ${response.toString}")
       } else {
-        println(s"For request: ${request.toString} got response: ${response.toString}") // scalastyle:ignore
+        println(s"For request: ${request.toString} got response: ${response.toString}")
       }
       response
     }
@@ -52,7 +51,7 @@ class LoggingSttpBackend[F[_], +P](delegate: SttpBackend[F, P]) extends SttpBack
 abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
   implicit val ioRuntime: IORuntime = IORuntime.global
   implicit val trace: Trace[IO] = natchez.Trace.Implicits.noop
-  implicit val traceId: Trace[Id] = natchez.Trace.Implicits.noop
+  implicit val traceEither: Trace[OrError] = natchez.Trace.Implicits.noop
   implicit val authSttpBackend: SttpBackend[IO, Any] = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
   // Use this if you need request logs for debugging: new LoggingSttpBackend[Id, Nothing](sttpBackend)
   lazy val client: GenericClient[IO] = GenericClient[IO](

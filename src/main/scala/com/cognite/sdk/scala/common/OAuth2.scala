@@ -72,7 +72,7 @@ object OAuth2 {
             }
         }
         expiresAt = acquiredLowerBound + payload.expires_in
-      } yield TokenState(payload.access_token, expiresAt, cdfProjectName)
+      } yield TokenState(payload.access_token, expiresAt)
     }
   }
 
@@ -86,7 +86,8 @@ object OAuth2 {
     /** Only use for SessionProvider to interact with Cognite internal SessionAPI */
     private def getKubernetesJwt[F[_]](implicit F: Async[F]): F[String] = {
       val serviceAccountTokenPath = Path("/var/run/secrets/tokens/cdf_token")
-      Files[F]
+      Files
+        .forAsync[F]
         .readAll(serviceAccountTokenPath)
         .through(fs2.text.utf8.decode)
         .compile
@@ -117,9 +118,9 @@ object OAuth2 {
             parseResponse[SessionTokenResponse, SessionTokenResponse](uri, value => value)
           )
           .send(sttpBackend)
-          .map(_.body)
+          .flatMap(r => F.fromEither(r.body))
         expiresAt = acquiredLowerBound + payload.expiresIn
-      } yield TokenState(payload.accessToken, expiresAt, cdfProjectName)
+      } yield TokenState(payload.accessToken, expiresAt)
     }
   }
 
@@ -133,7 +134,7 @@ object OAuth2 {
     for {
       now <- clock.realTime.map(_.toSeconds)
       _ <- cache.invalidateIfNeeded(_.expiresAt - refreshSecondsBeforeExpiration <= now)
-      auth <- cache.run(state => F.pure(OidcTokenAuth(state.token, state.cdfProjectName)))
+      auth <- cache.run(state => F.pure(OidcTokenAuth(state.token)))
     } yield auth
 
   class ClientCredentialsProvider[F[_]] private (
@@ -156,7 +157,6 @@ object OAuth2 {
     def getAuth: F[Auth] = commonGetAuth(cache, refreshSecondsBeforeExpiration)
   }
 
-  // scalastyle:off method.length
   object ClientCredentialsProvider {
     def apply[F[_]](
         credentials: ClientCredentials,
@@ -169,7 +169,6 @@ object OAuth2 {
       ConcurrentCachedObject(credentials.getAuth, initialToken)
         .map(new ClientCredentialsProvider[F](_, refreshSecondsBeforeExpiration))
   }
-  // scalastyle:on method.length
 
   object SessionProvider {
     def apply[F[_]](
@@ -190,5 +189,5 @@ object OAuth2 {
     implicit val decoder: Decoder[ClientCredentialsResponse] = deriveDecoder
   }
 
-  final case class TokenState(token: String, expiresAt: Long, cdfProjectName: String)
+  final case class TokenState(token: String, expiresAt: Long)
 }
