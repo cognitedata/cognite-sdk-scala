@@ -2,7 +2,8 @@ import sbt.{Test, project}
 import wartremover.Wart
 
 val scala3 = "3.3.3"
-val supportedScalaVersions = List(scala213)
+val scala213 = "2.13.16"
+val supportedScalaVersions = List(scala213, scala3)
 
 
 // This is used only for tests.
