@@ -8,7 +8,7 @@ import cats.effect.unsafe.implicits.global
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler
+import org.eclipse.jetty.servlet.ServletContextHandler
 import org.scalatest.EitherValues.convertEitherToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.{BeforeAndAfter, OptionValues}
