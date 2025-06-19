@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2025-01-16T13:07:45.082825Z",
+  "timestamp" : "2025-06-19T13:13:36.590769Z",
   "configurations" : [
     "compile",
     "optional",
@@ -494,20 +494,6 @@
       ]
     },
     {
-      "org" : "javax.servlet",
-      "name" : "javax.servlet-api",
-      "version" : "3.1.0",
-      "artifacts" : [
-        {
-          "name" : "javax.servlet-api.jar",
-          "hash" : "sha1:3cd63d075497751784b2fa84be59432f4905bf7c"
-        }
-      ],
-      "configurations" : [
-        "test"
-      ]
-    },
-    {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client",
       "version" : "2.12.3",
@@ -538,11 +524,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-http",
-      "version" : "9.4.57.v20241219",
+      "version" : "11.0.25",
       "artifacts" : [
         {
           "name" : "jetty-http.jar",
-          "hash" : "sha1:c7a3a9c599346708894cf355e03105937f45f427"
+          "hash" : "sha1:1c33e326c11d9db04b134d070d600418f818809d"
         }
       ],
       "configurations" : [
@@ -552,11 +538,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-io",
-      "version" : "9.4.57.v20241219",
+      "version" : "11.0.25",
       "artifacts" : [
         {
           "name" : "jetty-io.jar",
-          "hash" : "sha1:bd0ca6e5c4314972cd91f427fa09dedfe3b84ff5"
+          "hash" : "sha1:0175602210a8b3fe4a8cc55c07d4b2041daff70e"
         }
       ],
       "configurations" : [
@@ -566,11 +552,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-security",
-      "version" : "9.4.57.v20241219",
+      "version" : "11.0.25",
       "artifacts" : [
         {
           "name" : "jetty-security.jar",
-          "hash" : "sha1:2b545f68d45b947fdc6e279a0e8ae3630ec10e05"
+          "hash" : "sha1:1698e2bcf1dd06785ded55fd4346bb9adafd64b6"
         }
       ],
       "configurations" : [
@@ -580,11 +566,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-server",
-      "version" : "9.4.57.v20241219",
+      "version" : "11.0.25",
       "artifacts" : [
         {
           "name" : "jetty-server.jar",
-          "hash" : "sha1:ad3baf52b98b4a32f5714fe2e58ac0e502b4e4d8"
+          "hash" : "sha1:0851d4e5d920bc14ba8e00117add2b37f4c1ce96"
         }
       ],
       "configurations" : [
@@ -594,11 +580,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-servlet",
-      "version" : "9.4.57.v20241219",
+      "version" : "11.0.25",
       "artifacts" : [
         {
           "name" : "jetty-servlet.jar",
-          "hash" : "sha1:3e648eebddbf5ad0c0f7698e50c6a69c4a77fd95"
+          "hash" : "sha1:76a1ea0dcd771797ce3c230809918f5a91e9b80f"
         }
       ],
       "configurations" : [
@@ -608,11 +594,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-util",
-      "version" : "9.4.57.v20241219",
+      "version" : "11.0.25",
       "artifacts" : [
         {
           "name" : "jetty-util.jar",
-          "hash" : "sha1:7bf7ea75644ac064199e1e32c66ccd312239f2dc"
+          "hash" : "sha1:1f725375a296fed1ec126125165c5d7ae7629437"
         }
       ],
       "configurations" : [
@@ -620,13 +606,13 @@
       ]
     },
     {
-      "org" : "org.eclipse.jetty",
-      "name" : "jetty-util-ajax",
-      "version" : "9.4.57.v20241219",
+      "org" : "org.eclipse.jetty.toolchain",
+      "name" : "jetty-jakarta-servlet-api",
+      "version" : "5.0.2",
       "artifacts" : [
         {
-          "name" : "jetty-util-ajax.jar",
-          "hash" : "sha1:7b5f144a3d0cbfcac62f2fcb9e14ffa765048f0e"
+          "name" : "jetty-jakarta-servlet-api.jar",
+          "hash" : "sha1:027fce6d666a203526236d33d00e202a4136230f"
         }
       ],
       "configurations" : [
@@ -978,11 +964,11 @@
     {
       "org" : "org.slf4j",
       "name" : "slf4j-api",
-      "version" : "1.7.30",
+      "version" : "2.0.13",
       "artifacts" : [
         {
           "name" : "slf4j-api.jar",
-          "hash" : "sha1:b5a4b6d16ab13e34a88fae84c35cd5d68cac922c"
+          "hash" : "sha1:80229737f704b121a318bba5d5deacbcf395bc77"
         }
       ],
       "configurations" : [
