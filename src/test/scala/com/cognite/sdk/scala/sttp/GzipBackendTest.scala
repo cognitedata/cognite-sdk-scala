@@ -18,7 +18,6 @@ import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import java.io.{ByteArrayInputStream, File}
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
-import java.nio.file.Paths
 import java.util.zip.GZIPInputStream
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import scala.io.Source
@@ -135,11 +134,11 @@ class GzipBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAfter 
   it should "not compress file input bodies" in {
     // TODO: Except, maybe we should.
     val request = basicRequest
-      .body(new File("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt"))
+      .body(new File(getClass.getResource("/uploadTest.txt").getPath))
       .post(uri"http://localhost:$port/file")
     val r = request.send(sttpBackend).unsafeRunSync()
     val source = Source.fromFile(
-      Paths.get("./src/test/scala/com/cognite/sdk/scala/v1/uploadTest.txt").toFile
+      new File(getClass.getResource("/uploadTest.txt").getPath)
     )(scala.io.Codec.UTF8)
     try {
       assert(r.body.value contains source.mkString)
