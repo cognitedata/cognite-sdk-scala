@@ -19,7 +19,7 @@ import java.io.{ByteArrayInputStream, File}
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import scala.io.Source
 
 class EchoServlet extends HttpServlet {
