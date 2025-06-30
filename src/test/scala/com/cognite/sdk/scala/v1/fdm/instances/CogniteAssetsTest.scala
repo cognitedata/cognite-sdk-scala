@@ -9,6 +9,8 @@ import com.cognite.sdk.scala.v1.fdm.views.ViewReference
 import com.cognite.sdk.scala.v1.{CogniteInstanceId, CommonDataModelTestHelper, File, FileDownloadInstanceId, FileDownloadLink, FileUploadInstanceId, InstanceId}
 import sttp.client3.UriContext
 
+import java.util.UUID
+
 
 @SuppressWarnings(
   Array(
@@ -20,9 +22,9 @@ import sttp.client3.UriContext
 class CogniteAssetsTest extends CommonDataModelTestHelper with RetryWhile {
 
   it should "make it possible to retrieve file and associated upload link and download link using instance id" in {
-
-    val instanceId: InstanceId = InstanceId(space = Utils.SpaceExternalId, externalId = "file_instance_ext_id2")
-    val cogniteInstanceId: CogniteInstanceId = CogniteInstanceId(InstanceId(space = Utils.SpaceExternalId, externalId = "file_instance_ext_id2"))
+    val randomizedInstanceExternalId = "file_instance_ext_id" + UUID.randomUUID().toString
+    val instanceId: InstanceId = InstanceId(space = Utils.SpaceExternalId, externalId = randomizedInstanceExternalId)
+    val cogniteInstanceId: CogniteInstanceId = CogniteInstanceId(InstanceId(space = Utils.SpaceExternalId, externalId = randomizedInstanceExternalId))
 
     val testFile = InstanceCreate(
       items = Seq(
