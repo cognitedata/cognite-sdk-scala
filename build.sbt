@@ -12,7 +12,7 @@ val javaVersion = "11"
 val jettyTestVersion = "11.0.25"
 
 val sttpVersion = "3.5.2"
-val circeVersion = "0.14.10"
+val circeVersion = "0.14.14"
 val catsEffectVersion = "3.5.7"
 val fs2Version = "3.11.0"
 val natchezVersion = "0.3.7"
