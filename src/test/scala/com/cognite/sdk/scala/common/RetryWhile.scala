@@ -17,7 +17,8 @@ trait RetryWhile {
       action: => A,
       assertion: A => Assertion,
       retriesRemaining: Int = 8,
-      initialDelay: FiniteDuration = Constants.DefaultInitialRetryDelay
+      initialDelay: FiniteDuration = Constants.DefaultInitialRetryDelay,
+      retryOnException: Boolean = false
   ): A = {
     val currentDelay = Random.nextInt(initialDelay.toMillis.toInt)
     val nextDelay = Constants.DefaultMaxBackoffDelay.min(initialDelay * 2)
@@ -28,7 +29,10 @@ trait RetryWhile {
     } match {
       case Failure(_: TestFailedException) if retriesRemaining > 0 =>
         Thread.sleep(currentDelay.toLong)
-        retryWithExpectedResult[A](action, assertion, retriesRemaining - 1, nextDelay)
+        retryWithExpectedResult[A](action, assertion, retriesRemaining - 1, nextDelay, retryOnException)
+      case Failure(_) if retriesRemaining > 0 && retryOnException =>
+        Thread.sleep(currentDelay.toLong)
+        retryWithExpectedResult[A](action, assertion, retriesRemaining - 1, nextDelay, retryOnException)
       case Failure(exception) => throw exception
       case Success(value) => value
     }

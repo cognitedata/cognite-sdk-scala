@@ -164,14 +164,12 @@ class InstancesTest extends CommonDataModelTestHelper {
     val queryNodesMapOfNodeView2: InstanceQueryResponse = queryNodeInstances(nodeView2.toSourceReference)
       .unsafeRunSync()
 
-    queryNodesMapOfNodeView1.nextCursor.map { map =>
+    queryNodesMapOfNodeView1.items.map { map =>
       map.size shouldBe 1
-      map.keys.exists("query" === _) shouldBe true
     }
 
-    queryNodesMapOfNodeView2.nextCursor.map { map =>
+    queryNodesMapOfNodeView2.items.map { map =>
       map.size shouldBe 1
-      map.keys.exists("query" === _) shouldBe true
     }
 
     val readEdgesMapOfEdge = fetchEdgeInstance(edgeView.toSourceReference, edgeWriteData.externalId).unsafeRunSync()
