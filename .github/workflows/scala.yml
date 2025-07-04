@@ -165,7 +165,7 @@ jobs:
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 scalafmtCheck test
 
     - name: Upload test coverage report
-      uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5
+      uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5
       with:
         token: ${{ secrets.codecov_token }}
 
