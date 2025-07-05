@@ -7,49 +7,6 @@ on:
     branches: [ master ]
 
 jobs:
-  compile_scala_212:
-    runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/master'
-    environment: CI
-
-    timeout-minutes: 20
-
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          fetch-depth: 0
-      - run: |
-          git rev-list --count --first-parent HEAD > patch_version.txt
-
-      - name: Set up JDK 8
-        uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
-        with:
-          jvm: adopt:8
-          apps: sbt
-
-      # Caching dependencies in Pull Requests based on branch name and build.sbt.
-      # Can we do something better here?
-      - name: Cache Coursier dependencies
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
-        env:
-          cache-name: coursier-cache
-        with:
-          path: ~/.cache/coursier/v1
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
-      - name: Cache Ivy 2 cache
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
-        env:
-          cache-name: sbt-ivy2-cache
-        with:
-          path: ~/.ivy2/cache
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
-      - name: Compile
-        run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true ++2.12 dependencyLockCheck
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.12 Test/compile
-
   compile_scala_213:
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/master'
@@ -64,16 +21,16 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 8
+      - name: Set up JDK 11
         uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
-          jvm: adopt:8
+          jvm: temurin:11
           apps: sbt
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
       - name: Cache Coursier dependencies
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         env:
           cache-name: coursier-cache
         with:
@@ -81,7 +38,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
       - name: Cache Ivy 2 cache
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         env:
           cache-name: sbt-ivy2-cache
         with:
@@ -107,16 +64,16 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 8
+      - name: Set up JDK 11
         uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
-          jvm: adopt:8
+          jvm: temurin:11
           apps: sbt
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
       - name: Cache Coursier dependencies
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         env:
           cache-name: coursier-cache
         with:
@@ -124,7 +81,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
       - name: Cache Ivy 2 cache
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         env:
           cache-name: sbt-ivy2-cache
         with:
@@ -149,16 +106,16 @@ jobs:
     - run: |
         git rev-list --count --first-parent HEAD > patch_version.txt
 
-    - name: Set up JDK 8
+    - name: Set up JDK 11
       uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
       with:
-        jvm: adopt:8
+        jvm: temurin:11
         apps: sbt
 
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
     # Can we do something better here?
     - name: Cache Coursier dependencies
-      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
       env:
         cache-name: coursier-cache
       with:
@@ -166,7 +123,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
     - name: Cache Ivy 2 cache
-      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
       env:
         cache-name: sbt-ivy2-cache
       with:
@@ -225,10 +182,10 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 8
+      - name: Set up JDK 11
         uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
-          jvm: adopt:8
+          jvm: temurin:11
           apps: sbt
 
       - name: Build JAR file
@@ -273,10 +230,10 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 8
+      - name: Set up JDK 11
         uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
         with:
-          jvm: adopt:8
+          jvm: temurin:11
           apps: sbt
 
       - name: Build JAR file
