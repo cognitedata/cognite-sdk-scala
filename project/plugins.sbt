@@ -6,7 +6,7 @@ addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.4.4")
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.3")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.3.0")
 addSbtPlugin("au.com.onegeek" %% "sbt-dotenv" % "2.1.233")
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.2.7")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.3.1")
 addSbtPlugin("software.purpledragon" % "sbt-dependency-lock" % "1.5.1")
 
 addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.7")
