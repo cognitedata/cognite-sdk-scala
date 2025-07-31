@@ -25,7 +25,7 @@ lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.t
 
 credentials += Credentials(
   "Sonatype Nexus Repository Manager",
-  "oss.sonatype.org",
+  "ossrh-staging-api.central.sonatype.com",
   System.getenv("SONATYPE_USERNAME"),
   System.getenv("SONATYPE_PASSWORD")
 )
@@ -84,7 +84,7 @@ lazy val commonSettings = Seq(
     else
       Some("local-releases".at(s"$artifactory/libs-release-local/"))
   } else {
-    val nexus = "https://oss.sonatype.org/"
+    val nexus = "https://ossrh-staging-api.central.sonatype.com/"
     if (isSnapshot.value) Some("snapshots".at(nexus + "content/repositories/snapshots"))
     else Some("releases".at(nexus + "service/local/staging/deploy/maven2"))
   }),
