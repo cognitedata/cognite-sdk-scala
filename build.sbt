@@ -13,7 +13,7 @@ val jettyTestVersion = "11.0.25"
 
 val sttpVersion = "3.5.2"
 val circeVersion = "0.14.10"
-val catsEffectVersion = "3.5.7"
+val catsEffectVersion = "3.6.3"
 val fs2Version = "3.11.0"
 val natchezVersion = "0.3.7"
 
@@ -24,8 +24,8 @@ ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0
 lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
 
 credentials += Credentials(
-  "Sonatype Nexus Repository Manager",
-  "oss.sonatype.org",
+  "OSSRH Staging API Service",
+  "ossrh-staging-api.central.sonatype.com",
   System.getenv("SONATYPE_USERNAME"),
   System.getenv("SONATYPE_PASSWORD")
 )
@@ -84,7 +84,7 @@ lazy val commonSettings = Seq(
     else
       Some("local-releases".at(s"$artifactory/libs-release-local/"))
   } else {
-    val nexus = "https://oss.sonatype.org/"
+    val nexus = "https://ossrh-staging-api.central.sonatype.com/"
     if (isSnapshot.value) Some("snapshots".at(nexus + "content/repositories/snapshots"))
     else Some("releases".at(nexus + "service/local/staging/deploy/maven2"))
   }),
