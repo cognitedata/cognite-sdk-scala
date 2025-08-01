@@ -1,17 +1,19 @@
+import sbt.Keys.javacOptions
 import sbt.{Test, project}
 import wartremover.Wart
 
 val scala3 = "3.3.3"
 val scala213 = "2.13.16"
-val scala212 = "2.12.19"
-val supportedScalaVersions = List(scala212, scala213, scala3)
+val supportedScalaVersions = List(scala213, scala3)
+
+val javaVersion = "11"
 
 // This is used only for tests.
-val jettyTestVersion = "9.4.57.v20241219"
+val jettyTestVersion = "11.0.25"
 
 val sttpVersion = "3.5.2"
 val circeVersion = "0.14.10"
-val catsEffectVersion = "3.5.7"
+val catsEffectVersion = "3.6.3"
 val fs2Version = "3.11.0"
 val natchezVersion = "0.3.7"
 
@@ -22,8 +24,8 @@ ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0
 lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
 
 credentials += Credentials(
-  "Sonatype Nexus Repository Manager",
-  "oss.sonatype.org",
+  "OSSRH Staging API Service",
+  "ossrh-staging-api.central.sonatype.com",
   System.getenv("SONATYPE_USERNAME"),
   System.getenv("SONATYPE_PASSWORD")
 )
@@ -35,12 +37,14 @@ credentials += Credentials("Artifactory Realm",
 
 val artifactory = "https://cognite.jfrog.io/cognite"
 
+javacOptions ++= Seq("-source", javaVersion, "-target", javaVersion)
+
 lazy val commonSettings = Seq(
   name := "cognite-sdk-scala",
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.31." + patchVersion,
+  version := "2.32." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
@@ -80,7 +84,7 @@ lazy val commonSettings = Seq(
     else
       Some("local-releases".at(s"$artifactory/libs-release-local/"))
   } else {
-    val nexus = "https://oss.sonatype.org/"
+    val nexus = "https://ossrh-staging-api.central.sonatype.com/"
     if (isSnapshot.value) Some("snapshots".at(nexus + "content/repositories/snapshots"))
     else Some("releases".at(nexus + "service/local/staging/deploy/maven2"))
   }),
@@ -99,10 +103,6 @@ lazy val commonSettings = Seq(
   },
   Compile / wartremoverErrors :=
     (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 12)) =>
-        // We do this to make IntelliJ happy, as it doesn't understand Wartremover properly.
-        // Since we currently put 2.12 first in cross version, that's what IntelliJ is using.
-        Seq.empty[wartremover.Wart]
       case _ =>
         Warts.allBut(
           Wart.DefaultArguments,
@@ -143,10 +143,6 @@ lazy val core = (project in file("."))
       case Some((3, _)) =>
         List(
           "-Wconf:cat=deprecation:i",
-          // We use JavaConverters to remain backwards compatible with Scala 2.12,
-          // and to avoid a dependency on scala-collection-compat
-          "-Wconf:msg=object JavaConverters in package scala.collection is deprecated.*:s",
-          "-Wconf:msg=method mapValues in trait MapOps is deprecated.*:s",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.Assertion:s",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.compatible.Assertion:s",
 
@@ -156,15 +152,6 @@ lazy val core = (project in file("."))
         List(
           "-Wconf:cat=deprecation:i",
           "-Wconf:cat=other-pure-statement:i",
-          // We use JavaConverters to remain backwards compatible with Scala 2.12,
-          // and to avoid a dependency on scala-collection-compat
-          "-Wconf:origin=scala.collection.compat.*:s"
-        )
-      case Some((2, minor)) if minor == 12 =>
-        List(
-          // Scala 2.12 doesn't always handle @nowarn correctly,
-          // and doesn't seem to like @deprecated case class fields with default values.
-          "-Wconf:src=src/main/scala/com/cognite/sdk/scala/v1/resources/assets.scala&cat=deprecation:i"
         )
       case _ =>
         List.empty[String]
@@ -186,11 +173,7 @@ val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
   ("com.softwaremill.sttp.client3" %% "circe" % sttpVersion)
     // We specify our own version of circe.
-    .exclude("io.circe", "circe-core_2.11")
-    .exclude("io.circe", "circe-core_2.12")
     .exclude("io.circe", "circe-core_2.13")
-    .exclude("io.circe", "circe-parser_2.11")
-    .exclude("io.circe", "circe-parser_2.12")
     .exclude("io.circe", "circe-parser_2.13"),
   "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test
 )
@@ -199,26 +182,16 @@ def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
   Seq(
     // We use the cats version included in the cats-effect version we specify.
     ("io.circe" %% "circe-core" % circeVersion)
-      .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13"),
     ("io.circe" %% "circe-generic" % circeVersion)
-      .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13"),
     ("io.circe" %% "circe-parser" % circeVersion)
-      .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13"),
     ("io.circe" %% "circe-literal" % circeVersion % Test)
-      .exclude("org.typelevel", "cats-core_2.12")
       .exclude("org.typelevel", "cats-core_2.13")
   )
 
 scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
-  case Some((2, minor)) if minor == 12 =>
-    // disable those in 2.12 due to invalid warnings
-    List(
-      "-Ywarn-unused:implicits",
-      "-Ywarn-unused:params"
-    )
   case _ =>
     List.empty[String]
 })
