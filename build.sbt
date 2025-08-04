@@ -20,12 +20,13 @@ val natchezVersion = "0.3.7"
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
 ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.5.0"
+ThisBuild / sbtPluginPublishLegacyMavenStyle := false
 
 lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
 
 credentials += Credentials(
-  "OSSRH Staging API Service",
-  "ossrh-staging-api.central.sonatype.com",
+  "Sonatype Nexus Repository Manager",
+  "central.sonatype.com",
   System.getenv("SONATYPE_USERNAME"),
   System.getenv("SONATYPE_PASSWORD")
 )
@@ -84,9 +85,9 @@ lazy val commonSettings = Seq(
     else
       Some("local-releases".at(s"$artifactory/libs-release-local/"))
   } else {
-    val nexus = "https://ossrh-staging-api.central.sonatype.com/"
-    if (isSnapshot.value) Some("snapshots".at(nexus + "content/repositories/snapshots"))
-    else Some("releases".at(nexus + "service/local/staging/deploy/maven2"))
+    val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+    if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
+    else localStaging.value
   }),
   publishMavenStyle := true,
   pgpPassphrase := {
