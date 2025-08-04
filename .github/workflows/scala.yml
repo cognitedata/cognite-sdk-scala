@@ -2,9 +2,9 @@ name: Scala CI
 
 on:
   push:
-    branches: [ master, fix-deprecated-sonatype ]
+    branches: [ master ]
   pull_request:
-    branches: [ master, fix-deprecated-sonatype ]
+    branches: [ master ]
 
 jobs:
   compile_scala_213:
