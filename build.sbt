@@ -26,7 +26,7 @@ lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.t
 
 credentials += Credentials(
   "Sonatype Nexus Repository Manager",
-  "s01.oss.sonatype.org",
+  "central.sonatype.com",
   System.getenv("SONATYPE_USERNAME"),
   System.getenv("SONATYPE_PASSWORD")
 )
