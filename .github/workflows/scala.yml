@@ -263,4 +263,4 @@ jobs:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_OSSRH_USER }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
         run: |
-          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned +sonaUpload +sonaRealease
+          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned +sonaRelease
