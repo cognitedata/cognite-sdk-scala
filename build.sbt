@@ -24,8 +24,8 @@ ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0
 lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
 
 credentials += Credentials(
-  "OSSRH Staging API Service",
-  "ossrh-staging-api.central.sonatype.com",
+  "Sonatype Nexus Repository Manager",
+  "s01.oss.sonatype.org",
   System.getenv("SONATYPE_USERNAME"),
   System.getenv("SONATYPE_PASSWORD")
 )
@@ -84,7 +84,7 @@ lazy val commonSettings = Seq(
     else
       Some("local-releases".at(s"$artifactory/libs-release-local/"))
   } else {
-    val nexus = "https://ossrh-staging-api.central.sonatype.com/"
+    val nexus = "https://s01.oss.sonatype.org/"
     if (isSnapshot.value) Some("snapshots".at(nexus + "content/repositories/snapshots"))
     else Some("releases".at(nexus + "service/local/staging/deploy/maven2"))
   }),
