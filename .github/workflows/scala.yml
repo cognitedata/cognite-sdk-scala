@@ -195,9 +195,9 @@ jobs:
 
       - name: Install GPG & Sonatype credentials for SBT
         env:
-          GPG_PUBLIC_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PUBLIC_KEY }}
-          GPG_PRIVATE_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PRIVATE_KEY }}
-          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+          GPG_PUBLIC_KEY: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_PUBLIC_KEY }}
+          GPG_PRIVATE_KEY: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_KEY_PASSPHRASE }}
         run: |
           set -x
 
@@ -211,7 +211,7 @@ jobs:
 
       - name: Publish package
         env:
-          GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+          GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_KEY_PASSPHRASE }}
           JFROG_USERNAME: ${{ secrets.ARTIFACTORY_PUBLISH_TOKEN_USER }}
           JFROG_PASSWORD: ${{ secrets.ARTIFACTORY_PUBLISH_TOKEN }}
           PUBLISH_TO_JFROG: "true"
@@ -243,9 +243,9 @@ jobs:
 
       - name: Install GPG & Sonatype credentials for SBT
         env:
-          GPG_PUBLIC_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PUBLIC_KEY }}
-          GPG_PRIVATE_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PRIVATE_KEY }}
-          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+          GPG_PUBLIC_KEY: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_PUBLIC_KEY }}
+          GPG_PRIVATE_KEY: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_KEY_PASSPHRASE }}
         run: |
           set -x
 
@@ -259,8 +259,8 @@ jobs:
 
       - name: Publish package
         env:
-          GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_OSSRH_USER }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
+          GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_KEY_PASSPHRASE }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_CENTRAL_PORTAL_USER }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_PASSWORD }}
         run: |
-          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned +sonaRelease
+          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned sonaRelease
