@@ -14,9 +14,13 @@ sealed trait CogniteIdOrInstanceId
 sealed trait CogniteId extends CogniteIdOrInstanceId
 sealed trait CogniteExternalIdOrInstanceId
 
-final case class CogniteExternalId(externalId: String) extends CogniteId with CogniteExternalIdOrInstanceId
+final case class CogniteExternalId(externalId: String)
+    extends CogniteId
+    with CogniteExternalIdOrInstanceId
 final case class CogniteInternalId(id: Long) extends CogniteId
-final case class CogniteInstanceId(instanceId: InstanceId) extends CogniteIdOrInstanceId with CogniteExternalIdOrInstanceId
+final case class CogniteInstanceId(instanceId: InstanceId)
+    extends CogniteIdOrInstanceId
+    with CogniteExternalIdOrInstanceId
 final case class InstanceId(space: String, externalId: String)
 
 object CogniteExternalId {
