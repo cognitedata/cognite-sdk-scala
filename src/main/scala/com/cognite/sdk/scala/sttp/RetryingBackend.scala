@@ -54,7 +54,8 @@ class RetryingBackend[F[_], +P](
       case cdpError: CdpApiException => maybeRetry(Some(StatusCode(cdpError.code)), cdpError)
       case sdkException @ SdkException(_, _, _, code @ Some(_)) =>
         maybeRetry(code.map(StatusCode(_)), sdkException)
-      case e @ (_: TimeoutException | _: ConnectException | _: SttpClientException | _: UnknownHostException) =>
+      case e @ (_: TimeoutException | _: ConnectException | _: SttpClientException |
+          _: UnknownHostException) =>
         maybeRetry(None, e)
     }
     responseMonad.flatMap(r) { resp =>
