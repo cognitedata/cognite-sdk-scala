@@ -41,7 +41,6 @@ class RetryingBackendTest extends AnyFlatSpec with Matchers {
       ()
     }
 
-    mockBackend.callCount should be >= 2
-    mockBackend.callCount should be <= 5
+    mockBackend.callCount should be(3)
   }
 }
