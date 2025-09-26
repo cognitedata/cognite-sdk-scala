@@ -9,6 +9,7 @@ import org.scalatest.matchers.should.Matchers
 import sttp.capabilities.Effect
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
+import java.net.UnknownHostException
 import scala.concurrent.duration.DurationInt
 
 @SuppressWarnings(Array("org.wartremover.warts.Var"))
@@ -17,7 +18,7 @@ class FailingRetryingBackend[F[_], +P](delegate: SttpBackend[F, P]) extends Sttp
 
   override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] = {
     callCount += 1
-    responseMonad.error(new java.net.ConnectException("Connection failed"))
+    responseMonad.error(new UnknownHostException("Connection failed"))
   }
   override def close(): F[Unit] = delegate.close()
   override def responseMonad: MonadError[F] = delegate.responseMonad
