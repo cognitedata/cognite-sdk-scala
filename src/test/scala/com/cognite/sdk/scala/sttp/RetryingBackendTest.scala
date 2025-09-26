@@ -19,7 +19,7 @@ class FailingRetryingBackend[F[_], +P](val shouldSucceed: Boolean = false)(impli
   override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] = {
     callCount += 1
     if(shouldSucceed)
-      responseMonad.unit(Response.ok(request.response.show.asInstanceOf[T]))
+      responseMonad.unit(Response.ok(Right("mock success").asInstanceOf[T]))
     else
       responseMonad.error(new UnknownHostException("Connection failed"))
   }
@@ -39,7 +39,7 @@ class RetryingBackendTest extends AnyFlatSpec with Matchers {
       .body("test")
       .post(uri"http://host:$port/string")
 
-    an[Exception] should be thrownBy {
+    an[UnknownHostException] should be thrownBy {
       request.send(retryingBackend).unsafeRunSync()
       ()
     }
