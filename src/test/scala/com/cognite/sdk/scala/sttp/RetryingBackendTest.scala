@@ -14,7 +14,7 @@ import scala.concurrent.duration.DurationInt
 
 @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.AsInstanceOf"))
 class FailingRetryingBackend[F[_], +P](val shouldSucceed: Boolean = false)(implicit val responseMonad: MonadError[F]) extends SttpBackend[F, P] {
-  var callCount: Int = 0
+  var callCount: AtomicInteger = new AtomicInteger(0)
 
   override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] = {
     callCount += 1
