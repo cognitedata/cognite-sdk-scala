@@ -67,11 +67,6 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
     client.functions.deleteByIds(createRes.map(_.id.getOrElse(0L)))
   }
 
-  it should "call function" in {
-    val res = client.functionCalls(8590831424885479L).callFunction(Json.fromJsonObject(JsonObject.empty), Some(getNonce)).unsafeRunSync()
-    res.status should equal("Running")
-  }
-
   it should "read function call items" in {
     client.functionCalls(8590831424885479L).read().unsafeRunSync().items should not be empty
   }
@@ -103,6 +98,11 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
     val schedule = res.items.head
     schedule.name should equal("test-schedule-function")
     schedule.cronExpression should equal(Some("0 0 1 * *"))
+  }
+
+  it should "call function" in {
+    val res = client.functionCalls(8590831424885479L).callFunction(Json.fromJsonObject(JsonObject.empty), Some(getNonce)).unsafeRunSync()
+    res.status should equal("Running")
   }
 
   it should "create and delete function schedules" in {
