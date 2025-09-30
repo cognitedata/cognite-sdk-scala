@@ -45,7 +45,6 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
     filtered.items.head.id
   }
 
-
   it should "read function items" in {
     client.functions.read().unsafeRunSync().items should not be empty
   }
