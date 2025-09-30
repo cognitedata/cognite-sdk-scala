@@ -39,9 +39,10 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
   //They also assume the function with this ID has some completed calls already
   private val preExistingFunctionId: Long = 8590831424885479L
 
-  //retrieve a completed call to be used in tests
-  //due to 90 days retention policy, this needs to be dynamic
-  private lazy val callId: Long = {
+  //Retrieve a completed call to be used in tests
+  //Due to 90 days retention policy, this needs to be dynamic
+  //This assumes the function "preExistingFunctionId" has existing Completed calls
+  private lazy val preExistingCallId: Long = {
     val filter = FunctionCallFilter(status = Some("Completed"))
     val filtered = client.functionCalls(preExistingFunctionId).filter(filter).unsafeRunSync()
     filtered.items shouldNot be(empty)
@@ -76,17 +77,17 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
   }
 
   it should "retrieve function call by id" in {
-    val call = client.functionCalls(preExistingFunctionId).retrieveById(callId).unsafeRunSync()
-    call.id should equal(callId)
+    val call = client.functionCalls(preExistingFunctionId).retrieveById(preExistingCallId).unsafeRunSync()
+    call.id should equal(preExistingCallId)
   }
 
   it should "read function call logs items" in {
-    val res = client.functionCalls(preExistingFunctionId).retrieveLogs(callId).unsafeRunSync()
+    val res = client.functionCalls(preExistingFunctionId).retrieveLogs(preExistingCallId).unsafeRunSync()
     res.items.isEmpty shouldBe true
   }
 
   it should "retrieve function call response" in {
-    val response = client.functionCalls(preExistingFunctionId).retrieveResponse(callId).unsafeRunSync()
+    val response = client.functionCalls(preExistingFunctionId).retrieveResponse(preExistingCallId).unsafeRunSync()
     response.response shouldBe Some(Json.fromFields(Seq(("res_int", Json.fromInt(1)),("res_string", Json.fromString("string response")))))
   }
 
