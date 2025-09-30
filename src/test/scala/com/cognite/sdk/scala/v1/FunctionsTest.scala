@@ -35,11 +35,15 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
     .createWithClientCredentialFlow(Items(Seq(SessionCreateWithCredential(credentials.clientId, credentials.clientSecret)))).unsafeRunSync()
     .map(_.nonce).head
 
+  //Further test assume this function already exists
+  //They also assume the function with this ID has some completed calls already
+  private val preExistingFunctionId: Long = 8590831424885479L
+
   //retrieve a completed call to be used in tests
   //due to 90 days retention policy, this needs to be dynamic
   private lazy val callId: Long = {
     val filter = FunctionCallFilter(status = Some("Completed"))
-    val filtered = client.functionCalls(8590831424885479L).filter(filter).unsafeRunSync()
+    val filtered = client.functionCalls(preExistingFunctionId).filter(filter).unsafeRunSync()
     filtered.items shouldNot be(empty)
     filtered.items.head.status should equal("Completed")
     filtered.items.head.id
@@ -50,8 +54,8 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
   }
 
   it should "retrieve function by id" in {
-    val func = client.functions.retrieveById(8590831424885479L).unsafeRunSync()
-    func.id should equal(Some(8590831424885479L))
+    val func = client.functions.retrieveById(preExistingFunctionId).unsafeRunSync()
+    func.id should equal(Some(preExistingFunctionId))
     func.name should equal("scala-sdk-test-function")
     func.status should equal(Some("Ready"))
   }
@@ -68,27 +72,27 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
   }
 
   it should "read function call items" in {
-    client.functionCalls(8590831424885479L).read().unsafeRunSync().items should not be empty
+    client.functionCalls(preExistingFunctionId).read().unsafeRunSync().items should not be empty
   }
 
   it should "retrieve function call by id" in {
-    val call = client.functionCalls(8590831424885479L).retrieveById(callId).unsafeRunSync()
+    val call = client.functionCalls(preExistingFunctionId).retrieveById(callId).unsafeRunSync()
     call.id should equal(callId)
   }
 
   it should "read function call logs items" in {
-    val res = client.functionCalls(8590831424885479L).retrieveLogs(callId).unsafeRunSync()
+    val res = client.functionCalls(preExistingFunctionId).retrieveLogs(callId).unsafeRunSync()
     res.items.isEmpty shouldBe true
   }
 
   it should "retrieve function call response" in {
-    val response = client.functionCalls(8590831424885479L).retrieveResponse(callId).unsafeRunSync()
+    val response = client.functionCalls(preExistingFunctionId).retrieveResponse(callId).unsafeRunSync()
     response.response shouldBe Some(Json.fromFields(Seq(("res_int", Json.fromInt(1)),("res_string", Json.fromString("string response")))))
   }
 
   it should "filter function calls" in {
     val filter = FunctionCallFilter(status = Some("Completed"))
-    val res = client.functionCalls(8590831424885479L).filter(filter).unsafeRunSync().items
+    val res = client.functionCalls(preExistingFunctionId).filter(filter).unsafeRunSync().items
     forAll (res) { call => call.status should equal("Completed") }
   }
 
@@ -101,7 +105,7 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
   }
 
   it should "call function" in {
-    val res = client.functionCalls(8590831424885479L).callFunction(Json.fromJsonObject(JsonObject.empty), Some(getNonce)).unsafeRunSync()
+    val res = client.functionCalls(preExistingFunctionId).callFunction(Json.fromJsonObject(JsonObject.empty), Some(getNonce)).unsafeRunSync()
     res.status should equal("Running")
   }
 
@@ -109,7 +113,7 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
     val createRes = client.functionSchedules.create(Seq(
       FunctionScheduleCreate(
         name = "scala-sdk-write-example-1",
-        functionId = Some(8590831424885479L),
+        functionId = Some(preExistingFunctionId),
         cronExpression = "0 0 1 * *",
         nonce = Some(getNonce)
       )
