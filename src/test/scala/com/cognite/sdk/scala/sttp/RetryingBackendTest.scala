@@ -10,11 +10,12 @@ import sttp.capabilities.Effect
 import sttp.client3.impl.cats.implicits.monadError
 
 import java.net.UnknownHostException
+import java.util.concurrent.atomic.AtomicInteger
 import scala.concurrent.duration.DurationInt
 
-@SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.AsInstanceOf"))
+@SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf", "org.wartremover.warts.NonUnitStatements"))
 class FailingRetryingBackend[F[_], +P](val shouldSucceed: Boolean = false)(implicit val responseMonad: MonadError[F]) extends SttpBackend[F, P] {
-  val callCount = new java.util.concurrent.atomic.AtomicInteger(0)
+  val callCount: AtomicInteger = new java.util.concurrent.atomic.AtomicInteger(0)
 
   override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] = {
     callCount.incrementAndGet()
@@ -44,7 +45,7 @@ class RetryingBackendTest extends AnyFlatSpec with Matchers {
       ()
     }
 
-    mockBackend.callCount should be(3)
+    mockBackend.callCount.get() should be(3)
   }
 
   it should "not retry successful requests multiple times" in {
@@ -59,6 +60,6 @@ class RetryingBackendTest extends AnyFlatSpec with Matchers {
     request.send(retryingBackend).unsafeRunSync()
 
 
-    mockBackend.callCount shouldBe 1
+    mockBackend.callCount.get() shouldBe 1
   }
 }
