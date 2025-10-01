@@ -45,7 +45,7 @@ class RetryingBackendTest extends AnyFlatSpec with Matchers {
       ()
     }
 
-    mockBackend.callCount.get() should be(3)
+    mockBackend.callCount.get should be(3)
   }
 
   it should "not retry successful requests multiple times" in {
@@ -60,6 +60,6 @@ class RetryingBackendTest extends AnyFlatSpec with Matchers {
     request.send(retryingBackend).unsafeRunSync()
 
 
-    mockBackend.callCount.get() shouldBe 1
+    mockBackend.callCount.get shouldBe 1
   }
 }
