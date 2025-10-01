@@ -3,13 +3,14 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import io.circe.Json
-import org.scalatest.Inspectors._
-import io.circe.JsonObject
 import com.cognite.sdk.scala.common._
+import io.circe.{Json, JsonObject}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.Inspectors._
 import org.scalatest.matchers.should.Matchers
+
+import java.io.BufferedInputStream
 
 
 @SuppressWarnings(
@@ -19,35 +20,25 @@ import org.scalatest.matchers.should.Matchers
     "org.wartremover.warts.IterableOps"
   )
 )
-class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBehaviours {
-
-  private val client = new GenericClient[IO](
-    "scala-sdk-test",
-    "extractor-bluefield-testing",
-    "https://bluefield.cognitedata.com",
-    authProvider,
-    None,
-    None,
-    None
-  )
+class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBehaviours with BeforeAndAfterAll {
+  private val client = testClient
 
   private def getNonce: String = client.sessions
     .createWithClientCredentialFlow(Items(Seq(SessionCreateWithCredential(credentials.clientId, credentials.clientSecret)))).unsafeRunSync()
     .map(_.nonce).head
 
   //Further test assume this function already exists
-  //They also assume the function with this ID has some completed calls already
   private val preExistingFunctionId: Long = 8590831424885479L
 
-  //Retrieve a completed call to be used in tests
+  //Create and completes a call
   //Due to 90 days retention policy, this needs to be dynamic
-  //This assumes the function "preExistingFunctionId" has existing Completed calls
-  private lazy val preExistingCallId: Long = {
-    val filter = FunctionCallFilter(status = Some("Completed"))
-    val filtered = client.functionCalls(preExistingFunctionId).filter(filter).unsafeRunSync()
-    filtered.items shouldNot be(empty)
-    filtered.items.head.status should equal("Completed")
-    filtered.items.head.id
+  private lazy val callId: Long = {
+    val call = client.functionCalls(preExistingFunctionId).callFunction(Json.fromJsonObject(JsonObject.empty), Some(getNonce)).unsafeRunSync()
+    retryWithExpectedResult[FunctionCall](
+      client.functionCalls(preExistingFunctionId).retrieveById(call.id).unsafeRunSync(),
+      _.status should equal("Completed")
+    )
+    call.id
   }
 
   it should "read function items" in {
@@ -77,17 +68,17 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
   }
 
   it should "retrieve function call by id" in {
-    val call = client.functionCalls(preExistingFunctionId).retrieveById(preExistingCallId).unsafeRunSync()
-    call.id should equal(preExistingCallId)
+    val call = client.functionCalls(preExistingFunctionId).retrieveById(callId).unsafeRunSync()
+    call.id should equal(callId)
   }
 
   it should "read function call logs items" in {
-    val res = client.functionCalls(preExistingFunctionId).retrieveLogs(preExistingCallId).unsafeRunSync()
+    val res = client.functionCalls(preExistingFunctionId).retrieveLogs(callId).unsafeRunSync()
     res.items.isEmpty shouldBe true
   }
 
   it should "retrieve function call response" in {
-    val response = client.functionCalls(preExistingFunctionId).retrieveResponse(preExistingCallId).unsafeRunSync()
+    val response = client.functionCalls(preExistingFunctionId).retrieveResponse(callId).unsafeRunSync()
     response.response shouldBe Some(Json.fromFields(Seq(("res_int", Json.fromInt(1)),("res_string", Json.fromString("string response")))))
   }
 
