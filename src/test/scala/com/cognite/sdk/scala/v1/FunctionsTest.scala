@@ -10,8 +10,6 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Inspectors._
 import org.scalatest.matchers.should.Matchers
 
-import java.io.BufferedInputStream
-
 
 @SuppressWarnings(
   Array(
@@ -36,7 +34,8 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
     val call = client.functionCalls(preExistingFunctionId).callFunction(Json.fromJsonObject(JsonObject.empty), Some(getNonce)).unsafeRunSync()
     retryWithExpectedResult[FunctionCall](
       client.functionCalls(preExistingFunctionId).retrieveById(call.id).unsafeRunSync(),
-      _.status should equal("Completed")
+      _.status should equal("Completed"),
+      retriesRemaining = 5
     )
     call.id
   }
