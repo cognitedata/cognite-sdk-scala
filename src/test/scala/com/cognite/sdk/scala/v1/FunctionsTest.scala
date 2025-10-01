@@ -35,7 +35,7 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
     retryWithExpectedResult[FunctionCall](
       client.functionCalls(preExistingFunctionId).retrieveById(call.id).unsafeRunSync(),
       _.status should equal("Completed"),
-      retriesRemaining = 5
+      retriesRemaining = 10
     )
     call.id
   }
