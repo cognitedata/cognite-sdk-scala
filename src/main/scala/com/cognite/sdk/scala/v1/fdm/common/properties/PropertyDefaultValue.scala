@@ -3,21 +3,44 @@
 
 package com.cognite.sdk.scala.v1.fdm.common.properties
 
+import com.cognite.sdk.scala.v1.fdm.instances.InstancePropertyValue
 import io.circe._
 
-sealed abstract class PropertyDefaultValue extends Product with Serializable
+sealed abstract class PropertyDefaultValue extends Product with Serializable {
+  def toInstancePropertyValue: InstancePropertyValue
+}
 
 object PropertyDefaultValue {
-  final case class String(value: java.lang.String) extends PropertyDefaultValue
-  final case class Int32(value: scala.Int) extends PropertyDefaultValue
-  final case class Int64(value: scala.Long) extends PropertyDefaultValue
-  final case class Float32(value: scala.Float) extends PropertyDefaultValue
-  final case class Float64(value: scala.Double) extends PropertyDefaultValue
-  final case class Boolean(value: scala.Boolean) extends PropertyDefaultValue
-  final case class Object(value: Json) extends PropertyDefaultValue
-  final case class TimeSeriesReference(value: java.lang.String) extends PropertyDefaultValue
-  final case class FileReference(value: java.lang.String) extends PropertyDefaultValue
-  final case class SequenceReference(value: java.lang.String) extends PropertyDefaultValue
+  final case class String(value: java.lang.String) extends PropertyDefaultValue {
+    override def toInstancePropertyValue: InstancePropertyValue = InstancePropertyValue.String(value)
+  }
+  final case class Int32(value: scala.Int) extends PropertyDefaultValue {
+    override def toInstancePropertyValue: InstancePropertyValue = InstancePropertyValue.Int32(value)
+  }
+  final case class Int64(value: scala.Long) extends PropertyDefaultValue {
+    override def toInstancePropertyValue: InstancePropertyValue = InstancePropertyValue.Int64(value)
+  }
+  final case class Float32(value: scala.Float) extends PropertyDefaultValue {
+    override def toInstancePropertyValue: InstancePropertyValue = InstancePropertyValue.Float32(value)
+  }
+  final case class Float64(value: scala.Double) extends PropertyDefaultValue {
+    override def toInstancePropertyValue: InstancePropertyValue = InstancePropertyValue.Float64(value)
+  }
+  final case class Boolean(value: scala.Boolean) extends PropertyDefaultValue {
+    override def toInstancePropertyValue: InstancePropertyValue = InstancePropertyValue.Boolean(value)
+  }
+  final case class Object(value: Json) extends PropertyDefaultValue {
+    override def toInstancePropertyValue: InstancePropertyValue = InstancePropertyValue.Object(value)
+  }
+  final case class TimeSeriesReference(value: java.lang.String) extends PropertyDefaultValue {
+    override def toInstancePropertyValue: InstancePropertyValue = InstancePropertyValue.TimeSeriesReference(value)
+  }
+  final case class FileReference(value: java.lang.String) extends PropertyDefaultValue {
+    override def toInstancePropertyValue: InstancePropertyValue = InstancePropertyValue.FileReference(value)
+  }
+  final case class SequenceReference(value: java.lang.String) extends PropertyDefaultValue {
+    override def toInstancePropertyValue: InstancePropertyValue = InstancePropertyValue.SequenceReference(value)
+  }
 
   implicit val propertyDefaultValueEncoder: Encoder[PropertyDefaultValue] =
     Encoder.instance[PropertyDefaultValue] {
