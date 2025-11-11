@@ -1,0 +1,21 @@
+# .github/workflows/dependency-graph.yml
+name: Update Dependency Graph
+on:
+  # TODO: remove
+  pull_request:
+    branches:
+      - master # default branch of the project
+  push:
+    branches:
+      - master # default branch of the project
+jobs:
+  dependency-graph:
+    name: Update Dependency Graph
+    runs-on: ubuntu-24.04 # noble
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      - uses: sbt/setup-sbt@234370af1319038bf8dc432f8a7e4b83078a1781 # v1.1.11
+      - uses: scalacenter/sbt-dependency-submission@64084844d2b0a9b6c3765f33acde2fbe3f5ae7d3 # v3.1.0
+        env:
+          JFROG_USERNAME: ${{ secrets.ARTIFACTORY_READONLY_TOKEN_USER }}
+          JFROG_PASSWORD: ${{ secrets.ARTIFACTORY_READONLY_TOKEN }}
