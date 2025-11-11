@@ -1,10 +1,6 @@
 # .github/workflows/dependency-graph.yml
 name: Update Dependency Graph
 on:
-  # TODO: remove
-  pull_request:
-    branches:
-      - master # default branch of the project
   push:
     branches:
       - master # default branch of the project
