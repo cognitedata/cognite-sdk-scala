@@ -11,7 +11,7 @@ val javaVersion = "11"
 // This is used only for tests.
 val jettyTestVersion = "11.0.25"
 
-val sttpVersion = "3.5.2"
+val sttpVersion = "3.11.0"
 val circeVersion = "0.14.10"
 val catsEffectVersion = "3.6.3"
 val fs2Version = "3.11.0"
