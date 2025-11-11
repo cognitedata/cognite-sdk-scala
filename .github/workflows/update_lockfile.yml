@@ -2,7 +2,7 @@ name: Update lockfile
 
 on:
   pull_request:
-    types: [labeled,opened,reopened]
+    types: [labeled,opened,reopened,synchronize]
     branches: [ master ]
 
 jobs:
