@@ -50,4 +50,3 @@ jobs:
           add: 'build.*.sbt.lock'
           message: 'Update lockfiles'
           author_name: 'github-actions'
-          author_email: 'mail@example.com'
