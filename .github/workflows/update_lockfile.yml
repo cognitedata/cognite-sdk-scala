@@ -2,12 +2,13 @@ name: Update lockfile
 
 on:
   pull_request:
+    types: [labeled,opened,reopened]
     branches: [ master ]
 
 jobs:
   update_lockfile:
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/master'
+    if: contains(github.event.pull_request.labels.*.name, 'auto-lockfile-update')
     environment: CI
 
     timeout-minutes: 20
