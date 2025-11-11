@@ -43,7 +43,7 @@ jobs:
           path: ~/.ivy2/cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
-      - name: Compile
+      - name: Update lock
         run: sbt -Dsbt.log.noformat=true +dependencyLockWrite
 
       - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
