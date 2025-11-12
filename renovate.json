@@ -3,5 +3,11 @@
   "extends": [
     "local>cognitedata/renovate-config-public"
   ],
-  "rebaseWhen": "conflicted"
+  "rebaseWhen": "conflicted",
+  "packageRules": [
+    {
+      "matchDatasources": ["sbt"],
+      "addLabels": ["auto-lockfile-update"]
+    }
+  ]
 }

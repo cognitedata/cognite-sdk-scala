@@ -11,7 +11,7 @@ val javaVersion = "11"
 // This is used only for tests.
 val jettyTestVersion = "11.0.25"
 
-val sttpVersion = "3.5.2"
+val sttpVersion = "3.11.0"
 val circeVersion = "0.14.10"
 val catsEffectVersion = "3.6.3"
 val fs2Version = "3.11.0"
@@ -24,8 +24,8 @@ ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0
 lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
 
 credentials += Credentials(
-  "OSSRH Staging API Service",
-  "ossrh-staging-api.central.sonatype.com",
+  "Sonatype Nexus Repository Manager",
+  "central.sonatype.com",
   System.getenv("SONATYPE_USERNAME"),
   System.getenv("SONATYPE_PASSWORD")
 )
@@ -84,9 +84,9 @@ lazy val commonSettings = Seq(
     else
       Some("local-releases".at(s"$artifactory/libs-release-local/"))
   } else {
-    val nexus = "https://ossrh-staging-api.central.sonatype.com/"
-    if (isSnapshot.value) Some("snapshots".at(nexus + "content/repositories/snapshots"))
-    else Some("releases".at(nexus + "service/local/staging/deploy/maven2"))
+    val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+    if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
+    else localStaging.value
   }),
   publishMavenStyle := true,
   pgpPassphrase := {
@@ -136,7 +136,7 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "4.29.3",
+      "com.google.protobuf" % "protobuf-java" % "4.33.0",
       "org.tpolecat" %% "natchez-core" % natchezVersion,
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
