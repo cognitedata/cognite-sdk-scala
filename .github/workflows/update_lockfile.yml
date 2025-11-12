@@ -25,24 +25,6 @@ jobs:
           jvm: temurin:11
           apps: sbt
 
-      # Caching dependencies in Pull Requests based on branch name and build.sbt.
-      # Can we do something better here?
-      - name: Cache Coursier dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        env:
-          cache-name: coursier-cache
-        with:
-          path: ~/.cache/coursier/v1
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
-      - name: Cache Ivy 2 cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        env:
-          cache-name: sbt-ivy2-cache
-        with:
-          path: ~/.ivy2/cache
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
       - name: Update lock
         run: sbt -Dsbt.log.noformat=true +dependencyLockWrite
 
