@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
       - run: |
@@ -58,7 +58,7 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
       - run: |
@@ -100,7 +100,7 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       with:
         fetch-depth: 0
     - run: |
@@ -165,7 +165,7 @@ jobs:
         cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 scalafmtCheck test
 
     - name: Upload test coverage report
-      uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5
+      uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5
       with:
         token: ${{ secrets.codecov_token }}
 
@@ -176,7 +176,7 @@ jobs:
     environment: CD
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
       - run: |
@@ -195,9 +195,9 @@ jobs:
 
       - name: Install GPG & Sonatype credentials for SBT
         env:
-          GPG_PUBLIC_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PUBLIC_KEY }}
-          GPG_PRIVATE_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PRIVATE_KEY }}
-          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+          GPG_PUBLIC_KEY: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_PUBLIC_KEY }}
+          GPG_PRIVATE_KEY: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_KEY_PASSPHRASE }}
         run: |
           set -x
 
@@ -211,7 +211,7 @@ jobs:
 
       - name: Publish package
         env:
-          GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+          GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_KEY_PASSPHRASE }}
           JFROG_USERNAME: ${{ secrets.ARTIFACTORY_PUBLISH_TOKEN_USER }}
           JFROG_PASSWORD: ${{ secrets.ARTIFACTORY_PUBLISH_TOKEN }}
           PUBLISH_TO_JFROG: "true"
@@ -224,7 +224,7 @@ jobs:
     environment: CD
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
       - run: |
@@ -243,9 +243,9 @@ jobs:
 
       - name: Install GPG & Sonatype credentials for SBT
         env:
-          GPG_PUBLIC_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PUBLIC_KEY }}
-          GPG_PRIVATE_KEY: ${{ secrets.SONATYPE_OSSRH_GPG_PRIVATE_KEY }}
-          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
+          GPG_PUBLIC_KEY: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_PUBLIC_KEY }}
+          GPG_PRIVATE_KEY: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_KEY_PASSPHRASE }}
         run: |
           set -x
 
@@ -259,8 +259,8 @@ jobs:
 
       - name: Publish package
         env:
-          GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_OSSRH_GPG_KEY_PASSPHRASE }}
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_OSSRH_USER }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
+          GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_GPG_KEY_PASSPHRASE }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_CENTRAL_PORTAL_USER }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_PASSWORD }}
         run: |
-          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned +sonatypeReleaseAll
+          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned sonaRelease
