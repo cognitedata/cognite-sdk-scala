@@ -6,7 +6,7 @@
   "rebaseWhen": "conflicted",
   "packageRules": [
     {
-      "matchDatasources": ["sbt"],
+      "matchDatasources": ["sbt", "maven", "sbt-package"],
       "addLabels": ["auto-lockfile-update"]
     }
   ]
