@@ -24,7 +24,9 @@ import scala.concurrent.duration._
 import scala.collection.immutable.Seq
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
-class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
+class SyncClientTest extends SdkTestSpec with OptionValues with EitherValues {
+  import SyncClient.sttpBackend
+
   private val tokenInspectResponse = Response(
     s"""
        |{
