@@ -183,8 +183,9 @@ class GenericClient[F[_]: Trace](
     authProvider: AuthProvider[F],
     apiVersion: Option[String],
     clientTag: Option[String],
-    cdfVersion: Option[String]
-)(implicit monad: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]) {
+    cdfVersion: Option[String],
+    baseSttpBackend: SttpBackend[F, Any]
+)(implicit monad: CMonadError[F, Throwable]) {
   def this(
       applicationName: String,
       projectName: String,
@@ -192,8 +193,9 @@ class GenericClient[F[_]: Trace](
       auth: Auth,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
-      cdfVersion: Option[String] = None
-  )(implicit monad: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]) =
+      cdfVersion: Option[String] = None,
+      baseSttpBackend: SttpBackend[F, Any]
+  )(implicit monad: CMonadError[F, Throwable]) =
     this(
       applicationName,
       projectName,
@@ -201,7 +203,8 @@ class GenericClient[F[_]: Trace](
       AuthProvider[F](auth),
       apiVersion,
       clientTag,
-      cdfVersion
+      cdfVersion,
+      baseSttpBackend
     )
 
   import GenericClient._
@@ -212,13 +215,13 @@ class GenericClient[F[_]: Trace](
     RequestSession(
       applicationName,
       uri"$uri/api/${apiVersion.getOrElse("v1")}/projects/$projectName",
-      sttpBackend,
+      baseSttpBackend,
       authProvider,
       clientTag,
       cdfVersion
     )
   lazy val token =
-    new Token[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
+    new Token[F](RequestSession(applicationName, uri, baseSttpBackend, authProvider, clientTag))
   lazy val assets = new Assets[F](requestSession.withResourceType(ASSETS))
   lazy val events = new Events[F](requestSession.withResourceType(EVENTS))
   lazy val files = new Files[F](requestSession.withResourceType(FILES))
@@ -321,9 +324,10 @@ object GenericClient {
       applicationName: String,
       projectName: String,
       baseUrl: String,
-      auth: Auth
-  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): GenericClient[F] =
-    new GenericClient(applicationName, projectName, baseUrl, auth)
+      auth: Auth,
+      baseSttpBackend: SttpBackend[F, Any]
+  )(implicit F: CMonadError[F, Throwable]): GenericClient[F] =
+    new GenericClient(applicationName, projectName, baseUrl, auth, baseSttpBackend = baseSttpBackend)
 
   def parseBaseUrlOrThrow(baseUrl: String): Uri =
     try {
@@ -356,15 +360,17 @@ object GenericClient {
       applicationName: String,
       projectName: String,
       auth: Auth,
+      baseSttpBackend: SttpBackend[F, Any],
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
-  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+  )(implicit F: CMonadError[F, Throwable]): F[GenericClient[F]] =
     forAuthProvider(
       applicationName,
       projectName,
       AuthProvider(auth),
+      baseSttpBackend,
       baseUrl,
       apiVersion,
       clientTag,
@@ -375,11 +381,12 @@ object GenericClient {
       applicationName: String,
       projectName: String,
       authProvider: AuthProvider[F],
+      baseSttpBackend: SttpBackend[F, Any],
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None
-  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+  )(implicit F: CMonadError[F, Throwable]): F[GenericClient[F]] =
     if (projectName.isEmpty) {
       F.raiseError(InvalidAuthentication())
     } else {
@@ -391,7 +398,8 @@ object GenericClient {
           authProvider,
           apiVersion,
           clientTag,
-          cdfVersion
+          cdfVersion,
+          baseSttpBackend
         )
       )
     }
@@ -432,18 +440,19 @@ class Client(
     override val projectName: String,
     baseUrl: String =
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
-    auth: Auth
-)(implicit trace: Trace[OrError], sttpBackend: SttpBackend[OrError, Any])
-    extends GenericClient[OrError](applicationName, projectName, baseUrl, auth)
+    auth: Auth,
+    baseSttpBackend: SttpBackend[OrError, Any]
+)(implicit trace: Trace[OrError])
+    extends GenericClient[OrError](applicationName, projectName, baseUrl, auth, baseSttpBackend = baseSttpBackend)
 
 object Client {
   def apply(
       applicationName: String,
       projectName: String,
       baseUrl: String,
-      auth: Auth
+      auth: Auth,
+      baseSttpBackend: SttpBackend[OrError, Any]
   )(
-      implicit trace: Trace[OrError],
-      sttpBackend: SttpBackend[OrError, Any]
-  ): Client = new Client(applicationName, projectName, baseUrl, auth)
+      implicit trace: Trace[OrError]
+  ): Client = new Client(applicationName, projectName, baseUrl, auth, baseSttpBackend)
 }
