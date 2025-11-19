@@ -78,14 +78,15 @@ final case class RequestSession[F[_]: Trace](
     auth: AuthProvider[F],
     clientTag: Option[String] = None,
     cdfVersion: Option[String] = None,
-    tags: Map[String, Any] = Map.empty
+    tags: Map[String, Any] = Map.empty,
+    wrapSttpBackend: SttpBackend[F, _] => SttpBackend[F, _] = identity
 )(implicit F: CMonadError[F, Throwable]) {
   val implicits: RequestSessionImplicits[F] = new RequestSessionImplicits[F]
   def withResourceType(resourceType: GenericClient.RESOURCE_TYPE): RequestSession[F] =
     this.copy(tags = this.tags + (GenericClient.RESOURCE_TYPE_TAG -> resourceType))
 
   val sttpBackend: SttpBackend[F, _] =
-    new AuthSttpBackend(new TraceSttpBackend(baseSttpBackend), auth)
+    wrapSttpBackend(new AuthSttpBackend(new TraceSttpBackend(baseSttpBackend), auth))
 
   def send[R](
       r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any]
