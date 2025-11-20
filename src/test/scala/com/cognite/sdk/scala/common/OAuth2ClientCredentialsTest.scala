@@ -60,7 +60,8 @@ class OAuth2ClientCredentialsTest extends AnyFlatSpec with Matchers with OptionV
       authProvider = authProvider,
       apiVersion = None,
       clientTag = None,
-      cdfVersion = None
+      cdfVersion = None,
+      baseSttpBackend = sttpBackend
     )
 
     noException shouldBe thrownBy {

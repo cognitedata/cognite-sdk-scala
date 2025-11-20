@@ -27,7 +27,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
     authProvider,
     None,
     None,
-    None
+    None,
+    baseSttpBackend = sttpBackendAuth
   )
 
   def shortRandomUUID(): String = UUID.randomUUID().toString.substring(0, 8)

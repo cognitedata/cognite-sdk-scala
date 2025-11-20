@@ -57,10 +57,9 @@ trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
     authProvider,
     None,
     None,
-    Some("alpha")
+    Some("alpha"),
+    baseSttpBackend = new RetryingBackend[IO, Any](sttpBackendAuth)
   )(
-    implicitly,
-    implicitly,
-    new RetryingBackend[IO, Any](implicitly)
+    implicitly
   )
 }
