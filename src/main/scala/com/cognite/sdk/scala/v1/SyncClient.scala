@@ -7,6 +7,7 @@ import cats.implicits._
 import cats.{Id, MonadError => CMonadError}
 import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.sttp.GzipBackend
 import com.cognite.sdk.scala.v1.GenericClient.parseResponse
 import com.cognite.sdk.scala.v1.resources._
 import com.cognite.sdk.scala.v1.resources.fdm.containers.Containers
@@ -435,7 +436,7 @@ object GenericClient {
     )
 }
 
-class Client(
+class SyncClient(
     applicationName: String,
     override val projectName: String,
     baseUrl: String =
@@ -445,7 +446,10 @@ class Client(
 )(implicit trace: Trace[OrError])
     extends GenericClient[OrError](applicationName, projectName, baseUrl, auth, baseSttpBackend = baseSttpBackend)
 
-object Client {
+object SyncClient {
+  implicit val sttpBackend: SttpBackend[OrError, Any] =
+    new EitherBackend(new GzipBackend[Id, Any](HttpURLConnectionBackend()))
+
   def apply(
       applicationName: String,
       projectName: String,
@@ -454,5 +458,5 @@ object Client {
       baseSttpBackend: SttpBackend[OrError, Any]
   )(
       implicit trace: Trace[OrError]
-  ): Client = new Client(applicationName, projectName, baseUrl, auth, baseSttpBackend)
+  ): SyncClient = new SyncClient(applicationName, projectName, baseUrl, auth, baseSttpBackend)
 }

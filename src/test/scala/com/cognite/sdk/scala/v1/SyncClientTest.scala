@@ -24,7 +24,9 @@ import scala.concurrent.duration._
 import scala.collection.immutable.Seq
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
-class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
+class SyncClientTest extends SdkTestSpec with OptionValues with EitherValues {
+  import SyncClient.sttpBackend
+
   private val tokenInspectResponse = Response(
     s"""
        |{
@@ -126,7 +128,7 @@ class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
 
   it should "give a friendly error message when using a malformed base url" in {
     assertThrows[IllegalArgumentException] {
-      Client(
+      SyncClient(
         "relationships-unit-tests",
         projectName,
         "",
@@ -135,7 +137,7 @@ class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
       )(implicitly).token.inspect()
     }
     assertThrows[UnknownHostException] {
-      Client(
+      SyncClient(
         "url-test-3",
         projectName,
         "thisShouldThrowAnUnknownHostException:)",
@@ -147,7 +149,7 @@ class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
 
   it should "throw an SttpClientException when using plain http" in {
     val error = {
-      Client(
+      SyncClient(
         "url-test-2",
         projectName,
         "http://api.cognitedata.com",
