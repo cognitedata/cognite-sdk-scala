@@ -16,15 +16,16 @@ import sttp.client3.{Response, SttpBackend, SttpClientException, UriContext, bas
 import sttp.model.{Header, StatusCode}
 import sttp.monad.{EitherMonad, MonadAsyncError}
 
-import java.net.{ConnectException, UnknownHostException}
+import java.net.ConnectException
 import java.time.Instant
 import java.util.Base64
 import scala.concurrent.TimeoutException
 import scala.concurrent.duration._
-import scala.collection.immutable.Seq
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Var"))
-class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
+class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues {
+  import SyncClient.sttpBackend
+
   private val tokenInspectResponse = Response(
     s"""
        |{
@@ -129,37 +130,6 @@ class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
       implicitly,
       sttpBackend
     )
-  }
-
-  it should "give a friendly error message when using a malformed base url" in {
-    assertThrows[IllegalArgumentException] {
-      Client(
-        "relationships-unit-tests",
-        projectName,
-        "",
-        auth
-      )(implicitly, new LoggingSttpBackend[OrError, Any](sttpBackend)).token.inspect()
-    }
-    assertThrows[UnknownHostException] {
-      Client(
-        "url-test-3",
-        projectName,
-        "thisShouldThrowAnUnknownHostException:)",
-        auth
-      )(implicitly, sttpBackend).token.inspect()
-    }
-  }
-
-  it should "throw an SttpClientException when using plain http" in {
-    val error = {
-      Client(
-        "url-test-2",
-        projectName,
-        "http://api.cognitedata.com",
-        auth
-      )(implicitly, sttpBackend).token.inspect()
-    }.left.value
-    error shouldBe a [SttpClientException]
   }
 
   it should "retry certain failed requests" in {
@@ -413,9 +383,5 @@ class ClientTest extends SdkTestSpec with OptionValues with EitherValues {
         makeTestingBackend()
       ).threeDModels.list().compile.toList.unsafeRunSync()
     }
-  }
-
-  it should "send a head request and return the headers" in {
-    client.requestSession.head(uri"https://www.cognite.com/").unsafeRunSync() should not be(empty)
   }
 }
