@@ -11,7 +11,7 @@ val javaVersion = "11"
 // This is used only for tests.
 val jettyTestVersion = "11.0.25"
 
-val sttpVersion = "3.5.2"
+val sttpVersion = "3.11.0"
 val circeVersion = "0.14.10"
 val catsEffectVersion = "3.6.3"
 val fs2Version = "3.11.0"
@@ -44,7 +44,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.32." + patchVersion,
+  version := "2.33." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
@@ -136,7 +136,7 @@ lazy val core = (project in file("."))
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "4.29.3",
+      "com.google.protobuf" % "protobuf-java" % "4.33.0",
       "org.tpolecat" %% "natchez-core" % natchezVersion,
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
