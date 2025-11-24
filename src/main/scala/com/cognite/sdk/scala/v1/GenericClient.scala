@@ -33,8 +33,9 @@ class GenericClient[F[_]: Trace](
     authProvider: AuthProvider[F],
     apiVersion: Option[String],
     clientTag: Option[String],
-    cdfVersion: Option[String]
-)(implicit monad: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]) {
+    cdfVersion: Option[String],
+    sttpBackend: SttpBackend[F, Any]
+)(implicit monad: CMonadError[F, Throwable]) {
   def this(
       applicationName: String,
       projectName: String,
@@ -51,7 +52,8 @@ class GenericClient[F[_]: Trace](
       AuthProvider[F](auth),
       apiVersion,
       clientTag,
-      cdfVersion
+      cdfVersion,
+      sttpBackend
     )
 
   import GenericClient._
@@ -241,7 +243,8 @@ object GenericClient {
           authProvider,
           apiVersion,
           clientTag,
-          cdfVersion
+          cdfVersion,
+          sttpBackend
         )
       )
     }
