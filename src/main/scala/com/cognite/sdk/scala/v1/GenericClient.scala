@@ -33,8 +33,9 @@ class GenericClient[F[_]: Trace](
     authProvider: AuthProvider[F],
     apiVersion: Option[String],
     clientTag: Option[String],
-    cdfVersion: Option[String]
-)(implicit monad: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]) {
+    cdfVersion: Option[String],
+    sttpBackend: SttpBackend[F, Any]
+)(implicit monad: CMonadError[F, Throwable]) {
   def this(
       applicationName: String,
       projectName: String,
@@ -42,8 +43,9 @@ class GenericClient[F[_]: Trace](
       auth: Auth,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
-      cdfVersion: Option[String] = None
-  )(implicit monad: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]) =
+      cdfVersion: Option[String] = None,
+      sttpBackend: SttpBackend[F, Any]
+  )(implicit monad: CMonadError[F, Throwable]) =
     this(
       applicationName,
       projectName,
@@ -51,7 +53,8 @@ class GenericClient[F[_]: Trace](
       AuthProvider[F](auth),
       apiVersion,
       clientTag,
-      cdfVersion
+      cdfVersion,
+      sttpBackend
     )
 
   import GenericClient._
@@ -171,9 +174,10 @@ object GenericClient {
       applicationName: String,
       projectName: String,
       baseUrl: String,
-      auth: Auth
-  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): GenericClient[F] =
-    new GenericClient(applicationName, projectName, baseUrl, auth)
+      auth: Auth,
+      sttpBackend: SttpBackend[F, Any]
+  )(implicit F: CMonadError[F, Throwable]): GenericClient[F] =
+    new GenericClient(applicationName, projectName, baseUrl, auth, sttpBackend = sttpBackend)
 
   def parseBaseUrlOrThrow(baseUrl: String): Uri =
     try {
@@ -209,8 +213,9 @@ object GenericClient {
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
-      cdfVersion: Option[String] = None
-  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+      cdfVersion: Option[String] = None,
+      sttpBackend: SttpBackend[F, Any]
+  )(implicit F: CMonadError[F, Throwable]): F[GenericClient[F]] =
     forAuthProvider(
       applicationName,
       projectName,
@@ -218,7 +223,8 @@ object GenericClient {
       baseUrl,
       apiVersion,
       clientTag,
-      cdfVersion
+      cdfVersion,
+      sttpBackend
     )
 
   def forAuthProvider[F[_]: Trace](
@@ -228,8 +234,9 @@ object GenericClient {
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
-      cdfVersion: Option[String] = None
-  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+      cdfVersion: Option[String] = None,
+      sttpBackend: SttpBackend[F, Any]
+  )(implicit F: CMonadError[F, Throwable]): F[GenericClient[F]] =
     if (projectName.isEmpty) {
       F.raiseError(InvalidAuthentication())
     } else {
@@ -241,7 +248,8 @@ object GenericClient {
           authProvider,
           apiVersion,
           clientTag,
-          cdfVersion
+          cdfVersion,
+          sttpBackend
         )
       )
     }
