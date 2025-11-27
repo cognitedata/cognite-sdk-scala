@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2025-11-11T12:27:25.291367Z",
+  "timestamp" : "2025-11-12T10:11:04.831448Z",
   "configurations" : [
     "compile",
     "optional",
@@ -78,11 +78,11 @@
     {
       "org" : "com.google.protobuf",
       "name" : "protobuf-java",
-      "version" : "4.29.3",
+      "version" : "4.33.0",
       "artifacts" : [
         {
           "name" : "protobuf-java.jar",
-          "hash" : "sha1:83afa847b893932b49a8fd896608fa23cd5fb0b5"
+          "hash" : "sha1:5f82a81e6e7b6b7434d05a7bdd666b84d9eb0bc5"
         }
       ],
       "configurations" : [
@@ -94,11 +94,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "async-http-client-backend-cats_2.13",
-      "version" : "3.5.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "async-http-client-backend-cats_2.13.jar",
-          "hash" : "sha1:de5a144cbc65590655124a03122e531921ee4b59"
+          "hash" : "sha1:4c9e33c27a0ac351a4da76f4e06761f452b1e2cc"
         }
       ],
       "configurations" : [
@@ -108,11 +108,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "async-http-client-backend_2.13",
-      "version" : "3.5.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "async-http-client-backend_2.13.jar",
-          "hash" : "sha1:88cbf4ffda294827e176a407e1f9b27f2ad5beb6"
+          "hash" : "sha1:358cd98cf8ac25c6f0b8dcaa099ebd990e971ded"
         }
       ],
       "configurations" : [
@@ -122,11 +122,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "cats_2.13",
-      "version" : "3.5.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "cats_2.13.jar",
-          "hash" : "sha1:d19b881660ae9876681a5f30b43e53ee97847ff4"
+          "hash" : "sha1:c21e62988c2d64c2aa7c5f54edb14cb7e7d7b653"
         }
       ],
       "configurations" : [
@@ -136,11 +136,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "circe_2.13",
-      "version" : "3.5.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "circe_2.13.jar",
-          "hash" : "sha1:235cd40423f2e97bbcb250234f8991f34d98ad0e"
+          "hash" : "sha1:4feb2967d5668fb3134a5ec7cc4376f6a0c806ac"
         }
       ],
       "configurations" : [
@@ -152,11 +152,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "core_2.13",
-      "version" : "3.5.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "core_2.13.jar",
-          "hash" : "sha1:c40e81feaafdec5f8d1861a9298d9c4dd755d25e"
+          "hash" : "sha1:764d0d7aa324bca8e5f1c3cf01c09589dca9f10d"
         }
       ],
       "configurations" : [
@@ -168,11 +168,11 @@
     {
       "org" : "com.softwaremill.sttp.client3",
       "name" : "json-common_2.13",
-      "version" : "3.5.2",
+      "version" : "3.11.0",
       "artifacts" : [
         {
           "name" : "json-common_2.13.jar",
-          "hash" : "sha1:c87a1b7b38b576a6b83433de14e199e12281102e"
+          "hash" : "sha1:35391c36542ad2e6db5d77813fe54e6753a576ed"
         }
       ],
       "configurations" : [
@@ -184,11 +184,11 @@
     {
       "org" : "com.softwaremill.sttp.model",
       "name" : "core_2.13",
-      "version" : "1.4.25",
+      "version" : "1.7.11",
       "artifacts" : [
         {
           "name" : "core_2.13.jar",
-          "hash" : "sha1:a984e346d7ba5bcd3786cdfd0f06db8379d97163"
+          "hash" : "sha1:5dffcef3f964767472774af9e1abe50de6e69d46"
         }
       ],
       "configurations" : [
@@ -200,11 +200,11 @@
     {
       "org" : "com.softwaremill.sttp.shared",
       "name" : "core_2.13",
-      "version" : "1.3.4",
+      "version" : "1.3.22",
       "artifacts" : [
         {
           "name" : "core_2.13.jar",
-          "hash" : "sha1:b5044b1e624d1db20edfbd75409e903843b9786a"
+          "hash" : "sha1:c4ac7e85a26548e102ee83b543c0a5771f56ceda"
         }
       ],
       "configurations" : [
@@ -216,11 +216,11 @@
     {
       "org" : "com.softwaremill.sttp.shared",
       "name" : "ws_2.13",
-      "version" : "1.3.4",
+      "version" : "1.3.22",
       "artifacts" : [
         {
           "name" : "ws_2.13.jar",
-          "hash" : "sha1:7afdc7333ed514b5fc7822509909669b681cb162"
+          "hash" : "sha1:92599a2a3aec353538b061cee9d545f1ed00492a"
         }
       ],
       "configurations" : [
@@ -496,11 +496,11 @@
     {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client",
-      "version" : "2.12.3",
+      "version" : "2.12.4",
       "artifacts" : [
         {
           "name" : "async-http-client.jar",
-          "hash" : "sha1:6dfc91814cc8b3bc3327246d0e5df36911b9a623"
+          "hash" : "sha1:c7ac461afff5c792af9557b11b334e139fc4f426"
         }
       ],
       "configurations" : [
@@ -510,11 +510,11 @@
     {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client-netty-utils",
-      "version" : "2.12.3",
+      "version" : "2.12.4",
       "artifacts" : [
         {
           "name" : "async-http-client-netty-utils.jar",
-          "hash" : "sha1:ad99d8622931ed31367d0fef7fa17eb62e033fb3"
+          "hash" : "sha1:dd226dcacb3b14ca1a8ce73c5c5c9ec6e2444dd2"
         }
       ],
       "configurations" : [

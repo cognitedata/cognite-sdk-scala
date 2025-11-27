@@ -58,11 +58,8 @@ abstract class SdkTestSpec extends AnyFlatSpec with Matchers with OptionValues {
     "scala-sdk-test",
     projectName,
     baseUrl,
-    auth
-  )(
-    implicitly,
-    implicitly,
-    new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
+    auth,
+    sttpBackend = new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
   )
 
   def shortRandom(): String = UUID.randomUUID().toString.substring(0, 8)
