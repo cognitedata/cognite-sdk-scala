@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2025-11-12T10:11:08.017099Z",
+  "timestamp" : "2025-11-12T14:43:16.612349Z",
   "configurations" : [
     "compile",
     "optional",
@@ -260,11 +260,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-core_3",
-      "version" : "0.14.10",
+      "version" : "0.14.15",
       "artifacts" : [
         {
           "name" : "circe-core_3.jar",
-          "hash" : "sha1:21c1e59454882ab49838ebc7d74d16f0c9a435c1"
+          "hash" : "sha1:419f36ad18d898db4f9099b7c3b848cf4a70ee91"
         }
       ],
       "configurations" : [
@@ -276,11 +276,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-generic_3",
-      "version" : "0.14.10",
+      "version" : "0.14.15",
       "artifacts" : [
         {
           "name" : "circe-generic_3.jar",
-          "hash" : "sha1:659311966c58ea1ed59afcffddd0cc8a819ad51e"
+          "hash" : "sha1:092598c81053ab0513e77cc28c2091996be06c72"
         }
       ],
       "configurations" : [
@@ -292,11 +292,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-jawn_3",
-      "version" : "0.14.10",
+      "version" : "0.14.15",
       "artifacts" : [
         {
           "name" : "circe-jawn_3.jar",
-          "hash" : "sha1:a441165f6f151694ec294a2a318102886daa2bcd"
+          "hash" : "sha1:1a63c86e8b25de92c23f74c9cb242187d1ebbb92"
         }
       ],
       "configurations" : [
@@ -308,11 +308,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-literal_3",
-      "version" : "0.14.10",
+      "version" : "0.14.15",
       "artifacts" : [
         {
           "name" : "circe-literal_3.jar",
-          "hash" : "sha1:41a80b7b7b85c8828172e169dcd0083e424c27b1"
+          "hash" : "sha1:dc03776ed359ebb723a858eb35a37a560f304066"
         }
       ],
       "configurations" : [
@@ -322,11 +322,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-numbers_3",
-      "version" : "0.14.10",
+      "version" : "0.14.15",
       "artifacts" : [
         {
           "name" : "circe-numbers_3.jar",
-          "hash" : "sha1:5e15f5e38135614e4d0e1d54b2c4103fce337705"
+          "hash" : "sha1:159ad7a660d6d870499573689751413e9b6abcc8"
         }
       ],
       "configurations" : [
@@ -338,11 +338,11 @@
     {
       "org" : "io.circe",
       "name" : "circe-parser_3",
-      "version" : "0.14.10",
+      "version" : "0.14.15",
       "artifacts" : [
         {
           "name" : "circe-parser_3.jar",
-          "hash" : "sha1:1e47c1604484c184f3e6a8d2ce45599280219a75"
+          "hash" : "sha1:3af99f3d58a59482ec4069cf2d7ed549eaa3ffcf"
         }
       ],
       "configurations" : [
@@ -620,11 +620,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala-library",
-      "version" : "2.13.14",
+      "version" : "2.13.16",
       "artifacts" : [
         {
           "name" : "scala-library.jar",
-          "hash" : "sha1:f8b4afe89abe48ca670f620c7da89b71f93e6546"
+          "hash" : "sha1:9e064d9304904fd7b6bd2b55a9e601b8c1c9006e"
         }
       ],
       "configurations" : [
@@ -636,11 +636,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala3-library_3",
-      "version" : "3.3.4",
+      "version" : "3.3.6",
       "artifacts" : [
         {
           "name" : "scala3-library_3.jar",
-          "hash" : "sha1:c219bdf4dbd177dd2f9e89ea05af7b600c74840f"
+          "hash" : "sha1:034bb6603c8cbc4ef4b13b4e5a48636f00b3a35b"
         }
       ],
       "configurations" : [
@@ -996,11 +996,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-core_3",
-      "version" : "2.12.0",
+      "version" : "2.13.0",
       "artifacts" : [
         {
           "name" : "cats-core_3.jar",
-          "hash" : "sha1:b253dca30971fd04a4ee5e3f5e9f6e623257656b"
+          "hash" : "sha1:cafcdb23af26a0b2de13a1b362ae33c72fafcd6a"
         }
       ],
       "configurations" : [
@@ -1130,11 +1130,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-kernel_3",
-      "version" : "2.12.0",
+      "version" : "2.13.0",
       "artifacts" : [
         {
           "name" : "cats-kernel_3.jar",
-          "hash" : "sha1:6839388dbf6385fabceff4e8927c0b79562c4e42"
+          "hash" : "sha1:b54ec5e7b865852b84856f5781c7b8426d3a73a4"
         }
       ],
       "configurations" : [
