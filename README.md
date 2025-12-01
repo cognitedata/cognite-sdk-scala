@@ -24,7 +24,7 @@ Create a simple client, specifying an application name:
 ```scala
 import com.cognite.sdk.scala.v1._
 
-val c = Client("scala-sdk-examples", "https://api.cognitedata.com")
+val c = SyncClient("scala-sdk-examples", "https://api.cognitedata.com")
 ```
 
 Create a client using the cats-effect `IO`:

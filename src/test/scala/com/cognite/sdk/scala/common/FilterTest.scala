@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.common
 
-import com.cognite.sdk.scala.v1.Client
+import com.cognite.sdk.scala.v1.SyncClient
 import io.circe.{Codec, Decoder, Encoder}
 import sttp.client3._
 import sttp.client3.testing.SttpBackendStub
@@ -45,7 +45,7 @@ class FilterTest extends SdkTestSpec with OptionValues {
           _ = { hijackedRequest = req }
         } yield Response(Right(ItemsWithCursor(Seq(0, 1, 2), None)), StatusCode.Ok, "OK")
     })
-    lazy val dummyClient = Client("foo",
+    lazy val dummyClient = SyncClient("foo",
       projectName,
       "https://api.cognitedata.com",
       auth)(implicitly, requestHijacker)
