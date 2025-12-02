@@ -44,8 +44,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
     val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token")
-    )(implicitly, implicitly, responseForSessionCreated)
+      auth = BearerTokenAuth("bearer Token"),
+      sttpBackend = responseForSessionCreated)
 
     val resCreate = client.sessions
       .createWithClientCredentialFlow(
@@ -78,8 +78,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
     val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token")
-    )(implicitly, implicitly, responseForSessionCreated)
+      auth = BearerTokenAuth("bearer Token"),
+      sttpBackend = responseForSessionCreated)
 
     val resCreate = client.sessions.createWithTokenExchangeFlow()
     resCreate shouldBe expectedResponse
@@ -114,8 +114,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
     val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token")
-    )(implicitly, implicitly, responseForSessionCreated)
+      auth = BearerTokenAuth("bearer Token"),
+      sttpBackend = responseForSessionCreated)
 
     val error = client.sessions
       .createWithClientCredentialFlow(
@@ -161,8 +161,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
     val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token")
-    )(implicitly, implicitly, responseForSessionCreated)
+      auth = BearerTokenAuth("bearer Token"),
+      sttpBackend = responseForSessionCreated)
 
     val error = client.sessions
       .createWithClientCredentialFlow(
@@ -212,8 +212,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
     val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token")
-    )(implicitly, implicitly, responseForSessionList)
+      auth = BearerTokenAuth("bearer Token"),
+      sttpBackend = responseForSessionList)
 
     client.sessions.list() shouldBe expectedResponse
   }
@@ -250,8 +250,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
     val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token")
-    )(implicitly, implicitly, responseForSessionBound)
+      auth = BearerTokenAuth("bearer Token"),
+      sttpBackend = responseForSessionBound)
 
     val responseBind = client.sessions.bind(BindSessionRequest("nonce-value"))
     responseBind shouldBe expectedResponse
@@ -288,8 +288,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
     val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token")
-    )(implicitly, implicitly, responseForSessionBound)
+      auth = BearerTokenAuth("bearer Token"),
+      sttpBackend = responseForSessionBound)
 
     val error = client.sessions
       .bind(BindSessionRequest("expired-nonce"))
@@ -333,8 +333,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
     val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token")
-    )(implicitly, implicitly, responseForSessionRefresh)
+      auth = BearerTokenAuth("bearer Token"),
+      sttpBackend = responseForSessionRefresh)
 
     val responseBind =
       client.sessions.refresh(RefreshSessionRequest(123, "sessionKey-value"))
@@ -372,8 +372,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
     val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token")
-    )(implicitly, implicitly, responseForSessionRefresh)
+      auth = BearerTokenAuth("bearer Token"),
+      sttpBackend = responseForSessionRefresh)
 
     val error = client.sessions
       .refresh(
@@ -409,8 +409,8 @@ class SessionsTest extends SdkTestSpec with ReadBehaviours with EitherValues wit
     val client = new GenericClient[OrError](
       applicationName = "CogniteScalaSDK-OAuth-Test",
       projectName = "session-testing",
-      auth = BearerTokenAuth("bearer Token")
-    )(implicitly, implicitly, responseForSessionRevoke)
+      auth = BearerTokenAuth("bearer Token"),
+      sttpBackend = responseForSessionRevoke)
 
     val responseDelete = client.sessions.revoke(Items(expectedIds)).value
     responseDelete.size shouldBe 2
