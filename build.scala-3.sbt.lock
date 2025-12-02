@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2025-07-29T09:21:42.447027017Z",
+  "timestamp" : "2025-12-02T10:25:44.867508Z",
   "configurations" : [
     "compile",
     "optional",
@@ -14,11 +14,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-core_3",
-      "version" : "3.11.0",
+      "version" : "3.12.2",
       "artifacts" : [
         {
           "name" : "fs2-core_3.jar",
-          "hash" : "sha1:329c2b8bc537d770dbff80b774fdd1d247f99bc8"
+          "hash" : "sha1:371fe77dc68736e4e23c613db34616173f357b97"
         }
       ],
       "configurations" : [
@@ -30,11 +30,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-io_3",
-      "version" : "3.11.0",
+      "version" : "3.12.2",
       "artifacts" : [
         {
           "name" : "fs2-io_3.jar",
-          "hash" : "sha1:5509f848735e39277dff96668ceb2f253cf6017a"
+          "hash" : "sha1:4ee0d3287f1a0947750bcc95f88f54923d0b494d"
         }
       ],
       "configurations" : [
@@ -620,11 +620,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala-library",
-      "version" : "2.13.14",
+      "version" : "2.13.15",
       "artifacts" : [
         {
           "name" : "scala-library.jar",
-          "hash" : "sha1:f8b4afe89abe48ca670f620c7da89b71f93e6546"
+          "hash" : "sha1:ed6f1d58968b16c5f9067d5cac032d952552de58"
         }
       ],
       "configurations" : [
@@ -636,11 +636,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala3-library_3",
-      "version" : "3.3.4",
+      "version" : "3.3.5",
       "artifacts" : [
         {
           "name" : "scala3-library_3.jar",
-          "hash" : "sha1:c219bdf4dbd177dd2f9e89ea05af7b600c74840f"
+          "hash" : "sha1:5f8b339c5bacb671ed315d78ca2903ea2a630538"
         }
       ],
       "configurations" : [
