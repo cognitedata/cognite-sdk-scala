@@ -60,7 +60,7 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
         headers = req.headers
         Right(tokenInspectResponse.copy(headers = req.headers))
       }
-    new GenericClient[OrError]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"))(implicitly, implicitly, saveHeadersStub)
+    new GenericClient[OrError]("scala-sdk-test", projectName, auth = auth, clientTag = Some("client-test"), sttpBackend = saveHeadersStub)
       .token.inspect()
     headers should contain (Header("x-cdp-clienttag", "client-test"))
     headers should contain (Header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}"))
@@ -72,11 +72,8 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
       "scala-sdk-test",
       projectName,
       baseUrl,
-      auth
-    )(
-      implicitly,
-      implicitly,
-      new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
+      auth,
+      sttpBackend = new RetryingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync())
     ).token.inspect().unsafeRunSync().projects should not be empty
   }
 
@@ -85,11 +82,8 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
       "scala-sdk-test",
       projectName,
       baseUrl,
-      auth
-    )(
-      implicitly,
-      implicitly,
-      RateLimitingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5)
+      auth,
+      sttpBackend = RateLimitingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5)
         .unsafeRunSync()
     ).token.inspect().unsafeRunSync().projects should not be empty
   }
@@ -104,31 +98,22 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
       "scala-sdk-test",
       projectName,
       baseUrl,
-      auth
-    )(
-      implicitly,
-      implicitly,
-      new BackpressureThrottleBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), makeQueueOf1.unsafeRunSync(), 1.seconds)
+      auth,
+      sttpBackend =new BackpressureThrottleBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), makeQueueOf1.unsafeRunSync(), 1.seconds)
     ).token.inspect().unsafeRunSync().projects should not be empty
   }
 
   it should "throw an exception if the authentication is invalid and project is not specified" in {
     implicit val auth: Auth = BearerTokenAuth("invalid-key")
     GenericClient.forAuth[OrError](
-      "scala-sdk-test", "", auth)(
-      implicitly,
-      implicitly,
-      sttpBackend
+      "scala-sdk-test", "", auth, sttpBackend = sttpBackend
     ).map(_.token.inspect()).left.value shouldBe a [InvalidAuthentication] 
   }
 
   it should "not throw an exception if the authentication is invalid and project is specified" in {
     implicit val auth: Auth = BearerTokenAuth("invalid-key")
     noException should be thrownBy new GenericClient[OrError](
-      "scala-sdk-test", projectName, auth = auth)(
-      implicitly,
-      implicitly,
-      sttpBackend
+      "scala-sdk-test", projectName, auth = auth, sttpBackend = sttpBackend
     )
   }
 
@@ -138,11 +123,8 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
         "scala-sdk-test",
         projectName,
         baseUrl,
-        auth
-      )(
-        implicitly,
-        implicitly,
-        makeTestingBackend()
+        auth,
+        sttpBackend = makeTestingBackend()
       ).threeDModels.list().compile.toList.unsafeRunSync()
     }
 
@@ -150,11 +132,8 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
         "scala-sdk-test",
         projectName,
         baseUrl,
-        auth
-      )(
-      implicitly,
-      implicitly,
-      new RetryingBackend[IO, Any](
+        auth,
+        sttpBackend = new RetryingBackend[IO, Any](
         makeTestingBackend(),
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
@@ -165,11 +144,8 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
         "scala-sdk-test",
         projectName,
         baseUrl,
-        auth
-      )(
-        implicitly,
-        implicitly,
-        new RetryingBackend[IO, Any](
+        auth,
+        sttpBackend = new RetryingBackend[IO, Any](
           makeTestingBackend(),
           maxRetries = 4,
           initialRetryDelay = 1.millis,
@@ -182,14 +158,12 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
     new GenericClient[F]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
-      BearerTokenAuth("irrelevant")
-    )(natchez.Trace.Implicits.noop,
-      implicitly,
-      new RetryingBackend[F, Any](backend,
+      BearerTokenAuth("irrelevant"),
+      sttpBackend = new RetryingBackend[F, Any](backend,
         maxRetries = maxRetries,
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
-    )
+    )(natchez.Trace.Implicits.noop, implicitly)
 
   it should "retry requests based on response code if the response is empty" in {
     val badGatewayResponseLeft = Response("",
@@ -211,12 +185,8 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
     val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhereatall",
-      BearerTokenAuth("irrelevant")
-
-    )(
-      implicitly,
-      implicitly,
-      new RetryingBackend[IO, Any](backendStub,
+      BearerTokenAuth("irrelevant"),
+      sttpBackend = new RetryingBackend[IO, Any](backendStub,
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
     )
@@ -291,11 +261,8 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
     val client = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
-      BearerTokenAuth("irrelevant")
-    )(
-      implicitly,
-      implicitly,
-      new RetryingBackend[IO, Any](
+      BearerTokenAuth("irrelevant"),
+      sttpBackend =new RetryingBackend[IO, Any](
         badRequestBackendStub,
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
@@ -330,11 +297,8 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
     val client2 = new GenericClient[IO]("scala-sdk-test",
       projectName,
       "https://www.cognite.com/nowhere-at-all",
-      BearerTokenAuth("irrelevant")
-    )(
-      implicitly,
-      implicitly,
-      new RetryingBackend[IO, Any](
+      BearerTokenAuth("irrelevant"),
+      sttpBackend = new RetryingBackend[IO, Any](
         badRequestBackendStub1,
         initialRetryDelay = 1.millis,
         maxRetryDelay = 2.millis)
@@ -376,11 +340,8 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
         "scala-sdk-test",
         projectName,
         baseUrl,
-        auth
-      )(
-        implicitly,
-        implicitly,
-        makeTestingBackend()
+        auth,
+        sttpBackend = makeTestingBackend()
       ).threeDModels.list().compile.toList.unsafeRunSync()
     }
   }

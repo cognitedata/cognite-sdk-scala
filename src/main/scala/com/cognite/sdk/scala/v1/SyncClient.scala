@@ -17,7 +17,13 @@ class SyncClient(
       Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
     auth: Auth
 )(implicit trace: Trace[OrError], sttpBackend: SttpBackend[OrError, Any])
-    extends GenericClient[OrError](applicationName, projectName, baseUrl, auth)
+    extends GenericClient[OrError](
+      applicationName,
+      projectName,
+      baseUrl,
+      auth,
+      sttpBackend = sttpBackend
+    )
 
 object SyncClient {
   implicit val sttpBackend: SttpBackend[OrError, Any] =
