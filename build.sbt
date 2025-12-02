@@ -12,7 +12,7 @@ val javaVersion = "11"
 val jettyTestVersion = "11.0.25"
 
 val sttpVersion = "3.11.0"
-val circeVersion = "0.14.10"
+val circeVersion = "0.14.15"
 val catsEffectVersion = "3.6.3"
 val fs2Version = "3.11.0"
 val natchezVersion = "0.3.7"
@@ -44,7 +44,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.33." + patchVersion,
+  version := "2.34." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
