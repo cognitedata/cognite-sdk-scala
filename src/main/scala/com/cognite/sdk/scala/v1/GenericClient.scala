@@ -34,7 +34,8 @@ class GenericClient[F[_]: Trace](
     apiVersion: Option[String],
     clientTag: Option[String],
     cdfVersion: Option[String],
-    sttpBackend: SttpBackend[F, Any]
+    sttpBackend: SttpBackend[F, Any],
+    wrapSttpBackend: SttpBackend[F, Any] => SttpBackend[F, Any]
 )(implicit monad: CMonadError[F, Throwable]) {
   def this(
       applicationName: String,
@@ -44,7 +45,8 @@ class GenericClient[F[_]: Trace](
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None,
-      sttpBackend: SttpBackend[F, Any]
+      sttpBackend: SttpBackend[F, Any],
+      wrapSttpBackend: SttpBackend[F, Any] => SttpBackend[F, Any] = identity[SttpBackend[F, Any]](_)
   )(implicit monad: CMonadError[F, Throwable]) =
     this(
       applicationName,
@@ -54,7 +56,8 @@ class GenericClient[F[_]: Trace](
       apiVersion,
       clientTag,
       cdfVersion,
-      sttpBackend
+      sttpBackend,
+      wrapSttpBackend
     )
 
   import GenericClient._
@@ -66,12 +69,15 @@ class GenericClient[F[_]: Trace](
       applicationName,
       uri"$uri/api/${apiVersion.getOrElse("v1")}/projects/$projectName",
       sttpBackend,
+      wrapSttpBackend,
       authProvider,
       clientTag,
       cdfVersion
     )
   lazy val token =
-    new Token[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
+    new Token[F](
+      RequestSession(applicationName, uri, sttpBackend, wrapSttpBackend, authProvider, clientTag)
+    )
   lazy val assets = new Assets[F](requestSession.withResourceType(ASSETS))
   lazy val events = new Events[F](requestSession.withResourceType(EVENTS))
   lazy val files = new Files[F](requestSession.withResourceType(FILES))
@@ -175,9 +181,17 @@ object GenericClient {
       projectName: String,
       baseUrl: String,
       auth: Auth,
-      sttpBackend: SttpBackend[F, Any]
+      sttpBackend: SttpBackend[F, Any],
+      wrapSttpBackend: SttpBackend[F, Any] => SttpBackend[F, Any] = identity[SttpBackend[F, Any]](_)
   )(implicit F: CMonadError[F, Throwable]): GenericClient[F] =
-    new GenericClient(applicationName, projectName, baseUrl, auth, sttpBackend = sttpBackend)
+    new GenericClient(
+      applicationName,
+      projectName,
+      baseUrl,
+      auth,
+      sttpBackend = sttpBackend,
+      wrapSttpBackend = wrapSttpBackend
+    )
 
   def parseBaseUrlOrThrow(baseUrl: String): Uri =
     try {
@@ -235,7 +249,8 @@ object GenericClient {
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
       cdfVersion: Option[String] = None,
-      sttpBackend: SttpBackend[F, Any]
+      sttpBackend: SttpBackend[F, Any],
+      wrapSttpBackend: SttpBackend[F, Any] => SttpBackend[F, Any] = identity[SttpBackend[F, Any]](_)
   )(implicit F: CMonadError[F, Throwable]): F[GenericClient[F]] =
     if (projectName.isEmpty) {
       F.raiseError(InvalidAuthentication())
@@ -249,7 +264,8 @@ object GenericClient {
           apiVersion,
           clientTag,
           cdfVersion,
-          sttpBackend
+          sttpBackend,
+          wrapSttpBackend
         )
       )
     }

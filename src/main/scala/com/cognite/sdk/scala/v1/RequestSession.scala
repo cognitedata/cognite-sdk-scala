@@ -29,6 +29,7 @@ final case class RequestSession[F[_]: Trace](
     applicationName: String,
     baseUrl: Uri,
     baseSttpBackend: SttpBackend[F, _],
+    wrapSttpBackend: SttpBackend[F, Any] => SttpBackend[F, Any],
     auth: AuthProvider[F],
     clientTag: Option[String] = None,
     cdfVersion: Option[String] = None,
@@ -39,7 +40,7 @@ final case class RequestSession[F[_]: Trace](
     this.copy(tags = this.tags + (GenericClient.RESOURCE_TYPE_TAG -> resourceType))
 
   val sttpBackend: SttpBackend[F, _] =
-    new AuthSttpBackend(new TraceSttpBackend(baseSttpBackend), auth)
+    wrapSttpBackend(new AuthSttpBackend(new TraceSttpBackend(baseSttpBackend), auth))
 
   def send[R](
       r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any]
