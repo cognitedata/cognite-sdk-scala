@@ -3,7 +3,7 @@ import sbt.{Test, project}
 import wartremover.Wart
 
 val scala3 = "3.3.3"
-val scala213 = "2.13.16"
+val scala213 = "2.13.18"
 val supportedScalaVersions = List(scala213, scala3)
 
 val javaVersion = "11"
@@ -44,7 +44,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.34." + patchVersion,
+  version := "2.35." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13

@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - uses: sbt/setup-sbt@234370af1319038bf8dc432f8a7e4b83078a1781 # v1.1.11
-      - uses: scalacenter/sbt-dependency-submission@64084844d2b0a9b6c3765f33acde2fbe3f5ae7d3 # v3.1.0
+      - uses: scalacenter/sbt-dependency-submission@f43202114d7522a4b233e052f82c2eea8d658134 # v3.2.1
         env:
           JFROG_USERNAME: ${{ secrets.ARTIFACTORY_READONLY_TOKEN_USER }}
           JFROG_PASSWORD: ${{ secrets.ARTIFACTORY_READONLY_TOKEN }}
