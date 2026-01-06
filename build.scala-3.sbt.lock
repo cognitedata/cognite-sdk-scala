@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2025-11-12T14:43:16.612349Z",
+  "timestamp" : "2025-12-08T08:40:23.712856Z",
   "configurations" : [
     "compile",
     "optional",
@@ -14,11 +14,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-core_3",
-      "version" : "3.11.0",
+      "version" : "3.12.0",
       "artifacts" : [
         {
           "name" : "fs2-core_3.jar",
-          "hash" : "sha1:329c2b8bc537d770dbff80b774fdd1d247f99bc8"
+          "hash" : "sha1:6c841cbd52a14b4638b1073126f1e1c446c7d0f6"
         }
       ],
       "configurations" : [
@@ -30,11 +30,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-io_3",
-      "version" : "3.11.0",
+      "version" : "3.12.0",
       "artifacts" : [
         {
           "name" : "fs2-io_3.jar",
-          "hash" : "sha1:5509f848735e39277dff96668ceb2f253cf6017a"
+          "hash" : "sha1:99158232b30481e69597a69d9ce39b5a65dde8e1"
         }
       ],
       "configurations" : [
@@ -964,11 +964,11 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_3",
-      "version" : "0.3.7",
+      "version" : "0.3.8",
       "artifacts" : [
         {
           "name" : "natchez-core_3.jar",
-          "hash" : "sha1:dd253ab63c238718635d575f0ab03045bde2d66d"
+          "hash" : "sha1:3fe4f789f194f21692e8c61a77c0c53cd6d80ec9"
         }
       ],
       "configurations" : [
