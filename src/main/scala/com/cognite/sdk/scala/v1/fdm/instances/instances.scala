@@ -49,7 +49,14 @@ final case class InstanceFilterRequest(
     limit: Option[Int] = None,
     sort: Option[Seq[PropertySortV3]] = None,
     filter: Option[FilterDefinition] = None,
+    debug: Option[InstanceDebug] = None,
     includeTyping: Option[Boolean] = Some(true)
+)
+
+final case class InstanceDebug(
+    timeout: Option[Int],
+    emitResults: Option[Boolean],
+    profile: Option[Boolean]
 )
 
 final case class InstanceQueryRequest(

@@ -14,7 +14,25 @@ import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, Conta
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.{EdgeDeletionRequest, NodeDeletionRequest}
 import com.cognite.sdk.scala.v1.fdm.views._
 
-import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit  it should "List instances with debug options and handle 408" in {
+  val exception = testClient.instances.filter(
+    filterRequest = InstanceFilterRequest(
+      debug = Some(InstanceDebug(
+        timeout = Some(1),
+        emitResults = Some(false),
+        profile = Some(false)
+      )),
+      limit = Some(1)
+    )
+  ).attempt.unsafeRunSync()
+  exception.isLeft shouldBe(true)
+  exception.leftMap {
+    case c: CdpApiException => {
+      c.code shouldBe 408
+    }
+    case _ => fail("unexpected type of exception when trying to get a 408 on list instance")
+  }
+}
 import scala.concurrent.duration.DurationInt
 
 @SuppressWarnings(
@@ -239,6 +257,26 @@ class InstancesTest extends CommonDataModelTestHelper {
       )
     )
     deletedContainers.length shouldBe 4
+  }
+
+  it should "List instances with debug options and handle 408" in {
+    val exception = testClient.instances.filter(
+      filterRequest = InstanceFilterRequest(
+        debug = Some(InstanceDebug(
+          timeout = Some(1),
+          emitResults = Some(false),
+          profile = Some(false)
+        )),
+        limit = Some(1)
+      )
+    ).attempt.unsafeRunSync()
+    exception.isLeft shouldBe(true)
+    exception.leftMap {
+      case c: CdpApiException => {
+        c.code shouldBe 408
+      }
+      case _ => fail("unexpected type of exception when trying to get a 408 on list instance")
+    }
   }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
