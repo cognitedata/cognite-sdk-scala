@@ -54,9 +54,9 @@ final case class InstanceFilterRequest(
 )
 
 final case class InstanceDebug(
-    timeout: Option[Int],
-    emitResults: Option[Boolean],
-    profile: Option[Boolean]
+    timeout: Option[Int] = None,
+    emitResults: Option[Boolean] = None,
+    profile: Option[Boolean] = None
 )
 
 final case class InstanceQueryRequest(
