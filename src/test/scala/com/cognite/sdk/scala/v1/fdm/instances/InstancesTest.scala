@@ -245,7 +245,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   it should "List instances with debug options and handle 408" in {
     val exception = testClient.instances.filter(
       filterRequest = InstanceFilterRequest(
-        debug = Some(InstanceDebug(
+        debug = Some(InstanceDebugParameters(
           timeout = Some(1),
           emitResults = Some(false),
           profile = Some(false)
