@@ -2,6 +2,7 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
+import cats.implicits.toBifunctorOps
 import com.cognite.sdk.scala.common.CdpApiException
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils
@@ -239,6 +240,26 @@ class InstancesTest extends CommonDataModelTestHelper {
       )
     )
     deletedContainers.length shouldBe 4
+  }
+
+  it should "List instances with debug options and handle 408" in {
+    val exception = testClient.instances.filter(
+      filterRequest = InstanceFilterRequest(
+        debug = Some(InstanceDebugParameters(
+          timeout = Some(1),
+          emitResults = Some(false),
+          profile = Some(false)
+        )),
+        limit = Some(1)
+      )
+    ).attempt.unsafeRunSync()
+    exception.isLeft shouldBe(true)
+    exception.leftMap {
+      case c: CdpApiException => {
+        c.code shouldBe 408
+      }
+      case _ => fail("unexpected type of exception when trying to get a 408 on list instance")
+    }
   }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {

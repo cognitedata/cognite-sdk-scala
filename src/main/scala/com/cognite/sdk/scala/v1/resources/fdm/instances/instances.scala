@@ -115,6 +115,7 @@ object Instances {
   implicit val viewPropertyReferenceEncoder: Encoder[ViewPropertyReference] = deriveEncoder
   implicit val propertySortV3Encoder: Encoder[PropertySortV3] = deriveEncoder
   implicit val instanceFilterRequestEncoder: Encoder[InstanceFilterRequest] = deriveEncoder
+  implicit val instanceDebugEncoder: Encoder[InstanceDebugParameters] = deriveEncoder
 
   implicit val instanceSyncRequestEncoder: Encoder[InstanceSyncRequest] =
     deriveEncoder[InstanceSyncRequest].mapJsonObject { jsonObj =>
