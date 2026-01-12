@@ -3,12 +3,14 @@
 
 package com.cognite.sdk.scala.common
 
-import java.time.Instant
 import cats.Id
+import com.cognite.sdk.scala.v1.fdm.instances.PropertySortV3
 import com.cognite.sdk.scala.v1.{CogniteId, CogniteInstanceId}
-import io.circe.{Decoder, Encoder, Json, JsonObject, KeyEncoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe._
 import sttp.model.Uri
+
+import java.time.Instant
 
 trait ResponseWithCursor {
   val nextCursor: Option[String]
@@ -68,8 +70,64 @@ final case class CdpApiErrorPayload(
     missing: Option[Seq[JsonObject]],
     duplicated: Option[Seq[JsonObject]],
     missingFields: Option[Seq[String]],
+    notices: Option[Seq[DebugNotice]],
     extra: Option[Extra]
 )
+
+trait DebugNotice {
+  val code: String
+  val category: String
+  val level: String
+  val hint: String
+  def toErrorMessage(): String = hint
+}
+
+final case class InvalidDebugOptionsNotice(
+    code: String,
+    category: String,
+    level: String,
+    hint: String,
+    timeout: Integer
+) extends DebugNotice
+
+final case class SortingNotice(
+    code: String,
+    category: String,
+    level: String,
+    hint: String,
+    grade: String,
+    sort: List[PropertySortV3],
+    resultExpression: String
+) extends DebugNotice
+
+final case class IndexingNotice(
+    code: String,
+    category: String,
+    level: String,
+    hint: String,
+    grade: String,
+    resultExpression: String,
+    property: List[String]
+) extends DebugNotice
+
+final case class FilteringNotice(
+    code: String,
+    category: String,
+    level: String,
+    hint: String,
+    grade: String,
+    viaForm: String,
+    resultExpression: String
+) extends DebugNotice
+
+final case class CursoringNotice(
+    code: String,
+    category: String,
+    level: String,
+    hint: String,
+    grade: String,
+    resultExpression: String
+) extends DebugNotice
 
 final case class CdpApiError(error: CdpApiErrorPayload) {
   def asException(url: Uri, requestId: Option[String]): CdpApiException =
@@ -81,20 +139,35 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
       error.duplicated,
       error.missingFields,
       requestId,
+      error.notices,
       error.extra
     )
 }
 
 object CdpApiError {
+  import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.propertySortV3Decoder
   implicit val errorExtraDecoder: Decoder[Extra] = deriveDecoder
-
   implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
   implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
+  implicit val sortingNoticeDecoder: Decoder[SortingNotice] = deriveDecoder
+  implicit val indexingNoticeDecoder: Decoder[IndexingNotice] = deriveDecoder
+  implicit val filteringNoticeDecoder: Decoder[FilteringNotice] = deriveDecoder
+  implicit val cursoringNoticeDecoder: Decoder[CursoringNotice] = deriveDecoder
+  implicit val invalidDebugOptionsNoticeDecoder: Decoder[InvalidDebugOptionsNotice] = deriveDecoder
+  implicit val debugNoticeDecoder: Decoder[DebugNotice] =
+    Decoder[InvalidDebugOptionsNotice]
+      .map(x => x: DebugNotice)
+      .or(Decoder[SortingNotice].map(x => x: DebugNotice))
+      .or(Decoder[IndexingNotice].map(x => x: DebugNotice))
+      .or(Decoder[FilteringNotice].map(x => x: DebugNotice))
+      .or(Decoder[CursoringNotice].map(x => x: DebugNotice))
+
 }
 
 final case class Extra(
     hint: Option[String] = None
 )
+
 final case class CdpApiException(
     url: Uri,
     code: Int,
@@ -103,16 +176,22 @@ final case class CdpApiException(
     duplicated: Option[Seq[JsonObject]],
     missingFields: Option[Seq[String]],
     requestId: Option[String],
+    debugNotices: Option[Seq[DebugNotice]],
     extra: Option[Extra] = None
 ) extends Throwable({
       import CdpApiException._
       val maybeId = requestId.map(id => s"with id $id ").getOrElse("")
       val maybeHint = extra.flatMap(e => e.hint.map(h => s" Hint: $h")).getOrElse("")
+      val debugNoticeHints: Option[String] =
+        debugNotices.map(notices => s""" Hints from data modeling:
+            ${notices.map(notice => notice.toErrorMessage()).mkString(", ")}
+        """)
 
       val details = Seq(
         missingFields.map(fields => s" Missing fields: [${fields.mkString(", ")}]."),
         duplicated.map(describeErrorList("Duplicated")),
-        missing.map(describeErrorList("Missing"))
+        missing.map(describeErrorList("Missing")),
+        debugNoticeHints
       ).flatMap(_.toList).mkString
 
       s"Request ${maybeId}to ${url.toString} failed with status ${code.toString}: $message.$details$maybeHint"

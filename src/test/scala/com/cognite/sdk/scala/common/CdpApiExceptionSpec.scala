@@ -15,7 +15,8 @@ class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {
       duplicated = None,
       missingFields = None,
       requestId = None,
-      extra = Some(Extra(hint = Some("giving hints to you")))
+      extra = Some(Extra(hint = Some("giving hints to you"))),
+      debugNotices = None
     )
 
     ex.getMessage shouldBe s"Request to https://api.cognitedata.com failed with status 404: Not Found. Hint: giving hints to you"
@@ -29,7 +30,8 @@ class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {
       missing = None,
       duplicated = None,
       missingFields = None,
-      requestId = Some("1234")
+      requestId = Some("1234"),
+      debugNotices = None
     )
 
     ex.getMessage shouldBe s"Request with id 1234 to https://api.cognitedata.com failed with status 400: Bad Request."
@@ -48,7 +50,8 @@ class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {
         JsonObject("externalId" -> Json.fromString("externalId-1"))
       )),
       missingFields = None,
-      requestId = Some("1234")
+      requestId = Some("1234"),
+      debugNotices = None
     )
 
     ex.getMessage should be(
@@ -72,7 +75,8 @@ class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {
         JsonObject("id" -> Json.fromInt(1))
       )),
       missingFields = None,
-      requestId = Some("1234")
+      requestId = Some("1234"),
+      debugNotices = None
     )
 
     ex.getMessage shouldBe
@@ -88,7 +92,8 @@ class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {
       missing = None,
       duplicated = None,
       missingFields = Some(Seq("foo", "bar")),
-      requestId = None
+      requestId = None,
+      debugNotices = None
     )
 
     ex.getMessage shouldBe

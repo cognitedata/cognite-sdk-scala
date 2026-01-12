@@ -3,11 +3,12 @@ package com.cognite.sdk.scala.v1.fdm.instances
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import cats.implicits.toBifunctorOps
-import com.cognite.sdk.scala.common.CdpApiException
+import com.cognite.sdk.scala.common.{CdpApiException, CursoringNotice}
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
-import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.HasData
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.{Equals, HasData}
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, DirectRelationReference, Usage}
@@ -242,21 +243,52 @@ class InstancesTest extends CommonDataModelTestHelper {
     deletedContainers.length shouldBe 4
   }
 
-  it should "List instances with debug options and handle 408" in {
+  it should "List instances with debug options and handle 408 and parse debug notice" in {
     val exception = testClient.instances.filter(
       filterRequest = InstanceFilterRequest(
+        instanceType = Some(InstanceType.Edge),
+        sources = Some(
+          Seq(
+            InstanceSource(
+              ViewReference(
+                "cdf_cdm",
+                "CogniteDiagramAnnotation",
+                "v1"
+              )
+            )
+          )
+        ),
+        filter = Some(
+          Equals(
+          property = Seq("cdf_cdm", "CogniteDiagramAnnotation/v1", "status"),
+          value = FilterValueDefinition.String("Approved")
+        )),
         debug = Some(InstanceDebugParameters(
           timeout = Some(1),
-          emitResults = Some(false),
-          profile = Some(false)
-        )),
-        limit = Some(1)
+          emitResults = Some(false)
+        ))
       )
     ).attempt.unsafeRunSync()
     exception.isLeft shouldBe(true)
     exception.leftMap {
       case c: CdpApiException => {
         c.code shouldBe 408
+        c.debugNotices shouldBe Some(
+            List(
+              CursoringNotice(
+                "containersWithoutIndexesInvolved",
+                "indexing",
+                "warning",
+                "The query is using one or more containers that doesn't have any indexes declared.",
+                "C",
+                "result"
+              )
+            )
+          )
+
+        c.getMessage should contain
+        """Graph query timed out. Reduce load or contention, or optimise your query..Hints from data modeling:
+          |            The query is using one or more containers that doesn't have any indexes declared.""".stripMargin
       }
       case _ => fail("unexpected type of exception when trying to get a 408 on list instance")
     }
