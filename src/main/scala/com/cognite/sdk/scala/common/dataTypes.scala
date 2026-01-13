@@ -162,7 +162,8 @@ object CdpApiError {
         case "indexing" => c.as[IndexingNotice]
         case "filtering" => c.as[FilteringNotice]
         case "cursoring" => c.as[CursoringNotice]
-        case unknown => Left(DecodingFailure(s"Unknown DebugNotice category: '$unknown'", c.history))
+        case unknown =>
+          Left(DecodingFailure(s"Unknown DebugNotice category: '$unknown'", c.history))
       }
 }
 
