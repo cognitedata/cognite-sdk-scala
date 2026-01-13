@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import cats.Id
+import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.instances.PropertySortV3
 import com.cognite.sdk.scala.v1.{CogniteId, CogniteInstanceId}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -74,6 +75,12 @@ final case class CdpApiErrorPayload(
     extra: Option[Extra]
 )
 
+final case class ContainerSubObjectIdentifier(
+    space: String,
+    containerExternalId: String,
+    identifier: String
+)
+
 trait DebugNotice {
   val code: String
   val category: String
@@ -87,7 +94,7 @@ final case class InvalidDebugOptionsNotice(
     category: String,
     level: String,
     hint: String,
-    timeout: Integer
+    timeout: Option[Integer]
 ) extends DebugNotice
 
 final case class SortingNotice(
@@ -96,7 +103,8 @@ final case class SortingNotice(
     level: String,
     hint: String,
     grade: String,
-    sort: List[PropertySortV3],
+    sort: Option[Seq[PropertySortV3]],
+    index: Option[ContainerSubObjectIdentifier],
     resultExpression: String
 ) extends DebugNotice
 
@@ -105,9 +113,10 @@ final case class IndexingNotice(
     category: String,
     level: String,
     hint: String,
-    grade: String,
-    resultExpression: String,
-    property: Option[List[String]]
+    grade: Option[String],
+    resultExpression: Option[String],
+    property: Option[Seq[String]],
+    containers: Option[Seq[ContainerReference]]
 ) extends DebugNotice
 
 final case class FilteringNotice(
@@ -116,8 +125,10 @@ final case class FilteringNotice(
     level: String,
     hint: String,
     grade: String,
-    viaForm: String,
-    resultExpression: String
+    viaForm: Option[String],
+    maxInvolvedRows: Option[Int],
+    resultExpression: String,
+    containers: Option[Seq[ContainerReference]]
 ) extends DebugNotice
 
 final case class CursoringNotice(
@@ -149,6 +160,8 @@ object CdpApiError {
   implicit val errorExtraDecoder: Decoder[Extra] = deriveDecoder
   implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
   implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
+  implicit val containerSubObjectIdentifierDecoder: Decoder[ContainerSubObjectIdentifier] =
+    deriveDecoder
   implicit val sortingNoticeDecoder: Decoder[SortingNotice] = deriveDecoder
   implicit val indexingNoticeDecoder: Decoder[IndexingNotice] = deriveDecoder
   implicit val filteringNoticeDecoder: Decoder[FilteringNotice] = deriveDecoder

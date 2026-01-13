@@ -3,7 +3,7 @@ package com.cognite.sdk.scala.v1.fdm.instances
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import cats.implicits.toBifunctorOps
-import com.cognite.sdk.scala.common.{CdpApiException, CursoringNotice, IndexingNotice}
+import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice}
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
@@ -280,9 +280,10 @@ class InstancesTest extends CommonDataModelTestHelper {
                 "indexing",
                 "warning",
                 "The query is using one or more containers that doesn't have any indexes declared.",
-                "C",
-                "result",
-                None
+                Some("C"),
+                Some("result"),
+                None,
+                Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
               )
             )
           )
