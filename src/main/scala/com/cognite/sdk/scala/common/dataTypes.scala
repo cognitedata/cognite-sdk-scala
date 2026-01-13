@@ -211,7 +211,7 @@ final case class CdpApiException(
       ).flatMap(_.toList).mkString
 
       val messageWithEndingPeriod: String = message + {
-        if(message.endsWith(".")) ""
+        if (message.endsWith(".")) ""
         else "."
       }
 
