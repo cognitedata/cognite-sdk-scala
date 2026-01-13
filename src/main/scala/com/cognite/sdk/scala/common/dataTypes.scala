@@ -86,12 +86,12 @@ trait DebugNotice {
   val category: String
   val level: String
   val hint: String
-  def toErrorMessage(): String = hint
+  def toErrorMessage: String = hint
 }
 
 final case class InvalidDebugOptionsNotice(
     code: String,
-    category: String,
+    category: "invalidDebugOptions",
     level: String,
     hint: String,
     timeout: Option[Integer]
@@ -99,7 +99,7 @@ final case class InvalidDebugOptionsNotice(
 
 final case class SortingNotice(
     code: String,
-    category: String,
+    category: "sorting",
     level: String,
     hint: String,
     grade: String,
@@ -110,7 +110,7 @@ final case class SortingNotice(
 
 final case class IndexingNotice(
     code: String,
-    category: String,
+    category: "indexing",
     level: String,
     hint: String,
     grade: Option[String],
@@ -121,7 +121,7 @@ final case class IndexingNotice(
 
 final case class FilteringNotice(
     code: String,
-    category: String,
+    category: "filtering",
     level: String,
     hint: String,
     grade: String,
@@ -133,7 +133,7 @@ final case class FilteringNotice(
 
 final case class CursoringNotice(
     code: String,
-    category: String,
+    category: "cursoring",
     level: String,
     hint: String,
     grade: String,
@@ -200,7 +200,7 @@ final case class CdpApiException(
       val maybeHint = extra.flatMap(e => e.hint.map(h => s" Hint: $h")).getOrElse("")
       val debugNoticeHints: Option[String] =
         debugNotices.map(notices => s""" Hints from data modeling:
-            ${notices.map(notice => notice.toErrorMessage()).mkString(", ")}
+            ${notices.map(notice => notice.toErrorMessage).mkString(", ")}
         """)
 
       val details = Seq(
