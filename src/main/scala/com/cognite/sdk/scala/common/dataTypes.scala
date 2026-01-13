@@ -193,7 +193,7 @@ final case class CdpApiException(
         debugNoticeHints
       ).flatMap(_.toList).mkString
 
-      s"Request ${maybeId}to ${url.toString} failed with status ${code.toString}: $message.$details$maybeHint"
+      s"Request ${maybeId}to ${url.toString} failed with status ${code.toString}: $message$details$maybeHint"
     })
 
 object CdpApiException {
