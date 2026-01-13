@@ -107,7 +107,7 @@ final case class IndexingNotice(
     hint: String,
     grade: String,
     resultExpression: String,
-    property: List[String]
+    property: Option[List[String]]
 ) extends DebugNotice
 
 final case class FilteringNotice(
@@ -155,12 +155,15 @@ object CdpApiError {
   implicit val cursoringNoticeDecoder: Decoder[CursoringNotice] = deriveDecoder
   implicit val invalidDebugOptionsNoticeDecoder: Decoder[InvalidDebugOptionsNotice] = deriveDecoder
   implicit val debugNoticeDecoder: Decoder[DebugNotice] =
-    Decoder[InvalidDebugOptionsNotice]
-      .map(x => x: DebugNotice)
-      .or(Decoder[SortingNotice].map(x => x: DebugNotice))
-      .or(Decoder[IndexingNotice].map(x => x: DebugNotice))
-      .or(Decoder[FilteringNotice].map(x => x: DebugNotice))
-      .or(Decoder[CursoringNotice].map(x => x: DebugNotice))
+    (c: HCursor) =>
+      c.downField("category").as[String].flatMap {
+        case "invalidDebugOptions" => c.as[InvalidDebugOptionsNotice]
+        case "sorting" => c.as[SortingNotice]
+        case "indexing" => c.as[IndexingNotice]
+        case "filtering" => c.as[FilteringNotice]
+        case "cursoring" => c.as[CursoringNotice]
+        case unknown => Left(DecodingFailure(s"Unknown DebugNotice category: '$unknown'", c.history))
+      }
 }
 
 final case class Extra(
