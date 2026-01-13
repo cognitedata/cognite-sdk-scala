@@ -154,14 +154,15 @@ object CdpApiError {
   implicit val filteringNoticeDecoder: Decoder[FilteringNotice] = deriveDecoder
   implicit val cursoringNoticeDecoder: Decoder[CursoringNotice] = deriveDecoder
   implicit val invalidDebugOptionsNoticeDecoder: Decoder[InvalidDebugOptionsNotice] = deriveDecoder
-  implicit val debugNoticeDecoder: Decoder[DebugNotice] =
-    Decoder[InvalidDebugOptionsNotice]
-      .map(x => x: DebugNotice)
-      .or(Decoder[SortingNotice].map(x => x: DebugNotice))
-      .or(Decoder[IndexingNotice].map(x => x: DebugNotice))
-      .or(Decoder[FilteringNotice].map(x => x: DebugNotice))
-      .or(Decoder[CursoringNotice].map(x => x: DebugNotice))
-
+  implicit val debugNoticeDecoder: Decoder[DebugNotice] = (c: HCursor) =>
+    c.downField("category").as[String].flatMap {
+      case "invalidDebugOptions" => c.as[InvalidDebugOptionsNotice]
+      case "sorting" => c.as[SortingNotice]
+      case "indexing" | "containersWithoutIndexesInvolved" => c.as[IndexingNotice] // "containersWithoutIndexesInvolved" is from a test, but seems to be an indexing notice
+      case "filtering" => c.as[FilteringNotice]
+      case "cursoring" => c.as[CursoringNotice]
+      case unknown => Left(DecodingFailure(s"Unknown DebugNotice category: '$unknown'", c.history))
+    }
 }
 
 final case class Extra(
