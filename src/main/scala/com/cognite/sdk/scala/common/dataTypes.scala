@@ -210,7 +210,12 @@ final case class CdpApiException(
         debugNoticeHints
       ).flatMap(_.toList).mkString
 
-      s"Request ${maybeId}to ${url.toString} failed with status ${code.toString}: $message$details$maybeHint"
+      val messageWithEndingPeriod: String = message + {
+        if(message.endsWith(".")) ""
+        else "."
+      }
+
+      s"Request ${maybeId}to ${url.toString} failed with status ${code.toString}: $messageWithEndingPeriod$details$maybeHint"
     })
 
 object CdpApiException {
