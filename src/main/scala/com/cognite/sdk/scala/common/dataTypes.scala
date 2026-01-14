@@ -7,8 +7,8 @@ import cats.Id
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.instances.PropertySortV3
 import com.cognite.sdk.scala.v1.{CogniteId, CogniteInstanceId}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import sttp.model.Uri
 
 import java.time.Instant
@@ -82,6 +82,16 @@ final case class ContainerSubObjectIdentifier(
 )
 
 trait DebugNotice {
+  def toErrorMessage: String
+}
+
+final case class UncategorizedDebugNotice (
+  category: String,
+) extends DebugNotice {
+  def toErrorMessage: String = s"Unknown debug notice category: $category"
+}
+
+trait StructuredDebugNotice extends DebugNotice {
   val code: String
   val category: String
   val level: String
@@ -95,7 +105,7 @@ final case class InvalidDebugOptionsNotice(
     level: String,
     hint: String,
     timeout: Option[Integer]
-) extends DebugNotice
+) extends StructuredDebugNotice
 
 final case class SortingNotice(
     code: String,
@@ -106,7 +116,7 @@ final case class SortingNotice(
     sort: Option[Seq[PropertySortV3]],
     index: Option[ContainerSubObjectIdentifier],
     resultExpression: String
-) extends DebugNotice
+) extends StructuredDebugNotice
 
 final case class IndexingNotice(
     code: String,
@@ -117,7 +127,7 @@ final case class IndexingNotice(
     resultExpression: Option[String],
     property: Option[Seq[String]],
     containers: Option[Seq[ContainerReference]]
-) extends DebugNotice
+) extends StructuredDebugNotice
 
 final case class FilteringNotice(
     code: String,
@@ -129,7 +139,7 @@ final case class FilteringNotice(
     maxInvolvedRows: Option[Int],
     resultExpression: String,
     containers: Option[Seq[ContainerReference]]
-) extends DebugNotice
+) extends StructuredDebugNotice
 
 final case class CursoringNotice(
     code: String,
@@ -138,7 +148,7 @@ final case class CursoringNotice(
     hint: String,
     grade: String,
     resultExpression: String
-) extends DebugNotice
+) extends StructuredDebugNotice
 
 final case class CdpApiError(error: CdpApiErrorPayload) {
   def asException(url: Uri, requestId: Option[String]): CdpApiException =
@@ -156,17 +166,20 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
 }
 
 object CdpApiError {
+  //needed to decode sorting notices
   import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.propertySortV3Decoder
+
   implicit val errorExtraDecoder: Decoder[Extra] = deriveDecoder
   implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
   implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
   implicit val containerSubObjectIdentifierDecoder: Decoder[ContainerSubObjectIdentifier] =
     deriveDecoder
-  implicit val sortingNoticeDecoder: Decoder[SortingNotice] = deriveDecoder
   implicit val indexingNoticeDecoder: Decoder[IndexingNotice] = deriveDecoder
+  implicit val sortingNoticeDecoder: Decoder[SortingNotice] = deriveDecoder
   implicit val filteringNoticeDecoder: Decoder[FilteringNotice] = deriveDecoder
   implicit val cursoringNoticeDecoder: Decoder[CursoringNotice] = deriveDecoder
   implicit val invalidDebugOptionsNoticeDecoder: Decoder[InvalidDebugOptionsNotice] = deriveDecoder
+  implicit val unstructuredDebugNoticeDecoder: Decoder[UncategorizedDebugNotice] = deriveDecoder
   implicit val debugNoticeDecoder: Decoder[DebugNotice] =
     (c: HCursor) =>
       c.downField("category").as[String].flatMap {
@@ -175,8 +188,7 @@ object CdpApiError {
         case "indexing" => c.as[IndexingNotice]
         case "filtering" => c.as[FilteringNotice]
         case "cursoring" => c.as[CursoringNotice]
-        case unknown =>
-          Left(DecodingFailure(s"Unknown DebugNotice category: '$unknown'", c.history))
+        case _ => c.as[UncategorizedDebugNotice]
       }
 }
 
