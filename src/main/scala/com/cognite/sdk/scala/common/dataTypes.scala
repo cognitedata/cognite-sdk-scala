@@ -16,6 +16,7 @@ import java.time.Instant
 trait ResponseWithCursor {
   val nextCursor: Option[String]
 }
+
 final case class ItemsWithCursor[A](items: Seq[A], nextCursor: Option[String] = None)
     extends ResponseWithCursor
 object ItemsWithCursor {
@@ -85,8 +86,8 @@ trait DebugNotice {
   def toErrorMessage: String
 }
 
-final case class UncategorizedDebugNotice (
-  category: String,
+final case class UncategorizedDebugNotice(
+    category: String
 ) extends DebugNotice {
   def toErrorMessage: String = s"Unknown debug notice category: $category"
 }
@@ -166,7 +167,7 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
 }
 
 object CdpApiError {
-  //needed to decode sorting notices
+  // needed to decode sorting notices
   import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.propertySortV3Decoder
 
   implicit val errorExtraDecoder: Decoder[Extra] = deriveDecoder
