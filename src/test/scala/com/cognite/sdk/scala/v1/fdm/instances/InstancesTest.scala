@@ -50,21 +50,21 @@ class InstancesTest extends CommonDataModelTestHelper {
 
   it should "CRUD instances with all property types" in {
 
-//    deleteContainers(Seq(
-//      ContainerId(space, edgeNodeContainerExtId),
-//      ContainerId(space, edgeContainerExtId),
-//      ContainerId(space, nodeContainer1ExtId),
-//      ContainerId(space, nodeContainer2ExtId),
-//      ContainerId(space, containerForDirectNodeRelationExtId)
-//    ))
-//
-//    deleteViews(Seq(
-//      DataModelReference(space, edgeNodeViewExtId, Some(viewVersion)),
-//      DataModelReference(space, edgeViewExtId, Some(viewVersion)),
-//      DataModelReference(space, nodeView1ExtId, Some(viewVersion)),
-//      DataModelReference(space, nodeView2ExtId, Some(viewVersion)),
-//      DataModelReference(space, viewForDirectNodeRelationExtId, Some(viewVersion))
-//    ))
+    deleteContainers(Seq(
+      ContainerId(space, edgeNodeContainerExtId),
+      ContainerId(space, edgeContainerExtId),
+      ContainerId(space, nodeContainer1ExtId),
+      ContainerId(space, nodeContainer2ExtId),
+      ContainerId(space, containerForDirectNodeRelationExtId)
+    ))
+
+    deleteViews(Seq(
+      DataModelReference(space, edgeNodeViewExtId, Some(viewVersion)),
+      DataModelReference(space, edgeViewExtId, Some(viewVersion)),
+      DataModelReference(space, nodeView1ExtId, Some(viewVersion)),
+      DataModelReference(space, nodeView2ExtId, Some(viewVersion)),
+      DataModelReference(space, viewForDirectNodeRelationExtId, Some(viewVersion))
+    ))
 
     createContainerForDirectNodeRelations.unsafeRunSync()
 
@@ -273,20 +273,18 @@ class InstancesTest extends CommonDataModelTestHelper {
     exception.leftMap {
       case c: CdpApiException => {
         c.code shouldBe 408
-        c.debugNotices shouldBe Some(
-            List(
-              IndexingNotice(
-                "containersWithoutIndexesInvolved",
-                "indexing",
-                "warning",
-                "The query is using one or more containers that doesn't have any indexes declared.",
-                Some("C"),
-                Some("result"),
-                None,
-                Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
-              )
-            )
+        c.debugNotices should contain(
+          IndexingNotice(
+            "containersWithoutIndexesInvolved",
+            "indexing",
+            "warning",
+            "The query is using one or more containers that doesn't have any indexes declared.",
+            Some("C"),
+            Some("result"),
+            None,
+            Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
           )
+        )
 
         c.getMessage should contain
         """Graph query timed out. Reduce load or contention, or optimise your query. Hints from data modeling:

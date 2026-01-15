@@ -220,9 +220,10 @@ final case class CdpApiException(
       val maybeId = requestId.map(id => s"with id $id ").getOrElse("")
       val maybeHint = extra.flatMap(e => e.hint.map(h => s" Hint: $h")).getOrElse("")
       val debugNoticeHints: Option[String] =
-        debugNotices.map(notices => s""" Hints from data modeling:
-            ${notices.map(notice => notice.toErrorMessage).mkString(", ")}
-        """)
+        debugNotices.map(notices =>
+          s""" Hints from data modeling:
+             |${notices.map(notice => notice.toErrorMessage).mkString(", ")}
+             |""".stripMargin)
 
       val details = Seq(
         missingFields.map(fields => s" Missing fields: [${fields.mkString(", ")}]."),
