@@ -50,21 +50,21 @@ class InstancesTest extends CommonDataModelTestHelper {
 
   it should "CRUD instances with all property types" in {
 
-    deleteContainers(Seq(
-      ContainerId(space, edgeNodeContainerExtId),
-      ContainerId(space, edgeContainerExtId),
-      ContainerId(space, nodeContainer1ExtId),
-      ContainerId(space, nodeContainer2ExtId),
-      ContainerId(space, containerForDirectNodeRelationExtId)
-    ))
-
-    deleteViews(Seq(
-      DataModelReference(space, edgeNodeViewExtId, Some(viewVersion)),
-      DataModelReference(space, edgeViewExtId, Some(viewVersion)),
-      DataModelReference(space, nodeView1ExtId, Some(viewVersion)),
-      DataModelReference(space, nodeView2ExtId, Some(viewVersion)),
-      DataModelReference(space, viewForDirectNodeRelationExtId, Some(viewVersion))
-    ))
+//    deleteContainers(Seq(
+//      ContainerId(space, edgeNodeContainerExtId),
+//      ContainerId(space, edgeContainerExtId),
+//      ContainerId(space, nodeContainer1ExtId),
+//      ContainerId(space, nodeContainer2ExtId),
+//      ContainerId(space, containerForDirectNodeRelationExtId)
+//    ))
+//
+//    deleteViews(Seq(
+//      DataModelReference(space, edgeNodeViewExtId, Some(viewVersion)),
+//      DataModelReference(space, edgeViewExtId, Some(viewVersion)),
+//      DataModelReference(space, nodeView1ExtId, Some(viewVersion)),
+//      DataModelReference(space, nodeView2ExtId, Some(viewVersion)),
+//      DataModelReference(space, viewForDirectNodeRelationExtId, Some(viewVersion))
+//    ))
 
     createContainerForDirectNodeRelations.unsafeRunSync()
 
