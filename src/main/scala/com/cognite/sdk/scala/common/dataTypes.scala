@@ -90,7 +90,8 @@ final case class InvalidDebugNotice(
     category: String,
     jsonPayload: String
 ) extends DebugNotice {
-  def toErrorMessage: String = s"Unhandled debug notice with category: $category and content $jsonPayload"
+  def toErrorMessage: String =
+    s"Unhandled debug notice with category: $category and content $jsonPayload"
 }
 
 trait StructuredDebugNotice extends DebugNotice {
@@ -189,12 +190,15 @@ object CdpApiError {
     } yield InvalidDebugNotice(category, jsonPayload)
   }
   implicit val debugNoticeDecoder: Decoder[DebugNotice] =
-    Decoder[InvalidDebugOptionsNotice].map(x => x: DebugNotice)
+    Decoder[InvalidDebugOptionsNotice]
+      .map(x => x: DebugNotice)
       .or(Decoder[SortingNotice].map(x => x: DebugNotice))
       .or(Decoder[IndexingNotice].map(x => x: DebugNotice))
       .or(Decoder[FilteringNotice].map(x => x: DebugNotice))
       .or(Decoder[CursoringNotice].map(x => x: DebugNotice))
-      .or(Decoder[InvalidDebugNotice].map(x => x: DebugNotice)) // fallback in case we can't parse (if new category or code is added with different fields)
+      .or(
+        Decoder[InvalidDebugNotice].map(x => x: DebugNotice)
+      ) // fallback in case we can't parse (if new category or code is added with different fields)
 }
 
 final case class Extra(
