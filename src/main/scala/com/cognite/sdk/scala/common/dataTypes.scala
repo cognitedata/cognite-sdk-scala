@@ -86,10 +86,11 @@ trait DebugNotice {
   def toErrorMessage: String
 }
 
-final case class UncategorizedDebugNotice(
-    category: String
+final case class InvalidDebugNotice(
+    category: String,
+    jsonPayload: String
 ) extends DebugNotice {
-  def toErrorMessage: String = s"Unknown debug notice category: $category"
+  def toErrorMessage: String = s"Unhandled debug notice with category: $category and content $jsonPayload"
 }
 
 trait StructuredDebugNotice extends DebugNotice {
@@ -180,17 +181,20 @@ object CdpApiError {
   implicit val filteringNoticeDecoder: Decoder[FilteringNotice] = deriveDecoder
   implicit val cursoringNoticeDecoder: Decoder[CursoringNotice] = deriveDecoder
   implicit val invalidDebugOptionsNoticeDecoder: Decoder[InvalidDebugOptionsNotice] = deriveDecoder
-  implicit val unstructuredDebugNoticeDecoder: Decoder[UncategorizedDebugNotice] = deriveDecoder
+  implicit val invalidDebugNoticeDecoder: Decoder[InvalidDebugNotice] = Decoder.instance { c =>
+    for {
+      category <- c.downField("category").as[String]
+      // Capture the entire JSON object as a string
+      jsonPayload <- Right(c.value.noSpaces)
+    } yield InvalidDebugNotice(category, jsonPayload)
+  }
   implicit val debugNoticeDecoder: Decoder[DebugNotice] =
-    (c: HCursor) =>
-      c.downField("category").as[String].flatMap {
-        case "invalidDebugOptions" => c.as[InvalidDebugOptionsNotice]
-        case "sorting" => c.as[SortingNotice]
-        case "indexing" => c.as[IndexingNotice]
-        case "filtering" => c.as[FilteringNotice]
-        case "cursoring" => c.as[CursoringNotice]
-        case _ => c.as[UncategorizedDebugNotice]
-      }
+    Decoder[InvalidDebugOptionsNotice].map(x => x: DebugNotice)
+      .or(Decoder[SortingNotice].map(x => x: DebugNotice))
+      .or(Decoder[IndexingNotice].map(x => x: DebugNotice))
+      .or(Decoder[FilteringNotice].map(x => x: DebugNotice))
+      .or(Decoder[CursoringNotice].map(x => x: DebugNotice))
+      .or(Decoder[InvalidDebugNotice].map(x => x: DebugNotice)) // fallback in case we can't parse (if new category or code is added with different fields)
 }
 
 final case class Extra(
