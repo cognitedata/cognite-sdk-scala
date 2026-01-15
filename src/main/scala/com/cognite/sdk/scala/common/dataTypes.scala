@@ -91,7 +91,7 @@ final case class InvalidDebugNotice(
     jsonPayload: String
 ) extends DebugNotice {
   def toErrorMessage: String =
-    s"Unhandled debug notice with category: $category and content $jsonPayload"
+    s"Unhandled debug notice with category: $category and content: $jsonPayload"
 }
 
 trait StructuredDebugNotice extends DebugNotice {
