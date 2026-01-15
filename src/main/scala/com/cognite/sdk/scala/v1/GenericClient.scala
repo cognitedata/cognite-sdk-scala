@@ -285,7 +285,8 @@ object GenericClient {
               duplicated = None,
               missingFields = None,
               message = "Too many requests.",
-              requestId = metadata.header("x-request-id")
+              requestId = metadata.header("x-request-id"),
+              debugNotices = None
             )
           case DeserializationException(_, error) =>
             SdkException(
