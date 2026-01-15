@@ -273,7 +273,7 @@ class InstancesTest extends CommonDataModelTestHelper {
     exception.leftMap {
       case c: CdpApiException => {
         c.code shouldBe 408
-        c.debugNotices should contain(
+        c.debugNotices.toList.flatten should contain(
           IndexingNotice(
             "containersWithoutIndexesInvolved",
             "indexing",
