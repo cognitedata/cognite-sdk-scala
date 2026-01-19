@@ -4,7 +4,6 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import cats.implicits.toBifunctorOps
 import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice}
-import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.{Equals, HasData}
@@ -15,6 +14,8 @@ import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, DirectRelationRe
 import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerId, ContainerReference}
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.{EdgeDeletionRequest, NodeDeletionRequest}
 import com.cognite.sdk.scala.v1.fdm.views._
+import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, GenericClient}
+import sttp.client3.SttpBackend
 
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.DurationInt
@@ -244,7 +245,18 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   it should "List instances with debug options and handle 408 and parse debug notice" in {
-    val exception = testClient.instances.filter(
+    val clientWithoutRetries = new GenericClient[IO](
+      "scala-sdk-test",
+      project,
+      baseUrl,
+      authProvider,
+      None,
+      None,
+      Some("alpha"),
+      implicitly[SttpBackend[IO, Any]],
+      identity[SttpBackend[IO, Any]](_)
+    )
+    val exception = clientWithoutRetries.instances.filter(
       filterRequest = InstanceFilterRequest(
         instanceType = Some(InstanceType.Edge),
         sources = Some(
@@ -286,9 +298,9 @@ class InstancesTest extends CommonDataModelTestHelper {
           )
         )
 
-        c.getMessage should contain (
+        c.getMessage should include (
           """Graph query timed out. Reduce load or contention, or optimise your query. Hints from data modeling:
-            |The query is using one or more containers that doesn't have any indexes de.clared.""".stripMargin
+            |The query is using one or more containers that doesn't have any indexes declared.""".stripMargin
         )
       }
       case _ => fail("unexpected type of exception when trying to get a 408 on list instance")
