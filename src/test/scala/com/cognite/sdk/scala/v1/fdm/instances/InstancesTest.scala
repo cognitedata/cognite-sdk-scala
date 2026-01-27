@@ -2,17 +2,20 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.CdpApiException
-import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
+import cats.implicits.toBifunctorOps
+import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice}
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
-import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.HasData
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.{Equals, HasData}
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, DirectRelationReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerId, ContainerReference}
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.{EdgeDeletionRequest, NodeDeletionRequest}
 import com.cognite.sdk.scala.v1.fdm.views._
+import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, GenericClient}
+import sttp.client3.SttpBackend
 
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.DurationInt
@@ -239,6 +242,69 @@ class InstancesTest extends CommonDataModelTestHelper {
       )
     )
     deletedContainers.length shouldBe 4
+  }
+
+  it should "List instances with debug options and handle 408 and parse debug notice" in {
+    val clientWithoutRetries = new GenericClient[IO](
+      "scala-sdk-test",
+      project,
+      baseUrl,
+      authProvider,
+      None,
+      None,
+      Some("alpha"),
+      implicitly[SttpBackend[IO, Any]],
+      identity[SttpBackend[IO, Any]](_)
+    )
+    val exception = clientWithoutRetries.instances.filter(
+      filterRequest = InstanceFilterRequest(
+        instanceType = Some(InstanceType.Edge),
+        sources = Some(
+          Seq(
+            InstanceSource(
+              ViewReference(
+                "cdf_cdm",
+                "CogniteDiagramAnnotation",
+                "v1"
+              )
+            )
+          )
+        ),
+        filter = Some(
+          Equals(
+          property = Seq("cdf_cdm", "CogniteDiagramAnnotation/v1", "status"),
+          value = FilterValueDefinition.String("Approved")
+        )),
+        debug = Some(InstanceDebugParameters(
+          timeout = Some(1),
+          emitResults = Some(false)
+        ))
+      )
+    ).attempt.unsafeRunSync()
+    exception.isLeft shouldBe(true)
+    exception.leftMap {
+      case c: CdpApiException => {
+        c.code shouldBe 408
+        c.debugNotices.toList.flatten should contain(
+          IndexingNotice(
+            "containersWithoutIndexesInvolved",
+            "indexing",
+            "warning",
+            "The query is using one or more containers that doesn't have any indexes declared.",
+            Some("C"),
+            Some("result"),
+            None,
+            Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
+          )
+        )
+
+        c.getMessage should include (
+          """Graph query timed out. Reduce load or contention, or optimise your query. Hints from data modeling:
+            |The query is using one or more containers that doesn't have any indexes declared.""".stripMargin
+        )
+      }
+      case _ => fail("unexpected type of exception when trying to get a 408 on list instance")
+    }
   }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
