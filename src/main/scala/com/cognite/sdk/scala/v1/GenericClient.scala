@@ -167,6 +167,7 @@ object GenericClient {
   case object PROJECT extends RESOURCE_TYPE
   case object GROUPS extends RESOURCE_TYPE
   case object SECURITY_CATEGORIES extends RESOURCE_TYPE
+  case object NONE extends RESOURCE_TYPE
 
   implicit val projectAuthenticationDecoder: Decoder[ProjectAuthentication] =
     deriveDecoder[ProjectAuthentication]
@@ -270,7 +271,7 @@ object GenericClient {
       )
     }
 
-  def parseResponse[T, R](uri: Uri, mapResult: T => R)(
+  def parseResponse[T, R](uri: Uri, mapResult: T => R, resourceType: RESOURCE_TYPE = NONE)(
       implicit decoder: Decoder[T]
   ): ResponseAs[Either[Throwable, R], Any] =
     asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>

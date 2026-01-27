@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import cats.Id
+import com.cognite.sdk.scala.v1.GenericClient.RESOURCE_TYPE
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.instances.PropertySortV3
 import com.cognite.sdk.scala.v1.{CogniteId, CogniteInstanceId}
@@ -154,11 +155,12 @@ final case class CursoringNotice(
 ) extends StructuredDebugNotice
 
 final case class CdpApiError(error: CdpApiErrorPayload) {
-  def asException(url: Uri, requestId: Option[String]): CdpApiException =
+  def asException(url: Uri, requestId: Option[String],resourceType: RESOURCE_TYPE)
+  : CdpApiException =
     CdpApiException(
       url,
       error.code,
-      error.message,
+      resourceType.toString+":"+error.message,
       error.missing,
       error.duplicated,
       error.missingFields,

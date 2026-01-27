@@ -4,18 +4,10 @@ import cats.implicits.{toFlatMapOps, toFunctorOps}
 import cats.{Id, MonadError => CMonadError}
 import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common.AuthProvider
-import com.cognite.sdk.scala.v1.GenericClient.parseResponse
+import com.cognite.sdk.scala.v1.GenericClient.{NONE, RAW_ROWS, RESOURCE_TYPE, parseResponse}
 import io.circe.Decoder
 import natchez.Trace
-import sttp.client3.{
-  BodySerializer,
-  Empty,
-  RequestT,
-  Response,
-  SttpBackend,
-  basicRequest,
-  emptyRequest
-}
+import sttp.client3.{BodySerializer, Empty, RequestT, Response, SttpBackend, basicRequest, emptyRequest}
 import sttp.model.{Header, Uri}
 
 import scala.concurrent.duration.DurationInt
@@ -96,14 +88,15 @@ final case class RequestSession[F[_]: Trace](
       uri: Uri,
       mapResult: T => R,
       contentType: String = "application/json",
-      accept: String = "application/json"
+      accept: String = "application/json",
+      resourceType: RESOURCE_TYPE = NONE
   )(implicit serializer: BodySerializer[I], decoder: Decoder[T]): F[R] =
     sttpRequest
       .contentType(contentType)
       .header("accept", accept)
       .post(uri)
       .body(body)
-      .response(parseResponse(uri, mapResult))
+      .response(parseResponse(uri, mapResult,resourceType))
       .send(sttpBackend)
       .flatMap(r => F.fromEither(r.body))
 
