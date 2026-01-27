@@ -4,7 +4,7 @@ import cats.implicits.{toFlatMapOps, toFunctorOps}
 import cats.{Id, MonadError => CMonadError}
 import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common.AuthProvider
-import com.cognite.sdk.scala.v1.GenericClient.{NONE, RAW_ROWS, RESOURCE_TYPE, parseResponse}
+import com.cognite.sdk.scala.v1.GenericClient.{NONE, RESOURCE_TYPE, parseResponse}
 import io.circe.Decoder
 import natchez.Trace
 import sttp.client3.{BodySerializer, Empty, RequestT, Response, SttpBackend, basicRequest, emptyRequest}
