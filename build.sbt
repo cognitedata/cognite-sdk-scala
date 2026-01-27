@@ -16,6 +16,7 @@ val circeVersion = "0.14.15"
 val catsEffectVersion = "3.6.3"
 val fs2Version = "3.11.0"
 val natchezVersion = "0.3.7"
+val nettyVersion = "4.1.68.Final"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -54,6 +55,17 @@ lazy val commonSettings = Seq(
         case Some((2, n)) => s"2.$n"
         case Some((3, _)) => s"3"
       }}.sbt.lock",
+  dependencyOverrides ++= Seq(
+    "io.netty" % "netty-buffer" % nettyVersion,
+    "io.netty" % "netty-codec" % nettyVersion,
+    "io.netty" % "netty-codec-http" % nettyVersion,
+    "io.netty" % "netty-codec-socks" % nettyVersion,
+    "io.netty" % "netty-common" % nettyVersion,
+    "io.netty" % "netty-handler" % nettyVersion,
+    "io.netty" % "netty-handler-proxy" % nettyVersion,
+    "io.netty" % "netty-resolver" % nettyVersion,
+    "io.netty" % "netty-transport" % nettyVersion,
+  ),
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
