@@ -9,4 +9,4 @@ addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.4.1")
 addSbtPlugin("software.purpledragon" % "sbt-dependency-lock" % "1.5.1")
 
 addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.8")
-libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.17"
+libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.20"
