@@ -115,6 +115,7 @@ object Instances {
   implicit val viewPropertyReferenceEncoder: Encoder[ViewPropertyReference] = deriveEncoder
   implicit val propertySortV3Encoder: Encoder[PropertySortV3] = deriveEncoder
   implicit val instanceFilterRequestEncoder: Encoder[InstanceFilterRequest] = deriveEncoder
+  implicit val instanceDebugEncoder: Encoder[InstanceDebugParameters] = deriveEncoder
 
   implicit val instanceSyncRequestEncoder: Encoder[InstanceSyncRequest] =
     deriveEncoder[InstanceSyncRequest].mapJsonObject { jsonObj =>
@@ -135,6 +136,9 @@ object Instances {
 
   implicit val instanceRetrieveRequestEncoder: Encoder[InstanceRetrieveRequest] = deriveEncoder
 
+  implicit val viewPropertyReferenceDecoder: Decoder[ViewPropertyReference] = deriveDecoder
+  implicit val sortDirectionDecoder: Decoder[SortDirection] = deriveDecoder
+  implicit val propertySortV3Decoder: Decoder[PropertySortV3] = deriveDecoder
   implicit val InstanceSourceDecoder: Decoder[InstanceSource] = deriveDecoder
   implicit val instanceRetrieveDecoder: Decoder[InstanceRetrieve] = deriveDecoder
   implicit val slimNodeOrEdgeItemsDecoder: Decoder[Items[SlimNodeOrEdge]] = deriveDecoder
