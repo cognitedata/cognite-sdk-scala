@@ -244,7 +244,7 @@ class InstancesTest extends CommonDataModelTestHelper {
     deletedContainers.length shouldBe 4
   }
 
-  it should "List instances with debug options and handle 408 and parse debug notice" in {
+  it should "List instances with debug options, handle 408 and parse debug notice" in {
     val clientWithoutRetries = new GenericClient[IO](
       "scala-sdk-test",
       project,
@@ -256,7 +256,7 @@ class InstancesTest extends CommonDataModelTestHelper {
       implicitly[SttpBackend[IO, Any]],
       identity[SttpBackend[IO, Any]](_)
     )
-    val exception = clientWithoutRetries.instances.filter(
+    val errorReturn = clientWithoutRetries.instances.filter(
       filterRequest = InstanceFilterRequest(
         instanceType = Some(InstanceType.Edge),
         sources = Some(
@@ -281,8 +281,8 @@ class InstancesTest extends CommonDataModelTestHelper {
         ))
       )
     ).attempt.unsafeRunSync()
-    exception.isLeft shouldBe(true)
-    exception.leftMap {
+    errorReturn.isLeft shouldBe(true)
+    errorReturn.leftMap {
       case c: CdpApiException => {
         c.code shouldBe 408
         c.debugNotices.toList.flatten should contain(
@@ -305,6 +305,61 @@ class InstancesTest extends CommonDataModelTestHelper {
       }
       case _ => fail("unexpected type of exception when trying to get a 408 on list instance")
     }
+  }
+
+  it should "List instances with debug options and parse debug notice on sucessful request" in {
+    val clientWithoutRetries = new GenericClient[IO](
+      "scala-sdk-test",
+      project,
+      baseUrl,
+      authProvider,
+      None,
+      None,
+      Some("alpha"),
+      implicitly[SttpBackend[IO, Any]],
+      identity[SttpBackend[IO, Any]](_)
+    )
+    val listedInstances = clientWithoutRetries.instances.filter(
+      filterRequest = InstanceFilterRequest(
+        instanceType = Some(InstanceType.Edge),
+        sources = Some(
+          Seq(
+            InstanceSource(
+              ViewReference(
+                "cdf_cdm",
+                "CogniteDiagramAnnotation",
+                "v1"
+              )
+            )
+          )
+        ),
+        filter = Some(
+          Equals(
+            property = Seq("cdf_cdm", "CogniteDiagramAnnotation/v1", "status"),
+            value = FilterValueDefinition.String("Approved")
+          )),
+        debug = Some(InstanceDebugParameters(
+          emitResults = Some(false)
+        ))
+      )
+    ).attempt.unsafeRunSync()
+    listedInstances.isLeft shouldBe(false)
+    listedInstances.map(
+      _.debug shouldBe(
+        Some(DebugNotices(Seq(
+          IndexingNotice(
+            "containersWithoutIndexesInvolved",
+            "indexing",
+            "warning",
+            "The query is using one or more containers that doesn't have any indexes declared.",
+            Some("C"),
+            Some("result"),
+            None,
+            Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
+          )
+        )))
+      )
+    )
   }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
