@@ -271,7 +271,7 @@ object GenericClient {
       )
     }
 
-  def parseResponse[T, R](uri: Uri, mapResult: T => R, resourceType: RESOURCE_TYPE = NONE)(
+  def parseResponse[T, R](uri: Uri, mapResult: T => R, resourceType: RESOURCE_TYPE = GenericClient.NONE)(
       implicit decoder: Decoder[T]
   ): ResponseAs[Either[Throwable, R], Any] =
     asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
@@ -287,7 +287,8 @@ object GenericClient {
               missingFields = None,
               message = "Too many requests.",
               requestId = metadata.header("x-request-id"),
-              debugNotices = None
+              debugNotices = None,
+              resourceType = resourceType
             )
           case DeserializationException(_, error) =>
             SdkException(
@@ -297,7 +298,7 @@ object GenericClient {
               Some(metadata.code.code)
             )
           case HttpError(cdpApiError, _) =>
-            cdpApiError.asException(uri"$uri", metadata.header("x-request-id"), resourceType)
+            cdpApiError.asException(uri"$uri", metadata.header("x-request-id"), resourceType);
         }
         .map(mapResult)
     )

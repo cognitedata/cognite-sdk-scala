@@ -25,11 +25,12 @@ final case class RequestSession[F[_]: Trace](
     auth: AuthProvider[F],
     clientTag: Option[String] = None,
     cdfVersion: Option[String] = None,
-    tags: Map[String, Any] = Map.empty
+    tags: Map[String, Any] = Map.empty,
+    resourceType: GenericClient.RESOURCE_TYPE = NONE
 )(implicit F: CMonadError[F, Throwable]) {
   val implicits: RequestSessionImplicits[F] = new RequestSessionImplicits[F]
   def withResourceType(resourceType: GenericClient.RESOURCE_TYPE): RequestSession[F] =
-    this.copy(tags = this.tags + (GenericClient.RESOURCE_TYPE_TAG -> resourceType))
+    this.copy(tags = this.tags + (GenericClient.RESOURCE_TYPE_TAG -> resourceType), resourceType = resourceType)
 
   val sttpBackend: SttpBackend[F, _] =
     wrapSttpBackend(new AuthSttpBackend(new TraceSttpBackend(baseSttpBackend), auth))
@@ -64,7 +65,7 @@ final case class RequestSession[F[_]: Trace](
       .contentType(contentType)
       .header("accept", accept)
       .get(uri)
-      .response(parseResponse(uri, mapResult))
+      .response(parseResponse(uri, mapResult, resourceType))
       .send(sttpBackend)
       .flatMap(r => F.fromEither(r.body))
 
@@ -79,7 +80,7 @@ final case class RequestSession[F[_]: Trace](
       .header("accept", accept)
       .header("cdf-version", "alpha")
       .post(uri)
-      .response(parseResponse(uri, mapResult))
+      .response(parseResponse(uri, mapResult, resourceType))
       .send(sttpBackend)
       .flatMap(r => F.fromEither(r.body))
 
@@ -89,7 +90,6 @@ final case class RequestSession[F[_]: Trace](
       mapResult: T => R,
       contentType: String = "application/json",
       accept: String = "application/json",
-      resourceType: RESOURCE_TYPE = NONE
   )(implicit serializer: BodySerializer[I], decoder: Decoder[T]): F[R] =
     sttpRequest
       .contentType(contentType)

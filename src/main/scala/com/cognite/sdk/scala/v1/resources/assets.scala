@@ -4,7 +4,6 @@
 package com.cognite.sdk.scala.v1.resources
 
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.GenericClient.ASSETS
 import com.cognite.sdk.scala.v1._
 import sttp.client3._
 import sttp.client3.circe._
@@ -98,8 +97,7 @@ class Assets[F[_]](val requestSession: RequestSession[F])
         ignoreUnknownIds
       ),
       uri"$baseUrl/delete",
-      _ => (),
-      resourceType = ASSETS
+      _ => ()
     )
 
   override def delete(ids: Seq[CogniteId], ignoreUnknownIds: Boolean = false): F[Unit] =
