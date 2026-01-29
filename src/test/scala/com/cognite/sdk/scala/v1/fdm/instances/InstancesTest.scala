@@ -281,7 +281,7 @@ class InstancesTest extends CommonDataModelTestHelper {
         ))
       )
     ).attempt.unsafeRunSync()
-    errorReturn.isLeft shouldBe(false)
+    errorReturn.isLeft shouldBe(true)
     errorReturn.leftMap {
       case c: CdpApiException => {
         c.code shouldBe 408
