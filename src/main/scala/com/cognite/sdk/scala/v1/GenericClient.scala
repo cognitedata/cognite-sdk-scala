@@ -273,7 +273,9 @@ object GenericClient {
   def parseResponse[T, R](uri: Uri, mapResult: T => R)(
       implicit decoder: Decoder[T]
   ): ResponseAs[Either[Throwable, R], Any] =
-    asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
+    asJsonEither[CdpApiError, T]
+      .mapWithMetadata(
+        (response, metadata) =>
       response
         .leftMap[Throwable] {
           case DeserializationException(_, _)
