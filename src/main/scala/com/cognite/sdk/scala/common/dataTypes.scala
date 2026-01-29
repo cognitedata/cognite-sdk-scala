@@ -168,13 +168,9 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
     )
 }
 
-object CdpApiError {
-  // needed to decode sorting notices
+object DebugNotice {
   import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.propertySortV3Decoder
 
-  implicit val errorExtraDecoder: Decoder[Extra] = deriveDecoder
-  implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
-  implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
   implicit val containerSubObjectIdentifierDecoder: Decoder[ContainerSubObjectIdentifier] =
     deriveDecoder
   implicit val indexingNoticeDecoder: Decoder[IndexingNotice] = deriveDecoder
@@ -199,6 +195,14 @@ object CdpApiError {
       .or(
         Decoder[InvalidDebugNotice].map(x => x: DebugNotice)
       ) // fallback in case we can't parse (if new category or code is added with different fields)
+}
+
+object CdpApiError {
+  import DebugNotice._
+
+  implicit val errorExtraDecoder: Decoder[Extra] = deriveDecoder
+  implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
+  implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
 }
 
 final case class Extra(

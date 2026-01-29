@@ -15,7 +15,7 @@ final case class DebugNotices(notices: Seq[DebugNotice])
 
 object InstanceFilterResponse {
 
-  import com.cognite.sdk.scala.common.CdpApiError._
+  import com.cognite.sdk.scala.common.DebugNotice._
   implicit val debugNoticesDecoder: Decoder[DebugNotices] = deriveDecoder
 
   implicit val instanceFilterResponseDecoder: Decoder[InstanceFilterResponse] = (c: HCursor) =>
