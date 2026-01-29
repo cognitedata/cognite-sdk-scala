@@ -274,32 +274,31 @@ object GenericClient {
       implicit decoder: Decoder[T]
   ): ResponseAs[Either[Throwable, R], Any] =
     asJsonEither[CdpApiError, T]
-      .mapWithMetadata(
-        (response, metadata) =>
-      response
-        .leftMap[Throwable] {
-          case DeserializationException(_, _)
-              if metadata.code.code === StatusCode.TooManyRequests.code =>
-            CdpApiException(
-              url = uri"$uri",
-              code = StatusCode.TooManyRequests.code,
-              missing = None,
-              duplicated = None,
-              missingFields = None,
-              message = "Too many requests.",
-              requestId = metadata.header("x-request-id"),
-              debugNotices = None
-            )
-          case DeserializationException(_, error) =>
-            SdkException(
-              s"Failed to parse response, reason: ${error.getMessage}",
-              Some(uri),
-              metadata.header("x-request-id"),
-              Some(metadata.code.code)
-            )
-          case HttpError(cdpApiError, _) =>
-            cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
-        }
-        .map(mapResult)
-    )
+      .mapWithMetadata((response, metadata) =>
+        response
+          .leftMap[Throwable] {
+            case DeserializationException(_, _)
+                if metadata.code.code === StatusCode.TooManyRequests.code =>
+              CdpApiException(
+                url = uri"$uri",
+                code = StatusCode.TooManyRequests.code,
+                missing = None,
+                duplicated = None,
+                missingFields = None,
+                message = "Too many requests.",
+                requestId = metadata.header("x-request-id"),
+                debugNotices = None
+              )
+            case DeserializationException(_, error) =>
+              SdkException(
+                s"Failed to parse response, reason: ${error.getMessage}",
+                Some(uri),
+                metadata.header("x-request-id"),
+                Some(metadata.code.code)
+              )
+            case HttpError(cdpApiError, _) =>
+              cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
+          }
+          .map(mapResult)
+      )
 }

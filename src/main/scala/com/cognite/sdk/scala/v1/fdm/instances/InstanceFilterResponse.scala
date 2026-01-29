@@ -34,7 +34,8 @@ object InstanceFilterResponse {
             implicitly
           )
         )
-      debug <- c.downField("debug")
+      debug <- c
+        .downField("debug")
         .as[Option[DebugNotices]]
     } yield InstanceFilterResponse(items, typing, nextCursor, debug)
 

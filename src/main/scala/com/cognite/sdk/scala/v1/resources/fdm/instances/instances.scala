@@ -62,7 +62,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       @annotation.nowarn partition: Option[Partition] = None
   )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] =
     filter(inputQuery.copy(cursor = cursor, limit = limit)).map {
-    case InstanceFilterResponse(items, _, cursor, _) =>
+      case InstanceFilterResponse(items, _, cursor, _) =>
         ItemsWithCursor(items, cursor)
     }
 
