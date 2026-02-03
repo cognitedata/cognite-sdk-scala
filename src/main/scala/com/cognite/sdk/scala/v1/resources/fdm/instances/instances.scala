@@ -55,6 +55,19 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       identity
     )
 
+  def queryStream(
+      imputQueryRequest: InstanceQueryRequest,
+      cursor: Option[String],
+      limit: Option[Int]
+                 )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
+    Readable
+      .pullFromCursor(cursor, limit, None, (cursor: Option[String], limit: Option[Int], _: Option[Partition]) => queryWithCursor(inputQueryRequest, cursor, limit))
+
+  private[sdk] def queryWithCursor(inputQuery: InstanceQueryRequest, cursor: Option[String], limit: Option[Int])(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] =
+    queryRequest(
+      inputQuery
+      .copy())
+
   private[sdk] def filterWithCursor(
       inputQuery: InstanceFilterRequest,
       cursor: Option[String],

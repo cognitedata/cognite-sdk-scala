@@ -66,6 +66,20 @@ final case class InstanceQueryRequest(
     includeTyping: Option[Boolean] = Some(true)
 )
 
+object InstanceQueryRequest {
+
+  def copyWithCursor(query: InstanceQueryRequest, limit: Option[Int], cursors: Seq[Option[String]]) =
+    query
+      .copy(`with` = query.`with`.map{
+        case (k: String,  v: TableExpression) =>
+          (k, v.copy(limit = limit))
+      }, cursors =
+        query.`with`{
+          case (k: String,  v: TableExpression) =>
+            (k, v.copy(limit = limit))
+        }
+}
+
 final case class InstanceSyncRequest(
     `with`: Map[String, TableExpression] = Map.empty,
     cursors: Option[Map[String, String]] = None,
