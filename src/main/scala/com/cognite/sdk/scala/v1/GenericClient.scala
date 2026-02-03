@@ -294,7 +294,8 @@ object GenericClient {
                 s"Failed to parse response, reason: ${error.getMessage}",
                 Some(uri),
                 metadata.header("x-request-id"),
-                Some(metadata.code.code)
+                Some(metadata.code.code),
+                resourceType
               )
             case HttpError(cdpApiError, _) =>
               cdpApiError.asException(uri"$uri", metadata.header("x-request-id"), resourceType)

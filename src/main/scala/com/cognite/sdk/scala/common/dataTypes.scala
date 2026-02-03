@@ -42,7 +42,8 @@ final case class SdkException(
     message: String,
     uri: Option[Uri] = None,
     requestId: Option[String] = None,
-    responseCode: Option[Int] = None
+    responseCode: Option[Int] = None,
+    resourceType: Option[RESOURCE_TYPE] = None
 ) extends Throwable(SdkException.formatMessage(message, uri, requestId, responseCode))
 object SdkException {
   def formatMessage(
