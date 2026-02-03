@@ -4,7 +4,12 @@ import cats.implicits.{toFlatMapOps, toFunctorOps}
 import cats.{Id, MonadError => CMonadError}
 import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common.AuthProvider
-import com.cognite.sdk.scala.v1.GenericClient.{RESOURCE_TYPE_TAG, NONE, RESOURCE_TYPE, parseResponse}
+import com.cognite.sdk.scala.v1.GenericClient.{
+  NONE,
+  RESOURCE_TYPE,
+  RESOURCE_TYPE_TAG,
+  parseResponse
+}
 import io.circe.Decoder
 import natchez.Trace
 import sttp.client3.{
@@ -43,7 +48,7 @@ final case class RequestSession[F[_]: Trace](
     wrapSttpBackend(new AuthSttpBackend(new TraceSttpBackend(baseSttpBackend), auth))
 
   def getResourceType(): RESOURCE_TYPE =
-    tags.get(RESOURCE_TYPE_TAG).collect{ case rt:RESOURCE_TYPE => rt }.getOrElse(NONE)
+    tags.get(RESOURCE_TYPE_TAG).collect { case rt: RESOURCE_TYPE => rt }.getOrElse(NONE)
 
   def send[R](
       r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any]
@@ -75,7 +80,7 @@ final case class RequestSession[F[_]: Trace](
       .contentType(contentType)
       .header("accept", accept)
       .get(uri)
-      .response(parseResponse(uri, mapResult,getResourceType()))
+      .response(parseResponse(uri, mapResult, getResourceType()))
       .send(sttpBackend)
       .flatMap(r => F.fromEither(r.body))
 
@@ -90,7 +95,7 @@ final case class RequestSession[F[_]: Trace](
       .header("accept", accept)
       .header("cdf-version", "alpha")
       .post(uri)
-      .response(parseResponse(uri, mapResult,getResourceType()))
+      .response(parseResponse(uri, mapResult, getResourceType()))
       .send(sttpBackend)
       .flatMap(r => F.fromEither(r.body))
 
@@ -106,7 +111,7 @@ final case class RequestSession[F[_]: Trace](
       .header("accept", accept)
       .post(uri)
       .body(body)
-      .response(parseResponse(uri, mapResult,getResourceType()))
+      .response(parseResponse(uri, mapResult, getResourceType()))
       .send(sttpBackend)
       .flatMap(r => F.fromEither(r.body))
 

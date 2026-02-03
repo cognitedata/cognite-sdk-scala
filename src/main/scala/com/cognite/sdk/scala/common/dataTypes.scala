@@ -155,7 +155,11 @@ final case class CursoringNotice(
 ) extends StructuredDebugNotice
 
 final case class CdpApiError(error: CdpApiErrorPayload) {
-  def asException(url: Uri, requestId: Option[String],resourceType: RESOURCE_TYPE = NONE): CdpApiException =
+  def asException(
+      url: Uri,
+      requestId: Option[String],
+      resourceType: RESOURCE_TYPE = NONE
+  ): CdpApiException =
     CdpApiException(
       url,
       error.code,

@@ -298,7 +298,7 @@ object GenericClient {
                 Some(metadata.code.code)
               )
             case HttpError(cdpApiError, _) =>
-              cdpApiError.asException(uri"$uri", metadata.header("x-request-id"),resourceType)
+              cdpApiError.asException(uri"$uri", metadata.header("x-request-id"), resourceType)
           }
           .map(mapResult)
       )
