@@ -5,7 +5,6 @@ import cats.{Id, MonadError => CMonadError}
 import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common.AuthProvider
 import com.cognite.sdk.scala.v1.GenericClient.{
-  NONE,
   RESOURCE_TYPE,
   RESOURCE_TYPE_TAG,
   parseResponse
@@ -47,8 +46,8 @@ final case class RequestSession[F[_]: Trace](
   val sttpBackend: SttpBackend[F, _] =
     wrapSttpBackend(new AuthSttpBackend(new TraceSttpBackend(baseSttpBackend), auth))
 
-  def getResourceType(): RESOURCE_TYPE =
-    tags.get(RESOURCE_TYPE_TAG).collect { case rt: RESOURCE_TYPE => rt }.getOrElse(NONE)
+  def getResourceType(): Option[RESOURCE_TYPE] =
+    tags.get(RESOURCE_TYPE_TAG).collect { case rt: RESOURCE_TYPE => rt }
 
   def send[R](
       r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any]

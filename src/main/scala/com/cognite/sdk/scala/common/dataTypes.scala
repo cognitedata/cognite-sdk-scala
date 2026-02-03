@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import cats.Id
-import com.cognite.sdk.scala.v1.GenericClient.{NONE, RESOURCE_TYPE}
+import com.cognite.sdk.scala.v1.GenericClient.RESOURCE_TYPE
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.instances.PropertySortV3
 import com.cognite.sdk.scala.v1.{CogniteId, CogniteInstanceId}
@@ -158,7 +158,7 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
   def asException(
       url: Uri,
       requestId: Option[String],
-      resourceType: RESOURCE_TYPE = NONE
+      resourceType: Option[RESOURCE_TYPE] = None
   ): CdpApiException =
     CdpApiException(
       url,
@@ -225,7 +225,7 @@ final case class CdpApiException(
     requestId: Option[String],
     debugNotices: Option[Seq[DebugNotice]],
     extra: Option[Extra] = None,
-    resourceType: RESOURCE_TYPE = NONE
+    resourceType: Option[RESOURCE_TYPE] = None
 ) extends Throwable({
       import CdpApiException._
       val maybeId = requestId.map(id => s"with id $id ").getOrElse("")

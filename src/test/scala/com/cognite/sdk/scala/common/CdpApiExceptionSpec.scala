@@ -117,7 +117,7 @@ class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {
       missingFields = None,
       requestId = None,
       debugNotices = None,
-      resourceType = RAW_METADATA
+      resourceType = Some(RAW_METADATA)
     )
 
     ex.getMessage shouldBe
