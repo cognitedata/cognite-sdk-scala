@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import cats.Id
+import com.cognite.sdk.scala.v1.GenericClient.{NONE, RESOURCE_TYPE}
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.instances.PropertySortV3
 import com.cognite.sdk.scala.v1.{CogniteId, CogniteInstanceId}
@@ -154,7 +155,7 @@ final case class CursoringNotice(
 ) extends StructuredDebugNotice
 
 final case class CdpApiError(error: CdpApiErrorPayload) {
-  def asException(url: Uri, requestId: Option[String]): CdpApiException =
+  def asException(url: Uri, requestId: Option[String],resourceType: RESOURCE_TYPE = NONE): CdpApiException =
     CdpApiException(
       url,
       error.code,
@@ -164,7 +165,8 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
       error.missingFields,
       requestId,
       error.notices,
-      error.extra
+      error.extra,
+      resourceType
     )
 }
 
@@ -218,7 +220,8 @@ final case class CdpApiException(
     missingFields: Option[Seq[String]],
     requestId: Option[String],
     debugNotices: Option[Seq[DebugNotice]],
-    extra: Option[Extra] = None
+    extra: Option[Extra] = None,
+    resourceType: RESOURCE_TYPE = NONE
 ) extends Throwable({
       import CdpApiException._
       val maybeId = requestId.map(id => s"with id $id ").getOrElse("")

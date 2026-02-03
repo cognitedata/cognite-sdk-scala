@@ -167,7 +167,7 @@ object GenericClient {
   case object PROJECT extends RESOURCE_TYPE
   case object GROUPS extends RESOURCE_TYPE
   case object SECURITY_CATEGORIES extends RESOURCE_TYPE
-
+  case object NONE extends RESOURCE_TYPE
   implicit val projectAuthenticationDecoder: Decoder[ProjectAuthentication] =
     deriveDecoder[ProjectAuthentication]
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
@@ -270,7 +270,7 @@ object GenericClient {
       )
     }
 
-  def parseResponse[T, R](uri: Uri, mapResult: T => R)(
+  def parseResponse[T, R](uri: Uri, mapResult: T => R, resourceType: RESOURCE_TYPE = NONE)(
       implicit decoder: Decoder[T]
   ): ResponseAs[Either[Throwable, R], Any] =
     asJsonEither[CdpApiError, T]
@@ -287,7 +287,8 @@ object GenericClient {
                 missingFields = None,
                 message = "Too many requests.",
                 requestId = metadata.header("x-request-id"),
-                debugNotices = None
+                debugNotices = None,
+                resourceType = resourceType
               )
             case DeserializationException(_, error) =>
               SdkException(
@@ -297,7 +298,7 @@ object GenericClient {
                 Some(metadata.code.code)
               )
             case HttpError(cdpApiError, _) =>
-              cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
+              cdpApiError.asException(uri"$uri", metadata.header("x-request-id"),resourceType)
           }
           .map(mapResult)
       )

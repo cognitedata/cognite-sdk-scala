@@ -4,6 +4,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import sttp.client3._
 import io.circe._
 import org.scalatest.matchers.should.Matchers
+import com.cognite.sdk.scala.v1.GenericClient.RAW_METADATA
 
 class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {
   it should "format messages without request ID" in {
@@ -98,5 +99,22 @@ class CdpApiExceptionSpec extends AnyFlatSpec with Matchers {
 
     ex.getMessage shouldBe
       s"Request to https://api.cognitedata.com failed with status 400: Bad Request. Missing fields: [foo, bar]."
+  }
+
+  it should "ignore resource types for getMessage" in {
+    val ex = CdpApiException(
+      url = uri"https://api.cognitedata.com",
+      code = 400,
+      message = "Bad Request",
+      missing = None,
+      duplicated = None,
+      missingFields = None,
+      requestId = None,
+      debugNotices = None,
+      resourceType = RAW_METADATA
+    )
+
+    ex.getMessage shouldBe
+      s"Request to https://api.cognitedata.com failed with status 400: Bad Request."
   }
 }
