@@ -4,6 +4,7 @@
 package com.cognite.sdk.scala.common
 
 import cats.Id
+import com.cognite.sdk.scala.v1.GenericClient.RESOURCE_TYPE
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
 import com.cognite.sdk.scala.v1.fdm.instances.PropertySortV3
 import com.cognite.sdk.scala.v1.{CogniteId, CogniteInstanceId}
@@ -41,7 +42,8 @@ final case class SdkException(
     message: String,
     uri: Option[Uri] = None,
     requestId: Option[String] = None,
-    responseCode: Option[Int] = None
+    responseCode: Option[Int] = None,
+    resourceType: Option[RESOURCE_TYPE] = None
 ) extends Throwable(SdkException.formatMessage(message, uri, requestId, responseCode))
 object SdkException {
   def formatMessage(
@@ -154,7 +156,11 @@ final case class CursoringNotice(
 ) extends StructuredDebugNotice
 
 final case class CdpApiError(error: CdpApiErrorPayload) {
-  def asException(url: Uri, requestId: Option[String]): CdpApiException =
+  def asException(
+      url: Uri,
+      requestId: Option[String],
+      resourceType: Option[RESOURCE_TYPE] = None
+  ): CdpApiException =
     CdpApiException(
       url,
       error.code,
@@ -164,17 +170,14 @@ final case class CdpApiError(error: CdpApiErrorPayload) {
       error.missingFields,
       requestId,
       error.notices,
-      error.extra
+      error.extra,
+      resourceType
     )
 }
 
-object CdpApiError {
-  // needed to decode sorting notices
+object DebugNotice {
   import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances.propertySortV3Decoder
 
-  implicit val errorExtraDecoder: Decoder[Extra] = deriveDecoder
-  implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
-  implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
   implicit val containerSubObjectIdentifierDecoder: Decoder[ContainerSubObjectIdentifier] =
     deriveDecoder
   implicit val indexingNoticeDecoder: Decoder[IndexingNotice] = deriveDecoder
@@ -201,6 +204,14 @@ object CdpApiError {
       ) // fallback in case we can't parse (if new category or code is added with different fields)
 }
 
+object CdpApiError {
+  import DebugNotice._
+
+  implicit val errorExtraDecoder: Decoder[Extra] = deriveDecoder
+  implicit val cdpApiErrorPayloadDecoder: Decoder[CdpApiErrorPayload] = deriveDecoder
+  implicit val cdpApiErrorDecoder: Decoder[CdpApiError] = deriveDecoder
+}
+
 final case class Extra(
     hint: Option[String] = None
 )
@@ -214,7 +225,8 @@ final case class CdpApiException(
     missingFields: Option[Seq[String]],
     requestId: Option[String],
     debugNotices: Option[Seq[DebugNotice]],
-    extra: Option[Extra] = None
+    extra: Option[Extra] = None,
+    resourceType: Option[RESOURCE_TYPE] = None
 ) extends Throwable({
       import CdpApiException._
       val maybeId = requestId.map(id => s"with id $id ").getOrElse("")

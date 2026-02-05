@@ -1,16 +1,22 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import io.circe.generic.semiauto.deriveEncoder
-import io.circe.{Decoder, Encoder, HCursor}
+import com.cognite.sdk.scala.common.DebugNotice
+import io.circe.generic.semiauto.deriveDecoder
+import io.circe.{Decoder, HCursor}
 
 final case class InstanceFilterResponse(
     items: Seq[InstanceDefinition],
     typing: Option[Map[String, Map[String, Map[String, TypePropertyDefinition]]]],
-    nextCursor: Option[String]
+    nextCursor: Option[String],
+    debug: Option[DebugNotices] = None
 )
 
+final case class DebugNotices(notices: Seq[DebugNotice])
+
 object InstanceFilterResponse {
-  implicit val instanceRetrieveResponseEncoder: Encoder[InstanceFilterResponse] = deriveEncoder
+
+  import com.cognite.sdk.scala.common.DebugNotice._
+  implicit val debugNoticesDecoder: Decoder[DebugNotices] = deriveDecoder
 
   implicit val instanceFilterResponseDecoder: Decoder[InstanceFilterResponse] = (c: HCursor) =>
     for {
@@ -28,6 +34,9 @@ object InstanceFilterResponse {
             implicitly
           )
         )
-    } yield InstanceFilterResponse(items, typing, nextCursor)
+      debug <- c
+        .downField("debug")
+        .as[Option[DebugNotices]]
+    } yield InstanceFilterResponse(items, typing, nextCursor, debug)
 
 }
