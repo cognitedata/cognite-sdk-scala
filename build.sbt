@@ -16,7 +16,7 @@ val circeVersion = "0.14.15"
 val catsEffectVersion = "3.6.3"
 val fs2Version = "3.11.0"
 val natchezVersion = "0.3.7"
-val nettyVersion = "4.1.68.Final"
+val nettyVersion = "4.2.9.Final"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
