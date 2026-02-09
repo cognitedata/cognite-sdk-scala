@@ -55,6 +55,51 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       identity
     )
 
+  private[sdk] def queryWithCursor(
+      inputTableExpression: TableExpression,
+      inputSelectExpression: SelectExpression,
+      cursor: Option[String],
+      limit: Option[Int],
+      @annotation.nowarn partition: Option[Partition] = None
+  )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] =
+    queryRequest(
+      InstanceQueryRequest(
+        `with` = Map(
+          "query" -> inputTableExpression
+            .copy(limit = limit)
+        ),
+        cursors = cursor.map(c => Map("query" -> c)),
+        select = Map("query" -> inputSelectExpression)
+      )
+    ).map { case InstanceQueryResponse(items, _, cursors) =>
+      ItemsWithCursor(
+        items.flatMap(_.get("query")).getOrElse(Seq.empty),
+        cursors.flatMap(_.get("query"))
+      )
+    }
+
+  private[sdk] def queryWithNextCursor(
+      inputTableExpression: TableExpression,
+      inputSelectExpression: SelectExpression,
+      cursor: Option[String],
+      limit: Option[Int]
+  )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
+    Readable
+      .pullFromCursor(
+        cursor,
+        limit,
+        None,
+        queryWithCursor(inputTableExpression, inputSelectExpression, _, _, _)
+      )
+      .stream
+
+  def queryStream(
+      inputTableExpression: TableExpression,
+      inputSelectExpression: SelectExpression,
+      limit: Option[Int]
+  )(implicit F: Async[F]): fs2.Stream[F, InstanceDefinition] =
+    queryWithNextCursor(inputTableExpression, inputSelectExpression, None, limit)
+
   private[sdk] def filterWithCursor(
       inputQuery: InstanceFilterRequest,
       cursor: Option[String],
