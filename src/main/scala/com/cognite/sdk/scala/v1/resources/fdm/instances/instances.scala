@@ -61,22 +61,24 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       cursor: Option[String],
       limit: Option[Int],
       @annotation.nowarn partition: Option[Partition] = None
-  )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] =
+  )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] = {
+    val resultName = "query"
     queryRequest(
       InstanceQueryRequest(
         `with` = Map(
-          "query" -> inputTableExpression
+          resultName -> inputTableExpression
             .copy(limit = limit)
         ),
-        cursors = cursor.map(c => Map("query" -> c)),
-        select = Map("query" -> inputSelectExpression)
+        cursors = cursor.map(c => Map(resultName -> c)),
+        select = Map(resultName -> inputSelectExpression)
       )
     ).map { case InstanceQueryResponse(items, _, cursors) =>
       ItemsWithCursor(
-        items.flatMap(_.get("query")).getOrElse(Seq.empty),
-        cursors.flatMap(_.get("query"))
+        items.flatMap(_.get(resultName)).getOrElse(Seq.empty),
+        cursors.flatMap(_.get(resultName))
       )
     }
+  }
 
   private[sdk] def queryWithNextCursor(
       inputTableExpression: TableExpression,
