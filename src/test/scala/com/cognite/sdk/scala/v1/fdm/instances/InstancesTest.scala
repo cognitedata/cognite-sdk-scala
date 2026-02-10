@@ -299,8 +299,7 @@ class InstancesTest extends CommonDataModelTestHelper {
         )
 
         c.getMessage should include (
-          """Graph query timed out. Reduce load or contention, or optimise your query. Hints from data modeling:
-            |The query is using one or more containers that doesn't have any indexes declared.""".stripMargin
+          """Graph query timed out. Reduce load or contention, or optimise your query.""".stripMargin
         )
       }
       case _ => fail("unexpected type of exception when trying to get a 408 on list instance")
