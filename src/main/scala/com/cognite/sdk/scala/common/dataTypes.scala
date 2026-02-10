@@ -235,7 +235,7 @@ final case class CdpApiException(
       val details = Seq(
         missingFields.map(fields => s" Missing fields: [${fields.mkString(", ")}]."),
         duplicated.map(describeErrorList("Duplicated")),
-        missing.map(describeErrorList("Missing")),
+        missing.map(describeErrorList("Missing"))
       ).flatMap(_.toList).mkString
 
       val messageWithEndingPeriod: String = message + {
