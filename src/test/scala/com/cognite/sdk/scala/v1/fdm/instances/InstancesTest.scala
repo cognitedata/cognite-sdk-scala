@@ -539,4 +539,150 @@ class InstancesTest extends CommonDataModelTestHelper {
     }) *> IO.sleep(2.seconds)
   }
 
+  it should "fail to create node with direct relation when autoCreateDirectRelations is false and target doesn't exist" in {
+    val directRelationContainerExtId = "sdkTestDirectRelationContainer"
+    val directRelationViewExtId = "sdkTestDirectRelationView"
+
+    // Create container with a direct relation property
+    val containerProps: Map[String, ContainerPropertyDefinition] = Map(
+      "relatedNode" -> ContainerPropertyDefinition(
+        nullable = Some(true),
+        autoIncrement = None,
+        defaultValue = None,
+        description = None,
+        name = Some("relatedNode"),
+        `type` = PropertyType.DirectNodeRelationProperty(None, None, Some(false))
+      )
+    )
+
+    val containerCreation = ContainerCreateDefinition(
+      space = space,
+      externalId = directRelationContainerExtId,
+      name = Some("DirectRelationTestContainer"),
+      description = Some("Container for testing autoCreateDirectRelations"),
+      usedFor = Some(Usage.Node),
+      properties = containerProps,
+      constraints = None,
+      indexes = None
+    )
+
+    val viewCreation = toViewCreateDef(directRelationViewExtId, viewVersion, containerCreation)
+
+    val setup = for {
+      _ <- createContainers(Seq(containerCreation))
+      _ <- createViews(Seq(viewCreation))
+    } yield ()
+    setup.unsafeRunSync()
+
+    // Create a node with a direct relation pointing to a non-existent node
+    val nonExistentNodeRef = DirectRelationReference(space, "non-existent-node-for-direct-relation-test")
+    val nodeWithDirectRelation = NodeOrEdgeCreate.NodeWrite(
+      space = space,
+      externalId = "nodeWithDirectRelation",
+      sources = Some(Seq(
+        EdgeOrNodeData(
+          source = ViewReference(space, directRelationViewExtId, viewVersion),
+          properties = Some(Map(
+            "relatedNode" -> Some(InstancePropertyValue.ViewDirectNodeRelation(Some(nonExistentNodeRef)))
+          ))
+        )
+      )),
+      `type` = None
+    )
+
+    // Should fail when autoCreateDirectRelations is false
+    val ex = intercept[CdpApiException] {
+      testClient.instances.createItems(
+        InstanceCreate(
+          items = Seq(nodeWithDirectRelation),
+          autoCreateDirectRelations = Some(false)
+        )
+      ).unsafeRunSync()
+    }
+    ex.code shouldBe 400
+
+    // Cleanup
+    deleteViews(Seq(DataModelReference(space, directRelationViewExtId, Some(viewVersion))))
+    deleteContainers(Seq(ContainerId(space, directRelationContainerExtId)))
+  }
+
+  it should "auto-create target node when autoCreateDirectRelations is true" in {
+    val directRelationContainerExtId = "sdkTestDirectRelationContainer2"
+    val directRelationViewExtId = "sdkTestDirectRelationView2"
+
+    // Create container with a direct relation property
+    val containerProps: Map[String, ContainerPropertyDefinition] = Map(
+      "relatedNode" -> ContainerPropertyDefinition(
+        nullable = Some(true),
+        autoIncrement = None,
+        defaultValue = None,
+        description = None,
+        name = Some("relatedNode"),
+        `type` = PropertyType.DirectNodeRelationProperty(None, None, Some(false))
+      )
+    )
+
+    val containerCreation = ContainerCreateDefinition(
+      space = space,
+      externalId = directRelationContainerExtId,
+      name = Some("DirectRelationTestContainer2"),
+      description = Some("Container for testing autoCreateDirectRelations=true"),
+      usedFor = Some(Usage.Node),
+      properties = containerProps,
+      constraints = None,
+      indexes = None
+    )
+
+    val viewCreation = toViewCreateDef(directRelationViewExtId, viewVersion, containerCreation)
+
+    val setup = for {
+      _ <- createContainers(Seq(containerCreation))
+      _ <- createViews(Seq(viewCreation))
+    } yield ()
+    setup.unsafeRunSync()
+
+    // Create a node with a direct relation pointing to a non-existent node
+    val autoCreatedNodeExtId = "auto-created-node-for-direct-relation-test"
+    val nonExistentNodeRef = DirectRelationReference(space, autoCreatedNodeExtId)
+    val nodeWithDirectRelation = NodeOrEdgeCreate.NodeWrite(
+      space = space,
+      externalId = "nodeWithDirectRelation2",
+      sources = Some(Seq(
+        EdgeOrNodeData(
+          source = ViewReference(space, directRelationViewExtId, viewVersion),
+          properties = Some(Map(
+            "relatedNode" -> Some(InstancePropertyValue.ViewDirectNodeRelation(Some(nonExistentNodeRef)))
+          ))
+        )
+      )),
+      `type` = None
+    )
+
+    // Should succeed when autoCreateDirectRelations is true
+    val result = testClient.instances.createItems(
+      InstanceCreate(
+        items = Seq(nodeWithDirectRelation),
+        autoCreateDirectRelations = Some(true)
+      )
+    ).unsafeRunSync()
+
+    result.size shouldBe 1 // Only the explicitly created node is returned
+
+    // Verify the auto-created node exists (created silently by the API)
+    val autoCreatedNode = testClient.instances.retrieveByExternalIds(
+      items = Seq(InstanceRetrieve(InstanceType.Node, autoCreatedNodeExtId, space)),
+      includeTyping = false,
+      sources = None
+    ).unsafeRunSync()
+    autoCreatedNode.items.size shouldBe 1
+
+    // Cleanup
+    deleteInstance(Seq(
+      NodeDeletionRequest(space, "nodeWithDirectRelation2"),
+      NodeDeletionRequest(space, autoCreatedNodeExtId)
+    ))
+    deleteViews(Seq(DataModelReference(space, directRelationViewExtId, Some(viewVersion))))
+    deleteContainers(Seq(ContainerId(space, directRelationContainerExtId)))
+  }
+
 }
