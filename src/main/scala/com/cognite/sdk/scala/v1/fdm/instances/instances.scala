@@ -63,7 +63,8 @@ final case class InstanceQueryRequest(
     `with`: Map[String, TableExpression] = Map.empty,
     cursors: Option[Map[String, String]] = None,
     select: Map[String, SelectExpression] = Map.empty,
-    includeTyping: Option[Boolean] = Some(true)
+    includeTyping: Option[Boolean] = Some(true),
+    forceCursorsDespitePerformanceHazard: Option[Boolean] = None
 )
 
 final case class InstanceSyncRequest(

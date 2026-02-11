@@ -58,6 +58,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
   private[sdk] def queryWithCursor(
       inputTableExpression: TableExpression,
       inputSelectExpression: SelectExpression,
+      forceCursorsDespitePerformanceHazard: Option[Boolean],
       cursor: Option[String],
       limit: Option[Int],
       @annotation.nowarn partition: Option[Partition] = None
@@ -70,7 +71,9 @@ class Instances[F[_]](val requestSession: RequestSession[F])
             .copy(limit = limit)
         ),
         cursors = cursor.map(c => Map(resultName -> c)),
-        select = Map(resultName -> inputSelectExpression)
+        select = Map(resultName -> inputSelectExpression),
+        includeTyping = Some(false),
+        forceCursorsDespitePerformanceHazard = forceCursorsDespitePerformanceHazard
       )
     ).map { case InstanceQueryResponse(items, _, cursors) =>
       ItemsWithCursor(
@@ -84,23 +87,38 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       inputTableExpression: TableExpression,
       inputSelectExpression: SelectExpression,
       cursor: Option[String],
-      limit: Option[Int]
+      limit: Option[Int],
+      forceCursorsDespitePerformanceHazard: Option[Boolean]
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
       .pullFromCursor(
         cursor,
         limit,
         None,
-        queryWithCursor(inputTableExpression, inputSelectExpression, _, _, _)
+        queryWithCursor(
+          inputTableExpression,
+          inputSelectExpression,
+          forceCursorsDespitePerformanceHazard,
+          _,
+          _,
+          _
+        )
       )
       .stream
 
   def queryStream(
       inputTableExpression: TableExpression,
       inputSelectExpression: SelectExpression,
-      limit: Option[Int]
+      limit: Option[Int],
+      forceCursorsDespitePerformanceHazard: Option[Boolean] = None
   )(implicit F: Async[F]): fs2.Stream[F, InstanceDefinition] =
-    queryWithNextCursor(inputTableExpression, inputSelectExpression, None, limit)
+    queryWithNextCursor(
+      inputTableExpression,
+      inputSelectExpression,
+      None,
+      limit,
+      forceCursorsDespitePerformanceHazard
+    )
 
   private[sdk] def filterWithCursor(
       inputQuery: InstanceFilterRequest,
