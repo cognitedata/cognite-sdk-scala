@@ -167,11 +167,11 @@ class InstancesTest extends CommonDataModelTestHelper {
     val queryNodesMapOfNodeView2: InstanceQueryResponse = queryNodeInstances(nodeView2.toSourceReference)
       .unsafeRunSync()
 
-    queryNodesMapOfNodeView1.items.map { map =>
+    queryNodesMapOfNodeView1.items.foreach { map =>
       map.size shouldBe 1
     }
 
-    queryNodesMapOfNodeView2.items.map { map =>
+    queryNodesMapOfNodeView2.items.foreach { map =>
       map.size shouldBe 1
     }
 

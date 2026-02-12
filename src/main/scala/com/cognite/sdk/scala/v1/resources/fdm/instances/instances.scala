@@ -59,6 +59,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       inputTableExpression: TableExpression,
       inputSelectExpression: SelectExpression,
       forceCursorsDespitePerformanceHazard: Option[Boolean],
+      batchSize: Option[Int],
       cursor: Option[String],
       limit: Option[Int],
       @annotation.nowarn partition: Option[Partition] = None
@@ -68,7 +69,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       InstanceQueryRequest(
         `with` = Map(
           resultName -> inputTableExpression
-            .copy(limit = limit)
+            .copy(limit = (limit.toSeq ++ batchSize.toSeq).minOption)
         ),
         cursors = cursor.map(c => Map(resultName -> c)),
         select = Map(resultName -> inputSelectExpression),
@@ -83,12 +84,12 @@ class Instances[F[_]](val requestSession: RequestSession[F])
     }
   }
 
-  private[sdk] def queryWithNextCursor(
+  def queryStream(
       inputTableExpression: TableExpression,
       inputSelectExpression: SelectExpression,
-      cursor: Option[String],
       limit: Option[Int],
-      forceCursorsDespitePerformanceHazard: Option[Boolean]
+      forceCursorsDespitePerformanceHazard: Option[Boolean] = None,
+      batchSize: Option[Int] = None
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
       .pullFromCursor(
@@ -99,26 +100,13 @@ class Instances[F[_]](val requestSession: RequestSession[F])
           inputTableExpression,
           inputSelectExpression,
           forceCursorsDespitePerformanceHazard,
+          batchSize,
           _,
           _,
           _
         )
       )
       .stream
-
-  def queryStream(
-      inputTableExpression: TableExpression,
-      inputSelectExpression: SelectExpression,
-      limit: Option[Int],
-      forceCursorsDespitePerformanceHazard: Option[Boolean] = None
-  )(implicit F: Async[F]): fs2.Stream[F, InstanceDefinition] =
-    queryWithNextCursor(
-      inputTableExpression,
-      inputSelectExpression,
-      None,
-      limit,
-      forceCursorsDespitePerformanceHazard
-    )
 
   private[sdk] def filterWithCursor(
       inputQuery: InstanceFilterRequest,
