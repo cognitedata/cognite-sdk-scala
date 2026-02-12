@@ -73,7 +73,6 @@ class Instances[F[_]](val requestSession: RequestSession[F])
         ),
         cursors = cursor.map(c => Map(resultName -> c)),
         select = Map(resultName -> inputSelectExpression),
-        includeTyping = Some(false),
         forceCursorsDespitePerformanceHazard = forceCursorsDespitePerformanceHazard
       )
     ).map { case InstanceQueryResponse(items, _, cursors) =>

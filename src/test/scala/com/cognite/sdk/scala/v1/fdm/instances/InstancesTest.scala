@@ -6,7 +6,7 @@ import cats.implicits.toBifunctorOps
 import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice}
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
-import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.{Equals, HasData, In}
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.{Equals, HasData}
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType
@@ -214,15 +214,15 @@ class InstancesTest extends CommonDataModelTestHelper {
     val queryedNodes = testClient.instances.queryStream(
       TableExpression(nodes = Option(NodesTableExpression(filter = 
         Some(
-          In(property= Seq("node", "space"), values= FilterValueDefinition.StringList(Seq(node1WriteData.space, node2WriteData.space)))
+          Equals(property= Seq("node", "space"), value= FilterValueDefinition.String(space))
         )))),
       SelectExpression(sources = List()),
-      limit = Some(2),
+      limit = Some(3),
       forceCursorsDespitePerformanceHazard = None,
       batchSize = Some(1)
     ).compile.toList.unsafeRunSync()
 
-    queryedNodes.length shouldBe 2
+    queryedNodes.length shouldBe 3
 
     val deletedInstances = deleteInstance(
       Seq(
