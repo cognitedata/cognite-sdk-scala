@@ -69,7 +69,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       InstanceQueryRequest(
         `with` = Map(
           resultName -> inputTableExpression
-            .copy(limit = (limit.toSeq ++ batchSize.toSeq).minOption)
+            .copy(limit = (limit.toList ++ batchSize.toList).minOption)
         ),
         cursors = cursor.map(c => Map(resultName -> c)),
         select = Map(resultName -> inputSelectExpression),
@@ -93,7 +93,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
       .pullFromCursor(
-        cursor,
+        None,
         limit,
         None,
         queryWithCursor(
