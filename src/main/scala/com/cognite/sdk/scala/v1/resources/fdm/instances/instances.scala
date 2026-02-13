@@ -92,17 +92,17 @@ class Instances[F[_]](val requestSession: RequestSession[F])
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
       .pullFromCursor(
-        None,
-        limit,
-        None,
-        queryWithCursor(
-          inputTableExpression,
-          inputSelectExpression,
-          forceCursorsDespitePerformanceHazard,
-          batchSize,
-          _,
-          _,
-          _
+        cursor = None,
+        maxItemsReturned = limit,
+        partition = None,
+        get = (cursor, remaining, partition) => queryWithCursor(
+          inputTableExpression = inputTableExpression,
+          inputSelectExpression = inputSelectExpression,
+          forceCursorsDespitePerformanceHazard = forceCursorsDespitePerformanceHazard,
+          batchSize = batchSize,
+          cursor = cursor,
+          limit = remaining,
+          partition = partition
         )
       )
       .stream
