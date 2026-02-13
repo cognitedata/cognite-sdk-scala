@@ -69,7 +69,9 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       InstanceQueryRequest(
         `with` = Map(
           resultName -> inputTableExpression
-            .copy(limit = (limit.toList ++ batchSize.toList).minOption)
+            .copy(limit =
+              Seq(limit.toList, batchSize.toList, inputTableExpression.limit).flatten.minOption
+            )
         ),
         cursors = cursor.map(c => Map(resultName -> c)),
         select = Map(resultName -> inputSelectExpression),
@@ -175,16 +177,14 @@ object Instances {
       jsonObj.filter { case (_, v) => !v.isNull }
     }
   implicit val instanceQueryRequestEncoder: Encoder[InstanceQueryRequest] =
-    deriveEncoder[InstanceQueryRequest].mapJsonObject { jsonObj => {
-        val additionalFields = jsonObj("additionalFlags")
-          .flatMap(_.asObject)
-          .getOrElse(JsonObject.empty)
+    deriveEncoder[InstanceQueryRequest].mapJsonObject { jsonObj =>
+      val additionalFields = jsonObj("additionalFlags")
+        .flatMap(_.asObject)
+        .getOrElse(JsonObject.empty)
 
-        jsonObj
-          .remove("additionalFlags")
-          .deepMerge(additionalFields)
-          .filter { case (_, v) => !v.isNull }
-      }
+      additionalFields
+        .deepMerge(jsonObj.remove("additionalFlags"))
+        .filter { case (_, v) => !v.isNull }
     }
   implicit val tableExpression: Encoder[TableExpression] =
     deriveEncoder[TableExpression].mapJsonObject { jsonObj =>
