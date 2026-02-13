@@ -10,7 +10,7 @@ import com.cognite.sdk.scala.v1.RequestSession
 import com.cognite.sdk.scala.v1.fdm.instances._
 import fs2.Stream
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, Printer}
+import io.circe.{Decoder, Encoder, JsonObject, Printer}
 import sttp.client3._
 import sttp.client3.circe._
 
@@ -58,7 +58,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
   private[sdk] def queryWithCursor(
       inputTableExpression: TableExpression,
       inputSelectExpression: SelectExpression,
-      forceCursorsDespitePerformanceHazard: Option[Boolean],
+      additionalFlags: Map[String, Boolean],
       batchSize: Option[Int],
       cursor: Option[String],
       limit: Option[Int],
@@ -73,7 +73,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
         ),
         cursors = cursor.map(c => Map(resultName -> c)),
         select = Map(resultName -> inputSelectExpression),
-        forceCursorsDespitePerformanceHazard = forceCursorsDespitePerformanceHazard
+        additionalFlags = additionalFlags
       )
     ).map { case InstanceQueryResponse(items, _, cursors) =>
       ItemsWithCursor(
@@ -87,7 +87,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       inputTableExpression: TableExpression,
       inputSelectExpression: SelectExpression,
       limit: Option[Int],
-      forceCursorsDespitePerformanceHazard: Option[Boolean] = None,
+      additionalFlags: Map[String, Boolean] = Map.empty,
       batchSize: Option[Int] = None
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
@@ -99,7 +99,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
           queryWithCursor(
             inputTableExpression = inputTableExpression,
             inputSelectExpression = inputSelectExpression,
-            forceCursorsDespitePerformanceHazard = forceCursorsDespitePerformanceHazard,
+            additionalFlags = additionalFlags,
             batchSize = batchSize,
             cursor = cursor,
             limit = remaining,
@@ -175,8 +175,16 @@ object Instances {
       jsonObj.filter { case (_, v) => !v.isNull }
     }
   implicit val instanceQueryRequestEncoder: Encoder[InstanceQueryRequest] =
-    deriveEncoder[InstanceQueryRequest].mapJsonObject { jsonObj =>
-      jsonObj.filter { case (_, v) => !v.isNull }
+    deriveEncoder[InstanceQueryRequest].mapJsonObject { jsonObj => {
+        val additionalFields = jsonObj("additionalFlags")
+          .flatMap(_.asObject)
+          .getOrElse(JsonObject.empty)
+
+        jsonObj
+          .remove("additionalFlags")
+          .deepMerge(additionalFields)
+          .filter { case (_, v) => !v.isNull }
+      }
     }
   implicit val tableExpression: Encoder[TableExpression] =
     deriveEncoder[TableExpression].mapJsonObject { jsonObj =>
