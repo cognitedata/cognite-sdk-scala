@@ -95,15 +95,16 @@ class Instances[F[_]](val requestSession: RequestSession[F])
         cursor = None,
         maxItemsReturned = limit,
         partition = None,
-        get = (cursor, remaining, partition) => queryWithCursor(
-          inputTableExpression = inputTableExpression,
-          inputSelectExpression = inputSelectExpression,
-          forceCursorsDespitePerformanceHazard = forceCursorsDespitePerformanceHazard,
-          batchSize = batchSize,
-          cursor = cursor,
-          limit = remaining,
-          partition = partition
-        )
+        get = (cursor, remaining, partition) =>
+          queryWithCursor(
+            inputTableExpression = inputTableExpression,
+            inputSelectExpression = inputSelectExpression,
+            forceCursorsDespitePerformanceHazard = forceCursorsDespitePerformanceHazard,
+            batchSize = batchSize,
+            cursor = cursor,
+            limit = remaining,
+            partition = partition
+          )
       )
       .stream
 
