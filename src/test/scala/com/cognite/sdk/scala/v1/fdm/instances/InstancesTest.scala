@@ -218,7 +218,7 @@ class InstancesTest extends CommonDataModelTestHelper {
         )))),
       SelectExpression(sources = List()),
       limit = Some(3),
-      additionalFlags = Map("forceCursorsDespitePerformanceHazard" -> true),
+      additionalFlags = Map.empty,
       batchSize = Some(1)
     ).compile.toList.unsafeRunSync()
 
