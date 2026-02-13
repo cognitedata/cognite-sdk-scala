@@ -182,6 +182,8 @@ object Instances {
         .flatMap(_.asObject)
         .getOrElse(JsonObject.empty)
 
+      // Order or merge is important, we want jsonObj properties to stay in case of conflicts
+      // additionalFlags only contains boolean so deepMerge will go a single level, if this is changed, change this logic too.
       additionalFields
         .deepMerge(jsonObj.remove("additionalFlags"))
         .filter { case (_, v) => !v.isNull }
