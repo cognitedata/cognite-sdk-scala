@@ -167,11 +167,11 @@ class InstancesTest extends CommonDataModelTestHelper {
     val queryNodesMapOfNodeView2: InstanceQueryResponse = queryNodeInstances(nodeView2.toSourceReference)
       .unsafeRunSync()
 
-    queryNodesMapOfNodeView1.items.map { map =>
+    queryNodesMapOfNodeView1.items.foreach { map =>
       map.size shouldBe 1
     }
 
-    queryNodesMapOfNodeView2.items.map { map =>
+    queryNodesMapOfNodeView2.items.foreach { map =>
       map.size shouldBe 1
     }
 
@@ -210,6 +210,19 @@ class InstancesTest extends CommonDataModelTestHelper {
     val readEditedEdge = fetchEdgeInstance(edgeView.toSourceReference, emptyEditData.externalId).unsafeRunSync()
     // The read data equals the original creation data, since the above should be a noop
     instancePropertyMapEquals(writeDataToMap(edgeWriteData), readEditedEdge) shouldBe true
+
+    val queryedNodes = testClient.instances.queryStream(
+      TableExpression(nodes = Option(NodesTableExpression(filter = 
+        Some(
+          Equals(property= Seq("node", "space"), value= FilterValueDefinition.String(space))
+        )))),
+      SelectExpression(sources = List()),
+      limit = Some(3),
+      additionalFlags = Map.empty,
+      batchSize = Some(1)
+    ).compile.toList.unsafeRunSync()
+
+    queryedNodes.length shouldBe 3
 
     val deletedInstances = deleteInstance(
       Seq(

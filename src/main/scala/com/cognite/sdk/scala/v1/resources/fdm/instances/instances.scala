@@ -10,7 +10,7 @@ import com.cognite.sdk.scala.v1.RequestSession
 import com.cognite.sdk.scala.v1.fdm.instances._
 import fs2.Stream
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, Printer}
+import io.circe.{Decoder, Encoder, JsonObject, Printer}
 import sttp.client3._
 import sttp.client3.circe._
 
@@ -54,6 +54,59 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       uri"$baseUrl/query",
       identity
     )
+
+  private[sdk] def queryWithCursor(
+      inputTableExpression: TableExpression,
+      inputSelectExpression: SelectExpression,
+      additionalFlags: Map[String, Boolean],
+      batchSize: Option[Int],
+      cursor: Option[String],
+      limit: Option[Int],
+      @annotation.nowarn partition: Option[Partition] = None
+  )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] = {
+    val resultName = "query"
+    queryRequest(
+      InstanceQueryRequest(
+        `with` = Map(
+          resultName -> inputTableExpression
+            .copy(limit = Seq(limit, batchSize, inputTableExpression.limit).flatten.minOption)
+        ),
+        cursors = cursor.map(c => Map(resultName -> c)),
+        select = Map(resultName -> inputSelectExpression),
+        additionalFlags = additionalFlags
+      )
+    ).map { case InstanceQueryResponse(items, _, cursors) =>
+      ItemsWithCursor(
+        items.flatMap(_.get(resultName)).getOrElse(Seq.empty),
+        cursors.flatMap(_.get(resultName))
+      )
+    }
+  }
+
+  def queryStream(
+      inputTableExpression: TableExpression,
+      inputSelectExpression: SelectExpression,
+      limit: Option[Int],
+      additionalFlags: Map[String, Boolean] = Map.empty,
+      batchSize: Option[Int] = None
+  )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
+    Readable
+      .pullFromCursor(
+        cursor = None,
+        maxItemsReturned = limit,
+        partition = None,
+        get = (cursor, remaining, partition) =>
+          queryWithCursor(
+            inputTableExpression = inputTableExpression,
+            inputSelectExpression = inputSelectExpression,
+            additionalFlags = additionalFlags,
+            batchSize = batchSize,
+            cursor = cursor,
+            limit = remaining,
+            partition = partition
+          )
+      )
+      .stream
 
   private[sdk] def filterWithCursor(
       inputQuery: InstanceFilterRequest,
@@ -123,7 +176,15 @@ object Instances {
     }
   implicit val instanceQueryRequestEncoder: Encoder[InstanceQueryRequest] =
     deriveEncoder[InstanceQueryRequest].mapJsonObject { jsonObj =>
-      jsonObj.filter { case (_, v) => !v.isNull }
+      val additionalFields = jsonObj("additionalFlags")
+        .flatMap(_.asObject)
+        .getOrElse(JsonObject.empty)
+
+      // Order or merge is important, we want jsonObj properties to stay in case of conflicts
+      // additionalFlags only contains boolean so deepMerge will go a single level, if this is changed, change this logic too.
+      additionalFields
+        .deepMerge(jsonObj.remove("additionalFlags"))
+        .filter { case (_, v) => !v.isNull }
     }
   implicit val tableExpression: Encoder[TableExpression] =
     deriveEncoder[TableExpression].mapJsonObject { jsonObj =>
