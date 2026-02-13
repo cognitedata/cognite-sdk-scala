@@ -69,9 +69,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       InstanceQueryRequest(
         `with` = Map(
           resultName -> inputTableExpression
-            .copy(limit =
-              Seq(limit, batchSize, inputTableExpression.limit).flatten.minOption
-            )
+            .copy(limit = Seq(limit, batchSize, inputTableExpression.limit).flatten.minOption)
         ),
         cursors = cursor.map(c => Map(resultName -> c)),
         select = Map(resultName -> inputSelectExpression),
