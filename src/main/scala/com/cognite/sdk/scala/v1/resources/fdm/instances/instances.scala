@@ -70,7 +70,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
         `with` = Map(
           resultName -> inputTableExpression
             .copy(limit =
-              Seq(limit.toList, batchSize.toList, inputTableExpression.limit).flatten.minOption
+              Seq(limit, batchSize, inputTableExpression.limit).flatten.minOption
             )
         ),
         cursors = cursor.map(c => Map(resultName -> c)),
