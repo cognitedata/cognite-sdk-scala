@@ -7,8 +7,9 @@ final case class InstanceQueryResponse(
     items: Option[Map[String, Seq[InstanceDefinition]]] = None,
     typing: Option[Map[String, Map[String, Map[String, Map[String, TypePropertyDefinition]]]]] =
       None,
-    nextCursor: Option[Map[String, String]] = None
-) {
+    nextCursor: Option[Map[String, String]] = None,
+    debug: Option[DebugNotices] = None,
+  ) {
   def getDataPart: InstanceDataResponsePart = InstanceDataResponsePart(items, typing)
 }
 

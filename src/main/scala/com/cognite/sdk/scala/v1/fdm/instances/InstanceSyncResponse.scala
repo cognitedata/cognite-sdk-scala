@@ -7,10 +7,10 @@ final case class InstanceSyncResponse(
     items: Option[Map[String, Seq[InstanceDefinition]]] = None,
     typing: Option[Map[String, Map[String, Map[String, Map[String, TypePropertyDefinition]]]]] =
       None,
-    nextCursor: Map[String, String] = Map.empty
-) {
+    nextCursor: Map[String, String] = Map.empty,
+    debug: Option[DebugNotices] = None,
+  ) {
   def getDataPart(): InstanceDataResponsePart = InstanceDataResponsePart(items, typing)
-
 }
 
 object InstanceSyncResponse {
