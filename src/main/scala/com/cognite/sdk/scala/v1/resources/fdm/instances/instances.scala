@@ -91,7 +91,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       additionalFlags: Map[String, Boolean] = Map.empty,
       batchSize: Option[Int] = None,
-      debug: Option[InstanceDebugParameters] = None,
+      debug: Option[InstanceDebugParameters] = None
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
       .pullFromCursor(
