@@ -440,7 +440,12 @@ class InstancesTest extends CommonDataModelTestHelper {
         `with` = Map("query" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = None,
         select = Map("query" -> SelectExpression(sources =
-          List(SourceSelector(source = viewRef, properties = List("*")))))
+          List(SourceSelector(source = viewRef, properties = List("*"))))),
+        debug = Some(InstanceDebugParameters(
+          timeout = None,
+          emitResults = Some(true),
+          profile = Some(false)
+        ))
       )
     )
   }
