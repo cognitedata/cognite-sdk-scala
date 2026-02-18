@@ -1,7 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.deriveEncoder
+import io.circe.Decoder
 
 final case class InstanceQueryResponse(
     items: Option[Map[String, Seq[InstanceDefinition]]] = None,
@@ -14,7 +13,6 @@ final case class InstanceQueryResponse(
 }
 
 object InstanceQueryResponse {
-  implicit val instanceQueryResponseEncoder: Encoder[InstanceQueryResponse] = deriveEncoder
   implicit val instanceQueryResponseDecoder: Decoder[InstanceQueryResponse] =
     InstanceDataResponsePart.instanceDataResponsePartDecoder
       .product(

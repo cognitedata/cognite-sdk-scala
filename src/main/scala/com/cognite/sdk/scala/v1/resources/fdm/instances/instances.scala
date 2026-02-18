@@ -75,7 +75,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
         select = Map(resultName -> inputSelectExpression),
         additionalFlags = additionalFlags
       )
-    ).map { case InstanceQueryResponse(items, _, cursors) =>
+    ).map { case InstanceQueryResponse(items, _, cursors, _) =>
       ItemsWithCursor(
         items.flatMap(_.get(resultName)).getOrElse(Seq.empty),
         cursors.flatMap(_.get(resultName))

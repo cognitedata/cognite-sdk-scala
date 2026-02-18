@@ -258,18 +258,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   it should "List instances with debug options, handle 408 and parse debug notice" in {
-    val clientWithoutRetries = new GenericClient[IO](
-      "scala-sdk-test",
-      project,
-      baseUrl,
-      authProvider,
-      None,
-      None,
-      Some("alpha"),
-      implicitly[SttpBackend[IO, Any]],
-      identity[SttpBackend[IO, Any]](_)
-    )
-    val errorReturn = clientWithoutRetries.instances.filter(
+    val errorReturn = testClientWithoutRetries.instances.filter(
       filterRequest = InstanceFilterRequest(
         instanceType = Some(InstanceType.Edge),
         sources = Some(
