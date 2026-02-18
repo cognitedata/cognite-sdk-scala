@@ -137,7 +137,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
   def filterStream(
       inputQuery: InstanceFilterRequest,
       limit: Option[Int],
-      debug: Option[InstanceDebugParameters]
+      debug: Option[InstanceDebugParameters] = None
   )(implicit F: Async[F]): fs2.Stream[F, InstanceDefinition] =
     filterWithNextCursor(inputQuery, None, limit, debug)
 
