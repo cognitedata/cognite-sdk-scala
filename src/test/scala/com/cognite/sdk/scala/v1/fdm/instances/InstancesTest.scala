@@ -399,7 +399,40 @@ class InstancesTest extends CommonDataModelTestHelper {
     queriedInstances.isLeft shouldBe(false)
   }
 
-
+  it should "Sync instances with debug options" in {
+    val syncedInstances = testClientWithoutRetries.instances.syncRequest(
+      syncRequest = InstanceSyncRequest(
+        `with` = Map(
+          "sync" -> TableExpression(
+            limit = None,
+            edges = Some(EdgeTableExpression(
+              filter = Some(
+                Equals(
+                  property = Seq("cdf_cdm", "CogniteDiagramAnnotation/v1", "status"),
+                  value = FilterValueDefinition.String("Approved")
+                ))
+            )),
+            nodes = None)
+        ),
+        cursors = None,
+        select = Map(
+          "sync" -> SelectExpression(Seq(SourceSelector(
+            ViewReference(
+              "cdf_cdm",
+              "CogniteDiagramAnnotation",
+              "v1"
+            ),
+            Seq("status")
+          )))
+        ),
+        includeTyping = Some(true),
+        debug = Some(InstanceDebugParameters(
+          emitResults = Some(false)
+        ))
+      )
+    ).attempt.unsafeRunSync()
+    syncedInstances.isLeft shouldBe(false)
+  }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
     case n: NodeOrEdgeCreate.NodeWrite => n.sources
