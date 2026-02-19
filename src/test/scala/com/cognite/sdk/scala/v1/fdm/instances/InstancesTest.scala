@@ -320,18 +320,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   it should "List instances with debug options and parse debug notice on sucessful request" in {
-    val clientWithoutRetries = new GenericClient[IO](
-      "scala-sdk-test",
-      project,
-      baseUrl,
-      authProvider,
-      None,
-      None,
-      Some("alpha"),
-      implicitly[SttpBackend[IO, Any]],
-      identity[SttpBackend[IO, Any]](_)
-    )
-    val listedInstances = clientWithoutRetries.instances.filter(
+    val listedInstances = testClientWithoutRetries.instances.filter(
       filterRequest = InstanceFilterRequest(
         instanceType = Some(InstanceType.Edge),
         sources = Some(
@@ -373,6 +362,44 @@ class InstancesTest extends CommonDataModelTestHelper {
       )
     )
   }
+
+  it should "Query instances with debug options" in {
+    val queriedInstances = testClientWithoutRetries.instances.queryRequest(
+      queryRequest = InstanceQueryRequest(
+        `with` = Map(
+          "query" -> TableExpression(
+            limit = None,
+            edges = Some(EdgeTableExpression(
+              filter = Some(
+                Equals(
+                  property = Seq("cdf_cdm", "CogniteDiagramAnnotation/v1", "status"),
+                  value = FilterValueDefinition.String("Approved")
+                ))
+            )),
+            nodes = None)
+        ),
+        cursors = None,
+        select = Map(
+          "query" -> SelectExpression(Seq(SourceSelector(
+            ViewReference(
+              "cdf_cdm",
+              "CogniteDiagramAnnotation",
+              "v1"
+            ),
+            Seq("status")
+          )))
+        ),
+        includeTyping = Some(true),
+        additionalFlags = Map.empty,
+        debug = Some(InstanceDebugParameters(
+          emitResults = Some(false)
+        ))
+      )
+    ).attempt.unsafeRunSync()
+    queriedInstances.isLeft shouldBe(false)
+  }
+
+
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
     case n: NodeOrEdgeCreate.NodeWrite => n.sources
