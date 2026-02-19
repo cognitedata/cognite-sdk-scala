@@ -52,7 +52,7 @@ class RetryingBackend[F[_], +P](
 
     val r = responseMonad.handleError(delegate.send(request)) {
       case cdpError: CdpApiException => maybeRetry(Some(StatusCode(cdpError.code)), cdpError)
-      case sdkException @ SdkException(_, _, _, code @ Some(_)) =>
+      case sdkException @ SdkException(_, _, _, code @ Some(_), _) =>
         maybeRetry(code.map(StatusCode(_)), sdkException)
       case e @ (_: TimeoutException | _: ConnectException | _: SttpClientException |
           _: UnknownHostException) =>

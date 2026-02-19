@@ -55,7 +55,7 @@ class BackpressureThrottleBackend[F[_]: Temporal, +S](
         .send(request)
         .onError {
           case cdpError: CdpApiException => processResponse(cdpError.code)
-          case SdkException(_, _, _, Some(code)) => processResponse(code)
+          case SdkException(_, _, _, Some(code), _) => processResponse(code)
         }
         .flatTap { response =>
           processResponse(response.code.code)
