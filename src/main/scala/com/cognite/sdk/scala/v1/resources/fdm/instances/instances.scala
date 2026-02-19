@@ -58,13 +58,13 @@ class Instances[F[_]](val requestSession: RequestSession[F])
   private[sdk] def queryWithCursor(
       inputTableExpression: TableExpression,
       inputSelectExpression: SelectExpression,
-      additionalFlags: Map[String, Boolean],
       batchSize: Option[Int],
       cursor: Option[String],
       limit: Option[Int],
       debug: Option[InstanceDebugParameters],
-      @annotation.nowarn partition: Option[Partition] = None
-  )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] = {
+      @annotation.nowarn partition: Option[Partition] = None,
+      additionalFlags: Map[String, Boolean],
+                                  )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] = {
     val resultName = "query"
     queryRequest(
       InstanceQueryRequest(
@@ -74,8 +74,8 @@ class Instances[F[_]](val requestSession: RequestSession[F])
         ),
         cursors = cursor.map(c => Map(resultName -> c)),
         select = Map(resultName -> inputSelectExpression),
+        debug = debug,
         additionalFlags = additionalFlags,
-        debug = debug
       )
     ).map { case InstanceQueryResponse(items, _, cursors) =>
       ItemsWithCursor(
@@ -89,9 +89,9 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       inputTableExpression: TableExpression,
       inputSelectExpression: SelectExpression,
       limit: Option[Int],
-      additionalFlags: Map[String, Boolean] = Map.empty,
       batchSize: Option[Int] = None,
-      debug: Option[InstanceDebugParameters] = None
+      debug: Option[InstanceDebugParameters] = None,
+      additionalFlags: Map[String, Boolean] = Map.empty
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
       .pullFromCursor(
@@ -102,12 +102,12 @@ class Instances[F[_]](val requestSession: RequestSession[F])
           queryWithCursor(
             inputTableExpression = inputTableExpression,
             inputSelectExpression = inputSelectExpression,
-            additionalFlags = additionalFlags,
             batchSize = batchSize,
             cursor = cursor,
             limit = remaining,
             partition = partition,
-            debug = debug
+            debug = debug,
+            additionalFlags = additionalFlags,
           )
       )
       .stream

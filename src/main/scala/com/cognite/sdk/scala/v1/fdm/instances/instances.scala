@@ -65,8 +65,8 @@ final case class InstanceQueryRequest(
     cursors: Option[Map[String, String]] = None,
     select: Map[String, SelectExpression] = Map.empty,
     includeTyping: Option[Boolean] = Some(true),
-    additionalFlags: Map[String, Boolean] = Map.empty,
-    debug: Option[InstanceDebugParameters] = None
+    debug: Option[InstanceDebugParameters] = None,
+    additionalFlags: Map[String, Boolean] = Map.empty
 )
 
 final case class InstanceSyncRequest(
