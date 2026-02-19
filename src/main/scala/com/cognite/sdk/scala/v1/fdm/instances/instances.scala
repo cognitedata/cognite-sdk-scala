@@ -65,6 +65,7 @@ final case class InstanceQueryRequest(
     cursors: Option[Map[String, String]] = None,
     select: Map[String, SelectExpression] = Map.empty,
     includeTyping: Option[Boolean] = Some(true),
+    debug: Option[InstanceDebugParameters] = None,
     additionalFlags: Map[String, Boolean] = Map.empty
 )
 
@@ -72,7 +73,8 @@ final case class InstanceSyncRequest(
     `with`: Map[String, TableExpression] = Map.empty,
     cursors: Option[Map[String, String]] = None,
     select: Map[String, SelectExpression] = Map.empty,
-    includeTyping: Option[Boolean] = Some(true)
+    includeTyping: Option[Boolean] = Some(true),
+    debug: Option[InstanceDebugParameters] = None
 )
 
 final case class TableExpression(

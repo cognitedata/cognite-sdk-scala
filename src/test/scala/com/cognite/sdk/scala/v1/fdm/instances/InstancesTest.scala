@@ -320,18 +320,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   it should "List instances with debug options and parse debug notice on sucessful request" in {
-    val clientWithoutRetries = new GenericClient[IO](
-      "scala-sdk-test",
-      project,
-      baseUrl,
-      authProvider,
-      None,
-      None,
-      Some("alpha"),
-      implicitly[SttpBackend[IO, Any]],
-      identity[SttpBackend[IO, Any]](_)
-    )
-    val listedInstances = clientWithoutRetries.instances.filter(
+    val listedInstances = testClientWithoutRetries.instances.filter(
       filterRequest = InstanceFilterRequest(
         instanceType = Some(InstanceType.Edge),
         sources = Some(
@@ -372,6 +361,77 @@ class InstancesTest extends CommonDataModelTestHelper {
         )))
       )
     )
+  }
+
+  it should "Query instances with debug options" in {
+    val queriedInstances = testClientWithoutRetries.instances.queryRequest(
+      queryRequest = InstanceQueryRequest(
+        `with` = Map(
+          "query" -> TableExpression(
+            limit = None,
+            edges = Some(EdgeTableExpression(
+              filter = Some(
+                Equals(
+                  property = Seq("cdf_cdm", "CogniteDiagramAnnotation/v1", "status"),
+                  value = FilterValueDefinition.String("Approved")
+                ))
+            )),
+            nodes = None)
+        ),
+        cursors = None,
+        select = Map(
+          "query" -> SelectExpression(Seq(SourceSelector(
+            ViewReference(
+              "cdf_cdm",
+              "CogniteDiagramAnnotation",
+              "v1"
+            ),
+            Seq("status")
+          )))
+        ),
+        includeTyping = Some(true),
+        additionalFlags = Map.empty,
+        debug = Some(InstanceDebugParameters(
+          emitResults = Some(false)
+        ))
+      )
+    ).attempt.unsafeRunSync()
+    queriedInstances.isLeft shouldBe(false)
+  }
+
+  it should "Sync instances with debug options" in {
+    val syncedInstances = testClientWithoutRetries.instances.syncRequest(
+      syncRequest = InstanceSyncRequest(
+        `with` = Map(
+          "sync" -> TableExpression(
+            limit = None,
+            edges = Some(EdgeTableExpression(
+              filter = Some(
+                Equals(
+                  property = Seq("cdf_cdm", "CogniteDiagramAnnotation/v1", "status"),
+                  value = FilterValueDefinition.String("Approved")
+                ))
+            )),
+            nodes = None)
+        ),
+        cursors = None,
+        select = Map(
+          "sync" -> SelectExpression(Seq(SourceSelector(
+            ViewReference(
+              "cdf_cdm",
+              "CogniteDiagramAnnotation",
+              "v1"
+            ),
+            Seq("status")
+          )))
+        ),
+        includeTyping = Some(true),
+        debug = Some(InstanceDebugParameters(
+          emitResults = Some(false)
+        ))
+      )
+    ).attempt.unsafeRunSync()
+    syncedInstances.isLeft shouldBe(false)
   }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
@@ -440,7 +500,12 @@ class InstancesTest extends CommonDataModelTestHelper {
         `with` = Map("query" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = None,
         select = Map("query" -> SelectExpression(sources =
-          List(SourceSelector(source = viewRef, properties = List("*")))))
+          List(SourceSelector(source = viewRef, properties = List("*"))))),
+        debug = Some(InstanceDebugParameters(
+          timeout = None,
+          emitResults = Some(true),
+          profile = Some(false)
+        ))
       )
     )
   }

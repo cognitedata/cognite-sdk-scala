@@ -90,7 +90,12 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
         cursors = cursors,
         select = Map("sync" -> SelectExpression(sources =
           List(SourceSelector(source = viewRef, properties = List("*"))))),
-        includeTyping = Some(true)
+        includeTyping = Some(true),
+        debug = Some(InstanceDebugParameters(
+          timeout = None,
+          emitResults = Some(true),
+          profile = None
+        ))
       )
     )
   }
