@@ -58,11 +58,12 @@ class Instances[F[_]](val requestSession: RequestSession[F])
   private[sdk] def queryWithCursor(
       inputTableExpression: TableExpression,
       inputSelectExpression: SelectExpression,
-      additionalFlags: Map[String, Boolean],
       batchSize: Option[Int],
       cursor: Option[String],
       limit: Option[Int],
-      @annotation.nowarn partition: Option[Partition] = None
+      debug: Option[InstanceDebugParameters],
+      @annotation.nowarn partition: Option[Partition] = None,
+      additionalFlags: Map[String, Boolean]
   )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] = {
     val resultName = "query"
     queryRequest(
@@ -73,6 +74,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
         ),
         cursors = cursor.map(c => Map(resultName -> c)),
         select = Map(resultName -> inputSelectExpression),
+        debug = debug,
         additionalFlags = additionalFlags
       )
     ).map { case InstanceQueryResponse(items, _, cursors) =>
@@ -87,8 +89,9 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       inputTableExpression: TableExpression,
       inputSelectExpression: SelectExpression,
       limit: Option[Int],
-      additionalFlags: Map[String, Boolean] = Map.empty,
-      batchSize: Option[Int] = None
+      batchSize: Option[Int] = None,
+      debug: Option[InstanceDebugParameters] = None,
+      additionalFlags: Map[String, Boolean] = Map.empty
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
       .pullFromCursor(
@@ -99,11 +102,12 @@ class Instances[F[_]](val requestSession: RequestSession[F])
           queryWithCursor(
             inputTableExpression = inputTableExpression,
             inputSelectExpression = inputSelectExpression,
-            additionalFlags = additionalFlags,
             batchSize = batchSize,
             cursor = cursor,
             limit = remaining,
-            partition = partition
+            partition = partition,
+            debug = debug,
+            additionalFlags = additionalFlags
           )
       )
       .stream
@@ -112,9 +116,10 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       inputQuery: InstanceFilterRequest,
       cursor: Option[String],
       limit: Option[Int],
+      debug: Option[InstanceDebugParameters] = None,
       @annotation.nowarn partition: Option[Partition] = None
   )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] =
-    filter(inputQuery.copy(cursor = cursor, limit = limit)).map {
+    filter(inputQuery.copy(cursor = cursor, limit = limit, debug = debug)).map {
       case InstanceFilterResponse(items, _, cursor, _) =>
         ItemsWithCursor(items, cursor)
     }
@@ -122,17 +127,19 @@ class Instances[F[_]](val requestSession: RequestSession[F])
   private[sdk] def filterWithNextCursor(
       inputQuery: InstanceFilterRequest,
       cursor: Option[String],
-      limit: Option[Int]
+      limit: Option[Int],
+      debug: Option[InstanceDebugParameters] = None
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
-      .pullFromCursor(cursor, limit, None, filterWithCursor(inputQuery, _, _, _))
+      .pullFromCursor(cursor, limit, None, filterWithCursor(inputQuery, _, _, debug, _))
       .stream
 
   def filterStream(
       inputQuery: InstanceFilterRequest,
-      limit: Option[Int]
+      limit: Option[Int],
+      debug: Option[InstanceDebugParameters] = None
   )(implicit F: Async[F]): fs2.Stream[F, InstanceDefinition] =
-    filterWithNextCursor(inputQuery, None, limit)
+    filterWithNextCursor(inputQuery, None, limit, debug)
 
   def retrieveByExternalIds(
       items: Seq[InstanceRetrieve],
