@@ -352,7 +352,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   it should "Query instances with debug options" in {
-    val queriedInstances = testClientWithoutRetries.instances.queryRequest(
+    val queryResponse = testClientWithoutRetries.instances.queryRequest(
       queryRequest = InstanceQueryRequest(
         `with` = Map(
           "query" -> TableExpression(
@@ -380,25 +380,25 @@ class InstancesTest extends CommonDataModelTestHelper {
         includeTyping = Some(true),
         additionalFlags = Map.empty,
         debug = Some(InstanceDebugParameters(
-          emitResults = Some(false)
+          emitResults = Some(false),
+          timeout = None
         ))
       )
     ).attempt.unsafeRunSync()
-    queriedInstances.isLeft shouldBe(false)
-    queriedInstances.map(
-      _.debug shouldBe Some(DebugNotices(Seq(
-          IndexingNotice(
-            "containersWithoutIndexesInvolved",
-            "indexing",
-            "warning",
-            "The query is using one or more containers that doesn't have any indexes declared.",
-            Some("C"),
-            Some("result"),
-            None,
-            Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
-          )
-        )))
-    )
+    queryResponse.isLeft shouldBe(false)
+    queryResponse.map(_.debug shouldBe Some(DebugNotices(Seq(
+        IndexingNotice(
+          "containersWithoutIndexesInvolved",
+          "indexing",
+          "warning",
+          "The query is using one or more containers that doesn't have any indexes declared.",
+          Some("C"),
+          Some("query"),
+          None,
+          Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
+        )
+      )
+    )))
   }
 
   it should "Sync instances with debug options" in {
@@ -429,7 +429,7 @@ class InstancesTest extends CommonDataModelTestHelper {
         ),
         includeTyping = Some(true),
         debug = Some(InstanceDebugParameters(
-          emitResults = Some(false)
+          emitResults = Some(true)
         ))
       )
     ).attempt.unsafeRunSync()
@@ -442,7 +442,7 @@ class InstancesTest extends CommonDataModelTestHelper {
           "warning",
           "The query is using one or more containers that doesn't have any indexes declared.",
           Some("C"),
-          Some("result"),
+          Some("sync"),
           None,
           Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
         )

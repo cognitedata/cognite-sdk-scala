@@ -1,17 +1,17 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.implicits.toTraverseOps
-import io.circe.generic.semiauto.deriveEncoder
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.{Decoder, HCursor, Json}
 
 final case class InstanceDataResponsePart(
     items: Option[Map[String, Seq[InstanceDefinition]]] = None,
     typing: Option[Map[String, Map[String, Map[String, Map[String, TypePropertyDefinition]]]]] =
-      None
+      None,
+    debug: Option[DebugNotices]
 )
 
 object InstanceDataResponsePart {
-  val instanceDataResponsePartEncoder: Encoder[InstanceDataResponsePart] = deriveEncoder
+  import com.cognite.sdk.scala.common.DebugNotice._
 
   val instanceDataResponsePartDecoder: Decoder[InstanceDataResponsePart] = (c: HCursor) =>
     for {
@@ -21,6 +21,9 @@ object InstanceDataResponsePart {
       itemObjects <- c
         .downField("items")
         .as[Option[Map[String, Seq[Json]]]]
+      debug <- c
+        .downField("debug")
+        .as[Option[DebugNotices]]
       items <- itemObjects
         .map {
           _.toList
@@ -40,5 +43,5 @@ object InstanceDataResponsePart {
         }
         .traverse(decodeResult => decodeResult)
 
-    } yield InstanceDataResponsePart(items, typing)
+    } yield InstanceDataResponsePart(items, typing, debug)
 }

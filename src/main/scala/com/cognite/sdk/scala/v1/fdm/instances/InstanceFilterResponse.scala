@@ -1,7 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
 import com.cognite.sdk.scala.common.DebugNotice
-import io.circe.generic.semiauto.deriveDecoder
 import io.circe.{Decoder, HCursor}
 
 final case class InstanceFilterResponse(
@@ -14,9 +13,7 @@ final case class InstanceFilterResponse(
 final case class DebugNotices(notices: Seq[DebugNotice])
 
 object InstanceFilterResponse {
-
   import com.cognite.sdk.scala.common.DebugNotice._
-  implicit val debugNoticesDecoder: Decoder[DebugNotices] = deriveDecoder
 
   implicit val instanceFilterResponseDecoder: Decoder[InstanceFilterResponse] = (c: HCursor) =>
     for {

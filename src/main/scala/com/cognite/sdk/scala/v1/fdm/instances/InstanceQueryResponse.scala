@@ -9,7 +9,7 @@ final case class InstanceQueryResponse(
     nextCursor: Option[Map[String, String]] = None,
     debug: Option[DebugNotices] = None
 ) {
-  def getDataPart: InstanceDataResponsePart = InstanceDataResponsePart(items, typing)
+  def getDataPart: InstanceDataResponsePart = InstanceDataResponsePart(items, typing, debug)
 }
 
 object InstanceQueryResponse {
@@ -18,5 +18,7 @@ object InstanceQueryResponse {
       .product(
         _.downField("nextCursor").as[Option[Map[String, String]]]
       )
-      .map { case (data, cursor) => InstanceQueryResponse(data.items, data.typing, cursor) }
+      .map { case (data, cursor) =>
+        InstanceQueryResponse(data.items, data.typing, cursor, data.debug)
+      }
 }

@@ -6,7 +6,7 @@ package com.cognite.sdk.scala.common
 import cats.Id
 import com.cognite.sdk.scala.v1.GenericClient.RESOURCE_TYPE
 import com.cognite.sdk.scala.v1.fdm.containers.ContainerReference
-import com.cognite.sdk.scala.v1.fdm.instances.PropertySortV3
+import com.cognite.sdk.scala.v1.fdm.instances.{DebugNotices, PropertySortV3}
 import com.cognite.sdk.scala.v1.{CogniteId, CogniteInstanceId}
 import io.circe._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -202,6 +202,7 @@ object DebugNotice {
       .or(
         Decoder[InvalidDebugNotice].map(x => x: DebugNotice)
       ) // fallback in case we can't parse (if new category or code is added with different fields)
+  implicit val debugNoticesDecoder: Decoder[DebugNotices] = deriveDecoder
 }
 
 object CdpApiError {

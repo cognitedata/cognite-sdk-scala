@@ -9,7 +9,7 @@ final case class InstanceSyncResponse(
     nextCursor: Map[String, String] = Map.empty,
     debug: Option[DebugNotices] = None
 ) {
-  def getDataPart(): InstanceDataResponsePart = InstanceDataResponsePart(items, typing)
+  def getDataPart(): InstanceDataResponsePart = InstanceDataResponsePart(items, typing, debug)
 }
 
 object InstanceSyncResponse {
@@ -18,5 +18,7 @@ object InstanceSyncResponse {
       .product(
         _.downField("nextCursor").as[Map[String, String]]
       )
-      .map { case (data, cursor) => InstanceSyncResponse(data.items, data.typing, cursor) }
+      .map { case (data, cursor) =>
+        InstanceSyncResponse(data.items, data.typing, cursor, data.debug)
+      }
 }
