@@ -4,6 +4,7 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import cats.implicits.toBifunctorOps
 import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice}
+import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.{Equals, HasData}
@@ -14,8 +15,6 @@ import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, DirectRelationRe
 import com.cognite.sdk.scala.v1.fdm.containers.{ContainerCreateDefinition, ContainerId, ContainerReference}
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.{EdgeDeletionRequest, NodeDeletionRequest}
 import com.cognite.sdk.scala.v1.fdm.views._
-import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, GenericClient}
-import sttp.client3.SttpBackend
 
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.DurationInt
