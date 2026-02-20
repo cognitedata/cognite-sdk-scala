@@ -386,6 +386,20 @@ class InstancesTest extends CommonDataModelTestHelper {
       )
     ).attempt.unsafeRunSync()
     queriedInstances.isLeft shouldBe(false)
+    queriedInstances.map(
+      _.debug shouldBe Some(DebugNotices(Seq(
+          IndexingNotice(
+            "containersWithoutIndexesInvolved",
+            "indexing",
+            "warning",
+            "The query is using one or more containers that doesn't have any indexes declared.",
+            Some("C"),
+            Some("result"),
+            None,
+            Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
+          )
+        )))
+    )
   }
 
   it should "Sync instances with debug options" in {
@@ -420,7 +434,21 @@ class InstancesTest extends CommonDataModelTestHelper {
         ))
       )
     ).attempt.unsafeRunSync()
-    syncedInstances.isLeft shouldBe(false)
+    syncedInstances.isLeft shouldBe false
+    syncedInstances.map(
+      _.debug shouldBe Some(DebugNotices(Seq(
+        IndexingNotice(
+          "containersWithoutIndexesInvolved",
+          "indexing",
+          "warning",
+          "The query is using one or more containers that doesn't have any indexes declared.",
+          Some("C"),
+          Some("result"),
+          None,
+          Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
+        )
+      )))
+    )
   }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {

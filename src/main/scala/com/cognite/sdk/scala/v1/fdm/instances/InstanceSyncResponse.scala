@@ -7,8 +7,8 @@ final case class InstanceSyncResponse(
     typing: Option[Map[String, Map[String, Map[String, Map[String, TypePropertyDefinition]]]]] =
       None,
     nextCursor: Map[String, String] = Map.empty,
-    debug: Option[DebugNotices] = None,
-  ) {
+    debug: Option[DebugNotices] = None
+) {
   def getDataPart(): InstanceDataResponsePart = InstanceDataResponsePart(items, typing)
 }
 
