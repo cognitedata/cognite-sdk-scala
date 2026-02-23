@@ -30,10 +30,11 @@ credentials += Credentials(
   System.getenv("SONATYPE_USERNAME"),
   System.getenv("SONATYPE_PASSWORD")
 )
-credentials += Credentials("Artifactory Realm",
+credentials += Credentials(
+  "Artifactory Realm",
   "cognite.jfrog.io",
   System.getenv("JFROG_USERNAME"),
-  System.getenv("JFROG_PASSWORD"),
+  System.getenv("JFROG_PASSWORD")
 )
 
 val artifactory = "https://cognite.jfrog.io/cognite"
@@ -64,7 +65,7 @@ lazy val commonSettings = Seq(
     "io.netty" % "netty-handler" % nettyVersion,
     "io.netty" % "netty-handler-proxy" % nettyVersion,
     "io.netty" % "netty-resolver" % nettyVersion,
-    "io.netty" % "netty-transport" % nettyVersion,
+    "io.netty" % "netty-transport" % nettyVersion
   ),
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
@@ -91,15 +92,15 @@ lazy val commonSettings = Seq(
     false
   },
   publishTo := (if (System.getenv("PUBLISH_TO_JFROG") == "true") {
-    if (isSnapshot.value)
-      Some("snapshots".at(s"$artifactory/libs-snapshot-local/"))
-    else
-      Some("local-releases".at(s"$artifactory/libs-release-local/"))
-  } else {
-    val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
-    if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
-    else localStaging.value
-  }),
+                  if (isSnapshot.value)
+                    Some("snapshots".at(s"$artifactory/libs-snapshot-local/"))
+                  else
+                    Some("local-releases".at(s"$artifactory/libs-release-local/"))
+                } else {
+                  val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+                  if (isSnapshot.value) Some("central-snapshots".at(centralSnapshots))
+                  else localStaging.value
+                }),
   publishMavenStyle := true,
   pgpPassphrase := {
     if (gpgPass.isDefined) gpgPass.map(_.toCharArray)
@@ -149,7 +150,7 @@ lazy val core = (project in file("."))
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
       "com.google.protobuf" % "protobuf-java" % "4.33.0",
-      "org.tpolecat" %% "natchez-core" % natchezVersion,
+      "org.tpolecat" %% "natchez-core" % natchezVersion
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) =>
@@ -157,13 +158,12 @@ lazy val core = (project in file("."))
           "-Wconf:cat=deprecation:i",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.Assertion:s",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.compatible.Assertion:s",
-
-          "-source:3.0-migration",
+          "-source:3.0-migration"
         )
       case Some((2, minor)) if minor == 13 =>
         List(
           "-Wconf:cat=deprecation:i",
-          "-Wconf:cat=other-pure-statement:i",
+          "-Wconf:cat=other-pure-statement:i"
         )
       case _ =>
         List.empty[String]
