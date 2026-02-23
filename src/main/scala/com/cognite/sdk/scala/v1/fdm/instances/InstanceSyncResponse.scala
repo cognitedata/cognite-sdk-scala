@@ -1,24 +1,24 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.deriveEncoder
+import io.circe.Decoder
 
 final case class InstanceSyncResponse(
     items: Option[Map[String, Seq[InstanceDefinition]]] = None,
     typing: Option[Map[String, Map[String, Map[String, Map[String, TypePropertyDefinition]]]]] =
       None,
-    nextCursor: Map[String, String] = Map.empty
+    nextCursor: Map[String, String] = Map.empty,
+    debug: Option[DebugNotices] = None
 ) {
-  def getDataPart(): InstanceDataResponsePart = InstanceDataResponsePart(items, typing)
-
+  def getDataPart(): InstanceDataResponsePart = InstanceDataResponsePart(items, typing, debug)
 }
 
 object InstanceSyncResponse {
-  implicit val instanceSyncResponseEncoder: Encoder[InstanceSyncResponse] = deriveEncoder
   implicit val instanceSyncResponseDecoder: Decoder[InstanceSyncResponse] =
     InstanceDataResponsePart.instanceDataResponsePartDecoder
       .product(
         _.downField("nextCursor").as[Map[String, String]]
       )
-      .map { case (data, cursor) => InstanceSyncResponse(data.items, data.typing, cursor) }
+      .map { case (data, cursor) =>
+        InstanceSyncResponse(data.items, data.typing, cursor, data.debug)
+      }
 }
