@@ -28,13 +28,13 @@ credentials += Credentials(
   "Sonatype Nexus Repository Manager",
   "central.sonatype.com",
   System.getenv("SONATYPE_USERNAME"),
-  System.getenv("SONATYPE_PASSWORD")
+  System.getenv("SONATYPE_PASSWORD"),
 )
 credentials += Credentials(
   "Artifactory Realm",
   "cognite.jfrog.io",
   System.getenv("JFROG_USERNAME"),
-  System.getenv("JFROG_PASSWORD")
+  System.getenv("JFROG_PASSWORD"),
 )
 
 val artifactory = "https://cognite.jfrog.io/cognite"
@@ -65,7 +65,7 @@ lazy val commonSettings = Seq(
     "io.netty" % "netty-handler" % nettyVersion,
     "io.netty" % "netty-handler-proxy" % nettyVersion,
     "io.netty" % "netty-resolver" % nettyVersion,
-    "io.netty" % "netty-transport" % nettyVersion
+    "io.netty" % "netty-transport" % nettyVersion,
   ),
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
@@ -78,14 +78,14 @@ lazy val commonSettings = Seq(
       id = "wjoel",
       name = "Joel Wilsson",
       email = "joel.wilsson@cognite.com",
-      url = url("https://wjoel.com")
-    )
+      url = url("https://wjoel.com"),
+    ),
   ),
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/cognitedata/cognite-sdk-scala"),
-      "scm:git@github.com:cognitedata/cognite-sdk-scala.git"
-    )
+      "scm:git@github.com:cognitedata/cognite-sdk-scala.git",
+    ),
   ),
   // Remove all additional repository other than Maven Central from POM
   pomIncludeRepository := { _ =>
@@ -126,17 +126,18 @@ lazy val commonSettings = Seq(
           Wart.ToString,
           Wart.Overloading,
           Wart.SeqApply,
-          Wart.SeqUpdated
+          Wart.SeqUpdated,
         )
-    })
+    }),
 )
 
-lazy val core = (project in file("."))
+lazy val core = project
+  .in(file("."))
   .enablePlugins(BuildInfoPlugin)
   .settings(
     buildInfoUsePackageAsPath := true,
     buildInfoKeys := Seq[BuildInfoKey](organization, version, organizationName),
-    buildInfoPackage := "com.cognite.scala_sdk"
+    buildInfoPackage := "com.cognite.scala_sdk",
   )
   .settings(
     commonSettings,
@@ -150,7 +151,7 @@ lazy val core = (project in file("."))
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
       "com.google.protobuf" % "protobuf-java" % "4.33.0",
-      "org.tpolecat" %% "natchez-core" % natchezVersion
+      "org.tpolecat" %% "natchez-core" % natchezVersion,
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) =>
@@ -158,12 +159,12 @@ lazy val core = (project in file("."))
           "-Wconf:cat=deprecation:i",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.Assertion:s",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.compatible.Assertion:s",
-          "-source:3.0-migration"
+          "-source:3.0-migration",
         )
       case Some((2, minor)) if minor == 13 =>
         List(
           "-Wconf:cat=deprecation:i",
-          "-Wconf:cat=other-pure-statement:i"
+          "-Wconf:cat=other-pure-statement:i",
         )
       case _ =>
         List.empty[String]
@@ -174,12 +175,12 @@ lazy val core = (project in file("."))
     // https://github.com/thesamet/sbt-protoc/issues/6#issuecomment-353028192
     PB.deleteTargetDirectory := false,
     Compile / PB.targets := Seq(
-      PB.gens.java -> (Compile / sourceManaged).value
-    )
+      PB.gens.java -> (Compile / sourceManaged).value,
+    ),
   )
 
 val scalaTestDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.19" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.19" % "test",
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
@@ -187,7 +188,7 @@ val sttpDeps = Seq(
     // We specify our own version of circe.
     .exclude("io.circe", "circe-core_2.13")
     .exclude("io.circe", "circe-parser_2.13"),
-  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test
+  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test,
 )
 
 def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
@@ -200,7 +201,7 @@ def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
     ("io.circe" %% "circe-parser" % circeVersion)
       .exclude("org.typelevel", "cats-core_2.13"),
     ("io.circe" %% "circe-literal" % circeVersion % Test)
-      .exclude("org.typelevel", "cats-core_2.13")
+      .exclude("org.typelevel", "cats-core_2.13"),
   )
 
 scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
