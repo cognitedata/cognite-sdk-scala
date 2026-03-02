@@ -28,9 +28,10 @@ credentials += Credentials(
   "Sonatype Nexus Repository Manager",
   "central.sonatype.com",
   System.getenv("SONATYPE_USERNAME"),
-  System.getenv("SONATYPE_PASSWORD")
+  System.getenv("SONATYPE_PASSWORD"),
 )
-credentials += Credentials("Artifactory Realm",
+credentials += Credentials(
+  "Artifactory Realm",
   "cognite.jfrog.io",
   System.getenv("JFROG_USERNAME"),
   System.getenv("JFROG_PASSWORD"),
@@ -77,29 +78,29 @@ lazy val commonSettings = Seq(
       id = "wjoel",
       name = "Joel Wilsson",
       email = "joel.wilsson@cognite.com",
-      url = url("https://wjoel.com")
-    )
+      url = url("https://wjoel.com"),
+    ),
   ),
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/cognitedata/cognite-sdk-scala"),
-      "scm:git@github.com:cognitedata/cognite-sdk-scala.git"
-    )
+      "scm:git@github.com:cognitedata/cognite-sdk-scala.git",
+    ),
   ),
   // Remove all additional repository other than Maven Central from POM
   pomIncludeRepository := { _ =>
     false
   },
   publishTo := (if (System.getenv("PUBLISH_TO_JFROG") == "true") {
-    if (isSnapshot.value)
-      Some("snapshots".at(s"$artifactory/libs-snapshot-local/"))
-    else
-      Some("local-releases".at(s"$artifactory/libs-release-local/"))
-  } else {
-    val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
-    if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
-    else localStaging.value
-  }),
+                  if (isSnapshot.value)
+                    Some("snapshots".at(s"$artifactory/libs-snapshot-local/"))
+                  else
+                    Some("local-releases".at(s"$artifactory/libs-release-local/"))
+                } else {
+                  val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+                  if (isSnapshot.value) Some("central-snapshots".at(centralSnapshots))
+                  else localStaging.value
+                }),
   publishMavenStyle := true,
   pgpPassphrase := {
     if (gpgPass.isDefined) gpgPass.map(_.toCharArray)
@@ -125,17 +126,18 @@ lazy val commonSettings = Seq(
           Wart.ToString,
           Wart.Overloading,
           Wart.SeqApply,
-          Wart.SeqUpdated
+          Wart.SeqUpdated,
         )
-    })
+    }),
 )
 
-lazy val core = (project in file("."))
+lazy val core = project
+  .in(file("."))
   .enablePlugins(BuildInfoPlugin)
   .settings(
     buildInfoUsePackageAsPath := true,
     buildInfoKeys := Seq[BuildInfoKey](organization, version, organizationName),
-    buildInfoPackage := "com.cognite.scala_sdk"
+    buildInfoPackage := "com.cognite.scala_sdk",
   )
   .settings(
     commonSettings,
@@ -157,7 +159,6 @@ lazy val core = (project in file("."))
           "-Wconf:cat=deprecation:i",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.Assertion:s",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.compatible.Assertion:s",
-
           "-source:3.0-migration",
         )
       case Some((2, minor)) if minor == 13 =>
@@ -174,12 +175,12 @@ lazy val core = (project in file("."))
     // https://github.com/thesamet/sbt-protoc/issues/6#issuecomment-353028192
     PB.deleteTargetDirectory := false,
     Compile / PB.targets := Seq(
-      PB.gens.java -> (Compile / sourceManaged).value
-    )
+      PB.gens.java -> (Compile / sourceManaged).value,
+    ),
   )
 
 val scalaTestDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.19" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.19" % "test",
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
@@ -187,7 +188,7 @@ val sttpDeps = Seq(
     // We specify our own version of circe.
     .exclude("io.circe", "circe-core_2.13")
     .exclude("io.circe", "circe-parser_2.13"),
-  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test
+  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test,
 )
 
 def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
@@ -200,7 +201,7 @@ def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
     ("io.circe" %% "circe-parser" % circeVersion)
       .exclude("org.typelevel", "cats-core_2.13"),
     ("io.circe" %% "circe-literal" % circeVersion % Test)
-      .exclude("org.typelevel", "cats-core_2.13")
+      .exclude("org.typelevel", "cats-core_2.13"),
   )
 
 scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {
