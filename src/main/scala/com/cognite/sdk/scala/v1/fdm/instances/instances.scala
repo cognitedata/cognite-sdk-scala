@@ -51,7 +51,7 @@ final case class InstanceFilterRequest(
     sort: Option[Seq[PropertySortV3]] = None,
     filter: Option[FilterDefinition] = None,
     debug: Option[InstanceDebugParameters] = None,
-    includeTyping: Option[Boolean] = Some(true)
+    includeTyping: Option[Boolean] = Some(false)
 )
 
 final case class InstanceDebugParameters(
@@ -64,7 +64,7 @@ final case class InstanceQueryRequest(
     `with`: Map[String, TableExpression] = Map.empty,
     cursors: Option[Map[String, String]] = None,
     select: Map[String, SelectExpression] = Map.empty,
-    includeTyping: Option[Boolean] = Some(true),
+    includeTyping: Option[Boolean] = Some(false),
     debug: Option[InstanceDebugParameters] = None,
     additionalFlags: Map[String, Boolean] = Map.empty
 )
@@ -73,7 +73,7 @@ final case class InstanceSyncRequest(
     `with`: Map[String, TableExpression] = Map.empty,
     cursors: Option[Map[String, String]] = None,
     select: Map[String, SelectExpression] = Map.empty,
-    includeTyping: Option[Boolean] = Some(true),
+    includeTyping: Option[Boolean] = Some(false),
     debug: Option[InstanceDebugParameters] = None
 )
 
