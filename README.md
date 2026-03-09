@@ -198,6 +198,81 @@ val nodeId = nodeIds.head.id
 val ancestorNodes = c.threeDNodes(modelId, revisionId).ancestors(nodeId).compile.toList
 ```
 
+## Flexible Data Model (FDM) Instances
+
+The SDK supports creating and managing FDM instances (nodes and edges) in Cognite Data Fusion.
+
+### Create FDM Instances
+
+To create FDM instances, you need to construct `NodeWrite` or `EdgeWrite` objects and pass them to `createItems`:
+
+```scala
+import com.cognite.sdk.scala.v1.fdm.instances._
+import com.cognite.sdk.scala.v1.fdm.common.DirectRelationReference
+import com.cognite.sdk.scala.v1.fdm.views.ViewReference
+
+// Create a node
+val node = NodeOrEdgeCreate.NodeWrite(
+  space = "mySpace",
+  externalId = "node1",
+  sources = Some(Seq(
+    EdgeOrNodeData(
+      source = ViewReference("mySpace", "myView", "v1"),
+      properties = Some(Map(
+        "name" -> Some(InstancePropertyValue.String("My Node"))
+      ))
+    )
+  )),
+  `type` = None
+)
+
+// Create an edge
+val edge = NodeOrEdgeCreate.EdgeWrite(
+  `type` = DirectRelationReference("mySpace", "edgeType"),
+  space = "mySpace",
+  externalId = "edge1",
+  startNode = DirectRelationReference("mySpace", "node1"),
+  endNode = DirectRelationReference("mySpace", "node2"),
+  sources = None
+)
+
+// Create instances
+val result = c.instances.createItems(
+  InstanceCreate(items = Seq(node, edge))
+)
+```
+
+### AutoCreate Options
+
+When creating FDM instances, you can control whether referenced nodes or edges should be automatically created if they don't exist. This is controlled through the `autoCreate` options in `InstanceCreate`:
+
+- **`autoCreateStartNodes`** (default: `false`): For edges, automatically create the start node if it doesn't exist
+- **`autoCreateEndNodes`** (default: `false`): For edges, automatically create the end node if it doesn't exist  
+- **`autoCreateDirectRelations`** (default: `true`): For nodes and edges, automatically create referenced nodes in direct relation properties if they don't exist
+
+```scala
+// Create an edge with auto-creation of start and end nodes
+val edgeWithAutoCreate = NodeOrEdgeCreate.EdgeWrite(
+  `type` = DirectRelationReference("mySpace", "edgeType"),
+  space = "mySpace",
+  externalId = "edge1",
+  startNode = DirectRelationReference("mySpace", "nonExistentStartNode"),
+  endNode = DirectRelationReference("mySpace", "nonExistentEndNode"),
+  sources = None
+)
+
+val result = c.instances.createItems(
+  InstanceCreate(
+    items = Seq(edgeWithAutoCreate),
+    autoCreateStartNodes = Some(true),  // Auto-create start node if missing
+    autoCreateEndNodes = Some(true),    // Auto-create end node if missing
+    autoCreateDirectRelations = Some(true)  // Auto-create nodes referenced in direct relations
+  )
+)
+```
+
+**Note**: When `autoCreateDirectRelations` is `false` and you reference a non-existent node in a direct relation property, the creation will fail with an error. When `true`, the referenced node will be automatically created.
+
 ## Running tests
 
 To be able to run most tests locally, these environment variables need to be set:
