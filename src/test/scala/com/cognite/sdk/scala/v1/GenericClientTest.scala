@@ -4,10 +4,9 @@
 package com.cognite.sdk.scala.v1
 
 import cats.effect._
-import cats.effect.std.Queue
 import com.cognite.scala_sdk.BuildInfo
 import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.sttp.{BackpressureThrottleBackend, RateLimitingBackend, RetryingBackend}
+import com.cognite.sdk.scala.sttp.{RateLimitingBackend, RetryingBackend}
 import org.scalatest.{EitherValues, OptionValues}
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.impl.cats.implicits.asyncMonadError
@@ -85,21 +84,6 @@ class GenericClientTest extends SdkTestSpec with OptionValues with EitherValues 
       auth,
       sttpBackend = RateLimitingBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), 5)
         .unsafeRunSync()
-    ).token.inspect().unsafeRunSync().projects should not be empty
-  }
-
-  it should "support client with BackpressureThrottleBackend" in {
-    val makeQueueOf1 = for {
-      queue <- Queue.bounded[IO, Unit](1)
-      _ <- queue.offer(())
-    } yield queue
-
-    GenericClient[IO](
-      "scala-sdk-test",
-      projectName,
-      baseUrl,
-      auth,
-      sttpBackend =new BackpressureThrottleBackend[IO, Any](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), makeQueueOf1.unsafeRunSync(), 1.seconds)
     ).token.inspect().unsafeRunSync().projects should not be empty
   }
 
