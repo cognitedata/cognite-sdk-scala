@@ -217,7 +217,6 @@ class InstancesTest extends CommonDataModelTestHelper {
         )))),
       SelectExpression(sources = List()),
       limit = Some(3),
-      additionalFlags = Map.empty,
       batchSize = Some(1)
     ).compile.toList.unsafeRunSync()
 
@@ -378,7 +377,6 @@ class InstancesTest extends CommonDataModelTestHelper {
           )))
         ),
         includeTyping = Some(true),
-        additionalFlags = Map.empty,
         debug = Some(InstanceDebugParameters(
           emitResults = Some(false),
           timeout = None

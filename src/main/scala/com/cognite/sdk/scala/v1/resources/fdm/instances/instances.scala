@@ -63,7 +63,6 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       debug: Option[InstanceDebugParameters],
       @annotation.nowarn partition: Option[Partition] = None,
-      additionalFlags: Map[String, Boolean]
   )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] = {
     val resultName = "query"
     queryRequest(
@@ -75,7 +74,6 @@ class Instances[F[_]](val requestSession: RequestSession[F])
         cursors = cursor.map(c => Map(resultName -> c)),
         select = Map(resultName -> inputSelectExpression),
         debug = debug,
-        additionalFlags = additionalFlags
       )
     ).map { case InstanceQueryResponse(items, _, cursors, _) =>
       ItemsWithCursor(
@@ -91,7 +89,6 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       limit: Option[Int],
       batchSize: Option[Int] = None,
       debug: Option[InstanceDebugParameters] = None,
-      additionalFlags: Map[String, Boolean] = Map.empty
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
       .pullFromCursor(
@@ -107,7 +104,6 @@ class Instances[F[_]](val requestSession: RequestSession[F])
             limit = remaining,
             partition = partition,
             debug = debug,
-            additionalFlags = additionalFlags
           )
       )
       .stream
@@ -183,15 +179,7 @@ object Instances {
     }
   implicit val instanceQueryRequestEncoder: Encoder[InstanceQueryRequest] =
     deriveEncoder[InstanceQueryRequest].mapJsonObject { jsonObj =>
-      val additionalFields = jsonObj("additionalFlags")
-        .flatMap(_.asObject)
-        .getOrElse(JsonObject.empty)
-
-      // Order or merge is important, we want jsonObj properties to stay in case of conflicts
-      // additionalFlags only contains boolean so deepMerge will go a single level, if this is changed, change this logic too.
-      additionalFields
-        .deepMerge(jsonObj.remove("additionalFlags"))
-        .filter { case (_, v) => !v.isNull }
+      jsonObj.filter { case (_, v) => !v.isNull }
     }
   implicit val tableExpression: Encoder[TableExpression] =
     deriveEncoder[TableExpression].mapJsonObject { jsonObj =>
