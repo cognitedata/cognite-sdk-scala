@@ -62,7 +62,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       cursor: Option[String],
       limit: Option[Int],
       debug: Option[InstanceDebugParameters],
-      @annotation.nowarn partition: Option[Partition] = None,
+      @annotation.nowarn partition: Option[Partition] = None
   )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] = {
     val resultName = "query"
     queryRequest(
@@ -73,7 +73,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
         ),
         cursors = cursor.map(c => Map(resultName -> c)),
         select = Map(resultName -> inputSelectExpression),
-        debug = debug,
+        debug = debug
       )
     ).map { case InstanceQueryResponse(items, _, cursors, _) =>
       ItemsWithCursor(
@@ -88,7 +88,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       inputSelectExpression: SelectExpression,
       limit: Option[Int],
       batchSize: Option[Int] = None,
-      debug: Option[InstanceDebugParameters] = None,
+      debug: Option[InstanceDebugParameters] = None
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
       .pullFromCursor(
@@ -103,7 +103,7 @@ class Instances[F[_]](val requestSession: RequestSession[F])
             cursor = cursor,
             limit = remaining,
             partition = partition,
-            debug = debug,
+            debug = debug
           )
       )
       .stream
