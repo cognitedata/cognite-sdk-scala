@@ -10,7 +10,7 @@ import com.cognite.sdk.scala.v1.RequestSession
 import com.cognite.sdk.scala.v1.fdm.instances._
 import fs2.Stream
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, JsonObject, Printer}
+import io.circe.{Decoder, Encoder, Printer}
 import sttp.client3._
 import sttp.client3.circe._
 
