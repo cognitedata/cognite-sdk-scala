@@ -34,13 +34,13 @@ class TokenParsingTest extends AnyFlatSpec with Matchers {
     )
     r shouldBe Right(ProjectsListScope(Seq("a")))
   }
-  it should "require *Acl field" in {
+  it should "not require *Acl field" in {
     val r = ProjectCapability.decoder.decodeJson(json"""
       {
         "projectScope": {"allProjects": {}}
       }
     """)
-    r.isLeft shouldBe true
+    r.isLeft shouldBe false
   }
   it should "decode allProjects capability" in {
     val r = ProjectCapability.decoder.decodeJson(json"""
