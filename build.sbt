@@ -9,7 +9,7 @@ val supportedScalaVersions = List(scala213, scala3)
 val javaVersion = "17"
 
 // This is used only for tests.
-val jettyTestVersion = "11.0.25"
+val jettyTestVersion = "12.1.9"
 
 val sttpVersion = "3.11.0"
 val circeVersion = "0.14.15"
@@ -144,7 +144,9 @@ lazy val core = project
     libraryDependencies ++= Seq(
       "commons-io" % "commons-io" % "2.18.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
-      "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
+      "org.eclipse.jetty.ee11" % "jetty-ee11-servlet" % jettyTestVersion % Test,
+      "org.eclipse.jetty.compression" % "jetty-compression-server" % jettyTestVersion % Test,
+      "org.eclipse.jetty.compression" % "jetty-compression-gzip" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
