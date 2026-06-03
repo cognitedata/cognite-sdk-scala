@@ -6,7 +6,7 @@ val scala3 = "3.3.3"
 val scala213 = "2.13.18"
 val supportedScalaVersions = List(scala213, scala3)
 
-val javaVersion = "11"
+val javaVersion = "17"
 
 // This is used only for tests.
 val jettyTestVersion = "11.0.25"
