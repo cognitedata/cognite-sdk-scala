@@ -7,8 +7,7 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.server.handler.gzip.GzipHandler
-import org.eclipse.jetty.servlet.ServletContextHandler
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler
 import org.scalatest.EitherValues.convertEitherToValuable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.{BeforeAndAfter, OptionValues}
@@ -20,6 +19,9 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+import org.eclipse.jetty.compression.gzip.GzipCompression
+import org.eclipse.jetty.compression.server.CompressionHandler
+
 import scala.io.Source
 
 class EchoServlet extends HttpServlet {
@@ -38,9 +40,9 @@ class GzipBackendTest extends AnyFlatSpec with OptionValues with BeforeAndAfter 
   val port: Int = 50000 + (java.lang.Math.random() * 1000).toInt
 
   val server: Server = new Server(port)
-  private val gzipHandler = new GzipHandler()
-  gzipHandler.addIncludedMethods("POST")
-  gzipHandler.setInflateBufferSize(8096)
+  private val gzipCompression = new GzipCompression()
+  private val gzipHandler = new CompressionHandler()
+  gzipHandler.putCompression(gzipCompression)
   private val servletHandler = new ServletContextHandler(ServletContextHandler.NO_SESSIONS)
   servletHandler.insertHandler(gzipHandler)
   servletHandler.setInitParameter("gzip", "true")
