@@ -1,6 +1,6 @@
 {
   "lockVersion" : 1,
-  "timestamp" : "2026-01-08T13:55:51.191844161Z",
+  "timestamp" : "2026-06-03T07:13:46.680787Z",
   "configurations" : [
     "compile",
     "optional",
@@ -494,6 +494,20 @@
       ]
     },
     {
+      "org" : "jakarta.servlet",
+      "name" : "jakarta.servlet-api",
+      "version" : "6.1.0",
+      "artifacts" : [
+        {
+          "name" : "jakarta.servlet-api.jar",
+          "hash" : "sha1:1169a246913fe3823782af7943e7a103634867c5"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client",
       "version" : "2.12.4",
@@ -524,11 +538,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-http",
-      "version" : "11.0.25",
+      "version" : "12.1.9",
       "artifacts" : [
         {
           "name" : "jetty-http.jar",
-          "hash" : "sha1:1c33e326c11d9db04b134d070d600418f818809d"
+          "hash" : "sha1:d4c8ce16b394a2cbea4834781d734e314bf26cfb"
         }
       ],
       "configurations" : [
@@ -538,11 +552,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-io",
-      "version" : "11.0.25",
+      "version" : "12.1.9",
       "artifacts" : [
         {
           "name" : "jetty-io.jar",
-          "hash" : "sha1:0175602210a8b3fe4a8cc55c07d4b2041daff70e"
+          "hash" : "sha1:eded2b009448a5e44e16addd2fbb66701fe6456b"
         }
       ],
       "configurations" : [
@@ -552,11 +566,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-security",
-      "version" : "11.0.25",
+      "version" : "12.1.9",
       "artifacts" : [
         {
           "name" : "jetty-security.jar",
-          "hash" : "sha1:1698e2bcf1dd06785ded55fd4346bb9adafd64b6"
+          "hash" : "sha1:da8049b28929f428a3945049be0d6956f2ab5363"
         }
       ],
       "configurations" : [
@@ -566,11 +580,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-server",
-      "version" : "11.0.25",
+      "version" : "12.1.9",
       "artifacts" : [
         {
           "name" : "jetty-server.jar",
-          "hash" : "sha1:0851d4e5d920bc14ba8e00117add2b37f4c1ce96"
+          "hash" : "sha1:d9b173609c17b7ff258b03f9dd79192c4684d12a"
         }
       ],
       "configurations" : [
@@ -579,12 +593,12 @@
     },
     {
       "org" : "org.eclipse.jetty",
-      "name" : "jetty-servlet",
-      "version" : "11.0.25",
+      "name" : "jetty-session",
+      "version" : "12.1.9",
       "artifacts" : [
         {
-          "name" : "jetty-servlet.jar",
-          "hash" : "sha1:76a1ea0dcd771797ce3c230809918f5a91e9b80f"
+          "name" : "jetty-session.jar",
+          "hash" : "sha1:e21cde48bb64be19453015ab7d3c79c205b0edd4"
         }
       ],
       "configurations" : [
@@ -594,11 +608,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-util",
-      "version" : "11.0.25",
+      "version" : "12.1.9",
       "artifacts" : [
         {
           "name" : "jetty-util.jar",
-          "hash" : "sha1:1f725375a296fed1ec126125165c5d7ae7629437"
+          "hash" : "sha1:d8a512027f8ccf8aa2299d4fdd5cd7ca1edc6fa1"
         }
       ],
       "configurations" : [
@@ -606,13 +620,55 @@
       ]
     },
     {
-      "org" : "org.eclipse.jetty.toolchain",
-      "name" : "jetty-jakarta-servlet-api",
-      "version" : "5.0.2",
+      "org" : "org.eclipse.jetty.compression",
+      "name" : "jetty-compression-common",
+      "version" : "12.1.9",
       "artifacts" : [
         {
-          "name" : "jetty-jakarta-servlet-api.jar",
-          "hash" : "sha1:027fce6d666a203526236d33d00e202a4136230f"
+          "name" : "jetty-compression-common.jar",
+          "hash" : "sha1:b5d45ac4d8396a78ec879d44bec19c4efaddf60d"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.eclipse.jetty.compression",
+      "name" : "jetty-compression-gzip",
+      "version" : "12.1.9",
+      "artifacts" : [
+        {
+          "name" : "jetty-compression-gzip.jar",
+          "hash" : "sha1:7433139b49e24d51cf5e75102d78b3d39c43dd97"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.eclipse.jetty.compression",
+      "name" : "jetty-compression-server",
+      "version" : "12.1.9",
+      "artifacts" : [
+        {
+          "name" : "jetty-compression-server.jar",
+          "hash" : "sha1:5a4de89661cc1cbd803d01bf8737ecf41cfe48f1"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.eclipse.jetty.ee11",
+      "name" : "jetty-ee11-servlet",
+      "version" : "12.1.9",
+      "artifacts" : [
+        {
+          "name" : "jetty-ee11-servlet.jar",
+          "hash" : "sha1:6b6a8fec7a0681f98a0925f8d4e69265fdc977d6"
         }
       ],
       "configurations" : [
@@ -964,11 +1020,11 @@
     {
       "org" : "org.slf4j",
       "name" : "slf4j-api",
-      "version" : "2.0.13",
+      "version" : "2.0.17",
       "artifacts" : [
         {
           "name" : "slf4j-api.jar",
-          "hash" : "sha1:80229737f704b121a318bba5d5deacbcf395bc77"
+          "hash" : "sha1:d9e58ac9c7779ba3bf8142aff6c830617a7fe60f"
         }
       ],
       "configurations" : [

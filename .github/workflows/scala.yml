@@ -21,10 +21,10 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         uses: coursier/setup-action@f7be3eb3dcef84a4e16fc8cd75c87beb2e5cbcc9 # v2.0.2
         with:
-          jvm: temurin:11
+          jvm: temurin:17
           apps: sbt
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
@@ -64,10 +64,10 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         uses: coursier/setup-action@f7be3eb3dcef84a4e16fc8cd75c87beb2e5cbcc9 # v2.0.2
         with:
-          jvm: temurin:11
+          jvm: temurin:17
           apps: sbt
 
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
@@ -106,10 +106,10 @@ jobs:
     - run: |
         git rev-list --count --first-parent HEAD > patch_version.txt
 
-    - name: Set up JDK 11
+    - name: Set up JDK 17
       uses: coursier/setup-action@f7be3eb3dcef84a4e16fc8cd75c87beb2e5cbcc9 # v2.0.2
       with:
-        jvm: temurin:11
+        jvm: temurin:17
         apps: sbt
 
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
@@ -145,7 +145,7 @@ jobs:
       # run: sbt test
       run: |
         cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalafmtCheck coverage test coverageReport
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalafmtCheck scalafmtSbtCheck coverage test coverageReport
 
     - name: Run tests for Scala 3
       env:
@@ -162,7 +162,7 @@ jobs:
       # run: sbt test
       run: |
         cat /dev/null | sbt -Dsbt.log.noformat=true ++3.3 dependencyLockCheck
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 scalafmtCheck test
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 scalafmtCheck scalafmtSbtCheck test
 
     - name: Upload test coverage report
       uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5
@@ -182,10 +182,10 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         uses: coursier/setup-action@f7be3eb3dcef84a4e16fc8cd75c87beb2e5cbcc9 # v2.0.2
         with:
-          jvm: temurin:11
+          jvm: temurin:17
           apps: sbt
 
       - name: Build JAR file
@@ -230,10 +230,10 @@ jobs:
       - run: |
           git rev-list --count --first-parent HEAD > patch_version.txt
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         uses: coursier/setup-action@f7be3eb3dcef84a4e16fc8cd75c87beb2e5cbcc9 # v2.0.2
         with:
-          jvm: temurin:11
+          jvm: temurin:17
           apps: sbt
 
       - name: Build JAR file
