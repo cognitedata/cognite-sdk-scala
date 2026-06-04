@@ -55,31 +55,87 @@ class Instances[F[_]](val requestSession: RequestSession[F])
       identity
     )
 
+  private[sdk] def queryWithCursor(
+      inputTableExpression: TableExpression,
+      inputSelectExpression: SelectExpression,
+      batchSize: Option[Int],
+      cursor: Option[String],
+      limit: Option[Int],
+      debug: Option[InstanceDebugParameters],
+      @annotation.nowarn partition: Option[Partition] = None
+  )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] = {
+    val resultName = "query"
+    queryRequest(
+      InstanceQueryRequest(
+        `with` = Map(
+          resultName -> inputTableExpression
+            .copy(limit = Seq(limit, batchSize, inputTableExpression.limit).flatten.minOption)
+        ),
+        cursors = cursor.map(c => Map(resultName -> c)),
+        select = Map(resultName -> inputSelectExpression),
+        debug = debug
+      )
+    ).map { case InstanceQueryResponse(items, _, cursors, _) =>
+      ItemsWithCursor(
+        items.flatMap(_.get(resultName)).getOrElse(Seq.empty),
+        cursors.flatMap(_.get(resultName))
+      )
+    }
+  }
+
+  def queryStream(
+      inputTableExpression: TableExpression,
+      inputSelectExpression: SelectExpression,
+      limit: Option[Int],
+      batchSize: Option[Int] = None,
+      debug: Option[InstanceDebugParameters] = None
+  )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
+    Readable
+      .pullFromCursor(
+        cursor = None,
+        maxItemsReturned = limit,
+        partition = None,
+        get = (cursor, remaining, partition) =>
+          queryWithCursor(
+            inputTableExpression = inputTableExpression,
+            inputSelectExpression = inputSelectExpression,
+            batchSize = batchSize,
+            cursor = cursor,
+            limit = remaining,
+            partition = partition,
+            debug = debug
+          )
+      )
+      .stream
+
   private[sdk] def filterWithCursor(
       inputQuery: InstanceFilterRequest,
       cursor: Option[String],
       limit: Option[Int],
+      debug: Option[InstanceDebugParameters] = None,
       @annotation.nowarn partition: Option[Partition] = None
   )(implicit F: Async[F]): F[ItemsWithCursor[InstanceDefinition]] =
-    filter(inputQuery.copy(cursor = cursor, limit = limit)).map {
-      case InstanceFilterResponse(items, _, cursor) =>
+    filter(inputQuery.copy(cursor = cursor, limit = limit, debug = debug)).map {
+      case InstanceFilterResponse(items, _, cursor, _) =>
         ItemsWithCursor(items, cursor)
     }
 
   private[sdk] def filterWithNextCursor(
       inputQuery: InstanceFilterRequest,
       cursor: Option[String],
-      limit: Option[Int]
+      limit: Option[Int],
+      debug: Option[InstanceDebugParameters] = None
   )(implicit F: Async[F]): Stream[F, InstanceDefinition] =
     Readable
-      .pullFromCursor(cursor, limit, None, filterWithCursor(inputQuery, _, _, _))
+      .pullFromCursor(cursor, limit, None, filterWithCursor(inputQuery, _, _, debug, _))
       .stream
 
   def filterStream(
       inputQuery: InstanceFilterRequest,
-      limit: Option[Int]
+      limit: Option[Int],
+      debug: Option[InstanceDebugParameters] = None
   )(implicit F: Async[F]): fs2.Stream[F, InstanceDefinition] =
-    filterWithNextCursor(inputQuery, None, limit)
+    filterWithNextCursor(inputQuery, None, limit, debug)
 
   def retrieveByExternalIds(
       items: Seq[InstanceRetrieve],
