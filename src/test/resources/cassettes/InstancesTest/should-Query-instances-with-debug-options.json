@@ -8,7 +8,7 @@
           "content-type" : "application/json",
           "cdf-version" : "alpha",
           "accept" : "application/json",
-          "x-cdp-sdk" : "CogniteScalaSDK:2.38.988",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.992",
           "accept-encoding" : "gzip, deflate",
           "x-cdp-app" : "scala-sdk-vcr-test"
         },
@@ -77,8 +77,8 @@
         },
         "headers" : {
           "server" : "envoy",
-          "x-request-id" : "3930a58a-dca2-9366-bd1c-a6feb7d21d8e",
-          "date" : "Fri, 05 Jun 2026 21:04:22 GMT",
+          "x-request-id" : "6a428d0f-06f0-9087-847d-b36a185b6afb",
+          "date" : "Fri, 05 Jun 2026 22:12:00 GMT",
           "content-type" : "application/json",
           "transfer-encoding" : "chunked",
           "x-frame-options" : "DENY",
@@ -91,8 +91,405 @@
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
-            "type" : "__gzipped_by_vcr_library_due_to_size",
-            "gzipped" : "H4sIAAAAAAAA/+1aTW/cNhC9+1cQe4kDGK4NFD30Ztg1soe6Re00NVwj4UqzWhYUqfJjvYvA/z1DUpIpaT+0gXcRAzokXpHD0eg9zvCJ4tcjQkbMQK5Hv5KveIGX/1tQS7x8eMTr5xNnIWBhLq3SUjmz0GaWBRNZd1i4xIYknX5O0jxqwsZLmQm83xWjmaL5hRDSUMOk+Gl+3jB0N6U5tNqcVym0UZQJc4sjoY4nMsHIugNf2kcGn2Z00u7lTBvsnVKuodOZSM59nG68TfTnCdUsGTXM2mGwPLeGTjis9joSFn2GbqNsu5daI8ciUZCDWBPXKAWdKFZUcX2QPNWEEgcckVNiZkAYokVFAuRpBgqwiRrC0KgoOEv83dtRBdRHN+5v1NV4utadB4p2pShqbjO1jpCryNNaXgzN9OEJ6WLzVvgYV+nhgCPHnOVYnFJiJDk/Ozvzre/XEXLnsF7LBOWMahjI2IGMC25ACQxzDr6GISElims5uChRXkuDllYlME6HKrVLVqRoyqYMFFYlX5wCjEQvNWqFdWTcBqPx1TY6LqXw0A2c9OekxKxaLUpCWHpKrqUqidH1Kl8ZjFO32mdcTijnS2IFQ5l2EhlUbtEKFgUkZfVDWUYmaAPmdAvbScnlFsr3wnXKFEbcZdvFhI5BrRgcDX8xa3twYRc0CValjF1hg8/tChb35aWStgGX25AprTHPGyfmjzXhrjy4REHIDTcrGlVgq2AJQGytBQqQ/fSO7Uvso2OMMy82F4UfC/tPMxAt+U41SQJUriY3mThmU0LnlPkg1q6VVcIGL9t4+VikAy/9eOFUG2IDXisXzN0Iit31zJ6PekWtG1bTyKZFpAMMF89a5kyVzFfwhmXvaSbrxIsMkB16Su5muG5GbvDKrZyZpYrishjW0pyaZEZs847aTZTLq+t+yUomy575OsyEvc6ERqoffjo0br9pTiDhU+d9T8JryiU1v/z8lkr33cxr1RKVsBHmCKT1FqTfFyOZlGngaEPG4QC7n1d7ELYrNUdzyu2KvQTfd2uzDFdS6L7iVlBWc6g27Fh1dCkOuygKJefb3dZ2vbz+Bf/5l4xtXmu7rtc3rKndJAyTp3qPe5l+G6ebMjcyhT9pBjc2n+ypxOPYt5fTwuNRwVkgQqFWMyyyxtXjZoJzmVQy7UuN6xdyzTi4+g1kyhTWWO9nhtqudH/+7wZ+QKQDO6/NjrMvgfXsECehRd2ExoUCjcF8N201/f/8zvbzFeMNLpN/u5WGTMA8Ab7qPJydnD+eEsSH5TYndKITpjWt+JxIK1ImMvyxIMccpoZAmsF7HGF12EAyiiWGLwkHrd2iK0gEO1305IcuBn428UMXPfhRLJutJyiX4fNggyAmehF0PyRQvwSSCulALFYTNJHG4MvHDil03zeF7ocU6pdCmxkystglge77JtDd8DVkd23hv1vgP0X9Vwv/4v7EUFWILnOy3JWrAN8q5gZNcEhNUINOF6fkD4F9LwdUusIvhSkTkPaQ5INyOKhyiHLnVWkc9MVh9UUN+yun46BCDqhCotx5VRIHrXIYrVLC/d3cHbV/hb/u/3CAN4WJjc7vCmlY4jeZH8oB0bHdxGmm+MiE/oTRS2vGIoUF6LGYS+42gU+iMTgPMunPBI+YM3PHhaN+DnPgrvOJKtHqQ2BMhZ0/WOye02oHkRSYFipM9JdwwoZ+KkGLd4bM6NxtreKoEB5ClHCqII1Ps4wyRcNTXcatCrTl5reF217SJYXhbHP8bPWNI7yamHm7bUdNth0zWX3E5GL1pnH9+7HBuD/GffT8DZ1pOELrLQAA"
+            "type" : "json",
+            "body" : {
+              "items" : {
+                "query" : [
+                ]
+              },
+              "nextCursor" : {
+                
+              },
+              "typing" : {
+                "query" : {
+                  "cdf_cdm" : {
+                    "CogniteDiagramAnnotation/v1" : {
+                      "name" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "text",
+                          "list" : false,
+                          "collation" : "ucs_basic"
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Holds a name of the instance where that is applicable",
+                        "name" : "Name"
+                      },
+                      "description" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "text",
+                          "list" : false,
+                          "collation" : "ucs_basic"
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Holds a description of the instance",
+                        "name" : "Description"
+                      },
+                      "tags" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "text",
+                          "list" : true,
+                          "collation" : "ucs_basic"
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Instance tags (limited to 1000 tags)",
+                        "name" : "Tags"
+                      },
+                      "aliases" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "text",
+                          "list" : true,
+                          "collation" : "ucs_basic"
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Alternative names (aliases)",
+                        "name" : "Aliases"
+                      },
+                      "sourceId" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "text",
+                          "list" : false,
+                          "collation" : "ucs_basic"
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Identifier in the source system",
+                        "name" : "Source ID"
+                      },
+                      "sourceContext" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "text",
+                          "list" : false,
+                          "collation" : "ucs_basic"
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Context of the source id. For systems where the sourceId is globally unique, the sourceContext is expected to not be set.",
+                        "name" : "Source context"
+                      },
+                      "source" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "direct",
+                          "container" : {
+                            "type" : "container",
+                            "space" : "cdf_cdm",
+                            "externalId" : "CogniteSourceSystem"
+                          },
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Direct relation to source system instance",
+                        "name" : "Source"
+                      },
+                      "sourceCreatedTime" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "timestamp",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "When the instance was created in source system (if available)",
+                        "name" : "Source created"
+                      },
+                      "sourceUpdatedTime" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "timestamp",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "When the instance was last updated in the source system (if available)",
+                        "name" : "Source last updated"
+                      },
+                      "sourceCreatedUser" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "text",
+                          "list" : false,
+                          "collation" : "ucs_basic"
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "User identifier from the source system on who created the source data. This identifier is not guaranteed to match user identifiers in CDF",
+                        "name" : "Source created by"
+                      },
+                      "sourceUpdatedUser" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "text",
+                          "list" : false,
+                          "collation" : "ucs_basic"
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "User identifier from the source system on who last updated the source data. This identifier is not guaranteed to match user identifiers in CDF",
+                        "name" : "Source last updated by"
+                      },
+                      "confidence" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "float64",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "The confidence that the annotation is a good match"
+                      },
+                      "status" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "enum",
+                          "values" : {
+                            "Suggested" : {
+                              "name" : "Suggested"
+                            },
+                            "Approved" : {
+                              "name" : "Approved"
+                            },
+                            "Rejected" : {
+                              "name" : "Rejected"
+                            }
+                          },
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "The status of the annotation"
+                      },
+                      "startNodePageNumber" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "int64",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "The number of the page on which this annotation is located in `startNode` File. The first page has number 1\n"
+                      },
+                      "endNodePageNumber" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "int64",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "The number of the page on which this annotation is located in the endNode File if an endNode is present. The first page has number 1\n"
+                      },
+                      "startNodeXMin" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "float64",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Value between [0,1]. Minimum abscissa of the bounding box (left edge). Must be strictly less than startNodeXMax\n"
+                      },
+                      "startNodeXMax" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "float64",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Value between [0,1]. Maximum abscissa of the bounding box (right edge). Must be strictly more than startNodeXMin\n"
+                      },
+                      "startNodeYMin" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "float64",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Value between [0,1]. Minimum ordinate of the bounding box (bottom edge). Must be strictly less than startNodeYMax\n"
+                      },
+                      "startNodeYMax" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "float64",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Value between [0,1]. Maximum ordinate of the bounding box (top edge). Must be strictly more than startNodeYMin\n"
+                      },
+                      "startNodeText" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "text",
+                          "list" : false,
+                          "collation" : "ucs_basic"
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "The text extracted from within the bounding box on the startNode"
+                      },
+                      "endNodeXMin" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "float64",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Value between [0,1]. Minimum abscissa of the bounding box (left edge). Must be strictly less than endNodeXMax. Only applicable if an endNode is defined\n"
+                      },
+                      "endNodeXMax" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "float64",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Value between [0,1]. Maximum abscissa of the bounding box (right edge). Must be strictly more than endNodeXMin. Only applicable if an endNode is defined\n"
+                      },
+                      "endNodeYMin" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "float64",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Value between [0,1]. Minimum ordinate of the bounding box (bottom edge). Must be strictly less than endNodeYMax. Only applicable if an endNode is defined\n"
+                      },
+                      "endNodeYMax" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "float64",
+                          "list" : false
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "Value between [0,1]. Maximum ordinate of the bounding box (top edge). Must be strictly more than endNodeYMin. Only applicable if an endNode is defined\n"
+                      },
+                      "endNodeText" : {
+                        "constraintState" : {
+                          
+                        },
+                        "type" : {
+                          "type" : "text",
+                          "list" : false,
+                          "collation" : "ucs_basic"
+                        },
+                        "immutable" : false,
+                        "nullable" : true,
+                        "autoIncrement" : false,
+                        "description" : "The text extracted from within the bounding box on the endNode. Only applicable if an endNode is defined\n"
+                      }
+                    }
+                  }
+                }
+              },
+              "debug" : {
+                "notices" : [
+                  {
+                    "code" : "containersWithoutIndexesInvolved",
+                    "category" : "indexing",
+                    "level" : "warning",
+                    "hint" : "The query is using one or more containers that doesn't have any indexes declared.",
+                    "grade" : "C",
+                    "resultExpression" : "query",
+                    "containers" : [
+                      {
+                        "type" : "container",
+                        "space" : "cdf_cdm",
+                        "externalId" : "CogniteAnnotation"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
           }
         }
       }

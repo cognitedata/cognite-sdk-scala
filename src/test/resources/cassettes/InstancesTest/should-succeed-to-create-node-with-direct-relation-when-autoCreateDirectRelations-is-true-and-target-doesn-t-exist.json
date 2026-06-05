@@ -8,7 +8,7 @@
           "content-type" : "application/json",
           "cdf-version" : "alpha",
           "accept" : "application/json",
-          "x-cdp-sdk" : "CogniteScalaSDK:2.38.988",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.992",
           "accept-encoding" : "gzip, deflate",
           "x-cdp-app" : "scala-sdk-vcr-test"
         },
@@ -51,8 +51,8 @@
         },
         "headers" : {
           "server" : "envoy",
-          "x-request-id" : "9c42b5de-2230-9a0d-a8c8-ee3357334d8f",
-          "date" : "Fri, 05 Jun 2026 21:04:39 GMT",
+          "x-request-id" : "45e50145-d72a-9d2c-9549-ae068fc7f23c",
+          "date" : "Fri, 05 Jun 2026 22:12:18 GMT",
           "content-type" : "application/json",
           "transfer-encoding" : "chunked",
           "x-frame-options" : "DENY",
@@ -72,8 +72,8 @@
                   "space" : "testSpaceScalaSdk1",
                   "externalId" : "sdkTestDirectRelationContainer2",
                   "usedFor" : "node",
-                  "createdTime" : 1780693480074,
-                  "lastUpdatedTime" : 1780693480074,
+                  "createdTime" : 1780697538983,
+                  "lastUpdatedTime" : 1780697538983,
                   "isGlobal" : false,
                   "properties" : {
                     "relatedNode" : {
@@ -113,7 +113,7 @@
           "content-type" : "application/json",
           "cdf-version" : "alpha",
           "accept" : "application/json",
-          "x-cdp-sdk" : "CogniteScalaSDK:2.38.988",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.992",
           "accept-encoding" : "gzip, deflate",
           "x-cdp-app" : "scala-sdk-vcr-test"
         },
@@ -158,8 +158,8 @@
         },
         "headers" : {
           "server" : "envoy",
-          "x-request-id" : "cf9d6825-b1a7-9ddd-beb5-bd80a59ce41b",
-          "date" : "Fri, 05 Jun 2026 21:04:43 GMT",
+          "x-request-id" : "b64fd0cc-bfb0-936f-96fb-3871ad7bc274",
+          "date" : "Fri, 05 Jun 2026 22:12:22 GMT",
           "content-type" : "application/json",
           "transfer-encoding" : "chunked",
           "x-frame-options" : "DENY",
@@ -172,8 +172,55 @@
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
-            "type" : "__gzipped_by_vcr_library_due_to_size",
-            "gzipped" : "H4sIAAAAAAAA/51UTU/DMAy991dEOa8S2xDbuIJAuyBEBxe0Q9Z4UrQ0DYm7MU377ySBfqrTKnqoVL/n5xfb6SkihAqEzNJ78uk+CDmFtwvDN4JRTC65w6jluxVYfBQGUnwDyVDk6kPAYUJHZYbVLAVPRsdM/EeSMskSvhvXpD0Y61I9bd8IpwYYAl+JzCuMZ/Obu8X0dj5dzKYVRzKL75pf5R2MQLaRnoCmgCr+VYA59gGFBf6UG+9J5RxqV8I+y3zDpEO2TNo6Q5tcg0EBvnFly1zc+M4Af/EqTcCfMFcWDRMKE3QcD59HTQIedTepjlIeOk9HbVQKi6W5BtIWdpXR1QVzWb2mdAoMmenwhXkoy0zodbevvz0+LjkoFFsR/Lc63MoTWVaUY28NK6CqkLJn9AFjBeZL5TYwc4V6sznY1AiNf4t70YNiYS1bhAo/R53j0oxpDbxqSn0J/XPq2Y0Lcxo8pf/OqLS+rqyXJ/X5sf8PxK5YHKrG12QrkU5bfRLxWsRdRuL0SNAjg/VEpmUYYujkOiqtr6PzD81mMl7qBAAA"
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "sdkTestDirectRelationView2",
+                  "space" : "testSpaceScalaSdk1",
+                  "version" : "v1",
+                  "createdTime" : 1780697543101,
+                  "lastUpdatedTime" : 1780697543101,
+                  "writable" : true,
+                  "queryable" : true,
+                  "usedFor" : "node",
+                  "isGlobal" : false,
+                  "properties" : {
+                    "relatedNode" : {
+                      "constraintState" : {
+                        
+                      },
+                      "type" : {
+                        "type" : "direct",
+                        "list" : false
+                      },
+                      "container" : {
+                        "type" : "container",
+                        "space" : "testSpaceScalaSdk1",
+                        "externalId" : "sdkTestDirectRelationContainer2"
+                      },
+                      "containerPropertyIdentifier" : "relatedNode",
+                      "immutable" : false,
+                      "nullable" : true,
+                      "autoIncrement" : false,
+                      "description" : "relatedNode",
+                      "name" : "relatedNode"
+                    }
+                  },
+                  "mappedContainers" : [
+                    {
+                      "type" : "container",
+                      "space" : "testSpaceScalaSdk1",
+                      "externalId" : "sdkTestDirectRelationContainer2"
+                    }
+                  ],
+                  "name" : "Test-View-Sdk-Scala-sdkTestDirectRelationContainer2",
+                  "description" : "Test View For Sdk Scala sdkTestDirectRelationContainer2",
+                  "implements" : [
+                  ]
+                }
+              ]
+            }
           }
         }
       }
@@ -186,7 +233,7 @@
           "content-type" : "application/json",
           "cdf-version" : "alpha",
           "accept" : "application/json",
-          "x-cdp-sdk" : "CogniteScalaSDK:2.38.988",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.992",
           "accept-encoding" : "gzip, deflate",
           "x-cdp-app" : "scala-sdk-vcr-test"
         },
@@ -239,8 +286,8 @@
         },
         "headers" : {
           "server" : "envoy",
-          "x-request-id" : "beeed2ff-981f-955c-b021-43715c68cbcc",
-          "date" : "Fri, 05 Jun 2026 21:04:51 GMT",
+          "x-request-id" : "b568cd20-d9c3-9eae-b4a4-45550adff094",
+          "date" : "Fri, 05 Jun 2026 22:12:27 GMT",
           "content-type" : "application/json",
           "transfer-encoding" : "chunked",
           "x-frame-options" : "DENY",
@@ -262,8 +309,8 @@
                   "wasModified" : true,
                   "space" : "testSpaceScalaSdk1",
                   "externalId" : "nodeWithDirectRelation2",
-                  "createdTime" : 1780693491513,
-                  "lastUpdatedTime" : 1780693491513
+                  "createdTime" : 1780697547540,
+                  "lastUpdatedTime" : 1780697547540
                 }
               ],
               "deleted" : [
@@ -281,7 +328,7 @@
           "content-type" : "application/json",
           "cdf-version" : "alpha",
           "accept" : "application/json",
-          "x-cdp-sdk" : "CogniteScalaSDK:2.38.988",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.992",
           "accept-encoding" : "gzip, deflate",
           "x-cdp-app" : "scala-sdk-vcr-test"
         },
@@ -312,8 +359,8 @@
         },
         "headers" : {
           "server" : "envoy",
-          "x-request-id" : "49b6b54d-1d4a-970c-89fe-8607e998e47e",
-          "date" : "Fri, 05 Jun 2026 21:04:51 GMT",
+          "x-request-id" : "ffa8fab1-cc13-9737-8b33-8e7e5f47849a",
+          "date" : "Fri, 05 Jun 2026 22:12:27 GMT",
           "content-type" : "application/json",
           "transfer-encoding" : "chunked",
           "x-frame-options" : "DENY",
@@ -348,7 +395,7 @@
           "content-type" : "application/json",
           "cdf-version" : "alpha",
           "accept" : "application/json",
-          "x-cdp-sdk" : "CogniteScalaSDK:2.38.988",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.992",
           "accept-encoding" : "gzip, deflate",
           "x-cdp-app" : "scala-sdk-vcr-test"
         },
@@ -379,8 +426,8 @@
         },
         "headers" : {
           "server" : "envoy",
-          "x-request-id" : "98327711-df26-9456-ba06-7254295a93d3",
-          "date" : "Fri, 05 Jun 2026 21:04:53 GMT",
+          "x-request-id" : "063848fa-19c8-9ac7-ab22-2ed06306c6a4",
+          "date" : "Fri, 05 Jun 2026 22:12:29 GMT",
           "content-type" : "application/json",
           "transfer-encoding" : "chunked",
           "x-frame-options" : "DENY",
@@ -415,7 +462,7 @@
           "content-type" : "application/json",
           "cdf-version" : "alpha",
           "accept" : "application/json",
-          "x-cdp-sdk" : "CogniteScalaSDK:2.38.988",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.992",
           "accept-encoding" : "gzip, deflate",
           "x-cdp-app" : "scala-sdk-vcr-test"
         },
@@ -446,8 +493,8 @@
         },
         "headers" : {
           "server" : "envoy",
-          "x-request-id" : "96d4841e-0606-9eb2-8ef4-f082c8e34061",
-          "date" : "Fri, 05 Jun 2026 21:04:56 GMT",
+          "x-request-id" : "98b8c6a4-3c1f-9e98-b9c2-8fb1d1cfcbbe",
+          "date" : "Fri, 05 Jun 2026 22:12:31 GMT",
           "content-type" : "application/json",
           "transfer-encoding" : "chunked",
           "x-frame-options" : "DENY",
@@ -482,7 +529,7 @@
           "content-type" : "application/json",
           "cdf-version" : "alpha",
           "accept" : "application/json",
-          "x-cdp-sdk" : "CogniteScalaSDK:2.38.988",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.992",
           "accept-encoding" : "gzip, deflate",
           "x-cdp-app" : "scala-sdk-vcr-test"
         },
@@ -512,8 +559,8 @@
         },
         "headers" : {
           "server" : "envoy",
-          "x-request-id" : "3f0a1218-b130-9cb0-920f-7fafb70a61cf",
-          "date" : "Fri, 05 Jun 2026 21:04:58 GMT",
+          "x-request-id" : "4dcaed03-d9cb-97d8-bdf2-eeedbff48edd",
+          "date" : "Fri, 05 Jun 2026 22:12:34 GMT",
           "content-type" : "application/json",
           "transfer-encoding" : "chunked",
           "x-frame-options" : "DENY",
