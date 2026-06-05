@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 package com.cognite.sdk.scala.common
-import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._
 
 object Constants {
