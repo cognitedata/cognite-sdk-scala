@@ -1,0 +1,89 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances/list",
+        "headers" : {
+          "content-type" : "application/json",
+          "cdf-version" : "alpha",
+          "accept" : "application/json",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.984",
+          "accept-encoding" : "gzip, deflate",
+          "x-cdp-app" : "scala-sdk-vcr-test"
+        },
+        "entity" : {
+          "contentLength" : 358,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "sources" : [
+                {
+                  "source" : {
+                    "type" : "view",
+                    "space" : "cdf_cdm",
+                    "externalId" : "CogniteDiagramAnnotation",
+                    "version" : "v1"
+                  }
+                }
+              ],
+              "instanceType" : "edge",
+              "cursor" : null,
+              "limit" : null,
+              "sort" : null,
+              "filter" : {
+                "equals" : {
+                  "property" : [
+                    "cdf_cdm",
+                    "CogniteDiagramAnnotation/v1",
+                    "status"
+                  ],
+                  "value" : "Approved"
+                }
+              },
+              "debug" : {
+                "timeout" : null,
+                "emitResults" : false,
+                "profile" : null
+              },
+              "includeTyping" : true
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : "envoy",
+          "x-request-id" : "10e5e718-0fa8-9ed0-9e4b-0d079233298a",
+          "date" : "Fri, 05 Jun 2026 19:59:14 GMT",
+          "content-type" : "application/json",
+          "transfer-encoding" : "chunked",
+          "x-frame-options" : "DENY",
+          "x-content-type-options" : "nosniff",
+          "vary" : "Accept-Encoding",
+          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+        },
+        "entity" : {
+          "contentLength" : 11064,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/+1aS2/cNhC++1cQe6kDGFsbKHrozbBrdA91i9pparhGwpVGWhYUqfCx3kXg/54hKWkprfbhdB3YgA6JLXI4Gn4f56ExvxwRMmIGCj36hdw/nLhHsyyZyPH5Cz7hc5JmH5O0aAZw6ELmAlddMporWpwLIQ01TIof52eRGAoKWkBrxOmTQhtFmTA3uMpPP53EAmhAd9FqdGRgYUYn7TnOtMG5jHINnalEcu5tc2ttoj9OqWbJKBJqv5wVhTV0yqFP30hY1BYmjbLtOWqNnIhEQQGi15pRCjpRrKyt+U3yVBNKHEhEZsTMgDDEhooEyOMMFOAQNYShUFlylvg3t+0J+I6u3c9mItpR550DEduIiIa7fPTDfhnp6UXf0Fx/P9i7SLxu1Cf1UXcgkWPOCgwpKTGSnJ2envrRd/2w3zpUe/GmnFENA+QbID/nBpRA4+bgow7CXiG2AenzCs9esLW0KoFJOsSVDXBPUhRkGQOFccSHkwAZ0UuNObcf8psgMrncBvqFFB6mAfl+5Ct86ihewc7SMbmSqoJfNzm2FpikLtfmXE4p50tiBfuMhkQCtVqUgkUJSRWvsPwhU5QBM97KaVKxtoXYAzOaMoVWdjl1dqBKUGsLo6UroZOuiC5pEmSq0nBNAnfpAg33waEuFwMKN+Hst1Y8bTl0r+E4XXoYiYJw3h3nLU/eUSaEjW/1ZwXIbnrLDl8uo0q0rSi3OfZrwPjDDESnBKaaJAEYFz/biB+zjNA5Zd6ADdmrdrugYxv+78t0wL8Pf061ITag05vEnkNErGwPb3iv1yLUkOFqaxw4mNCaAiNTsuhhB4PV40w2bhQJIAt0TG5nmMsiNfjkslluqaKYrEJ+K6hJZsS236jdcbi4vNrH9ch0uYf3DXwfjO+W235v0lsv38Q8Eps5vQcveTIuqfn5p9cebm9nvh6sMAiNHkcUbZppvu9DcinTwMUGD0Jhe+gPXhC2W9SN5pTbtS9rP3Nj8xxzHHQ/BGvY6tPRiHVkOtUfLjkvSyXnuxQ2Ujv1/QX/+WJ9u75GqqvvTdWq7mCFQ1F//ayO1MYjpMy1TOFPmsO1LaYHD8O47m14pPC7r4ErEY8QURmGQuOiZts9uUzqwuhTg+IncsU4uCgLJGMKY6HXM8NqqlJ/9u8GJkCkAw//jwcnX8HoeSCuPBXNEAqXCjSa8k0ENST/8zs7dD/9jSSuv10eIFMwj4AfDPenJ2cPY4JosMIWhE51wrSmNXNTaUXKRI6/LMgxh8wQSHN4hyusDk0To1hi+JJw0NqlQUEikOliDyboYmBixQRd7MGEYvlsMxWFDH96alHBxE4q7gan6HMKqRB43Hs/FVNpDJbyz3CLu33c4m5wiz632M6FkeVznOJuH6e4Hfr0m7lyKdh31PGfor6f7j9sHxlmebHOkKw6UDW4W8uoIUe/XI5uIKaLMflD4NzqisJ6yZVCxgSkO8reIZO/YCaPfOJghA35/iXzfQPyAV1sqAperCqIfOJgdA21w+Frhwrab+ToKP7p/vfbR9OmNroyKaRhiW+W3lcLojuRiatb4j+w6w9osbRmIlJYgJ6IueSurRl3y5HpXKplaOKgmLuhGc1zmAN3k49Uic4cgmFqvD5bUEu3N6sdLFLgkVfhEK/MCc3oVIIWPxgyo3PXQsRVwTyEJeFUQRrfdRjlioZdXcSjCrTl5teFa7noirYw1tpc8+YIsDZoXm7XzYRd9xL6byWc93RH457vQ4ty9/R09PQVovettDgrAAA="
+          }
+        }
+      }
+    }
+  ],
+  "recordedEnv" : {
+    
+  }
+}

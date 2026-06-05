@@ -1,0 +1,403 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers",
+        "headers" : {
+          "content-type" : "application/json",
+          "cdf-version" : "alpha",
+          "accept" : "application/json",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.984",
+          "accept-encoding" : "gzip, deflate",
+          "x-cdp-app" : "scala-sdk-vcr-test"
+        },
+        "entity" : {
+          "contentLength" : 312,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "testSpaceScalaSdk1",
+                  "externalId" : "sdkTestDirectRelationContainer",
+                  "name" : "DirectRelationTestContainer",
+                  "description" : "Container for testing autoCreateDirectRelations",
+                  "usedFor" : "node",
+                  "properties" : {
+                    "relatedNode" : {
+                      "nullable" : true,
+                      "name" : "relatedNode",
+                      "type" : {
+                        "type" : "direct",
+                        "list" : false
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : "envoy",
+          "x-request-id" : "ece77c83-31d9-9631-817a-735e51c70cc2",
+          "date" : "Fri, 05 Jun 2026 19:59:17 GMT",
+          "content-type" : "application/json",
+          "transfer-encoding" : "chunked",
+          "x-frame-options" : "DENY",
+          "x-content-type-options" : "nosniff",
+          "vary" : "Accept-Encoding",
+          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+        },
+        "entity" : {
+          "contentLength" : 723,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "testSpaceScalaSdk1",
+                  "externalId" : "sdkTestDirectRelationContainer",
+                  "usedFor" : "node",
+                  "createdTime" : 1780689558157,
+                  "lastUpdatedTime" : 1780689558157,
+                  "isGlobal" : false,
+                  "properties" : {
+                    "relatedNode" : {
+                      "constraintState" : {
+                        
+                      },
+                      "type" : {
+                        "type" : "direct",
+                        "list" : false
+                      },
+                      "immutable" : false,
+                      "nullable" : true,
+                      "autoIncrement" : false,
+                      "name" : "relatedNode"
+                    }
+                  },
+                  "name" : "DirectRelationTestContainer",
+                  "description" : "Container for testing autoCreateDirectRelations",
+                  "constraints" : {
+                    
+                  },
+                  "indexes" : {
+                    
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/views",
+        "headers" : {
+          "content-type" : "application/json",
+          "cdf-version" : "alpha",
+          "accept" : "application/json",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.984",
+          "accept-encoding" : "gzip, deflate",
+          "x-cdp-app" : "scala-sdk-vcr-test"
+        },
+        "entity" : {
+          "contentLength" : 461,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "testSpaceScalaSdk1",
+                  "externalId" : "sdkTestDirectRelationView",
+                  "version" : "v1",
+                  "name" : "Test-View-Sdk-Scala-sdkTestDirectRelationContainer",
+                  "description" : "Test View For Sdk Scala sdkTestDirectRelationContainer",
+                  "properties" : {
+                    "relatedNode" : {
+                      "name" : "relatedNode",
+                      "description" : "relatedNode",
+                      "container" : {
+                        "type" : "container",
+                        "space" : "testSpaceScalaSdk1",
+                        "externalId" : "sdkTestDirectRelationContainer"
+                      },
+                      "containerPropertyIdentifier" : "relatedNode"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/views",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : "envoy",
+          "x-request-id" : "4a4f8988-5749-979b-a557-7e031deb9ece",
+          "date" : "Fri, 05 Jun 2026 19:59:23 GMT",
+          "content-type" : "application/json",
+          "transfer-encoding" : "chunked",
+          "x-frame-options" : "DENY",
+          "x-content-type-options" : "nosniff",
+          "vary" : "Accept-Encoding",
+          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+        },
+        "entity" : {
+          "contentLength" : 1253,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/51UwU7DMAy99yuinleJSmwMriDQLgjRwQXtEBpPipamIXE3pmn/Thxou1adVtFDpfo9P7/YTg8RY7FEKFx8xz78B2OH8PZh+EawmquF8FjsxGYJDh+khRxfQXGUpX6XsIsndYIzPAfioidm9JHlXPFMbNKWtAXrfCbRtifh3AJHEEtZkEJ6M7+azW+ns+l1mjYcxR2+GXGRt7MS+aciAtoKmvhXBXY/BFQOxGNpyZMuBbSupHtS5SdXHllz5doMY0sDFiVQ3+qO+bilxoB4JpVTgE5YaoeWS40Zeg7Bx8kpAfemn9RGYxEaH0+6qJIOa3MnSFfYV0ZfF+x59ZbSKzBmpuP35b4pc9nsy2+L9wsBGuVaBvudBnfyZFFU9dQ7swqorpQamHzAeIXlQvsFLHyhwWwBLrfS4N/envWgedjKDqHBj1HvuHHBjQHR9KS9gvQcBlbjzJhGD+mfI6qdrxrn9UEpPaGfQOJrJaFockG10eg1lXIYSTF/E5mXY0GOjZWThVFhgqGNq6g2voqOPx+tQhPlBAAA"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances",
+        "headers" : {
+          "content-type" : "application/json",
+          "cdf-version" : "alpha",
+          "accept" : "application/json",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.984",
+          "accept-encoding" : "gzip, deflate",
+          "x-cdp-app" : "scala-sdk-vcr-test"
+        },
+        "entity" : {
+          "contentLength" : 492,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "instanceType" : "node",
+                  "type" : null,
+                  "space" : "testSpaceScalaSdk1",
+                  "externalId" : "nodeWithDirectRelation",
+                  "sources" : [
+                    {
+                      "source" : {
+                        "type" : "view",
+                        "space" : "testSpaceScalaSdk1",
+                        "externalId" : "sdkTestDirectRelationView",
+                        "version" : "v1"
+                      },
+                      "properties" : {
+                        "relatedNode" : {
+                          "space" : "testSpaceScalaSdk1",
+                          "externalId" : "non-existent-node-for-direct-relation-test"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "autoCreateStartNodes" : false,
+              "autoCreateEndNodes" : false,
+              "autoCreateDirectRelations" : false,
+              "skipOnVersionConflict" : false,
+              "replace" : false
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances",
+        "status" : {
+          "code" : 400,
+          "reason" : "Bad Request"
+        },
+        "headers" : {
+          "server" : "envoy",
+          "x-request-id" : "0ddce7e8-9b11-9031-928c-fc233ec85cef",
+          "date" : "Fri, 05 Jun 2026 19:59:29 GMT",
+          "content-type" : "application/json",
+          "transfer-encoding" : "chunked",
+          "x-frame-options" : "DENY",
+          "x-content-type-options" : "nosniff",
+          "vary" : "Accept-Encoding",
+          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+        },
+        "entity" : {
+          "contentLength" : 195,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "error" : {
+                "code" : 400,
+                "message" : "Node with external id 'non-existent-node-for-direct-relation-test' was referenced as the target of a direct relation, but it does not exist."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/views/delete",
+        "headers" : {
+          "content-type" : "application/json",
+          "cdf-version" : "alpha",
+          "accept" : "application/json",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.984",
+          "accept-encoding" : "gzip, deflate",
+          "x-cdp-app" : "scala-sdk-vcr-test"
+        },
+        "entity" : {
+          "contentLength" : 98,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "testSpaceScalaSdk1",
+                  "externalId" : "sdkTestDirectRelationView",
+                  "version" : "v1"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/views/delete",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : "envoy",
+          "x-request-id" : "0efd3d6a-78e6-92ec-9e09-159c35fec366",
+          "date" : "Fri, 05 Jun 2026 19:59:29 GMT",
+          "content-type" : "application/json",
+          "transfer-encoding" : "chunked",
+          "x-frame-options" : "DENY",
+          "x-content-type-options" : "nosniff",
+          "vary" : "Accept-Encoding",
+          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+        },
+        "entity" : {
+          "contentLength" : 140,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "sdkTestDirectRelationView",
+                  "space" : "testSpaceScalaSdk1",
+                  "version" : "v1"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers/delete",
+        "headers" : {
+          "content-type" : "application/json",
+          "cdf-version" : "alpha",
+          "accept" : "application/json",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.984",
+          "accept-encoding" : "gzip, deflate",
+          "x-cdp-app" : "scala-sdk-vcr-test"
+        },
+        "entity" : {
+          "contentLength" : 88,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "testSpaceScalaSdk1",
+                  "externalId" : "sdkTestDirectRelationContainer"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers/delete",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : "envoy",
+          "x-request-id" : "6da75c5e-9aa7-9e8f-8013-004037b201e4",
+          "date" : "Fri, 05 Jun 2026 19:59:32 GMT",
+          "content-type" : "application/json",
+          "transfer-encoding" : "chunked",
+          "x-frame-options" : "DENY",
+          "x-content-type-options" : "nosniff",
+          "vary" : "Accept-Encoding",
+          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+        },
+        "entity" : {
+          "contentLength" : 122,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "sdkTestDirectRelationContainer",
+                  "space" : "testSpaceScalaSdk1"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "recordedEnv" : {
+    
+  }
+}

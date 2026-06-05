@@ -1,0 +1,104 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances/sync",
+        "headers" : {
+          "content-type" : "application/json",
+          "cdf-version" : "alpha",
+          "accept" : "application/json",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.984",
+          "accept-encoding" : "gzip, deflate",
+          "x-cdp-app" : "scala-sdk-vcr-test"
+        },
+        "entity" : {
+          "contentLength" : 488,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "with" : {
+                "sync" : {
+                  "edges" : {
+                    "from" : null,
+                    "chainTo" : "destination",
+                    "maxDistance" : null,
+                    "direction" : "inwards",
+                    "filter" : {
+                      "equals" : {
+                        "property" : [
+                          "cdf_cdm",
+                          "CogniteDiagramAnnotation/v1",
+                          "status"
+                        ],
+                        "value" : "Approved"
+                      }
+                    },
+                    "nodeFilter" : null,
+                    "terminationFilter" : null
+                  }
+                }
+              },
+              "select" : {
+                "sync" : {
+                  "sources" : [
+                    {
+                      "source" : {
+                        "type" : "view",
+                        "space" : "cdf_cdm",
+                        "externalId" : "CogniteDiagramAnnotation",
+                        "version" : "v1"
+                      },
+                      "properties" : [
+                        "status"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "includeTyping" : true,
+              "debug" : {
+                "timeout" : null,
+                "emitResults" : true,
+                "profile" : null
+              }
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances/sync",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : "envoy",
+          "x-request-id" : "136f3ec7-732a-9d90-a66b-8e9926769873",
+          "date" : "Fri, 05 Jun 2026 19:59:16 GMT",
+          "content-type" : "application/json",
+          "transfer-encoding" : "chunked",
+          "x-frame-options" : "DENY",
+          "x-content-type-options" : "nosniff",
+          "vary" : "Accept-Encoding",
+          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+        },
+        "entity" : {
+          "contentLength" : 12602,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      }
+    }
+  ],
+  "recordedEnv" : {
+    
+  }
+}
