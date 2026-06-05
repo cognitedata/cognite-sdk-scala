@@ -385,12 +385,12 @@ object Utils {
         InstancePropertyValue.Float64List((1 to 10).map(_ => random.nextDouble()).toList)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Date, Some(true)) =>
         InstancePropertyValue.DateList(
-          (1 to 10).toList.map(i => LocalDate.now().minusDays(i.toLong))
+          (1 to 10).toList.map(i => LocalDate.of(2025, 1, 1).minusDays(i.toLong))
         )
       case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, Some(true)) =>
         InstancePropertyValue.TimestampList(
           (1 to 10).toList.map(i =>
-            LocalDateTime.now().minusDays(i.toLong).atZone(ZoneId.of("UTC"))
+            LocalDateTime.of(2025, 1, 1, 0, 0, 0, 0).minusDays(i.toLong).atZone(ZoneId.of("UTC"))
           )
         )
       case PropertyType.PrimitiveProperty(PrimitivePropType.Json, Some(true)) =>
@@ -425,10 +425,10 @@ object Utils {
       case PropertyType.PrimitiveProperty(PrimitivePropType.Float64, None | Some(false)) =>
         InstancePropertyValue.Float64(random.nextDouble())
       case PropertyType.PrimitiveProperty(PrimitivePropType.Date, None | Some(false)) =>
-        InstancePropertyValue.Date(LocalDate.now().minusDays(random.nextInt(30).toLong))
+        InstancePropertyValue.Date(LocalDate.of(2025, 1, 1).minusDays(random.nextInt(30).toLong))
       case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, None | Some(false)) =>
         InstancePropertyValue.Timestamp(
-          LocalDateTime.now().minusDays(random.nextInt(30).toLong).atZone(ZoneId.of("UTC"))
+          LocalDateTime.of(2025, 1, 1, 0, 0, 0, 0).minusDays(random.nextInt(30).toLong).atZone(ZoneId.of("UTC"))
         )
       case PropertyType.PrimitiveProperty(PrimitivePropType.Json, None | Some(false)) =>
         InstancePropertyValue.Object(
