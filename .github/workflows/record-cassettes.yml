@@ -4,11 +4,12 @@ name: Record VCR Cassettes
 # Runs tests in RECORD mode, commits any new/updated cassette files back to the PR branch.
 on:
   pull_request:
-    types: [labeled]
+    types: [ labeled,opened,reopened,synchronize ]
+    branches: [ master ]
 
 jobs:
   record:
-    if: github.event.label.name == 'record-cassettes'
+    if: contains(github.event.pull_request.labels.*.name, 'record-cassettes')
     runs-on: ubuntu-latest
     environment: CI
 
