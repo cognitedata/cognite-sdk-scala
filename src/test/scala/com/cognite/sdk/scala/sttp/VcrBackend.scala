@@ -67,7 +67,7 @@ object RecordedContent {
     }
   }
 
-  private val GzipThreshold = 1000
+  private val GzipThreshold = 1000000
 
   def fromBytes(bytes: Array[Byte], contentType: String): RecordedContent = {
     val mimeType = contentType.split(";")(0).strip().toLowerCase(Locale.ROOT)
