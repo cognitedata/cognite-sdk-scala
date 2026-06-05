@@ -74,7 +74,7 @@ abstract class VcrTestSpec
 
   override def beforeEach(testData: TestData): Unit = {
     val path = cassettePath(testData.name)
-    val mode = VcrMode.fromEnv(VcrMode.Auto) match {
+    val mode = VcrMode.fromEnv(VcrMode.Playback) match {
       case VcrMode.Auto =>
         if (java.nio.file.Files.exists(java.nio.file.Paths.get(path))) VcrMode.Playback
         else VcrMode.Record
