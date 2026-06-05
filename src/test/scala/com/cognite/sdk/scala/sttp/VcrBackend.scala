@@ -298,10 +298,7 @@ class VcrBackend[F[_]](
 
     val bodyError = (actualBody, expectedBody) match {
       case (Some(actual), Some(expected)) =>
-        Option.when(!bodiesMatch(actual, expected))(
-          s"Body mismatch:\n  expected: ${new String(expected, "UTF-8")}" +
-            s"\n  actual:   ${new String(actual, "UTF-8")}"
-        )
+        Option.when(!bodiesMatch(actual, expected))(bodyMismatchMessage(actual, expected))
       case (None, Some(_)) => Some("Expected a request body but got none")
       case (Some(_), None) => Some("Got a request body but expected none")
       case _               => None
@@ -341,6 +338,54 @@ class VcrBackend[F[_]](
       (parse(actualStr), parse(expectedStr)) match {
         case (Right(j1), Right(j2)) => j1.equals(j2)
         case _                      => false
+      }
+  }
+
+  private def bodyMismatchMessage(actual: Array[Byte], expected: Array[Byte]): String = {
+    val actualStr = new String(actual, "UTF-8")
+    val expectedStr = new String(expected, "UTF-8")
+    (parse(actualStr), parse(expectedStr)) match {
+      case (Right(aj), Right(ej)) =>
+        jsonDiff(aj, ej, "$")
+          .map(d => s"Body mismatch at $d")
+          .getOrElse(s"Body mismatch (JSON is semantically equal but raw bytes differ)")
+      case _ =>
+        s"Body mismatch:\n  expected: $expectedStr\n  actual:   $actualStr"
+    }
+  }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
+  private def jsonDiff(actual: Json, expected: Json, path: String): Option[String] = {
+    if (actual == expected) None
+    else
+      (actual.asObject, expected.asObject) match {
+        case (Some(ao), Some(eo)) =>
+          val missing = eo.keys.toVector.filterNot(k => ao.contains(k))
+          val extra   = ao.keys.toVector.filterNot(k => eo.contains(k))
+          missing.headOption
+            .map(k => s"$path.$k: expected ${eo(k).fold("null")(_.noSpaces)}, got missing")
+            .orElse(
+              extra.headOption.map(k =>
+                s"$path.$k: expected missing, got ${ao(k).fold("null")(_.noSpaces)}"
+              )
+            )
+            .orElse(
+              eo.toIterable
+                .flatMap { case (k, ev) => ao(k).flatMap(av => jsonDiff(av, ev, s"$path.$k")) }
+                .headOption
+            )
+        case _ =>
+          (actual.asArray, expected.asArray) match {
+            case (Some(aa), Some(ea)) =>
+              if (aa.lengthIs != ea.length)
+                Some(s"$path: expected array of length ${ea.length}, got ${aa.length}")
+              else
+                aa.zip(ea).zipWithIndex
+                  .flatMap { case ((av, ev), i) => jsonDiff(av, ev, s"$path[$i]") }
+                  .headOption
+            case _ =>
+              Some(s"$path: expected ${expected.noSpaces}, got ${actual.noSpaces}")
+          }
       }
   }
 
