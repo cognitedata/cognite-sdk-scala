@@ -475,8 +475,7 @@ object Utils {
       case PrimitiveProperty(PrimitivePropType.Timestamp, _) =>
         Some(
           PropertyDefaultValue.String(
-            LocalDateTime
-              .now()
+            LocalDateTime.of(2025, 1, 1, 0, 0, 0, 0)
               .atZone(ZoneId.of("UTC"))
               .format(InstancePropertyValue.Timestamp.formatter)
           )
@@ -484,7 +483,7 @@ object Utils {
       case PrimitiveProperty(PrimitivePropType.Date, _) =>
         Some(
           PropertyDefaultValue.String(
-            LocalDate.now().format(InstancePropertyValue.Date.formatter)
+            LocalDate.of(2025, 1, 1).format(InstancePropertyValue.Date.formatter)
           )
         )
       case PrimitiveProperty(PrimitivePropType.Json, _) =>
