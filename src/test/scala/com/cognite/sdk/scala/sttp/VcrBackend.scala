@@ -293,6 +293,10 @@ class VcrBackend[F[_]](
       s"URI mismatch:\n  expected: ${recorded.uri}\n  actual:   ${request.uri}"
     )
 
+    val headerErrors = Option.when(!toHeaderMap(request.headers).equals(recorded.headers))(
+      s"Header mismatch:\n expected: ${recorded.headers}\n actual:   ${toHeaderMap(request.headers)}"
+    )
+
     val actualBody = extractRequestBody(request)
     val expectedBody = recorded.entity.map(_.content.toBytes)
 
@@ -304,7 +308,7 @@ class VcrBackend[F[_]](
       case _               => None
     }
 
-    val errors = List(methodError, uriError, bodyError).flatten
+    val errors = List(methodError, uriError, headerErrors, bodyError).flatten
     if (errors.isEmpty) None else Some(new RequestMismatch(errors))
   }
 
@@ -438,7 +442,7 @@ class VcrBackend[F[_]](
   }
 
   private val SensitiveHeaders: Set[String] =
-    Set("authorization", "x-api-key", "cookie", "set-cookie")
+    Set("authorization", "x-api-key", "cookie", "set-cookie", "x-cdp-sdk")
 
   private def toHeaderMap(headers: Seq[Header]): Map[String, List[String]] =
     headers
