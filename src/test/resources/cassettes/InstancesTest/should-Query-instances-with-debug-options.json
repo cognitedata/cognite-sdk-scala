@@ -8,7 +8,7 @@
           "content-type" : "application/json",
           "cdf-version" : "alpha",
           "accept" : "application/json",
-          "x-cdp-sdk" : "CogniteScalaSDK:2.38.984",
+          "x-cdp-sdk" : "CogniteScalaSDK:2.38.988",
           "accept-encoding" : "gzip, deflate",
           "x-cdp-app" : "scala-sdk-vcr-test"
         },
@@ -77,8 +77,8 @@
         },
         "headers" : {
           "server" : "envoy",
-          "x-request-id" : "b1015837-a0ff-9ae3-90b3-43d0fcc67ce1",
-          "date" : "Fri, 05 Jun 2026 19:59:15 GMT",
+          "x-request-id" : "3930a58a-dca2-9366-bd1c-a6feb7d21d8e",
+          "date" : "Fri, 05 Jun 2026 21:04:22 GMT",
           "content-type" : "application/json",
           "transfer-encoding" : "chunked",
           "x-frame-options" : "DENY",
