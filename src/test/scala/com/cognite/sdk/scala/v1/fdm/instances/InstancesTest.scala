@@ -1,10 +1,8 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
 import cats.implicits.toBifunctorOps
-import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice}
-import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
+import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice, VcrTestSpec}
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.{Equals, HasData}
@@ -31,7 +29,9 @@ import scala.concurrent.duration.DurationInt
     "org.wartremover.warts.OptionPartial"
   )
 )
-class InstancesTest extends CommonDataModelTestHelper {
+class InstancesTest extends VcrTestSpec {
+  override protected def cdfVersion: Option[String] = Some("alpha")
+
   private val space = Utils.SpaceExternalId
 
   private val edgeNodeContainerExtId = "sdkTest16EdgeNodeContainer2"
@@ -49,22 +49,6 @@ class InstancesTest extends CommonDataModelTestHelper {
   private val viewVersion = Utils.ViewVersion
 
   it should "CRUD instances with all property types" in {
-
-//    deleteContainers(Seq(
-//      ContainerId(space, edgeNodeContainerExtId),
-//      ContainerId(space, edgeContainerExtId),
-//      ContainerId(space, nodeContainer1ExtId),
-//      ContainerId(space, nodeContainer2ExtId),
-//      ContainerId(space, containerForDirectNodeRelationExtId)
-//    ))
-//
-//    deleteViews(Seq(
-//      DataModelReference(space, edgeNodeViewExtId, Some(viewVersion)),
-//      DataModelReference(space, edgeViewExtId, Some(viewVersion)),
-//      DataModelReference(space, nodeView1ExtId, Some(viewVersion)),
-//      DataModelReference(space, nodeView2ExtId, Some(viewVersion)),
-//      DataModelReference(space, viewForDirectNodeRelationExtId, Some(viewVersion))
-//    ))
 
     createContainerForDirectNodeRelations.unsafeRunSync()
 
@@ -210,8 +194,8 @@ class InstancesTest extends CommonDataModelTestHelper {
     // The read data equals the original creation data, since the above should be a noop
     instancePropertyMapEquals(writeDataToMap(edgeWriteData), readEditedEdge) shouldBe true
 
-    val queryedNodes = testClient.instances.queryStream(
-      TableExpression(nodes = Option(NodesTableExpression(filter = 
+    val queryedNodes = client.instances.queryStream(
+      TableExpression(nodes = Option(NodesTableExpression(filter =
         Some(
           Equals(property= Seq("node", "space"), value= FilterValueDefinition.String(space))
         )))),
@@ -256,7 +240,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   it should "List instances with debug options, handle 408 and parse debug notice" in {
-    val errorReturn = testClientWithoutRetries.instances.filter(
+    val errorReturn = rawClient.instances.filter(
       filterRequest = InstanceFilterRequest(
         instanceType = Some(InstanceType.Edge),
         sources = Some(
@@ -307,7 +291,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   it should "List instances with debug options and parse debug notice on sucessful request" in {
-    val listedInstances = testClientWithoutRetries.instances.filter(
+    val listedInstances = rawClient.instances.filter(
       filterRequest = InstanceFilterRequest(
         instanceType = Some(InstanceType.Edge),
         sources = Some(
@@ -351,7 +335,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   it should "Query instances with debug options" in {
-    val queryResponse = testClientWithoutRetries.instances.queryRequest(
+    val queryResponse = rawClient.instances.queryRequest(
       queryRequest = InstanceQueryRequest(
         `with` = Map(
           "query" -> TableExpression(
@@ -400,7 +384,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   }
 
   it should "Sync instances with debug options" in {
-    val syncedInstances = testClientWithoutRetries.instances.syncRequest(
+    val syncedInstances = rawClient.instances.syncRequest(
       syncRequest = InstanceSyncRequest(
         `with` = Map(
           "sync" -> TableExpression(
@@ -448,39 +432,162 @@ class InstancesTest extends CommonDataModelTestHelper {
     )
   }
 
+  it should "fail to create node with direct relation when autoCreateDirectRelations is false and target doesn't exist" in {
+    val directRelationContainerExtId = "sdkTestDirectRelationContainer"
+    val directRelationViewExtId = "sdkTestDirectRelationView"
+
+    val containerProps: Map[String, ContainerPropertyDefinition] = Map(
+      "relatedNode" -> ContainerPropertyDefinition(
+        nullable = Some(true),
+        autoIncrement = None,
+        defaultValue = None,
+        description = None,
+        name = Some("relatedNode"),
+        `type` = PropertyType.DirectNodeRelationProperty(None, None, Some(false))
+      )
+    )
+
+    val containerCreation = ContainerCreateDefinition(
+      space = space,
+      externalId = directRelationContainerExtId,
+      name = Some("DirectRelationTestContainer"),
+      description = Some("Container for testing autoCreateDirectRelations"),
+      usedFor = Some(Usage.Node),
+      properties = containerProps,
+      constraints = None,
+      indexes = None
+    )
+
+    val viewCreation = toViewCreateDef(directRelationViewExtId, viewVersion, containerCreation)
+
+    val setup = for {
+      _ <- createContainers(Seq(containerCreation))
+      _ <- createViews(Seq(viewCreation))
+    } yield ()
+    setup.unsafeRunSync()
+
+    val nonExistentNodeRef = DirectRelationReference(space, "non-existent-node-for-direct-relation-test")
+    val nodeWithDirectRelation = NodeOrEdgeCreate.NodeWrite(
+      space = space,
+      externalId = "nodeWithDirectRelation",
+      sources = Some(Seq(
+        EdgeOrNodeData(
+          source = ViewReference(space, directRelationViewExtId, viewVersion),
+          properties = Some(Map(
+            "relatedNode" -> Some(InstancePropertyValue.ViewDirectNodeRelation(Some(nonExistentNodeRef)))
+          ))
+        )
+      )),
+      `type` = None
+    )
+
+    val ex = intercept[CdpApiException] {
+      client.instances.createItems(
+        InstanceCreate(
+          items = Seq(nodeWithDirectRelation),
+          autoCreateDirectRelations = Some(false)
+        )
+      ).unsafeRunSync()
+    }
+    ex.code shouldBe 400
+
+    deleteViews(Seq(DataModelReference(space, directRelationViewExtId, Some(viewVersion))))
+    deleteContainers(Seq(ContainerId(space, directRelationContainerExtId)))
+  }
+
+  it should "succeed to create node with direct relation when autoCreateDirectRelations is true and target doesn't exist" in {
+    val directRelationContainerExtId = "sdkTestDirectRelationContainer2"
+    val directRelationViewExtId = "sdkTestDirectRelationView2"
+
+    val containerProps: Map[String, ContainerPropertyDefinition] = Map(
+      "relatedNode" -> ContainerPropertyDefinition(
+        nullable = Some(true),
+        autoIncrement = None,
+        defaultValue = None,
+        description = None,
+        name = Some("relatedNode"),
+        `type` = PropertyType.DirectNodeRelationProperty(None, None, Some(false))
+      )
+    )
+
+    val containerCreation = ContainerCreateDefinition(
+      space = space,
+      externalId = directRelationContainerExtId,
+      name = Some("DirectRelationTestContainer2"),
+      description = Some("Container for testing autoCreateDirectRelations=true"),
+      usedFor = Some(Usage.Node),
+      properties = containerProps,
+      constraints = None,
+      indexes = None
+    )
+
+    val viewCreation = toViewCreateDef(directRelationViewExtId, viewVersion, containerCreation)
+
+    val setup = for {
+      _ <- createContainers(Seq(containerCreation))
+      _ <- createViews(Seq(viewCreation))
+    } yield ()
+    setup.unsafeRunSync()
+
+    val autoCreatedNodeExtId = "auto-created-node-for-direct-relation-test"
+    val nonExistentNodeRef = DirectRelationReference(space, autoCreatedNodeExtId)
+    val nodeWithDirectRelation = NodeOrEdgeCreate.NodeWrite(
+      space = space,
+      externalId = "nodeWithDirectRelation2",
+      sources = Some(Seq(
+        EdgeOrNodeData(
+          source = ViewReference(space, directRelationViewExtId, viewVersion),
+          properties = Some(Map(
+            "relatedNode" -> Some(InstancePropertyValue.ViewDirectNodeRelation(Some(nonExistentNodeRef)))
+          ))
+        )
+      )),
+      `type` = None
+    )
+
+    val result = client.instances.createItems(
+      InstanceCreate(
+        items = Seq(nodeWithDirectRelation),
+        autoCreateDirectRelations = Some(true)
+      )
+    ).unsafeRunSync()
+
+    result.size should be >= 1
+    result.exists(_.externalId === "nodeWithDirectRelation2") shouldBe true
+
+    deleteInstance(Seq(NodeDeletionRequest(space, "nodeWithDirectRelation2")))
+    scala.util.Try {
+      deleteInstance(Seq(NodeDeletionRequest(space, autoCreatedNodeExtId)))
+    }
+    deleteViews(Seq(DataModelReference(space, directRelationViewExtId, Some(viewVersion))))
+    deleteContainers(Seq(ContainerId(space, directRelationContainerExtId)))
+  }
+
   private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
     case n: NodeOrEdgeCreate.NodeWrite => n.sources
     case e: NodeOrEdgeCreate.EdgeWrite => e.sources
   }).getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).flatMap {case (k, v) => v.map(k -> _)}.toMap
 
-  private def createContainers(items: Seq[ContainerCreateDefinition]) = {
-    testClient.containers.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
-  }
+  private def createContainers(items: Seq[ContainerCreateDefinition]) =
+    client.containers.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
 
-  private def deleteContainers(items: Seq[ContainerId]) = {
-    testClient.containers.delete(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
-  }
+  private def deleteContainers(items: Seq[ContainerId]) =
+    client.containers.delete(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
 
-  private def createViews(items: Seq[ViewCreateDefinition]) = {
-    testClient.views.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
-  }
+  private def createViews(items: Seq[ViewCreateDefinition]) =
+    client.views.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
 
-  private def createInstance(writeData: Seq[NodeOrEdgeCreate]): IO[Seq[SlimNodeOrEdge]] = {
-    testClient.instances.createItems(
-      InstanceCreate(items = writeData)
-    ).flatTap(_ => IO.sleep(2.seconds))
-  }
+  private def createInstance(writeData: Seq[NodeOrEdgeCreate]): IO[Seq[SlimNodeOrEdge]] =
+    client.instances.createItems(InstanceCreate(items = writeData)).flatTap(_ => IO.sleep(2.seconds))
 
-  private def deleteInstance(refs: Seq[InstanceDeletionRequest]): Seq[InstanceDeletionRequest] = {
-    testClient.instances.delete(instanceRefs = refs).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
-  }
+  private def deleteInstance(refs: Seq[InstanceDeletionRequest]): Seq[InstanceDeletionRequest] =
+    client.instances.delete(instanceRefs = refs).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
 
-  private def deleteViews(items: Seq[DataModelReference]) = {
-    testClient.views.deleteItems(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
-  }
+  private def deleteViews(items: Seq[DataModelReference]) =
+    client.views.deleteItems(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
 
-  private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) = {
-    testClient.instances.retrieveByExternalIds(items = Seq(
+  private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) =
+    client.instances.retrieveByExternalIds(items = Seq(
       InstanceRetrieve(InstanceType.Node, instanceExternalId, viewRef.space)),
       includeTyping = true,
       sources = Some(Seq(InstanceSource(viewRef)))
@@ -491,12 +598,10 @@ class InstancesTest extends CommonDataModelTestHelper {
         n.properties.getOrElse(Map.empty).values.flatMap(_.values).foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
       }.foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
     }
-  }
 
   private def syncNodeInstances(viewRef: ViewReference) = {
     val hasData = HasData(Seq(viewRef))
-
-    testClient.instances.syncRequest(
+    client.instances.syncRequest(
       InstanceSyncRequest(
         `with` = Map("sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = None,
@@ -508,8 +613,7 @@ class InstancesTest extends CommonDataModelTestHelper {
 
   private def queryNodeInstances(viewRef: ViewReference) = {
     val hasData = HasData(Seq(viewRef))
-
-    testClient.instances.queryRequest(
+    client.instances.queryRequest(
       InstanceQueryRequest(
         `with` = Map("query" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = None,
@@ -524,8 +628,8 @@ class InstancesTest extends CommonDataModelTestHelper {
     )
   }
 
-  private def fetchEdgeInstance(viewRef: ViewReference, instanceExternalId: String) = {
-    testClient.instances.retrieveByExternalIds(items = Seq(
+  private def fetchEdgeInstance(viewRef: ViewReference, instanceExternalId: String) =
+    client.instances.retrieveByExternalIds(items = Seq(
       InstanceRetrieve(InstanceType.Edge, instanceExternalId, viewRef.space)),
       includeTyping = true,
       sources = Some(Seq(InstanceSource(viewRef)))
@@ -536,9 +640,8 @@ class InstancesTest extends CommonDataModelTestHelper {
         n.properties.getOrElse(Map.empty).values.flatMap(_.values).foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
       }.foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
     }
-  }
 
-  private def toViewCreateDef(viewExternalId: String, viewVersion: String, container: ContainerCreateDefinition): ViewCreateDefinition = {
+  private def toViewCreateDef(viewExternalId: String, viewVersion: String, container: ContainerCreateDefinition): ViewCreateDefinition =
     ViewCreateDefinition(
       space = space,
       externalId = viewExternalId,
@@ -556,9 +659,7 @@ class InstancesTest extends CommonDataModelTestHelper {
       },
       implements = None
     )
-  }
 
-  // compare timestamps adhering to the accepted format
   private def instancePropertyMapEquals(expected: Map[String, InstancePropertyValue], actual: Map[String, InstancePropertyValue]): Boolean = {
     val sizeEquals = actual.size === expected.size
     sizeEquals && expected.forall {
@@ -629,148 +730,4 @@ class InstancesTest extends CommonDataModelTestHelper {
       createInstance(Seq(instanceData))
     }) *> IO.sleep(2.seconds)
   }
-
-  it should "fail to create node with direct relation when autoCreateDirectRelations is false and target doesn't exist" in {
-    val directRelationContainerExtId = "sdkTestDirectRelationContainer"
-    val directRelationViewExtId = "sdkTestDirectRelationView"
-
-    // Create container with a direct relation property
-    val containerProps: Map[String, ContainerPropertyDefinition] = Map(
-      "relatedNode" -> ContainerPropertyDefinition(
-        nullable = Some(true),
-        autoIncrement = None,
-        defaultValue = None,
-        description = None,
-        name = Some("relatedNode"),
-        `type` = PropertyType.DirectNodeRelationProperty(None, None, Some(false))
-      )
-    )
-
-    val containerCreation = ContainerCreateDefinition(
-      space = space,
-      externalId = directRelationContainerExtId,
-      name = Some("DirectRelationTestContainer"),
-      description = Some("Container for testing autoCreateDirectRelations"),
-      usedFor = Some(Usage.Node),
-      properties = containerProps,
-      constraints = None,
-      indexes = None
-    )
-
-    val viewCreation = toViewCreateDef(directRelationViewExtId, viewVersion, containerCreation)
-
-    val setup = for {
-      _ <- createContainers(Seq(containerCreation))
-      _ <- createViews(Seq(viewCreation))
-    } yield ()
-    setup.unsafeRunSync()
-
-    // Create a node with a direct relation pointing to a non-existent node
-    val nonExistentNodeRef = DirectRelationReference(space, "non-existent-node-for-direct-relation-test")
-    val nodeWithDirectRelation = NodeOrEdgeCreate.NodeWrite(
-      space = space,
-      externalId = "nodeWithDirectRelation",
-      sources = Some(Seq(
-        EdgeOrNodeData(
-          source = ViewReference(space, directRelationViewExtId, viewVersion),
-          properties = Some(Map(
-            "relatedNode" -> Some(InstancePropertyValue.ViewDirectNodeRelation(Some(nonExistentNodeRef)))
-          ))
-        )
-      )),
-      `type` = None
-    )
-
-    // Should fail when autoCreateDirectRelations is false
-    val ex = intercept[CdpApiException] {
-      testClient.instances.createItems(
-        InstanceCreate(
-          items = Seq(nodeWithDirectRelation),
-          autoCreateDirectRelations = Some(false)
-        )
-      ).unsafeRunSync()
-    }
-    ex.code shouldBe 400
-
-    // Cleanup
-    deleteViews(Seq(DataModelReference(space, directRelationViewExtId, Some(viewVersion))))
-    deleteContainers(Seq(ContainerId(space, directRelationContainerExtId)))
-  }
-
-  it should "succeed to create node with direct relation when autoCreateDirectRelations is true and target doesn't exist" in {
-    val directRelationContainerExtId = "sdkTestDirectRelationContainer2"
-    val directRelationViewExtId = "sdkTestDirectRelationView2"
-
-    // Create container with a direct relation property
-    val containerProps: Map[String, ContainerPropertyDefinition] = Map(
-      "relatedNode" -> ContainerPropertyDefinition(
-        nullable = Some(true),
-        autoIncrement = None,
-        defaultValue = None,
-        description = None,
-        name = Some("relatedNode"),
-        `type` = PropertyType.DirectNodeRelationProperty(None, None, Some(false))
-      )
-    )
-
-    val containerCreation = ContainerCreateDefinition(
-      space = space,
-      externalId = directRelationContainerExtId,
-      name = Some("DirectRelationTestContainer2"),
-      description = Some("Container for testing autoCreateDirectRelations=true"),
-      usedFor = Some(Usage.Node),
-      properties = containerProps,
-      constraints = None,
-      indexes = None
-    )
-
-    val viewCreation = toViewCreateDef(directRelationViewExtId, viewVersion, containerCreation)
-
-    val setup = for {
-      _ <- createContainers(Seq(containerCreation))
-      _ <- createViews(Seq(viewCreation))
-    } yield ()
-    setup.unsafeRunSync()
-
-    // Create a node with a direct relation pointing to a non-existent node
-    val autoCreatedNodeExtId = "auto-created-node-for-direct-relation-test"
-    val nonExistentNodeRef = DirectRelationReference(space, autoCreatedNodeExtId)
-    val nodeWithDirectRelation = NodeOrEdgeCreate.NodeWrite(
-      space = space,
-      externalId = "nodeWithDirectRelation2",
-      sources = Some(Seq(
-        EdgeOrNodeData(
-          source = ViewReference(space, directRelationViewExtId, viewVersion),
-          properties = Some(Map(
-            "relatedNode" -> Some(InstancePropertyValue.ViewDirectNodeRelation(Some(nonExistentNodeRef)))
-          ))
-        )
-      )),
-      `type` = None
-    )
-
-    // Should succeed when autoCreateDirectRelations is true (no exception thrown)
-    val result = testClient.instances.createItems(
-      InstanceCreate(
-        items = Seq(nodeWithDirectRelation),
-        autoCreateDirectRelations = Some(true)
-      )
-    ).unsafeRunSync()
-
-    // The node we created should be returned
-    result.size should be >= 1
-    result.exists(_.externalId === "nodeWithDirectRelation2") shouldBe true
-
-    // Cleanup - try to delete both nodes (the auto-created one may or may not exist)
-    deleteInstance(Seq(
-      NodeDeletionRequest(space, "nodeWithDirectRelation2")
-    ))
-    // Try to clean up auto-created node if it exists (ignore errors)
-    scala.util.Try {
-      deleteInstance(Seq(NodeDeletionRequest(space, autoCreatedNodeExtId)))
-    }
-    deleteViews(Seq(DataModelReference(space, directRelationViewExtId, Some(viewVersion))))
-    deleteContainers(Seq(ContainerId(space, directRelationContainerExtId)))
-  }
-
 }
