@@ -190,7 +190,8 @@ object Utils {
 
   def createInstancePropertyForContainerProperty(
       propName: String,
-      containerPropType: PropertyType
+      containerPropType: PropertyType,
+      random: Random
   ): InstancePropertyValue =
     containerPropType match {
       case DirectNodeRelationProperty(_, _, isList) if isList.contains(false) =>
@@ -199,8 +200,8 @@ object Utils {
       case DirectNodeRelationProperty(_, _, isList) if isList.contains(true) =>
         val autoRef = DirectRelationReference(Utils.SpaceExternalId, s"$propName-Instance")
         InstancePropertyValue.ViewDirectNodeRelationList(Seq(autoRef, autoRef))
-      case p: ListablePropertyType if p.isList => listContainerPropToInstanceProperty(propName, p)
-      case p => nonListContainerPropToInstanceProperty(propName, p)
+      case p: ListablePropertyType if p.isList => listContainerPropToInstanceProperty(propName, p, random)
+      case p => nonListContainerPropToInstanceProperty(propName, p, random)
     }
 
   def createNodeWriteData(
@@ -208,10 +209,11 @@ object Utils {
       nodeExternalId: String,
       sourceRef: SourceReference,
       propsMap: Map[String, CorePropertyDefinition],
-      `type`: Option[DirectRelationReference]
+      `type`: Option[DirectRelationReference],
+      random: Random
   ): NodeWrite = {
     val instanceValuesForProps = propsMap.map { case (propName, prop) =>
-      propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+      propName -> createInstancePropertyForContainerProperty(propName, prop.`type`, random)
     }
 //    val (nullables, nonNullables) = instanceValuesForProps.partition {
 //      case (propName, _) =>
@@ -246,10 +248,11 @@ object Utils {
       sourceRef: SourceReference,
       propsMap: Map[String, CorePropertyDefinition],
       startNode: DirectRelationReference,
-      endNode: DirectRelationReference
+      endNode: DirectRelationReference,
+      random: Random
   ): EdgeWrite = {
     val instanceValuesForProps = propsMap.map { case (propName, prop) =>
-      propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+      propName -> createInstancePropertyForContainerProperty(propName, prop.`type`, random)
     }
     val (nullables, nonNullables) = instanceValuesForProps.partition { case (propName, _) =>
       propsMap(propName).nullable.getOrElse(true)
@@ -292,7 +295,8 @@ object Utils {
       sourceRef: SourceReference,
       propsMap: Map[String, CorePropertyDefinition],
       startNode: DirectRelationReference,
-      endNode: DirectRelationReference
+      endNode: DirectRelationReference,
+      random: Random
   ): NodeOrEdgeCreate =
     usage match {
       case u @ (Usage.Node | Usage.Edge) =>
@@ -301,7 +305,7 @@ object Utils {
         )
       case _ =>
         val instanceValuesForProps = propsMap.map { case (propName, prop) =>
-          propName -> createInstancePropertyForContainerProperty(propName, prop.`type`)
+          propName -> createInstancePropertyForContainerProperty(propName, prop.`type`, random)
         }
         val (nullables, nonNullables) = instanceValuesForProps.partition { case (propName, _) =>
           propsMap(propName).nullable.getOrElse(true)
@@ -363,7 +367,8 @@ object Utils {
 
   private def listContainerPropToInstanceProperty(
       propName: String,
-      propertyType: PropertyType
+      propertyType: PropertyType,
+      random: Random
   ): InstancePropertyValue =
     propertyType match {
       case PropertyType.TextProperty(Some(true), _) =>
@@ -371,13 +376,13 @@ object Utils {
       case PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, Some(true)) =>
         InstancePropertyValue.BooleanList(List(true, false, true, false))
       case PropertyType.PrimitiveProperty(PrimitivePropType.Int32, Some(true)) =>
-        InstancePropertyValue.Int32List((1 to 10).map(_ => Random.nextInt(10000)).toList)
+        InstancePropertyValue.Int32List((1 to 10).map(_ => random.nextInt(10000)).toList)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Int64, Some(true)) =>
-        InstancePropertyValue.Int64List((1 to 10).map(_ => Random.nextLong()).toList)
+        InstancePropertyValue.Int64List((1 to 10).map(_ => random.nextLong()).toList)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Float32, Some(true)) =>
-        InstancePropertyValue.Float32List((1 to 10).map(_ => Random.nextFloat()).toList)
+        InstancePropertyValue.Float32List((1 to 10).map(_ => random.nextFloat()).toList)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Float64, Some(true)) =>
-        InstancePropertyValue.Float64List((1 to 10).map(_ => Random.nextDouble()).toList)
+        InstancePropertyValue.Float64List((1 to 10).map(_ => random.nextDouble()).toList)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Date, Some(true)) =>
         InstancePropertyValue.DateList(
           (1 to 10).toList.map(i => LocalDate.now().minusDays(i.toLong))
@@ -401,7 +406,8 @@ object Utils {
 
   private def nonListContainerPropToInstanceProperty(
       propName: String,
-      propertyType: PropertyType
+      propertyType: PropertyType,
+      random: Random
   ): InstancePropertyValue =
     propertyType match {
       case PropertyType.EnumProperty(_, _) =>
@@ -411,18 +417,18 @@ object Utils {
       case PropertyType.PrimitiveProperty(PrimitivePropType.Boolean, _) =>
         InstancePropertyValue.Boolean(false)
       case PropertyType.PrimitiveProperty(PrimitivePropType.Int32, None | Some(false)) =>
-        InstancePropertyValue.Int32(Random.nextInt(10000))
+        InstancePropertyValue.Int32(random.nextInt(10000))
       case PropertyType.PrimitiveProperty(PrimitivePropType.Int64, None | Some(false)) =>
-        InstancePropertyValue.Int64(Random.nextLong())
+        InstancePropertyValue.Int64(random.nextLong())
       case PropertyType.PrimitiveProperty(PrimitivePropType.Float32, None | Some(false)) =>
-        InstancePropertyValue.Float32(Random.nextFloat())
+        InstancePropertyValue.Float32(random.nextFloat())
       case PropertyType.PrimitiveProperty(PrimitivePropType.Float64, None | Some(false)) =>
-        InstancePropertyValue.Float64(Random.nextDouble())
+        InstancePropertyValue.Float64(random.nextDouble())
       case PropertyType.PrimitiveProperty(PrimitivePropType.Date, None | Some(false)) =>
-        InstancePropertyValue.Date(LocalDate.now().minusDays(Random.nextInt(30).toLong))
+        InstancePropertyValue.Date(LocalDate.now().minusDays(random.nextInt(30).toLong))
       case PropertyType.PrimitiveProperty(PrimitivePropType.Timestamp, None | Some(false)) =>
         InstancePropertyValue.Timestamp(
-          LocalDateTime.now().minusDays(Random.nextInt(30).toLong).atZone(ZoneId.of("UTC"))
+          LocalDateTime.now().minusDays(random.nextInt(30).toLong).atZone(ZoneId.of("UTC"))
         )
       case PropertyType.PrimitiveProperty(PrimitivePropType.Json, None | Some(false)) =>
         InstancePropertyValue.Object(

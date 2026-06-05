@@ -16,6 +16,7 @@ import com.cognite.sdk.scala.v1.fdm.views._
 
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.DurationInt
+import scala.util.Random
 
 @SuppressWarnings(
   Array(
@@ -50,6 +51,8 @@ class InstancesTest extends VcrTestSpec {
   private val viewForDirectNodeRelationExtId = Utils.DirectNodeRelationViewExtId
 
   private val viewVersion = Utils.ViewVersion
+
+  private val random = new Random(42)
 
   it should "CRUD instances with all property types" in {
 
@@ -90,14 +93,16 @@ class InstancesTest extends VcrTestSpec {
       s"nodeExtId$nodeViewExternalId1",
       nodeView1.toSourceReference,
       nodeView1.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
-      Some(DirectRelationReference(nodeView1.space, nodeView1.externalId))
+      Some(DirectRelationReference(nodeView1.space, nodeView1.externalId)),
+      random
     )
     val node2WriteData = createNodeWriteData(
       space,
       s"nodeExtId$nodeViewExternalId2",
       nodeView2.toSourceReference,
       nodeView2.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
-      None
+      None,
+      random
     )
     val startNode = DirectRelationReference(space, externalId = node1WriteData.externalId)
     val endNode = DirectRelationReference(space, externalId = node2WriteData.externalId)
@@ -107,7 +112,8 @@ class InstancesTest extends VcrTestSpec {
       edgeView.toSourceReference,
       edgeView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
       startNode = startNode,
-      endNode = endNode
+      endNode = endNode,
+      random
     )
     val nodeOrEdgeWriteData = Seq(
       createEdgeWriteData(
@@ -116,14 +122,16 @@ class InstancesTest extends VcrTestSpec {
         allView.toSourceReference,
         allView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
         startNode = startNode,
-        endNode = endNode
+        endNode = endNode,
+        random
       ),
       createNodeWriteData(
         space,
         s"nodesOrEdgesExtId${allViewExternalId}Nodes",
         allView.toSourceReference,
         allView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
-        Some(DirectRelationReference(nodeView1.space, nodeView1.externalId))
+        Some(DirectRelationReference(nodeView1.space, nodeView1.externalId)),
+        random
       )
     )
 
@@ -728,7 +736,8 @@ class InstancesTest extends VcrTestSpec {
         s"${containerForDirectNodeRelationExtId}Instance",
         ViewReference(space = space, externalId = viewForDirectNodeRelationExtId, version = viewVersion),
         viewsMap(viewForDirectNodeRelationExtId).properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p },
-        None
+        None,
+        random
       )
       createInstance(Seq(instanceData))
     }) *> IO.sleep(2.seconds)
