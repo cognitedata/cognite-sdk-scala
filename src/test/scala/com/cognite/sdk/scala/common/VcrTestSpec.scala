@@ -54,8 +54,13 @@ abstract class VcrTestSpec
   def rawClient: GenericClient[IO] =
     _rawClient.getOrElse(sys.error("VCR rawClient not initialized — called outside of a test?"))
 
-  def projectName: String = sys.env.getOrElse("TEST_PROJECT2", "playground")
-  def baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL2", GenericClient.defaultBaseUrl)
+  /** Suffix appended to credential env var names: TEST_CLIENT_ID{suffix}, TEST_AAD_TENANT{suffix}, etc.
+    * Override to `""` to use the un-suffixed vars (TEST_CLIENT_ID, COGNITE_BASE_URL, …).
+    */
+  protected def envVarSuffix: String = "2"
+
+  def projectName: String = sys.env.getOrElse(s"TEST_PROJECT$envVarSuffix", "playground")
+  def baseUrl: String = sys.env.getOrElse(s"COGNITE_BASE_URL$envVarSuffix", GenericClient.defaultBaseUrl)
   def cassettesBaseDir: String = "src/test/resources/cassettes"
 
   /** Override to add the `cdf-version` header to all requests (e.g. `Some("alpha")`). */
@@ -107,20 +112,21 @@ abstract class VcrTestSpec
   }
 
   private def fetchRealAuth(): Auth = {
+    val s = envVarSuffix
     val tokenUri = sys.env
-      .get("TEST_TOKEN_URL2")
+      .get(s"TEST_TOKEN_URL$s")
       .orElse(
         sys.env
-          .get("TEST_AAD_TENANT2")
+          .get(s"TEST_AAD_TENANT$s")
           .map(t => s"https://login.microsoftonline.com/$t/oauth2/v2.0/token")
       )
       .getOrElse(
-        sys.error("TEST_TOKEN_URL2 or TEST_AAD_TENANT2 must be set for VCR RECORD mode")
+        sys.error(s"TEST_TOKEN_URL$s or TEST_AAD_TENANT$s must be set for VCR RECORD mode")
       )
     val clientId =
-      sys.env.getOrElse("TEST_CLIENT_ID2", sys.error("TEST_CLIENT_ID2 must be set"))
+      sys.env.getOrElse(s"TEST_CLIENT_ID$s", sys.error(s"TEST_CLIENT_ID$s must be set"))
     val clientSecret =
-      sys.env.getOrElse("TEST_CLIENT_SECRET2", sys.error("TEST_CLIENT_SECRET2 must be set"))
+      sys.env.getOrElse(s"TEST_CLIENT_SECRET$s", sys.error(s"TEST_CLIENT_SECRET$s must be set"))
 
     val credentials = OAuth2.ClientCredentials(
       tokenUri = uri"${tokenUri}",
