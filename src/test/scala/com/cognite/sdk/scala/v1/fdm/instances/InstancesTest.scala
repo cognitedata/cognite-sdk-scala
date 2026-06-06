@@ -52,9 +52,8 @@ class InstancesTest extends VcrTestSpec {
 
   private val viewVersion = Utils.ViewVersion
 
-  private val random = new Random(42)
-
   it should "CRUD instances with all property types" in {
+    val random = new Random(42)
 
 //    deleteContainers(Seq(
 //      ContainerId(space, edgeNodeContainerExtId),
@@ -72,7 +71,7 @@ class InstancesTest extends VcrTestSpec {
 //      DataModelReference(space, viewForDirectNodeRelationExtId, Some(viewVersion))
 //    ))
 
-    createContainerForDirectNodeRelations.unsafeRunSync()
+    createContainerForDirectNodeRelations(random).unsafeRunSync()
 
     val allContainerCreateDefinition = createTestContainer(space, edgeNodeContainerExtId, Usage.All)
     val edgeContainerCreateDefinition = createTestContainer(space, edgeContainerExtId, Usage.Edge)
@@ -601,7 +600,7 @@ class InstancesTest extends VcrTestSpec {
     }
   }
 
-  private def createContainerForDirectNodeRelations = {
+  private def createContainerForDirectNodeRelations(random: Random) = {
     val nodeContainerProps: Map[String, ContainerPropertyDefinition] = Map(
       "stringProp1" -> ContainerPropertyDefinition(
         nullable = Some(true),
