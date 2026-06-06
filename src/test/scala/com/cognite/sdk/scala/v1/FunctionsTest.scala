@@ -3,12 +3,11 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import io.circe.Json
-import org.scalatest.Inspectors._
-import io.circe.JsonObject
 import com.cognite.sdk.scala.common._
+import io.circe.{Json, JsonObject}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.Inspectors._
 import org.scalatest.matchers.should.Matchers
 
 
@@ -19,25 +18,35 @@ import org.scalatest.matchers.should.Matchers
     "org.wartremover.warts.IterableOps"
   )
 )
-class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBehaviours {
+class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBehaviours with BeforeAndAfterAll {
+  private val client = testClient
 
-  private val client = new GenericClient[IO](
-    "scala-sdk-test",
-    "extractor-bluefield-testing",
-    "https://bluefield.cognitedata.com",
-    authProvider,
-    None,
-    None,
-    None
-  )
+  private def getNonce: String = client.sessions
+    .createWithClientCredentialFlow(Items(Seq(SessionCreateWithCredential(credentials.clientId, credentials.clientSecret)))).unsafeRunSync()
+    .map(_.nonce).head
+
+  //Further test assume this function already exists
+  private val preExistingFunctionId: Long = 8590831424885479L
+
+  //Create and completes a call
+  //Due to 90 days retention policy, this needs to be dynamic
+  private lazy val callId: Long = {
+    val call = client.functionCalls(preExistingFunctionId).callFunction(Json.fromJsonObject(JsonObject.empty), Some(getNonce)).unsafeRunSync()
+    retryWithExpectedResult[FunctionCall](
+      client.functionCalls(preExistingFunctionId).retrieveById(call.id).unsafeRunSync(),
+      _.status should equal("Completed"),
+      retriesRemaining = 10
+    )
+    call.id
+  }
 
   it should "read function items" in {
     client.functions.read().unsafeRunSync().items should not be empty
   }
 
   it should "retrieve function by id" in {
-    val func = client.functions.retrieveById(8590831424885479L).unsafeRunSync()
-    func.id should equal(Some(8590831424885479L))
+    val func = client.functions.retrieveById(preExistingFunctionId).unsafeRunSync()
+    func.id should equal(Some(preExistingFunctionId))
     func.name should equal("scala-sdk-test-function")
     func.status should equal(Some("Ready"))
   }
@@ -54,28 +63,27 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
   }
 
   it should "read function call items" in {
-    client.functionCalls(8590831424885479L).read().unsafeRunSync().items should not be empty
+    client.functionCalls(preExistingFunctionId).read().unsafeRunSync().items should not be empty
   }
 
   it should "retrieve function call by id" in {
-    val call = client.functionCalls(8590831424885479L).retrieveById(3987350585370826L).unsafeRunSync()
-    call.id should equal(3987350585370826L)
-    call.status should equal("Completed")
+    val call = client.functionCalls(preExistingFunctionId).retrieveById(callId).unsafeRunSync()
+    call.id should equal(callId)
   }
 
   it should "read function call logs items" in {
-    val res = client.functionCalls(8590831424885479L).retrieveLogs(3987350585370826L).unsafeRunSync()
+    val res = client.functionCalls(preExistingFunctionId).retrieveLogs(callId).unsafeRunSync()
     res.items.isEmpty shouldBe true
   }
 
   it should "retrieve function call response" in {
-    val response = client.functionCalls(8590831424885479L).retrieveResponse(3987350585370826L).unsafeRunSync()
+    val response = client.functionCalls(preExistingFunctionId).retrieveResponse(callId).unsafeRunSync()
     response.response shouldBe Some(Json.fromFields(Seq(("res_int", Json.fromInt(1)),("res_string", Json.fromString("string response")))))
   }
 
   it should "filter function calls" in {
     val filter = FunctionCallFilter(status = Some("Completed"))
-    val res = client.functionCalls(8590831424885479L).filter(filter).unsafeRunSync().items
+    val res = client.functionCalls(preExistingFunctionId).filter(filter).unsafeRunSync().items
     forAll (res) { call => call.status should equal("Completed") }
   }
 
@@ -88,23 +96,17 @@ class FunctionsTest extends CommonDataModelTestHelper with Matchers with ReadBeh
   }
 
   it should "call function" in {
-    val nonce = client.sessions
-      .createWithClientCredentialFlow(Items(Seq(SessionCreateWithCredential(credentials.clientId, credentials.clientSecret)))).unsafeRunSync()
-      .map(_.nonce).head
-    val res = client.functionCalls(8590831424885479L).callFunction(Json.fromJsonObject(JsonObject.empty), Some(nonce)).unsafeRunSync()
+    val res = client.functionCalls(preExistingFunctionId).callFunction(Json.fromJsonObject(JsonObject.empty), Some(getNonce)).unsafeRunSync()
     res.status should equal("Running")
   }
 
   it should "create and delete function schedules" in {
-    val nonce = client.sessions
-      .createWithClientCredentialFlow(Items(Seq(SessionCreateWithCredential(credentials.clientId, credentials.clientSecret)))).unsafeRunSync()
-      .map(_.nonce).head
     val createRes = client.functionSchedules.create(Seq(
       FunctionScheduleCreate(
         name = "scala-sdk-write-example-1",
-        functionId = Some(8590831424885479L),
+        functionId = Some(preExistingFunctionId),
         cronExpression = "0 0 1 * *",
-        nonce = Some(nonce)
+        nonce = Some(getNonce)
       )
     )).unsafeRunSync()
     createRes.length should equal(1)

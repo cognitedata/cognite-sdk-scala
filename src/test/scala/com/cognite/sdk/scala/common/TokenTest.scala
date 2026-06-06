@@ -21,7 +21,7 @@ class TokenTest extends SdkTestSpec with OptionValues {
 
     val token =
       new Token(RequestSession[IO]("CogniteScalaSDK-OAuth-Test", uri"${baseUrl}", sttpBackend,
-        authProvider))
+        identity, authProvider))
     val status = token.inspect().unsafeRunTimed(10.seconds).value
     assert(status.subject !== "")
   }

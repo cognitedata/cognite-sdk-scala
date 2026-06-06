@@ -60,7 +60,7 @@ class Files[F[_]](val requestSession: RequestSession[F])
       }
       _ <- F.raiseUnless(response.isSuccess) {
         SdkException(
-          s"File upload of file ${file.name} failed with error code ${response.code.toString}"
+          s"File upload of file ${file.name} failed with error code ${response.code.toString} ${response.body.toString}"
         )
       }
     } yield file

@@ -1,180 +1,30 @@
-// Copyright 2020 Cognite AS
-// SPDX-License-Identifier: Apache-2.0
-
 package com.cognite.sdk.scala.v1
 
-import cats.implicits._
-import cats.{Id, MonadError => CMonadError}
-import com.cognite.scala_sdk.BuildInfo
-import com.cognite.sdk.scala.common._
-import com.cognite.sdk.scala.v1.GenericClient.parseResponse
-import com.cognite.sdk.scala.v1.resources._
+import cats.implicits.{catsSyntaxEq, toBifunctorOps}
+import cats.{MonadError => CMonadError}
+import com.cognite.sdk.scala.common.{
+  Auth,
+  AuthProvider,
+  CdpApiError,
+  CdpApiException,
+  InvalidAuthentication,
+  SdkException,
+  Token
+}
 import com.cognite.sdk.scala.v1.resources.fdm.containers.Containers
 import com.cognite.sdk.scala.v1.resources.fdm.datamodels.{DataModels => DataModelsV3}
 import com.cognite.sdk.scala.v1.resources.fdm.instances.Instances
 import com.cognite.sdk.scala.v1.resources.fdm.views.Views
+import com.cognite.sdk.scala.v1.resources._
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import natchez.Trace
-import sttp.capabilities.Effect
-import sttp.client3._
 import sttp.client3.circe.asJsonEither
-import sttp.model.{Header, StatusCode, Uri}
-import sttp.monad.MonadError
+import sttp.client3.{DeserializationException, HttpError, ResponseAs, SttpBackend, UriContext}
+import sttp.model.{StatusCode, Uri}
 
 import java.net.{InetAddress, UnknownHostException}
-import scala.concurrent.duration._
 import scala.util.control.NonFatal
-
-class TraceSttpBackend[F[_]: Trace, +P](delegate: SttpBackend[F, P]) extends SttpBackend[F, P] {
-
-  def sendImpl[T, R >: P with Effect[F]](
-      request: Request[T, R]
-  )(implicit monad: MonadError[F]): F[Response[T]] =
-    Trace[F].span("sttp-client-request") {
-      import sttp.monad.syntax._
-      for {
-        knl <- Trace[F].kernel
-        _ <- Trace[F].put(
-          "client.http.uri" -> request.uri.toString(),
-          "client.http.method" -> request.method.toString
-        )
-        response <- delegate.send(
-          request.headers(
-            knl.toHeaders.map { case (k, v) => Header(k.toString, v) }.toSeq: _*
-          )
-        )
-        _ <- Trace[F].put("client.http.status_code" -> response.code.toString())
-      } yield response
-    }
-  override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] =
-    sendImpl(request)(responseMonad)
-
-  override def close(): F[Unit] = delegate.close()
-
-  override def responseMonad: MonadError[F] = delegate.responseMonad
-}
-
-class AuthSttpBackend[F[_], +P](delegate: SttpBackend[F, P], authProvider: AuthProvider[F])
-    extends SttpBackend[F, P] {
-  override def send[T, R >: P with Effect[F]](request: Request[T, R]): F[Response[T]] =
-    responseMonad.flatMap(authProvider.getAuth) { (auth: Auth) =>
-      delegate.send(auth.auth(request))
-    }
-
-  override def close(): F[Unit] = delegate.close()
-
-  override def responseMonad: MonadError[F] = delegate.responseMonad
-}
-
-class RequestSessionImplicits[F[_]](
-    implicit val FMonad: CMonadError[F, Throwable],
-    val FTrace: Trace[F]
-)
-final case class RequestSession[F[_]: Trace](
-    applicationName: String,
-    baseUrl: Uri,
-    baseSttpBackend: SttpBackend[F, _],
-    auth: AuthProvider[F],
-    clientTag: Option[String] = None,
-    cdfVersion: Option[String] = None,
-    tags: Map[String, Any] = Map.empty
-)(implicit F: CMonadError[F, Throwable]) {
-  val implicits: RequestSessionImplicits[F] = new RequestSessionImplicits[F]
-  def withResourceType(resourceType: GenericClient.RESOURCE_TYPE): RequestSession[F] =
-    this.copy(tags = this.tags + (GenericClient.RESOURCE_TYPE_TAG -> resourceType))
-
-  val sttpBackend: SttpBackend[F, _] =
-    new AuthSttpBackend(new TraceSttpBackend(baseSttpBackend), auth)
-
-  def send[R](
-      r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any]
-  ): F[Response[R]] =
-    r(emptyRequest.readTimeout(90.seconds)).send(sttpBackend)
-
-  private val sttpRequest = {
-    val baseRequest = basicRequest
-      .followRedirects(false)
-      .header("x-cdp-sdk", s"CogniteScalaSDK:${BuildInfo.version}")
-      .header("x-cdp-app", applicationName)
-      .readTimeout(90.seconds)
-      .headers(
-        Seq(
-          clientTag.map(Header("x-cdp-clienttag", _)),
-          cdfVersion.map(Header("cdf-version", _))
-        ).flatMap(_.toList): _*
-      )
-    tags.foldLeft(baseRequest)((req, tag) => req.tag(tag._1, tag._2))
-  }
-
-  def get[R, T](
-      uri: Uri,
-      mapResult: T => R,
-      contentType: String = "application/json",
-      accept: String = "application/json"
-  )(implicit decoder: Decoder[T]): F[R] =
-    sttpRequest
-      .contentType(contentType)
-      .header("accept", accept)
-      .get(uri)
-      .response(parseResponse(uri, mapResult))
-      .send(sttpBackend)
-      .flatMap(r => F.fromEither(r.body))
-
-  def postEmptyBody[R, T](
-      uri: Uri,
-      mapResult: T => R,
-      contentType: String = "application/json",
-      accept: String = "application/json"
-  )(implicit decoder: Decoder[T]): F[R] =
-    sttpRequest
-      .contentType(contentType)
-      .header("accept", accept)
-      .header("cdf-version", "alpha")
-      .post(uri)
-      .response(parseResponse(uri, mapResult))
-      .send(sttpBackend)
-      .flatMap(r => F.fromEither(r.body))
-
-  def post[R, T, I](
-      body: I,
-      uri: Uri,
-      mapResult: T => R,
-      contentType: String = "application/json",
-      accept: String = "application/json"
-  )(implicit serializer: BodySerializer[I], decoder: Decoder[T]): F[R] =
-    sttpRequest
-      .contentType(contentType)
-      .header("accept", accept)
-      .post(uri)
-      .body(body)
-      .response(parseResponse(uri, mapResult))
-      .send(sttpBackend)
-      .flatMap(r => F.fromEither(r.body))
-
-  def head(
-      uri: Uri,
-      overrideHeaders: Seq[Header] = Seq()
-  ): F[Seq[Header]] =
-    sttpRequest
-      .headers(overrideHeaders: _*)
-      .head(uri)
-      .send(sttpBackend)
-      .map(_.headers)
-
-  def sendCdf[R](
-      r: RequestT[Empty, Either[String, String], Any] => RequestT[Id, R, Any],
-      contentType: String = "application/json",
-      accept: String = "application/json"
-  ): F[R] =
-    r(
-      sttpRequest
-        .contentType(contentType)
-        .header("accept", accept)
-    )
-      .send(sttpBackend)
-      .map(_.body)
-}
 
 class GenericClient[F[_]: Trace](
     applicationName: String,
@@ -183,8 +33,10 @@ class GenericClient[F[_]: Trace](
     authProvider: AuthProvider[F],
     apiVersion: Option[String],
     clientTag: Option[String],
-    cdfVersion: Option[String]
-)(implicit monad: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]) {
+    cdfVersion: Option[String],
+    sttpBackend: SttpBackend[F, Any],
+    wrapSttpBackend: SttpBackend[F, Any] => SttpBackend[F, Any]
+)(implicit monad: CMonadError[F, Throwable]) {
   def this(
       applicationName: String,
       projectName: String,
@@ -192,8 +44,10 @@ class GenericClient[F[_]: Trace](
       auth: Auth,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
-      cdfVersion: Option[String] = None
-  )(implicit monad: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]) =
+      cdfVersion: Option[String] = None,
+      sttpBackend: SttpBackend[F, Any],
+      wrapSttpBackend: SttpBackend[F, Any] => SttpBackend[F, Any] = identity[SttpBackend[F, Any]](_)
+  )(implicit monad: CMonadError[F, Throwable]) =
     this(
       applicationName,
       projectName,
@@ -201,7 +55,9 @@ class GenericClient[F[_]: Trace](
       AuthProvider[F](auth),
       apiVersion,
       clientTag,
-      cdfVersion
+      cdfVersion,
+      sttpBackend,
+      wrapSttpBackend
     )
 
   import GenericClient._
@@ -213,12 +69,15 @@ class GenericClient[F[_]: Trace](
       applicationName,
       uri"$uri/api/${apiVersion.getOrElse("v1")}/projects/$projectName",
       sttpBackend,
+      wrapSttpBackend,
       authProvider,
       clientTag,
       cdfVersion
     )
   lazy val token =
-    new Token[F](RequestSession(applicationName, uri, sttpBackend, authProvider, clientTag))
+    new Token[F](
+      RequestSession(applicationName, uri, sttpBackend, wrapSttpBackend, authProvider, clientTag)
+    )
   lazy val assets = new Assets[F](requestSession.withResourceType(ASSETS))
   lazy val events = new Events[F](requestSession.withResourceType(EVENTS))
   lazy val files = new Files[F](requestSession.withResourceType(FILES))
@@ -308,7 +167,6 @@ object GenericClient {
   case object PROJECT extends RESOURCE_TYPE
   case object GROUPS extends RESOURCE_TYPE
   case object SECURITY_CATEGORIES extends RESOURCE_TYPE
-
   implicit val projectAuthenticationDecoder: Decoder[ProjectAuthentication] =
     deriveDecoder[ProjectAuthentication]
   @SuppressWarnings(Array("org.wartremover.warts.JavaSerializable"))
@@ -321,9 +179,18 @@ object GenericClient {
       applicationName: String,
       projectName: String,
       baseUrl: String,
-      auth: Auth
-  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): GenericClient[F] =
-    new GenericClient(applicationName, projectName, baseUrl, auth)
+      auth: Auth,
+      sttpBackend: SttpBackend[F, Any],
+      wrapSttpBackend: SttpBackend[F, Any] => SttpBackend[F, Any] = identity[SttpBackend[F, Any]](_)
+  )(implicit F: CMonadError[F, Throwable]): GenericClient[F] =
+    new GenericClient(
+      applicationName,
+      projectName,
+      baseUrl,
+      auth,
+      sttpBackend = sttpBackend,
+      wrapSttpBackend = wrapSttpBackend
+    )
 
   def parseBaseUrlOrThrow(baseUrl: String): Uri =
     try {
@@ -359,8 +226,9 @@ object GenericClient {
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
-      cdfVersion: Option[String] = None
-  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+      cdfVersion: Option[String] = None,
+      sttpBackend: SttpBackend[F, Any]
+  )(implicit F: CMonadError[F, Throwable]): F[GenericClient[F]] =
     forAuthProvider(
       applicationName,
       projectName,
@@ -368,7 +236,8 @@ object GenericClient {
       baseUrl,
       apiVersion,
       clientTag,
-      cdfVersion
+      cdfVersion,
+      sttpBackend
     )
 
   def forAuthProvider[F[_]: Trace](
@@ -378,8 +247,10 @@ object GenericClient {
       baseUrl: String = defaultBaseUrl,
       apiVersion: Option[String] = None,
       clientTag: Option[String] = None,
-      cdfVersion: Option[String] = None
-  )(implicit F: CMonadError[F, Throwable], sttpBackend: SttpBackend[F, Any]): F[GenericClient[F]] =
+      cdfVersion: Option[String] = None,
+      sttpBackend: SttpBackend[F, Any],
+      wrapSttpBackend: SttpBackend[F, Any] => SttpBackend[F, Any] = identity[SttpBackend[F, Any]](_)
+  )(implicit F: CMonadError[F, Throwable]): F[GenericClient[F]] =
     if (projectName.isEmpty) {
       F.raiseError(InvalidAuthentication())
     } else {
@@ -391,59 +262,44 @@ object GenericClient {
           authProvider,
           apiVersion,
           clientTag,
-          cdfVersion
+          cdfVersion,
+          sttpBackend,
+          wrapSttpBackend
         )
       )
     }
 
-  def parseResponse[T, R](uri: Uri, mapResult: T => R)(
+  def parseResponse[T, R](uri: Uri, mapResult: T => R, resourceType: Option[RESOURCE_TYPE] = None)(
       implicit decoder: Decoder[T]
   ): ResponseAs[Either[Throwable, R], Any] =
-    asJsonEither[CdpApiError, T].mapWithMetadata((response, metadata) =>
-      response
-        .leftMap[Throwable] {
-          case DeserializationException(_, _)
-              if metadata.code.code === StatusCode.TooManyRequests.code =>
-            CdpApiException(
-              url = uri"$uri",
-              code = StatusCode.TooManyRequests.code,
-              missing = None,
-              duplicated = None,
-              missingFields = None,
-              message = "Too many requests.",
-              requestId = metadata.header("x-request-id")
-            )
-          case DeserializationException(_, error) =>
-            SdkException(
-              s"Failed to parse response, reason: ${error.getMessage}",
-              Some(uri),
-              metadata.header("x-request-id"),
-              Some(metadata.code.code)
-            )
-          case HttpError(cdpApiError, _) =>
-            cdpApiError.asException(uri"$uri", metadata.header("x-request-id"))
-        }
-        .map(mapResult)
-    )
-}
-
-class Client(
-    applicationName: String,
-    override val projectName: String,
-    baseUrl: String =
-      Option(System.getenv("COGNITE_BASE_URL")).getOrElse("https://api.cognitedata.com"),
-    auth: Auth
-)(implicit trace: Trace[OrError], sttpBackend: SttpBackend[OrError, Any])
-    extends GenericClient[OrError](applicationName, projectName, baseUrl, auth)
-
-object Client {
-  def apply(
-      applicationName: String,
-      projectName: String,
-      baseUrl: String,
-      auth: Auth
-  )(
-      implicit trace: Trace[OrError],
-      sttpBackend: SttpBackend[OrError, Any]
-  ): Client = new Client(applicationName, projectName, baseUrl, auth)
+    asJsonEither[CdpApiError, T]
+      .mapWithMetadata((response, metadata) =>
+        response
+          .leftMap[Throwable] {
+            case DeserializationException(_, _)
+                if metadata.code.code === StatusCode.TooManyRequests.code =>
+              CdpApiException(
+                url = uri"$uri",
+                code = StatusCode.TooManyRequests.code,
+                missing = None,
+                duplicated = None,
+                missingFields = None,
+                message = "Too many requests.",
+                requestId = metadata.header("x-request-id"),
+                debugNotices = None,
+                resourceType = resourceType
+              )
+            case DeserializationException(_, error) =>
+              SdkException(
+                s"Failed to parse response, reason: ${error.getMessage}",
+                Some(uri),
+                metadata.header("x-request-id"),
+                Some(metadata.code.code),
+                resourceType
+              )
+            case HttpError(cdpApiError, _) =>
+              cdpApiError.asException(uri"$uri", metadata.header("x-request-id"), resourceType)
+          }
+          .map(mapResult)
+      )
 }

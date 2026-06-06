@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.common
 
-import com.cognite.sdk.scala.v1.Client
+import com.cognite.sdk.scala.v1.SyncClient
 import io.circe.Decoder
 import sttp.client3._
 import sttp.client3.testing.SttpBackendStub
@@ -38,7 +38,7 @@ class ReadTest extends SdkTestSpec with OptionValues {
         Right(Response.ok(Right(0)))
       }
     lazy val dummyClient =
-      Client("foo", projectName, "https://api.cognitedata.com", auth)(implicitly, requestHijacker)
+      SyncClient("foo", projectName, "https://api.cognitedata.com", auth)(implicitly, requestHijacker)
     val dummyRequestSession = dummyClient.requestSession
 
     Readable.readWithCursor(

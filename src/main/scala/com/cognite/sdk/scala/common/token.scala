@@ -70,14 +70,6 @@ object ProjectCapability {
           h.history
         )
       )
-      _ <- Either.cond(
-        acls.nonEmpty,
-        (),
-        DecodingFailure(
-          DecodingFailure.Reason.CustomReason("capability must have some resourceAcl"),
-          h.history
-        )
-      )
     } yield new ProjectCapability(acls, projectScope)
   }
   implicit val encoder: Encoder[ProjectCapability] = Encoder.instance {
