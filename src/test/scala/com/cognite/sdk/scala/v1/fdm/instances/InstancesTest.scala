@@ -76,7 +76,7 @@ class InstancesTest extends VcrTestSpec {
     val nodeViewExternalId1 = nodeView1ExtId
     val nodeViewExternalId2 = nodeView2ExtId
 
-    val createdViewsMap = (IO.sleep(2.seconds) *> createViews(Seq(
+    val createdViewsMap = (sleepUnlessPlayback(2.seconds) *> createViews(Seq(
       toViewCreateDef(allViewExternalId, viewVersion, allContainerCreateDefinition),
       toViewCreateDef(edgeViewExternalId, viewVersion, edgeContainerCreateDefinition),
       toViewCreateDef(nodeViewExternalId1, viewVersion, nodeContainerCreateDefinition1),
@@ -135,12 +135,12 @@ class InstancesTest extends VcrTestSpec {
       )
     )
 
-    (IO.sleep(2.seconds) *> createInstance(Seq(node1WriteData))).unsafeRunSync()
+    (sleepUnlessPlayback(2.seconds) *> createInstance(Seq(node1WriteData))).unsafeRunSync()
     createInstance(Seq(node2WriteData)).unsafeRunSync()
     createInstance(Seq(edgeWriteData)).unsafeRunSync()
     createInstance(nodeOrEdgeWriteData).unsafeRunSync()
 
-    val readNodesMapOfNode1 = (IO.sleep(10.seconds) *> fetchNodeInstance(nodeView1.toSourceReference, node1WriteData.externalId)).unsafeRunSync()
+    val readNodesMapOfNode1 = (sleepUnlessPlayback(10.seconds) *> fetchNodeInstance(nodeView1.toSourceReference, node1WriteData.externalId)).unsafeRunSync()
     val readNodesMapOfNode2 = fetchNodeInstance(nodeView2.toSourceReference, node2WriteData.externalId).unsafeRunSync()
     val syncNodesMapOfNodeView1: InstanceSyncResponse = syncNodeInstances(nodeView1.toSourceReference)
       .unsafeRunSync()
@@ -580,22 +580,22 @@ class InstancesTest extends VcrTestSpec {
   }).getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).flatMap {case (k, v) => v.map(k -> _)}.toMap
 
   private def createContainers(items: Seq[ContainerCreateDefinition]) =
-    client.containers.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+    client.containers.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
 
   private def deleteContainers(items: Seq[ContainerId]) =
-    client.containers.delete(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    client.containers.delete(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
 
   private def createViews(items: Seq[ViewCreateDefinition]) =
-    client.views.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+    client.views.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
 
   private def createInstance(writeData: Seq[NodeOrEdgeCreate]): IO[Seq[SlimNodeOrEdge]] =
-    client.instances.createItems(InstanceCreate(items = writeData)).flatTap(_ => IO.sleep(2.seconds))
+    client.instances.createItems(InstanceCreate(items = writeData)).flatTap(_ => sleepUnlessPlayback(2.seconds))
 
   private def deleteInstance(refs: Seq[InstanceDeletionRequest]): Seq[InstanceDeletionRequest] =
-    client.instances.delete(instanceRefs = refs).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    client.instances.delete(instanceRefs = refs).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
 
   private def deleteViews(items: Seq[DataModelReference]) =
-    client.views.deleteItems(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    client.views.deleteItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
 
   private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) =
     client.instances.retrieveByExternalIds(items = Seq(
@@ -740,6 +740,6 @@ class InstancesTest extends VcrTestSpec {
         random
       )
       createInstance(Seq(instanceData))
-    }) *> IO.sleep(2.seconds)
+    }) *> sleepUnlessPlayback(2.seconds)
   }
 }

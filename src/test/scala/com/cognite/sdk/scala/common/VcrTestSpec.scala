@@ -17,7 +17,7 @@ import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.impl.cats.CatsMonadAsyncError
 import sttp.client3.testing.SttpBackendStub
 
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 /** Base class for tests that use VCR (cassette-based HTTP recording/playback).
   *
@@ -164,6 +164,14 @@ abstract class VcrTestSpec
     )
 
   def shortRandom(): String = java.util.UUID.randomUUID().toString.substring(0, 8)
+
+  def vcrMode: VcrMode = _vcrBackend.map(_.actualMode).getOrElse(VcrMode.Bypass)
+
+  def sleepUnlessPlayback(duration: FiniteDuration): IO[Unit] =
+    vcrMode match {
+      case VcrMode.Playback => IO.unit
+      case _ => IO.sleep(duration)
+    }
 
   private def simplifyFilename(name: String): String = {
     val initial = name.replaceAll("[^a-zA-Z0-9._]", "-")
