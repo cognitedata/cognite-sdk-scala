@@ -61,4 +61,16 @@ trait CommonDataModelTestHelper extends AnyFlatSpec with Matchers {
     implicitly[SttpBackend[IO, Any]],
     new RetryingBackend[IO, Any](_: SttpBackend[IO, Any]),
   )
+
+  lazy val testClientWithoutRetries = new GenericClient[IO](
+    "scala-sdk-test",
+    project,
+    baseUrl,
+    authProvider,
+    None,
+    None,
+    Some("alpha"),
+    implicitly[SttpBackend[IO, Any]],
+    identity[SttpBackend[IO, Any]](_)
+  )
 }

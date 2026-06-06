@@ -37,7 +37,12 @@ trait Filter[R, Fi, F[_]] extends WithRequestSession[F] with BaseUrl {
       aggregatedProperties: Option[Seq[String]]
   ): Stream[F, R] =
     Readable
-      .pullFromCursor(cursor, limit, None, filterWithCursor(filter, _, _, _, aggregatedProperties))
+      .pullFromCursor(
+        cursor = cursor,
+        maxItemsReturned = limit,
+        partition = None,
+        get = filterWithCursor(filter, _, _, _, aggregatedProperties)
+      )
       .stream
 
   def filter(filter: Fi, limit: Option[Int] = None): Stream[F, R] =
