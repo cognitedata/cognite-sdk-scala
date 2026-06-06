@@ -250,6 +250,184 @@ class InstancesTest extends VcrTestSpec {
     deletedContainers.length shouldBe 4
   }
 
+  private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
+    case n: NodeOrEdgeCreate.NodeWrite => n.sources
+    case e: NodeOrEdgeCreate.EdgeWrite => e.sources
+  }).getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).flatMap {case (k, v) => v.map(k -> _)}.toMap
+
+  private def createContainers(items: Seq[ContainerCreateDefinition]) = {
+    client.containers.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+  }
+
+  private def deleteContainers(items: Seq[ContainerId]) = {
+    client.containers.delete(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
+  }
+
+  private def createViews(items: Seq[ViewCreateDefinition]) = {
+    client.views.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+  }
+
+  private def createInstance(writeData: Seq[NodeOrEdgeCreate]): IO[Seq[SlimNodeOrEdge]] = {
+    client.instances.createItems(
+      InstanceCreate(items = writeData)
+    ).flatTap(_ => sleepUnlessPlayback(2.seconds))
+  }
+
+  private def deleteInstance(refs: Seq[InstanceDeletionRequest]): Seq[InstanceDeletionRequest] = {
+    client.instances.delete(instanceRefs = refs).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
+  }
+
+  private def deleteViews(items: Seq[DataModelReference]) = {
+    client.views.deleteItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
+  }
+
+  private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) = {
+    client.instances.retrieveByExternalIds(items = Seq(
+      InstanceRetrieve(InstanceType.Node, instanceExternalId, viewRef.space)),
+      includeTyping = true,
+      sources = Some(Seq(InstanceSource(viewRef)))
+    ).map { r =>
+      r.items.collect {
+        case n: InstanceDefinition.NodeDefinition => n
+      }.map { n =>
+        n.properties.getOrElse(Map.empty).values.flatMap(_.values).foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
+      }.foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
+    }
+  }
+
+  private def syncNodeInstances(viewRef: ViewReference) = {
+    val hasData = HasData(Seq(viewRef))
+
+    client.instances.syncRequest(
+      InstanceSyncRequest(
+        `with` = Map("sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
+        cursors = None,
+        select = Map("sync" -> SelectExpression(sources =
+          List(SourceSelector(source = viewRef, properties = List("*")))))
+      )
+    )
+  }
+
+  private def queryNodeInstances(viewRef: ViewReference) = {
+    val hasData = HasData(Seq(viewRef))
+
+    client.instances.queryRequest(
+      InstanceQueryRequest(
+        `with` = Map("query" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
+        cursors = None,
+        select = Map("query" -> SelectExpression(sources =
+          List(SourceSelector(source = viewRef, properties = List("*")))))
+      )
+    )
+  }
+
+  private def fetchEdgeInstance(viewRef: ViewReference, instanceExternalId: String) = {
+    client.instances.retrieveByExternalIds(items = Seq(
+      InstanceRetrieve(InstanceType.Edge, instanceExternalId, viewRef.space)),
+      includeTyping = true,
+      sources = Some(Seq(InstanceSource(viewRef)))
+    ).map { r =>
+      r.items.collect {
+        case n: InstanceDefinition.EdgeDefinition => n
+      }.map { n =>
+        n.properties.getOrElse(Map.empty).values.flatMap(_.values).foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
+      }.foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
+    }
+  }
+
+  private def toViewCreateDef(viewExternalId: String, viewVersion: String, container: ContainerCreateDefinition): ViewCreateDefinition = {
+    ViewCreateDefinition(
+      space = space,
+      externalId = viewExternalId,
+      version = viewVersion,
+      name = Some(s"Test-View-Sdk-Scala-${container.externalId}"),
+      description = Some(s"Test View For Sdk Scala ${container.externalId}"),
+      filter = None,
+      properties = container.properties.map {
+        case (pName, _) => pName -> ViewPropertyCreateDefinition.CreateViewProperty(
+          name = Some(pName),
+          description = Some(pName),
+          container = ContainerReference(container.space, container.externalId),
+          containerPropertyIdentifier = pName
+        )
+      },
+      implements = None
+    )
+  }
+
+  // compare timestamps adhering to the accepted format
+  private def instancePropertyMapEquals(expected: Map[String, InstancePropertyValue], actual: Map[String, InstancePropertyValue]): Boolean = {
+    val sizeEquals = actual.size === expected.size
+    sizeEquals && expected.forall {
+      case (k, expectedVal) =>
+        val keyEquals = actual.contains(k)
+
+        def valueEquals = {
+          val formatter = InstancePropertyValue.Timestamp.formatter
+          (actual(k), expectedVal) match {
+            case (actVal: InstancePropertyValue.Timestamp, expVal: InstancePropertyValue.Timestamp) =>
+              val expTs = expVal.value.truncatedTo(ChronoUnit.MILLIS)
+              expTs
+                .format(formatter) === actVal
+                .value
+                .truncatedTo(ChronoUnit.MILLIS)
+                .format(formatter)
+            case (actVal: InstancePropertyValue.TimestampList, expVal: InstancePropertyValue.TimestampList) =>
+              val expTsSeq = expVal
+                .value
+                .map(_.truncatedTo(ChronoUnit.MILLIS).format(formatter))
+              expTsSeq === actVal
+                .value
+                .map(_.truncatedTo(ChronoUnit.MILLIS).format(formatter))
+            case (actVal, expVal) if actVal === expVal => true
+            case (actVal, expVal) => fail(s"Actual: ${actVal.toString}, Expected: ${expVal.toString}")
+          }
+        }
+        keyEquals && valueEquals
+    }
+  }
+
+  private def createContainerForDirectNodeRelations = {
+    val nodeContainerProps: Map[String, ContainerPropertyDefinition] = Map(
+      "stringProp1" -> ContainerPropertyDefinition(
+        nullable = Some(true),
+        autoIncrement = None,
+        defaultValue = None,
+        description = None,
+        name = None,
+        `type` = PropertyType.TextProperty(Some(false), None)
+      )
+    )
+
+    val containerCreation = ContainerCreateDefinition(
+      space = space,
+      externalId = containerForDirectNodeRelationExtId,
+      name = Some(s"NodeContainerForDirectRelation"),
+      description = Some(s"NodeContainerForDirectRelation"),
+      usedFor = Some(Usage.Node),
+      properties = nodeContainerProps,
+      constraints = None,
+      indexes = None
+    )
+
+    val viewCreation = toViewCreateDef(viewForDirectNodeRelationExtId, viewVersion, containerCreation)
+
+    (for {
+      _ <- createContainers(Seq(containerCreation))
+      viewsMap <- createViews(Seq(viewCreation))
+    } yield  {
+      val instanceData = createNodeWriteData(
+        space,
+        s"${containerForDirectNodeRelationExtId}Instance",
+        ViewReference(space = space, externalId = viewForDirectNodeRelationExtId, version = viewVersion),
+        viewsMap(viewForDirectNodeRelationExtId).properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p },
+        None,
+        random
+      )
+      createInstance(Seq(instanceData))
+    }) *> sleepUnlessPlayback(2.seconds)
+  }
+
   it should "List instances with debug options, handle 408 and parse debug notice" in {
     val errorReturn = rawClient.instances.filter(
       filterRequest = InstanceFilterRequest(
@@ -572,172 +750,5 @@ class InstancesTest extends VcrTestSpec {
     }
     deleteViews(Seq(DataModelReference(space, directRelationViewExtId, Some(viewVersion))))
     deleteContainers(Seq(ContainerId(space, directRelationContainerExtId)))
-  }
-
-  private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
-    case n: NodeOrEdgeCreate.NodeWrite => n.sources
-    case e: NodeOrEdgeCreate.EdgeWrite => e.sources
-  }).getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).flatMap {case (k, v) => v.map(k -> _)}.toMap
-
-  private def createContainers(items: Seq[ContainerCreateDefinition]) =
-    client.containers.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
-
-  private def deleteContainers(items: Seq[ContainerId]) =
-    client.containers.delete(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
-
-  private def createViews(items: Seq[ViewCreateDefinition]) =
-    client.views.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
-
-  private def createInstance(writeData: Seq[NodeOrEdgeCreate]): IO[Seq[SlimNodeOrEdge]] =
-    client.instances.createItems(InstanceCreate(items = writeData)).flatTap(_ => sleepUnlessPlayback(2.seconds))
-
-  private def deleteInstance(refs: Seq[InstanceDeletionRequest]): Seq[InstanceDeletionRequest] =
-    client.instances.delete(instanceRefs = refs).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
-
-  private def deleteViews(items: Seq[DataModelReference]) =
-    client.views.deleteItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
-
-  private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) =
-    client.instances.retrieveByExternalIds(items = Seq(
-      InstanceRetrieve(InstanceType.Node, instanceExternalId, viewRef.space)),
-      includeTyping = true,
-      sources = Some(Seq(InstanceSource(viewRef)))
-    ).map { r =>
-      r.items.collect {
-        case n: InstanceDefinition.NodeDefinition => n
-      }.map { n =>
-        n.properties.getOrElse(Map.empty).values.flatMap(_.values).foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
-      }.foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
-    }
-
-  private def syncNodeInstances(viewRef: ViewReference) = {
-    val hasData = HasData(Seq(viewRef))
-
-    client.instances.syncRequest(
-      InstanceSyncRequest(
-        `with` = Map("sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
-        cursors = None,
-        select = Map("sync" -> SelectExpression(sources =
-          List(SourceSelector(source = viewRef, properties = List("*")))))
-      )
-    )
-  }
-
-  private def queryNodeInstances(viewRef: ViewReference) = {
-    val hasData = HasData(Seq(viewRef))
-
-    client.instances.queryRequest(
-      InstanceQueryRequest(
-        `with` = Map("query" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
-        cursors = None,
-        select = Map("query" -> SelectExpression(sources =
-          List(SourceSelector(source = viewRef, properties = List("*")))))
-      )
-    )
-  }
-
-  private def fetchEdgeInstance(viewRef: ViewReference, instanceExternalId: String) =
-    client.instances.retrieveByExternalIds(items = Seq(
-      InstanceRetrieve(InstanceType.Edge, instanceExternalId, viewRef.space)),
-      includeTyping = true,
-      sources = Some(Seq(InstanceSource(viewRef)))
-    ).map { r =>
-      r.items.collect {
-        case n: InstanceDefinition.EdgeDefinition => n
-      }.map { n =>
-        n.properties.getOrElse(Map.empty).values.flatMap(_.values).foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
-      }.foldLeft(Map.empty[String, InstancePropertyValue])((a, b) => a ++ b)
-    }
-
-  private def toViewCreateDef(viewExternalId: String, viewVersion: String, container: ContainerCreateDefinition): ViewCreateDefinition =
-    ViewCreateDefinition(
-      space = space,
-      externalId = viewExternalId,
-      version = viewVersion,
-      name = Some(s"Test-View-Sdk-Scala-${container.externalId}"),
-      description = Some(s"Test View For Sdk Scala ${container.externalId}"),
-      filter = None,
-      properties = container.properties.map {
-        case (pName, _) => pName -> ViewPropertyCreateDefinition.CreateViewProperty(
-          name = Some(pName),
-          description = Some(pName),
-          container = ContainerReference(container.space, container.externalId),
-          containerPropertyIdentifier = pName
-        )
-      },
-      implements = None
-    )
-
-  // compare timestamps adhering to the accepted format
-  private def instancePropertyMapEquals(expected: Map[String, InstancePropertyValue], actual: Map[String, InstancePropertyValue]): Boolean = {
-    val sizeEquals = actual.size === expected.size
-    sizeEquals && expected.forall {
-      case (k, expectedVal) =>
-        val keyEquals = actual.contains(k)
-
-        def valueEquals = {
-          val formatter = InstancePropertyValue.Timestamp.formatter
-          (actual(k), expectedVal) match {
-            case (actVal: InstancePropertyValue.Timestamp, expVal: InstancePropertyValue.Timestamp) =>
-              val expTs = expVal.value.truncatedTo(ChronoUnit.MILLIS)
-              expTs
-                .format(formatter) === actVal
-                .value
-                .truncatedTo(ChronoUnit.MILLIS)
-                .format(formatter)
-            case (actVal: InstancePropertyValue.TimestampList, expVal: InstancePropertyValue.TimestampList) =>
-              val expTsSeq = expVal
-                .value
-                .map(_.truncatedTo(ChronoUnit.MILLIS).format(formatter))
-              expTsSeq === actVal
-                .value
-                .map(_.truncatedTo(ChronoUnit.MILLIS).format(formatter))
-            case (actVal, expVal) if actVal === expVal => true
-            case (actVal, expVal) => fail(s"Actual: ${actVal.toString}, Expected: ${expVal.toString}")
-          }
-        }
-        keyEquals && valueEquals
-    }
-  }
-
-  private def createContainerForDirectNodeRelations = {
-    val nodeContainerProps: Map[String, ContainerPropertyDefinition] = Map(
-      "stringProp1" -> ContainerPropertyDefinition(
-        nullable = Some(true),
-        autoIncrement = None,
-        defaultValue = None,
-        description = None,
-        name = None,
-        `type` = PropertyType.TextProperty(Some(false), None)
-      )
-    )
-
-    val containerCreation = ContainerCreateDefinition(
-      space = space,
-      externalId = containerForDirectNodeRelationExtId,
-      name = Some(s"NodeContainerForDirectRelation"),
-      description = Some(s"NodeContainerForDirectRelation"),
-      usedFor = Some(Usage.Node),
-      properties = nodeContainerProps,
-      constraints = None,
-      indexes = None
-    )
-
-    val viewCreation = toViewCreateDef(viewForDirectNodeRelationExtId, viewVersion, containerCreation)
-
-    (for {
-      _ <- createContainers(Seq(containerCreation))
-      viewsMap <- createViews(Seq(viewCreation))
-    } yield  {
-      val instanceData = createNodeWriteData(
-        space,
-        s"${containerForDirectNodeRelationExtId}Instance",
-        ViewReference(space = space, externalId = viewForDirectNodeRelationExtId, version = viewVersion),
-        viewsMap(viewForDirectNodeRelationExtId).properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p },
-        None,
-        random
-      )
-      createInstance(Seq(instanceData))
-    }) *> sleepUnlessPlayback(2.seconds)
   }
 }
