@@ -161,11 +161,11 @@ class InstancesTest extends VcrTestSpec {
     val queryNodesMapOfNodeView2: InstanceQueryResponse = queryNodeInstances(nodeView2.toSourceReference)
       .unsafeRunSync()
 
-    queryNodesMapOfNodeView1.items.foreach { map =>
+    queryNodesMapOfNodeView1.items.map { map =>
       map.size shouldBe 1
     }
 
-    queryNodesMapOfNodeView2.items.foreach { map =>
+    queryNodesMapOfNodeView2.items.map { map =>
       map.size shouldBe 1
     }
 
@@ -612,6 +612,7 @@ class InstancesTest extends VcrTestSpec {
 
   private def syncNodeInstances(viewRef: ViewReference) = {
     val hasData = HasData(Seq(viewRef))
+
     client.instances.syncRequest(
       InstanceSyncRequest(
         `with` = Map("sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
@@ -624,17 +625,13 @@ class InstancesTest extends VcrTestSpec {
 
   private def queryNodeInstances(viewRef: ViewReference) = {
     val hasData = HasData(Seq(viewRef))
+
     client.instances.queryRequest(
       InstanceQueryRequest(
         `with` = Map("query" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = None,
         select = Map("query" -> SelectExpression(sources =
-          List(SourceSelector(source = viewRef, properties = List("*"))))),
-        debug = Some(InstanceDebugParameters(
-          timeout = None,
-          emitResults = Some(true),
-          profile = Some(false)
-        ))
+          List(SourceSelector(source = viewRef, properties = List("*")))))
       )
     )
   }
@@ -671,6 +668,7 @@ class InstancesTest extends VcrTestSpec {
       implements = None
     )
 
+  // compare timestamps adhering to the accepted format
   private def instancePropertyMapEquals(expected: Map[String, InstancePropertyValue], actual: Map[String, InstancePropertyValue]): Boolean = {
     val sizeEquals = actual.size === expected.size
     sizeEquals && expected.forall {
