@@ -5,10 +5,9 @@
         "method" : "POST",
         "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances/list",
         "headers" : {
+          "accept" : "application/json",
           "content-type" : "application/json",
           "cdf-version" : "alpha",
-          "accept" : "application/json",
-          "x-cdp-sdk" : "CogniteScalaSDK:2.38.994",
           "accept-encoding" : "gzip, deflate",
           "x-cdp-app" : "scala-sdk-vcr-test"
         },
@@ -62,8 +61,8 @@
         },
         "headers" : {
           "server" : "envoy",
-          "x-request-id" : "a94fa7f3-61d2-9913-ae52-3bda76c3086f",
-          "date" : "Fri, 05 Jun 2026 22:20:15 GMT",
+          "x-request-id" : "3ff77829-c0bc-9052-b1d2-5ec5fa72ab1c",
+          "date" : "Sat, 06 Jun 2026 07:16:47 GMT",
           "content-type" : "application/json",
           "transfer-encoding" : "chunked",
           "x-frame-options" : "DENY",
