@@ -463,13 +463,13 @@ class VcrBackend[F[_]](
     val _ = Files.write(path, json.getBytes("UTF-8"))
   }
 
-  override def close(): F[Unit] = {
+  override def close(): F[Unit] =
     actualMode match {
-      case VcrMode.Record => flushCassette()
-      case _              => ()
+      case VcrMode.Record =>
+        responseMonad.flatMap(responseMonad.eval(flushCassette()))(_ => delegate.close())
+      case _ =>
+        delegate.close()
     }
-    delegate.close()
-  }
 
   override def responseMonad: MonadError[F] = delegate.responseMonad
 }
