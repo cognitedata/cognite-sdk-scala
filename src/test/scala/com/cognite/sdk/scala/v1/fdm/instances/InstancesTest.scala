@@ -177,11 +177,11 @@ class InstancesTest extends VcrTestSpec {
     val queryNodesMapOfNodeView2: InstanceQueryResponse = queryNodeInstances(nodeView2.toSourceReference)
       .unsafeRunSync()
 
-    queryNodesMapOfNodeView1.items.map { map =>
+    queryNodesMapOfNodeView1.items.foreach { map =>
       map.size shouldBe 1
     }
 
-    queryNodesMapOfNodeView2.items.map { map =>
+    queryNodesMapOfNodeView2.items.foreach { map =>
       map.size shouldBe 1
     }
 
@@ -525,7 +525,12 @@ class InstancesTest extends VcrTestSpec {
         `with` = Map("query" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = None,
         select = Map("query" -> SelectExpression(sources =
-          List(SourceSelector(source = viewRef, properties = List("*")))))
+          List(SourceSelector(source = viewRef, properties = List("*"))))),
+        debug = Some(InstanceDebugParameters(
+          timeout = None,
+          emitResults = Some(true),
+          profile = Some(false)
+        ))
       )
     )
   }
@@ -641,6 +646,7 @@ class InstancesTest extends VcrTestSpec {
     val directRelationContainerExtId = "sdkTestDirectRelationContainer"
     val directRelationViewExtId = "sdkTestDirectRelationView"
 
+    // Create container with a direct relation property
     val containerProps: Map[String, ContainerPropertyDefinition] = Map(
       "relatedNode" -> ContainerPropertyDefinition(
         nullable = Some(true),
@@ -671,6 +677,7 @@ class InstancesTest extends VcrTestSpec {
     } yield ()
     setup.unsafeRunSync()
 
+    // Create a node with a direct relation pointing to a non-existent node
     val nonExistentNodeRef = DirectRelationReference(space, "non-existent-node-for-direct-relation-test")
     val nodeWithDirectRelation = NodeOrEdgeCreate.NodeWrite(
       space = space,
@@ -686,6 +693,7 @@ class InstancesTest extends VcrTestSpec {
       `type` = None
     )
 
+    // Should fail when autoCreateDirectRelations is false
     val ex = intercept[CdpApiException] {
       client.instances.createItems(
         InstanceCreate(
@@ -696,6 +704,7 @@ class InstancesTest extends VcrTestSpec {
     }
     ex.code shouldBe 400
 
+    // Cleanup
     deleteViews(Seq(DataModelReference(space, directRelationViewExtId, Some(viewVersion))))
     deleteContainers(Seq(ContainerId(space, directRelationContainerExtId)))
   }
@@ -704,6 +713,7 @@ class InstancesTest extends VcrTestSpec {
     val directRelationContainerExtId = "sdkTestDirectRelationContainer2"
     val directRelationViewExtId = "sdkTestDirectRelationView2"
 
+    // Create container with a direct relation property
     val containerProps: Map[String, ContainerPropertyDefinition] = Map(
       "relatedNode" -> ContainerPropertyDefinition(
         nullable = Some(true),
@@ -734,6 +744,7 @@ class InstancesTest extends VcrTestSpec {
     } yield ()
     setup.unsafeRunSync()
 
+    // Create a node with a direct relation pointing to a non-existent node
     val autoCreatedNodeExtId = "auto-created-node-for-direct-relation-test"
     val nonExistentNodeRef = DirectRelationReference(space, autoCreatedNodeExtId)
     val nodeWithDirectRelation = NodeOrEdgeCreate.NodeWrite(
@@ -750,6 +761,7 @@ class InstancesTest extends VcrTestSpec {
       `type` = None
     )
 
+    // Should succeed when autoCreateDirectRelations is true (no exception thrown)
     val result = client.instances.createItems(
       InstanceCreate(
         items = Seq(nodeWithDirectRelation),
@@ -757,10 +769,15 @@ class InstancesTest extends VcrTestSpec {
       )
     ).unsafeRunSync()
 
+    // The node we created should be returned
     result.size should be >= 1
     result.exists(_.externalId === "nodeWithDirectRelation2") shouldBe true
 
-    deleteInstance(Seq(NodeDeletionRequest(space, "nodeWithDirectRelation2")))
+    // Cleanup - try to delete both nodes (the auto-created one may or may not exist)
+    deleteInstance(Seq(
+      NodeDeletionRequest(space, "nodeWithDirectRelation2")
+    ))
+    // Try to clean up auto-created node if it exists (ignore errors)
     scala.util.Try {
       deleteInstance(Seq(NodeDeletionRequest(space, autoCreatedNodeExtId)))
     }
