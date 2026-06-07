@@ -6,17 +6,17 @@ val scala3 = "3.3.3"
 val scala213 = "2.13.18"
 val supportedScalaVersions = List(scala213, scala3)
 
-val javaVersion = "11"
+val javaVersion = "17"
 
 // This is used only for tests.
-val jettyTestVersion = "11.0.25"
+val jettyTestVersion = "12.1.9"
 
 val sttpVersion = "3.11.0"
 val circeVersion = "0.14.15"
 val catsEffectVersion = "3.6.3"
 val fs2Version = "3.11.0"
 val natchezVersion = "0.3.7"
-val nettyVersion = "4.1.68.Final"
+val nettyVersion = "4.2.12.Final"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -46,7 +46,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.37." + patchVersion,
+  version := "2.38." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
@@ -144,13 +144,15 @@ lazy val core = project
     libraryDependencies ++= Seq(
       "commons-io" % "commons-io" % "2.18.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
-      "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
+      "org.eclipse.jetty.ee11" % "jetty-ee11-servlet" % jettyTestVersion % Test,
+      "org.eclipse.jetty.compression" % "jetty-compression-server" % jettyTestVersion % Test,
+      "org.eclipse.jetty.compression" % "jetty-compression-gzip" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "4.33.0",
+      "com.google.protobuf" % "protobuf-java" % "4.33.4",
       "org.tpolecat" %% "natchez-core" % natchezVersion,
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
