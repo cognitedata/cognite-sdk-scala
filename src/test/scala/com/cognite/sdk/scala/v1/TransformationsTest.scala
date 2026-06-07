@@ -8,6 +8,7 @@ import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.OAuth2.ClientCredentials
 import com.cognite.sdk.scala.common._
 import io.circe.syntax.EncoderOps
+import sttp.client3.SttpBackend
 import sttp.model.Uri
 
 import java.time.temporal.ChronoUnit
@@ -28,7 +29,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
     None,
     None,
     None,
-    sttpBackendAuth
+    sttpBackendAuth,
+    identity[SttpBackend[IO, Any]](_),
   )
 
   def shortRandomUUID(): String = UUID.randomUUID().toString.substring(0, 8)

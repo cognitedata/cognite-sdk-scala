@@ -16,6 +16,7 @@ final case class InstanceCreate(
     items: Seq[NodeOrEdgeCreate],
     autoCreateStartNodes: Option[Boolean] = Some(false),
     autoCreateEndNodes: Option[Boolean] = Some(false),
+    autoCreateDirectRelations: Option[Boolean] = Some(true),
     skipOnVersionConflict: Option[Boolean] = Some(false),
     replace: Option[Boolean] = Some(false)
 )
@@ -49,21 +50,30 @@ final case class InstanceFilterRequest(
     limit: Option[Int] = None,
     sort: Option[Seq[PropertySortV3]] = None,
     filter: Option[FilterDefinition] = None,
+    debug: Option[InstanceDebugParameters] = None,
     includeTyping: Option[Boolean] = Some(true)
+)
+
+final case class InstanceDebugParameters(
+    timeout: Option[Int] = None,
+    emitResults: Option[Boolean] = None,
+    profile: Option[Boolean] = None
 )
 
 final case class InstanceQueryRequest(
     `with`: Map[String, TableExpression] = Map.empty,
     cursors: Option[Map[String, String]] = None,
     select: Map[String, SelectExpression] = Map.empty,
-    includeTyping: Option[Boolean] = Some(true)
+    includeTyping: Option[Boolean] = Some(true),
+    debug: Option[InstanceDebugParameters] = None
 )
 
 final case class InstanceSyncRequest(
     `with`: Map[String, TableExpression] = Map.empty,
     cursors: Option[Map[String, String]] = None,
     select: Map[String, SelectExpression] = Map.empty,
-    includeTyping: Option[Boolean] = Some(true)
+    includeTyping: Option[Boolean] = Some(true),
+    debug: Option[InstanceDebugParameters] = None
 )
 
 final case class TableExpression(

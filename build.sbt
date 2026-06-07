@@ -6,16 +6,17 @@ val scala3 = "3.3.3"
 val scala213 = "2.13.18"
 val supportedScalaVersions = List(scala213, scala3)
 
-val javaVersion = "11"
+val javaVersion = "17"
 
 // This is used only for tests.
-val jettyTestVersion = "11.0.25"
+val jettyTestVersion = "12.1.9"
 
 val sttpVersion = "3.11.0"
 val circeVersion = "0.14.15"
 val catsEffectVersion = "3.6.3"
 val fs2Version = "3.11.0"
 val natchezVersion = "0.3.8"
+val nettyVersion = "4.2.12.Final"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -27,9 +28,10 @@ credentials += Credentials(
   "Sonatype Nexus Repository Manager",
   "central.sonatype.com",
   System.getenv("SONATYPE_USERNAME"),
-  System.getenv("SONATYPE_PASSWORD")
+  System.getenv("SONATYPE_PASSWORD"),
 )
-credentials += Credentials("Artifactory Realm",
+credentials += Credentials(
+  "Artifactory Realm",
   "cognite.jfrog.io",
   System.getenv("JFROG_USERNAME"),
   System.getenv("JFROG_PASSWORD"),
@@ -44,7 +46,7 @@ lazy val commonSettings = Seq(
   organization := "com.cognite",
   organizationName := "Cognite",
   organizationHomepage := Some(url("https://cognite.com")),
-  version := "2.34." + patchVersion,
+  version := "2.38." + patchVersion,
   isSnapshot := patchVersion.endsWith("-SNAPSHOT"),
   scalaVersion := scala213, // use 2.13 by default
   // handle cross plugin https://github.com/stringbean/sbt-dependency-lock/issues/13
@@ -54,6 +56,17 @@ lazy val commonSettings = Seq(
         case Some((2, n)) => s"2.$n"
         case Some((3, _)) => s"3"
       }}.sbt.lock",
+  dependencyOverrides ++= Seq(
+    "io.netty" % "netty-buffer" % nettyVersion,
+    "io.netty" % "netty-codec" % nettyVersion,
+    "io.netty" % "netty-codec-http" % nettyVersion,
+    "io.netty" % "netty-codec-socks" % nettyVersion,
+    "io.netty" % "netty-common" % nettyVersion,
+    "io.netty" % "netty-handler" % nettyVersion,
+    "io.netty" % "netty-handler-proxy" % nettyVersion,
+    "io.netty" % "netty-resolver" % nettyVersion,
+    "io.netty" % "netty-transport" % nettyVersion,
+  ),
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
@@ -65,29 +78,29 @@ lazy val commonSettings = Seq(
       id = "wjoel",
       name = "Joel Wilsson",
       email = "joel.wilsson@cognite.com",
-      url = url("https://wjoel.com")
-    )
+      url = url("https://wjoel.com"),
+    ),
   ),
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/cognitedata/cognite-sdk-scala"),
-      "scm:git@github.com:cognitedata/cognite-sdk-scala.git"
-    )
+      "scm:git@github.com:cognitedata/cognite-sdk-scala.git",
+    ),
   ),
   // Remove all additional repository other than Maven Central from POM
   pomIncludeRepository := { _ =>
     false
   },
   publishTo := (if (System.getenv("PUBLISH_TO_JFROG") == "true") {
-    if (isSnapshot.value)
-      Some("snapshots".at(s"$artifactory/libs-snapshot-local/"))
-    else
-      Some("local-releases".at(s"$artifactory/libs-release-local/"))
-  } else {
-    val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
-    if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
-    else localStaging.value
-  }),
+                  if (isSnapshot.value)
+                    Some("snapshots".at(s"$artifactory/libs-snapshot-local/"))
+                  else
+                    Some("local-releases".at(s"$artifactory/libs-release-local/"))
+                } else {
+                  val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+                  if (isSnapshot.value) Some("central-snapshots".at(centralSnapshots))
+                  else localStaging.value
+                }),
   publishMavenStyle := true,
   pgpPassphrase := {
     if (gpgPass.isDefined) gpgPass.map(_.toCharArray)
@@ -113,30 +126,33 @@ lazy val commonSettings = Seq(
           Wart.ToString,
           Wart.Overloading,
           Wart.SeqApply,
-          Wart.SeqUpdated
+          Wart.SeqUpdated,
         )
-    })
+    }),
 )
 
-lazy val core = (project in file("."))
+lazy val core = project
+  .in(file("."))
   .enablePlugins(BuildInfoPlugin)
   .settings(
     buildInfoUsePackageAsPath := true,
     buildInfoKeys := Seq[BuildInfoKey](organization, version, organizationName),
-    buildInfoPackage := "com.cognite.scala_sdk"
+    buildInfoPackage := "com.cognite.scala_sdk",
   )
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
       "commons-io" % "commons-io" % "2.18.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
-      "org.eclipse.jetty" % "jetty-servlet" % jettyTestVersion % Test,
+      "org.eclipse.jetty.ee11" % "jetty-ee11-servlet" % jettyTestVersion % Test,
+      "org.eclipse.jetty.compression" % "jetty-compression-server" % jettyTestVersion % Test,
+      "org.eclipse.jetty.compression" % "jetty-compression-gzip" % jettyTestVersion % Test,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "cats-effect-laws" % catsEffectVersion % Test,
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "4.33.0",
+      "com.google.protobuf" % "protobuf-java" % "4.33.4",
       "org.tpolecat" %% "natchez-core" % natchezVersion,
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -145,7 +161,6 @@ lazy val core = (project in file("."))
           "-Wconf:cat=deprecation:i",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.Assertion:s",
           "-Wconf:msg=discarded non-Unit value of type org.scalatest.compatible.Assertion:s",
-
           "-source:3.0-migration",
         )
       case Some((2, minor)) if minor == 13 =>
@@ -162,12 +177,12 @@ lazy val core = (project in file("."))
     // https://github.com/thesamet/sbt-protoc/issues/6#issuecomment-353028192
     PB.deleteTargetDirectory := false,
     Compile / PB.targets := Seq(
-      PB.gens.java -> (Compile / sourceManaged).value
-    )
+      PB.gens.java -> (Compile / sourceManaged).value,
+    ),
   )
 
 val scalaTestDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.19" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.19" % "test",
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
@@ -175,7 +190,7 @@ val sttpDeps = Seq(
     // We specify our own version of circe.
     .exclude("io.circe", "circe-core_2.13")
     .exclude("io.circe", "circe-parser_2.13"),
-  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test
+  "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test,
 )
 
 def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
@@ -188,7 +203,7 @@ def circeDeps(scalaVersion: Option[(Long, Long)]): Seq[ModuleID] =
     ("io.circe" %% "circe-parser" % circeVersion)
       .exclude("org.typelevel", "cats-core_2.13"),
     ("io.circe" %% "circe-literal" % circeVersion % Test)
-      .exclude("org.typelevel", "cats-core_2.13")
+      .exclude("org.typelevel", "cats-core_2.13"),
   )
 
 scalacOptions --= (CrossVersion.partialVersion(scalaVersion.value) match {

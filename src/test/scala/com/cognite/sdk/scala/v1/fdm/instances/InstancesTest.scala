@@ -2,11 +2,13 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.CdpApiException
+import cats.implicits.toBifunctorOps
+import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice}
 import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
-import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.HasData
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.{Equals, HasData}
+import com.cognite.sdk.scala.v1.fdm.common.filters.FilterValueDefinition
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, DirectRelationReference, Usage}
@@ -164,11 +166,11 @@ class InstancesTest extends CommonDataModelTestHelper {
     val queryNodesMapOfNodeView2: InstanceQueryResponse = queryNodeInstances(nodeView2.toSourceReference)
       .unsafeRunSync()
 
-    queryNodesMapOfNodeView1.items.map { map =>
+    queryNodesMapOfNodeView1.items.foreach { map =>
       map.size shouldBe 1
     }
 
-    queryNodesMapOfNodeView2.items.map { map =>
+    queryNodesMapOfNodeView2.items.foreach { map =>
       map.size shouldBe 1
     }
 
@@ -208,6 +210,18 @@ class InstancesTest extends CommonDataModelTestHelper {
     // The read data equals the original creation data, since the above should be a noop
     instancePropertyMapEquals(writeDataToMap(edgeWriteData), readEditedEdge) shouldBe true
 
+    val queryedNodes = testClient.instances.queryStream(
+      TableExpression(nodes = Option(NodesTableExpression(filter = 
+        Some(
+          Equals(property= Seq("node", "space"), value= FilterValueDefinition.String(space))
+        )))),
+      SelectExpression(sources = List()),
+      limit = Some(3),
+      batchSize = Some(1)
+    ).compile.toList.unsafeRunSync()
+
+    queryedNodes.length shouldBe 3
+
     val deletedInstances = deleteInstance(
       Seq(
         NodeDeletionRequest(node1WriteData.space, node1WriteData.externalId),
@@ -239,6 +253,199 @@ class InstancesTest extends CommonDataModelTestHelper {
       )
     )
     deletedContainers.length shouldBe 4
+  }
+
+  it should "List instances with debug options, handle 408 and parse debug notice" in {
+    val errorReturn = testClientWithoutRetries.instances.filter(
+      filterRequest = InstanceFilterRequest(
+        instanceType = Some(InstanceType.Edge),
+        sources = Some(
+          Seq(
+            InstanceSource(
+              ViewReference(
+                "cdf_cdm",
+                "CogniteDiagramAnnotation",
+                "v1"
+              )
+            )
+          )
+        ),
+        filter = Some(
+          Equals(
+          property = Seq("cdf_cdm", "CogniteDiagramAnnotation/v1", "status"),
+          value = FilterValueDefinition.String("Approved")
+        )),
+        debug = Some(InstanceDebugParameters(
+          timeout = Some(1),
+          emitResults = Some(false)
+        ))
+      )
+    ).attempt.unsafeRunSync()
+    errorReturn.isLeft shouldBe(true)
+    errorReturn.leftMap {
+      case c: CdpApiException => {
+        c.code shouldBe 408
+        c.debugNotices.toList.flatten should contain(
+          IndexingNotice(
+            "containersWithoutIndexesInvolved",
+            "indexing",
+            "warning",
+            "The query is using one or more containers that doesn't have any indexes declared.",
+            Some("C"),
+            Some("result"),
+            None,
+            Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
+          )
+        )
+
+        c.getMessage should include (
+          """Graph query timed out. Reduce load or contention, or optimise your query.""".stripMargin
+        )
+      }
+      case _ => fail("unexpected type of exception when trying to get a 408 on list instance")
+    }
+  }
+
+  it should "List instances with debug options and parse debug notice on sucessful request" in {
+    val listedInstances = testClientWithoutRetries.instances.filter(
+      filterRequest = InstanceFilterRequest(
+        instanceType = Some(InstanceType.Edge),
+        sources = Some(
+          Seq(
+            InstanceSource(
+              ViewReference(
+                "cdf_cdm",
+                "CogniteDiagramAnnotation",
+                "v1"
+              )
+            )
+          )
+        ),
+        filter = Some(
+          Equals(
+            property = Seq("cdf_cdm", "CogniteDiagramAnnotation/v1", "status"),
+            value = FilterValueDefinition.String("Approved")
+          )),
+        debug = Some(InstanceDebugParameters(
+          emitResults = Some(false)
+        ))
+      )
+    ).attempt.unsafeRunSync()
+    listedInstances.isLeft shouldBe(false)
+    listedInstances.map(
+      _.debug shouldBe(
+        Some(DebugNotices(Seq(
+          IndexingNotice(
+            "containersWithoutIndexesInvolved",
+            "indexing",
+            "warning",
+            "The query is using one or more containers that doesn't have any indexes declared.",
+            Some("C"),
+            Some("result"),
+            None,
+            Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
+          )
+        )))
+      )
+    )
+  }
+
+  it should "Query instances with debug options" in {
+    val queryResponse = testClientWithoutRetries.instances.queryRequest(
+      queryRequest = InstanceQueryRequest(
+        `with` = Map(
+          "query" -> TableExpression(
+            limit = None,
+            edges = Some(EdgeTableExpression(
+              filter = Some(
+                Equals(
+                  property = Seq("cdf_cdm", "CogniteDiagramAnnotation/v1", "status"),
+                  value = FilterValueDefinition.String("Approved")
+                ))
+            )),
+            nodes = None)
+        ),
+        cursors = None,
+        select = Map(
+          "query" -> SelectExpression(Seq(SourceSelector(
+            ViewReference(
+              "cdf_cdm",
+              "CogniteDiagramAnnotation",
+              "v1"
+            ),
+            Seq("status")
+          )))
+        ),
+        includeTyping = Some(true),
+        debug = Some(InstanceDebugParameters(
+          emitResults = Some(false),
+          timeout = None
+        ))
+      )
+    ).attempt.unsafeRunSync()
+    queryResponse.isLeft shouldBe(false)
+    queryResponse.map(_.debug shouldBe Some(DebugNotices(Seq(
+        IndexingNotice(
+          "containersWithoutIndexesInvolved",
+          "indexing",
+          "warning",
+          "The query is using one or more containers that doesn't have any indexes declared.",
+          Some("C"),
+          Some("query"),
+          None,
+          Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
+        )
+      )
+    )))
+  }
+
+  it should "Sync instances with debug options" in {
+    val syncedInstances = testClientWithoutRetries.instances.syncRequest(
+      syncRequest = InstanceSyncRequest(
+        `with` = Map(
+          "sync" -> TableExpression(
+            limit = None,
+            edges = Some(EdgeTableExpression(
+              filter = Some(
+                Equals(
+                  property = Seq("cdf_cdm", "CogniteDiagramAnnotation/v1", "status"),
+                  value = FilterValueDefinition.String("Approved")
+                ))
+            )),
+            nodes = None)
+        ),
+        cursors = None,
+        select = Map(
+          "sync" -> SelectExpression(Seq(SourceSelector(
+            ViewReference(
+              "cdf_cdm",
+              "CogniteDiagramAnnotation",
+              "v1"
+            ),
+            Seq("status")
+          )))
+        ),
+        includeTyping = Some(true),
+        debug = Some(InstanceDebugParameters(
+          emitResults = Some(true)
+        ))
+      )
+    ).attempt.unsafeRunSync()
+    syncedInstances.isLeft shouldBe false
+    syncedInstances.map(
+      _.debug shouldBe Some(DebugNotices(Seq(
+        IndexingNotice(
+          "containersWithoutIndexesInvolved",
+          "indexing",
+          "warning",
+          "The query is using one or more containers that doesn't have any indexes declared.",
+          Some("C"),
+          Some("sync"),
+          None,
+          Some(Seq(ContainerReference("cdf_cdm", "CogniteAnnotation")))
+        )
+      )))
+    )
   }
 
   private def writeDataToMap(writeData: NodeOrEdgeCreate): Map[String, InstancePropertyValue] = (writeData match {
@@ -307,7 +514,12 @@ class InstancesTest extends CommonDataModelTestHelper {
         `with` = Map("query" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = None,
         select = Map("query" -> SelectExpression(sources =
-          List(SourceSelector(source = viewRef, properties = List("*")))))
+          List(SourceSelector(source = viewRef, properties = List("*"))))),
+        debug = Some(InstanceDebugParameters(
+          timeout = None,
+          emitResults = Some(true),
+          profile = Some(false)
+        ))
       )
     )
   }
@@ -416,6 +628,149 @@ class InstancesTest extends CommonDataModelTestHelper {
       )
       createInstance(Seq(instanceData))
     }) *> IO.sleep(2.seconds)
+  }
+
+  it should "fail to create node with direct relation when autoCreateDirectRelations is false and target doesn't exist" in {
+    val directRelationContainerExtId = "sdkTestDirectRelationContainer"
+    val directRelationViewExtId = "sdkTestDirectRelationView"
+
+    // Create container with a direct relation property
+    val containerProps: Map[String, ContainerPropertyDefinition] = Map(
+      "relatedNode" -> ContainerPropertyDefinition(
+        nullable = Some(true),
+        autoIncrement = None,
+        defaultValue = None,
+        description = None,
+        name = Some("relatedNode"),
+        `type` = PropertyType.DirectNodeRelationProperty(None, None, Some(false))
+      )
+    )
+
+    val containerCreation = ContainerCreateDefinition(
+      space = space,
+      externalId = directRelationContainerExtId,
+      name = Some("DirectRelationTestContainer"),
+      description = Some("Container for testing autoCreateDirectRelations"),
+      usedFor = Some(Usage.Node),
+      properties = containerProps,
+      constraints = None,
+      indexes = None
+    )
+
+    val viewCreation = toViewCreateDef(directRelationViewExtId, viewVersion, containerCreation)
+
+    val setup = for {
+      _ <- createContainers(Seq(containerCreation))
+      _ <- createViews(Seq(viewCreation))
+    } yield ()
+    setup.unsafeRunSync()
+
+    // Create a node with a direct relation pointing to a non-existent node
+    val nonExistentNodeRef = DirectRelationReference(space, "non-existent-node-for-direct-relation-test")
+    val nodeWithDirectRelation = NodeOrEdgeCreate.NodeWrite(
+      space = space,
+      externalId = "nodeWithDirectRelation",
+      sources = Some(Seq(
+        EdgeOrNodeData(
+          source = ViewReference(space, directRelationViewExtId, viewVersion),
+          properties = Some(Map(
+            "relatedNode" -> Some(InstancePropertyValue.ViewDirectNodeRelation(Some(nonExistentNodeRef)))
+          ))
+        )
+      )),
+      `type` = None
+    )
+
+    // Should fail when autoCreateDirectRelations is false
+    val ex = intercept[CdpApiException] {
+      testClient.instances.createItems(
+        InstanceCreate(
+          items = Seq(nodeWithDirectRelation),
+          autoCreateDirectRelations = Some(false)
+        )
+      ).unsafeRunSync()
+    }
+    ex.code shouldBe 400
+
+    // Cleanup
+    deleteViews(Seq(DataModelReference(space, directRelationViewExtId, Some(viewVersion))))
+    deleteContainers(Seq(ContainerId(space, directRelationContainerExtId)))
+  }
+
+  it should "succeed to create node with direct relation when autoCreateDirectRelations is true and target doesn't exist" in {
+    val directRelationContainerExtId = "sdkTestDirectRelationContainer2"
+    val directRelationViewExtId = "sdkTestDirectRelationView2"
+
+    // Create container with a direct relation property
+    val containerProps: Map[String, ContainerPropertyDefinition] = Map(
+      "relatedNode" -> ContainerPropertyDefinition(
+        nullable = Some(true),
+        autoIncrement = None,
+        defaultValue = None,
+        description = None,
+        name = Some("relatedNode"),
+        `type` = PropertyType.DirectNodeRelationProperty(None, None, Some(false))
+      )
+    )
+
+    val containerCreation = ContainerCreateDefinition(
+      space = space,
+      externalId = directRelationContainerExtId,
+      name = Some("DirectRelationTestContainer2"),
+      description = Some("Container for testing autoCreateDirectRelations=true"),
+      usedFor = Some(Usage.Node),
+      properties = containerProps,
+      constraints = None,
+      indexes = None
+    )
+
+    val viewCreation = toViewCreateDef(directRelationViewExtId, viewVersion, containerCreation)
+
+    val setup = for {
+      _ <- createContainers(Seq(containerCreation))
+      _ <- createViews(Seq(viewCreation))
+    } yield ()
+    setup.unsafeRunSync()
+
+    // Create a node with a direct relation pointing to a non-existent node
+    val autoCreatedNodeExtId = "auto-created-node-for-direct-relation-test"
+    val nonExistentNodeRef = DirectRelationReference(space, autoCreatedNodeExtId)
+    val nodeWithDirectRelation = NodeOrEdgeCreate.NodeWrite(
+      space = space,
+      externalId = "nodeWithDirectRelation2",
+      sources = Some(Seq(
+        EdgeOrNodeData(
+          source = ViewReference(space, directRelationViewExtId, viewVersion),
+          properties = Some(Map(
+            "relatedNode" -> Some(InstancePropertyValue.ViewDirectNodeRelation(Some(nonExistentNodeRef)))
+          ))
+        )
+      )),
+      `type` = None
+    )
+
+    // Should succeed when autoCreateDirectRelations is true (no exception thrown)
+    val result = testClient.instances.createItems(
+      InstanceCreate(
+        items = Seq(nodeWithDirectRelation),
+        autoCreateDirectRelations = Some(true)
+      )
+    ).unsafeRunSync()
+
+    // The node we created should be returned
+    result.size should be >= 1
+    result.exists(_.externalId === "nodeWithDirectRelation2") shouldBe true
+
+    // Cleanup - try to delete both nodes (the auto-created one may or may not exist)
+    deleteInstance(Seq(
+      NodeDeletionRequest(space, "nodeWithDirectRelation2")
+    ))
+    // Try to clean up auto-created node if it exists (ignore errors)
+    scala.util.Try {
+      deleteInstance(Seq(NodeDeletionRequest(space, autoCreatedNodeExtId)))
+    }
+    deleteViews(Seq(DataModelReference(space, directRelationViewExtId, Some(viewVersion))))
+    deleteContainers(Seq(ContainerId(space, directRelationContainerExtId)))
   }
 
 }
