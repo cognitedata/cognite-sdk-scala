@@ -182,7 +182,7 @@ lazy val core = project
   )
 
 val scalaTestDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.19" % "test",
+  "org.scalatest" %% "scalatest" % "3.2.20" % "test",
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
