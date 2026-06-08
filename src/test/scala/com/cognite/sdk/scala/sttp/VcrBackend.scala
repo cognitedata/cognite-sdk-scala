@@ -438,10 +438,14 @@ class VcrBackend[F[_]](
 
   private def toHeaderMap(headers: Seq[Header]): Map[String, List[String]] =
     headers
-      .filterNot(h => SensitiveHeaders.contains(h.name.toLowerCase(Locale.ROOT)))
       .groupBy(_.name.toLowerCase(Locale.ROOT))
       .view
-      .mapValues(hs => hs.map(_.value).toList)
+      .mapValues { hs =>
+        if (SensitiveHeaders.contains(hs.head.name.toLowerCase(Locale.ROOT)))
+          List("<redacted>")
+        else
+          hs.map(_.value).toList
+      }
       .toMap
 
   private def toSttpHeaders(headers: Map[String, List[String]]): Seq[Header] =
