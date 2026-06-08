@@ -142,7 +142,7 @@ lazy val core = project
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "commons-io" % "commons-io" % "2.18.0",
+      "commons-io" % "commons-io" % "2.22.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty.ee11" % "jetty-ee11-servlet" % jettyTestVersion % Test,
       "org.eclipse.jetty.compression" % "jetty-compression-server" % jettyTestVersion % Test,
