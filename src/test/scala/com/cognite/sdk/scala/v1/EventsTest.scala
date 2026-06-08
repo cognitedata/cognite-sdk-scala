@@ -5,9 +5,8 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 import fs2._
-import com.cognite.sdk.scala.common.{CdpApiException, Items, ReadBehaviours, RetryWhile, SdkTestSpec, SetNull, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common.{CdpApiException, Items, ReadBehaviours, RetryWhile, SdkVcrTestSpec, SetNull, SetValue, WritableBehaviors}
 
-import java.util.UUID
 import scala.util.control.NonFatal
 
 @SuppressWarnings(
@@ -19,7 +18,7 @@ import scala.util.control.NonFatal
     "org.wartremover.warts.SizeIs"
   )
 )
-class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
+class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
@@ -47,12 +46,12 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     client.events,
     None,
     Seq(
-      Event(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
-      Event(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
+      Event(description = Some("scala-sdk-read-example-1"), externalId = Some("sdk-events-r1")),
+      Event(description = Some("scala-sdk-read-example-2"), externalId = Some("sdk-events-r2"))
     ),
     Seq(
-      EventCreate(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
-      EventCreate(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
+      EventCreate(description = Some("scala-sdk-read-example-1"), externalId = Some("sdk-events-c1")),
+      EventCreate(description = Some("scala-sdk-read-example-2"), externalId = Some("sdk-events-c2"))
     ),
     externalIdsThatDoNotExist,
     supportsMissingAndThrown = true
@@ -61,8 +60,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   it should behave like deletableWithIgnoreUnknownIds(
     client.events,
     Seq(
-      Event(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
-      Event(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
+      Event(description = Some("scala-sdk-read-example-1"), externalId = Some("sdk-events-d1")),
+      Event(description = Some("scala-sdk-read-example-2"), externalId = Some("sdk-events-d2"))
     ),
     idsThatDoNotExist
   )
@@ -82,7 +81,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   }
 
   it should "support deleting by CogniteIds" in {
-    val prefix = s"delete-cogniteId-${shortRandom()}"
+    val prefix = "delete-cogniteId-fixed1"
     val createdEvents = createEvents(prefix)
     try {
       val (deleteByInternalIds, deleteByExternalIds) = createdEvents.splitAt(createdEvents.size/2)
@@ -107,7 +106,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   }
 
   it should "raise a conflict error if input of delete contains internalId and externalId that represent the same row" in {
-    val prefix = s"delete-conflict-${shortRandom()}"
+    val prefix = "delete-conflict-fixed1"
     val createdEvents = createEvents(prefix)
     try {
       val (deleteByInternalIds, deleteByExternalIds) = createdEvents.splitAt(createdEvents.size/2)
@@ -126,7 +125,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
       client.events.delete(internalIds ++ externalIds, true).unsafeRunSync()
 
-      //make sure that events are deletes
+      //make sure that events are deleted
       retryWithExpectedResult[Seq[Event]](
         client.events.filter(EventsFilter(externalIdPrefix = Some(prefix))).compile.toList.unsafeRunSync(),
         r => r should have size 0
@@ -140,12 +139,12 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     }
   }
 
-  private val eventsToCreate = Seq(
+  private lazy val eventsToCreate = Seq(
     Event(description = Some("scala-sdk-update-1"), `type` = Some("test"), subtype = Some("test")),
     Event(description = Some("scala-sdk-update-2"), `type` = Some("test"), subtype = Some("test")),
     Event(description = Some("scala-sdk-update-3"), `type` = Some("test"), dataSetId = Some(testDataSet.id))
   )
-  private val eventUpdates = Seq(
+  private lazy val eventUpdates = Seq(
     Event(description = Some("scala-sdk-update-1-1"), `type` = Some("testA"), subtype = Some(null)),
     Event(
       description = Some("scala-sdk-update-2-1"),
@@ -201,8 +200,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     }
   )
 
-  private val updateExternalId1 = s"update-1-externalId-${UUID.randomUUID.toString.substring(0, 8)}"
-  private val updateExternalId2 = s"update-2-externalId-${UUID.randomUUID.toString.substring(0, 8)}"
+  private val updateExternalId1 = "update-1-externalId-aabbccdd"
+  private val updateExternalId2 = "update-2-externalId-eeff0011"
 
   it should behave like updatableByExternalId(
     client.events,
@@ -242,7 +241,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   }
 
   it should "update metadata on events with empty map" in {
-    val externalId1 = UUID.randomUUID.toString
+    val externalId1 = "sdk-events-metadata-upd-1"
 
     // Create event with metadata
     val eventsToCreate = Seq(

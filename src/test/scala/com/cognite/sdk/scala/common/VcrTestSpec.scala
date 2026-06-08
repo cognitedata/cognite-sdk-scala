@@ -111,7 +111,7 @@ abstract class VcrTestSpec
     _testClientWithoutRetries = None
   }
 
-  private def fetchRealAuth(): Auth = {
+  protected def fetchRealAuth(): Auth = {
     val s = envVarSuffix
     val tokenUri = sys.env
       .get(s"TEST_TOKEN_URL$s")

@@ -17,10 +17,10 @@ import org.scalatest.matchers.should.Matchers
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
 trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: AnyFlatSpec =>
   def readable[R, InternalId, PrimitiveId](
-      readable: Readable[R, IO],
+      readable: => Readable[R, IO],
       supportsLimit: Boolean = true
   )(implicit ioRuntime: IORuntime): Unit = {
-    val listLength = readable.list(Some(100)).compile.toList.unsafeRunSync().length
+    lazy val listLength = readable.list(Some(100)).compile.toList.unsafeRunSync().length
     it should "read items" in {
       readable.read().unsafeRunSync().items should not be empty
     }
@@ -46,7 +46,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   }
 
   def partitionedReadable[R, InternalId, PrimitiveId](
-      readable: PartitionedReadable[R, IO]
+      readable: => PartitionedReadable[R, IO]
   )(implicit ioRuntime: IORuntime): Unit = {
     it should "read items with partitions" in {
       val partitionStreams = readable.listPartitions(2)
@@ -96,7 +96,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   }
 
   def readableWithRetrieve[R <: WithId[Long], W](
-      readable: Readable[R, IO] with RetrieveByIds[R, IO],
+      readable: => Readable[R, IO] with RetrieveByIds[R, IO],
       idsThatDoNotExist: Seq[Long],
       supportsMissingAndThrown: Boolean
   )(implicit ioRuntime: IORuntime): Unit = {
@@ -160,7 +160,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   }
 
   def readableWithRetrieveByRequiredExternalId[R <: WithRequiredExternalId with WithCreatedTime, W](
-     readable: Readable[R, IO] with RetrieveByExternalIds[R, IO],
+     readable: => Readable[R, IO] with RetrieveByExternalIds[R, IO],
      idsThatDoNotExist: Seq[String],
      supportsMissingAndThrown: Boolean
    )(implicit ioRuntime: IORuntime): Unit = {
@@ -205,7 +205,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   }
 
   def readableWithRetrieveByExternalId[R <: WithExternalId with WithCreatedTime, W](
-      readable: Readable[R, IO] with RetrieveByExternalIds[R, IO],
+      readable: => Readable[R, IO] with RetrieveByExternalIds[R, IO],
       idsThatDoNotExist: Seq[String],
       supportsMissingAndThrown: Boolean
   )(implicit ioRuntime: IORuntime): Unit = {
@@ -259,15 +259,15 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   }
 
   def readableWithRetrieveUnknownIds[R <: WithExternalId with WithId[Long] with WithCreatedTime, W](
-      readable: Readable[R, IO]
+      readable: => Readable[R, IO]
         with RetrieveByExternalIdsWithIgnoreUnknownIds[R, IO]
         with RetrieveByIdsWithIgnoreUnknownIds[R, IO]
   )(implicit ioRuntime: IORuntime): Unit = {
-    val firstTwoItemItems = fetchTestItems(readable)
-    val firstTwoExternalIds = firstTwoItemItems.map(_.externalId.value)
-    val firstTwoIds = firstTwoItemItems.map(_.id)
-    val nonExistentExternalId = s"does-not-exist/${UUID.randomUUID.toString}"
-    val nonExistentId = ThreadLocalRandom.current().nextLong(1, 9007199254740991L)
+    lazy val firstTwoItemItems = fetchTestItems(readable)
+    lazy val firstTwoExternalIds = firstTwoItemItems.map(_.externalId.value)
+    lazy val firstTwoIds = firstTwoItemItems.map(_.id)
+    lazy val nonExistentExternalId = s"does-not-exist/${UUID.randomUUID.toString}"
+    lazy val nonExistentId = ThreadLocalRandom.current().nextLong(1, 9007199254740991L)
 
     it should "support retrieving items by external id with ignoreUnknownIds=true" in {
       firstTwoExternalIds should have size 2
