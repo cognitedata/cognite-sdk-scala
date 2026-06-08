@@ -14,9 +14,8 @@ import sttp.model.{Header, StatusCode}
 import sttp.monad.MonadError
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import java.net.URI
 import java.nio.file.{Files, Paths}
-import java.util.{Base64, Locale, Objects}
+import java.util.{Base64, Locale}
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 import scala.jdk.CollectionConverters._
@@ -281,7 +280,7 @@ class VcrBackend[F[_]](
       s"Method mismatch: expected ${recorded.method}, got ${request.method.method}"
     )
 
-    val uriError = Option.when(!urisMatchIgnoringPort(request.uri.toString, recorded.uri))(
+    val uriError = Option.when(!request.uri.toString.equals(recorded.uri))(
       s"URI mismatch:\n  expected: ${recorded.uri}\n  actual:   ${request.uri}"
     )
 
@@ -303,18 +302,6 @@ class VcrBackend[F[_]](
     val errors = List(methodError, uriError, headerErrors, bodyError).flatten
     if (errors.isEmpty) None else Some(new RequestMismatch(errors))
   }
-
-  private def urisMatchIgnoringPort(uri1: String, uri2: String): Boolean =
-    try {
-      val u1 = new URI(uri1)
-      val u2 = new URI(uri2)
-      Objects.equals(u1.getScheme, u2.getScheme) &&
-        Objects.equals(u1.getHost, u2.getHost) &&
-        Objects.equals(u1.getPath, u2.getPath) &&
-        Objects.equals(u1.getQuery, u2.getQuery) &&
-        Objects.equals(u1.getFragment, u2.getFragment) &&
-        Objects.equals(u1.getUserInfo, u2.getUserInfo)
-    } catch { case _: Exception => uri1.equals(uri2) }
 
   private def extractRequestBody(request: Request[_, _]): Option[Array[Byte]] =
     request.body match {
