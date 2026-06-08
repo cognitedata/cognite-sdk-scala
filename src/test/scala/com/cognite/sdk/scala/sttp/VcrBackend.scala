@@ -211,7 +211,8 @@ class VcrBackend[F[_]](
     case other => other
   }
 
-  private lazy val cassetteInteractions: Iterator[Interaction] = loadCassette().iterator
+  private lazy val cassetteInteractions: ConcurrentLinkedQueue[Interaction] =
+    new ConcurrentLinkedQueue[Interaction](loadCassette().asJava)
 
   private def loadCassette(): List[Interaction] = {
     val path = Paths.get(cassettePath)
@@ -254,22 +255,21 @@ class VcrBackend[F[_]](
   }
 
   private def playback[T, R >: Any with Effect[F]](request: Request[T, R]): F[Response[T]] =
-    if (!cassetteInteractions.hasNext)
-      responseMonad.error[Response[T]](new NoMoreInteractionsException())
-    else {
-      val interaction = cassetteInteractions.next()
-      validateRequest(request, interaction.request) match {
-        case Some(err) => responseMonad.error[Response[T]](err)
-        case None =>
-          val bytes =
-            interaction.response.entity.map(_.content.toBytes).getOrElse(Array.empty[Byte])
-          val status = StatusCode(interaction.response.status.code)
-          val respHeaders = toSttpHeaders(interaction.response.headers)
-          val stub = SttpBackendStub[F, Any](responseMonad)
-            .whenAnyRequest
-            .thenRespond(bytes, status)
-          responseMonad.map(stub.send(request))(_.copy(headers = respHeaders))
-      }
+    Option(cassetteInteractions.poll()) match {
+      case None => responseMonad.error[Response[T]](new NoMoreInteractionsException())
+      case Some(interaction) =>
+        validateRequest(request, interaction.request) match {
+          case Some(err) => responseMonad.error[Response[T]](err)
+          case None =>
+            val bytes =
+              interaction.response.entity.map(_.content.toBytes).getOrElse(Array.empty[Byte])
+            val status = StatusCode(interaction.response.status.code)
+            val respHeaders = toSttpHeaders(interaction.response.headers)
+            val stub = SttpBackendStub[F, Any](responseMonad)
+              .whenAnyRequest
+              .thenRespond(bytes, status)
+            responseMonad.map(stub.send(request))(_.copy(headers = respHeaders))
+        }
     }
 
   private def validateRequest(
