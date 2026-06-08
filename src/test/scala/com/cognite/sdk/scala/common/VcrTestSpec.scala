@@ -8,7 +8,7 @@ import cats.effect.unsafe.IORuntime
 import com.cognite.sdk.scala.sttp.{RetryingBackend, VcrBackend, VcrMode}
 import com.cognite.sdk.scala.v1._
 import natchez.Trace
-import org.scalatest.{BeforeAndAfterEachTestData, TestData}
+import org.scalatest.{BeforeAndAfterEachTestData, Tag, TestData}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.OptionValues
@@ -173,12 +173,19 @@ abstract class VcrTestSpec
       case _ => IO.sleep(duration)
     }
 
+  override def tags: Map[String, Set[String]] =
+    testNames.foldLeft(super.tags) { (acc, name) =>
+      acc.updated(name, acc.getOrElse(name, Set.empty) + VcrTestSpec.VcrTag.name)
+    }
+
   private def simplifyFilename(name: String): String =
     VcrTestSpec.simplifyFilename(name)
 }
 
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
 object VcrTestSpec {
+  object VcrTag extends Tag("com.cognite.sdk.scala.VcrTest")
+
   private[common] def simplifyFilename(name: String): String = {
     val initial = name.replaceAll("[^a-zA-Z0-9._]", "-")
 

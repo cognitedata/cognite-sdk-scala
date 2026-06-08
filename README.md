@@ -309,7 +309,7 @@ sbt test
 ```bash
 VCR_MODE=AUTO \
   TEST_AAD_TENANT=... TEST_CLIENT_ID=... TEST_CLIENT_SECRET=... \
-  sbt test
+  sbt "testOnly * -- -n com.cognite.sdk.scala.VcrTest"
 ```
 
 **CI — `record-cassettes` label:**
