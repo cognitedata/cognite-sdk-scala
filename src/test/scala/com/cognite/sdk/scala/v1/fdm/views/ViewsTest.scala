@@ -3,8 +3,8 @@
 
 package com.cognite.sdk.scala.v1.fdm.views
 
-import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
+import com.cognite.sdk.scala.v1.fdm.DataModelVcrTestSpec
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{Int32, TimeSeriesReference}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ReverseDirectRelationConnection, ThroughReference, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{EnumValueMetadata, PrimitiveProperty}
@@ -13,9 +13,9 @@ import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, Proper
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.containers._
 import com.cognite.sdk.scala.v1.fdm.views.ViewPropertyCreateDefinition.{CreateConnectionDefinition, CreateViewProperty}
-import com.cognite.sdk.scala.v1.{CommonDataModelTestHelper, SpaceCreateDefinition}
+import com.cognite.sdk.scala.v1.SpaceCreateDefinition
 import io.circe.Json
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.TestData
 
 @SuppressWarnings(
   Array(
@@ -27,7 +27,7 @@ import org.scalatest.BeforeAndAfterAll
     "org.wartremover.warts.AsInstanceOf"
   )
 )
-class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAndAfterAll {
+class ViewsTest extends DataModelVcrTestSpec with RetryWhile {
   private val spaceName = "test-space-scala-sdk"
   private val containerNamePrim = "scala sdk container prim"
   private val containerPrimitiveExternalId = "scala_sdk_container_primitive"
@@ -120,13 +120,10 @@ class ViewsTest extends CommonDataModelTestHelper with RetryWhile with BeforeAnd
     indexes = None
   )
 
-  override def beforeAll(): Unit = {
-    testClient.spacesv3
-      .createItems(Seq(SpaceCreateDefinition(space = spaceName)))
-      .unsafeRunSync()
-
-    testClient.containers.createItems(Seq(containerPrimitive, containerList)).unsafeRunSync()
-    ()
+  override def beforeEach(testData: TestData): Unit = {
+    super.beforeEach(testData)
+    testClient.spacesv3.createItems(Seq(SpaceCreateDefinition(space = spaceName))).unsafeRunSync()
+    val _ = testClient.containers.createItems(Seq(containerPrimitive, containerList)).unsafeRunSync()
   }
 
   val viewVersion1 = "v1"

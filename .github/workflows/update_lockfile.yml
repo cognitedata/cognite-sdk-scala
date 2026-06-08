@@ -20,7 +20,7 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Set up JDK 17
-        uses: coursier/setup-action@7acb5c9ea69bc1a1bb185ec45ebce2ac114f3628 # v2.0.3
+        uses: coursier/setup-action@fd1707a76b027efdfb66ca79318b4d29b72e5a02 # v3.0.0
         with:
           jvm: temurin:17
           apps: sbt
@@ -34,7 +34,7 @@ jobs:
             sed -i"" 's/"timestamp" : ".*"/"timestamp" : "1970-01-01T00:00:00.000000000Z"/' "$f"
           done
 
-      - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9
+      - uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10
         with:
           add: 'build.*.sbt.lock'
           message: 'Update lockfiles'

@@ -37,7 +37,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 17
-        uses: coursier/setup-action@039f736548afa5411c1382f40a5bd9c2d30e0383 # v1.3.9
+        uses: coursier/setup-action@fd1707a76b027efdfb66ca79318b4d29b72e5a02 # v3.0.0
         with:
           jvm: temurin:17
           apps: sbt
@@ -67,7 +67,7 @@ jobs:
           cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC \
             "++2.13 testOnly * -- -n com.cognite.sdk.scala.VcrTest"
 
-      - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9
+      - uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10
         with:
           add: 'src/test/resources/cassettes/'
           message: 'chore: record VCR cassettes'
