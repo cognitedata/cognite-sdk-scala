@@ -16,8 +16,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   def writable[R <: ToCreate[W] with WithId[PrimitiveId], W, PrimitiveId](
       writable: => Create[R, W, IO] with CreateOne[R, W, IO],
       maybeDeletable: => Option[DeleteByIds[IO, PrimitiveId]],
-      readExamples: Seq[R],
-      createExamples: Seq[W],
+      readExamples: => Seq[R],
+      createExamples: => Seq[W],
       idsThatDoNotExist: Seq[PrimitiveId],
       supportsMissingAndThrown: Boolean,
       deleteMissingThrows: Boolean = true
@@ -111,8 +111,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   ]](
       writable: => Create[R, W, IO],
       maybeDeletable: => Option[DeleteByExternalIds[IO]],
-      readExamples: Seq[R],
-      createExamples: Seq[W],
+      readExamples: => Seq[R],
+      createExamples: => Seq[W],
       externalIdsThatDoNotExist: Seq[String],
       supportsMissingAndThrown: Boolean
   )(implicit IORuntime: IORuntime): Unit =
@@ -130,8 +130,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   ]](
       writable: => Create[R, W, IO],
       maybeDeletable: => Option[DeleteByExternalIds[IO]],
-      readExamples: Seq[R],
-      createExamples: Seq[W],
+      readExamples: => Seq[R],
+      createExamples: => Seq[W],
       externalIdsThatDoNotExist: Seq[String],
       supportsMissingAndThrown: Boolean,
       trySameIdsThatDoNotExist: Boolean = true
@@ -151,8 +151,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   ]](
       writable: => Create[R, W, IO],
       maybeDeletable: => Option[DeleteByExternalIds[IO]],
-      readExamples: Seq[R],
-      createExamples: Seq[W],
+      readExamples: => Seq[R],
+      createExamples: => Seq[W],
       externalIdsThatDoNotExist: Seq[String],
       supportsMissingAndThrown: Boolean,
       trySameIdsThatDoNotExist: Boolean = true
@@ -227,8 +227,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   def updatable[R <: ToCreate[W] with ToUpdate[U] with WithId[Long], W, U](
       updatable: => Create[R, W, IO] with UpdateById[R, U, IO] with RetrieveByIds[R, IO],
       maybeDeletable: => Option[DeleteByIds[IO, Long]],
-      readExamples: Seq[R],
-      updateExamples: Seq[R],
+      readExamples: => Seq[R],
+      updateExamples: => Seq[R],
       updateId: (Long, R) => R,
       compareItems: (R, R) => Boolean,
       compareUpdated: (Seq[R], Seq[R]) => Unit
@@ -263,8 +263,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   def updatableByExternalId[R <: ToCreate[W] with WithExternalId, W, U](
       resource: => Create[R, W, IO] with UpdateByExternalId[R, U, IO] with RetrieveByIds[R, IO],
       maybeDeletable: => Option[DeleteByExternalIds[IO]],
-      itemsToCreate: Seq[R],
-      updatesToMake: Map[String, U],
+      itemsToCreate: => Seq[R],
+      updatesToMake: => Map[String, U],
       expectedBehaviors: (Seq[R], Seq[R]) => Unit
   )(implicit ioRuntime: IORuntime): Unit =
     it should "allow updating by externalId" in {
@@ -278,8 +278,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   def updatableByRequiredExternalId[R <: ToCreate[W] with WithRequiredExternalId, W, U](
       resource: => Create[R, W, IO] with UpdateByExternalId[R, U, IO] with RetrieveByIds[R, IO],
       maybeDeletable: => Option[DeleteByExternalIds[IO]],
-      itemsToCreate: Seq[R],
-      updatesToMake: Map[String, U],
+      itemsToCreate: => Seq[R],
+      updatesToMake: => Map[String, U],
       expectedBehaviors: (Seq[R], Seq[R]) => Unit
   )(implicit IORuntime: IORuntime): Unit =
     it should "allow updating by externalId" in {
@@ -293,8 +293,8 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
   def updatableById[R <: ToCreate[W] with ToUpdate[U] with WithId[Long], W, U](
       resource: => Create[R, W, IO] with UpdateById[R, U, IO] with RetrieveByIds[R, IO],
       maybeDeletable: => Option[DeleteByIds[IO, Long]],
-      itemsToCreate: Seq[R],
-      updatesToMake: Seq[U],
+      itemsToCreate: => Seq[R],
+      updatesToMake: => Seq[U],
       expectedBehaviors: (Seq[R], Seq[R]) => Unit
   )(implicit IORuntime: IORuntime): Unit =
     it should "allow updating by Id" in {
@@ -310,7 +310,7 @@ trait WritableBehaviors extends Matchers with OptionValues { this: AnyFlatSpec =
       writable: => Create[R, W, IO]
         with DeleteByIdsWithIgnoreUnknownIds[IO, Long]
         with RetrieveByIds[R, IO],
-      readExamples: Seq[R],
+      readExamples: => Seq[R],
       idsThatDoNotExist: Seq[Long]
   )(implicit IORuntime: IORuntime): Unit =
     it should "support ignoring unknown ids on delete" in {
