@@ -1,0 +1,455 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 23014,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "bf6c95f0-bd55-977c-81ad-e95bbc1c0d48"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 13:07:13 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 39989,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers/byids",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 73,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "testSpaceScalaSdk1",
+                  "externalId" : "testContainer88"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers/byids",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "ea991f14-2b61-9749-87b4-bbe26f84d37f"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 13:07:29 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 39989,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 23569,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "6138eaf8-1f2c-9ed2-8a14-6f67cf591d0f"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 13:07:29 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 41954,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers/byids",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 73,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "testSpaceScalaSdk1",
+                  "externalId" : "testContainer88"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers/byids",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "06217050-982c-938c-809e-e52e2234451b"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 13:07:37 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 41954,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers/delete",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 73,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "testSpaceScalaSdk1",
+                  "externalId" : "testContainer88"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers/delete",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "e372b047-27ce-9595-94a4-faf0b3f7e9f8"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 13:07:37 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 107,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "testContainer88",
+                  "space" : "testSpaceScalaSdk1"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "recordedEnv" : {
+    
+  }
+}
