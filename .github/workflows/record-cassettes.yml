@@ -67,7 +67,7 @@ jobs:
           cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC \
             "++2.13 testOnly * -- -n com.cognite.sdk.scala.VcrTest"
 
-      - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9
+      - uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10
         with:
           add: 'src/test/resources/cassettes/'
           message: 'chore: record VCR cassettes'
