@@ -13,6 +13,22 @@
   "dependencies" : [
     {
       "org" : "co.fs2",
+      "name" : "fs2-core_2.13",
+      "version" : "3.12.0",
+      "artifacts" : [
+        {
+          "name" : "fs2-core_2.13.jar",
+          "hash" : "sha1:cd2d9ce7616098215fade61e6c884052d43d2487"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "co.fs2",
       "name" : "fs2-io_2.13",
       "version" : "3.12.0",
       "artifacts" : [
