@@ -1,4 +1,4 @@
-// Copyright 2020 Cognite AS
+// Copyright 2026 Cognite AS
 // SPDX-License-Identifier: Apache-2.0
 
 package com.cognite.sdk.scala.sttp
