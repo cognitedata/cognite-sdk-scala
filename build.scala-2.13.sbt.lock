@@ -260,11 +260,11 @@
     {
       "org" : "commons-io",
       "name" : "commons-io",
-      "version" : "2.18.0",
+      "version" : "2.22.0",
       "artifacts" : [
         {
           "name" : "commons-io.jar",
-          "hash" : "sha1:44084ef756763795b31c578403dd028ff4a22950"
+          "hash" : "sha1:5b1e18bc0ad651ed878029d83f88d9c8189fd51e"
         }
       ],
       "configurations" : [
