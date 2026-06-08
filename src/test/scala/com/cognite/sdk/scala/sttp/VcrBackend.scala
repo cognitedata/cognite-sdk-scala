@@ -20,6 +20,7 @@ import java.util.{Base64, Locale, Objects}
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 import scala.jdk.CollectionConverters._
+import scala.util.Using
 
 @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
 sealed trait VcrMode
@@ -60,24 +61,21 @@ object RecordedContent {
   final case class GzippedContent(gzipped: String) extends RecordedContent {
     def toBytes: Array[Byte] = {
       val compressed = Base64.getDecoder.decode(gzipped)
-      val bis = new ByteArrayInputStream(compressed)
-      val gz = new GZIPInputStream(bis)
-      try gz.readAllBytes()
-      finally gz.close()
+      Using.resource(new GZIPInputStream(new ByteArrayInputStream(compressed)))(_.readAllBytes())
     }
   }
 
   private val GzipThresholdBytes = 1000
 
   def fromBytes(bytes: Array[Byte], contentType: String): RecordedContent = {
-    val mimeType = contentType.split(";")(0).strip().toLowerCase(Locale.ROOT)
     if (bytes.length >= GzipThresholdBytes) {
       val baos = new ByteArrayOutputStream()
-      val gz = new GZIPOutputStream(baos)
-      gz.write(bytes)
-      gz.close()
+      Using.resource(new GZIPOutputStream(baos)) { gz =>
+        gz.write(bytes)
+      }
       GzippedContent(Base64.getEncoder.encodeToString(baos.toByteArray))
     } else {
+      val mimeType = contentType.split(";")(0).strip().toLowerCase(Locale.ROOT)
       mimeType match {
         case "application/json" =>
           parse(new String(bytes, "UTF-8")) match {
