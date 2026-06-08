@@ -5,11 +5,21 @@
         "method" : "POST",
         "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances/list",
         "headers" : {
-          "accept" : "application/json",
-          "content-type" : "application/json",
-          "cdf-version" : "alpha",
-          "accept-encoding" : "gzip, deflate",
-          "x-cdp-app" : "scala-sdk-vcr-test"
+          "accept" : [
+            "application/json"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
         },
         "entity" : {
           "contentLength" : 358,
@@ -60,15 +70,33 @@
           "reason" : "OK"
         },
         "headers" : {
-          "server" : "envoy",
-          "x-request-id" : "e51c5e7f-82c9-97ab-aad7-11e0c938879f",
-          "date" : "Sat, 06 Jun 2026 09:41:20 GMT",
-          "content-type" : "application/json",
-          "transfer-encoding" : "chunked",
-          "x-frame-options" : "DENY",
-          "x-content-type-options" : "nosniff",
-          "vary" : "Accept-Encoding",
-          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "e62edf55-d8bf-9319-a1f4-d7cf1882e838"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 09:02:59 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
         },
         "entity" : {
           "contentLength" : 11064,

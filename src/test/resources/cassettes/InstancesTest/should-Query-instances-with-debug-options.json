@@ -5,11 +5,21 @@
         "method" : "POST",
         "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances/query",
         "headers" : {
-          "accept" : "application/json",
-          "content-type" : "application/json",
-          "cdf-version" : "alpha",
-          "accept-encoding" : "gzip, deflate",
-          "x-cdp-app" : "scala-sdk-vcr-test"
+          "accept" : [
+            "application/json"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
         },
         "entity" : {
           "contentLength" : 491,
@@ -75,15 +85,33 @@
           "reason" : "OK"
         },
         "headers" : {
-          "server" : "envoy",
-          "x-request-id" : "d1a1ef8d-c9f2-9e2d-b5d7-33af6a17fc1d",
-          "date" : "Sat, 06 Jun 2026 09:41:21 GMT",
-          "content-type" : "application/json",
-          "transfer-encoding" : "chunked",
-          "x-frame-options" : "DENY",
-          "x-content-type-options" : "nosniff",
-          "vary" : "Accept-Encoding",
-          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "b50d7d5c-12c9-9043-96c1-536da491d98b"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 09:03:00 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
         },
         "entity" : {
           "contentLength" : 11755,

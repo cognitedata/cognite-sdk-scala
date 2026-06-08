@@ -5,11 +5,21 @@
         "method" : "POST",
         "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers",
         "headers" : {
-          "accept" : "application/json",
-          "content-type" : "application/json",
-          "cdf-version" : "alpha",
-          "accept-encoding" : "gzip, deflate",
-          "x-cdp-app" : "scala-sdk-vcr-test"
+          "accept" : [
+            "application/json"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
         },
         "entity" : {
           "contentLength" : 312,
@@ -49,15 +59,33 @@
           "reason" : "OK"
         },
         "headers" : {
-          "server" : "envoy",
-          "x-request-id" : "27dce7b7-3962-99af-a6df-140ee5b25f20",
-          "date" : "Sat, 06 Jun 2026 09:41:23 GMT",
-          "content-type" : "application/json",
-          "transfer-encoding" : "chunked",
-          "x-frame-options" : "DENY",
-          "x-content-type-options" : "nosniff",
-          "vary" : "Accept-Encoding",
-          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "27924781-8c52-923e-93a7-6563679e1bc8"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 09:03:01 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
         },
         "entity" : {
           "contentLength" : 723,
@@ -71,8 +99,8 @@
                   "space" : "testSpaceScalaSdk1",
                   "externalId" : "sdkTestDirectRelationContainer",
                   "usedFor" : "node",
-                  "createdTime" : 1780738884157,
-                  "lastUpdatedTime" : 1780738884157,
+                  "createdTime" : 1780909382202,
+                  "lastUpdatedTime" : 1780909382202,
                   "isGlobal" : false,
                   "properties" : {
                     "relatedNode" : {
@@ -109,11 +137,21 @@
         "method" : "POST",
         "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/views",
         "headers" : {
-          "accept" : "application/json",
-          "content-type" : "application/json",
-          "cdf-version" : "alpha",
-          "accept-encoding" : "gzip, deflate",
-          "x-cdp-app" : "scala-sdk-vcr-test"
+          "accept" : [
+            "application/json"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
         },
         "entity" : {
           "contentLength" : 461,
@@ -155,15 +193,33 @@
           "reason" : "OK"
         },
         "headers" : {
-          "server" : "envoy",
-          "x-request-id" : "04037bda-885b-9ba0-b15b-7e9195c5b013",
-          "date" : "Sat, 06 Jun 2026 09:41:28 GMT",
-          "content-type" : "application/json",
-          "transfer-encoding" : "chunked",
-          "x-frame-options" : "DENY",
-          "x-content-type-options" : "nosniff",
-          "vary" : "Accept-Encoding",
-          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "f75c2554-6787-9904-bfda-c5e0f7c0dd17"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 09:03:06 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
         },
         "entity" : {
           "contentLength" : 1253,
@@ -171,7 +227,7 @@
           "contentEncoding" : null,
           "content" : {
             "type" : "__gzipped_by_vcr_library_due_to_size",
-            "gzipped" : "H4sIAAAAAAAA/51UTWvDMAy951eYnBtoKazdrhsbvYyxdLuMHrxYBVPH8WylXSn977O85ZOUhuUQiN7T07Mk5xQxFkuE3MV37MN/MHYKbx+GbwSruVoJj8VO7Nbg8EFayPAVFEdZ6HcJh3hSJTjDMyAuemJKH2nGFU/FbtaQ9mCdzyTavhXOLHAEsZY5KcwWy+livlzeTuc3s5qjuMM3I67yDlYi/1REQFtCHf8qwR6HgNKBeCwsedKFgMaVdE+q+OTKI1uuXJNhbGHAogTqW9UxH7fUGBDPpNIG6ISFdmi51Jii5xB8nrQJeDT9pCYai9D4eNJFlXRYmWshXWFfGX1dsJfVG0qvwJiZjt+X+7rMdbMvvy0+rgRolFsZ7Hca3MmTeV5WU+/MKqC6VGpg8gHjJRYr7Rcw94UGswW4zEqDf3t70YPmYSs7hBo/R73jxjk3BkTdk+YK0nMaWI0LYxo9pH+OqHK+qZ1XB6X0hH4Cia+VhKLJFdVao9dUymEkxfxNZF6OBTk2Vk7mRoUJhjZuosr4Jjr/AEv8rHjlBAAA"
+            "gzipped" : "H4sIAAAAAAAA/51UTWvDMAy951eYnBvoGHTNrhsbvYyxdLuMHtxYBVPH8WylXSn977O85aukNCyHQPSenp4lOceIsVgiFC6+Z5/+g7FjePswfCNYzdVCeCx2YrsEh4/SQo5voDjKUn9I2MeTOsEZngNx0RMz+shyrngmtjctaQfW+Uyi7Trh3AJHEEtZkMLN3XyaTtPb+SxNZw1HcYfvRlzl7a1EvlZEQFtBE/+qwB6GgMqBeCotedKlgNaVdM+qXHPlkQ1Xrs0wtjRgUQL1re6Yj1tqDIgXUukCdMJSO7RcaszQcwg+TboEPJjzpDYai9D4eNJHlXRYm+sgfWFfGX1dsJfVW8pZgTEzHb8vD02Z62Zff1t8WAjQKDcy2O81uJcni6Kqp96bVUB1pdTA5APGKywX2i9g4QsNZgtwuZUG//b2ogfNw1b2CA1+is6OGxfcGBBNT9orSM9xYDUujGn0kP45otr5qnFeH5TSE/oJJL5WEoomV1QbjbOmUg4jKeZvIvNyLMixsXKyMCpMMLRxFdXGV9HpByCyXNLlBAAA"
           }
         }
       }
@@ -181,11 +237,21 @@
         "method" : "POST",
         "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances",
         "headers" : {
-          "accept" : "application/json",
-          "content-type" : "application/json",
-          "cdf-version" : "alpha",
-          "accept-encoding" : "gzip, deflate",
-          "x-cdp-app" : "scala-sdk-vcr-test"
+          "accept" : [
+            "application/json"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
         },
         "entity" : {
           "contentLength" : 492,
@@ -235,15 +301,33 @@
           "reason" : "Bad Request"
         },
         "headers" : {
-          "server" : "envoy",
-          "x-request-id" : "6300fe78-7694-9849-9371-f93b4fd2483b",
-          "date" : "Sat, 06 Jun 2026 09:41:36 GMT",
-          "content-type" : "application/json",
-          "transfer-encoding" : "chunked",
-          "x-frame-options" : "DENY",
-          "x-content-type-options" : "nosniff",
-          "vary" : "Accept-Encoding",
-          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "a453e907-a59f-901a-8100-cdcf505f153a"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 09:03:11 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
         },
         "entity" : {
           "contentLength" : 195,
@@ -266,11 +350,21 @@
         "method" : "POST",
         "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/views/delete",
         "headers" : {
-          "accept" : "application/json",
-          "content-type" : "application/json",
-          "cdf-version" : "alpha",
-          "accept-encoding" : "gzip, deflate",
-          "x-cdp-app" : "scala-sdk-vcr-test"
+          "accept" : [
+            "application/json"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
         },
         "entity" : {
           "contentLength" : 98,
@@ -298,15 +392,33 @@
           "reason" : "OK"
         },
         "headers" : {
-          "server" : "envoy",
-          "x-request-id" : "58e6798b-1393-9653-993a-e565413ef272",
-          "date" : "Sat, 06 Jun 2026 09:41:37 GMT",
-          "content-type" : "application/json",
-          "transfer-encoding" : "chunked",
-          "x-frame-options" : "DENY",
-          "x-content-type-options" : "nosniff",
-          "vary" : "Accept-Encoding",
-          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "3a40911a-b2c6-9d60-8bcb-5494e18f6b0c"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 09:03:11 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
         },
         "entity" : {
           "contentLength" : 140,
@@ -332,11 +444,21 @@
         "method" : "POST",
         "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers/delete",
         "headers" : {
-          "accept" : "application/json",
-          "content-type" : "application/json",
-          "cdf-version" : "alpha",
-          "accept-encoding" : "gzip, deflate",
-          "x-cdp-app" : "scala-sdk-vcr-test"
+          "accept" : [
+            "application/json"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
         },
         "entity" : {
           "contentLength" : 88,
@@ -363,15 +485,33 @@
           "reason" : "OK"
         },
         "headers" : {
-          "server" : "envoy",
-          "x-request-id" : "3e01ef0e-245e-9626-8e41-5cd1f8889aed",
-          "date" : "Sat, 06 Jun 2026 09:41:40 GMT",
-          "content-type" : "application/json",
-          "transfer-encoding" : "chunked",
-          "x-frame-options" : "DENY",
-          "x-content-type-options" : "nosniff",
-          "vary" : "Accept-Encoding",
-          "strict-transport-security" : "max-age=31536000; includeSubDomains"
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "95b84c81-ffbb-9b43-8da4-be0db5165e7e"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 09:03:14 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
         },
         "entity" : {
           "contentLength" : 122,
