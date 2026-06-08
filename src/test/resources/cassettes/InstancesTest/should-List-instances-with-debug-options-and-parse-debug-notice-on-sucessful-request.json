@@ -5,14 +5,20 @@
         "method" : "POST",
         "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances/list",
         "headers" : {
-          "accept" : [
-            "application/json"
+          "authorization" : [
+            "<redacted>"
           ],
           "content-type" : [
             "application/json"
           ],
           "cdf-version" : [
             "alpha"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
           ],
           "accept-encoding" : [
             "gzip, deflate"
@@ -74,10 +80,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "a4150801-e677-9d99-a811-4e3470e88284"
+            "dbcba906-899c-99c0-ba2e-a63a8e14230b"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 09:17:49 GMT"
+            "Mon, 08 Jun 2026 10:47:26 GMT"
           ],
           "content-type" : [
             "application/json"
