@@ -9,14 +9,14 @@ val supportedScalaVersions = List(scala213, scala3)
 val javaVersion = "17"
 
 // This is used only for tests.
-val jettyTestVersion = "12.1.9"
+val jettyTestVersion = "12.1.10"
 
 val sttpVersion = "3.11.0"
 val circeVersion = "0.14.15"
 val catsEffectVersion = "3.6.3"
-val fs2Version = "3.11.0"
-val natchezVersion = "0.3.7"
-val nettyVersion = "4.2.12.Final"
+val fs2Version = "3.12.2"
+val natchezVersion = "0.3.8"
+val nettyVersion = "4.2.14.Final"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -142,7 +142,7 @@ lazy val core = project
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
-      "commons-io" % "commons-io" % "2.18.0",
+      "commons-io" % "commons-io" % "2.22.0",
       "org.eclipse.jetty" % "jetty-server" % jettyTestVersion % Test,
       "org.eclipse.jetty.ee11" % "jetty-ee11-servlet" % jettyTestVersion % Test,
       "org.eclipse.jetty.compression" % "jetty-compression-server" % jettyTestVersion % Test,
@@ -182,7 +182,7 @@ lazy val core = project
   )
 
 val scalaTestDeps = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.19" % "test",
+  "org.scalatest" %% "scalatest" % "3.2.20" % "test",
 )
 val sttpDeps = Seq(
   "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
