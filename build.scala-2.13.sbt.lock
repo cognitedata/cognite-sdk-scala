@@ -750,11 +750,11 @@
     {
       "org" : "org.scala-lang.modules",
       "name" : "scala-collection-compat_2.13",
-      "version" : "2.11.0",
+      "version" : "2.14.0",
       "artifacts" : [
         {
           "name" : "scala-collection-compat_2.13.jar",
-          "hash" : "sha1:a1d1a4591c59ac01f041762692d81879accd849b"
+          "hash" : "sha1:73b62c66181022be8c2f63c60dd83201be1febde"
         }
       ],
       "configurations" : [
@@ -1062,11 +1062,27 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_2.13",
-      "version" : "0.3.8",
+      "version" : "0.3.10",
       "artifacts" : [
         {
           "name" : "natchez-core_2.13.jar",
-          "hash" : "sha1:c3b5b9b622cf70192af9a1c4e4a9260f6b916cbd"
+          "hash" : "sha1:2d0fa2272bec93f36f37cf9632e0eb537a270e48"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "algebra_2.13",
+      "version" : "2.13.0",
+      "artifacts" : [
+        {
+          "name" : "algebra_2.13.jar",
+          "hash" : "sha1:6599fd5793c47fd9e60ac889daa1b78491c20cfa"
         }
       ],
       "configurations" : [
@@ -1094,11 +1110,27 @@
     {
       "org" : "org.typelevel",
       "name" : "case-insensitive_2.13",
-      "version" : "1.4.2",
+      "version" : "1.5.0",
       "artifacts" : [
         {
           "name" : "case-insensitive_2.13.jar",
-          "hash" : "sha1:690c34beb2359abd4154a72dc41ce1ee39095865"
+          "hash" : "sha1:771b613d614a0044c73a5a2c50a2ef022b319f32"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-collections-core_2.13",
+      "version" : "0.9.10",
+      "artifacts" : [
+        {
+          "name" : "cats-collections-core_2.13.jar",
+          "hash" : "sha1:9db783dda63697132ac48e57326df06e98e5dd7e"
         }
       ],
       "configurations" : [

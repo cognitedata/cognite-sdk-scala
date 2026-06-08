@@ -736,11 +736,11 @@
     {
       "org" : "org.scala-lang.modules",
       "name" : "scala-collection-compat_3",
-      "version" : "2.11.0",
+      "version" : "2.14.0",
       "artifacts" : [
         {
           "name" : "scala-collection-compat_3.jar",
-          "hash" : "sha1:dccc0fe9416577811b2c43a042040d5eb62bfa6e"
+          "hash" : "sha1:8086487b9662280dfe300498055674364fe1d5e1"
         }
       ],
       "configurations" : [
@@ -1048,11 +1048,27 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_3",
-      "version" : "0.3.8",
+      "version" : "0.3.10",
       "artifacts" : [
         {
           "name" : "natchez-core_3.jar",
-          "hash" : "sha1:3fe4f789f194f21692e8c61a77c0c53cd6d80ec9"
+          "hash" : "sha1:95874116a7448b46f4456420b331878800655e77"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "algebra_3",
+      "version" : "2.13.0",
+      "artifacts" : [
+        {
+          "name" : "algebra_3.jar",
+          "hash" : "sha1:305e7d234d4755134a05a9ea9ae5f79ebe700682"
         }
       ],
       "configurations" : [
@@ -1080,11 +1096,27 @@
     {
       "org" : "org.typelevel",
       "name" : "case-insensitive_3",
-      "version" : "1.4.2",
+      "version" : "1.5.0",
       "artifacts" : [
         {
           "name" : "case-insensitive_3.jar",
-          "hash" : "sha1:fe70a06a40e7f65bb885c3bae7c97e6c93f0bfda"
+          "hash" : "sha1:c5d576756b6444f63da5cbf1e10710d0d99911e2"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-collections-core_3",
+      "version" : "0.9.10",
+      "artifacts" : [
+        {
+          "name" : "cats-collections-core_3.jar",
+          "hash" : "sha1:bf34def762c7afe9abdcbefa8ca40d74dfd225ab"
         }
       ],
       "configurations" : [
