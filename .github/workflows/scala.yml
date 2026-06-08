@@ -5,6 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   compile_scala_213:
@@ -22,7 +23,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 17
-        uses: coursier/setup-action@f7be3eb3dcef84a4e16fc8cd75c87beb2e5cbcc9 # v2.0.2
+        uses: coursier/setup-action@7acb5c9ea69bc1a1bb185ec45ebce2ac114f3628 # v2.0.3
         with:
           jvm: temurin:17
           apps: sbt
@@ -35,14 +36,6 @@ jobs:
           cache-name: coursier-cache
         with:
           path: ~/.cache/coursier/v1
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
-      - name: Cache Ivy 2 cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5
-        env:
-          cache-name: sbt-ivy2-cache
-        with:
-          path: ~/.ivy2/cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
       - name: Compile
@@ -65,7 +58,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 17
-        uses: coursier/setup-action@f7be3eb3dcef84a4e16fc8cd75c87beb2e5cbcc9 # v2.0.2
+        uses: coursier/setup-action@7acb5c9ea69bc1a1bb185ec45ebce2ac114f3628 # v2.0.3
         with:
           jvm: temurin:17
           apps: sbt
@@ -78,14 +71,6 @@ jobs:
           cache-name: coursier-cache
         with:
           path: ~/.cache/coursier/v1
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
-      - name: Cache Ivy 2 cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5
-        env:
-          cache-name: sbt-ivy2-cache
-        with:
-          path: ~/.ivy2/cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
       - name: Compile
@@ -107,7 +92,7 @@ jobs:
         git rev-list --count --first-parent HEAD > patch_version.txt
 
     - name: Set up JDK 17
-      uses: coursier/setup-action@f7be3eb3dcef84a4e16fc8cd75c87beb2e5cbcc9 # v2.0.2
+      uses: coursier/setup-action@7acb5c9ea69bc1a1bb185ec45ebce2ac114f3628 # v2.0.3
       with:
         jvm: temurin:17
         apps: sbt
@@ -120,14 +105,6 @@ jobs:
         cache-name: coursier-cache
       with:
         path: ~/.cache/coursier/v1
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
-    - name: Cache Ivy 2 cache
-      uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5
-      env:
-        cache-name: sbt-ivy2-cache
-      with:
-        path: ~/.ivy2/cache
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
     - name: Run tests for Scala 2.13
@@ -183,7 +160,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 17
-        uses: coursier/setup-action@f7be3eb3dcef84a4e16fc8cd75c87beb2e5cbcc9 # v2.0.2
+        uses: coursier/setup-action@7acb5c9ea69bc1a1bb185ec45ebce2ac114f3628 # v2.0.3
         with:
           jvm: temurin:17
           apps: sbt
@@ -231,7 +208,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 17
-        uses: coursier/setup-action@f7be3eb3dcef84a4e16fc8cd75c87beb2e5cbcc9 # v2.0.2
+        uses: coursier/setup-action@7acb5c9ea69bc1a1bb185ec45ebce2ac114f3628 # v2.0.3
         with:
           jvm: temurin:17
           apps: sbt

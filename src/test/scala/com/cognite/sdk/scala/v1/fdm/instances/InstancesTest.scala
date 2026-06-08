@@ -1,10 +1,8 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
 import cats.implicits.toBifunctorOps
-import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice}
-import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
+import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice, VcrTestSpec}
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.{Equals, HasData}
@@ -18,6 +16,7 @@ import com.cognite.sdk.scala.v1.fdm.views._
 
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.DurationInt
+import scala.util.Random
 
 @SuppressWarnings(
   Array(
@@ -31,7 +30,12 @@ import scala.concurrent.duration.DurationInt
     "org.wartremover.warts.OptionPartial"
   )
 )
-class InstancesTest extends CommonDataModelTestHelper {
+class InstancesTest extends VcrTestSpec {
+  override protected def envVarSuffix: String = ""
+  override def projectName: String = sys.env.getOrElse("TEST_PROJECT", "extractor-bluefield-testing")
+  override def baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL", "https://bluefield.cognitedata.com")
+  override protected def cdfVersion: Option[String] = Some("alpha")
+
   private val space = Utils.SpaceExternalId
 
   private val edgeNodeContainerExtId = "sdkTest16EdgeNodeContainer2"
@@ -49,6 +53,7 @@ class InstancesTest extends CommonDataModelTestHelper {
   private val viewVersion = Utils.ViewVersion
 
   it should "CRUD instances with all property types" in {
+    val random = new Random(42)
 
 //    deleteContainers(Seq(
 //      ContainerId(space, edgeNodeContainerExtId),
@@ -66,7 +71,7 @@ class InstancesTest extends CommonDataModelTestHelper {
 //      DataModelReference(space, viewForDirectNodeRelationExtId, Some(viewVersion))
 //    ))
 
-    createContainerForDirectNodeRelations.unsafeRunSync()
+    createContainerForDirectNodeRelations(random).unsafeRunSync()
 
     val allContainerCreateDefinition = createTestContainer(space, edgeNodeContainerExtId, Usage.All)
     val edgeContainerCreateDefinition = createTestContainer(space, edgeContainerExtId, Usage.Edge)
@@ -86,7 +91,7 @@ class InstancesTest extends CommonDataModelTestHelper {
     val nodeViewExternalId1 = nodeView1ExtId
     val nodeViewExternalId2 = nodeView2ExtId
 
-    val createdViewsMap = (IO.sleep(2.seconds) *> createViews(Seq(
+    val createdViewsMap = (sleepUnlessPlayback(2.seconds) *> createViews(Seq(
       toViewCreateDef(allViewExternalId, viewVersion, allContainerCreateDefinition),
       toViewCreateDef(edgeViewExternalId, viewVersion, edgeContainerCreateDefinition),
       toViewCreateDef(nodeViewExternalId1, viewVersion, nodeContainerCreateDefinition1),
@@ -103,14 +108,16 @@ class InstancesTest extends CommonDataModelTestHelper {
       s"nodeExtId$nodeViewExternalId1",
       nodeView1.toSourceReference,
       nodeView1.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
-      Some(DirectRelationReference(nodeView1.space, nodeView1.externalId))
+      Some(DirectRelationReference(nodeView1.space, nodeView1.externalId)),
+      random
     )
     val node2WriteData = createNodeWriteData(
       space,
       s"nodeExtId$nodeViewExternalId2",
       nodeView2.toSourceReference,
       nodeView2.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
-      None
+      None,
+      random
     )
     val startNode = DirectRelationReference(space, externalId = node1WriteData.externalId)
     val endNode = DirectRelationReference(space, externalId = node2WriteData.externalId)
@@ -120,7 +127,8 @@ class InstancesTest extends CommonDataModelTestHelper {
       edgeView.toSourceReference,
       edgeView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
       startNode = startNode,
-      endNode = endNode
+      endNode = endNode,
+      random
     )
     val nodeOrEdgeWriteData = Seq(
       createEdgeWriteData(
@@ -129,23 +137,25 @@ class InstancesTest extends CommonDataModelTestHelper {
         allView.toSourceReference,
         allView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
         startNode = startNode,
-        endNode = endNode
+        endNode = endNode,
+        random
       ),
       createNodeWriteData(
         space,
         s"nodesOrEdgesExtId${allViewExternalId}Nodes",
         allView.toSourceReference,
         allView.properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p},
-        Some(DirectRelationReference(nodeView1.space, nodeView1.externalId))
+        Some(DirectRelationReference(nodeView1.space, nodeView1.externalId)),
+        random
       )
     )
 
-    (IO.sleep(2.seconds) *> createInstance(Seq(node1WriteData))).unsafeRunSync()
+    (sleepUnlessPlayback(2.seconds) *> createInstance(Seq(node1WriteData))).unsafeRunSync()
     createInstance(Seq(node2WriteData)).unsafeRunSync()
     createInstance(Seq(edgeWriteData)).unsafeRunSync()
     createInstance(nodeOrEdgeWriteData).unsafeRunSync()
 
-    val readNodesMapOfNode1 = (IO.sleep(10.seconds) *> fetchNodeInstance(nodeView1.toSourceReference, node1WriteData.externalId)).unsafeRunSync()
+    val readNodesMapOfNode1 = (sleepUnlessPlayback(10.seconds) *> fetchNodeInstance(nodeView1.toSourceReference, node1WriteData.externalId)).unsafeRunSync()
     val readNodesMapOfNode2 = fetchNodeInstance(nodeView2.toSourceReference, node2WriteData.externalId).unsafeRunSync()
     val syncNodesMapOfNodeView1: InstanceSyncResponse = syncNodeInstances(nodeView1.toSourceReference)
       .unsafeRunSync()
@@ -211,7 +221,7 @@ class InstancesTest extends CommonDataModelTestHelper {
     instancePropertyMapEquals(writeDataToMap(edgeWriteData), readEditedEdge) shouldBe true
 
     val queryedNodes = testClient.instances.queryStream(
-      TableExpression(nodes = Option(NodesTableExpression(filter = 
+      TableExpression(nodes = Option(NodesTableExpression(filter =
         Some(
           Equals(property= Seq("node", "space"), value= FilterValueDefinition.String(space))
         )))),
@@ -454,29 +464,29 @@ class InstancesTest extends CommonDataModelTestHelper {
   }).getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).flatMap {case (k, v) => v.map(k -> _)}.toMap
 
   private def createContainers(items: Seq[ContainerCreateDefinition]) = {
-    testClient.containers.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+    testClient.containers.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
   }
 
   private def deleteContainers(items: Seq[ContainerId]) = {
-    testClient.containers.delete(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    testClient.containers.delete(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
   }
 
   private def createViews(items: Seq[ViewCreateDefinition]) = {
-    testClient.views.createItems(items).flatTap(_ => IO.sleep(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+    testClient.views.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
   }
 
   private def createInstance(writeData: Seq[NodeOrEdgeCreate]): IO[Seq[SlimNodeOrEdge]] = {
     testClient.instances.createItems(
       InstanceCreate(items = writeData)
-    ).flatTap(_ => IO.sleep(2.seconds))
+    ).flatTap(_ => sleepUnlessPlayback(2.seconds))
   }
 
   private def deleteInstance(refs: Seq[InstanceDeletionRequest]): Seq[InstanceDeletionRequest] = {
-    testClient.instances.delete(instanceRefs = refs).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    testClient.instances.delete(instanceRefs = refs).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
   }
 
   private def deleteViews(items: Seq[DataModelReference]) = {
-    testClient.views.deleteItems(items).flatTap(_ => IO.sleep(2.seconds)).unsafeRunSync()
+    testClient.views.deleteItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
   }
 
   private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) = {
@@ -590,7 +600,7 @@ class InstancesTest extends CommonDataModelTestHelper {
     }
   }
 
-  private def createContainerForDirectNodeRelations = {
+  private def createContainerForDirectNodeRelations(random: Random) = {
     val nodeContainerProps: Map[String, ContainerPropertyDefinition] = Map(
       "stringProp1" -> ContainerPropertyDefinition(
         nullable = Some(true),
@@ -624,10 +634,11 @@ class InstancesTest extends CommonDataModelTestHelper {
         s"${containerForDirectNodeRelationExtId}Instance",
         ViewReference(space = space, externalId = viewForDirectNodeRelationExtId, version = viewVersion),
         viewsMap(viewForDirectNodeRelationExtId).properties.collect { case (n, p: ViewCorePropertyDefinition) => n -> p },
-        None
+        None,
+        random
       )
       createInstance(Seq(instanceData))
-    }) *> IO.sleep(2.seconds)
+    }) *> sleepUnlessPlayback(2.seconds)
   }
 
   it should "fail to create node with direct relation when autoCreateDirectRelations is false and target doesn't exist" in {
@@ -772,5 +783,4 @@ class InstancesTest extends CommonDataModelTestHelper {
     deleteViews(Seq(DataModelReference(space, directRelationViewExtId, Some(viewVersion))))
     deleteContainers(Seq(ContainerId(space, directRelationContainerExtId)))
   }
-
 }
