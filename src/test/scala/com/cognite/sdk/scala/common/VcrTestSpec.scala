@@ -90,7 +90,7 @@ abstract class VcrTestSpec
         _vcrBackend = Some(vcr)
         val fakeAuth = BearerTokenAuth("vcr-playback-token")
         // During playback retrying doesn't affect cassette matching, use identity for both
-        _testClient = Some(buildClient(vcr, fakeAuth, identity))
+        _testClient = Some(buildClient(vcr, fakeAuth, new RetryingBackend[IO, Any](_)))
         _testClientWithoutRetries = Some(buildClient(vcr, fakeAuth, identity))
 
       case _ =>
