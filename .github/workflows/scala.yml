@@ -37,14 +37,6 @@ jobs:
           path: ~/.cache/coursier/v1
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
-      - name: Cache Ivy 2 cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5
-        env:
-          cache-name: sbt-ivy2-cache
-        with:
-          path: ~/.ivy2/cache
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
       - name: Compile
         run: |
           cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
@@ -80,14 +72,6 @@ jobs:
           path: ~/.cache/coursier/v1
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
-      - name: Cache Ivy 2 cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5
-        env:
-          cache-name: sbt-ivy2-cache
-        with:
-          path: ~/.ivy2/cache
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
       - name: Compile
         run: |
           cat /dev/null | sbt -Dsbt.log.noformat=true ++3.3 dependencyLockCheck
@@ -120,14 +104,6 @@ jobs:
         cache-name: coursier-cache
       with:
         path: ~/.cache/coursier/v1
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
-    - name: Cache Ivy 2 cache
-      uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5
-      env:
-        cache-name: sbt-ivy2-cache
-      with:
-        path: ~/.ivy2/cache
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
 
     - name: Run tests for Scala 2.13
