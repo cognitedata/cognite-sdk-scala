@@ -220,7 +220,7 @@ class InstancesTest extends VcrTestSpec {
     // The read data equals the original creation data, since the above should be a noop
     instancePropertyMapEquals(writeDataToMap(edgeWriteData), readEditedEdge) shouldBe true
 
-    val queryedNodes = client.instances.queryStream(
+    val queryedNodes = testClient.instances.queryStream(
       TableExpression(nodes = Option(NodesTableExpression(filter =
         Some(
           Equals(property= Seq("node", "space"), value= FilterValueDefinition.String(space))
@@ -266,7 +266,7 @@ class InstancesTest extends VcrTestSpec {
   }
 
   it should "List instances with debug options, handle 408 and parse debug notice" in {
-    val errorReturn = rawClient.instances.filter(
+    val errorReturn = testClientWithoutRetries.instances.filter(
       filterRequest = InstanceFilterRequest(
         instanceType = Some(InstanceType.Edge),
         sources = Some(
@@ -317,7 +317,7 @@ class InstancesTest extends VcrTestSpec {
   }
 
   it should "List instances with debug options and parse debug notice on sucessful request" in {
-    val listedInstances = rawClient.instances.filter(
+    val listedInstances = testClientWithoutRetries.instances.filter(
       filterRequest = InstanceFilterRequest(
         instanceType = Some(InstanceType.Edge),
         sources = Some(
@@ -361,7 +361,7 @@ class InstancesTest extends VcrTestSpec {
   }
 
   it should "Query instances with debug options" in {
-    val queryResponse = rawClient.instances.queryRequest(
+    val queryResponse = testClientWithoutRetries.instances.queryRequest(
       queryRequest = InstanceQueryRequest(
         `with` = Map(
           "query" -> TableExpression(
@@ -410,7 +410,7 @@ class InstancesTest extends VcrTestSpec {
   }
 
   it should "Sync instances with debug options" in {
-    val syncedInstances = rawClient.instances.syncRequest(
+    val syncedInstances = testClientWithoutRetries.instances.syncRequest(
       syncRequest = InstanceSyncRequest(
         `with` = Map(
           "sync" -> TableExpression(
@@ -464,33 +464,33 @@ class InstancesTest extends VcrTestSpec {
   }).getOrElse(Seq.empty).flatMap(d => d.properties.getOrElse(Map.empty)).flatMap {case (k, v) => v.map(k -> _)}.toMap
 
   private def createContainers(items: Seq[ContainerCreateDefinition]) = {
-    client.containers.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+    testClient.containers.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
   }
 
   private def deleteContainers(items: Seq[ContainerId]) = {
-    client.containers.delete(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
+    testClient.containers.delete(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
   }
 
   private def createViews(items: Seq[ViewCreateDefinition]) = {
-    client.views.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
+    testClient.views.createItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).map(r => r.map(v => v.externalId -> v).toMap)
   }
 
   private def createInstance(writeData: Seq[NodeOrEdgeCreate]): IO[Seq[SlimNodeOrEdge]] = {
-    client.instances.createItems(
+    testClient.instances.createItems(
       InstanceCreate(items = writeData)
     ).flatTap(_ => sleepUnlessPlayback(2.seconds))
   }
 
   private def deleteInstance(refs: Seq[InstanceDeletionRequest]): Seq[InstanceDeletionRequest] = {
-    client.instances.delete(instanceRefs = refs).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
+    testClient.instances.delete(instanceRefs = refs).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
   }
 
   private def deleteViews(items: Seq[DataModelReference]) = {
-    client.views.deleteItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
+    testClient.views.deleteItems(items).flatTap(_ => sleepUnlessPlayback(2.seconds)).unsafeRunSync()
   }
 
   private def fetchNodeInstance(viewRef: ViewReference, instanceExternalId: String) = {
-    client.instances.retrieveByExternalIds(items = Seq(
+    testClient.instances.retrieveByExternalIds(items = Seq(
       InstanceRetrieve(InstanceType.Node, instanceExternalId, viewRef.space)),
       includeTyping = true,
       sources = Some(Seq(InstanceSource(viewRef)))
@@ -506,7 +506,7 @@ class InstancesTest extends VcrTestSpec {
   private def syncNodeInstances(viewRef: ViewReference) = {
     val hasData = HasData(Seq(viewRef))
 
-    client.instances.syncRequest(
+    testClient.instances.syncRequest(
       InstanceSyncRequest(
         `with` = Map("sync" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = None,
@@ -519,7 +519,7 @@ class InstancesTest extends VcrTestSpec {
   private def queryNodeInstances(viewRef: ViewReference) = {
     val hasData = HasData(Seq(viewRef))
 
-    client.instances.queryRequest(
+    testClient.instances.queryRequest(
       InstanceQueryRequest(
         `with` = Map("query" -> TableExpression(nodes = Option(NodesTableExpression(filter = Option(hasData))))),
         cursors = None,
@@ -535,7 +535,7 @@ class InstancesTest extends VcrTestSpec {
   }
 
   private def fetchEdgeInstance(viewRef: ViewReference, instanceExternalId: String) = {
-    client.instances.retrieveByExternalIds(items = Seq(
+    testClient.instances.retrieveByExternalIds(items = Seq(
       InstanceRetrieve(InstanceType.Edge, instanceExternalId, viewRef.space)),
       includeTyping = true,
       sources = Some(Seq(InstanceSource(viewRef)))
@@ -694,7 +694,7 @@ class InstancesTest extends VcrTestSpec {
 
     // Should fail when autoCreateDirectRelations is false
     val ex = intercept[CdpApiException] {
-      client.instances.createItems(
+      testClient.instances.createItems(
         InstanceCreate(
           items = Seq(nodeWithDirectRelation),
           autoCreateDirectRelations = Some(false)
@@ -761,7 +761,7 @@ class InstancesTest extends VcrTestSpec {
     )
 
     // Should succeed when autoCreateDirectRelations is true (no exception thrown)
-    val result = client.instances.createItems(
+    val result = testClient.instances.createItems(
       InstanceCreate(
         items = Seq(nodeWithDirectRelation),
         autoCreateDirectRelations = Some(true)

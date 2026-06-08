@@ -42,17 +42,17 @@ abstract class VcrTestSpec
   implicit val ioRuntime: IORuntime = IORuntime.global
   implicit val trace: Trace[IO] = natchez.Trace.Implicits.noop
 
-  private var _client: Option[GenericClient[IO]] = None
-  private var _rawClient: Option[GenericClient[IO]] = None
+  private var _testClient: Option[GenericClient[IO]] = None
+  private var _testClientWithoutRetries: Option[GenericClient[IO]] = None
   private var _vcrBackend: Option[VcrBackend[IO]] = None
 
   /** Client with `RetryingBackend`. Use this for normal operations. */
-  def client: GenericClient[IO] =
-    _client.getOrElse(sys.error("VCR client not initialized — called outside of a test?"))
+  def testClient: GenericClient[IO] =
+    _testClient.getOrElse(sys.error("VCR client not initialized — called outside of a test?"))
 
   /** Client without retrying. Use this when testing error responses directly. */
-  def rawClient: GenericClient[IO] =
-    _rawClient.getOrElse(sys.error("VCR rawClient not initialized — called outside of a test?"))
+  def testClientWithoutRetries: GenericClient[IO] =
+    _testClientWithoutRetries.getOrElse(sys.error("VCR rawClient not initialized — called outside of a test?"))
 
   /** Suffix appended to credential env var names: TEST_CLIENT_ID{suffix}, TEST_AAD_TENANT{suffix}, etc.
     * Override to `""` to use the un-suffixed vars (TEST_CLIENT_ID, COGNITE_BASE_URL, …).
@@ -90,8 +90,8 @@ abstract class VcrTestSpec
         _vcrBackend = Some(vcr)
         val fakeAuth = BearerTokenAuth("vcr-playback-token")
         // During playback retrying doesn't affect cassette matching, use identity for both
-        _client = Some(buildClient(vcr, fakeAuth, identity))
-        _rawClient = Some(buildClient(vcr, fakeAuth, identity))
+        _testClient = Some(buildClient(vcr, fakeAuth, identity))
+        _testClientWithoutRetries = Some(buildClient(vcr, fakeAuth, identity))
 
       case _ =>
         val auth = fetchRealAuth()
@@ -99,16 +99,16 @@ abstract class VcrTestSpec
         // VCR wraps realHttp directly so every individual HTTP call (including retries) is recorded
         val vcr = new VcrBackend[IO](realHttp, path, mode)
         _vcrBackend = Some(vcr)
-        _client = Some(buildClient(vcr, auth, new RetryingBackend[IO, Any](_)))
-        _rawClient = Some(buildClient(vcr, auth, identity))
+        _testClient = Some(buildClient(vcr, auth, new RetryingBackend[IO, Any](_)))
+        _testClientWithoutRetries = Some(buildClient(vcr, auth, identity))
     }
   }
 
   override def afterEach(testData: TestData): Unit = {
     _vcrBackend.foreach(_.close().unsafeRunSync())
     _vcrBackend = None
-    _client = None
-    _rawClient = None
+    _testClient = None
+    _testClientWithoutRetries = None
   }
 
   private def fetchRealAuth(): Auth = {
