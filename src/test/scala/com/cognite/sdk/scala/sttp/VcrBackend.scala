@@ -108,18 +108,12 @@ object RecordedContent {
   }
 }
 
-// Codec that matches the Kotlin reference: single-value headers as a bare string, multi-value as array.
 object HeaderCodecs {
-  private val decodeStringList: Decoder[List[String]] =
-    Decoder.decodeList(Decoder.decodeString)
-
-  implicit val headerValuesEncoder: Encoder[List[String]] = Encoder.instance {
-    case List(single) => Json.fromString(single)
-    case multiple     => Json.arr(multiple.map(Json.fromString): _*)
-  }
+  implicit val headerValuesEncoder: Encoder[List[String]] =
+    Encoder.encodeList(Encoder.encodeString)
 
   implicit val headerValuesDecoder: Decoder[List[String]] =
-    Decoder.instance(c => c.as[String].map(List(_)).orElse(decodeStringList.tryDecode(c)))
+    Decoder.decodeList(Decoder.decodeString)
 }
 
 final case class RecordedEntity(
