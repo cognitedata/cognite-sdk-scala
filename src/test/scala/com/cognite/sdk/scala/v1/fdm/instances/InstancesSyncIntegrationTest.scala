@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import com.cognite.sdk.scala.common.VcrTestSpec
+import com.cognite.sdk.scala.v1.fdm.DataModelVcrTestSpec
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.HasData
@@ -21,11 +21,7 @@ import com.cognite.sdk.scala.v1.fdm.views.{ViewCreateDefinition, ViewDefinition,
     "org.wartremover.warts.Var"
   )
 )
-class InstancesSyncIntegrationTest extends VcrTestSpec {
-  override protected def envVarSuffix: String = ""
-  override def projectName: String = sys.env.getOrElse("TEST_PROJECT", "extractor-bluefield-testing")
-  override def baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL", "https://bluefield.cognitedata.com")
-  override protected def cdfVersion: Option[String] = Some("alpha")
+class InstancesSyncIntegrationTest extends DataModelVcrTestSpec {
   private val nodePropMap = Map(
     "stringProp1" -> ContainerPropertyDefinition(
       nullable = Some(true),

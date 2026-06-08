@@ -1,6 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.datamodels
 
-import com.cognite.sdk.scala.common.VcrTestSpec
+import com.cognite.sdk.scala.v1.fdm.DataModelVcrTestSpec
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
@@ -19,12 +19,7 @@ import com.cognite.sdk.scala.v1.fdm.views.{ViewCreateDefinition, ViewPropertyCre
     "org.wartremover.warts.OptionPartial"
   )
 )
-class DataModelsTest extends VcrTestSpec {
-  override protected def envVarSuffix: String = ""
-  override def projectName: String = sys.env.getOrElse("TEST_PROJECT", "extractor-bluefield-testing")
-  override def baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL", "https://bluefield.cognitedata.com")
-  override protected def cdfVersion: Option[String] = Some("alpha")
-
+class DataModelsTest extends DataModelVcrTestSpec {
   private val space = Utils.SpaceExternalId
 
   private val propsMap = Map(

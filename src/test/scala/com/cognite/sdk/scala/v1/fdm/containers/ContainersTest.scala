@@ -3,7 +3,7 @@
 
 package com.cognite.sdk.scala.v1.fdm.containers
 
-import com.cognite.sdk.scala.common.VcrTestSpec
+import com.cognite.sdk.scala.v1.fdm.DataModelVcrTestSpec
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils._
 import com.cognite.sdk.scala.v1.fdm.common.Usage
@@ -27,12 +27,7 @@ import scala.concurrent.duration.DurationInt
     "org.wartremover.warts.OptionPartial"
   )
 )
-class ContainersTest extends VcrTestSpec {
-  override protected def envVarSuffix: String = ""
-  override def projectName: String = sys.env.getOrElse("TEST_PROJECT", "extractor-bluefield-testing")
-  override def baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL", "https://bluefield.cognitedata.com")
-  override protected def cdfVersion: Option[String] = Some("alpha")
-
+class ContainersTest extends DataModelVcrTestSpec {
   private val space = Utils.SpaceExternalId
 
   "Containers" should "serialize & deserialize ConstraintTypes" in {

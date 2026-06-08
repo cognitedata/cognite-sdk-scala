@@ -3,7 +3,8 @@
 
 package com.cognite.sdk.scala.v1.fdm.views
 
-import com.cognite.sdk.scala.common.{RetryWhile, VcrTestSpec}
+import com.cognite.sdk.scala.common.RetryWhile
+import com.cognite.sdk.scala.v1.fdm.DataModelVcrTestSpec
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefaultValue.{Int32, TimeSeriesReference}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.{ContainerPropertyDefinition, ReverseDirectRelationConnection, ThroughReference, ViewCorePropertyDefinition}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{EnumValueMetadata, PrimitiveProperty}
@@ -26,11 +27,7 @@ import org.scalatest.TestData
     "org.wartremover.warts.AsInstanceOf"
   )
 )
-class ViewsTest extends VcrTestSpec with RetryWhile {
-  override protected def envVarSuffix: String = ""
-  override def projectName: String = sys.env.getOrElse("TEST_PROJECT", "extractor-bluefield-testing")
-  override def baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL", "https://bluefield.cognitedata.com")
-  override protected def cdfVersion: Option[String] = Some("alpha")
+class ViewsTest extends DataModelVcrTestSpec with RetryWhile {
   private val spaceName = "test-space-scala-sdk"
   private val containerNamePrim = "scala sdk container prim"
   private val containerPrimitiveExternalId = "scala_sdk_container_primitive"
