@@ -317,3 +317,7 @@ Add the `record-cassettes` label to a PR to trigger the recording workflow. It r
 `AUTO` mode: existing cassettes are replayed (no commit if they pass), and missing ones are
 recorded and committed back to the branch. If playback fails for any cassette the whole suite
 is re-run in `RECORD` mode and the updated cassettes are committed.
+
+The workflow runs tests with Scala 2.13 only. Cassettes record HTTP interactions at the
+network level and are independent of the Scala version, so the same cassettes are used for
+both 2.13 and 3.3 test runs.
