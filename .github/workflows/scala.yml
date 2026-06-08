@@ -22,7 +22,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 17
-        uses: coursier/setup-action@7acb5c9ea69bc1a1bb185ec45ebce2ac114f3628 # v2.0.3
+        uses: coursier/setup-action@fd1707a76b027efdfb66ca79318b4d29b72e5a02 # v3.0.0
         with:
           jvm: temurin:17
           apps: sbt
@@ -57,7 +57,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 17
-        uses: coursier/setup-action@7acb5c9ea69bc1a1bb185ec45ebce2ac114f3628 # v2.0.3
+        uses: coursier/setup-action@fd1707a76b027efdfb66ca79318b4d29b72e5a02 # v3.0.0
         with:
           jvm: temurin:17
           apps: sbt
@@ -91,7 +91,7 @@ jobs:
         git rev-list --count --first-parent HEAD > patch_version.txt
 
     - name: Set up JDK 17
-      uses: coursier/setup-action@7acb5c9ea69bc1a1bb185ec45ebce2ac114f3628 # v2.0.3
+      uses: coursier/setup-action@fd1707a76b027efdfb66ca79318b4d29b72e5a02 # v3.0.0
       with:
         jvm: temurin:17
         apps: sbt
@@ -159,7 +159,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 17
-        uses: coursier/setup-action@7acb5c9ea69bc1a1bb185ec45ebce2ac114f3628 # v2.0.3
+        uses: coursier/setup-action@fd1707a76b027efdfb66ca79318b4d29b72e5a02 # v3.0.0
         with:
           jvm: temurin:17
           apps: sbt
@@ -207,7 +207,7 @@ jobs:
           git rev-list --count --first-parent HEAD > patch_version.txt
 
       - name: Set up JDK 17
-        uses: coursier/setup-action@7acb5c9ea69bc1a1bb185ec45ebce2ac114f3628 # v2.0.3
+        uses: coursier/setup-action@fd1707a76b027efdfb66ca79318b4d29b72e5a02 # v3.0.0
         with:
           jvm: temurin:17
           apps: sbt
