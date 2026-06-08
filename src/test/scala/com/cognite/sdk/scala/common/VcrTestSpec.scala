@@ -177,6 +177,7 @@ abstract class VcrTestSpec
     VcrTestSpec.simplifyFilename(name)
 }
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 object VcrTestSpec {
   private[common] def simplifyFilename(name: String): String = {
     val initial = name.replaceAll("[^a-zA-Z0-9._]", "-")

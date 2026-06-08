@@ -11,7 +11,7 @@ import org.scalatest.matchers.should.Matchers
 
 import RecordedContent._
 
-@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.OptionPartial"))
 class VcrBackendTest extends AnyFlatSpec with Matchers {
 
   "RecordedContent.fromBytes" should "produce TextContent for small non-JSON bodies" in {

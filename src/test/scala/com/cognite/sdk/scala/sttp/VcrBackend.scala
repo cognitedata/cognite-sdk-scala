@@ -428,7 +428,7 @@ class VcrBackend[F[_]](
       .groupBy(_.name.toLowerCase(Locale.ROOT))
       .view
       .mapValues { hs =>
-        if (SensitiveHeaders.contains(hs.head.name.toLowerCase(Locale.ROOT)))
+        if (hs.headOption.exists(h => SensitiveHeaders.contains(h.name.toLowerCase(Locale.ROOT))))
           List("<redacted>")
         else
           hs.map(_.value).toList
