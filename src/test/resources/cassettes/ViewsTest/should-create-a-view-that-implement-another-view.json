@@ -1,0 +1,410 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/spaces",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 44,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "test-space-scala-sdk"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/spaces",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "10fdbc34-dc95-9405-b394-c1967289af94"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 13:07:30 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 171,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "test-space-scala-sdk",
+                  "createdTime" : 1669203302286,
+                  "lastUpdatedTime" : 1780924041405,
+                  "isGlobal" : false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 1569,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/6WUwWrjMBCGX0XoHB/cLnvwrVAChR56ymVZjCKPqagsGWmUzRL87h3JtuI4ZbdtwGA08+ufb8ayTlwhdJ5Xv07c90ICrziCxyItCi+FFoVv3viGwxHBGaGfGtKkRE2JWlqDQhlwde9Up1AdgMRGdDDLGMlYlrEoI0UDXjrVo7Im1nxVntEjFkLbsmzJ8G8PnrYFD83WOtoitKZ172wPDhUlq1Na1ag68OCmkAlai70mGnQBNlwEtE9GOujAIK9aoT1EmlYEjTuhQ+RudTgWUtAMFFpXaDiA9lfQ06Ytictzz4/wbB0Iw6IJyyYsm8RWItn45gvcYRgbqpXB+7vv0pdrzheyZKNlpryIrYjmsFZ+rpHJkI7Bt8eKFu3VFBNJsr2Em0Iz2wJmw6Wl6tP+IH29F17JLOZpa0YGE7qvIF/BJYNLuCm0GtwUDebN2D9m7nr38ByneYjLdCQpUCag0TAlyqu5pDArObWRHKrTMMSe6AcxIEfRDU39f+JTU41yVI6n4rdfEukz/vN+mBSfuh+i9itXQ9TXe2v1TaNLVZPL5fyW8dUQY5TuhPxTxYr5gCaqVluBP3/cDjYbfcB2Tq3wzokl3jD8Ht4B34kBriEGAAA="
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/containers",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "0e28f83c-6cfb-995e-b1ad-523ca83cd784"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 13:07:33 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 3796,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/+1W32vbMBB+z18h9JxA7aRO07fB6Cj0YbCtL2MYxVaYqCwZ6ZxllPzvOymJfyhOtnUeS2FgDNZ3d9J99+l8zyNCqABeWHpLPuMHIc/+jcu2ZBnHZQrcwsR/TWzGJJvY/ImOD2Z8A9woJu9zZ+sNUjRIM62ACcVNWhpRCBBr3jhVlud32jgPJmWznhnOgOcfReF2jpL5VTyb3cTT6Xxe20hm4VOZt+3myU0cJYvrm+SqsRP2ndRLJtFgxaTlNVAaXXIDgrukD+nu11OhYBp31t2xtLJgMBv4ALivg7fjtgF8L3ng1KzSXcxxF5TCwuFoLaQbVxRFBWwpeZiER1Ul5R4EU3UxVoG+V8hnwRX0eud8xSoJj0xWnsQAtJkRJQitXAbvkRpynAZVzBegjddwK5MdtYBSGZhZH/IMsQGUaSTskFOV2XTJrMjoJdBPQYOmP63BUcLdEnj4TAXwvlhuQuUPUIcm8IXLnK5ktZlkDNuZAG0mkq+5tGeJ30e4Q8eon/u3/EFj51LEBSd1cLIP3lsQiQ3RYrsZuBK5MDw7eyf+URUG1DJSpDDJXaz/5P0eeb4RcFUVA3PnQwbMrd2lC3uNRx7fPEQ96600vG8UROyjwxuSiAaG29DT7en/7NvRGTtaqSelv6m6X3iv16CIowJ0FeHhRhGj4Mi1sZ/gCE5wpJ7giJvgmiEt2By+CkvwYS0HvSL11EecQmxrxqt1ZjsawzEp55udXHbH20PDT6S+fn9tGJ3Fi0UyW1zP4+QPh1F3znSptRz4rrqQ+Ls6IWunx4tRtTsT8RSclnZjc7rjeSpXUjNIZgOzeYj6WtjsO28PoQezF/aM7h37tZ7h9315u8D3l9H2ByevOCnUDgAA"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/views",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 605,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "test-space-scala-sdk",
+                  "externalId" : "scala_sdk_view_2",
+                  "version" : "v1",
+                  "name" : "second view",
+                  "description" : "some desc",
+                  "implements" : [
+                    {
+                      "type" : "view",
+                      "space" : "test-space-scala-sdk",
+                      "externalId" : "scala_sdk_view_1",
+                      "version" : "v1"
+                    }
+                  ],
+                  "properties" : {
+                    "prop_int32" : {
+                      "container" : {
+                        "type" : "container",
+                        "space" : "test-space-scala-sdk",
+                        "externalId" : "scala_sdk_container_primitive"
+                      },
+                      "containerPropertyIdentifier" : "prop_int32"
+                    },
+                    "prop_list_float64" : {
+                      "container" : {
+                        "type" : "container",
+                        "space" : "test-space-scala-sdk",
+                        "externalId" : "scala_sdk_container_list"
+                      },
+                      "containerPropertyIdentifier" : "prop_list_float64"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/views",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "41f69b8b-3b77-9110-bda8-bb007e16dc6d"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 13:07:35 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 3690,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/+1XXWvbMBR9z68wek4gzrpu7dsYbAT2MNjWl1GMYl+DqCx50pXTEPLfJynxl+p8rM1aNpqHgO899+rqnGMZrUdRRBhCocl19NM+RNHa/9sw3CMoQfk8szmiU8pporO7pGKwTGZkXON0SVNwEASNE/808eiJRbewCpRmUjhgFbfhVAFFyL6zwvWI372fXs0upm8v46tpg+FU448yO4pbKoZ0wR0AlYEm/suAWg0ljIbsk1RuJsp5OxTTn7lcUG4TOeW6LSiVLEEhA8dXzdQunjCBb2a9uNufFBoVtblvaDfg0ptxF4CrEoKiNkq2Pcf9JGca69E6mX5fuzDaZUHtb95CggVOk/SIT5ruSalYwZBVQI5P+3XL8GqegUCWMz9/l99eGSsKU0veU8pnheF8QHafowblXFj3FXadweoMcmo43lBuvOWaXGfy7WBoKTiz7r7lAdmDVCrtTnH3eplUJwuqWXoC3f+NOR4Q9pzeIChRkgMGsaeWBhUeG2ewSdv49YwImH4xM+Tc3E9SahlhKNWEQwVcH3AHCFOc2Re+ZaBB5eYLDegzNx++xANxRwz1n9ttbRx03G1ep4qV9dnjgVFMAuAmrHRr+m/lZnQAR4y4E3IpGmp91avTG9f8TY/vN6xjPMm5pHh5cWbj1l2HNXaD/wsS+3GfpG6P4udReRTMSgpalpB9rKdtrwjutx7QdA+/f8Du416fDr0vNlZf8prM24bM+iTVYGuyyF2i2vtGcIhqWUDkYp0bSVFyr9sJKvR6n2un/tbX/wIEV7qHmx/VT7ejzW/RIqQ5ag4AAA=="
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/views/delete",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 91,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "space" : "test-space-scala-sdk",
+                  "externalId" : "scala_sdk_view_2",
+                  "version" : "v1"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/views/delete",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "be934bf6-9814-97b4-94a4-cf7ee104df3a"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 13:07:38 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 133,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "scala_sdk_view_2",
+                  "space" : "test-space-scala-sdk",
+                  "version" : "v1"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "recordedEnv" : {
+    
+  }
+}
