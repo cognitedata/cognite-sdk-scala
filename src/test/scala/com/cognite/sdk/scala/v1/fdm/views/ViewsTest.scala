@@ -123,7 +123,7 @@ class ViewsTest extends DataModelVcrTestSpec with RetryWhile {
   override def beforeEach(testData: TestData): Unit = {
     super.beforeEach(testData)
     testClient.spacesv3.createItems(Seq(SpaceCreateDefinition(space = spaceName))).unsafeRunSync()
-    testClient.containers.createItems(Seq(containerPrimitive, containerList)).unsafeRunSync()
+    val _ = testClient.containers.createItems(Seq(containerPrimitive, containerList)).unsafeRunSync()
   }
 
   val viewVersion1 = "v1"
