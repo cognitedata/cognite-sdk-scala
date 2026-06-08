@@ -284,3 +284,40 @@ TEST_AAD_TENANT="a valid azure ad tenant id"
 TEST_CLIENT_ID="the id of a valid client credential, belonging to the given tenant, and with access to the playground project"
 TEST_CLIENT_SECRET="a valid client secret for the given client id"
 ```
+
+## VCR tests
+
+Some tests use a cassette-based HTTP recording system. Recorded cassettes are stored under
+`src/test/resources/cassettes/` and committed to the repository, so those tests run offline
+by default with no credentials required.
+
+The mode is controlled by the `VCR_MODE` environment variable:
+
+| Value | Behaviour |
+|-------|-----------|
+| `PLAYBACK` | Replay cassettes; fail if one is missing. Default when `VCR_MODE` is unset. |
+| `RECORD` | Run against the real API and overwrite all cassettes. |
+| `AUTO` | Replay if a cassette exists, record if it does not. |
+| `BYPASS` | Pass requests through without touching cassettes. |
+
+**Running locally in playback (default):**
+```bash
+sbt test
+```
+
+**Recording missing cassettes locally:**
+```bash
+VCR_MODE=AUTO \
+  TEST_AAD_TENANT=... TEST_CLIENT_ID=... TEST_CLIENT_SECRET=... \
+  sbt "testOnly * -- -n com.cognite.sdk.scala.VcrTest"
+```
+
+**CI — `record-cassettes` label:**
+Add the `record-cassettes` label to a PR to trigger the recording workflow. It runs in
+`AUTO` mode: existing cassettes are replayed (no commit if they pass), and missing ones are
+recorded and committed back to the branch. If playback fails for any cassette the whole suite
+is re-run in `RECORD` mode and the updated cassettes are committed.
+
+The workflow runs tests with Scala 2.13 only. Cassettes record HTTP interactions at the
+network level and are independent of the Scala version, so the same cassettes are used for
+both 2.13 and 3.3 test runs.
