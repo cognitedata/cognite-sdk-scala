@@ -84,6 +84,9 @@ jobs:
 
     timeout-minutes: 60
 
+    permissions:
+      pull-requests: write
+
     steps:
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
@@ -145,6 +148,39 @@ jobs:
       uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
       with:
         token: ${{ secrets.codecov_token }}
+
+    - name: Comment PR with top 3 slowest test suites
+      if: github.event_name == 'pull_request'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        python3 << 'EOF'
+        import glob, xml.etree.ElementTree as ET, subprocess
+
+        results = []
+        for f in glob.glob('target/test-reports/*.xml'):
+            try:
+                root = ET.parse(f).getroot()
+                name = root.get('name', f)
+                time = float(root.get('time', 0))
+                results.append((name, time))
+            except Exception:
+                pass
+
+        results.sort(key=lambda x: -x[1])
+        top3 = results[:3]
+
+        lines = ['## Top 3 slowest test suites', '', '| # | Suite | Time |', '|---|-------|------|']
+        for i, (name, time) in enumerate(top3, 1):
+            lines.append(f'| {i} | `{name}` | {time:.1f}s |')
+
+        body = '\n'.join(lines)
+        subprocess.run(
+            ['gh', 'pr', 'comment', '${{ github.event.pull_request.number }}',
+             '--body', body, '--repo', '${{ github.repository }}'],
+            check=True
+        )
+        EOF
 
   publish_jfrog:
     runs-on: ubuntu-latest
