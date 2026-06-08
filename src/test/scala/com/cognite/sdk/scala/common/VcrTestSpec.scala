@@ -173,7 +173,12 @@ abstract class VcrTestSpec
       case _ => IO.sleep(duration)
     }
 
-  private def simplifyFilename(name: String): String = {
+  private def simplifyFilename(name: String): String =
+    VcrTestSpec.simplifyFilename(name)
+}
+
+object VcrTestSpec {
+  private[common] def simplifyFilename(name: String): String = {
     val initial = name.replaceAll("[^a-zA-Z0-9._]", "-")
 
     @scala.annotation.tailrec
