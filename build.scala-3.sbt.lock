@@ -14,11 +14,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-core_3",
-      "version" : "3.12.2",
+      "version" : "3.13.0",
       "artifacts" : [
         {
           "name" : "fs2-core_3.jar",
-          "hash" : "sha1:371fe77dc68736e4e23c613db34616173f357b97"
+          "hash" : "sha1:6f1cea6ada1ad0a152a8a1b354c9d13b684a543c"
         }
       ],
       "configurations" : [
@@ -30,11 +30,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-io_3",
-      "version" : "3.12.2",
+      "version" : "3.13.0",
       "artifacts" : [
         {
           "name" : "fs2-io_3.jar",
-          "hash" : "sha1:4ee0d3287f1a0947750bcc95f88f54923d0b494d"
+          "hash" : "sha1:a51cd6acf01a4bf874d872feaa42ed3e629881c1"
         }
       ],
       "configurations" : [
@@ -46,11 +46,11 @@
     {
       "org" : "com.comcast",
       "name" : "ip4s-core_3",
-      "version" : "3.6.0",
+      "version" : "3.8.0",
       "artifacts" : [
         {
           "name" : "ip4s-core_3.jar",
-          "hash" : "sha1:a10a19c26ca4cb065f79c315f1b9724a039c98eb"
+          "hash" : "sha1:c48f7cddea5480c8cd2ff0a1d821cada9747eb20"
         }
       ],
       "configurations" : [
@@ -736,11 +736,11 @@
     {
       "org" : "org.scala-lang.modules",
       "name" : "scala-collection-compat_3",
-      "version" : "2.11.0",
+      "version" : "2.14.0",
       "artifacts" : [
         {
           "name" : "scala-collection-compat_3.jar",
-          "hash" : "sha1:dccc0fe9416577811b2c43a042040d5eb62bfa6e"
+          "hash" : "sha1:8086487b9662280dfe300498055674364fe1d5e1"
         }
       ],
       "configurations" : [
@@ -1018,11 +1018,11 @@
     {
       "org" : "org.scodec",
       "name" : "scodec-bits_3",
-      "version" : "1.1.38",
+      "version" : "1.2.4",
       "artifacts" : [
         {
           "name" : "scodec-bits_3.jar",
-          "hash" : "sha1:3b2b8b0e757ee6fa6ec2cadc5e0e4c5b55bdc798"
+          "hash" : "sha1:930435c7cc79cd3133c3022997ebff6e6ffc34ad"
         }
       ],
       "configurations" : [
@@ -1048,11 +1048,27 @@
     {
       "org" : "org.tpolecat",
       "name" : "natchez-core_3",
-      "version" : "0.3.8",
+      "version" : "0.3.10",
       "artifacts" : [
         {
           "name" : "natchez-core_3.jar",
-          "hash" : "sha1:3fe4f789f194f21692e8c61a77c0c53cd6d80ec9"
+          "hash" : "sha1:95874116a7448b46f4456420b331878800655e77"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "algebra_3",
+      "version" : "2.13.0",
+      "artifacts" : [
+        {
+          "name" : "algebra_3.jar",
+          "hash" : "sha1:305e7d234d4755134a05a9ea9ae5f79ebe700682"
         }
       ],
       "configurations" : [
@@ -1064,11 +1080,27 @@
     {
       "org" : "org.typelevel",
       "name" : "case-insensitive_3",
-      "version" : "1.4.2",
+      "version" : "1.5.0",
       "artifacts" : [
         {
           "name" : "case-insensitive_3.jar",
-          "hash" : "sha1:fe70a06a40e7f65bb885c3bae7c97e6c93f0bfda"
+          "hash" : "sha1:c5d576756b6444f63da5cbf1e10710d0d99911e2"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
+      "name" : "cats-collections-core_3",
+      "version" : "0.9.10",
+      "artifacts" : [
+        {
+          "name" : "cats-collections-core_3.jar",
+          "hash" : "sha1:bf34def762c7afe9abdcbefa8ca40d74dfd225ab"
         }
       ],
       "configurations" : [
@@ -1287,6 +1319,22 @@
     },
     {
       "org" : "org.typelevel",
+      "name" : "idna4s-core_3",
+      "version" : "0.1.0",
+      "artifacts" : [
+        {
+          "name" : "idna4s-core_3.jar",
+          "hash" : "sha1:8cdc1c3899514b4857fb22a00c63f31417a0f811"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.typelevel",
       "name" : "jawn-parser_3",
       "version" : "1.6.0",
       "artifacts" : [
@@ -1304,11 +1352,11 @@
     {
       "org" : "org.typelevel",
       "name" : "literally_3",
-      "version" : "1.1.0",
+      "version" : "1.2.0",
       "artifacts" : [
         {
           "name" : "literally_3.jar",
-          "hash" : "sha1:14eb53559df5119d79b721449519c7b683b3eb50"
+          "hash" : "sha1:dd85bb070bb2737b1df7fe72bf24b114e3ec7aad"
         }
       ],
       "configurations" : [
