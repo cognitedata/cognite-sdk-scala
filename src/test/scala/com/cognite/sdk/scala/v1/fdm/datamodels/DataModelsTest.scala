@@ -1,7 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.datamodels
 
-import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
+import com.cognite.sdk.scala.v1.fdm.DataModelVcrTestSpec
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.common.{DataModelReference, Usage}
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.ContainerPropertyDefinition
@@ -20,7 +19,7 @@ import com.cognite.sdk.scala.v1.fdm.views.{ViewCreateDefinition, ViewPropertyCre
     "org.wartremover.warts.OptionPartial"
   )
 )
-class DataModelsTest extends CommonDataModelTestHelper {
+class DataModelsTest extends DataModelVcrTestSpec {
   private val space = Utils.SpaceExternalId
 
   private val propsMap = Map(
@@ -33,7 +32,7 @@ class DataModelsTest extends CommonDataModelTestHelper {
       `type` = PropertyType.TextProperty(Some(false), Some("ucs_basic"))
     )
   )
-  private val container = testClient.containers
+  private lazy val container = testClient.containers
     .createItems(containers =
         Seq(
           ContainerCreateDefinition(
@@ -49,7 +48,7 @@ class DataModelsTest extends CommonDataModelTestHelper {
       )
     ).unsafeRunSync().headOption
 
-  private val view = testClient.views
+  private lazy val view = testClient.views
     .createItems(items =
       Seq(
         ViewCreateDefinition(

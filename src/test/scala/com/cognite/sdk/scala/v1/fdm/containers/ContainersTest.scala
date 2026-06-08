@@ -3,8 +3,7 @@
 
 package com.cognite.sdk.scala.v1.fdm.containers
 
-import cats.effect.IO
-import cats.effect.unsafe.implicits.global
+import com.cognite.sdk.scala.v1.fdm.DataModelVcrTestSpec
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils._
 import com.cognite.sdk.scala.v1.fdm.common.Usage
@@ -12,7 +11,7 @@ import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyDefinition.Contain
 import com.cognite.sdk.scala.v1.fdm.common.properties.PropertyType.{EnumValueMetadata, PrimitiveProperty}
 import com.cognite.sdk.scala.v1.fdm.common.properties.{PrimitivePropType, PropertyDefaultValue, PropertyType}
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
-import com.cognite.sdk.scala.v1.{CogniteExternalId, CommonDataModelTestHelper}
+import com.cognite.sdk.scala.v1.CogniteExternalId
 import io.circe.{Decoder, Encoder}
 
 import scala.concurrent.duration.DurationInt
@@ -28,7 +27,7 @@ import scala.concurrent.duration.DurationInt
     "org.wartremover.warts.OptionPartial"
   )
 )
-class ContainersTest extends CommonDataModelTestHelper {
+class ContainersTest extends DataModelVcrTestSpec {
   private val space = Utils.SpaceExternalId
 
   "Containers" should "serialize & deserialize ConstraintTypes" in {
@@ -277,7 +276,7 @@ class ContainersTest extends CommonDataModelTestHelper {
     createdResponse.isEmpty shouldBe false
 
     // TODO: Check update reflection delay and remove 5 seconds sleep
-    val readAfterCreateContainers = (IO.sleep(5.seconds) *> testClient
+    val readAfterCreateContainers = (sleepUnlessPlayback(5.seconds) *> testClient
       .containers
       .retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))))
       .unsafeRunSync()
@@ -322,7 +321,7 @@ class ContainersTest extends CommonDataModelTestHelper {
     updatedResponse.isEmpty shouldBe false
 
     // TODO: Check update reflection delay and remove 10.seconds sleep
-    val readAfterUpdateContainers = (IO.sleep(5.seconds) *> testClient
+    val readAfterUpdateContainers = (sleepUnlessPlayback(5.seconds) *> testClient
       .containers
       .retrieveByExternalIds(Seq(ContainerId(space, containerExternalId))))
       .unsafeRunSync()

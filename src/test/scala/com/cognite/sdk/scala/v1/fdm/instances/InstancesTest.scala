@@ -2,7 +2,8 @@ package com.cognite.sdk.scala.v1.fdm.instances
 
 import cats.effect.IO
 import cats.implicits.toBifunctorOps
-import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice, VcrTestSpec}
+import com.cognite.sdk.scala.common.{CdpApiException, IndexingNotice}
+import com.cognite.sdk.scala.v1.fdm.DataModelVcrTestSpec
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.Utils.{createEdgeWriteData, createNodeWriteData, createTestContainer}
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.{Equals, HasData}
@@ -30,11 +31,7 @@ import scala.util.Random
     "org.wartremover.warts.OptionPartial"
   )
 )
-class InstancesTest extends VcrTestSpec {
-  override protected def envVarSuffix: String = ""
-  override def projectName: String = sys.env.getOrElse("TEST_PROJECT", "extractor-bluefield-testing")
-  override def baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL", "https://bluefield.cognitedata.com")
-  override protected def cdfVersion: Option[String] = Some("alpha")
+class InstancesTest extends DataModelVcrTestSpec {
 
   private val space = Utils.SpaceExternalId
 
