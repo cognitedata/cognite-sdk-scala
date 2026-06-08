@@ -78,5 +78,5 @@ jobs:
       - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9
         with:
           add: 'src/test/resources/cassettes/'
-          message: 'chore: record VCR cassettes [skip ci]'
+          message: 'chore: record VCR cassettes'
           author_name: 'github-actions'
