@@ -1,7 +1,6 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.v1.CommonDataModelTestHelper
+import com.cognite.sdk.scala.common.VcrTestSpec
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.common.Usage
 import com.cognite.sdk.scala.v1.fdm.common.filters.FilterDefinition.HasData
@@ -22,7 +21,11 @@ import com.cognite.sdk.scala.v1.fdm.views.{ViewCreateDefinition, ViewDefinition,
     "org.wartremover.warts.Var"
   )
 )
-class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
+class InstancesSyncIntegrationTest extends VcrTestSpec {
+  override protected def envVarSuffix: String = ""
+  override def projectName: String = sys.env.getOrElse("TEST_PROJECT", "extractor-bluefield-testing")
+  override def baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL", "https://bluefield.cognitedata.com")
+  override protected def cdfVersion: Option[String] = Some("alpha")
   private val nodePropMap = Map(
     "stringProp1" -> ContainerPropertyDefinition(
       nullable = Some(true),
@@ -34,7 +37,7 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
     )
   )
 
-  private val nodeContainer = {
+  private lazy val nodeContainer = {
     testClient.containers
       .createItems(containers =
         Seq(
@@ -52,7 +55,7 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
       ).unsafeRunSync().headOption
   }
 
-  private val nodeView: Option[ViewDefinition] = {
+  private lazy val nodeView: Option[ViewDefinition] = {
     testClient.views
       .createItems(items =
         Seq(
@@ -78,7 +81,7 @@ class InstancesSyncIntegrationTest extends CommonDataModelTestHelper {
       ).unsafeRunSync().headOption
   }
 
-  private val viewReference = nodeView.map(v => ViewReference(
+  private lazy val viewReference = nodeView.map(v => ViewReference(
     externalId = v.externalId, space = v.space, version = v.version)
   ).getOrElse(throw new Exception("View not found"))
 

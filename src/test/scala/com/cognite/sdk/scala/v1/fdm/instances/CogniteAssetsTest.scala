@@ -1,15 +1,12 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
-import cats.effect.unsafe.implicits.global
-import com.cognite.sdk.scala.common.RetryWhile
+import com.cognite.sdk.scala.common.{RetryWhile, VcrTestSpec}
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.NodeDeletionRequest
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.NodeWrite
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
-import com.cognite.sdk.scala.v1.{CogniteInstanceId, CommonDataModelTestHelper, File, FileDownloadInstanceId, FileDownloadLink, FileUploadInstanceId, InstanceId}
+import com.cognite.sdk.scala.v1.{CogniteInstanceId, File, FileDownloadInstanceId, FileDownloadLink, FileUploadInstanceId, InstanceId}
 import sttp.client3.UriContext
-
-import java.util.UUID
 
 
 @SuppressWarnings(
@@ -19,10 +16,14 @@ import java.util.UUID
     "org.wartremover.warts.Equals"
   )
 )
-class CogniteAssetsTest extends CommonDataModelTestHelper with RetryWhile {
+class CogniteAssetsTest extends VcrTestSpec with RetryWhile {
+  override protected def envVarSuffix: String = ""
+  override def projectName: String = sys.env.getOrElse("TEST_PROJECT", "extractor-bluefield-testing")
+  override def baseUrl: String = sys.env.getOrElse("COGNITE_BASE_URL", "https://bluefield.cognitedata.com")
+  override protected def cdfVersion: Option[String] = Some("alpha")
 
   it should "make it possible to retrieve file and associated upload link and download link using instance id" in {
-    val randomizedInstanceExternalId = "file_instance_ext_id" + UUID.randomUUID().toString
+    val randomizedInstanceExternalId = "file_instance_ext_id_vcr_test"
     val instanceId: InstanceId = InstanceId(space = Utils.SpaceExternalId, externalId = randomizedInstanceExternalId)
     val cogniteInstanceId: CogniteInstanceId = CogniteInstanceId(InstanceId(space = Utils.SpaceExternalId, externalId = randomizedInstanceExternalId))
 
