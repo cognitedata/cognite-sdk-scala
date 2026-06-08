@@ -1,0 +1,126 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/datasets/byids",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 99,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "id" : 128441580228
+                },
+                {
+                  "id" : 164311490409
+                },
+                {
+                  "id" : 4721676791546437
+                }
+              ],
+              "ignoreUnknownIds" : true
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/datasets/byids",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "6ad31684-9106-9d83-b6f1-b4cd617cdcc4"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 22:40:15 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 503,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "2bb5435c",
+                  "name" : "scala-sdk-read-example-2",
+                  "metadata" : {
+                    
+                  },
+                  "writeProtected" : false,
+                  "id" : 128441580228,
+                  "createdTime" : 1780908775443,
+                  "lastUpdatedTime" : 1780908775443
+                },
+                {
+                  "externalId" : "b14720d7",
+                  "name" : "scala-sdk-create-example-3",
+                  "metadata" : {
+                    
+                  },
+                  "writeProtected" : false,
+                  "id" : 164311490409,
+                  "createdTime" : 1725009884443,
+                  "lastUpdatedTime" : 1725009884443
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "recordedEnv" : {
+    
+  }
+}
