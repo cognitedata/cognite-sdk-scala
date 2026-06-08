@@ -1,13 +1,15 @@
 package com.cognite.sdk.scala.v1.fdm.instances
 
+import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.RetryWhile
-import com.cognite.sdk.scala.v1.fdm.DataModelVcrTestSpec
 import com.cognite.sdk.scala.v1.fdm.Utils
 import com.cognite.sdk.scala.v1.fdm.instances.InstanceDeletionRequest.NodeDeletionRequest
 import com.cognite.sdk.scala.v1.fdm.instances.NodeOrEdgeCreate.NodeWrite
 import com.cognite.sdk.scala.v1.fdm.views.ViewReference
-import com.cognite.sdk.scala.v1.{CogniteInstanceId, File, FileDownloadInstanceId, FileDownloadLink, FileUploadInstanceId, InstanceId}
+import com.cognite.sdk.scala.v1.{CogniteInstanceId, CommonDataModelTestHelper, File, FileDownloadInstanceId, FileDownloadLink, FileUploadInstanceId, InstanceId}
 import sttp.client3.UriContext
+
+import java.util.UUID
 
 
 @SuppressWarnings(
@@ -17,9 +19,10 @@ import sttp.client3.UriContext
     "org.wartremover.warts.Equals"
   )
 )
-class CogniteAssetsTest extends DataModelVcrTestSpec with RetryWhile {
+class CogniteAssetsTest extends CommonDataModelTestHelper with RetryWhile {
+
   it should "make it possible to retrieve file and associated upload link and download link using instance id" in {
-    val randomizedInstanceExternalId = "file_instance_ext_id_vcr_test"
+    val randomizedInstanceExternalId = "file_instance_ext_id" + UUID.randomUUID().toString
     val instanceId: InstanceId = InstanceId(space = Utils.SpaceExternalId, externalId = randomizedInstanceExternalId)
     val cogniteInstanceId: CogniteInstanceId = CogniteInstanceId(InstanceId(space = Utils.SpaceExternalId, externalId = randomizedInstanceExternalId))
 
