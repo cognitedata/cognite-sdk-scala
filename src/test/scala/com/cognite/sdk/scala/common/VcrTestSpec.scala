@@ -179,10 +179,12 @@ abstract class VcrTestSpec
   private def vcrSeed: Long =
     _vcrBackend.getOrElse(sys.error("VCR backend not initialized — called outside of a test?")).getSeed
 
-  def random: Random = _random.getOrElse {
-    val r = new Random(vcrSeed)
-    _random = Some(r)
-    r
+  def random: Random = synchronized {
+    _random.getOrElse {
+      val r = new Random(vcrSeed)
+      _random = Some(r)
+      r
+    }
   }
 
   def randomUuid(): java.util.UUID = new java.util.UUID(random.nextLong(), random.nextLong())
