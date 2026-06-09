@@ -68,6 +68,7 @@ lazy val commonSettings = Seq(
     "io.netty" % "netty-resolver" % nettyVersion,
     "io.netty" % "netty-transport" % nettyVersion,
     "org.asynchttpclient" % "async-http-client" % asyncHttpClientVersion,
+    "org.asynchttpclient" % "async-http-client-netty-utils" % asyncHttpClientVersion,
   ),
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
