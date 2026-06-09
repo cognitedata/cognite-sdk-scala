@@ -20,7 +20,7 @@ import sttp.client3.UriContext
 class CogniteAssetsTest extends DataModelVcrTestSpec with RetryWhile {
 
   it should "make it possible to retrieve file and associated upload link and download link using instance id" in {
-    val randomizedInstanceExternalId = "file_instance_ext_id" + randomUuid().toString
+    val randomizedInstanceExternalId = "file_instance_ext_id_" + randomHexString(12)
     val instanceId: InstanceId = InstanceId(space = Utils.SpaceExternalId, externalId = randomizedInstanceExternalId)
     val cogniteInstanceId: CogniteInstanceId = CogniteInstanceId(InstanceId(space = Utils.SpaceExternalId, externalId = randomizedInstanceExternalId))
 
