@@ -55,10 +55,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "0d9982c4-76c8-975b-8db8-2c8b8e0f6256"
+            "59274cf8-9200-9b52-9f99-333a7b3935f6"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 13:07:43 GMT"
+            "Tue, 09 Jun 2026 07:18:47 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -90,7 +90,7 @@
                 {
                   "space" : "test-space-scala-sdk",
                   "createdTime" : 1669203302286,
-                  "lastUpdatedTime" : 1780924064367,
+                  "lastUpdatedTime" : 1780989527988,
                   "isGlobal" : false
                 }
               ]
@@ -148,10 +148,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "82191839-d4f1-94dd-a36c-d74b70a93a49"
+            "5b1fd1bb-9884-920f-bfff-0feba970b7b1"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 13:07:46 GMT"
+            "Tue, 09 Jun 2026 07:18:49 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -281,10 +281,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "54223c30-082f-9d62-9065-7cd5eb81a0c9"
+            "26e4cef6-7ba6-95d2-8ae6-fe1b24ab761c"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 13:07:48 GMT"
+            "Tue, 09 Jun 2026 07:18:51 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -373,10 +373,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "9938e1f1-4afc-97f6-a062-cf889e2bbe12"
+            "7b1582af-3f07-9f74-92ef-a38f4866db75"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 13:07:50 GMT"
+            "Tue, 09 Jun 2026 07:18:53 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -409,7 +409,5 @@
       }
     }
   ],
-  "recordedEnv" : {
-    
-  }
+  "seed" : -5569699080462537673
 }
