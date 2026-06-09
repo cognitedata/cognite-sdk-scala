@@ -104,7 +104,6 @@ abstract class VcrTestSpec
         _testClient = Some(buildClient(vcr, auth, new RetryingBackend[IO, Any](_)))
         _testClientWithoutRetries = Some(buildClient(vcr, auth, identity))
     }
-    _random = Some(new Random(vcrSeed))
   }
 
   override def afterEach(testData: TestData): Unit = {
@@ -180,8 +179,11 @@ abstract class VcrTestSpec
   private def vcrSeed: Long =
     _vcrBackend.getOrElse(sys.error("VCR backend not initialized — called outside of a test?")).getSeed
 
-  def random: Random =
-    _random.getOrElse(sys.error("VCR random not initialized — called outside of a test?"))
+  def random: Random = _random.getOrElse {
+    val r = new Random(vcrSeed)
+    _random = Some(r)
+    r
+  }
 
   def randomUuid(): java.util.UUID = new java.util.UUID(random.nextLong(), random.nextLong())
 
