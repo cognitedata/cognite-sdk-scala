@@ -17,6 +17,7 @@ import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import sttp.client3.impl.cats.CatsMonadAsyncError
 import sttp.client3.testing.SttpBackendStub
 
+import java.util.UUID
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.Random
 
@@ -185,7 +186,14 @@ abstract class VcrTestSpec
     r
   }
 
-  def randomUuid(): java.util.UUID = new java.util.UUID(random.nextLong(), random.nextLong())
+  def randomUuid(): UUID = {
+    val randomBytes: Array[Byte] = new Array[Byte](16)
+    random.nextBytes(randomBytes)
+    randomBytes(6) = ((randomBytes(6) & 0x0f) | 0x40).toByte /* version 4 */
+    randomBytes(8) = ((randomBytes(8) & 0x3f) | 0x80).toByte /* IETF variant */
+    val bb = java.nio.ByteBuffer.wrap(randomBytes)
+    new UUID(bb.getLong(), bb.getLong())
+  }
 
   def sleepUnlessPlayback(duration: FiniteDuration): IO[Unit] =
     vcrMode match {
