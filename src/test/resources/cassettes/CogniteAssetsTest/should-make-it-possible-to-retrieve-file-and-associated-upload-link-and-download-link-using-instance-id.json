@@ -28,7 +28,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 397,
+          "contentLength" : 374,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -39,7 +39,7 @@
                   "instanceType" : "node",
                   "type" : null,
                   "space" : "testSpaceScalaSdk1",
-                  "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685",
+                  "externalId" : "file_instance_ext_id_2974dad76ad4",
                   "sources" : [
                     {
                       "source" : {
@@ -74,10 +74,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "fe11bbd5-8e1b-9825-92ba-91d6ca28adcc"
+            "37caa24f-a9c5-9c81-8271-daabe9fcd86f"
           ],
           "date" : [
-            "Tue, 09 Jun 2026 07:43:50 GMT"
+            "Tue, 09 Jun 2026 10:31:58 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -99,7 +99,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 318,
+          "contentLength" : 295,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -111,9 +111,9 @@
                   "version" : 1,
                   "wasModified" : true,
                   "space" : "testSpaceScalaSdk1",
-                  "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685",
-                  "createdTime" : 1780991030214,
-                  "lastUpdatedTime" : 1780991030214
+                  "externalId" : "file_instance_ext_id_2974dad76ad4",
+                  "createdTime" : 1781001118665,
+                  "lastUpdatedTime" : 1781001118665
                 }
               ],
               "deleted" : [
@@ -151,7 +151,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 154,
+          "contentLength" : 131,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -161,7 +161,7 @@
                 {
                   "instanceId" : {
                     "space" : "testSpaceScalaSdk1",
-                    "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685"
+                    "externalId" : "file_instance_ext_id_2974dad76ad4"
                   }
                 }
               ],
@@ -182,10 +182,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "b087a97e-2ce2-9d12-a5d2-b9286529c623"
+            "d6ecfe5e-2387-90fc-bcf6-844733bff890"
           ],
           "date" : [
-            "Tue, 09 Jun 2026 07:43:50 GMT"
+            "Tue, 09 Jun 2026 10:31:58 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -207,7 +207,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 339,
+          "contentLength" : 316,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -215,15 +215,15 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 5649735962038429,
+                  "id" : 2012385537890022,
                   "instanceId" : {
                     "space" : "testSpaceScalaSdk1",
-                    "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685"
+                    "externalId" : "file_instance_ext_id_2974dad76ad4"
                   },
                   "name" : "untitled",
                   "uploaded" : false,
-                  "createdTime" : 1780991030433,
-                  "lastUpdatedTime" : 1780991030433
+                  "createdTime" : 1781001118905,
+                  "lastUpdatedTime" : 1781001118905
                 }
               ]
             }
@@ -259,7 +259,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 154,
+          "contentLength" : 131,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -269,7 +269,7 @@
                 {
                   "instanceId" : {
                     "space" : "testSpaceScalaSdk1",
-                    "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685"
+                    "externalId" : "file_instance_ext_id_2974dad76ad4"
                   }
                 }
               ],
@@ -290,10 +290,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "a646014a-a66a-92fe-a3a5-2bd33cc2a281"
+            "646eb768-df62-9186-ba01-e7d15aae85fc"
           ],
           "date" : [
-            "Tue, 09 Jun 2026 07:43:50 GMT"
+            "Tue, 09 Jun 2026 10:31:59 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -315,7 +315,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 339,
+          "contentLength" : 316,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -323,15 +323,15 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 5649735962038429,
+                  "id" : 2012385537890022,
                   "instanceId" : {
                     "space" : "testSpaceScalaSdk1",
-                    "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685"
+                    "externalId" : "file_instance_ext_id_2974dad76ad4"
                   },
                   "name" : "untitled",
                   "uploaded" : false,
-                  "createdTime" : 1780991030433,
-                  "lastUpdatedTime" : 1780991030433
+                  "createdTime" : 1781001118905,
+                  "lastUpdatedTime" : 1781001118905
                 }
               ]
             }
@@ -367,7 +367,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 129,
+          "contentLength" : 106,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -377,7 +377,7 @@
                 {
                   "instanceId" : {
                     "space" : "testSpaceScalaSdk1",
-                    "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685"
+                    "externalId" : "file_instance_ext_id_2974dad76ad4"
                   }
                 }
               ]
@@ -397,10 +397,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "712cd434-98b2-98b9-a656-e9e31c151f49"
+            "2aba36da-5fa0-9237-b2ee-4fe302c39541"
           ],
           "date" : [
-            "Tue, 09 Jun 2026 07:43:50 GMT"
+            "Tue, 09 Jun 2026 10:31:59 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -422,7 +422,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 577,
+          "contentLength" : 552,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -430,16 +430,16 @@
             "body" : {
               "items" : [
                 {
-                  "uploadUrl" : "https://bluefield.cognitedata.com/api/v1/files/storage/cognite/5564302947473076%2F5649735962038429%2Funtitled?sv=2026-04-06&se=2026-06-16T07%3A43%3A50Z&sr=b&sp=cw&sig=Oslcuz6MKBkBVgYuB6MpljLF3QtXCHjNgq9Us%2FukVtA%3D",
-                  "id" : 5649735962038429,
+                  "uploadUrl" : "https://bluefield.cognitedata.com/api/v1/files/storage/cognite/5564302947473076%2F2012385537890022%2Funtitled?sv=2026-04-06&se=2026-06-16T10%3A31%3A59Z&sr=b&sp=cw&sig=GsYMNmbUxOL2vwPIctC9PgEYSXRgVQuVTyrgpuQSTG4%3D",
+                  "id" : 2012385537890022,
                   "instanceId" : {
                     "space" : "testSpaceScalaSdk1",
-                    "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685"
+                    "externalId" : "file_instance_ext_id_2974dad76ad4"
                   },
                   "name" : "untitled",
                   "uploaded" : false,
-                  "createdTime" : 1780991030433,
-                  "lastUpdatedTime" : 1780991030433
+                  "createdTime" : 1781001118905,
+                  "lastUpdatedTime" : 1781001118905
                 }
               ]
             }
@@ -450,7 +450,7 @@
     {
       "request" : {
         "method" : "PUT",
-        "uri" : "https://bluefield.cognitedata.com/api/v1/files/storage/cognite/5564302947473076%2F5649735962038429%2Funtitled?sv=2026-04-06&se=2026-06-16T07:43:50Z&sr=b&sp=cw&sig=Oslcuz6MKBkBVgYuB6MpljLF3QtXCHjNgq9Us/ukVtA%3D",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/files/storage/cognite/5564302947473076%2F2012385537890022%2Funtitled?sv=2026-04-06&se=2026-06-16T10:31:59Z&sr=b&sp=cw&sig=GsYMNmbUxOL2vwPIctC9PgEYSXRgVQuVTyrgpuQSTG4%3D",
         "headers" : {
           "content-length" : [
             "20"
@@ -466,14 +466,14 @@
       },
       "response" : {
         "method" : "PUT",
-        "uri" : "https://bluefield.cognitedata.com/api/v1/files/storage/cognite/5564302947473076%2F5649735962038429%2Funtitled?sv=2026-04-06&se=2026-06-16T07:43:50Z&sr=b&sp=cw&sig=Oslcuz6MKBkBVgYuB6MpljLF3QtXCHjNgq9Us/ukVtA%3D",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/files/storage/cognite/5564302947473076%2F2012385537890022%2Funtitled?sv=2026-04-06&se=2026-06-16T10:31:59Z&sr=b&sp=cw&sig=GsYMNmbUxOL2vwPIctC9PgEYSXRgVQuVTyrgpuQSTG4%3D",
         "status" : {
           "code" : 201,
           "reason" : "Created"
         },
         "headers" : {
           "etag" : [
-            "\"0x8DEC5FAD9369757\""
+            "\"0x8DEC612569A2112\""
           ],
           "x-ms-content-crc64" : [
             "SKNk6X4lDDw="
@@ -482,7 +482,7 @@
             "envoy"
           ],
           "x-ms-request-id" : [
-            "70cd5c05-501e-00b5-01e3-f7e4de000000"
+            "135fbb51-201e-0080-58fb-f788ca000000"
           ],
           "content-md5" : [
             "Pej4sNyUuMIjD6uewLoFBg=="
@@ -491,13 +491,13 @@
             "default-src 'none'"
           ],
           "x-ms-version-id" : [
-            "2026-06-09T07:43:50.9928550Z"
+            "2026-06-09T10:31:59.7841682Z"
           ],
           "last-modified" : [
-            "Tue, 09 Jun 2026 07:43:50 GMT"
+            "Tue, 09 Jun 2026 10:31:59 GMT"
           ],
           "date" : [
-            "Tue, 09 Jun 2026 07:43:50 GMT"
+            "Tue, 09 Jun 2026 10:31:59 GMT"
           ],
           "x-ms-version" : [
             "2020-06-12"
@@ -552,7 +552,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 129,
+          "contentLength" : 106,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -562,7 +562,7 @@
                 {
                   "instanceId" : {
                     "space" : "testSpaceScalaSdk1",
-                    "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685"
+                    "externalId" : "file_instance_ext_id_2974dad76ad4"
                   }
                 }
               ]
@@ -582,10 +582,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "8f047758-24c5-90c5-b0af-70b4d695284e"
+            "23bf39be-c125-9143-813d-aa8ebeeae76e"
           ],
           "date" : [
-            "Tue, 09 Jun 2026 07:43:51 GMT"
+            "Tue, 09 Jun 2026 10:31:59 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -607,7 +607,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 423,
+          "contentLength" : 396,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -617,9 +617,9 @@
                 {
                   "instanceId" : {
                     "space" : "testSpaceScalaSdk1",
-                    "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685"
+                    "externalId" : "file_instance_ext_id_2974dad76ad4"
                   },
-                  "downloadUrl" : "https://bluefield.cognitedata.com/api/v1/files/storage/cognite/5564302947473076%2F5649735962038429%2Funtitled?sv=2026-04-06&se=2026-06-09T07%3A44%3A21Z&sr=b&sp=r&sig=6YEZYaIv40HonJsNCdLVFIro6flK%2F5QnH3%2BDOpgU6NY%3D"
+                  "downloadUrl" : "https://bluefield.cognitedata.com/api/v1/files/storage/cognite/5564302947473076%2F2012385537890022%2Funtitled?sv=2026-04-06&se=2026-06-09T10%3A32%3A29Z&sr=b&sp=r&sig=WXfHGqbQdql47J1JAu7ajsJjpPidznjpisOfc5B8QaM%3D"
                 }
               ]
             }
@@ -655,7 +655,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 136,
+          "contentLength" : 113,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -665,7 +665,7 @@
                 {
                   "instanceType" : "node",
                   "space" : "testSpaceScalaSdk1",
-                  "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685"
+                  "externalId" : "file_instance_ext_id_2974dad76ad4"
                 }
               ]
             }
@@ -684,10 +684,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "39eb4a3e-940e-9462-819d-45c27b898152"
+            "92d1de85-53a7-90ec-a38c-a9aa6e2365a6"
           ],
           "date" : [
-            "Tue, 09 Jun 2026 07:43:51 GMT"
+            "Tue, 09 Jun 2026 10:32:00 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -709,7 +709,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 178,
+          "contentLength" : 155,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -718,7 +718,7 @@
               "items" : [
                 {
                   "instanceType" : "node",
-                  "externalId" : "file_instance_ext_idff8466e3-fbf0-4440-a592-f39aee608685",
+                  "externalId" : "file_instance_ext_id_2974dad76ad4",
                   "space" : "testSpaceScalaSdk1"
                 }
               ]
@@ -728,5 +728,5 @@
       }
     }
   ],
-  "seed" : 3853422704233889892
+  "seed" : -1526413104472963916
 }
