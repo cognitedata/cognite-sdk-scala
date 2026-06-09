@@ -55,10 +55,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "d1580c7b-f7fb-9587-bc69-888e973039e7"
+            "10fdbc34-dc95-9405-b394-c1967289af94"
           ],
           "date" : [
-            "Tue, 09 Jun 2026 07:18:37 GMT"
+            "Mon, 08 Jun 2026 13:07:30 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -90,7 +90,7 @@
                 {
                   "space" : "test-space-scala-sdk",
                   "createdTime" : 1669203302286,
-                  "lastUpdatedTime" : 1780989504596,
+                  "lastUpdatedTime" : 1780924041405,
                   "isGlobal" : false
                 }
               ]
@@ -148,10 +148,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "9db33207-dd85-98b0-b385-2f61fe6df67e"
+            "0e28f83c-6cfb-995e-b1ad-523ca83cd784"
           ],
           "date" : [
-            "Tue, 09 Jun 2026 07:18:40 GMT"
+            "Mon, 08 Jun 2026 13:07:33 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -268,10 +268,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "f9367cb5-170d-9d1d-9047-01a42335de70"
+            "41f69b8b-3b77-9110-bda8-bb007e16dc6d"
           ],
           "date" : [
-            "Tue, 09 Jun 2026 07:18:41 GMT"
+            "Mon, 08 Jun 2026 13:07:35 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -298,7 +298,7 @@
           "contentEncoding" : null,
           "content" : {
             "type" : "__gzipped_by_vcr_library_due_to_size",
-            "gzipped" : "H4sIAAAAAAAA/+1XTYvbMBC9+1cYnWOo03a76a0UWgI9FNrupSxGsScgVpZcaeRsCPnvlZT4S+t8tE13adkcAp55Mxq99yyjTRTHhCGUmryNv9uHON74fxuGewQlKJ8XNkd0TjnNdHGX1QxW2ZRMGpyuaA4OgqAx8U+JRycW3cFqUJpJ4YB12oVzBRSh+MpK1yN9c/1idj17PU1nV2mL4VTjt6o4iVsphnTBHQCVgTb+w4BajyWMhuKDVG4mynk3FNMfuVxQbhNLynVXUClZgUIGjq+GqX08YwJfTgdxtz8pNCpqc1/QbsClt5M+ANcVBEVdlOx6ToZJzjQ2o/Uyw752YbTLgjrcvIMEC5wn6QmftN2zSrGSIauBnJ72847h9bwAgWzJ/Px9fgdlrCxNI/lAKZ8VhvMR2X2OGpRzYd1X2nVGqwtYUsPxhnLjLdfmepPvBkNLwYV19y2PyB6kcml3ivvXy+Q6W1DN8jPo/m/M8YCwx/QGQYmSHDGIPbU0qPDYuIBNusbPZ0TA9JOZYcnNfZJTywhDqRIONXB9xB0gTHlhX/iWgQa1my80oM/cvPuUjsQdMdR/bne1adBxv3mdK1Y1Z48HxikJgNuw0q3pv5Xb6AiOGHEn5Eq01PqqZ6e3rvmbHj9sWMd4tuSS4tWrCxu36TqusRv8X5DYj/tH6g4ofhyVo2BWUtKqguJ9M213RXC/zYimB/j9BXZ/7/Xp0ftkYw0lb8i8bclsTlINtqaI3SWqu28Eh6iWJcQu1ruRlBX3up2hwqD3pXbqb33DL0BwpXu4+ah5uo22PwGRkXByag4AAA=="
+            "gzipped" : "H4sIAAAAAAAA/+1XXWvbMBR9z68wek4gzrpu7dsYbAT2MNjWl1GMYl+DqCx50pXTEPLfJynxl+p8rM1aNpqHgO899+rqnGMZrUdRRBhCocl19NM+RNHa/9sw3CMoQfk8szmiU8pporO7pGKwTGZkXON0SVNwEASNE/808eiJRbewCpRmUjhgFbfhVAFFyL6zwvWI372fXs0upm8v46tpg+FU448yO4pbKoZ0wR0AlYEm/suAWg0ljIbsk1RuJsp5OxTTn7lcUG4TOeW6LSiVLEEhA8dXzdQunjCBb2a9uNufFBoVtblvaDfg0ptxF4CrEoKiNkq2Pcf9JGca69E6mX5fuzDaZUHtb95CggVOk/SIT5ruSalYwZBVQI5P+3XL8GqegUCWMz9/l99eGSsKU0veU8pnheF8QHafowblXFj3FXadweoMcmo43lBuvOWaXGfy7WBoKTiz7r7lAdmDVCrtTnH3eplUJwuqWXoC3f+NOR4Q9pzeIChRkgMGsaeWBhUeG2ewSdv49YwImH4xM+Tc3E9SahlhKNWEQwVcH3AHCFOc2Re+ZaBB5eYLDegzNx++xANxRwz1n9ttbRx03G1ep4qV9dnjgVFMAuAmrHRr+m/lZnQAR4y4E3IpGmp91avTG9f8TY/vN6xjPMm5pHh5cWbj1l2HNXaD/wsS+3GfpG6P4udReRTMSgpalpB9rKdtrwjutx7QdA+/f8Du416fDr0vNlZf8prM24bM+iTVYGuyyF2i2vtGcIhqWUDkYp0bSVFyr9sJKvR6n2un/tbX/wIEV7qHmx/VT7ejzW/RIqQ5ag4AAA=="
           }
         }
       }
@@ -360,10 +360,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "c880a7dc-f4ab-9a2f-acaf-dd1260ce6f57"
+            "be934bf6-9814-97b4-94a4-cf7ee104df3a"
           ],
           "date" : [
-            "Tue, 09 Jun 2026 07:18:45 GMT"
+            "Mon, 08 Jun 2026 13:07:38 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -404,5 +404,7 @@
       }
     }
   ],
-  "seed" : -1102083272510043052
+  "recordedEnv" : {
+    
+  }
 }
