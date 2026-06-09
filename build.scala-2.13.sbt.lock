@@ -794,11 +794,11 @@
     {
       "org" : "org.scalacheck",
       "name" : "scalacheck_2.13",
-      "version" : "1.17.1",
+      "version" : "1.19.0",
       "artifacts" : [
         {
           "name" : "scalacheck_2.13.jar",
-          "hash" : "sha1:2c0be9a432c6e2d21acd0ba81aeb489096d12ec1"
+          "hash" : "sha1:808372a1ba2266dcc7b4c6590883916a5df1fee1"
         }
       ],
       "configurations" : [
@@ -1142,11 +1142,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-kernel-testkit_2.13",
-      "version" : "3.6.3",
+      "version" : "3.7.0",
       "artifacts" : [
         {
           "name" : "cats-effect-kernel-testkit_2.13.jar",
-          "hash" : "sha1:23d43f77ba2d4cd27c98a58ec8a546e0f31d618e"
+          "hash" : "sha1:ad55a5f6d290e99d8afc4b6c2ae06a1fa76a32b3"
         }
       ],
       "configurations" : [
@@ -1172,11 +1172,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-laws_2.13",
-      "version" : "3.6.3",
+      "version" : "3.7.0",
       "artifacts" : [
         {
           "name" : "cats-effect-laws_2.13.jar",
-          "hash" : "sha1:601786387d5005bd8f62ec34a9cd31c852a046af"
+          "hash" : "sha1:603d712dce58e1da3d8501d69a275805bcc8c6e8"
         }
       ],
       "configurations" : [
@@ -1202,11 +1202,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-effect-testkit_2.13",
-      "version" : "3.6.3",
+      "version" : "3.7.0",
       "artifacts" : [
         {
           "name" : "cats-effect-testkit_2.13.jar",
-          "hash" : "sha1:1de6b5a4e5cbcc1bd13ce8308919ebda26babef8"
+          "hash" : "sha1:19681bcca188daf3369f0d2531aa225c74fcaaf2"
         }
       ],
       "configurations" : [
@@ -1232,11 +1232,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-free_2.13",
-      "version" : "2.11.0",
+      "version" : "2.13.0",
       "artifacts" : [
         {
           "name" : "cats-free_2.13.jar",
-          "hash" : "sha1:45ef5376cf59f314e931664f0b06cf44f8a7ffa5"
+          "hash" : "sha1:5c0d772fb6b448f197dd63474d84c439371ad096"
         }
       ],
       "configurations" : [
@@ -1246,11 +1246,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-kernel-laws_2.13",
-      "version" : "2.11.0",
+      "version" : "2.13.0",
       "artifacts" : [
         {
           "name" : "cats-kernel-laws_2.13.jar",
-          "hash" : "sha1:263782590f730cabb4b76178b386912dbc6c1461"
+          "hash" : "sha1:e62338089314a44c59cda0d24a688fb30e25f273"
         }
       ],
       "configurations" : [
@@ -1276,11 +1276,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-laws_2.13",
-      "version" : "2.11.0",
+      "version" : "2.13.0",
       "artifacts" : [
         {
           "name" : "cats-laws_2.13.jar",
-          "hash" : "sha1:b95c3f986bf036e5b955893f2b7d8148aa3b7659"
+          "hash" : "sha1:2701705a161b80f18b80249d518c32bcdff0d199"
         }
       ],
       "configurations" : [
@@ -1306,11 +1306,11 @@
     {
       "org" : "org.typelevel",
       "name" : "coop_2.13",
-      "version" : "1.2.0",
+      "version" : "1.3.0",
       "artifacts" : [
         {
           "name" : "coop_2.13.jar",
-          "hash" : "sha1:322e25688230e9e12527ce251b7706d3271100ff"
+          "hash" : "sha1:db3df9f60962de5f06b148772b84126b8185cae9"
         }
       ],
       "configurations" : [
@@ -1320,11 +1320,11 @@
     {
       "org" : "org.typelevel",
       "name" : "discipline-core_2.13",
-      "version" : "1.6.0",
+      "version" : "1.7.0",
       "artifacts" : [
         {
           "name" : "discipline-core_2.13.jar",
-          "hash" : "sha1:f61fef37ca9866a344e5117bb2b2723234fabf24"
+          "hash" : "sha1:a08f22ec5355d8ad9b2e2b0f8ca5d4cee4c691bb"
         }
       ],
       "configurations" : [
