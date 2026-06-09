@@ -230,11 +230,11 @@
     {
       "org" : "com.typesafe.netty",
       "name" : "netty-reactive-streams",
-      "version" : "2.0.4",
+      "version" : "2.0.17",
       "artifacts" : [
         {
           "name" : "netty-reactive-streams.jar",
-          "hash" : "sha1:0f77c8eaa7d5e2f2160b6d21ba385cf726f164b2"
+          "hash" : "sha1:76a9ec6b868ee09f06d5caf36a1246c1ee5415ab"
         }
       ],
       "configurations" : [
@@ -522,11 +522,11 @@
     {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client",
-      "version" : "2.12.4",
+      "version" : "2.15.0",
       "artifacts" : [
         {
           "name" : "async-http-client.jar",
-          "hash" : "sha1:c7ac461afff5c792af9557b11b334e139fc4f426"
+          "hash" : "sha1:c66b7c129d9b1ef6882cea37130b33fe277ec47b"
         }
       ],
       "configurations" : [
@@ -536,11 +536,11 @@
     {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client-netty-utils",
-      "version" : "2.12.4",
+      "version" : "2.15.0",
       "artifacts" : [
         {
           "name" : "async-http-client-netty-utils.jar",
-          "hash" : "sha1:dd226dcacb3b14ca1a8ce73c5c5c9ec6e2444dd2"
+          "hash" : "sha1:321226ee0cab422df6bc1748640b903dd45016e2"
         }
       ],
       "configurations" : [
@@ -690,11 +690,11 @@
     {
       "org" : "org.reactivestreams",
       "name" : "reactive-streams",
-      "version" : "1.0.3",
+      "version" : "1.0.4",
       "artifacts" : [
         {
           "name" : "reactive-streams.jar",
-          "hash" : "sha1:d9fb7a7926ffa635b3dcaa5049fb2bfa25b3e7d0"
+          "hash" : "sha1:3864a1320d97d7b045f729a326e1e077661f31b7"
         }
       ],
       "configurations" : [
