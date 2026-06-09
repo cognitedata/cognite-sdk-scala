@@ -55,10 +55,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "3aea471b-8c60-9bbf-9580-3896f38115f6"
+            "fcf68524-6a7c-925a-8fd1-05b74c4250e8"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 13:07:50 GMT"
+            "Tue, 09 Jun 2026 07:18:54 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -90,7 +90,7 @@
                 {
                   "space" : "test-space-scala-sdk",
                   "createdTime" : 1669203302286,
-                  "lastUpdatedTime" : 1780924064367,
+                  "lastUpdatedTime" : 1780989527988,
                   "isGlobal" : false
                 }
               ]
@@ -148,10 +148,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "e58d5b53-b768-9991-a6b0-2486771f8d86"
+            "d82da290-73bf-9b51-9e26-e7d274a25190"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 13:07:52 GMT"
+            "Tue, 09 Jun 2026 07:18:56 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -268,10 +268,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "088423bd-9c55-9a56-a148-b21c830f595b"
+            "1d9e8ac2-ab81-9b7b-9ad7-5afcec123d2a"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 13:07:53 GMT"
+            "Tue, 09 Jun 2026 07:18:57 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -298,7 +298,7 @@
           "contentEncoding" : null,
           "content" : {
             "type" : "__gzipped_by_vcr_library_due_to_size",
-            "gzipped" : "H4sIAAAAAAAA/+1WwWobMRC9+ysWnb1gJy1pei20+FZo0ksxi7waw1BppUqjTYzJv1eSs6vdjRMnJbRQ4oNB855GM2+eJe9nRcGQQDn2sfgRFkWxT98hDLcEtuFyJQLGXM0lr5z4WbUIN9V7Nu94zvAaIoXAUZlWZWKXgZ1pLViHuonEdpnDtQVOIK5QxRzLiw+Ly7N3i4vzy+Wi50ju6NqIk7wbi8Q3MhLIeujjvzzY3THAOxCftY01cSlzUei+SL3hMgBbLl3eYKw2YAkh6tUpdR+vsKHzs1E89qcbR5YH7BuFBiJ8Nx8SaGdgsilH2SHnfAxKdNSVNkDGecPBFI4F+3jyTJkc8LyRnvBJn70yFhUStsBOV/v1oPBuJaAh3GKqf6jvaBsq5buRjyaV0MZLeWTsCeOe9KoJ7lPhnKO7BWy5l/SdS58s12ODyg+FUZDgleeeUj4x9glU69Ap3f+8fO2qDXdYP0Pu/8YcDwT7m95gpEmzJwwSbi0HdnptvIJNcuK3O2Ki9D8zw1b627LmQREkbUsJLUg3cMds0hxT3BgQn7r28lscP/sjbnhkKi+YyZ9NpCt93ZfecHXoGa2jIv41yK+oAFdbNN21FJeDJ1YZmSRN3a5nXfr17O437PvAS5UIAAA="
+            "gzipped" : "H4sIAAAAAAAA/+1WwWobMRC9+ysWnb1QNw1xei20+BZI20sxi7waw1BppUqjTYzJv1eSs6vdjRMnJbRQ4oNB855GM2+eJe9nRcGQQDn2sfgRFkWxT98hDLcEtuFyJQLGXM0lr5z4WbUIN9U5m3c8Z3gNkULgqEyrMrHLwM60FqxD3URiu8jh2gInEF9RxRyLi+W7y+Xl+dnFcvGh50ju6JsRJ3k3FolvZCSQ9dDHf3mwu2OAdyA+axtr4lLmotB9kXrDZQC2XLq8wVhtwBJC1KtT6j5eYUNn70fx2J9uHFkesGsKDUT4bj4k0M7AZFOOskPO+RiU6KgrbYCM84aDKRwL9vHkmTI54HkjPeGTPntlLCokbIGdrvbqoPBuJaAh3GKqf6jvaBsq5buRjyaV0MZLeWTsCeOe9KoJ7lPhnKO7BWy5l/SdS58s12ODyg+FUZDgleeeUj4x9glU69Ap3f+8fO2qDXdYP0Pu/8YcDwT7m95gpEmzJwwSbi0HdnptvIJNcuK3O2Ki9D8zw1b627LmQREkbUsJLUg3cMds0hxT3BgQn7r28lscP/sjbnhkKi+YyZ9NpCt93ZfecHXoGa2jIv41yK+oAFdbNN21FJeDJ1YZmSRN3a5nXfr17O43m3NO7ZUIAAA="
           }
         }
       }
@@ -360,10 +360,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "e4928513-3773-92b5-989d-b7ba232afaf2"
+            "4c7106eb-3664-9a0c-b653-2c9b680f6ad2"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 13:07:55 GMT"
+            "Tue, 09 Jun 2026 07:18:59 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -460,10 +460,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "f2a9620f-7181-97e1-8b59-4c31476ac19b"
+            "00e34aef-2dc4-911d-ba1f-aa38c1083232"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 13:07:56 GMT"
+            "Tue, 09 Jun 2026 07:19:00 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -499,7 +499,5 @@
       }
     }
   ],
-  "recordedEnv" : {
-    
-  }
+  "seed" : -2787440268991588300
 }
