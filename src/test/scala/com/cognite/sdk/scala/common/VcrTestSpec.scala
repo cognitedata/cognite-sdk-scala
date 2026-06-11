@@ -114,7 +114,7 @@ abstract class VcrTestSpec
     _random = None
   }
 
-  private def fetchRealAuth(): Auth = {
+  protected def fetchRealAuth(): Auth = {
     val s = envVarSuffix
     val tokenUri = sys.env
       .get(s"TEST_TOKEN_URL$s")
@@ -166,7 +166,7 @@ abstract class VcrTestSpec
       wrapSttpBackend = wrap
     )
 
-  def shortRandom(): String = java.util.UUID.randomUUID().toString.substring(0, 8)
+  def shortRandom(): String = randomHexString(8)
 
   def vcrMode: VcrMode = _vcrBackend.map(_.actualMode).getOrElse(VcrMode.Bypass)
 
@@ -194,6 +194,13 @@ abstract class VcrTestSpec
     vcrMode match {
       case VcrMode.Playback => IO.unit
       case _ => IO.sleep(duration)
+    }
+
+  @SuppressWarnings(Array("org.wartremover.warts.ThreadSleep"))
+  def sleepUnlessPlayback(delayMillis: Long): Unit =
+    vcrMode match {
+      case VcrMode.Playback =>
+      case _ => Thread.sleep(delayMillis)
     }
 
   override def tags: Map[String, Set[String]] =
