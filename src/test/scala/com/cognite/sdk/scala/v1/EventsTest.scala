@@ -46,12 +46,12 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
     client.events,
     None,
     Seq(
-      Event(description = Some("scala-sdk-read-example-1"), externalId = Some("sdk-events-r1")),
-      Event(description = Some("scala-sdk-read-example-2"), externalId = Some("sdk-events-r2"))
+      Event(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
+      Event(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
     ),
     Seq(
-      EventCreate(description = Some("scala-sdk-read-example-1"), externalId = Some("sdk-events-c1")),
-      EventCreate(description = Some("scala-sdk-read-example-2"), externalId = Some("sdk-events-c2"))
+      EventCreate(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
+      EventCreate(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
     ),
     externalIdsThatDoNotExist,
     supportsMissingAndThrown = true
@@ -60,8 +60,8 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
   it should behave like deletableWithIgnoreUnknownIds(
     client.events,
     Seq(
-      Event(description = Some("scala-sdk-read-example-1"), externalId = Some("sdk-events-d1")),
-      Event(description = Some("scala-sdk-read-example-2"), externalId = Some("sdk-events-d2"))
+      Event(description = Some("scala-sdk-read-example-1"), externalId = Some(shortRandom())),
+      Event(description = Some("scala-sdk-read-example-2"), externalId = Some(shortRandom()))
     ),
     idsThatDoNotExist
   )
@@ -81,7 +81,7 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
   }
 
   it should "support deleting by CogniteIds" in {
-    val prefix = "delete-cogniteId-fixed1"
+    val prefix = s"delete-cogniteId-${shortRandom()}"
     val createdEvents = createEvents(prefix)
     try {
       val (deleteByInternalIds, deleteByExternalIds) = createdEvents.splitAt(createdEvents.size/2)
@@ -106,7 +106,7 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
   }
 
   it should "raise a conflict error if input of delete contains internalId and externalId that represent the same row" in {
-    val prefix = "delete-conflict-fixed1"
+    val prefix = s"delete-conflict-${shortRandom()}"
     val createdEvents = createEvents(prefix)
     try {
       val (deleteByInternalIds, deleteByExternalIds) = createdEvents.splitAt(createdEvents.size/2)
@@ -200,8 +200,8 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
     }
   )
 
-  private val updateExternalId1 = "update-1-externalId-aabbccdd"
-  private val updateExternalId2 = "update-2-externalId-eeff0011"
+  private lazy val updateExternalId1 = s"update-1-externalId-${shortRandom()}"
+  private lazy val updateExternalId2 = s"update-2-externalId-${shortRandom()}"
 
   it should behave like updatableByExternalId(
     client.events,
@@ -241,7 +241,7 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
   }
 
   it should "update metadata on events with empty map" in {
-    val externalId1 = "sdk-events-metadata-upd-1"
+    val externalId1 = shortRandom()
 
     // Create event with metadata
     val eventsToCreate = Seq(

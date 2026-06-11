@@ -166,7 +166,7 @@ abstract class VcrTestSpec
       wrapSttpBackend = wrap
     )
 
-  def shortRandom(): String = java.util.UUID.randomUUID().toString.substring(0, 8)
+  def shortRandom(): String = randomHexString(8)
 
   def vcrMode: VcrMode = _vcrBackend.map(_.actualMode).getOrElse(VcrMode.Bypass)
 
