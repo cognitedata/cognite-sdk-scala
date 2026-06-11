@@ -265,13 +265,13 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
         with RetrieveByIdsWithIgnoreUnknownIds[R, IO],
       random: => Random = ThreadLocalRandom.current()
   )(implicit ioRuntime: IORuntime): Unit = {
-    lazy val firstTwoItemItems = fetchTestItems(readable)
-    lazy val firstTwoExternalIds = firstTwoItemItems.map(_.externalId.value)
-    lazy val firstTwoIds = firstTwoItemItems.map(_.id)
-    lazy val nonExistentExternalId = s"does-not-exist/${Seq.fill(16)(random.nextInt(16)).map(_.toHexString).mkString}"
-    lazy val nonExistentId = random.between(1L, 9007199254740991L)
+    def fetchFirstTwoItems = fetchTestItems(readable)
+    def nonExistentExternalId = s"does-not-exist/${Seq.fill(16)(random.nextInt(16)).map(_.toHexString).mkString}"
+    def nonExistentId = random.between(1L, 9007199254740991L)
 
     it should "support retrieving items by external id with ignoreUnknownIds=true" in {
+      val firsTwoItems = fetchFirstTwoItems
+      val firstTwoExternalIds = firsTwoItems.map(_.externalId.value)
       firstTwoExternalIds should have size 2
       val maybeItemsRead = readable.retrieveByExternalIds(
         firstTwoExternalIds ++ Seq(nonExistentExternalId),
@@ -289,6 +289,8 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
     }
 
     it should "throw when retrieving items by external id with ignoreUnknownIds=false" in {
+      val firsTwoItems = fetchFirstTwoItems
+      val firstTwoExternalIds = firsTwoItems.map(_.externalId.value)
       val exception = intercept[CdpApiException] {
         readable.retrieveByExternalIds(
           firstTwoExternalIds ++ Seq(nonExistentExternalId),
@@ -299,6 +301,9 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
     }
 
     it should "support retrieving items by id with ignoreUnknownIds=true" in {
+      val firsTwoItems = fetchFirstTwoItems
+      val firstTwoIds = firsTwoItems.map(_.id)
+      val firstTwoExternalIds = firsTwoItems.map(_.externalId.value)
       val maybeItemsRead =
         readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = true).unsafeRunSync()
       val itemsReadIds = maybeItemsRead.map(_.externalId.value)
@@ -307,6 +312,8 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
     }
 
     it should "throw when retrieving items by id with ignoreUnknownIds=false" in {
+      val firsTwoItems = fetchFirstTwoItems
+      val firstTwoIds = firsTwoItems.map(_.id)
       val exception = intercept[CdpApiException] {
         readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = false).unsafeRunSync()
       }
