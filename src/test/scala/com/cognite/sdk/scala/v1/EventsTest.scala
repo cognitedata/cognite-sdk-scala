@@ -139,12 +139,12 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
     }
   }
 
-  private lazy val eventsToCreate = Seq(
+  def eventsToCreate: Seq[Event] = Seq(
     Event(description = Some("scala-sdk-update-1"), `type` = Some("test"), subtype = Some("test")),
     Event(description = Some("scala-sdk-update-2"), `type` = Some("test"), subtype = Some("test")),
     Event(description = Some("scala-sdk-update-3"), `type` = Some("test"), dataSetId = Some(testDataSet.id))
   )
-  private lazy val eventUpdates = Seq(
+  def eventUpdates: Seq[Event] = Seq(
     Event(description = Some("scala-sdk-update-1-1"), `type` = Some("testA"), subtype = Some(null)),
     Event(
       description = Some("scala-sdk-update-2-1"),
