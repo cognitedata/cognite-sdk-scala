@@ -299,7 +299,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
           ignoreUnknownIds = false
         ).unsafeRunSync()
       }
-      exception.message should include("ids not found")
+      exception.message should (include("ids not found") or include("id not found"))
     }
 
     it should "support retrieving items by id with ignoreUnknownIds=true" in {
