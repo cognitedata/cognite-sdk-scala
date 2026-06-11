@@ -35,49 +35,49 @@
                 {
                   "startTime" : null,
                   "endTime" : null,
-                  "description" : "delete-conflict-78aeb104-1",
+                  "description" : "delete-conflict-6c238a0a-1",
                   "type" : null,
                   "subtype" : null,
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "delete-conflict-78aeb104-1",
+                  "externalId" : "delete-conflict-6c238a0a-1",
                   "dataSetId" : null
                 },
                 {
                   "startTime" : null,
                   "endTime" : null,
-                  "description" : "delete-conflict-78aeb104-2",
+                  "description" : "delete-conflict-6c238a0a-2",
                   "type" : null,
                   "subtype" : null,
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "delete-conflict-78aeb104-2",
+                  "externalId" : "delete-conflict-6c238a0a-2",
                   "dataSetId" : null
                 },
                 {
                   "startTime" : null,
                   "endTime" : null,
-                  "description" : "delete-conflict-78aeb104-3",
+                  "description" : "delete-conflict-6c238a0a-3",
                   "type" : null,
                   "subtype" : null,
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "delete-conflict-78aeb104-3",
+                  "externalId" : "delete-conflict-6c238a0a-3",
                   "dataSetId" : null
                 },
                 {
                   "startTime" : null,
                   "endTime" : null,
-                  "description" : "delete-conflict-78aeb104-4",
+                  "description" : "delete-conflict-6c238a0a-4",
                   "type" : null,
                   "subtype" : null,
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "delete-conflict-78aeb104-4",
+                  "externalId" : "delete-conflict-6c238a0a-4",
                   "dataSetId" : null
                 }
               ]
@@ -97,10 +97,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "c227b290-3616-9b62-a16b-c083ae72c693"
+            "4f3eba5a-0b1b-9b33-9dbd-2df44907e3c3"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:08 GMT"
+            "Thu, 11 Jun 2026 11:19:04 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -130,32 +130,32 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-conflict-78aeb104-1",
-                  "description" : "delete-conflict-78aeb104-1",
-                  "id" : 8513485798979598,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-1",
+                  "description" : "delete-conflict-6c238a0a-1",
+                  "id" : 3965973449475804,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-2",
-                  "description" : "delete-conflict-78aeb104-2",
-                  "id" : 5303740150191825,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-2",
+                  "description" : "delete-conflict-6c238a0a-2",
+                  "id" : 3787114136873144,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-3",
-                  "description" : "delete-conflict-78aeb104-3",
-                  "id" : 5434483850685510,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-3",
+                  "description" : "delete-conflict-6c238a0a-3",
+                  "id" : 1585517987336937,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-4",
-                  "description" : "delete-conflict-78aeb104-4",
-                  "id" : 4616606831251200,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-4",
+                  "description" : "delete-conflict-6c238a0a-4",
+                  "id" : 1653876672296955,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 }
               ]
             }
@@ -195,7 +195,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-conflict-78aeb104"
+                "externalIdPrefix" : "delete-conflict-6c238a0a"
               },
               "limit" : 1000
             }
@@ -214,10 +214,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "ae2f418f-76da-902e-9ef2-35efcdb24215"
+            "8146cdd0-00ea-9b98-afdc-11aa17030700"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:08 GMT"
+            "Thu, 11 Jun 2026 11:19:04 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -284,7 +284,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-conflict-78aeb104"
+                "externalIdPrefix" : "delete-conflict-6c238a0a"
               },
               "limit" : 1000
             }
@@ -303,10 +303,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "1b57f54f-958f-9831-945b-7a186f09c391"
+            "3bf52a77-100f-9f15-a95a-eb8de8ae5736"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:08 GMT"
+            "Thu, 11 Jun 2026 11:19:05 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -373,7 +373,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-conflict-78aeb104"
+                "externalIdPrefix" : "delete-conflict-6c238a0a"
               },
               "limit" : 1000
             }
@@ -392,10 +392,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "734fcc84-9409-9aa4-8394-293b3f7a16fa"
+            "7d2fef92-bf13-9923-bf0c-d811c5c5b905"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:09 GMT"
+            "Thu, 11 Jun 2026 11:19:05 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -417,27 +417,13 @@
           ]
         },
         "entity" : {
-          "contentLength" : 457,
+          "contentLength" : 17,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
             "type" : "json",
             "body" : {
               "items" : [
-                {
-                  "externalId" : "delete-conflict-78aeb104-3",
-                  "description" : "delete-conflict-78aeb104-3",
-                  "id" : 5434483850685510,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
-                },
-                {
-                  "externalId" : "delete-conflict-78aeb104-1",
-                  "description" : "delete-conflict-78aeb104-1",
-                  "id" : 8513485798979598,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
-                }
               ]
             }
           }
@@ -476,7 +462,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-conflict-78aeb104"
+                "externalIdPrefix" : "delete-conflict-6c238a0a"
               },
               "limit" : 1000
             }
@@ -495,113 +481,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "4b432eae-b815-9012-9efa-2aff539c0efc"
+            "9c7ac40d-16a7-94f1-bcb8-c4a2bce08e65"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:09 GMT"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "transfer-encoding" : [
-            "chunked"
-          ],
-          "x-frame-options" : [
-            "DENY"
-          ],
-          "x-content-type-options" : [
-            "nosniff"
-          ],
-          "vary" : [
-            "Accept-Encoding"
-          ],
-          "strict-transport-security" : [
-            "max-age=31536000; includeSubDomains"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 457,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "items" : [
-                {
-                  "externalId" : "delete-conflict-78aeb104-2",
-                  "description" : "delete-conflict-78aeb104-2",
-                  "id" : 5303740150191825,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
-                },
-                {
-                  "externalId" : "delete-conflict-78aeb104-3",
-                  "description" : "delete-conflict-78aeb104-3",
-                  "id" : 5434483850685510,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
-                }
-              ]
-            }
-          }
-        }
-      }
-    },
-    {
-      "request" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
-        "headers" : {
-          "authorization" : [
-            "<redacted>"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "accept" : [
-            "application/json"
-          ],
-          "x-cdp-sdk" : [
-            "<redacted>"
-          ],
-          "accept-encoding" : [
-            "gzip, deflate"
-          ],
-          "x-cdp-app" : [
-            "scala-sdk-vcr-test"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 71,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "filter" : {
-                "externalIdPrefix" : "delete-conflict-78aeb104"
-              },
-              "limit" : 1000
-            }
-          }
-        }
-      },
-      "response" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
-        "status" : {
-          "code" : 200,
-          "reason" : "OK"
-        },
-        "headers" : {
-          "server" : [
-            "envoy"
-          ],
-          "x-request-id" : [
-            "5bf6489f-df53-9562-8c99-0f7467e79e55"
-          ],
-          "date" : [
-            "Thu, 11 Jun 2026 10:53:10 GMT"
+            "Thu, 11 Jun 2026 11:19:06 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -631,32 +514,32 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-conflict-78aeb104-4",
-                  "description" : "delete-conflict-78aeb104-4",
-                  "id" : 4616606831251200,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-3",
+                  "description" : "delete-conflict-6c238a0a-3",
+                  "id" : 1585517987336937,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-2",
-                  "description" : "delete-conflict-78aeb104-2",
-                  "id" : 5303740150191825,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-4",
+                  "description" : "delete-conflict-6c238a0a-4",
+                  "id" : 1653876672296955,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-3",
-                  "description" : "delete-conflict-78aeb104-3",
-                  "id" : 5434483850685510,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-2",
+                  "description" : "delete-conflict-6c238a0a-2",
+                  "id" : 3787114136873144,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-1",
-                  "description" : "delete-conflict-78aeb104-1",
-                  "id" : 8513485798979598,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-1",
+                  "description" : "delete-conflict-6c238a0a-1",
+                  "id" : 3965973449475804,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 }
               ]
             }
@@ -697,13 +580,13 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-conflict-78aeb104-3"
+                  "externalId" : "delete-conflict-6c238a0a-3"
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-4"
+                  "externalId" : "delete-conflict-6c238a0a-4"
                 },
                 {
-                  "id" : 5434483850685510
+                  "id" : 1585517987336937
                 }
               ],
               "ignoreUnknownIds" : true
@@ -723,10 +606,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "02ddb2ca-1be4-903c-843b-af5c61d2bc1a"
+            "303b99af-c4f5-98c3-8380-a59585ae18b8"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:10 GMT"
+            "Thu, 11 Jun 2026 11:19:06 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -757,7 +640,7 @@
               "error" : {
                 "duplicated" : [
                   {
-                    "id" : 5434483850685510
+                    "id" : 1585517987336937
                   }
                 ],
                 "code" : 409,
@@ -801,13 +684,13 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 8513485798979598
+                  "id" : 3965973449475804
                 },
                 {
-                  "id" : 5303740150191825
+                  "id" : 3787114136873144
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-2"
+                  "externalId" : "delete-conflict-6c238a0a-2"
                 }
               ],
               "ignoreUnknownIds" : true
@@ -827,10 +710,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "0007cd9e-0f92-922a-9060-d12b3214be31"
+            "c8f757d9-9f8b-951b-87e1-8bd937a63188"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:11 GMT"
+            "Thu, 11 Jun 2026 11:19:06 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -861,7 +744,7 @@
               "error" : {
                 "duplicated" : [
                   {
-                    "id" : 5303740150191825
+                    "id" : 3787114136873144
                   }
                 ],
                 "code" : 409,
@@ -905,16 +788,16 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 8513485798979598
+                  "id" : 3965973449475804
                 },
                 {
-                  "id" : 5303740150191825
+                  "id" : 3787114136873144
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-3"
+                  "externalId" : "delete-conflict-6c238a0a-3"
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-4"
+                  "externalId" : "delete-conflict-6c238a0a-4"
                 }
               ],
               "ignoreUnknownIds" : true
@@ -934,10 +817,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "6cf8959f-7502-913d-ba52-f7c9f347a628"
+            "1868b8b7-3428-9de7-b04d-7507bc38ccc7"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:11 GMT"
+            "Thu, 11 Jun 2026 11:19:06 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -1003,7 +886,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-conflict-78aeb104"
+                "externalIdPrefix" : "delete-conflict-6c238a0a"
               },
               "limit" : 1000
             }
@@ -1022,10 +905,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "1a8f9d54-0df4-966e-8812-f1bc5c35c3cd"
+            "bc6c74ed-1078-9d80-9b1b-e1db5d0ad1e1"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:11 GMT"
+            "Thu, 11 Jun 2026 11:19:06 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -1055,32 +938,32 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-conflict-78aeb104-4",
-                  "description" : "delete-conflict-78aeb104-4",
-                  "id" : 4616606831251200,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-3",
+                  "description" : "delete-conflict-6c238a0a-3",
+                  "id" : 1585517987336937,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-2",
-                  "description" : "delete-conflict-78aeb104-2",
-                  "id" : 5303740150191825,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-4",
+                  "description" : "delete-conflict-6c238a0a-4",
+                  "id" : 1653876672296955,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-3",
-                  "description" : "delete-conflict-78aeb104-3",
-                  "id" : 5434483850685510,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-2",
+                  "description" : "delete-conflict-6c238a0a-2",
+                  "id" : 3787114136873144,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-1",
-                  "description" : "delete-conflict-78aeb104-1",
-                  "id" : 8513485798979598,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-1",
+                  "description" : "delete-conflict-6c238a0a-1",
+                  "id" : 3965973449475804,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 }
               ]
             }
@@ -1120,7 +1003,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-conflict-78aeb104"
+                "externalIdPrefix" : "delete-conflict-6c238a0a"
               },
               "limit" : 1000
             }
@@ -1139,127 +1022,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "d5d46865-e125-9402-bd12-425029d1f4b6"
+            "172036b9-7250-99c8-83e9-6f07311ef8b1"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:11 GMT"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "transfer-encoding" : [
-            "chunked"
-          ],
-          "x-frame-options" : [
-            "DENY"
-          ],
-          "x-content-type-options" : [
-            "nosniff"
-          ],
-          "vary" : [
-            "Accept-Encoding"
-          ],
-          "strict-transport-security" : [
-            "max-age=31536000; includeSubDomains"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 895,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "items" : [
-                {
-                  "externalId" : "delete-conflict-78aeb104-4",
-                  "description" : "delete-conflict-78aeb104-4",
-                  "id" : 4616606831251200,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
-                },
-                {
-                  "externalId" : "delete-conflict-78aeb104-2",
-                  "description" : "delete-conflict-78aeb104-2",
-                  "id" : 5303740150191825,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
-                },
-                {
-                  "externalId" : "delete-conflict-78aeb104-3",
-                  "description" : "delete-conflict-78aeb104-3",
-                  "id" : 5434483850685510,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
-                },
-                {
-                  "externalId" : "delete-conflict-78aeb104-1",
-                  "description" : "delete-conflict-78aeb104-1",
-                  "id" : 8513485798979598,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
-                }
-              ]
-            }
-          }
-        }
-      }
-    },
-    {
-      "request" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
-        "headers" : {
-          "authorization" : [
-            "<redacted>"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "accept" : [
-            "application/json"
-          ],
-          "x-cdp-sdk" : [
-            "<redacted>"
-          ],
-          "accept-encoding" : [
-            "gzip, deflate"
-          ],
-          "x-cdp-app" : [
-            "scala-sdk-vcr-test"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 71,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "filter" : {
-                "externalIdPrefix" : "delete-conflict-78aeb104"
-              },
-              "limit" : 1000
-            }
-          }
-        }
-      },
-      "response" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
-        "status" : {
-          "code" : 200,
-          "reason" : "OK"
-        },
-        "headers" : {
-          "server" : [
-            "envoy"
-          ],
-          "x-request-id" : [
-            "300889eb-a53e-95b2-91e4-8a5584f4e9b4"
-          ],
-          "date" : [
-            "Thu, 11 Jun 2026 10:53:11 GMT"
+            "Thu, 11 Jun 2026 11:19:06 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -1289,18 +1055,18 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-conflict-78aeb104-3",
-                  "description" : "delete-conflict-78aeb104-3",
-                  "id" : 5434483850685510,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-2",
+                  "description" : "delete-conflict-6c238a0a-2",
+                  "id" : 3787114136873144,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 },
                 {
-                  "externalId" : "delete-conflict-78aeb104-1",
-                  "description" : "delete-conflict-78aeb104-1",
-                  "id" : 8513485798979598,
-                  "lastUpdatedTime" : 1781175188360,
-                  "createdTime" : 1781175188360
+                  "externalId" : "delete-conflict-6c238a0a-1",
+                  "description" : "delete-conflict-6c238a0a-1",
+                  "id" : 3965973449475804,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
                 }
               ]
             }
@@ -1340,7 +1106,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-conflict-78aeb104"
+                "externalIdPrefix" : "delete-conflict-6c238a0a"
               },
               "limit" : 1000
             }
@@ -1359,10 +1125,113 @@
             "envoy"
           ],
           "x-request-id" : [
-            "6131b8c3-97f7-9f21-a131-972c5f802808"
+            "1957346b-a2ed-9093-9c91-b1bfa3750c74"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:12 GMT"
+            "Thu, 11 Jun 2026 11:19:06 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 457,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "delete-conflict-6c238a0a-3",
+                  "description" : "delete-conflict-6c238a0a-3",
+                  "id" : 1585517987336937,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
+                },
+                {
+                  "externalId" : "delete-conflict-6c238a0a-4",
+                  "description" : "delete-conflict-6c238a0a-4",
+                  "id" : 1653876672296955,
+                  "lastUpdatedTime" : 1781176744767,
+                  "createdTime" : 1781176744767
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 71,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "externalIdPrefix" : "delete-conflict-6c238a0a"
+              },
+              "limit" : 1000
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "8b4201fb-472a-9de3-bcad-5f9ad4f8a052"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 11:19:07 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -1430,16 +1299,16 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 8513485798979598
+                  "id" : 3965973449475804
                 },
                 {
-                  "id" : 5303740150191825
+                  "id" : 3787114136873144
                 },
                 {
-                  "id" : 5434483850685510
+                  "id" : 1585517987336937
                 },
                 {
-                  "id" : 4616606831251200
+                  "id" : 1653876672296955
                 }
               ],
               "ignoreUnknownIds" : true
@@ -1459,10 +1328,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "9767ad52-d735-9ea4-98da-1ff4c82bf1c2"
+            "40e68c32-0a39-96b0-a393-5454e5cebd91"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:53:12 GMT"
+            "Thu, 11 Jun 2026 11:19:07 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -1497,5 +1366,5 @@
       }
     }
   ],
-  "seed" : 5654347731334448055
+  "seed" : -7969601613454778006
 }
