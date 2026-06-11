@@ -25,7 +25,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 399,
+          "contentLength" : 389,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -41,7 +41,7 @@
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "sdk-events-d1",
+                  "externalId" : "7ac08b70",
                   "dataSetId" : null
                 },
                 {
@@ -53,7 +53,7 @@
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "sdk-events-d2",
+                  "externalId" : "0fc6ca66",
                   "dataSetId" : null
                 }
               ]
@@ -73,10 +73,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "28d8136a-6503-9b3d-afa4-922fefd344e9"
+            "e094c74a-ac36-9104-ae80-9d74f9e7916c"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:23 GMT"
+            "Thu, 11 Jun 2026 10:37:27 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -98,7 +98,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 427,
+          "contentLength" : 417,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -106,18 +106,18 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "sdk-events-d1",
+                  "externalId" : "7ac08b70",
                   "description" : "scala-sdk-read-example-1",
-                  "id" : 3566989641963525,
-                  "lastUpdatedTime" : 1780958423696,
-                  "createdTime" : 1780958423696
+                  "id" : 7421252190957716,
+                  "lastUpdatedTime" : 1781174247729,
+                  "createdTime" : 1781174247729
                 },
                 {
-                  "externalId" : "sdk-events-d2",
+                  "externalId" : "0fc6ca66",
                   "description" : "scala-sdk-read-example-2",
-                  "id" : 5829926161539916,
-                  "lastUpdatedTime" : 1780958423696,
-                  "createdTime" : 1780958423696
+                  "id" : 5892916896216831,
+                  "lastUpdatedTime" : 1781174247729,
+                  "createdTime" : 1781174247729
                 }
               ]
             }
@@ -158,10 +158,10 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 3566989641963525
+                  "id" : 7421252190957716
                 },
                 {
-                  "id" : 5829926161539916
+                  "id" : 5892916896216831
                 },
                 {
                   "id" : 999991
@@ -187,10 +187,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "0935c334-890a-90d3-9977-5f413a61a66d"
+            "026c4826-64dd-9d39-8aca-3bd26c8aa09b"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:23 GMT"
+            "Thu, 11 Jun 2026 10:37:27 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -257,10 +257,10 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 3566989641963525
+                  "id" : 7421252190957716
                 },
                 {
-                  "id" : 5829926161539916
+                  "id" : 5892916896216831
                 }
               ],
               "ignoreUnknownIds" : false
@@ -280,10 +280,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "6913a12f-9755-9f8e-a33b-e8d809f94e7d"
+            "e0a07e61-62db-9bd3-a361-6f1ed0729dd4"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:23 GMT"
+            "Thu, 11 Jun 2026 10:37:28 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -314,10 +314,10 @@
               "error" : {
                 "missing" : [
                   {
-                    "id" : 5829926161539916
+                    "id" : 7421252190957716
                   },
                   {
-                    "id" : 3566989641963525
+                    "id" : 5892916896216831
                   }
                 ],
                 "code" : 400,
@@ -384,10 +384,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "cc0b878f-1f21-9bc2-8db5-8f19538c1fca"
+            "113a4e10-2e1b-9cf1-97de-074805a6d306"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:24 GMT"
+            "Thu, 11 Jun 2026 10:37:28 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -433,7 +433,5 @@
       }
     }
   ],
-  "recordedEnv" : {
-    
-  }
+  "seed" : 203912264920650799
 }
