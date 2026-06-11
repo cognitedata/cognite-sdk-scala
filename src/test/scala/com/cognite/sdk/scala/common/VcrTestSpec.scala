@@ -18,6 +18,7 @@ import sttp.client3.impl.cats.CatsMonadAsyncError
 import sttp.client3.testing.SttpBackendStub
 
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.util.Random
 
 /** Base class for tests that use VCR (cassette-based HTTP recording/playback).
   *
@@ -45,6 +46,7 @@ abstract class VcrTestSpec
   private var _testClient: Option[GenericClient[IO]] = None
   private var _testClientWithoutRetries: Option[GenericClient[IO]] = None
   private var _vcrBackend: Option[VcrBackend[IO]] = None
+  private var _random: Option[Random] = None
 
   /** Client with `RetryingBackend`. Use this for normal operations. */
   def testClient: GenericClient[IO] =
@@ -109,6 +111,7 @@ abstract class VcrTestSpec
     _vcrBackend = None
     _testClient = None
     _testClientWithoutRetries = None
+    _random = None
   }
 
   protected def fetchRealAuth(): Auth = {
@@ -166,6 +169,26 @@ abstract class VcrTestSpec
   def shortRandom(): String = java.util.UUID.randomUUID().toString.substring(0, 8)
 
   def vcrMode: VcrMode = _vcrBackend.map(_.actualMode).getOrElse(VcrMode.Bypass)
+
+  /** A stable random seed for the current test, persisted in the cassette.
+    *
+    * In record mode, a UUID is generated on first access and saved to the cassette. In playback
+    * mode, the same UUID is returned. Use this for IDs that must be unique across record runs but
+    * reproducible during playback (e.g. instance external IDs created during the test).
+    */
+  private def vcrSeed: Long =
+    _vcrBackend.getOrElse(sys.error("VCR backend not initialized — called outside of a test?")).getSeed
+
+  def random: Random = synchronized {
+    _random.getOrElse {
+      val r = new Random(vcrSeed)
+      _random = Some(r)
+      r
+    }
+  }
+
+  def randomHexString(length: Int): String =
+    Seq.fill(length)(random.nextInt(16)).map(_.toHexString).mkString
 
   def sleepUnlessPlayback(duration: FiniteDuration): IO[Unit] =
     vcrMode match {

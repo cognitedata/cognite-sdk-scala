@@ -142,7 +142,7 @@ final case class RecordedResponse(
 final case class Interaction(request: RecordedRequest, response: RecordedResponse)
 final case class Cassette(
     interactions: List[Interaction],
-    recordedEnv: Map[String, String] = Map.empty
+    seed: Option[Long] = None
 )
 
 object CassetteCodecs {
@@ -198,6 +198,7 @@ class VcrBackend[F[_]](
   import CassetteCodecs._
 
   private val recordedInteractions = new ConcurrentLinkedQueue[Interaction]()
+  private lazy val generatedSeed: Long = java.util.concurrent.ThreadLocalRandom.current().nextLong()
 
   val actualMode: VcrMode = mode match {
     case VcrMode.Auto =>
@@ -211,10 +212,7 @@ class VcrBackend[F[_]](
     case other => other
   }
 
-  private lazy val cassetteInteractions: ConcurrentLinkedQueue[Interaction] =
-    new ConcurrentLinkedQueue[Interaction](loadCassette().asJava)
-
-  private def loadCassette(): List[Interaction] = {
+  private lazy val loadedCassette: Cassette = {
     val path = Paths.get(cassettePath)
     if (!Files.exists(path))
       throw new IllegalStateException(
@@ -222,7 +220,7 @@ class VcrBackend[F[_]](
       )
     val content = new String(Files.readAllBytes(path), "UTF-8")
     decode[Cassette](content) match {
-      case Right(cassette) => cassette.interactions
+      case Right(cassette) => cassette
       case Left(e) =>
         throw new RuntimeException(
           s"Failed to decode cassette at $cassettePath. " +
@@ -230,6 +228,27 @@ class VcrBackend[F[_]](
         )
     }
   }
+
+  private lazy val cassetteInteractions: ConcurrentLinkedQueue[Interaction] =
+    new ConcurrentLinkedQueue[Interaction](loadedCassette.interactions.asJava)
+
+  /** Returns a stable random seed for this test run.
+    *
+    * In record mode, the seed is generated lazily on first access and persisted in the cassette so
+    * it can be reproduced during playback. Use this instead of `UUID.randomUUID()` when you need
+    * unique identifiers that must survive record→playback cycles.
+    */
+  def getSeed: Long =
+    actualMode match {
+      case VcrMode.Playback =>
+        loadedCassette.seed.getOrElse(
+          throw new IllegalStateException(
+            s"No seed in cassette at $cassettePath. Re-record the cassette."
+          )
+        )
+      case _ =>
+        generatedSeed
+    }
 
   override def send[T, R >: Any with Effect[F]](request: Request[T, R]): F[Response[T]] =
     actualMode match {
@@ -439,7 +458,7 @@ class VcrBackend[F[_]](
     headers.flatMap { case (k, vs) => vs.map(v => Header(k, v)) }.toSeq
 
   private def flushCassette(): Unit = {
-    val cassette = Cassette(recordedInteractions.asScala.toList)
+    val cassette = Cassette(recordedInteractions.asScala.toList, Some(generatedSeed))
     val json = cassette.asJson.spaces2
     val path = Paths.get(cassettePath)
     Option(path.getParent).foreach(p => Files.createDirectories(p))
