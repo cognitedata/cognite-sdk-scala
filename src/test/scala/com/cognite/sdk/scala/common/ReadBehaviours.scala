@@ -9,10 +9,11 @@ import org.scalatest.OptionValues
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import scala.util.Random
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
 trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: AnyFlatSpec =>
@@ -261,13 +262,14 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   def readableWithRetrieveUnknownIds[R <: WithExternalId with WithId[Long] with WithCreatedTime, W](
       readable: => Readable[R, IO]
         with RetrieveByExternalIdsWithIgnoreUnknownIds[R, IO]
-        with RetrieveByIdsWithIgnoreUnknownIds[R, IO]
+        with RetrieveByIdsWithIgnoreUnknownIds[R, IO],
+      random: => Random = ThreadLocalRandom.current()
   )(implicit ioRuntime: IORuntime): Unit = {
     lazy val firstTwoItemItems = fetchTestItems(readable)
     lazy val firstTwoExternalIds = firstTwoItemItems.map(_.externalId.value)
     lazy val firstTwoIds = firstTwoItemItems.map(_.id)
-    lazy val nonExistentExternalId = s"does-not-exist/${UUID.randomUUID.toString}"
-    lazy val nonExistentId = ThreadLocalRandom.current().nextLong(1, 9007199254740991L)
+    lazy val nonExistentExternalId = s"does-not-exist/${Seq.fill(16)(random.nextInt(16)).map(_.toHexString).mkString}"
+    lazy val nonExistentId = random.between(1L, 9007199254740991L)
 
     it should "support retrieving items by external id with ignoreUnknownIds=true" in {
       firstTwoExternalIds should have size 2
