@@ -41,7 +41,7 @@
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "2412b5a5",
+                  "externalId" : "d2bba71b",
                   "dataSetId" : null
                 },
                 {
@@ -53,7 +53,7 @@
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "a9190d50",
+                  "externalId" : "1e2a89a2",
                   "dataSetId" : null
                 }
               ]
@@ -73,10 +73,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "0a2e148b-e39d-90d4-8d86-c473800f0076"
+            "3b73db48-5b5b-90ed-9ef4-a4537e2d0bc5"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 11:18:59 GMT"
+            "Thu, 11 Jun 2026 12:11:37 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -98,7 +98,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 417,
+          "contentLength" : 416,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -106,18 +106,18 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "2412b5a5",
+                  "externalId" : "d2bba71b",
                   "description" : "scala-sdk-read-example-1",
-                  "id" : 8845892393211061,
-                  "lastUpdatedTime" : 1781176739263,
-                  "createdTime" : 1781176739263
+                  "id" : 797848663677003,
+                  "lastUpdatedTime" : 1781179897228,
+                  "createdTime" : 1781179897228
                 },
                 {
-                  "externalId" : "a9190d50",
+                  "externalId" : "1e2a89a2",
                   "description" : "scala-sdk-read-example-2",
-                  "id" : 6805622775120041,
-                  "lastUpdatedTime" : 1781176739263,
-                  "createdTime" : 1781176739263
+                  "id" : 4870217005838640,
+                  "lastUpdatedTime" : 1781179897228,
+                  "createdTime" : 1781179897228
                 }
               ]
             }
@@ -126,5 +126,5 @@
       }
     }
   ],
-  "seed" : -2522405004716633674
+  "seed" : -986615267175365039
 }
