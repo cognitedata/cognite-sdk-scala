@@ -41,7 +41,7 @@
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "449427e1",
+                  "externalId" : "6dac38b5",
                   "dataSetId" : null
                 },
                 {
@@ -53,7 +53,7 @@
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "10cc6eb6",
+                  "externalId" : "c2657cc4",
                   "dataSetId" : null
                 }
               ]
@@ -73,10 +73,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "30ef8790-ebc3-9391-851d-89249b66027b"
+            "65eb9ea9-3dec-9387-9405-b31b0ee4f03b"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 10:37:26 GMT"
+            "Thu, 11 Jun 2026 10:53:02 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -106,18 +106,18 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "449427e1",
+                  "externalId" : "6dac38b5",
                   "description" : "scala-sdk-read-example-1",
-                  "id" : 8157952940378483,
-                  "lastUpdatedTime" : 1781174246728,
-                  "createdTime" : 1781174246728
+                  "id" : 8963934637009489,
+                  "lastUpdatedTime" : 1781175182234,
+                  "createdTime" : 1781175182234
                 },
                 {
-                  "externalId" : "10cc6eb6",
+                  "externalId" : "c2657cc4",
                   "description" : "scala-sdk-read-example-2",
-                  "id" : 8855544657626292,
-                  "lastUpdatedTime" : 1781174246728,
-                  "createdTime" : 1781174246728
+                  "id" : 7628516498170278,
+                  "lastUpdatedTime" : 1781175182234,
+                  "createdTime" : 1781175182234
                 }
               ]
             }
@@ -126,5 +126,5 @@
       }
     }
   ],
-  "seed" : 7028032902566103867
+  "seed" : 6477147380744091453
 }
