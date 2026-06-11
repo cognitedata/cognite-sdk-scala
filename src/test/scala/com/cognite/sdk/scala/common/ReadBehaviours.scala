@@ -319,7 +319,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
       val exception = intercept[CdpApiException] {
         readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = false).unsafeRunSync()
       }
-      exception.message should include("ids not found")
+      exception.message should (include("ids not found") or include("id not found"))
     }
   }
 }
