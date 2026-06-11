@@ -4,7 +4,6 @@
 package com.cognite.sdk.scala.v1
 
 import java.time.Instant
-import java.util.UUID
 import com.cognite.sdk.scala.common._
 import fs2.Stream
 
@@ -19,19 +18,19 @@ import scala.util.control.NonFatal
     "org.wartremover.warts.SizeIs"
   )
 )
-class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
+class AssetsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
   it should behave like readable(client.assets)
 
-  it should behave like partitionedReadable(client.assets)
+  it should behave like partitionedReadable(client.assets, sleep = sleepUnlessPlayback)
 
   it should behave like readableWithRetrieve(client.assets, idsThatDoNotExist, supportsMissingAndThrown = true)
 
   it should behave like readableWithRetrieveByExternalId(client.assets, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
-  it should behave like readableWithRetrieveUnknownIds(client.dataSets)
+  it should behave like readableWithRetrieveUnknownIds(client.dataSets, random)
 
   it should behave like writable(
     client.assets,
@@ -77,14 +76,16 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     try {
       retryWithExpectedResult[Seq[Asset]](
         client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList.unsafeRunSync(),
-        r => r should have size 3
+        r => r should have size 3,
+        sleep = sleepUnlessPlayback
       )
 
       client.assets.deleteRecursive(Seq(CogniteExternalId(s"$key-recursive-root")), true, true).unsafeRunSync()
 
       retryWithExpectedResult[Seq[Asset]](
         client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList.unsafeRunSync(),
-        r => r should have size 0
+        r => r should have size 0,
+        sleep = sleepUnlessPlayback
       )
     } finally {
       try {
@@ -107,14 +108,16 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     try {
       retryWithExpectedResult[Seq[Asset]](
         client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList.unsafeRunSync(),
-        r => r should have size 3
+        r => r should have size 3,
+        sleep = sleepUnlessPlayback
       )
 
       client.assets.deleteRecursive(Seq(CogniteInternalId(createdAssets(0).id)), true, true).unsafeRunSync()
 
       retryWithExpectedResult[Seq[Asset]](
         client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$key-recursive"))).compile.toList.unsafeRunSync(),
-        r => r should have size 0
+        r => r should have size 0,
+        sleep = sleepUnlessPlayback
       )
     } finally {
       try {
@@ -132,7 +135,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     retryWithExpectedResult[Seq[Asset]](
       client.assets.filter(AssetsFilter(externalIdPrefix = Some(s"$externalIdPrefix"))).compile.toList.unsafeRunSync(),
-      r => r should have size 4
+      r => r should have size 4,
+      sleep = sleepUnlessPlayback
     )
     createdItems
   }
@@ -149,10 +153,10 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     client.assets.delete(cogniteIds, true).unsafeRunSync()
 
-    //make sure that assets are deletes
     retryWithExpectedResult[Seq[Asset]](
       client.assets.filter(AssetsFilter(externalIdPrefix = Some(externalIdPrefix))).compile.toList.unsafeRunSync(),
-      r => r should have size 0
+      r => r should have size 0,
+      sleep = sleepUnlessPlayback
     )
   }
 
@@ -176,18 +180,18 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     client.assets.delete(internalIds ++ externalIds, true).unsafeRunSync()
 
-    //make sure that assets are deletes
     retryWithExpectedResult[Seq[Asset]](
       client.assets.filter(AssetsFilter(externalIdPrefix = Some(prefix))).compile.toList.unsafeRunSync(),
-      r => r should have size 0
+      r => r should have size 0,
+      sleep = sleepUnlessPlayback
     )
   }
 
-  private val assetsToCreate = Seq(
+  private def assetsToCreate = Seq(
     Asset(name = "scala-sdk-update-1", description = Some("description-1")),
     Asset(name = "scala-sdk-update-2", description = Some("description-2"), dataSetId = Some(testDataSet.id))
   )
-  private val assetUpdates = Seq(
+  private def assetUpdates = Seq(
     Asset(name = "scala-sdk-update-1-1", description = null, dataSetId = Some(testDataSet.id)),
     Asset(name = "scala-sdk-update-2-1")
   )
@@ -214,9 +218,9 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   )
 
   it should "update labels on assets" in {
-    val externalId1 = UUID.randomUUID.toString
-    val externalId2 = UUID.randomUUID.toString
-    val externalId3 = UUID.randomUUID.toString
+    val externalId1 = shortRandom()
+    val externalId2 = shortRandom()
+    val externalId3 = shortRandom()
 
     // Create labels
     client.labels.createItems(
@@ -264,7 +268,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   }
 
   it should "update metadata on assets with empty map" in {
-    val externalId1 = UUID.randomUUID.toString
+    val externalId1 = shortRandom()
 
     // Create asset with metadata
     val assetToCreate = Seq(
@@ -308,8 +312,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     }
   )
 
-  private val update1ExternalId = s"update-1-externalId-${UUID.randomUUID.toString.substring(0, 8)}"
-  private val update2ExternalId = s"update-2-externalId-${UUID.randomUUID.toString.substring(0, 8)}"
+  private lazy val update1ExternalId = s"update-1-externalId-${shortRandom()}"
+  private lazy val update2ExternalId = s"update-2-externalId-${shortRandom()}"
 
   it should behave like updatableByExternalId(
     client.assets,
@@ -340,7 +344,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
         .compile
         .toList
         .unsafeRunSync(),
-      r => r should have size 84
+      r => r should have size 84,
+      sleep = sleepUnlessPlayback
     )
 
     val createdTimeFilterResults = client.assets
@@ -388,7 +393,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       .compile
       .toList
         .unsafeRunSync(),
-      a => a should have size 1106
+      a => a should have size 1106,
+      sleep = sleepUnlessPlayback
     )
 
     val assetSubtreeIdsFilterResult = client.assets
@@ -412,7 +418,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
       a => {
         val bool = a.map(_.aggregates.value.get("childCount").value).exists(_ > 0)
         bool shouldBe true
-      }
+      },
+      sleep = sleepUnlessPlayback
     )
   }
 
@@ -493,7 +500,8 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
             max = Some(createdTimes.max)
           ))
         )))).unsafeRunSync(),
-        a => a should not be empty
+        a => a should not be empty,
+        sleep = sleepUnlessPlayback
       )
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
       created.filter(_.dataSetId.isDefined).map(_.id) should contain theSameElementsAs foundItems.map(_.id)
