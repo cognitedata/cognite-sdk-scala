@@ -31,7 +31,7 @@ class AssetsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
   it should behave like readableWithRetrieveByExternalId(client.assets, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
-  it should behave like readableWithRetrieveUnknownIds(client.dataSets)
+  it should behave like readableWithRetrieveUnknownIds(client.assets)
 
   it should behave like writable(
     client.assets,

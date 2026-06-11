@@ -36,7 +36,7 @@ class SequencesTest extends SdkTestSpec with ReadBehaviours with WritableBehavio
     )
   )
 
-  (it should behave).like(readableWithRetrieveUnknownIds(client.dataSets))
+  (it should behave).like(readableWithRetrieveUnknownIds(client.sequences))
 
   (it should behave).like(
     writable(
