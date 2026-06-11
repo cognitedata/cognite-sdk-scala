@@ -25,7 +25,7 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
   // Unpartitioned read is too slow.
   // it should behave like readable(client.events)
 
-  it should behave like partitionedReadable(client.events)
+  it should behave like partitionedReadable(client.events, sleep = sleepUnlessPlayback)
 
   it should behave like readableWithRetrieve(client.events, idsThatDoNotExist, supportsMissingAndThrown = true)
 
@@ -75,7 +75,8 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
 
     retryWithExpectedResult[Seq[Event]](
       client.events.filter(EventsFilter(externalIdPrefix = Some(externalIdsPrefix))).compile.toList.unsafeRunSync(),
-      r => r should have size 4
+      r => r should have size 4,
+      sleep = sleepUnlessPlayback
     )
     createdItems
   }
@@ -94,7 +95,8 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
 
       retryWithExpectedResult[Seq[Event]](
         client.events.filter(EventsFilter(externalIdPrefix = Some(prefix))).compile.toList.unsafeRunSync(),
-        r => r should have size 0
+        r => r should have size 0,
+        sleep = sleepUnlessPlayback
       )
     } finally {
       try {
@@ -128,7 +130,8 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
       //make sure that events are deleted
       retryWithExpectedResult[Seq[Event]](
         client.events.filter(EventsFilter(externalIdPrefix = Some(prefix))).compile.toList.unsafeRunSync(),
-        r => r should have size 0
+        r => r should have size 0,
+        sleep = sleepUnlessPlayback
       )
     } finally {
       try {
@@ -408,7 +411,8 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
             max = Some(createdTimes.max)
           ))
         )))).unsafeRunSync(),
-        a => a should not be empty
+        a => a should not be empty,
+        sleep = sleepUnlessPlayback
       )
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
       created.filter(_.dataSetId.isDefined).map(_.id) should contain theSameElementsAs foundItems.map(_.id)

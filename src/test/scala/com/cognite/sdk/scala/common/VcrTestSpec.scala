@@ -196,6 +196,13 @@ abstract class VcrTestSpec
       case _ => IO.sleep(duration)
     }
 
+  @SuppressWarnings(Array("org.wartremover.warts.ThreadSleep"))
+  def sleepUnlessPlayback(delayMillis: Long): Unit =
+    vcrMode match {
+      case VcrMode.Playback =>
+      case _ => Thread.sleep(delayMillis)
+    }
+
   override def tags: Map[String, Set[String]] =
     testNames.foldLeft(super.tags) { (acc, name) =>
       acc.updated(name, acc.getOrElse(name, Set.empty) + VcrTestSpec.VcrTag.name)

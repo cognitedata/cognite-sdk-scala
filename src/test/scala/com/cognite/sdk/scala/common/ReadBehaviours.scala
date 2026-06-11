@@ -15,7 +15,7 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.util.Random
 
-@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.ThreadSleep"))
 trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: AnyFlatSpec =>
   def readable[R, InternalId, PrimitiveId](
       readable: => Readable[R, IO],
@@ -47,7 +47,8 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   }
 
   def partitionedReadable[R, InternalId, PrimitiveId](
-      readable: => PartitionedReadable[R, IO]
+      readable: => PartitionedReadable[R, IO],
+      sleep: Long => Unit = delay => Thread.sleep(delay)
   )(implicit ioRuntime: IORuntime): Unit = {
     it should "read items with partitions" in {
       val partitionStreams = readable.listPartitions(2)
@@ -92,7 +93,8 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
           .unsafeRunSync()
           .length
         (unlimitedLength, partitionsLength)
-      }, { case (unlimitedLength, partitionsLength) => assert(unlimitedLength === partitionsLength) })
+      }, { case (unlimitedLength, partitionsLength) => assert(unlimitedLength === partitionsLength) },
+        sleep = sleep)
     }
   }
 
