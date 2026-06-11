@@ -25,7 +25,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 399,
+          "contentLength" : 389,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -41,7 +41,7 @@
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "sdk-events-r1",
+                  "externalId" : "bbf8b675",
                   "dataSetId" : null
                 },
                 {
@@ -53,7 +53,7 @@
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "sdk-events-r2",
+                  "externalId" : "3bd04fe8",
                   "dataSetId" : null
                 }
               ]
@@ -73,10 +73,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "b922c2dd-026b-92e2-84b4-ca4eb8d8b4eb"
+            "28ed46cf-3be8-9269-9e12-1851e7353e8b"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:21 GMT"
+            "Thu, 11 Jun 2026 10:37:25 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -98,7 +98,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 427,
+          "contentLength" : 417,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -106,18 +106,18 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "sdk-events-r1",
+                  "externalId" : "bbf8b675",
                   "description" : "scala-sdk-read-example-1",
-                  "id" : 5643238211572303,
-                  "lastUpdatedTime" : 1780958421775,
-                  "createdTime" : 1780958421775
+                  "id" : 2294616003380472,
+                  "lastUpdatedTime" : 1781174245585,
+                  "createdTime" : 1781174245585
                 },
                 {
-                  "externalId" : "sdk-events-r2",
+                  "externalId" : "3bd04fe8",
                   "description" : "scala-sdk-read-example-2",
-                  "id" : 4551894077596856,
-                  "lastUpdatedTime" : 1780958421775,
-                  "createdTime" : 1780958421775
+                  "id" : 6223745248358607,
+                  "lastUpdatedTime" : 1781174245585,
+                  "createdTime" : 1781174245585
                 }
               ]
             }
@@ -126,7 +126,5 @@
       }
     }
   ],
-  "recordedEnv" : {
-    
-  }
+  "seed" : 8316526000086980001
 }

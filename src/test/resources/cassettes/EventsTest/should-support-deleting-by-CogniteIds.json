@@ -25,7 +25,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 839,
+          "contentLength" : 855,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -35,49 +35,49 @@
                 {
                   "startTime" : null,
                   "endTime" : null,
-                  "description" : "delete-cogniteId-fixed1-1",
+                  "description" : "delete-cogniteId-8d6cd4d1-1",
                   "type" : null,
                   "subtype" : null,
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "delete-cogniteId-fixed1-1",
+                  "externalId" : "delete-cogniteId-8d6cd4d1-1",
                   "dataSetId" : null
                 },
                 {
                   "startTime" : null,
                   "endTime" : null,
-                  "description" : "delete-cogniteId-fixed1-2",
+                  "description" : "delete-cogniteId-8d6cd4d1-2",
                   "type" : null,
                   "subtype" : null,
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "delete-cogniteId-fixed1-2",
+                  "externalId" : "delete-cogniteId-8d6cd4d1-2",
                   "dataSetId" : null
                 },
                 {
                   "startTime" : null,
                   "endTime" : null,
-                  "description" : "delete-cogniteId-fixed1-3",
+                  "description" : "delete-cogniteId-8d6cd4d1-3",
                   "type" : null,
                   "subtype" : null,
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "delete-cogniteId-fixed1-3",
+                  "externalId" : "delete-cogniteId-8d6cd4d1-3",
                   "dataSetId" : null
                 },
                 {
                   "startTime" : null,
                   "endTime" : null,
-                  "description" : "delete-cogniteId-fixed1-4",
+                  "description" : "delete-cogniteId-8d6cd4d1-4",
                   "type" : null,
                   "subtype" : null,
                   "metadata" : null,
                   "assetIds" : null,
                   "source" : null,
-                  "externalId" : "delete-cogniteId-fixed1-4",
+                  "externalId" : "delete-cogniteId-8d6cd4d1-4",
                   "dataSetId" : null
                 }
               ]
@@ -97,10 +97,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "21633057-3e3c-90ef-9149-7994993c2a4b"
+            "2dc9df4d-d1fd-9d5b-a865-b436c2996e98"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:24 GMT"
+            "Thu, 11 Jun 2026 10:37:29 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -122,7 +122,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 887,
+          "contentLength" : 903,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -130,32 +130,32 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-cogniteId-fixed1-1",
-                  "description" : "delete-cogniteId-fixed1-1",
-                  "id" : 4351459063015414,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-1",
+                  "description" : "delete-cogniteId-8d6cd4d1-1",
+                  "id" : 3205757044535039,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-2",
-                  "description" : "delete-cogniteId-fixed1-2",
-                  "id" : 4089012437967706,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-2",
+                  "description" : "delete-cogniteId-8d6cd4d1-2",
+                  "id" : 1865121984347500,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-3",
-                  "description" : "delete-cogniteId-fixed1-3",
-                  "id" : 1877974977518634,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-3",
+                  "description" : "delete-cogniteId-8d6cd4d1-3",
+                  "id" : 4876202188559132,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-4",
-                  "description" : "delete-cogniteId-fixed1-4",
-                  "id" : 7245523750977626,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-4",
+                  "description" : "delete-cogniteId-8d6cd4d1-4",
+                  "id" : 6670500132997298,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 }
               ]
             }
@@ -188,14 +188,14 @@
           ]
         },
         "entity" : {
-          "contentLength" : 70,
+          "contentLength" : 72,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-fixed1"
+                "externalIdPrefix" : "delete-cogniteId-8d6cd4d1"
               },
               "limit" : 1000
             }
@@ -214,10 +214,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "ff9b7dae-ffd4-94ff-99a4-780212f8f052"
+            "5639732c-6c34-9e60-9bf0-8e6bba827890"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:25 GMT"
+            "Thu, 11 Jun 2026 10:37:29 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -277,14 +277,14 @@
           ]
         },
         "entity" : {
-          "contentLength" : 70,
+          "contentLength" : 72,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-fixed1"
+                "externalIdPrefix" : "delete-cogniteId-8d6cd4d1"
               },
               "limit" : 1000
             }
@@ -303,10 +303,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "2c397c5c-acbf-9d29-8716-fbb2ead9c210"
+            "8a18086a-34e7-9e1d-b42e-a6077cf0f5c0"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:25 GMT"
+            "Thu, 11 Jun 2026 10:37:29 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -328,185 +328,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 17,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "items" : [
-              ]
-            }
-          }
-        }
-      }
-    },
-    {
-      "request" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
-        "headers" : {
-          "authorization" : [
-            "<redacted>"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "accept" : [
-            "application/json"
-          ],
-          "x-cdp-sdk" : [
-            "<redacted>"
-          ],
-          "accept-encoding" : [
-            "gzip, deflate"
-          ],
-          "x-cdp-app" : [
-            "scala-sdk-vcr-test"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 70,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-fixed1"
-              },
-              "limit" : 1000
-            }
-          }
-        }
-      },
-      "response" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
-        "status" : {
-          "code" : 200,
-          "reason" : "OK"
-        },
-        "headers" : {
-          "server" : [
-            "envoy"
-          ],
-          "x-request-id" : [
-            "08234c91-e1a0-9b35-9b33-274fc07af765"
-          ],
-          "date" : [
-            "Mon, 08 Jun 2026 22:40:25 GMT"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "transfer-encoding" : [
-            "chunked"
-          ],
-          "x-frame-options" : [
-            "DENY"
-          ],
-          "x-content-type-options" : [
-            "nosniff"
-          ],
-          "vary" : [
-            "Accept-Encoding"
-          ],
-          "strict-transport-security" : [
-            "max-age=31536000; includeSubDomains"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 17,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "items" : [
-              ]
-            }
-          }
-        }
-      }
-    },
-    {
-      "request" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
-        "headers" : {
-          "authorization" : [
-            "<redacted>"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "accept" : [
-            "application/json"
-          ],
-          "x-cdp-sdk" : [
-            "<redacted>"
-          ],
-          "accept-encoding" : [
-            "gzip, deflate"
-          ],
-          "x-cdp-app" : [
-            "scala-sdk-vcr-test"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 70,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-fixed1"
-              },
-              "limit" : 1000
-            }
-          }
-        }
-      },
-      "response" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
-        "status" : {
-          "code" : 200,
-          "reason" : "OK"
-        },
-        "headers" : {
-          "server" : [
-            "envoy"
-          ],
-          "x-request-id" : [
-            "928f99c4-849b-9fe7-b2f9-7742fda0cf33"
-          ],
-          "date" : [
-            "Mon, 08 Jun 2026 22:40:25 GMT"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "transfer-encoding" : [
-            "chunked"
-          ],
-          "x-frame-options" : [
-            "DENY"
-          ],
-          "x-content-type-options" : [
-            "nosniff"
-          ],
-          "vary" : [
-            "Accept-Encoding"
-          ],
-          "strict-transport-security" : [
-            "max-age=31536000; includeSubDomains"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 453,
+          "contentLength" : 461,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -514,18 +336,18 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-cogniteId-fixed1-1",
-                  "description" : "delete-cogniteId-fixed1-1",
-                  "id" : 4351459063015414,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-3",
+                  "description" : "delete-cogniteId-8d6cd4d1-3",
+                  "id" : 4876202188559132,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-4",
-                  "description" : "delete-cogniteId-fixed1-4",
-                  "id" : 7245523750977626,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-4",
+                  "description" : "delete-cogniteId-8d6cd4d1-4",
+                  "id" : 6670500132997298,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 }
               ]
             }
@@ -558,14 +380,14 @@
           ]
         },
         "entity" : {
-          "contentLength" : 70,
+          "contentLength" : 72,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-fixed1"
+                "externalIdPrefix" : "delete-cogniteId-8d6cd4d1"
               },
               "limit" : 1000
             }
@@ -584,10 +406,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "70d70aa1-ebb7-9a0a-950b-2a87ddb07e59"
+            "54332663-5e8b-97e2-9355-67662b357189"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:26 GMT"
+            "Thu, 11 Jun 2026 10:37:29 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -609,7 +431,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 887,
+          "contentLength" : 461,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -617,32 +439,135 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-cogniteId-fixed1-3",
-                  "description" : "delete-cogniteId-fixed1-3",
-                  "id" : 1877974977518634,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-2",
+                  "description" : "delete-cogniteId-8d6cd4d1-2",
+                  "id" : 1865121984347500,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-2",
-                  "description" : "delete-cogniteId-fixed1-2",
-                  "id" : 4089012437967706,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-1",
+                  "description" : "delete-cogniteId-8d6cd4d1-1",
+                  "id" : 3205757044535039,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 72,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "externalIdPrefix" : "delete-cogniteId-8d6cd4d1"
+              },
+              "limit" : 1000
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "d38583ff-5289-9163-a8bf-50616eba33e0"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 10:37:30 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 903,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "delete-cogniteId-8d6cd4d1-2",
+                  "description" : "delete-cogniteId-8d6cd4d1-2",
+                  "id" : 1865121984347500,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-1",
-                  "description" : "delete-cogniteId-fixed1-1",
-                  "id" : 4351459063015414,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-1",
+                  "description" : "delete-cogniteId-8d6cd4d1-1",
+                  "id" : 3205757044535039,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-4",
-                  "description" : "delete-cogniteId-fixed1-4",
-                  "id" : 7245523750977626,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-3",
+                  "description" : "delete-cogniteId-8d6cd4d1-3",
+                  "id" : 4876202188559132,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
+                },
+                {
+                  "externalId" : "delete-cogniteId-8d6cd4d1-4",
+                  "description" : "delete-cogniteId-8d6cd4d1-4",
+                  "id" : 6670500132997298,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 }
               ]
             }
@@ -675,7 +600,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 169,
+          "contentLength" : 173,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -683,16 +608,16 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 4351459063015414
+                  "id" : 3205757044535039
                 },
                 {
-                  "id" : 4089012437967706
+                  "id" : 1865121984347500
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-3"
+                  "externalId" : "delete-cogniteId-8d6cd4d1-3"
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-4"
+                  "externalId" : "delete-cogniteId-8d6cd4d1-4"
                 }
               ],
               "ignoreUnknownIds" : true
@@ -712,10 +637,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "9d6af4e9-ab86-944e-ba9b-0dbac1c3dd93"
+            "4a833870-1e3f-9272-9a62-50701c49f83d"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:26 GMT"
+            "Thu, 11 Jun 2026 10:37:30 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -774,14 +699,14 @@
           ]
         },
         "entity" : {
-          "contentLength" : 70,
+          "contentLength" : 72,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-fixed1"
+                "externalIdPrefix" : "delete-cogniteId-8d6cd4d1"
               },
               "limit" : 1000
             }
@@ -800,10 +725,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "98e52997-09ca-90cc-8a30-4462eb8a55c5"
+            "f740f816-fbb3-99ec-bb69-17b38f0b00a3"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:26 GMT"
+            "Thu, 11 Jun 2026 10:37:30 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -825,7 +750,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 887,
+          "contentLength" : 903,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -833,32 +758,32 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-cogniteId-fixed1-3",
-                  "description" : "delete-cogniteId-fixed1-3",
-                  "id" : 1877974977518634,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-2",
+                  "description" : "delete-cogniteId-8d6cd4d1-2",
+                  "id" : 1865121984347500,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-2",
-                  "description" : "delete-cogniteId-fixed1-2",
-                  "id" : 4089012437967706,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-1",
+                  "description" : "delete-cogniteId-8d6cd4d1-1",
+                  "id" : 3205757044535039,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-1",
-                  "description" : "delete-cogniteId-fixed1-1",
-                  "id" : 4351459063015414,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-3",
+                  "description" : "delete-cogniteId-8d6cd4d1-3",
+                  "id" : 4876202188559132,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-4",
-                  "description" : "delete-cogniteId-fixed1-4",
-                  "id" : 7245523750977626,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-4",
+                  "description" : "delete-cogniteId-8d6cd4d1-4",
+                  "id" : 6670500132997298,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 }
               ]
             }
@@ -891,14 +816,14 @@
           ]
         },
         "entity" : {
-          "contentLength" : 70,
+          "contentLength" : 72,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-fixed1"
+                "externalIdPrefix" : "delete-cogniteId-8d6cd4d1"
               },
               "limit" : 1000
             }
@@ -917,10 +842,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "0435e4e1-4525-96d1-a7ac-54065dd15593"
+            "9532b891-c271-9e25-a3a2-38edb5369abe"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:27 GMT"
+            "Thu, 11 Jun 2026 10:37:30 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -942,7 +867,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 887,
+          "contentLength" : 903,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -950,32 +875,32 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-cogniteId-fixed1-3",
-                  "description" : "delete-cogniteId-fixed1-3",
-                  "id" : 1877974977518634,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-2",
+                  "description" : "delete-cogniteId-8d6cd4d1-2",
+                  "id" : 1865121984347500,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-2",
-                  "description" : "delete-cogniteId-fixed1-2",
-                  "id" : 4089012437967706,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-1",
+                  "description" : "delete-cogniteId-8d6cd4d1-1",
+                  "id" : 3205757044535039,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-1",
-                  "description" : "delete-cogniteId-fixed1-1",
-                  "id" : 4351459063015414,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-3",
+                  "description" : "delete-cogniteId-8d6cd4d1-3",
+                  "id" : 4876202188559132,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-4",
-                  "description" : "delete-cogniteId-fixed1-4",
-                  "id" : 7245523750977626,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-4",
+                  "description" : "delete-cogniteId-8d6cd4d1-4",
+                  "id" : 6670500132997298,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 }
               ]
             }
@@ -1008,14 +933,14 @@
           ]
         },
         "entity" : {
-          "contentLength" : 70,
+          "contentLength" : 72,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-fixed1"
+                "externalIdPrefix" : "delete-cogniteId-8d6cd4d1"
               },
               "limit" : 1000
             }
@@ -1034,10 +959,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "71556925-90ec-9bdc-832f-628462a9972d"
+            "204c45e0-807b-910d-a1ae-b0f945a03ec3"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:27 GMT"
+            "Thu, 11 Jun 2026 10:37:31 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -1059,7 +984,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 887,
+          "contentLength" : 461,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -1067,32 +992,18 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-cogniteId-fixed1-3",
-                  "description" : "delete-cogniteId-fixed1-3",
-                  "id" : 1877974977518634,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-3",
+                  "description" : "delete-cogniteId-8d6cd4d1-3",
+                  "id" : 4876202188559132,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 },
                 {
-                  "externalId" : "delete-cogniteId-fixed1-2",
-                  "description" : "delete-cogniteId-fixed1-2",
-                  "id" : 4089012437967706,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
-                },
-                {
-                  "externalId" : "delete-cogniteId-fixed1-1",
-                  "description" : "delete-cogniteId-fixed1-1",
-                  "id" : 4351459063015414,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
-                },
-                {
-                  "externalId" : "delete-cogniteId-fixed1-4",
-                  "description" : "delete-cogniteId-fixed1-4",
-                  "id" : 7245523750977626,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
+                  "externalId" : "delete-cogniteId-8d6cd4d1-4",
+                  "description" : "delete-cogniteId-8d6cd4d1-4",
+                  "id" : 6670500132997298,
+                  "lastUpdatedTime" : 1781174248998,
+                  "createdTime" : 1781174248998
                 }
               ]
             }
@@ -1125,14 +1036,14 @@
           ]
         },
         "entity" : {
-          "contentLength" : 70,
+          "contentLength" : 72,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-fixed1"
+                "externalIdPrefix" : "delete-cogniteId-8d6cd4d1"
               },
               "limit" : 1000
             }
@@ -1151,127 +1062,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "fde6d4b2-eb24-9a93-b296-e0c16d658f52"
+            "8c8ddadc-238f-9968-aed6-50745ef30ce8"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:27 GMT"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "transfer-encoding" : [
-            "chunked"
-          ],
-          "x-frame-options" : [
-            "DENY"
-          ],
-          "x-content-type-options" : [
-            "nosniff"
-          ],
-          "vary" : [
-            "Accept-Encoding"
-          ],
-          "strict-transport-security" : [
-            "max-age=31536000; includeSubDomains"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 887,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "items" : [
-                {
-                  "externalId" : "delete-cogniteId-fixed1-3",
-                  "description" : "delete-cogniteId-fixed1-3",
-                  "id" : 1877974977518634,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
-                },
-                {
-                  "externalId" : "delete-cogniteId-fixed1-2",
-                  "description" : "delete-cogniteId-fixed1-2",
-                  "id" : 4089012437967706,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
-                },
-                {
-                  "externalId" : "delete-cogniteId-fixed1-1",
-                  "description" : "delete-cogniteId-fixed1-1",
-                  "id" : 4351459063015414,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
-                },
-                {
-                  "externalId" : "delete-cogniteId-fixed1-4",
-                  "description" : "delete-cogniteId-fixed1-4",
-                  "id" : 7245523750977626,
-                  "lastUpdatedTime" : 1780958424894,
-                  "createdTime" : 1780958424894
-                }
-              ]
-            }
-          }
-        }
-      }
-    },
-    {
-      "request" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
-        "headers" : {
-          "authorization" : [
-            "<redacted>"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "accept" : [
-            "application/json"
-          ],
-          "x-cdp-sdk" : [
-            "<redacted>"
-          ],
-          "accept-encoding" : [
-            "gzip, deflate"
-          ],
-          "x-cdp-app" : [
-            "scala-sdk-vcr-test"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 70,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-fixed1"
-              },
-              "limit" : 1000
-            }
-          }
-        }
-      },
-      "response" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/list",
-        "status" : {
-          "code" : 200,
-          "reason" : "OK"
-        },
-        "headers" : {
-          "server" : [
-            "envoy"
-          ],
-          "x-request-id" : [
-            "5154d9f3-9cec-997f-a1ba-4beaffbab9db"
-          ],
-          "date" : [
-            "Mon, 08 Jun 2026 22:40:28 GMT"
+            "Thu, 11 Jun 2026 10:37:31 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -1339,16 +1133,16 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 4351459063015414
+                  "id" : 3205757044535039
                 },
                 {
-                  "id" : 4089012437967706
+                  "id" : 1865121984347500
                 },
                 {
-                  "id" : 1877974977518634
+                  "id" : 4876202188559132
                 },
                 {
-                  "id" : 7245523750977626
+                  "id" : 6670500132997298
                 }
               ],
               "ignoreUnknownIds" : true
@@ -1368,10 +1162,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "7f8a1dd0-75f8-98eb-97c2-dac16df64f30"
+            "b58204ed-658c-975b-910f-d59e76aeb577"
           ],
           "date" : [
-            "Mon, 08 Jun 2026 22:40:29 GMT"
+            "Thu, 11 Jun 2026 10:37:31 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -1406,7 +1200,5 @@
       }
     }
   ],
-  "recordedEnv" : {
-    
-  }
+  "seed" : 2186419885836596827
 }
