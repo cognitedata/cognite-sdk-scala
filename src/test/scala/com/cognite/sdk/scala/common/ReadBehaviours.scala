@@ -265,7 +265,8 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
       readable: => Readable[R, IO]
         with RetrieveByExternalIdsWithIgnoreUnknownIds[R, IO]
         with RetrieveByIdsWithIgnoreUnknownIds[R, IO],
-      random: => Random = ThreadLocalRandom.current()
+      random: => Random = ThreadLocalRandom.current(),
+      idsNotFoundMessage: String = "ids not found",
   )(implicit ioRuntime: IORuntime): Unit = {
     def fetchFirstTwoItems = fetchTestItems(readable)
     def nonExistentExternalId = s"does-not-exist/${Seq.fill(16)(random.nextInt(16)).map(_.toHexString).mkString}"
@@ -299,7 +300,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
           ignoreUnknownIds = false
         ).unsafeRunSync()
       }
-      exception.message should (include("ids not found") or include("id not found"))
+      exception.message should include(idsNotFoundMessage)
     }
 
     it should "support retrieving items by id with ignoreUnknownIds=true" in {
@@ -319,7 +320,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
       val exception = intercept[CdpApiException] {
         readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = false).unsafeRunSync()
       }
-      exception.message should (include("ids not found") or include("id not found"))
+      exception.message should include(idsNotFoundMessage)
     }
   }
 }
