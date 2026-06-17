@@ -122,7 +122,11 @@ jobs:
       # run: sbt test
       run: |
         cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalafmtCheck scalafmtSbtCheck coverage test coverageReport
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalafmtCheck
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalafmtSbtCheck
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 coverage
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 test
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 coverageReport
 
     - name: Run tests for Scala 3
       env:
