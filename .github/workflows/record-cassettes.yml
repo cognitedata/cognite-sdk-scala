@@ -65,7 +65,7 @@ jobs:
           VCR_MODE: RECORD
         run: |
           cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC \
-            "++2.13 testOnly * -- -n com.cognite.sdk.scala.VcrTest"
+            "++2.13 testQuick * -- -n com.cognite.sdk.scala.VcrTest"
 
       - uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10
         with:
