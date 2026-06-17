@@ -97,16 +97,6 @@ jobs:
         jvm: temurin:17
         apps: sbt
 
-    # Caching dependencies in Pull Requests based on branch name and build.sbt.
-    # Can we do something better here?
-    - name: Cache Coursier dependencies
-      uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5
-      env:
-        cache-name: coursier-cache
-      with:
-        path: ~/.cache/coursier/v1
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.head_ref }}-${{ hashFiles('**/build.sbt') }}
-
     - name: Run tests for Scala 2.13
       env:
         COGNITE_BASE_URL: "https://bluefield.cognitedata.com"
