@@ -13,6 +13,22 @@
   "dependencies" : [
     {
       "org" : "co.fs2",
+      "name" : "fs2-core_3",
+      "version" : "3.13.0",
+      "artifacts" : [
+        {
+          "name" : "fs2-core_3.jar",
+          "hash" : "sha1:6f1cea6ada1ad0a152a8a1b354c9d13b684a543c"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "co.fs2",
       "name" : "fs2-io_3",
       "version" : "3.13.0",
       "artifacts" : [
@@ -1063,44 +1079,12 @@
     },
     {
       "org" : "org.typelevel",
-      "name" : "algebra_3",
-      "version" : "2.13.0",
-      "artifacts" : [
-        {
-          "name" : "algebra_3.jar",
-          "hash" : "sha1:305e7d234d4755134a05a9ea9ae5f79ebe700682"
-        }
-      ],
-      "configurations" : [
-        "compile",
-        "runtime",
-        "test"
-      ]
-    },
-    {
-      "org" : "org.typelevel",
       "name" : "case-insensitive_3",
       "version" : "1.5.0",
       "artifacts" : [
         {
           "name" : "case-insensitive_3.jar",
           "hash" : "sha1:c5d576756b6444f63da5cbf1e10710d0d99911e2"
-        }
-      ],
-      "configurations" : [
-        "compile",
-        "runtime",
-        "test"
-      ]
-    },
-    {
-      "org" : "org.typelevel",
-      "name" : "cats-collections-core_3",
-      "version" : "0.9.10",
-      "artifacts" : [
-        {
-          "name" : "cats-collections-core_3.jar",
-          "hash" : "sha1:bf34def762c7afe9abdcbefa8ca40d74dfd225ab"
         }
       ],
       "configurations" : [
