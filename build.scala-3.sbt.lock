@@ -216,25 +216,11 @@
     {
       "org" : "com.sun.activation",
       "name" : "jakarta.activation",
-      "version" : "1.2.2",
+      "version" : "2.0.1",
       "artifacts" : [
         {
           "name" : "jakarta.activation.jar",
-          "hash" : "sha1:74548703f9851017ce2f556066659438019e7eb5"
-        }
-      ],
-      "configurations" : [
-        "test"
-      ]
-    },
-    {
-      "org" : "com.typesafe.netty",
-      "name" : "netty-reactive-streams",
-      "version" : "2.0.17",
-      "artifacts" : [
-        {
-          "name" : "netty-reactive-streams.jar",
-          "hash" : "sha1:76a9ec6b868ee09f06d5caf36a1246c1ee5415ab"
+          "hash" : "sha1:828b80e886a52bb09fe41ff410b10b342f533ce1"
         }
       ],
       "configurations" : [
@@ -367,6 +353,20 @@
     },
     {
       "org" : "io.netty",
+      "name" : "netty-codec",
+      "version" : "4.2.15.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-codec.jar",
+          "hash" : "sha1:bfb2ba7974e83ba3a412fef8818667494a2efe19"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
       "name" : "netty-codec-base",
       "version" : "4.2.15.Final",
       "artifacts" : [
@@ -395,12 +395,68 @@
     },
     {
       "org" : "io.netty",
+      "name" : "netty-codec-dns",
+      "version" : "4.2.13.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-codec-dns.jar",
+          "hash" : "sha1:56b382fec4774601c57e579bc1db9ba83e72669e"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
       "name" : "netty-codec-http",
       "version" : "4.2.15.Final",
       "artifacts" : [
         {
           "name" : "netty-codec-http.jar",
           "hash" : "sha1:e611826aa054371bb9a17f27bdb05755a4cac5f0"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-codec-http2",
+      "version" : "4.2.13.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-codec-http2.jar",
+          "hash" : "sha1:5c8512afb15a0d26a3f1b7b43117aa5d26fac662"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-codec-marshalling",
+      "version" : "4.2.15.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-codec-marshalling.jar",
+          "hash" : "sha1:45e92017ba43525cc52610ea04d4fc73b31f6972"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-codec-protobuf",
+      "version" : "4.2.15.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-codec-protobuf.jar",
+          "hash" : "sha1:106fa7bb7b7cb288965a576bfcb96463241f33e2"
         }
       ],
       "configurations" : [
@@ -479,6 +535,20 @@
     },
     {
       "org" : "io.netty",
+      "name" : "netty-resolver-dns",
+      "version" : "4.2.13.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-resolver-dns.jar",
+          "hash" : "sha1:de63340cfecd51c43569e750e24eb2c6d1f97fa7"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
       "name" : "netty-transport",
       "version" : "4.2.15.Final",
       "artifacts" : [
@@ -522,25 +592,11 @@
     {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client",
-      "version" : "2.15.0",
+      "version" : "3.0.10",
       "artifacts" : [
         {
           "name" : "async-http-client.jar",
-          "hash" : "sha1:c66b7c129d9b1ef6882cea37130b33fe277ec47b"
-        }
-      ],
-      "configurations" : [
-        "test"
-      ]
-    },
-    {
-      "org" : "org.asynchttpclient",
-      "name" : "async-http-client-netty-utils",
-      "version" : "2.15.0",
-      "artifacts" : [
-        {
-          "name" : "async-http-client-netty-utils.jar",
-          "hash" : "sha1:321226ee0cab422df6bc1748640b903dd45016e2"
+          "hash" : "sha1:753caf342185c6ae3e954b9559b1f10120d89c36"
         }
       ],
       "configurations" : [
@@ -688,13 +744,13 @@
       ]
     },
     {
-      "org" : "org.reactivestreams",
-      "name" : "reactive-streams",
-      "version" : "1.0.4",
+      "org" : "org.jetbrains",
+      "name" : "annotations",
+      "version" : "26.1.0",
       "artifacts" : [
         {
-          "name" : "reactive-streams.jar",
-          "hash" : "sha1:3864a1320d97d7b045f729a326e1e077661f31b7"
+          "name" : "annotations.jar",
+          "hash" : "sha1:c1e9226d7ca6661020c58c94397da0cc3673d5e4"
         }
       ],
       "configurations" : [
