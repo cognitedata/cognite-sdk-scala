@@ -14,9 +14,10 @@ val jettyTestVersion = "12.1.10"
 val sttpVersion = "3.11.0"
 val circeVersion = "0.14.15"
 val catsEffectVersion = "3.7.0"
-val fs2Version = "3.12.2"
+val fs2Version = "3.13.0"
 val natchezVersion = "0.3.10"
 val nettyVersion = "4.2.15.Final"
+val asyncHttpClientVersion = "2.15.0"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -66,6 +67,8 @@ lazy val commonSettings = Seq(
     "io.netty" % "netty-handler-proxy" % nettyVersion,
     "io.netty" % "netty-resolver" % nettyVersion,
     "io.netty" % "netty-transport" % nettyVersion,
+    "org.asynchttpclient" % "async-http-client" % asyncHttpClientVersion,
+    "org.asynchttpclient" % "async-http-client-netty-utils" % asyncHttpClientVersion,
   ),
   crossScalaVersions := supportedScalaVersions,
   semanticdbEnabled := true,
