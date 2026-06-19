@@ -168,7 +168,7 @@ jobs:
       - name: Build JAR file
         run: |
           cat /dev/null | sbt -Dsbt.log.noformat=true +dependencyLockCheck
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}" "set compile/skip := true" +package
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}; set compile/skip := true; +package"
 
       - name: Install GPG & Sonatype credentials for SBT
         env:
@@ -216,7 +216,7 @@ jobs:
       - name: Build JAR file
         run: |
           cat /dev/null | sbt -Dsbt.log.noformat=true +dependencyLockCheck
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}" "set compile/skip := true" +package
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}; set compile/skip := true; +package"
 
       - name: Install GPG & Sonatype credentials for SBT
         env:
@@ -240,4 +240,4 @@ jobs:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_CENTRAL_PORTAL_USER }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_PASSWORD }}
         run: |
-          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned sonaRelease
+          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "+publishSigned; sonaRelease"
