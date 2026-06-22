@@ -17,7 +17,7 @@ val catsEffectVersion = "3.7.0"
 val fs2Version = "3.13.0"
 val natchezVersion = "0.3.10"
 val nettyVersion = "4.2.15.Final"
-val asyncHttpClientVersion = "2.15.0"
+val asyncHttpClientVersion = "2.16.0"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
