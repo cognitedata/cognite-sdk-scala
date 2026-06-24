@@ -78,11 +78,11 @@
     {
       "org" : "com.google.protobuf",
       "name" : "protobuf-java",
-      "version" : "4.35.0",
+      "version" : "4.35.1",
       "artifacts" : [
         {
           "name" : "protobuf-java.jar",
-          "hash" : "sha1:6d5d7c2261b26586e772f7fd2d27716272ef7bdd"
+          "hash" : "sha1:b933d3f9fc35b0356f28980c2ffc5892d297eebf"
         }
       ],
       "configurations" : [
@@ -246,11 +246,11 @@
     {
       "org" : "com.typesafe.netty",
       "name" : "netty-reactive-streams",
-      "version" : "2.0.4",
+      "version" : "2.0.17",
       "artifacts" : [
         {
           "name" : "netty-reactive-streams.jar",
-          "hash" : "sha1:0f77c8eaa7d5e2f2160b6d21ba385cf726f164b2"
+          "hash" : "sha1:76a9ec6b868ee09f06d5caf36a1246c1ee5415ab"
         }
       ],
       "configurations" : [
@@ -538,11 +538,11 @@
     {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client",
-      "version" : "2.12.4",
+      "version" : "2.16.0",
       "artifacts" : [
         {
           "name" : "async-http-client.jar",
-          "hash" : "sha1:c7ac461afff5c792af9557b11b334e139fc4f426"
+          "hash" : "sha1:af91fcb4e5b03c9cbe115adf3133d8e3716901a6"
         }
       ],
       "configurations" : [
@@ -552,11 +552,11 @@
     {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client-netty-utils",
-      "version" : "2.12.4",
+      "version" : "2.16.0",
       "artifacts" : [
         {
           "name" : "async-http-client-netty-utils.jar",
-          "hash" : "sha1:dd226dcacb3b14ca1a8ce73c5c5c9ec6e2444dd2"
+          "hash" : "sha1:b967a10eb112ff4c16b35061de17c81864fb9f10"
         }
       ],
       "configurations" : [
@@ -706,11 +706,11 @@
     {
       "org" : "org.reactivestreams",
       "name" : "reactive-streams",
-      "version" : "1.0.3",
+      "version" : "1.0.4",
       "artifacts" : [
         {
           "name" : "reactive-streams.jar",
-          "hash" : "sha1:d9fb7a7926ffa635b3dcaa5049fb2bfa25b3e7d0"
+          "hash" : "sha1:3864a1320d97d7b045f729a326e1e077661f31b7"
         }
       ],
       "configurations" : [
