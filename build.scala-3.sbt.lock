@@ -214,34 +214,6 @@
       ]
     },
     {
-      "org" : "com.sun.activation",
-      "name" : "jakarta.activation",
-      "version" : "1.2.2",
-      "artifacts" : [
-        {
-          "name" : "jakarta.activation.jar",
-          "hash" : "sha1:74548703f9851017ce2f556066659438019e7eb5"
-        }
-      ],
-      "configurations" : [
-        "test"
-      ]
-    },
-    {
-      "org" : "com.typesafe.netty",
-      "name" : "netty-reactive-streams",
-      "version" : "2.0.17",
-      "artifacts" : [
-        {
-          "name" : "netty-reactive-streams.jar",
-          "hash" : "sha1:76a9ec6b868ee09f06d5caf36a1246c1ee5415ab"
-        }
-      ],
-      "configurations" : [
-        "test"
-      ]
-    },
-    {
       "org" : "commons-io",
       "name" : "commons-io",
       "version" : "2.22.0",
@@ -395,12 +367,40 @@
     },
     {
       "org" : "io.netty",
+      "name" : "netty-codec-dns",
+      "version" : "4.2.15.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-codec-dns.jar",
+          "hash" : "sha1:3da23523d91eaf8af81d2b9080a61d9b1af0762c"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
       "name" : "netty-codec-http",
       "version" : "4.2.15.Final",
       "artifacts" : [
         {
           "name" : "netty-codec-http.jar",
           "hash" : "sha1:e611826aa054371bb9a17f27bdb05755a4cac5f0"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
+      "name" : "netty-codec-http2",
+      "version" : "4.2.15.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-codec-http2.jar",
+          "hash" : "sha1:c70540243427c8c952473f55813c6d459817de42"
         }
       ],
       "configurations" : [
@@ -479,6 +479,20 @@
     },
     {
       "org" : "io.netty",
+      "name" : "netty-resolver-dns",
+      "version" : "4.2.15.Final",
+      "artifacts" : [
+        {
+          "name" : "netty-resolver-dns.jar",
+          "hash" : "sha1:1b3eaebe62b905c780e181b5f3fd18c013ca73a4"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "io.netty",
       "name" : "netty-transport",
       "version" : "4.2.15.Final",
       "artifacts" : [
@@ -522,25 +536,11 @@
     {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client",
-      "version" : "2.15.0",
+      "version" : "3.0.11",
       "artifacts" : [
         {
           "name" : "async-http-client.jar",
-          "hash" : "sha1:c66b7c129d9b1ef6882cea37130b33fe277ec47b"
-        }
-      ],
-      "configurations" : [
-        "test"
-      ]
-    },
-    {
-      "org" : "org.asynchttpclient",
-      "name" : "async-http-client-netty-utils",
-      "version" : "2.15.0",
-      "artifacts" : [
-        {
-          "name" : "async-http-client-netty-utils.jar",
-          "hash" : "sha1:321226ee0cab422df6bc1748640b903dd45016e2"
+          "hash" : "sha1:678add72bc2ec304571494c99a65aeea8b6ddcb0"
         }
       ],
       "configurations" : [
@@ -688,13 +688,13 @@
       ]
     },
     {
-      "org" : "org.reactivestreams",
-      "name" : "reactive-streams",
-      "version" : "1.0.4",
+      "org" : "org.jetbrains",
+      "name" : "annotations",
+      "version" : "26.1.0",
       "artifacts" : [
         {
-          "name" : "reactive-streams.jar",
-          "hash" : "sha1:3864a1320d97d7b045f729a326e1e077661f31b7"
+          "name" : "annotations.jar",
+          "hash" : "sha1:c1e9226d7ca6661020c58c94397da0cc3673d5e4"
         }
       ],
       "configurations" : [
@@ -1034,11 +1034,11 @@
     {
       "org" : "org.slf4j",
       "name" : "slf4j-api",
-      "version" : "2.0.17",
+      "version" : "2.0.18",
       "artifacts" : [
         {
           "name" : "slf4j-api.jar",
-          "hash" : "sha1:d9e58ac9c7779ba3bf8142aff6c830617a7fe60f"
+          "hash" : "sha1:78a9e7a37cd6360e0b818e86341b24123d28d4df"
         }
       ],
       "configurations" : [
