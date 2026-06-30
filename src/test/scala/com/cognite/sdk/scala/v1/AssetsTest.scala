@@ -30,7 +30,7 @@ class AssetsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
 
   it should behave like readableWithRetrieveByExternalId(client.assets, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
-  it should behave like readableWithRetrieveUnknownIds(client.dataSets, random)
+  it should behave like readableWithRetrieveUnknownIds(client.assets, random, idsNotFoundMessage = "id not found")
 
   it should behave like writable(
     client.assets,

@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           fetch-depth: 0
       - run: |
@@ -40,8 +40,8 @@ jobs:
 
       - name: Compile
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 Test/compile
+          cat /dev/null | sbt -Dsbt.log.noformat=true "++2.13 dependencyLockCheck"
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC "++2.13; Test/compile"
 
   compile_scala_3:
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           fetch-depth: 0
       - run: |
@@ -75,8 +75,8 @@ jobs:
 
       - name: Compile
         run: |
-          cat /dev/null | sbt -Dsbt.log.noformat=true ++3.3 dependencyLockCheck
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 Test/compile
+          cat /dev/null | sbt -Dsbt.log.noformat=true "++3.3 dependencyLockCheck"
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC "++3.3; Test/compile"
 
   test:
     runs-on: ubuntu-latest
@@ -85,7 +85,7 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       with:
         fetch-depth: 0
     - run: |
@@ -121,8 +121,8 @@ jobs:
         TEST_PROJECT2: "playground"
       # run: sbt test
       run: |
-        cat /dev/null | sbt -Dsbt.log.noformat=true ++2.13 dependencyLockCheck
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC ++2.13 scalafmtCheck scalafmtSbtCheck coverage test coverageReport
+        cat /dev/null | sbt -Dsbt.log.noformat=true "++2.13 dependencyLockCheck"
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx2G -J-XX:+UseG1GC "++2.13; scalafmtCheck; scalafmtSbtCheck; coverage; test; coverageReport"
 
     - name: Run tests for Scala 3
       env:
@@ -138,11 +138,11 @@ jobs:
         TEST_PROJECT2: "playground"
       # run: sbt test
       run: |
-        cat /dev/null | sbt -Dsbt.log.noformat=true ++3.3 dependencyLockCheck
-        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC ++3.3 scalafmtCheck scalafmtSbtCheck test
+        cat /dev/null | sbt -Dsbt.log.noformat=true "++3.3 dependencyLockCheck"
+        cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx4G -J-XX:+UseG1GC "++3.3; scalafmtCheck; scalafmtSbtCheck; test"
 
     - name: Upload test coverage report
-      uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6
+      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
       with:
         token: ${{ secrets.codecov_token }}
 
@@ -153,7 +153,7 @@ jobs:
     environment: CD
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           fetch-depth: 0
       - run: |
@@ -168,7 +168,7 @@ jobs:
       - name: Build JAR file
         run: |
           cat /dev/null | sbt -Dsbt.log.noformat=true +dependencyLockCheck
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}" "set compile/skip := true" +package
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}; set compile/skip := true; +package"
 
       - name: Install GPG & Sonatype credentials for SBT
         env:
@@ -201,7 +201,7 @@ jobs:
     environment: CD
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           fetch-depth: 0
       - run: |
@@ -216,7 +216,7 @@ jobs:
       - name: Build JAR file
         run: |
           cat /dev/null | sbt -Dsbt.log.noformat=true +dependencyLockCheck
-          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}" "set compile/skip := true" +package
+          cat /dev/null | sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "set Test/test := {}; set compile/skip := true; +package"
 
       - name: Install GPG & Sonatype credentials for SBT
         env:
@@ -240,4 +240,4 @@ jobs:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_CENTRAL_PORTAL_USER }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PORTAL_PASSWORD }}
         run: |
-          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC +publishSigned sonaRelease
+          sbt -Dsbt.log.noformat=true -J-Xmx3G -J-XX:+UseG1GC "+publishSigned; sonaRelease"
