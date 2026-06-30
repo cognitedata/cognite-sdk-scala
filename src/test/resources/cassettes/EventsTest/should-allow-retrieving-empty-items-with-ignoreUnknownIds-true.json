@@ -3,7 +3,7 @@
     {
       "request" : {
         "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/datasets/byids",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/byids",
         "headers" : {
           "authorization" : [
             "<redacted>"
@@ -33,7 +33,7 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "does-not-exist/00cb1bb68ac89608"
+                  "externalId" : "does-not-exist/26ed1ecd23bbb074"
                 }
               ],
               "ignoreUnknownIds" : true
@@ -43,7 +43,7 @@
       },
       "response" : {
         "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/datasets/byids",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/byids",
         "status" : {
           "code" : 200,
           "reason" : "OK"
@@ -53,10 +53,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "e82aabc0-394c-9c76-8d89-9ea5080e10e4"
+            "6eb3f6d7-7cfc-92ba-a7af-a402562e7b60"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 12:11:29 GMT"
+            "Thu, 11 Jun 2026 14:14:15 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -92,5 +92,5 @@
       }
     }
   ],
-  "seed" : -9069616506813122524
+  "seed" : 8165687927841684860
 }

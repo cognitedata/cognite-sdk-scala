@@ -31,7 +31,7 @@ class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehavio
 
   it should behave like readableWithRetrieveByExternalId(client.events, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
-  it should behave like readableWithRetrieveUnknownIds(client.dataSets, random)
+  it should behave like readableWithRetrieveUnknownIds(client.events, random, idsNotFoundMessage = "id not found")
 
   it should behave like writable(
     client.events,
