@@ -1,0 +1,957 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 593,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "name" : "root",
+                  "parentId" : null,
+                  "description" : null,
+                  "source" : null,
+                  "externalId" : "c84cb5d3-recursive-root",
+                  "metadata" : null,
+                  "parentExternalId" : null,
+                  "dataSetId" : null,
+                  "labels" : null
+                },
+                {
+                  "name" : "child",
+                  "parentId" : null,
+                  "description" : null,
+                  "source" : null,
+                  "externalId" : "c84cb5d3-recursive-child",
+                  "metadata" : null,
+                  "parentExternalId" : "c84cb5d3-recursive-root",
+                  "dataSetId" : null,
+                  "labels" : null
+                },
+                {
+                  "name" : "grandchild",
+                  "parentId" : null,
+                  "description" : null,
+                  "source" : null,
+                  "externalId" : "c84cb5d3-recursive-grandchild",
+                  "metadata" : null,
+                  "parentExternalId" : "c84cb5d3-recursive-child",
+                  "dataSetId" : null,
+                  "labels" : null
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets",
+        "status" : {
+          "code" : 201,
+          "reason" : "Created"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "a9b54e20-7999-9b2d-bb75-2a10c55fb339"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:37 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 941,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "createdTime" : 1782822517960,
+                  "lastUpdatedTime" : 1782822517960,
+                  "rootId" : 4527550335879193,
+                  "externalId" : "c84cb5d3-recursive-root",
+                  "name" : "root",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 4527550335879193
+                },
+                {
+                  "createdTime" : 1782822517960,
+                  "lastUpdatedTime" : 1782822517960,
+                  "rootId" : 4527550335879193,
+                  "parentId" : 4527550335879193,
+                  "parentExternalId" : "c84cb5d3-recursive-root",
+                  "externalId" : "c84cb5d3-recursive-child",
+                  "name" : "child",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 2518093318962828
+                },
+                {
+                  "createdTime" : 1782822517960,
+                  "lastUpdatedTime" : 1782822517960,
+                  "rootId" : 4527550335879193,
+                  "parentId" : 2518093318962828,
+                  "parentExternalId" : "c84cb5d3-recursive-child",
+                  "externalId" : "c84cb5d3-recursive-grandchild",
+                  "name" : "grandchild",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 6628862089332206
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 65,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "externalIdPrefix" : "c84cb5d3-recursive"
+              },
+              "limit" : 1000
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "fe0f93b0-1b7f-9775-a43c-298a90be1a78"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:38 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 17,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 65,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "externalIdPrefix" : "c84cb5d3-recursive"
+              },
+              "limit" : 1000
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "2a70dc98-be03-98bb-9f01-6100d7406db0"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:38 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 17,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 65,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "externalIdPrefix" : "c84cb5d3-recursive"
+              },
+              "limit" : 1000
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "2d3aff54-39d5-946d-8959-0cc8d1b999d9"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:38 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 364,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "createdTime" : 1782822517960,
+                  "lastUpdatedTime" : 1782822517960,
+                  "rootId" : 4527550335879193,
+                  "parentId" : 2518093318962828,
+                  "parentExternalId" : "c84cb5d3-recursive-child",
+                  "externalId" : "c84cb5d3-recursive-grandchild",
+                  "name" : "grandchild",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 6628862089332206
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 65,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "externalIdPrefix" : "c84cb5d3-recursive"
+              },
+              "limit" : 1000
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "5c01af6d-eaba-9144-b90c-658babf82f10"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:38 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 596,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "createdTime" : 1782822517960,
+                  "lastUpdatedTime" : 1782822517960,
+                  "rootId" : 4527550335879193,
+                  "parentId" : 4527550335879193,
+                  "parentExternalId" : "c84cb5d3-recursive-root",
+                  "externalId" : "c84cb5d3-recursive-child",
+                  "name" : "child",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 2518093318962828
+                },
+                {
+                  "createdTime" : 1782822517960,
+                  "lastUpdatedTime" : 1782822517960,
+                  "rootId" : 4527550335879193,
+                  "externalId" : "c84cb5d3-recursive-root",
+                  "name" : "root",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 4527550335879193
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 65,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "externalIdPrefix" : "c84cb5d3-recursive"
+              },
+              "limit" : 1000
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "24190b81-8074-9527-91ea-2660f27ebb40"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:38 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 941,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "createdTime" : 1782822517960,
+                  "lastUpdatedTime" : 1782822517960,
+                  "rootId" : 4527550335879193,
+                  "parentId" : 4527550335879193,
+                  "parentExternalId" : "c84cb5d3-recursive-root",
+                  "externalId" : "c84cb5d3-recursive-child",
+                  "name" : "child",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 2518093318962828
+                },
+                {
+                  "createdTime" : 1782822517960,
+                  "lastUpdatedTime" : 1782822517960,
+                  "rootId" : 4527550335879193,
+                  "externalId" : "c84cb5d3-recursive-root",
+                  "name" : "root",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 4527550335879193
+                },
+                {
+                  "createdTime" : 1782822517960,
+                  "lastUpdatedTime" : 1782822517960,
+                  "rootId" : 4527550335879193,
+                  "parentId" : 2518093318962828,
+                  "parentExternalId" : "c84cb5d3-recursive-child",
+                  "externalId" : "c84cb5d3-recursive-grandchild",
+                  "name" : "grandchild",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 6628862089332206
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/delete",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 93,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "c84cb5d3-recursive-root"
+                }
+              ],
+              "recursive" : true,
+              "ignoreUnknownIds" : true
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/delete",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "b65f327d-20de-9432-87f2-20cd839a4f6c"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:39 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 2,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 65,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "externalIdPrefix" : "c84cb5d3-recursive"
+              },
+              "limit" : 1000
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "991cf7c9-d611-9913-8a8f-96161e91ae60"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:39 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 17,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/delete",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 107,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "id" : 4527550335879193
+                },
+                {
+                  "id" : 2518093318962828
+                },
+                {
+                  "id" : 6628862089332206
+                }
+              ],
+              "ignoreUnknownIds" : true
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/delete",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "e97fd3f9-361a-9faf-9716-2ef712b15349"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:39 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 2,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : 167105385504182312
+}

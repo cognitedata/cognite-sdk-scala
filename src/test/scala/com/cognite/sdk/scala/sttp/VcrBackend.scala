@@ -268,8 +268,8 @@ class VcrBackend[F[_]](
       val _ = recordedInteractions.add(buildInteraction(request, rawResponse, bodyBytes))
       val stub = SttpBackendStub[F, Any](responseMonad)
         .whenAnyRequest
-        .thenRespond(bodyBytes, rawResponse.code)
-      responseMonad.map(stub.send(request))(_.copy(headers = rawResponse.headers))
+        .thenRespond(Response(bodyBytes, rawResponse.code, rawResponse.statusText, rawResponse.headers))
+      stub.send(request)
     }
   }
 
@@ -286,8 +286,8 @@ class VcrBackend[F[_]](
             val respHeaders = toSttpHeaders(interaction.response.headers)
             val stub = SttpBackendStub[F, Any](responseMonad)
               .whenAnyRequest
-              .thenRespond(bytes, status)
-            responseMonad.map(stub.send(request))(_.copy(headers = respHeaders))
+              .thenRespond(Response(bytes, status, "", respHeaders))
+            stub.send(request)
         }
     }
 

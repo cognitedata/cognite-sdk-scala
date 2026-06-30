@@ -1,0 +1,98 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 104,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "assetSubtreeIds" : [
+                  {
+                    "id" : 7127045760755934
+                  }
+                ]
+              },
+              "limit" : 5,
+              "aggregatedProperties" : [
+                "childCount"
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "b275156f-75ca-9f78-8178-181fce29be72"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:29:01 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 7248,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/+2Ya4/aRhSGv+dXWHxqpRDN/eIvlTGzxKmxiW2S0qpCZHG3NNllBaySNsp/7xlzCWATYBd2o6orrVfreefimTnPeWc+P3Oc2k3+aebfTabjSc11ar3Xg47xfxXmU6v9B2a373+e8stbFaae+qd9hejf8l3Ef87ZxH9fe26rj2b59RRq/gb/OM7n4gmvLyf5YJYPs9F1DoWYCyS5YEwSRJ8vNR8G01n3drhXNxmPZ8EQiiUmEjEurYhrylaKwdXVJL+ChuxIlmOwo/hz9GHoj+9uZvAeLd5/WVW7HUzym0XTCBGtCWdaSqnkSnIzKAZWI7QeemEdFATXVqXDfHo5Gd3ORuMbK3qTNJ2603np4DRLs1ba9bPUT7qNhkmc0LwxoeMu/nqhl7SdMH77ta3rfDaAuRhsfoEJ/X6aeVk37QdN2wcm+OsAQJDG3cQ3/WbDFn4cT95fwzRUCDKvEZpCYwX94bvBi4/Xs/5scLUuftvO+l5ivGVnXPHtYt/LTCtOeksJ5qQkiaMs8fwsTpYiocS26KIb+aBsmlVDDJU6C2PoLoijpQYhti3pxItCRZHeLkx7aWbaCwFjDG0LMq/V9+GDM9PsN+FZrDXCtI54HQsHY5cjF5cGP68WZIHvhWEQFdWiKlHTpP5Dt8Zac60wbnjhajIWP0RjqVWV/mWQwir0EvO6GySmqNar0s1bFFoJWjlFQbPvRb6xjVkhZQKXV6IQprDuwZtiQnC1IH4bmWaj10niV8bPrLCyy7YXRIthKQwhX6WJvLbZGZ1rum6nWaxwo7eYuG+q1vYBbAJUR7APqIuZuxl50/Hd5DIv6FHjSGBNsKBECKQEL+s6k/Ff+aXlUO327t2H0WUR6yUkzcVbqlXpyHbGCcecCsQUVfLZWvV98MUU4UPgu6F7DPgKjjGGzYeRkFKoKvh2Mru6FNfbjZ34TeOLzIGFdLaCzY/bHcdGHIDkO+etQKV9fj7eEnkf3j4AqaxOqIOBp8hlJVQfjdSjlns/QxXEcOW3HMtQQWhpXqsZSsrZ9UkZWhVkp6OoLrKpcEkFHecUFYzbyZOMagAcpuekKMWKcwCp1gjAcxRGgb8HYXRddyKM4m9hVAmhNdZCaQV2ln010GsczewSC0R3QnQrmJpB6vtxHDotL3XibvZgfiZmWSI4Q5uO7em9bNnp3YutjKtSrD3YynoXJustCWlC0zZRtmqsHNuHcTpu22asxBsO86HTvRnNps5PvvMDbIS67yd1YCNH/DkE7wvEXmDy42G8Rxp8U52AdeIuFS6Vp7bQO3fmXtQLqSk6gV0Ggovqdkqo55AVzov6MI47tnAzuu+fC0qg2JkItEKV31aRCGgdkyIREJdTd9PrrCcC2zGhTDJCkP09ZyJg9uCPUXH04eiIRGAd+CGJYFP3GH5aUcqFxJpDGAJkqw11M6hrgZnYmQl2+SsnNd486i6CMDPJ/5b6qSw1seGEwVKz4nRaGYUnsdQ7l3y/reZI6srrkyNtNaREXJlDKq4mdPUdxpPZ6lKorenmkeG/bK2tK1vcOiDpMr5163BqMy53MRgrKQnR4JoImEpZcfVxQgYTSMmYQD7FirHjGIzJYQxe0z2KGYevoVhgqSgDQ15pxn/J7L5YOy3uMeNOO4Zd7rwCHEZOI2k5UdP8B+h7KtO9dWL8fk3345vlb+6cvRCXFnKVFzZHG2alDjPMQslKXJ7BMG9E4P0pXwrmMxjmnffPFDwMlogoBXZP8bPCmkvCNQa7rKiWZA5reP7+7Mu/K7USKlAcAAA="
+          }
+        }
+      }
+    }
+  ],
+  "seed" : -7040674295620343403
+}

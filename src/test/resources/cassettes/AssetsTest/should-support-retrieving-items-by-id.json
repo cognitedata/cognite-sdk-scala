@@ -1,0 +1,222 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "65155c4e-8b45-974d-86f1-063ce2476286"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:13 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 625,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "nextCursor" : "fJpOMHcnWXAIPuJziX8DBoKt7qN7P9kDgqB7ONoUsZI",
+              "items" : [
+                {
+                  "createdTime" : 1575414266312,
+                  "lastUpdatedTime" : 1575414266312,
+                  "rootId" : 7494766521626568,
+                  "parentId" : 1322479343209952,
+                  "name" : "test__asset_01343",
+                  "description" : "Description for asset test__asset_01343",
+                  "metadata" : {
+                    "k1" : "v1",
+                    "k2" : "v2"
+                  },
+                  "id" : 182529235222
+                },
+                {
+                  "createdTime" : 1585740793230,
+                  "lastUpdatedTime" : 1585740793230,
+                  "rootId" : 3681970118588,
+                  "name" : "ex-204",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 3681970118588
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/byids",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 77,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "id" : 182529235222
+                },
+                {
+                  "id" : 3681970118588
+                }
+              ],
+              "ignoreUnknownIds" : false
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/byids",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "e24a347b-b122-92f8-a2aa-a74212528820"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:13 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 562,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "createdTime" : 1575414266312,
+                  "lastUpdatedTime" : 1575414266312,
+                  "rootId" : 7494766521626568,
+                  "parentId" : 1322479343209952,
+                  "name" : "test__asset_01343",
+                  "description" : "Description for asset test__asset_01343",
+                  "metadata" : {
+                    "k1" : "v1",
+                    "k2" : "v2"
+                  },
+                  "id" : 182529235222
+                },
+                {
+                  "createdTime" : 1585740793230,
+                  "lastUpdatedTime" : 1585740793230,
+                  "rootId" : 3681970118588,
+                  "name" : "ex-204",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 3681970118588
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : 5949268460743263016
+}

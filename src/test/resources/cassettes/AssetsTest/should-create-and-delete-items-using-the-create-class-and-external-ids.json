@@ -1,0 +1,229 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 375,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "name" : "scala-sdk-create-example-1",
+                  "parentId" : null,
+                  "description" : null,
+                  "source" : null,
+                  "externalId" : "8be7e19a",
+                  "metadata" : null,
+                  "parentExternalId" : null,
+                  "dataSetId" : null,
+                  "labels" : null
+                },
+                {
+                  "name" : "scala-sdk-create-example-2",
+                  "parentId" : null,
+                  "description" : null,
+                  "source" : null,
+                  "externalId" : "c4a88c85",
+                  "metadata" : null,
+                  "parentExternalId" : null,
+                  "dataSetId" : null,
+                  "labels" : null
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets",
+        "status" : {
+          "code" : 201,
+          "reason" : "Created"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "0cdc4fcc-469c-94e1-b55b-64904d63c78a"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:35 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 519,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "createdTime" : 1782822515350,
+                  "lastUpdatedTime" : 1782822515350,
+                  "rootId" : 8880895673530206,
+                  "externalId" : "8be7e19a",
+                  "name" : "scala-sdk-create-example-1",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 8880895673530206
+                },
+                {
+                  "createdTime" : 1782822515350,
+                  "lastUpdatedTime" : 1782822515350,
+                  "rootId" : 4232631091000702,
+                  "externalId" : "c4a88c85",
+                  "name" : "scala-sdk-create-example-2",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 4232631091000702
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/delete",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 88,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "8be7e19a"
+                },
+                {
+                  "externalId" : "c4a88c85"
+                }
+              ],
+              "ignoreUnknownIds" : false
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/delete",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "221e5793-f988-9fcd-a537-8e4785cb23aa"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:35 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 2,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : 8608298789915325848
+}
