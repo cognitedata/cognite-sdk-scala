@@ -1,0 +1,178 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=2&partition=1/2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=2&partition=1/2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "ed1c625d-b8da-9ef3-aae9-a74e3d15dac4"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:06 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 625,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "nextCursor" : "fJpOMHcnWXAIPuJziX8DBoKt7qN7P9kDgqB7ONoUsZI",
+              "items" : [
+                {
+                  "createdTime" : 1575414266312,
+                  "lastUpdatedTime" : 1575414266312,
+                  "rootId" : 7494766521626568,
+                  "parentId" : 1322479343209952,
+                  "name" : "test__asset_01343",
+                  "description" : "Description for asset test__asset_01343",
+                  "metadata" : {
+                    "k1" : "v1",
+                    "k2" : "v2"
+                  },
+                  "id" : 182529235222
+                },
+                {
+                  "createdTime" : 1585740793230,
+                  "lastUpdatedTime" : 1585740793230,
+                  "rootId" : 3681970118588,
+                  "name" : "ex-204",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 3681970118588
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=2&partition=2/2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=2&partition=2/2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "d51fc532-be10-9153-af1f-1b9013e156d7"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:06 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 1809,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/52V226bQBCG7/MUyNehYpc9sL7DQAgtBhcWR1ZVIYJXkZvYWIDVqlHevQsY4tgkkYqslcx8M8P8wwzPV4oy2Yk/tXUoq6KcTJUJ/pYH88Nuyaq/5dyOVLvyZy7Q4P4xSvwwX6r32Z27LxbiJp9cN+6bWmwr6flD/lGU5/aUt/NSZLVY881WSCPARKOYIER1nV33zFNW1cl+/SlXFkXtraWZAkg1hGkDYaajgdhnpdh1jK5BAzMqAWpQCujA7LI2xQTqKvcslUGsoclgXYsqLzf7elPsGigOb7jCTVdZRraiKotbBcQ85m6cWNwKQ19xzVgJE/4aYCvqTJaSSe9eBHnX8a005iZP4tSzm8AAAjA4KU2iJLKc1J41xt9F+biVcowA3Jz5Tss0QLq+z7783tZpnT2cwndznpqRY/bJsIHPzZbJHTeMVj0CMLxAwoBHpsXDqIeIQc6hmySwJGk7QyBIL5L5oUznhUHPaCeSH5F4FXNnfgQQQto5ILuQWrIm7tipLc+2hxqAavPTFYCmgE7RRRGdmydbbfq+F7RuwRhkO7H1Xy0/ieH64cz0hyKPF8RAQ2yMv/Viqe4qcr4nXuS0bqsxrotIDB2SC+E6e2oGltMEa0AdEYL1UTCW/fSWrQpgHAjvAseerRZR+NWxeAOOtmJuekH/WEBO4hgTmHPn3VE74brJsG7dk74iFWiqRhRNNhVPwcUr1fglC7t9HWaro+CjJfXUSXDcBmcKAFNMpvqbh6+KQ5mLdodMECWUEbmHIKMEAuOSW5TFL5HXDbw/3D9t8nb2j9TLsBU6+IwarJsmGcIaZhgQOawMGNC4Oonw7jo1EJOwBjUEPlynR44w/ZUb1qnMbOjyghTIpQrgQMgvgih32VMnhk4wgJAhzACSYqyhTghjr9oNm7UWVZ2mWVWJOpUDCt9fr/dZ+dnmbJBjzI9kreTqf1TbnJV62FeirNXGZ7N7EMgQBGJ0qfebqju95fnz6uUfgU/6SBEHAAA="
+          }
+        }
+      }
+    }
+  ],
+  "seed" : 5969849113131226056
+}
