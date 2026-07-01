@@ -33,7 +33,7 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "3c8fd986",
+                  "externalId" : "10027e02",
                   "name" : "scala-sdk-delete-example-1",
                   "isString" : false,
                   "metadata" : null,
@@ -46,7 +46,7 @@
                   "dataSetId" : null
                 },
                 {
-                  "externalId" : "0857472d",
+                  "externalId" : "c9b5517d",
                   "name" : null,
                   "isString" : false,
                   "metadata" : null,
@@ -75,10 +75,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "9404ed52-41c8-946b-9a2d-1128f1fcf487"
+            "a170f043-71da-9878-bb6a-22adaf91a1c0"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:53:15 GMT"
+            "Wed, 01 Jul 2026 07:58:01 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -105,8 +105,8 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 5536522725795243,
-                  "externalId" : "3c8fd986",
+                  "id" : 1312065755887348,
+                  "externalId" : "10027e02",
                   "name" : "scala-sdk-delete-example-1",
                   "type" : "numeric",
                   "isString" : false,
@@ -118,12 +118,12 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782892396012,
-                  "lastUpdatedTime" : 1782892396012
+                  "createdTime" : 1782892682033,
+                  "lastUpdatedTime" : 1782892682033
                 },
                 {
-                  "id" : 8141248512808520,
-                  "externalId" : "0857472d",
+                  "id" : 4674450725993419,
+                  "externalId" : "c9b5517d",
                   "type" : "numeric",
                   "isString" : false,
                   "metadata" : {
@@ -135,8 +135,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782892396012,
-                  "lastUpdatedTime" : 1782892396012
+                  "createdTime" : 1782892682033,
+                  "lastUpdatedTime" : 1782892682033
                 }
               ]
             }
@@ -177,10 +177,10 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 5536522725795243
+                  "id" : 1312065755887348
                 },
                 {
-                  "id" : 8141248512808520
+                  "id" : 4674450725993419
                 },
                 {
                   "id" : 999991
@@ -209,10 +209,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "eb13570d-d47c-9a0d-b612-9f820dc485dd"
+            "e7b4d1ea-6bb6-9aab-9e63-88b6315c5ce5"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:53:15 GMT"
+            "Wed, 01 Jul 2026 07:58:02 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -276,10 +276,10 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 5536522725795243
+                  "id" : 1312065755887348
                 },
                 {
-                  "id" : 8141248512808520
+                  "id" : 4674450725993419
                 }
               ],
               "ignoreUnknownIds" : false
@@ -299,10 +299,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "7864bf82-668e-964e-8d9a-1cc7d5e1f1db"
+            "340b6269-59c7-94d3-b4e1-9e2f2a5259ad"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:53:16 GMT"
+            "Wed, 01 Jul 2026 07:58:02 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -332,10 +332,10 @@
                 "message" : "Time series not found",
                 "missing" : [
                   {
-                    "id" : 5536522725795243
+                    "id" : 1312065755887348
                   },
                   {
-                    "id" : 8141248512808520
+                    "id" : 4674450725993419
                   }
                 ]
               }
@@ -403,10 +403,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "25aaf03c-54ae-9727-9adf-9b1a68a0fd5a"
+            "be26946a-5f78-9cc0-b78b-3abc5ad45546"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:53:16 GMT"
+            "Wed, 01 Jul 2026 07:58:02 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -452,5 +452,5 @@
       }
     }
   ],
-  "seed" : -5691787478885802375
+  "seed" : -7552738145499898199
 }

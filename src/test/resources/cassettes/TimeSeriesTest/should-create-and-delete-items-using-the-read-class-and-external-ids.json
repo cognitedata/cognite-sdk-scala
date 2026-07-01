@@ -33,7 +33,7 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "3293bfe1",
+                  "externalId" : "06136cc0",
                   "name" : "scala-sdk-write-external-example-1",
                   "isString" : false,
                   "metadata" : null,
@@ -46,7 +46,7 @@
                   "dataSetId" : null
                 },
                 {
-                  "externalId" : "4cbf8002",
+                  "externalId" : "7acba95d",
                   "name" : "scala-sdk-write-external-example-2",
                   "isString" : false,
                   "metadata" : null,
@@ -59,7 +59,7 @@
                   "dataSetId" : null
                 },
                 {
-                  "externalId" : "7261eee7",
+                  "externalId" : "1c954184",
                   "name" : null,
                   "isString" : false,
                   "metadata" : null,
@@ -88,10 +88,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "7c4c16cc-cfc3-92d1-acaf-f719ad28d703"
+            "145e8c6a-7799-958b-9f04-fdcdee7416d8"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:53:01 GMT"
+            "Wed, 01 Jul 2026 07:57:49 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -118,8 +118,8 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 7518743788983787,
-                  "externalId" : "3293bfe1",
+                  "id" : 5861973044120842,
+                  "externalId" : "06136cc0",
                   "name" : "scala-sdk-write-external-example-1",
                   "type" : "numeric",
                   "isString" : false,
@@ -131,12 +131,12 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782892381816,
-                  "lastUpdatedTime" : 1782892381816
+                  "createdTime" : 1782892669334,
+                  "lastUpdatedTime" : 1782892669334
                 },
                 {
-                  "id" : 1930852933631583,
-                  "externalId" : "4cbf8002",
+                  "id" : 8479200698267418,
+                  "externalId" : "7acba95d",
                   "name" : "scala-sdk-write-external-example-2",
                   "type" : "numeric",
                   "isString" : false,
@@ -148,12 +148,12 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782892381816,
-                  "lastUpdatedTime" : 1782892381816
+                  "createdTime" : 1782892669334,
+                  "lastUpdatedTime" : 1782892669334
                 },
                 {
-                  "id" : 8305173010153455,
-                  "externalId" : "7261eee7",
+                  "id" : 1624196810803064,
+                  "externalId" : "1c954184",
                   "type" : "numeric",
                   "isString" : false,
                   "metadata" : {
@@ -164,8 +164,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782892381816,
-                  "lastUpdatedTime" : 1782892381816
+                  "createdTime" : 1782892669334,
+                  "lastUpdatedTime" : 1782892669334
                 }
               ]
             }
@@ -206,13 +206,13 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "3293bfe1"
+                  "externalId" : "06136cc0"
                 },
                 {
-                  "externalId" : "4cbf8002"
+                  "externalId" : "7acba95d"
                 },
                 {
-                  "externalId" : "7261eee7"
+                  "externalId" : "1c954184"
                 }
               ],
               "ignoreUnknownIds" : false
@@ -232,10 +232,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "893ee21b-dc64-9dae-84e3-b945d8c2393d"
+            "95659181-d26d-90ee-a940-943632a99b5c"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:53:01 GMT"
+            "Wed, 01 Jul 2026 07:57:49 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -267,5 +267,5 @@
       }
     }
   ],
-  "seed" : -5924174693925784051
+  "seed" : 3591830575868318931
 }
