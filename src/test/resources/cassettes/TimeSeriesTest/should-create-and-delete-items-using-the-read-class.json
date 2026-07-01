@@ -62,10 +62,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "fb387821-19e4-930a-a630-49e1b7850643"
+            "a34f0464-1f20-9009-bb1b-d593db6a6eb3"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:32:11 GMT"
+            "Wed, 01 Jul 2026 07:45:11 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -92,7 +92,7 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 5679155423348947,
+                  "id" : 8476929464960086,
                   "name" : "scala-sdk-write-example-1",
                   "type" : "numeric",
                   "isString" : false,
@@ -104,8 +104,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891131773,
-                  "lastUpdatedTime" : 1782891131773
+                  "createdTime" : 1782891911484,
+                  "lastUpdatedTime" : 1782891911484
                 }
               ]
             }
@@ -146,7 +146,7 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 5679155423348947
+                  "id" : 8476929464960086
                 }
               ],
               "ignoreUnknownIds" : false
@@ -166,10 +166,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "ce7e722b-2b59-97f8-a278-6e0f59212035"
+            "0dcfcb88-8b1a-9942-88db-b242de8b8170"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:32:11 GMT"
+            "Wed, 01 Jul 2026 07:45:11 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -288,10 +288,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "a1532a96-c261-9d07-9ce7-86ebed3264cc"
+            "f6c8399e-98ab-9e8d-ba9c-db96a83d1d8e"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:32:11 GMT"
+            "Wed, 01 Jul 2026 07:45:11 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -310,7 +310,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 660,
+          "contentLength" : 659,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -318,7 +318,7 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 8118265913552096,
+                  "id" : 4909269438398770,
                   "name" : "scala-sdk-write-example-1",
                   "type" : "numeric",
                   "isString" : false,
@@ -330,11 +330,11 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891132003,
-                  "lastUpdatedTime" : 1782891132003
+                  "createdTime" : 1782891911750,
+                  "lastUpdatedTime" : 1782891911750
                 },
                 {
-                  "id" : 2850207431535769,
+                  "id" : 164460949534633,
                   "name" : "scala-sdk-write-example-2",
                   "type" : "numeric",
                   "isString" : false,
@@ -346,11 +346,11 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891132003,
-                  "lastUpdatedTime" : 1782891132003
+                  "createdTime" : 1782891911750,
+                  "lastUpdatedTime" : 1782891911750
                 },
                 {
-                  "id" : 8363904413902747,
+                  "id" : 1492829008032137,
                   "type" : "numeric",
                   "isString" : false,
                   "metadata" : {
@@ -361,8 +361,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891132003,
-                  "lastUpdatedTime" : 1782891132003
+                  "createdTime" : 1782891911750,
+                  "lastUpdatedTime" : 1782891911750
                 }
               ]
             }
@@ -395,7 +395,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 108,
+          "contentLength" : 107,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -403,13 +403,13 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 8118265913552096
+                  "id" : 4909269438398770
                 },
                 {
-                  "id" : 2850207431535769
+                  "id" : 164460949534633
                 },
                 {
-                  "id" : 8363904413902747
+                  "id" : 1492829008032137
                 }
               ],
               "ignoreUnknownIds" : false
@@ -429,10 +429,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "c88531b5-a456-9fb0-a747-32f890679b7d"
+            "f2a738b3-7fc6-9d1d-a6b1-82feb118b3b2"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:32:11 GMT"
+            "Wed, 01 Jul 2026 07:45:11 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -464,5 +464,5 @@
       }
     }
   ],
-  "seed" : 2988059727380591049
+  "seed" : 2885987364734446554
 }

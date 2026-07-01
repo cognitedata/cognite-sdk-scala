@@ -75,10 +75,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "e3454b75-46a1-9fc2-924b-8e0425549878"
+            "49a687f2-e50e-96a4-81ef-349b2fab409c"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:32:18 GMT"
+            "Wed, 01 Jul 2026 07:45:18 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -97,7 +97,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 520,
+          "contentLength" : 521,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -105,7 +105,7 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 6095122416966420,
+                  "id" : 5750673236609756,
                   "name" : "scala-sdk-write-example-1",
                   "type" : "numeric",
                   "isString" : false,
@@ -119,11 +119,11 @@
                   "dataSetId" : 87195428580,
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891139307,
-                  "lastUpdatedTime" : 1782891139307
+                  "createdTime" : 1782891918810,
+                  "lastUpdatedTime" : 1782891918810
                 },
                 {
-                  "id" : 479997745627623,
+                  "id" : 4166066210612174,
                   "name" : "scala-sdk-write-example-2",
                   "type" : "numeric",
                   "isString" : false,
@@ -135,8 +135,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891139307,
-                  "lastUpdatedTime" : 1782891139307
+                  "createdTime" : 1782891918810,
+                  "lastUpdatedTime" : 1782891918810
                 }
               ]
             }
@@ -169,7 +169,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 199,
+          "contentLength" : 200,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -185,7 +185,7 @@
                       "setNull" : true
                     }
                   },
-                  "id" : 6095122416966420
+                  "id" : 5750673236609756
                 },
                 {
                   "update" : {
@@ -193,7 +193,7 @@
                       "set" : "scala-sdk-write-example-2-1"
                     }
                   },
-                  "id" : 479997745627623
+                  "id" : 4166066210612174
                 }
               ]
             }
@@ -212,10 +212,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "652705a1-a918-9fb8-95e4-e780a6b60df1"
+            "facf104c-df69-9628-82d4-0ff26e375f84"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:32:19 GMT"
+            "Wed, 01 Jul 2026 07:45:18 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -234,7 +234,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 500,
+          "contentLength" : 501,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -242,7 +242,7 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 6095122416966420,
+                  "id" : 5750673236609756,
                   "name" : "scala-sdk-write-example-1-1",
                   "type" : "numeric",
                   "isString" : false,
@@ -255,11 +255,11 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891139307,
-                  "lastUpdatedTime" : 1782891139449
+                  "createdTime" : 1782891918810,
+                  "lastUpdatedTime" : 1782891918991
                 },
                 {
-                  "id" : 479997745627623,
+                  "id" : 4166066210612174,
                   "name" : "scala-sdk-write-example-2-1",
                   "type" : "numeric",
                   "isString" : false,
@@ -271,8 +271,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891139307,
-                  "lastUpdatedTime" : 1782891139449
+                  "createdTime" : 1782891918810,
+                  "lastUpdatedTime" : 1782891918991
                 }
               ]
             }
@@ -305,7 +305,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 83,
+          "contentLength" : 84,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -313,10 +313,10 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 6095122416966420
+                  "id" : 5750673236609756
                 },
                 {
-                  "id" : 479997745627623
+                  "id" : 4166066210612174
                 }
               ],
               "ignoreUnknownIds" : false
@@ -336,10 +336,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "1a99d93f-3aab-9154-9e87-b66afd0510bf"
+            "74203815-9721-960a-bd0b-26b7c607f8df"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:32:19 GMT"
+            "Wed, 01 Jul 2026 07:45:18 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -371,5 +371,5 @@
       }
     }
   ],
-  "seed" : -1088026626678739747
+  "seed" : -1019384096135035045
 }
