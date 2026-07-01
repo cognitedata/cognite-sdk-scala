@@ -32,7 +32,7 @@ existing = json.loads(subprocess.run(
     capture_output=True, text=True, check=True
 ).stdout)
 
-bot_comment = next((c for c in existing if MARKER in c.get("body", "")), None)
+bot_comment = next((c for c in existing if MARKER in (c.get("body") or "")), None)
 
 if bot_comment:
     subprocess.run(
