@@ -64,7 +64,13 @@ object RecordedContent {
     }
   }
 
+  final case class BinaryContent(encoded: String) extends RecordedContent {
+    def toBytes: Array[Byte] = Base64.getDecoder.decode(encoded)
+  }
+
   private val GzipThresholdBytes = 1000
+
+  private val BinaryMimeTypes = Set("application/protobuf", "application/octet-stream")
 
   def fromBytes(bytes: Array[Byte], contentType: String): RecordedContent = {
     if (bytes.length >= GzipThresholdBytes) {
@@ -81,6 +87,8 @@ object RecordedContent {
             case Right(json) => JsonContent(json)
             case Left(_)     => TextContent(new String(bytes, "UTF-8"))
           }
+        case mt if BinaryMimeTypes.contains(mt) =>
+          BinaryContent(Base64.getEncoder.encodeToString(bytes))
         case _ => TextContent(new String(bytes, "UTF-8"))
       }
     }
@@ -94,6 +102,8 @@ object RecordedContent {
         "type"    -> "__gzipped_by_vcr_library_due_to_size".asJson,
         "gzipped" -> gz.asJson
       )
+    case BinaryContent(enc) =>
+      Json.obj("type" -> "binary".asJson, "encoded" -> enc.asJson)
   }
 
   implicit val decoder: Decoder[RecordedContent] = Decoder.instance { c =>
@@ -102,6 +112,7 @@ object RecordedContent {
       case "json" => c.downField("body").as[Json].map(j => JsonContent(j))
       case "__gzipped_by_vcr_library_due_to_size" =>
         c.downField("gzipped").as[String].map(s => GzippedContent(s))
+      case "binary" => c.downField("encoded").as[String].map(s => BinaryContent(s))
       case other => Left(DecodingFailure(s"Unknown content type: $other", c.history))
     }
   }

@@ -1,0 +1,234 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries?limit=2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries?limit=2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "21c402ed-2b48-996a-8406-aeb54c516f44"
+          ],
+          "date" : [
+            "Wed, 01 Jul 2026 07:57:32 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 508,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "nextCursor" : "493418085159",
+              "items" : [
+                {
+                  "id" : 155460237412,
+                  "type" : "numeric",
+                  "isString" : false,
+                  "metadata" : {
+                    
+                  },
+                  "isStep" : false,
+                  "securityCategories" : [
+                  ],
+                  "accessCategories" : [
+                  ],
+                  "createdTime" : 1591153742685,
+                  "lastUpdatedTime" : 1591153742685
+                },
+                {
+                  "id" : 493418085159,
+                  "name" : "test__constant_99_with_noise",
+                  "type" : "numeric",
+                  "isString" : false,
+                  "metadata" : {
+                    
+                  },
+                  "isStep" : false,
+                  "description" : "Constant 99 with +-0.1 uniform noise",
+                  "securityCategories" : [
+                  ],
+                  "accessCategories" : [
+                  ],
+                  "createdTime" : 1616677542400,
+                  "lastUpdatedTime" : 1616677542400
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/byids",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 76,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "id" : 155460237412
+                },
+                {
+                  "id" : 493418085159
+                }
+              ],
+              "ignoreUnknownIds" : false
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/byids",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "64d25746-3233-9426-b8a6-4cd25dffcbfb"
+          ],
+          "date" : [
+            "Wed, 01 Jul 2026 07:57:32 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 480,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "id" : 155460237412,
+                  "type" : "numeric",
+                  "isString" : false,
+                  "metadata" : {
+                    
+                  },
+                  "isStep" : false,
+                  "securityCategories" : [
+                  ],
+                  "accessCategories" : [
+                  ],
+                  "createdTime" : 1591153742685,
+                  "lastUpdatedTime" : 1591153742685
+                },
+                {
+                  "id" : 493418085159,
+                  "name" : "test__constant_99_with_noise",
+                  "type" : "numeric",
+                  "isString" : false,
+                  "metadata" : {
+                    
+                  },
+                  "isStep" : false,
+                  "description" : "Constant 99 with +-0.1 uniform noise",
+                  "securityCategories" : [
+                  ],
+                  "accessCategories" : [
+                  ],
+                  "createdTime" : 1616677542400,
+                  "lastUpdatedTime" : 1616677542400
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : 7506309916675983857
+}

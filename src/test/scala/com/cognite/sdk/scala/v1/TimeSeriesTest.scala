@@ -18,7 +18,7 @@ import fs2.Stream
     "org.wartremover.warts.SizeIs"
   )
 )
-class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
+class TimeSeriesTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L, 999993L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
@@ -28,7 +28,7 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
   it should behave like readableWithRetrieveByExternalId(client.timeSeries, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
-  it should behave like readableWithRetrieveUnknownIds(client.timeSeries, idsNotFoundMessage = "Time series not found")
+  it should behave like readableWithRetrieveUnknownIds(client.timeSeries, random, idsNotFoundMessage = "Time series not found")
 
   it should behave like writable(
     client.timeSeries,
@@ -64,11 +64,11 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     supportsMissingAndThrown = true
   )
 
-  private val timeSeriesToCreate = Seq(
+  private lazy val timeSeriesToCreate = Seq(
     TimeSeries(name = Some("scala-sdk-write-example-1"), description = Some("description-1"), dataSetId = Some(testDataSet.id)),
     TimeSeries(name = Some("scala-sdk-write-example-2"))
   )
-  private val timeSeriesUpdates = Seq(
+  private lazy val timeSeriesUpdates = Seq(
     TimeSeries(name = Some("scala-sdk-write-example-1-1"), description = Some(null)),
     TimeSeries(name = Some("scala-sdk-write-example-2-1"), description = Some("scala-sdk-write-example-2"), dataSetId = Some(testDataSet.id))
   )
@@ -113,8 +113,8 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     }
   )
 
-  private val updateExternalId1 = s"externalId-1-${shortRandom()}"
-  private val updateExternalId2 = s"externalId-1-${shortRandom()}"
+  private lazy val updateExternalId1 = s"externalId-1-${shortRandom()}"
+  private lazy val updateExternalId2 = s"externalId-2-${shortRandom()}"
 
   it should behave like updatableByExternalId(
     client.timeSeries,
@@ -226,7 +226,8 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
     retryWithExpectedResult[Seq[TimeSeries]](
       client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(s"$externalIdPrefix-"))).compile.toList.unsafeRunSync(),
-      r => r should have size 4
+      r => r should have size 4,
+      sleep = sleepUnlessPlayback
     )
     createdItems
   }
@@ -245,7 +246,8 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
     retryWithExpectedResult[Seq[TimeSeries]](
       client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(prefix))).compile.toList.unsafeRunSync(),
-      r => r should have size 0
+      r => r should have size 0,
+      sleep = sleepUnlessPlayback
     )
   }
 
@@ -272,7 +274,8 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
     //make sure that timeSeries are deletes
     retryWithExpectedResult[Seq[TimeSeries]](
       client.timeSeries.filter(TimeSeriesFilter(externalIdPrefix = Some(prefix))).compile.toList.unsafeRunSync(),
-      r => r should have size 0
+      r => r should have size 0,
+      sleep = sleepUnlessPlayback
     )
   }
 
@@ -383,10 +386,10 @@ class TimeSeriesTest extends SdkTestSpec with ReadBehaviours with WritableBehavi
 
   it should "be possible to create and query a time series without a name" in {
     val timeSeriesID = client.timeSeries.createFromRead(Seq(TimeSeries())).unsafeRunSync().head.id
-    val startTime = System.currentTimeMillis()
+    val startTime = 1577836800000L
     val endTime = startTime + 20*1000
     val dp = (startTime to endTime by 1000).map(t =>
-        DataPoint(Instant.ofEpochMilli(t), java.lang.Math.random()))
+        DataPoint(Instant.ofEpochMilli(t), random.nextDouble()))
     client.dataPoints.insert(CogniteInternalId(timeSeriesID), dp).unsafeRunSync()
     retryWithExpectedResult[DataPointsByIdResponse](
       client.dataPoints.queryById(
