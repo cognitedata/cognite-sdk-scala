@@ -1,0 +1,375 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 202,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : null,
+                  "name" : null,
+                  "isString" : false,
+                  "metadata" : null,
+                  "unit" : null,
+                  "unitExternalId" : null,
+                  "assetId" : null,
+                  "isStep" : false,
+                  "description" : null,
+                  "securityCategories" : null,
+                  "dataSetId" : null
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries",
+        "status" : {
+          "code" : 201,
+          "reason" : "Created"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "191565da-911a-9b18-83ba-72c6d12c7d66"
+          ],
+          "date" : [
+            "Wed, 01 Jul 2026 07:32:37 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 204,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "id" : 3611259993781457,
+                  "type" : "numeric",
+                  "isString" : false,
+                  "metadata" : {
+                    
+                  },
+                  "isStep" : false,
+                  "securityCategories" : [
+                  ],
+                  "accessCategories" : [
+                  ],
+                  "createdTime" : 1782891157714,
+                  "lastUpdatedTime" : 1782891157714
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/data",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/protobuf"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 393,
+          "contentType" : "application/protobuf",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "text",
+            "body" : "\n�\u0003\b���迍�\u0006\u001a�\u0002\n\u0010\b�Л��-\u0011�P\u001f\")\u0001�?\n\u0010\b�כ��-\u0011@+�����?\n\u0010\b�ߛ��-\u0011\u0011��q�\u0018�?\n\u0010\b����-\u0011�V�\u007f\u000f��?\n\u0010\b����-\u0011��B-��?\n\u0010\b�����-\u00115o�`\u0013g�?\n\u0010\b�����-\u0011�~\n@�F�?\n\u0010\b؆���-\u0011�\u0006\u00041�R�?\n\u0010\b�����-\u0011W<\u001f4���?\n\u0010\b�����-\u0011�]m�.|�?\n\u0010\b�����-\u0011\u0000�1�!Mm?\n\u0010\b�����-\u0011�\r�d�%�?\n\u0010\bଡ଼��-\u0011+K�X�a�?\n\u0010\bȵ���-\u0011B\u001f�w ��?\n\u0010\b�����-\u0011����~��?\n\u0010\b�Ŝ��-\u0011�\u001e����?\n\u0010\b�͜��-\u0011W�=����?\n\u0010\b�Ԝ��-\u0011Hݱ�o:�?\n\u0010\b�ܜ��-\u0011�\u000e�#���?\n\u0010\b����-\u00110��@hO�?\n\u0010\b����-\u0011�\u0001I?���?"
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/data",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "c24b20c5-3c6e-9f84-83e4-037681afb631"
+          ],
+          "date" : [
+            "Wed, 01 Jul 2026 07:32:37 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 2,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/data/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/protobuf"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 158,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "start" : "1577836800000",
+                  "end" : "1577836821000",
+                  "limit" : 100000,
+                  "granularity" : null,
+                  "aggregates" : null,
+                  "id" : 3611259993781457
+                }
+              ],
+              "ignoreUnknownIds" : false
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/data/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "d3ac5142-e373-98d4-9880-41b220a45cdd"
+          ],
+          "date" : [
+            "Wed, 01 Jul 2026 07:32:37 GMT"
+          ],
+          "content-type" : [
+            "application/protobuf"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 395,
+          "contentType" : "application/protobuf",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "text",
+            "body" : "\n�\u0003\b���迍�\u0006\u001a�\u0002\n\u0010\b�Л��-\u0011�P\u001f\")\u0001�?\n\u0010\b�כ��-\u0011@+�����?\n\u0010\b�ߛ��-\u0011\u0011��q�\u0018�?\n\u0010\b����-\u0011�V�\u007f\u000f��?\n\u0010\b����-\u0011��B-��?\n\u0010\b�����-\u00115o�`\u0013g�?\n\u0010\b�����-\u0011�~\n@�F�?\n\u0010\b؆���-\u0011�\u0006\u00041�R�?\n\u0010\b�����-\u0011W<\u001f4���?\n\u0010\b�����-\u0011�]m�.|�?\n\u0010\b�����-\u0011\u0000�1�!Mm?\n\u0010\b�����-\u0011�\r�d�%�?\n\u0010\bଡ଼��-\u0011+K�X�a�?\n\u0010\bȵ���-\u0011B\u001f�w ��?\n\u0010\b�����-\u0011����~��?\n\u0010\b�Ŝ��-\u0011�\u001e����?\n\u0010\b�͜��-\u0011W�=����?\n\u0010\b�Ԝ��-\u0011Hݱ�o:�?\n\u0010\b�ܜ��-\u0011�\u000e�#���?\n\u0010\b����-\u00110��@hO�?\n\u0010\b����-\u0011�\u0001I?���?`\u0001"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/data/delete",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 95,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "inclusiveBegin" : 1577836800000,
+                  "exclusiveEnd" : 1577836821000,
+                  "id" : 3611259993781457
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/data/delete",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "dd148930-d9ae-9ccb-94be-8b1d4c59465e"
+          ],
+          "date" : [
+            "Wed, 01 Jul 2026 07:32:37 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 2,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : 1430698668751072511
+}
