@@ -31,7 +31,7 @@ jobs:
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
       - name: Cache Coursier dependencies
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5
+        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6
         env:
           cache-name: coursier-cache
         with:
@@ -66,7 +66,7 @@ jobs:
       # Caching dependencies in Pull Requests based on branch name and build.sbt.
       # Can we do something better here?
       - name: Cache Coursier dependencies
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5
+        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6
         env:
           cache-name: coursier-cache
         with:
@@ -103,7 +103,7 @@ jobs:
     # Caching dependencies in Pull Requests based on branch name and build.sbt.
     # Can we do something better here?
     - name: Cache Coursier dependencies
-      uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5
+      uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6
       env:
         cache-name: coursier-cache
       with:
