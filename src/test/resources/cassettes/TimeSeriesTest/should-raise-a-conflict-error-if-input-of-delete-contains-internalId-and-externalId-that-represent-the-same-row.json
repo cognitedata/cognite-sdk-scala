@@ -30,7 +30,7 @@
           "contentEncoding" : null,
           "content" : {
             "type" : "__gzipped_by_vcr_library_due_to_size",
-            "gzipped" : "H4sIAAAAAAAA/92RsYrDMAyG30VzDCVOmkvW44bOHcsNiq0EU8cplgI9Qt69KUevhlsylm6W/emXPzSDExoYmtMMdBWKAf3BQgOWPAkpM/ZhJQ5WlSYvCm1yZXcd5nVZQQYBB1pZNuhRsT2rf10J7Pgo0YUemg49UwYDCVoUhCZM3mcwrT3p+Sv5z+8tMpM8y3siXf7yLLGJ7iJuDA+CyUzRyc8nCvVjdMSPl/vg4zNsyTb7lx+6rroCN/kn8Lv4V3rX2loXm/wT+F3829bURu+37T+BX9v/e7kBjc2xNAsEAAA="
+            "gzipped" : "H4sIAAAAAAAA/92PPY/CMAyG/4vnRiqllF5XxMDMiBhcx1TRpSmKXQmE+O8UnTgi3dLxxJaP533t5wZOuRdoDjfgi3IM6HcWGrDsWdnQ0IWJ2FlTrSrKTys0tGgLsuUaMgjY88QKoUcj9tv8SSWwk71GFzpoTuiFM+hZ0aIiNGH0PoNxyqTnbbLPzyuKsL6vz0Y+//ZZForurG4IL0KYxuj0ukHlboiO5fXzHLx/l92z2f4FFTmusZrln8Cf4r9s7Re1dT7LP4E/xb+s27peVOUs/wT+3/7H+wNufxIcCwQAAA=="
           }
         }
       },
@@ -46,10 +46,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "2e2d2ab6-2248-9243-842e-15f3d4f0f139"
+            "a030a9f5-c729-93e1-9362-c1268f536b70"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:31 GMT"
+            "Wed, 01 Jul 2026 07:53:20 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -68,12 +68,12 @@
           ]
         },
         "entity" : {
-          "contentLength" : 1162,
+          "contentLength" : 1163,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
             "type" : "__gzipped_by_vcr_library_due_to_size",
-            "gzipped" : "H4sIAAAAAAAA/9WSPWvDMBCG/8vNNuj7LK+dMredSoaLdAmithMsBRpC/nsVAsW0FLxmfd/n4O7hrpAKjxn6jyukCL2RBrW0SmmUUugG+KvwPNGwqSVEHrhwG46HqY5tYmuDMkYH1UaxJ+UtQgMTjVzZHGigNsfP9s/UAi6X0x2eziPPKdQg5dcyp+kA/Z6GzA2MXChSIeivt0fNp58yczjPqVxeqPDhOCe+X7JtgELgnH+nYeaaxLd0X1BipzovvZbOiQYGyuX9FP/pb81DjzXovPHeV0nYObXaj+20x72hVX4W8JP5UVjfRwsjtbLSaVztB7XYRa/NKj8L+Mn8VC1edsJ2Ao1D9Kv97HbBB+3W/c8CfhY/29s3Berg1YoEAAA="
+            "gzipped" : "H4sIAAAAAAAA/9WTPWvDMBCG/4tmG/Stk9dOmdNOJcNZugRR2wmWAg3B/712A8W0FLxmfd/n4O5BurNUqM+seb+zFFmjBAelFCjPvTPCVYw+C40Ddru5ZZE6KlSH82mY53axtsYGfjRYB9HKELVjFRuwp5nNATusc/yo/0yt4HK7LPBw7WlMYQ5S3pcxDSfWHLHLVLGeCkYsyJr79Kjp8lNmCtcxldsLFjqdx0TLKYeKYQiU8+80jDQn8TUtCwoHErzUnGthK9ZhLm+X+E8/VQ8/moPhnksLwnij9WY/MkiODu0mPyv4yfyAMUY6D97Z+Rk5sdmPaqMPLfBNflbwk/nRBqxwQn//MiHUZj8aWgBh9SY/K/hZ/BymLxwtzeaLBAAA"
           }
         }
       }
@@ -110,7 +110,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-5c2443c2-"
+                "externalIdPrefix" : "delete-cogniteId-656c0f5a-"
               },
               "limit" : 1000
             }
@@ -129,10 +129,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "ec6b7bfc-c353-930e-85b2-17c905afb731"
+            "1738ed97-18c6-9adc-b9fd-3ff1da99a56f"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:31 GMT"
+            "Wed, 01 Jul 2026 07:53:20 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -196,7 +196,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-5c2443c2-"
+                "externalIdPrefix" : "delete-cogniteId-656c0f5a-"
               },
               "limit" : 1000
             }
@@ -215,10 +215,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "44d0aa78-5c6f-93ce-8579-d2f0dbb1a591"
+            "849bd9e5-b7de-9412-924a-b87b5e74ecb1"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:31 GMT"
+            "Wed, 01 Jul 2026 07:53:20 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -237,7 +237,93 @@
           ]
         },
         "entity" : {
-          "contentLength" : 298,
+          "contentLength" : 12,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 73,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "externalIdPrefix" : "delete-cogniteId-656c0f5a-"
+              },
+              "limit" : 1000
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/list",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "14a4ddd1-75e5-9273-a3e5-77dc98fe8672"
+          ],
+          "date" : [
+            "Wed, 01 Jul 2026 07:53:20 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 587,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -245,9 +331,9 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 414731522371103,
-                  "externalId" : "delete-cogniteId-5c2443c2-d0fa2957",
-                  "name" : "scala-sdk-delete-cogniteId-d0fa2957",
+                  "id" : 4085090268159544,
+                  "externalId" : "delete-cogniteId-656c0f5a-2c20a7a6",
+                  "name" : "scala-sdk-delete-cogniteId-2c20a7a6",
                   "type" : "numeric",
                   "isString" : false,
                   "metadata" : {
@@ -258,8 +344,25 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891931660,
-                  "lastUpdatedTime" : 1782891931660
+                  "createdTime" : 1782892400416,
+                  "lastUpdatedTime" : 1782892400416
+                },
+                {
+                  "id" : 8555279897633371,
+                  "externalId" : "delete-cogniteId-656c0f5a-3bd9cb80",
+                  "name" : "scala-sdk-delete-cogniteId-3bd9cb80",
+                  "type" : "numeric",
+                  "isString" : false,
+                  "metadata" : {
+                    
+                  },
+                  "isStep" : false,
+                  "securityCategories" : [
+                  ],
+                  "accessCategories" : [
+                  ],
+                  "createdTime" : 1782892400416,
+                  "lastUpdatedTime" : 1782892400416
                 }
               ]
             }
@@ -299,7 +402,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-5c2443c2-"
+                "externalIdPrefix" : "delete-cogniteId-656c0f5a-"
               },
               "limit" : 1000
             }
@@ -318,10 +421,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "2f67db8b-7e5f-9a3b-8afa-24a38707d2e4"
+            "39d7b2fa-0d44-92e0-82dd-7291146fa9ef"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:31 GMT"
+            "Wed, 01 Jul 2026 07:53:21 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -340,218 +443,12 @@
           ]
         },
         "entity" : {
-          "contentLength" : 298,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "items" : [
-                {
-                  "id" : 414731522371103,
-                  "externalId" : "delete-cogniteId-5c2443c2-d0fa2957",
-                  "name" : "scala-sdk-delete-cogniteId-d0fa2957",
-                  "type" : "numeric",
-                  "isString" : false,
-                  "metadata" : {
-                    
-                  },
-                  "isStep" : false,
-                  "securityCategories" : [
-                  ],
-                  "accessCategories" : [
-                  ],
-                  "createdTime" : 1782891931660,
-                  "lastUpdatedTime" : 1782891931660
-                }
-              ]
-            }
-          }
-        }
-      }
-    },
-    {
-      "request" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/list",
-        "headers" : {
-          "authorization" : [
-            "<redacted>"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "accept" : [
-            "application/json"
-          ],
-          "x-cdp-sdk" : [
-            "<redacted>"
-          ],
-          "accept-encoding" : [
-            "gzip, deflate"
-          ],
-          "x-cdp-app" : [
-            "scala-sdk-vcr-test"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 73,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-5c2443c2-"
-              },
-              "limit" : 1000
-            }
-          }
-        }
-      },
-      "response" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/list",
-        "status" : {
-          "code" : 200,
-          "reason" : "OK"
-        },
-        "headers" : {
-          "server" : [
-            "envoy"
-          ],
-          "x-request-id" : [
-            "1833db60-c796-9938-a45e-c8c36fa277af"
-          ],
-          "date" : [
-            "Wed, 01 Jul 2026 07:45:32 GMT"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "transfer-encoding" : [
-            "chunked"
-          ],
-          "x-frame-options" : [
-            "DENY"
-          ],
-          "x-content-type-options" : [
-            "nosniff"
-          ],
-          "strict-transport-security" : [
-            "max-age=31536000; includeSubDomains"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 298,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "items" : [
-                {
-                  "id" : 414731522371103,
-                  "externalId" : "delete-cogniteId-5c2443c2-d0fa2957",
-                  "name" : "scala-sdk-delete-cogniteId-d0fa2957",
-                  "type" : "numeric",
-                  "isString" : false,
-                  "metadata" : {
-                    
-                  },
-                  "isStep" : false,
-                  "securityCategories" : [
-                  ],
-                  "accessCategories" : [
-                  ],
-                  "createdTime" : 1782891931660,
-                  "lastUpdatedTime" : 1782891931660
-                }
-              ]
-            }
-          }
-        }
-      }
-    },
-    {
-      "request" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/list",
-        "headers" : {
-          "authorization" : [
-            "<redacted>"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "accept" : [
-            "application/json"
-          ],
-          "x-cdp-sdk" : [
-            "<redacted>"
-          ],
-          "accept-encoding" : [
-            "gzip, deflate"
-          ],
-          "x-cdp-app" : [
-            "scala-sdk-vcr-test"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 73,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-5c2443c2-"
-              },
-              "limit" : 1000
-            }
-          }
-        }
-      },
-      "response" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/list",
-        "status" : {
-          "code" : 200,
-          "reason" : "OK"
-        },
-        "headers" : {
-          "server" : [
-            "envoy"
-          ],
-          "x-request-id" : [
-            "c838d155-5650-9632-a813-a037a8b151b2"
-          ],
-          "date" : [
-            "Wed, 01 Jul 2026 07:45:32 GMT"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "transfer-encoding" : [
-            "chunked"
-          ],
-          "x-frame-options" : [
-            "DENY"
-          ],
-          "x-content-type-options" : [
-            "nosniff"
-          ],
-          "strict-transport-security" : [
-            "max-age=31536000; includeSubDomains"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 1162,
+          "contentLength" : 1163,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
             "type" : "__gzipped_by_vcr_library_due_to_size",
-            "gzipped" : "H4sIAAAAAAAA/9XTPWvDMBAG4P9ysw36Pstrp8xtp5LhIl2CqO0ES4GGkP9ehUAxLQWvWe99D6QH7gqp8Jih/7hCitAbaVBLq5RGKYVugL8KzxMNmxpC5IELt+F4mOraJrY2KGN0UG0Ue1LeIjQw0ci1mwMN1Ob42f7ZWpTL5XQvT+eR5xTqIOXXMqfpAP2ehswNjFwoUiHor7dHzKefMHM4z6lcXqjw4Tgnvv9k2wCFwDn/noaZ6yS+pfsDJXaq89Jr6ZxoYKBc3k/xn/zWPHgUVh4tjNTKSqdxtQ9qsYtem1U+i/KT+VQWLzthO4HGIfrVPrtd8EE7WuWzKD+ZjzXovPHe1yPDzqnVPrbTHvdmnc+i/Cw+29s3AJGRlooEAAA="
+            "gzipped" : "H4sIAAAAAAAA/9WSPWvDMBCG/4tmG/Stk9dOmdNOJcNZugRR2wmWAg3B/712A8W0FLxmfd/n4O7h7iwV6jNr3u8sRdYowUEpBcpz74xwFaPPQuOA3W5uWaSOCtXhfBrmuV2srbGBHw3WQbQyRO1YxQbsaWZzwA7rHD/qP1MruNwuCzxcexpTmIOU92VMw4k1R+wyVaynghELsuY+PWq6/JSZwnVM5faChU7nMdFyyqFiGALl/DsNI81JfE3LgsKBBC8151rYinWYy9sl/tNP1cOP5mC459KCMN5ovdmPDJKjQ7vJzwp+Nj8GrHBCf3+REGqzHw0tgLB6k58V/GR+wBgjnQfv7CzIic1+VBt9aIFv8rOCn8XPYfoCdK/1/4sEAAA="
           }
         }
       }
@@ -589,13 +486,13 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "delete-cogniteId-5c2443c2-730bd934"
+                  "externalId" : "delete-cogniteId-656c0f5a-3bd9cb80"
                 },
                 {
-                  "externalId" : "delete-cogniteId-5c2443c2-bbc9c36a"
+                  "externalId" : "delete-cogniteId-656c0f5a-48b88164"
                 },
                 {
-                  "id" : 2747330413251637
+                  "id" : 8555279897633371
                 }
               ],
               "ignoreUnknownIds" : true
@@ -615,10 +512,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "faf29991-64f8-93c8-bf7e-2692350feaa1"
+            "a5911f0d-4252-944d-aca4-1905e2cc9bac"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:32 GMT"
+            "Wed, 01 Jul 2026 07:53:21 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -648,8 +545,8 @@
                 "message" : "Conflicting time series references",
                 "duplicated" : [
                   {
-                    "id" : 2747330413251637,
-                    "externalId" : "delete-cogniteId-5c2443c2-730bd934"
+                    "id" : 8555279897633371,
+                    "externalId" : "delete-cogniteId-656c0f5a-3bd9cb80"
                   }
                 ]
               }
@@ -683,7 +580,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 134,
+          "contentLength" : 135,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -691,13 +588,13 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 414731522371103
+                  "id" : 3108333839097517
                 },
                 {
-                  "id" : 5476949997317862
+                  "id" : 4085090268159544
                 },
                 {
-                  "externalId" : "delete-cogniteId-5c2443c2-58397f4a"
+                  "externalId" : "delete-cogniteId-656c0f5a-2c20a7a6"
                 }
               ],
               "ignoreUnknownIds" : true
@@ -717,10 +614,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "e84f4e20-76fe-9607-9024-8d9edddfb97b"
+            "5814abcf-1349-942c-a0d3-9f19a7d88fad"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:32 GMT"
+            "Wed, 01 Jul 2026 07:53:21 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -750,8 +647,8 @@
                 "message" : "Conflicting time series references",
                 "duplicated" : [
                   {
-                    "id" : 5476949997317862,
-                    "externalId" : "delete-cogniteId-5c2443c2-58397f4a"
+                    "id" : 4085090268159544,
+                    "externalId" : "delete-cogniteId-656c0f5a-2c20a7a6"
                   }
                 ]
               }
@@ -785,7 +682,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 186,
+          "contentLength" : 187,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -793,16 +690,16 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 414731522371103
+                  "id" : 3108333839097517
                 },
                 {
-                  "id" : 5476949997317862
+                  "id" : 4085090268159544
                 },
                 {
-                  "externalId" : "delete-cogniteId-5c2443c2-730bd934"
+                  "externalId" : "delete-cogniteId-656c0f5a-3bd9cb80"
                 },
                 {
-                  "externalId" : "delete-cogniteId-5c2443c2-bbc9c36a"
+                  "externalId" : "delete-cogniteId-656c0f5a-48b88164"
                 }
               ],
               "ignoreUnknownIds" : true
@@ -822,10 +719,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "1aa58284-dfdf-9f9b-a725-0ce93b6dc578"
+            "8663378e-99d0-9337-82cf-8202f33d465f"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:32 GMT"
+            "Wed, 01 Jul 2026 07:53:21 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -888,7 +785,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-5c2443c2"
+                "externalIdPrefix" : "delete-cogniteId-656c0f5a"
               },
               "limit" : 1000
             }
@@ -907,10 +804,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "9fbcead3-66f6-9026-8160-ad88f7b195d9"
+            "78311bcc-9c09-9504-9f43-1fdbab38b3ef"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:32 GMT"
+            "Wed, 01 Jul 2026 07:53:21 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -929,90 +826,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 1162,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "__gzipped_by_vcr_library_due_to_size",
-            "gzipped" : "H4sIAAAAAAAA/9XTPWvDMBAG4P9ysw36Pstrp8xtp5LhIl2CqO0ES4GGkP9ehUAxLQWvWe99D6QH7gqp8Jih/7hCitAbaVBLq5RGKYVugL8KzxMNmxpC5IELt+F4mOraJrY2KGN0UG0Ue1LeIjQw0ci1mwMN1Ob42f7ZWpTL5XQvT+eR5xTqIOXXMqfpAP2ehswNjFwoUiHor7dHzKefMHM4z6lcXqjw4Tgnvv9k2wCFwDn/noaZ6yS+pfsDJXaq89Jr6ZxoYKBc3k/xn/zWPHgUVh4tjNTKSqdxtQ9qsYtem1U+i/KT+VQWLzthO4HGIfrVPrtd8EE7WuWzKD+ZjzXovPHe1yPDzqnVPrbTHvdmnc+i/Cw+29s3AJGRlooEAAA="
-          }
-        }
-      }
-    },
-    {
-      "request" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/list",
-        "headers" : {
-          "authorization" : [
-            "<redacted>"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "accept" : [
-            "application/json"
-          ],
-          "x-cdp-sdk" : [
-            "<redacted>"
-          ],
-          "accept-encoding" : [
-            "gzip, deflate"
-          ],
-          "x-cdp-app" : [
-            "scala-sdk-vcr-test"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 72,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-5c2443c2"
-              },
-              "limit" : 1000
-            }
-          }
-        }
-      },
-      "response" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/list",
-        "status" : {
-          "code" : 200,
-          "reason" : "OK"
-        },
-        "headers" : {
-          "server" : [
-            "envoy"
-          ],
-          "x-request-id" : [
-            "187fd340-946d-9ca0-b073-02de2b660415"
-          ],
-          "date" : [
-            "Wed, 01 Jul 2026 07:45:33 GMT"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "transfer-encoding" : [
-            "chunked"
-          ],
-          "x-frame-options" : [
-            "DENY"
-          ],
-          "x-content-type-options" : [
-            "nosniff"
-          ],
-          "strict-transport-security" : [
-            "max-age=31536000; includeSubDomains"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 298,
+          "contentLength" : 875,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -1020,9 +834,9 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 414731522371103,
-                  "externalId" : "delete-cogniteId-5c2443c2-d0fa2957",
-                  "name" : "scala-sdk-delete-cogniteId-d0fa2957",
+                  "id" : 3108333839097517,
+                  "externalId" : "delete-cogniteId-656c0f5a-c1b2cd47",
+                  "name" : "scala-sdk-delete-cogniteId-c1b2cd47",
                   "type" : "numeric",
                   "isString" : false,
                   "metadata" : {
@@ -1033,8 +847,42 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891931660,
-                  "lastUpdatedTime" : 1782891931660
+                  "createdTime" : 1782892400416,
+                  "lastUpdatedTime" : 1782892400416
+                },
+                {
+                  "id" : 4085090268159544,
+                  "externalId" : "delete-cogniteId-656c0f5a-2c20a7a6",
+                  "name" : "scala-sdk-delete-cogniteId-2c20a7a6",
+                  "type" : "numeric",
+                  "isString" : false,
+                  "metadata" : {
+                    
+                  },
+                  "isStep" : false,
+                  "securityCategories" : [
+                  ],
+                  "accessCategories" : [
+                  ],
+                  "createdTime" : 1782892400416,
+                  "lastUpdatedTime" : 1782892400416
+                },
+                {
+                  "id" : 4586171408333113,
+                  "externalId" : "delete-cogniteId-656c0f5a-48b88164",
+                  "name" : "scala-sdk-delete-cogniteId-48b88164",
+                  "type" : "numeric",
+                  "isString" : false,
+                  "metadata" : {
+                    
+                  },
+                  "isStep" : false,
+                  "securityCategories" : [
+                  ],
+                  "accessCategories" : [
+                  ],
+                  "createdTime" : 1782892400416,
+                  "lastUpdatedTime" : 1782892400416
                 }
               ]
             }
@@ -1074,7 +922,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-5c2443c2"
+                "externalIdPrefix" : "delete-cogniteId-656c0f5a"
               },
               "limit" : 1000
             }
@@ -1093,10 +941,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "5f23754d-a2ff-9c8d-858a-488ea973c028"
+            "1c56792a-eb35-9508-a741-eb7e5758c7c7"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:33 GMT"
+            "Wed, 01 Jul 2026 07:53:21 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -1115,7 +963,7 @@
           ]
         },
         "entity" : {
-          "contentLength" : 298,
+          "contentLength" : 875,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
@@ -1123,9 +971,9 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 414731522371103,
-                  "externalId" : "delete-cogniteId-5c2443c2-d0fa2957",
-                  "name" : "scala-sdk-delete-cogniteId-d0fa2957",
+                  "id" : 3108333839097517,
+                  "externalId" : "delete-cogniteId-656c0f5a-c1b2cd47",
+                  "name" : "scala-sdk-delete-cogniteId-c1b2cd47",
                   "type" : "numeric",
                   "isString" : false,
                   "metadata" : {
@@ -1136,8 +984,42 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891931660,
-                  "lastUpdatedTime" : 1782891931660
+                  "createdTime" : 1782892400416,
+                  "lastUpdatedTime" : 1782892400416
+                },
+                {
+                  "id" : 4085090268159544,
+                  "externalId" : "delete-cogniteId-656c0f5a-2c20a7a6",
+                  "name" : "scala-sdk-delete-cogniteId-2c20a7a6",
+                  "type" : "numeric",
+                  "isString" : false,
+                  "metadata" : {
+                    
+                  },
+                  "isStep" : false,
+                  "securityCategories" : [
+                  ],
+                  "accessCategories" : [
+                  ],
+                  "createdTime" : 1782892400416,
+                  "lastUpdatedTime" : 1782892400416
+                },
+                {
+                  "id" : 4586171408333113,
+                  "externalId" : "delete-cogniteId-656c0f5a-48b88164",
+                  "name" : "scala-sdk-delete-cogniteId-48b88164",
+                  "type" : "numeric",
+                  "isString" : false,
+                  "metadata" : {
+                    
+                  },
+                  "isStep" : false,
+                  "securityCategories" : [
+                  ],
+                  "accessCategories" : [
+                  ],
+                  "createdTime" : 1782892400416,
+                  "lastUpdatedTime" : 1782892400416
                 }
               ]
             }
@@ -1177,7 +1059,7 @@
             "type" : "json",
             "body" : {
               "filter" : {
-                "externalIdPrefix" : "delete-cogniteId-5c2443c2"
+                "externalIdPrefix" : "delete-cogniteId-656c0f5a"
               },
               "limit" : 1000
             }
@@ -1196,10 +1078,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "39cc9af8-18d6-9d76-93f2-30f17e13faf7"
+            "24ba359a-4a52-9aac-93ae-487ff92e5ec4"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:34 GMT"
+            "Wed, 01 Jul 2026 07:53:22 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -1232,5 +1114,5 @@
       }
     }
   ],
-  "seed" : -7981818904411029651
+  "seed" : 3112984488835066739
 }

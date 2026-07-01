@@ -75,10 +75,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "38998177-64a6-9879-9b4a-9087c6dea52b"
+            "aafb20a4-687b-9865-a906-f7bcc60dd173"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:40 GMT"
+            "Wed, 01 Jul 2026 07:53:29 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -105,7 +105,7 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 1135150595283530,
+                  "id" : 2428117287064232,
                   "name" : "scala-sdk-write-example-1",
                   "type" : "numeric",
                   "isString" : false,
@@ -119,11 +119,11 @@
                   "dataSetId" : 87195428580,
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891940872,
-                  "lastUpdatedTime" : 1782891940872
+                  "createdTime" : 1782892409748,
+                  "lastUpdatedTime" : 1782892409748
                 },
                 {
-                  "id" : 3143017334069121,
+                  "id" : 7676172752558307,
                   "name" : "scala-sdk-write-example-2",
                   "type" : "numeric",
                   "isString" : false,
@@ -135,8 +135,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891940872,
-                  "lastUpdatedTime" : 1782891940872
+                  "createdTime" : 1782892409748,
+                  "lastUpdatedTime" : 1782892409748
                 }
               ]
             }
@@ -195,10 +195,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "2db5e07d-8e2f-9595-9ec7-cd81a08f7212"
+            "d3f66d99-3ddf-9dfb-8ccd-613c10ef8848"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:41 GMT"
+            "Wed, 01 Jul 2026 07:53:29 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -263,8 +263,8 @@
             "body" : {
               "filter" : {
                 "createdTime" : {
-                  "min" : 1782891940872,
-                  "max" : 1782891940872
+                  "min" : 1782892409748,
+                  "max" : 1782892409748
                 },
                 "dataSetIds" : [
                   {
@@ -289,10 +289,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "90bf5382-71a2-95af-9476-270f7c6cb4df"
+            "953f8e9e-d401-93f2-b5ae-969771bd3271"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:40 GMT"
+            "Wed, 01 Jul 2026 07:53:29 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -357,8 +357,8 @@
             "body" : {
               "filter" : {
                 "createdTime" : {
-                  "min" : 1782891940872,
-                  "max" : 1782891940872
+                  "min" : 1782892409748,
+                  "max" : 1782892409748
                 },
                 "dataSetIds" : [
                   {
@@ -383,198 +383,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "954176bc-c981-90e9-8437-9a88c6bd9a24"
+            "8b324bce-6221-93b5-8ae8-ac971e150737"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:41 GMT"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "transfer-encoding" : [
-            "chunked"
-          ],
-          "x-frame-options" : [
-            "DENY"
-          ],
-          "x-content-type-options" : [
-            "nosniff"
-          ],
-          "strict-transport-security" : [
-            "max-age=31536000; includeSubDomains"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 12,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "items" : [
-              ]
-            }
-          }
-        }
-      }
-    },
-    {
-      "request" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/search",
-        "headers" : {
-          "authorization" : [
-            "<redacted>"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "accept" : [
-            "application/json"
-          ],
-          "x-cdp-sdk" : [
-            "<redacted>"
-          ],
-          "accept-encoding" : [
-            "gzip, deflate"
-          ],
-          "x-cdp-app" : [
-            "scala-sdk-vcr-test"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 114,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "filter" : {
-                "createdTime" : {
-                  "min" : 1782891940872,
-                  "max" : 1782891940872
-                },
-                "dataSetIds" : [
-                  {
-                    "id" : 87195428580
-                  }
-                ]
-              },
-              "limit" : 100
-            }
-          }
-        }
-      },
-      "response" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/search",
-        "status" : {
-          "code" : 200,
-          "reason" : "OK"
-        },
-        "headers" : {
-          "server" : [
-            "envoy"
-          ],
-          "x-request-id" : [
-            "079372d6-8452-95a8-a1f9-957e1fb73b7b"
-          ],
-          "date" : [
-            "Wed, 01 Jul 2026 07:45:41 GMT"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "transfer-encoding" : [
-            "chunked"
-          ],
-          "x-frame-options" : [
-            "DENY"
-          ],
-          "x-content-type-options" : [
-            "nosniff"
-          ],
-          "strict-transport-security" : [
-            "max-age=31536000; includeSubDomains"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 12,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "items" : [
-              ]
-            }
-          }
-        }
-      }
-    },
-    {
-      "request" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/search",
-        "headers" : {
-          "authorization" : [
-            "<redacted>"
-          ],
-          "content-type" : [
-            "application/json"
-          ],
-          "accept" : [
-            "application/json"
-          ],
-          "x-cdp-sdk" : [
-            "<redacted>"
-          ],
-          "accept-encoding" : [
-            "gzip, deflate"
-          ],
-          "x-cdp-app" : [
-            "scala-sdk-vcr-test"
-          ]
-        },
-        "entity" : {
-          "contentLength" : 114,
-          "contentType" : "application/json",
-          "contentEncoding" : null,
-          "content" : {
-            "type" : "json",
-            "body" : {
-              "filter" : {
-                "createdTime" : {
-                  "min" : 1782891940872,
-                  "max" : 1782891940872
-                },
-                "dataSetIds" : [
-                  {
-                    "id" : 87195428580
-                  }
-                ]
-              },
-              "limit" : 100
-            }
-          }
-        }
-      },
-      "response" : {
-        "method" : "POST",
-        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/timeseries/search",
-        "status" : {
-          "code" : 200,
-          "reason" : "OK"
-        },
-        "headers" : {
-          "server" : [
-            "envoy"
-          ],
-          "x-request-id" : [
-            "aa34c878-afea-94cf-99b7-f795ac463182"
-          ],
-          "date" : [
-            "Wed, 01 Jul 2026 07:45:41 GMT"
+            "Wed, 01 Jul 2026 07:53:30 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -601,7 +413,7 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 1135150595283530,
+                  "id" : 2428117287064232,
                   "name" : "scala-sdk-write-example-1",
                   "type" : "numeric",
                   "isString" : false,
@@ -615,8 +427,8 @@
                   "dataSetId" : 87195428580,
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891940872,
-                  "lastUpdatedTime" : 1782891940872
+                  "createdTime" : 1782892409748,
+                  "lastUpdatedTime" : 1782892409748
                 }
               ]
             }
@@ -657,10 +469,10 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 1135150595283530
+                  "id" : 2428117287064232
                 },
                 {
-                  "id" : 3143017334069121
+                  "id" : 7676172752558307
                 }
               ],
               "ignoreUnknownIds" : false
@@ -680,10 +492,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "453cae24-502f-9d12-96e5-fd8844666074"
+            "a6f5239e-5e86-998c-82da-abe1e7705476"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:41 GMT"
+            "Wed, 01 Jul 2026 07:53:30 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -715,5 +527,5 @@
       }
     }
   ],
-  "seed" : -7291474123190092478
+  "seed" : -2057267295426312947
 }

@@ -33,7 +33,7 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "812f2c08",
+                  "externalId" : "9952f8b2",
                   "name" : null,
                   "isString" : false,
                   "metadata" : null,
@@ -62,10 +62,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "3f46338e-828e-93c5-828c-432018c3c971"
+            "a72476b2-a08e-92a9-8f76-d9a7f7274987"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:43 GMT"
+            "Wed, 01 Jul 2026 07:53:32 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -92,8 +92,8 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 1884839648493364,
-                  "externalId" : "812f2c08",
+                  "id" : 2938367607779489,
+                  "externalId" : "9952f8b2",
                   "type" : "numeric",
                   "isString" : false,
                   "metadata" : {
@@ -105,8 +105,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891944136,
-                  "lastUpdatedTime" : 1782891944136
+                  "createdTime" : 1782892412663,
+                  "lastUpdatedTime" : 1782892412663
                 }
               ]
             }
@@ -147,7 +147,7 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "812f2c08"
+                  "externalId" : "9952f8b2"
                 }
               ],
               "ignoreUnknownIds" : false
@@ -167,10 +167,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "31d22509-18cc-9ee1-9ff2-8bb2f23e0f7e"
+            "3477dbde-3b32-9042-b382-6c0242f3db2c"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:43 GMT"
+            "Wed, 01 Jul 2026 07:53:32 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -197,8 +197,8 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 1884839648493364,
-                  "externalId" : "812f2c08",
+                  "id" : 2938367607779489,
+                  "externalId" : "9952f8b2",
                   "type" : "numeric",
                   "isString" : false,
                   "metadata" : {
@@ -210,8 +210,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891944136,
-                  "lastUpdatedTime" : 1782891944136
+                  "createdTime" : 1782892412663,
+                  "lastUpdatedTime" : 1782892412663
                 }
               ]
             }
@@ -257,7 +257,7 @@
                       "set" : "temperature:deg_f"
                     }
                   },
-                  "externalId" : "812f2c08"
+                  "externalId" : "9952f8b2"
                 }
               ]
             }
@@ -276,10 +276,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "852b11b9-ad39-942c-b058-735abc28f9c2"
+            "0d624035-f680-92d1-8dcd-7f4f58f47d0c"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:44 GMT"
+            "Wed, 01 Jul 2026 07:53:32 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -306,8 +306,8 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 1884839648493364,
-                  "externalId" : "812f2c08",
+                  "id" : 2938367607779489,
+                  "externalId" : "9952f8b2",
                   "type" : "numeric",
                   "isString" : false,
                   "metadata" : {
@@ -319,8 +319,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891944136,
-                  "lastUpdatedTime" : 1782891944418
+                  "createdTime" : 1782892412663,
+                  "lastUpdatedTime" : 1782892413011
                 }
               ]
             }
@@ -361,7 +361,7 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "812f2c08"
+                  "externalId" : "9952f8b2"
                 }
               ],
               "ignoreUnknownIds" : false
@@ -381,10 +381,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "ecc18073-1826-9688-804f-1207fb5f74c4"
+            "37bc5873-29df-979a-bff9-5dad72c4de7d"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:44 GMT"
+            "Wed, 01 Jul 2026 07:53:32 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -411,8 +411,8 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 1884839648493364,
-                  "externalId" : "812f2c08",
+                  "id" : 2938367607779489,
+                  "externalId" : "9952f8b2",
                   "type" : "numeric",
                   "isString" : false,
                   "metadata" : {
@@ -424,8 +424,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891944136,
-                  "lastUpdatedTime" : 1782891944418
+                  "createdTime" : 1782892412663,
+                  "lastUpdatedTime" : 1782892413011
                 }
               ]
             }
@@ -484,10 +484,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "d22f6cff-2975-92ba-94d1-52ce5455c2d3"
+            "558c830f-f5d6-9726-9c88-b436ec5eecb8"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:44 GMT"
+            "Wed, 01 Jul 2026 07:53:33 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -506,13 +506,30 @@
           ]
         },
         "entity" : {
-          "contentLength" : 265,
+          "contentLength" : 519,
           "contentType" : "application/json",
           "contentEncoding" : null,
           "content" : {
             "type" : "json",
             "body" : {
               "items" : [
+                {
+                  "id" : 2938367607779489,
+                  "externalId" : "9952f8b2",
+                  "type" : "numeric",
+                  "isString" : false,
+                  "metadata" : {
+                    
+                  },
+                  "unitExternalId" : "temperature:deg_f",
+                  "isStep" : false,
+                  "securityCategories" : [
+                  ],
+                  "accessCategories" : [
+                  ],
+                  "createdTime" : 1782892412663,
+                  "lastUpdatedTime" : 1782892413011
+                },
                 {
                   "id" : 8307035654530677,
                   "externalId" : "53d3eaba",
@@ -587,10 +604,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "01744625-fdb9-9840-ba1d-391bdc8a51e9"
+            "3c6cb191-f8f6-9e3e-b960-3dd9609501a8"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:44 GMT"
+            "Wed, 01 Jul 2026 07:53:33 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -617,8 +634,8 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 1884839648493364,
-                  "externalId" : "812f2c08",
+                  "id" : 2938367607779489,
+                  "externalId" : "9952f8b2",
                   "type" : "numeric",
                   "isString" : false,
                   "metadata" : {
@@ -630,8 +647,8 @@
                   ],
                   "accessCategories" : [
                   ],
-                  "createdTime" : 1782891944136,
-                  "lastUpdatedTime" : 1782891944418
+                  "createdTime" : 1782892412663,
+                  "lastUpdatedTime" : 1782892413011
                 },
                 {
                   "id" : 8307035654530677,
@@ -689,7 +706,7 @@
             "body" : {
               "items" : [
                 {
-                  "externalId" : "812f2c08"
+                  "externalId" : "9952f8b2"
                 }
               ],
               "ignoreUnknownIds" : true
@@ -709,10 +726,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "ce96e72f-8064-9edc-b89a-a6d74427544e"
+            "30c225af-7da9-9122-909f-dec3db951227"
           ],
           "date" : [
-            "Wed, 01 Jul 2026 07:45:44 GMT"
+            "Wed, 01 Jul 2026 07:53:33 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -744,5 +761,5 @@
       }
     }
   ],
-  "seed" : 4251887661562474084
+  "seed" : 7949126623842808238
 }
