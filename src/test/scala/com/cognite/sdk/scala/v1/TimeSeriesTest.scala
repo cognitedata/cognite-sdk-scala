@@ -114,7 +114,7 @@ class TimeSeriesTest extends SdkVcrTestSpec with ReadBehaviours with WritableBeh
   )
 
   private lazy val updateExternalId1 = s"externalId-1-${shortRandom()}"
-  private lazy val updateExternalId2 = s"externalId-1-${shortRandom()}"
+  private lazy val updateExternalId2 = s"externalId-2-${shortRandom()}"
 
   it should behave like updatableByExternalId(
     client.timeSeries,
