@@ -27,10 +27,11 @@ body = "\n".join(lines)
 pr_number = sys.argv[1]
 repo = sys.argv[2]
 
-existing = json.loads(subprocess.run(
-    ["gh", "api", f"repos/{repo}/issues/{pr_number}/comments", "--paginate"],
+pages = json.loads(subprocess.run(
+    ["gh", "api", f"repos/{repo}/issues/{pr_number}/comments", "--paginate", "--slurp"],
     capture_output=True, text=True, check=True
 ).stdout)
+existing = [comment for page in pages for comment in page]
 
 bot_comment = next((c for c in existing if MARKER in (c.get("body") or "")), None)
 
