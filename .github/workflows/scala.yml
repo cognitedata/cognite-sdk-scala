@@ -151,6 +151,7 @@ jobs:
 
     - name: Comment PR with top 3 slowest test suites
       if: github.event_name == 'pull_request'
+      continue-on-error: true
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
