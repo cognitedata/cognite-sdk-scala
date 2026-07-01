@@ -51,10 +51,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "30ca162b-42b0-91d8-a659-8c9fd7f823c4"
+            "8bc3d706-e7d4-9645-b3cf-ffc86922a03f"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 12:11:58 GMT"
+            "Thu, 11 Jun 2026 14:14:52 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -171,10 +171,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "5965c4de-40da-9ddc-98fe-aa887d7dd057"
+            "913586a8-088e-9eec-afd4-1c48a74c22b8"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 12:11:58 GMT"
+            "Thu, 11 Jun 2026 14:14:52 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -207,25 +207,25 @@
                   "type" : "test",
                   "subtype" : "test",
                   "description" : "scala-sdk-update-1",
-                  "id" : 6801000017200215,
-                  "lastUpdatedTime" : 1781179918675,
-                  "createdTime" : 1781179918675
+                  "id" : 3813902209409212,
+                  "lastUpdatedTime" : 1781187292647,
+                  "createdTime" : 1781187292647
                 },
                 {
                   "type" : "test",
                   "subtype" : "test",
                   "description" : "scala-sdk-update-2",
-                  "id" : 2524158113945259,
-                  "lastUpdatedTime" : 1781179918675,
-                  "createdTime" : 1781179918675
+                  "id" : 3576242406966771,
+                  "lastUpdatedTime" : 1781187292647,
+                  "createdTime" : 1781187292647
                 },
                 {
                   "dataSetId" : 87195428580,
                   "type" : "test",
                   "description" : "scala-sdk-update-3",
-                  "id" : 8005237333347109,
-                  "lastUpdatedTime" : 1781179918675,
-                  "createdTime" : 1781179918675
+                  "id" : 7480157082972092,
+                  "lastUpdatedTime" : 1781187292647,
+                  "createdTime" : 1781187292647
                 }
               ]
             }
@@ -266,8 +266,8 @@
             "body" : {
               "filter" : {
                 "createdTime" : {
-                  "min" : 1781179918675,
-                  "max" : 1781179918675
+                  "min" : 1781187292647,
+                  "max" : 1781187292647
                 },
                 "dataSetIds" : [
                   {
@@ -292,13 +292,13 @@
             "envoy"
           ],
           "x-request-id" : [
-            "6c42d72d-17c5-9309-80bd-a688fb54f021"
+            "1776bd0b-289c-9f96-a7e9-5108080140f6"
           ],
           "access-control-expose-headers" : [
             "X-Cognite-Fingerprint"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 12:11:58 GMT"
+            "Thu, 11 Jun 2026 14:14:52 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -310,7 +310,7 @@
             "DENY"
           ],
           "x-cognite-fingerprint" : [
-            "com.cognite.api.services.search.SearchFingerprint@45d752aa"
+            "com.cognite.api.services.search.SearchFingerprint@2688a5de"
           ],
           "x-content-type-options" : [
             "nosniff"
@@ -369,8 +369,8 @@
             "body" : {
               "filter" : {
                 "createdTime" : {
-                  "min" : 1781179918675,
-                  "max" : 1781179918675
+                  "min" : 1781187292647,
+                  "max" : 1781187292647
                 },
                 "dataSetIds" : [
                   {
@@ -395,13 +395,13 @@
             "envoy"
           ],
           "x-request-id" : [
-            "820c5143-8261-9f3f-b07f-9e45856a0780"
+            "8ba4add1-2862-9dca-bb56-5502eb601b49"
           ],
           "access-control-expose-headers" : [
             "X-Cognite-Fingerprint"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 12:11:58 GMT"
+            "Thu, 11 Jun 2026 14:14:53 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -413,7 +413,7 @@
             "DENY"
           ],
           "x-cognite-fingerprint" : [
-            "com.cognite.api.services.search.SearchFingerprint@712738b9"
+            "com.cognite.api.services.search.SearchFingerprint@30c9acc9"
           ],
           "x-content-type-options" : [
             "nosniff"
@@ -472,8 +472,8 @@
             "body" : {
               "filter" : {
                 "createdTime" : {
-                  "min" : 1781179918675,
-                  "max" : 1781179918675
+                  "min" : 1781187292647,
+                  "max" : 1781187292647
                 },
                 "dataSetIds" : [
                   {
@@ -498,13 +498,13 @@
             "envoy"
           ],
           "x-request-id" : [
-            "08d1d61b-5059-92ce-9724-51957e694db6"
+            "f193b90f-6f7f-9c67-a2ba-e46aff5b9bb1"
           ],
           "access-control-expose-headers" : [
             "X-Cognite-Fingerprint"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 12:11:59 GMT"
+            "Thu, 11 Jun 2026 14:14:53 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -516,7 +516,110 @@
             "DENY"
           ],
           "x-cognite-fingerprint" : [
-            "com.cognite.api.services.search.SearchFingerprint@69fca14d"
+            "com.cognite.api.services.search.SearchFingerprint@597fed87"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 17,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 114,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "createdTime" : {
+                  "min" : 1781187292647,
+                  "max" : 1781187292647
+                },
+                "dataSetIds" : [
+                  {
+                    "id" : 87195428580
+                  }
+                ]
+              },
+              "limit" : 100
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "64f5cd20-3e85-95bd-a2b7-b25b170c9fed"
+          ],
+          "access-control-expose-headers" : [
+            "X-Cognite-Fingerprint"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 14:14:53 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-cognite-fingerprint" : [
+            "com.cognite.api.services.search.SearchFingerprint@3261c3b2"
           ],
           "x-content-type-options" : [
             "nosniff"
@@ -540,9 +643,9 @@
                   "dataSetId" : 87195428580,
                   "type" : "test",
                   "description" : "scala-sdk-update-3",
-                  "id" : 8005237333347109,
-                  "lastUpdatedTime" : 1781179918675,
-                  "createdTime" : 1781179918675
+                  "id" : 7480157082972092,
+                  "lastUpdatedTime" : 1781187292647,
+                  "createdTime" : 1781187292647
                 }
               ]
             }
@@ -583,13 +686,13 @@
             "body" : {
               "items" : [
                 {
-                  "id" : 6801000017200215
+                  "id" : 3813902209409212
                 },
                 {
-                  "id" : 2524158113945259
+                  "id" : 3576242406966771
                 },
                 {
-                  "id" : 8005237333347109
+                  "id" : 7480157082972092
                 }
               ],
               "ignoreUnknownIds" : false
@@ -609,10 +712,10 @@
             "envoy"
           ],
           "x-request-id" : [
-            "5661ed15-225a-9481-b602-0da3261cdad4"
+            "34836b72-6dc3-990d-bd41-72b793ba012e"
           ],
           "date" : [
-            "Thu, 11 Jun 2026 12:11:59 GMT"
+            "Thu, 11 Jun 2026 14:14:53 GMT"
           ],
           "content-type" : [
             "application/json"
@@ -647,5 +750,5 @@
       }
     }
   ],
-  "seed" : -7291572836882515663
+  "seed" : 647989034964638391
 }

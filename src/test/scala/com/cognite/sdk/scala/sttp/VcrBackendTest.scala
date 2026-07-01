@@ -3,16 +3,68 @@
 
 package com.cognite.sdk.scala.sttp
 
+import cats.effect.IO
+import cats.effect.unsafe.IORuntime
 import io.circe.Json
 import io.circe.parser.{decode, parse}
 import io.circe.syntax._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sttp.client3.{UriContext, asStringAlways, basicRequest}
+import sttp.client3.impl.cats.CatsMonadAsyncError
+import sttp.client3.testing.SttpBackendStub
 
+import java.nio.file.{Files, Paths}
 import RecordedContent._
+
+import java.util.concurrent.atomic.AtomicReference
 
 @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.OptionPartial"))
 class VcrBackendTest extends AnyFlatSpec with Matchers {
+
+  implicit val ioRuntime: IORuntime = IORuntime.global
+
+  "VcrBackend playback" should "make response headers available inside ResponseAs.mapWithMetadata" in {
+    val cassette = Cassette(
+      interactions = List(
+        Interaction(
+          RecordedRequest("GET", "https://api.example.com/test", Map("accept-encoding" -> List("gzip, deflate")), None),
+          RecordedResponse(
+            "GET", "https://api.example.com/test",
+            RecordedStatus(400, "Bad Request"),
+            Map("x-request-id" -> List("repro-request-id")),
+            None
+          )
+        )
+      ),
+      seed = Some(42L)
+    )
+    import CassetteCodecs._
+    val cassettePath = Files.createTempFile("vcr-repro-", ".json").toString
+    try {
+      val _ = Files.write(Paths.get(cassettePath), cassette.asJson.spaces2.getBytes("UTF-8"))
+
+      val dummyBackend = SttpBackendStub[IO, Any](new CatsMonadAsyncError[IO]())
+        .whenAnyRequest
+        .thenRespondServerError()
+      val vcr = new VcrBackend[IO](dummyBackend, cassettePath, VcrMode.Playback)
+
+      val capturedHeader: AtomicReference[Option[String]] = new AtomicReference(Option.empty)
+      val request = basicRequest
+        .get(uri"https://api.example.com/test")
+        .response(asStringAlways.mapWithMetadata { (body, meta) =>
+          capturedHeader.set(meta.header("x-request-id"))
+          body
+        })
+
+      val _ = vcr.send(request).unsafeRunSync()
+      vcr.close().unsafeRunSync()
+
+      capturedHeader.get() shouldBe Some("repro-request-id")
+    } finally {
+      val _ = Files.deleteIfExists(Paths.get(cassettePath))
+    }
+  }
 
   "RecordedContent.fromBytes" should "produce TextContent for small non-JSON bodies" in {
     fromBytes("hello".getBytes("UTF-8"), "text/plain") shouldBe TextContent("hello")

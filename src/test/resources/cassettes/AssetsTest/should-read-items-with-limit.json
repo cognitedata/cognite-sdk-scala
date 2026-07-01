@@ -1,0 +1,268 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=1",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=1",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "b4992f36-01fc-9633-8aef-75b6c558de39"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:01 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 433,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "nextCursor" : "Kx7ydzuxNWd90xXiajHeUw-qsma9eHu4OfAALFGzXW8",
+              "items" : [
+                {
+                  "createdTime" : 1575414266312,
+                  "lastUpdatedTime" : 1575414266312,
+                  "rootId" : 7494766521626568,
+                  "parentId" : 1322479343209952,
+                  "name" : "test__asset_01343",
+                  "description" : "Description for asset test__asset_01343",
+                  "metadata" : {
+                    "k1" : "v1",
+                    "k2" : "v2"
+                  },
+                  "id" : 182529235222
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=100",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=100",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "c4ce05a3-6621-9fa5-8aaf-afa3f91a723e"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:01 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 43823,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets?limit=2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "028aa47b-e936-9d65-aff2-afe28be8d87f"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:28:01 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 625,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "nextCursor" : "fJpOMHcnWXAIPuJziX8DBoKt7qN7P9kDgqB7ONoUsZI",
+              "items" : [
+                {
+                  "createdTime" : 1575414266312,
+                  "lastUpdatedTime" : 1575414266312,
+                  "rootId" : 7494766521626568,
+                  "parentId" : 1322479343209952,
+                  "name" : "test__asset_01343",
+                  "description" : "Description for asset test__asset_01343",
+                  "metadata" : {
+                    "k1" : "v1",
+                    "k2" : "v2"
+                  },
+                  "id" : 182529235222
+                },
+                {
+                  "createdTime" : 1585740793230,
+                  "lastUpdatedTime" : 1585740793230,
+                  "rootId" : 3681970118588,
+                  "name" : "ex-204",
+                  "metadata" : {
+                    
+                  },
+                  "id" : 3681970118588
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : -3964284600333279936
+}
