@@ -1,0 +1,193 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files?limit=1000",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files?limit=1000",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "c3f0a00d-cccc-96cc-83bc-292c0330bb51"
+          ],
+          "date" : [
+            "Thu, 02 Jul 2026 06:54:24 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 14869,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files/byids",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 104,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "id" : 83183241643089
+                },
+                {
+                  "id" : 446583236623682
+                },
+                {
+                  "id" : 2637193649430453
+                }
+              ],
+              "ignoreUnknownIds" : true
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files/byids",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "79ed21a4-fdbe-9c54-b47a-44c1dcfd6b10"
+          ],
+          "date" : [
+            "Thu, 02 Jul 2026 06:54:24 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 532,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "id" : 83183241643089,
+                  "externalId" : "1272127106955124.fbx",
+                  "name" : "1272127106955124.fbx",
+                  "uploaded" : true,
+                  "uploadedTime" : 1550757472780,
+                  "createdTime" : 1550757470591,
+                  "lastUpdatedTime" : 1566828491271
+                },
+                {
+                  "id" : 446583236623682,
+                  "externalId" : "MyCadFile7753.fbx",
+                  "name" : "MyCadFile7753.fbx",
+                  "uploaded" : true,
+                  "uploadedTime" : 1561988851701,
+                  "createdTime" : 1561988849571,
+                  "lastUpdatedTime" : 1566828485757
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : -3605885334587804114
+}

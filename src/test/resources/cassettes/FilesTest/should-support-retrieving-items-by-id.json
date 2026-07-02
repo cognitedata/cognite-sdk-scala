@@ -1,0 +1,212 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files?limit=2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files?limit=2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "80b68452-a2a7-9bc7-b0dc-786f06e44ffb"
+          ],
+          "date" : [
+            "Thu, 02 Jul 2026 06:54:18 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 572,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "nextCursor" : "lEEMyAlEadRkzRUT0p_c_BIPBAf781ZUNWIVnHtB2KA",
+              "items" : [
+                {
+                  "id" : 83183241643089,
+                  "externalId" : "1272127106955124.fbx",
+                  "name" : "1272127106955124.fbx",
+                  "uploaded" : true,
+                  "uploadedTime" : 1550757472780,
+                  "createdTime" : 1550757470591,
+                  "lastUpdatedTime" : 1566828491271
+                },
+                {
+                  "id" : 123061968379515,
+                  "name" : "big.txt",
+                  "directory" : "/test",
+                  "uploaded" : true,
+                  "uploadedTime" : 1616674121163,
+                  "createdTime" : 1616674119398,
+                  "lastUpdatedTime" : 1616674119398
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files/byids",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 81,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "id" : 83183241643089
+                },
+                {
+                  "id" : 123061968379515
+                }
+              ],
+              "ignoreUnknownIds" : false
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files/byids",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "59bcf93f-7b24-9be3-a3c5-a19126b59c13"
+          ],
+          "date" : [
+            "Thu, 02 Jul 2026 06:54:19 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 509,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "id" : 83183241643089,
+                  "externalId" : "1272127106955124.fbx",
+                  "name" : "1272127106955124.fbx",
+                  "uploaded" : true,
+                  "uploadedTime" : 1550757472780,
+                  "createdTime" : 1550757470591,
+                  "lastUpdatedTime" : 1566828491271
+                },
+                {
+                  "id" : 123061968379515,
+                  "name" : "big.txt",
+                  "directory" : "/test",
+                  "uploaded" : true,
+                  "uploadedTime" : 1616674121163,
+                  "createdTime" : 1616674119398,
+                  "lastUpdatedTime" : 1616674119398
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : 2702698685998968992
+}

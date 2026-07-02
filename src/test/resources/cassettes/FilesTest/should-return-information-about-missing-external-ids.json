@@ -1,0 +1,210 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files/byids",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 104,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "5PNii0w4GCDBvXPZ"
+                },
+                {
+                  "externalId" : "6VhKQqtTJqBHGulw"
+                }
+              ],
+              "ignoreUnknownIds" : false
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files/byids",
+        "status" : {
+          "code" : 400,
+          "reason" : "Bad Request"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "1676cd61-1408-9af3-922f-352455591471"
+          ],
+          "date" : [
+            "Thu, 02 Jul 2026 06:54:21 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 249,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "error" : {
+                "missing" : [
+                  {
+                    "externalId" : "5PNii0w4GCDBvXPZ"
+                  },
+                  {
+                    "externalId" : "6VhKQqtTJqBHGulw"
+                  }
+                ],
+                "code" : 400,
+                "message" : "Files ids not found: 5PNii0w4GCDBvXPZ, 6VhKQqtTJqBHGulw"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files/byids",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 104,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "5PNii0w4GCDBvXPZ"
+                },
+                {
+                  "externalId" : "5PNii0w4GCDBvXPZ"
+                }
+              ],
+              "ignoreUnknownIds" : false
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/files/byids",
+        "status" : {
+          "code" : 409,
+          "reason" : "Conflict"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "816b485a-1991-9c8c-b163-ba3d17038078"
+          ],
+          "date" : [
+            "Thu, 02 Jul 2026 06:54:21 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 179,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "error" : {
+                "duplicated" : [
+                  {
+                    "externalId" : "5PNii0w4GCDBvXPZ"
+                  }
+                ],
+                "code" : 409,
+                "message" : "Duplicate external ids: 5PNii0w4GCDBvXPZ"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : -8990540046302126955
+}
