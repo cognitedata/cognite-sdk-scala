@@ -1,0 +1,233 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 196,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "startTime" : null,
+                  "endTime" : null,
+                  "description" : "scala-sdk-create-example-1",
+                  "type" : null,
+                  "subtype" : null,
+                  "metadata" : null,
+                  "assetIds" : null,
+                  "source" : null,
+                  "externalId" : null,
+                  "dataSetId" : null
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events",
+        "status" : {
+          "code" : 201,
+          "reason" : "Created"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "d5c4acbf-2b7e-9792-a08a-b859ebfbd3d4"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 14:14:25 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 188,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "description" : "scala-sdk-create-example-1",
+                  "id" : 3185427977881007,
+                  "lastUpdatedTime" : 1781187265990,
+                  "createdTime" : 1781187265990
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 381,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "startTime" : null,
+                  "endTime" : null,
+                  "description" : "scala-sdk-create-example-1",
+                  "type" : null,
+                  "subtype" : null,
+                  "metadata" : null,
+                  "assetIds" : null,
+                  "source" : null,
+                  "externalId" : null,
+                  "dataSetId" : null
+                },
+                {
+                  "startTime" : null,
+                  "endTime" : null,
+                  "description" : "scala-sdk-create-example-2",
+                  "type" : null,
+                  "subtype" : null,
+                  "metadata" : null,
+                  "assetIds" : null,
+                  "source" : null,
+                  "externalId" : null,
+                  "dataSetId" : null
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events",
+        "status" : {
+          "code" : 201,
+          "reason" : "Created"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "734b7455-821e-9baa-8f2e-1abb26af4a24"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 14:14:26 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 357,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "description" : "scala-sdk-create-example-1",
+                  "id" : 3400941434683180,
+                  "lastUpdatedTime" : 1781187266159,
+                  "createdTime" : 1781187266159
+                },
+                {
+                  "description" : "scala-sdk-create-example-2",
+                  "id" : 8829206197604022,
+                  "lastUpdatedTime" : 1781187266159,
+                  "createdTime" : 1781187266159
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : -6929515382681308636
+}

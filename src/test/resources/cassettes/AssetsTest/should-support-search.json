@@ -1,0 +1,514 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/search",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 80,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "createdTime" : {
+                  "min" : 1560756441301,
+                  "max" : 1560756445000
+                }
+              },
+              "limit" : 100
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/search",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "e4e914b7-43ac-9b50-85c6-b8d5131b271f"
+          ],
+          "access-control-expose-headers" : [
+            "X-Cognite-Fingerprint"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:29:02 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-cognite-fingerprint" : [
+            "asset_1619153b+name-4.0+description-1.0+ngramRequested-false"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 119891,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/search",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 166,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "parentIds" : [
+                  1790957171927257,
+                  2436611095973105,
+                  6078796607206585
+                ],
+                "createdTime" : {
+                  "min" : 0,
+                  "max" : 1560756460294
+                }
+              },
+              "search" : {
+                "description" : "VALVE"
+              },
+              "limit" : 100
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/search",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "0728c342-5514-9eaf-8057-6142e5263615"
+          ],
+          "access-control-expose-headers" : [
+            "X-Cognite-Fingerprint"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:29:02 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-cognite-fingerprint" : [
+            "asset_1619153b+name-4.0+description-1.0+ngramRequested-false"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 4108,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/72WW2/iOBSA3/srLJ43K98d5y0kLk0VEjYxzLKrFWIArdidlooymofR/Pc5CZcCMeKidioUVPz5JPbx+XK+3yHUmq9mT6+tAP0N/yD0vb7Cz5PlbLyaTe38aQaDREishORccaJ+2zJfxq+r/sv0LLdcLFbJFIYVoQpzoSpIaMZ3xMt4OXteM0RprIUiimiqqHiL8jyub9GizDNlPPA0FZiE3iMmrR0znb1OlvOX1XzxXKGma4qOyaIhKh/6Ns4/ZWgQpgPjPfazyCZ5htr5n2+zn2arMaxmDFO3+wC/mjQalTa0/XKUxFVUQgndTQKgzPtFZEZxuxr8tlj+/wQ74gBs2E5NzVTAaPp5/Pu3p9VoNf53H/7UtaOwMOH2ZsIXx8NRaE0nL4ZbhBB5jNzDAkdRHpsNI4nmx0yaQyDYhG0YjBtIOSyt6W4Azjk+BmzYGUXwtNbEoxiudYIwkR724YMIDYQKGHVPS2wShWmaZPW0zAXFpoyuz+RegE6at8N0t8LNn5acKeXiH5LSwtYW5o9+Uph62tDFrSMqHxPN3OOjMItMFawCGRdSNLa3BssQFjCot8C5vUkJqzVxe9gr8kcT2ZNgN0yyTbZ9AjXmYrKwa84U0R69PvbRQ+cgtQR7RCOsAs4D5lx8vxfXJ6I9rCb5hDm3ektdGPx18XU5mdWOaClNJdOMYMKFUFw3ud5y8d9ssqrgl6+fv8wndWFvqB+7kl/DR9RudL6WlvJrWwnpK8Xv9gKcsaXg8IQX2PKQu8qWlDMpCQFjagVBhMuWvRLyDAIQJz05KGLkoTQvUZTnqSlQiAqTJuZ+XWQ3GJIeSKsw2xEhmM/Vr7OnxI0yuMCeUZ7ZAsoyL7YQo40jfKxYLuhNig3vjR1uZWhSMF1md3yzvm5UMtYelh6VcOgCJgN3RV6l5EsPzVkZS58ptxuvkzHjkp5wbEPGWpxw7XvJOM3z3lv9vYOum1V8RtTMw8TDFGEdYD9wr/dQ1JAS52vAIWpRibp6weMAs6Pg+6KmmmPfx9ynUPiS8I8UNYe3OryNQYRcaYnJVabGklxk6n3uKlPDmA+PBV8US2jqXKb+y1YvZM68bvukq8v83iLIClrXX+8BkdKWthPl3d668lAvL5PKOrd0tuTXufmSzlY0Wsemm6V/tv0lkKDGzT6w/4Xa4x5lVXnA57A/uUm2t2T9rHipL4h0Vvx14pVaMtbIgVO8Clrvc+J1PtFHdcGukns/QWpESCBkcNg97AuSCOJLjYmikkNCPraTVUxyKqnUglLN6FqQcP3n7sdPoSge2AwQAAA="
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/search",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 38,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "search" : {
+                "name" : "ESDV"
+              },
+              "limit" : 100
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/search",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "ee9c1e75-7382-926b-81a0-e460320580d6"
+          ],
+          "access-control-expose-headers" : [
+            "X-Cognite-Fingerprint"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:29:02 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-cognite-fingerprint" : [
+            "asset_1619153b+name-4.0+description-1.0+ngramRequested-false"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 27605,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/search",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 37,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "search" : {
+                "name" : "ESDV"
+              },
+              "limit" : 10
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/search",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "4ce21b8f-cd73-9944-bbba-8abe15199653"
+          ],
+          "access-control-expose-headers" : [
+            "X-Cognite-Fingerprint"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:29:02 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-cognite-fingerprint" : [
+            "asset_1619153b+name-4.0+description-1.0+ngramRequested-false"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 13712,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "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"
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/search",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 57,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "parentExternalIds" : [
+                  "test-root"
+                ]
+              },
+              "limit" : 10
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/assets/search",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "aefd170b-0282-9751-adc1-fbd0bfa7f72e"
+          ],
+          "access-control-expose-headers" : [
+            "X-Cognite-Fingerprint"
+          ],
+          "date" : [
+            "Tue, 30 Jun 2026 12:29:03 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-cognite-fingerprint" : [
+            "asset_1619153b+name-4.0+description-1.0+ngramRequested-false"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 771,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "createdTime" : 1583764635101,
+                  "lastUpdatedTime" : 1583764947620,
+                  "rootId" : 551601593808160,
+                  "parentId" : 551601593808160,
+                  "parentExternalId" : "test-root",
+                  "externalId" : "test-child",
+                  "name" : "test-child",
+                  "dataSetId" : 6789121196786359,
+                  "metadata" : {
+                    
+                  },
+                  "source" : "test-data",
+                  "id" : 3323327635057497
+                },
+                {
+                  "createdTime" : 1583764635101,
+                  "lastUpdatedTime" : 1583764946988,
+                  "rootId" : 551601593808160,
+                  "parentId" : 551601593808160,
+                  "parentExternalId" : "test-root",
+                  "externalId" : "test-child2",
+                  "name" : "test-child2",
+                  "dataSetId" : 6789121196786359,
+                  "metadata" : {
+                    
+                  },
+                  "source" : "test-data",
+                  "id" : 3142936406414866
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : -1882833779450836503
+}

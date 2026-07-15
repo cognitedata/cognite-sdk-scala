@@ -1,0 +1,130 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 389,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "startTime" : null,
+                  "endTime" : null,
+                  "description" : "scala-sdk-read-example-1",
+                  "type" : null,
+                  "subtype" : null,
+                  "metadata" : null,
+                  "assetIds" : null,
+                  "source" : null,
+                  "externalId" : "83614452",
+                  "dataSetId" : null
+                },
+                {
+                  "startTime" : null,
+                  "endTime" : null,
+                  "description" : "scala-sdk-read-example-2",
+                  "type" : null,
+                  "subtype" : null,
+                  "metadata" : null,
+                  "assetIds" : null,
+                  "source" : null,
+                  "externalId" : "07196b90",
+                  "dataSetId" : null
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events",
+        "status" : {
+          "code" : 201,
+          "reason" : "Created"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "4b4bfbcc-bc2b-93d7-a6cd-197f2c930e06"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 14:14:27 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 417,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "83614452",
+                  "description" : "scala-sdk-read-example-1",
+                  "id" : 1497816645329726,
+                  "lastUpdatedTime" : 1781187267780,
+                  "createdTime" : 1781187267780
+                },
+                {
+                  "externalId" : "07196b90",
+                  "description" : "scala-sdk-read-example-2",
+                  "id" : 3390648502757679,
+                  "lastUpdatedTime" : 1781187267780,
+                  "createdTime" : 1781187267780
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : 211306882484829527
+}

@@ -3,14 +3,13 @@
 
 package com.cognite.sdk.scala.v1
 
-import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkTestSpec, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common.{CdpApiException, ReadBehaviours, RetryWhile, SdkVcrTestSpec, SetValue, WritableBehaviors}
 import fs2.Stream
 import org.scalatest.matchers.should.Matchers
 
 import java.io.{BufferedInputStream, ByteArrayOutputStream}
 import java.nio.file.{Files, Paths}
 import java.time.Instant
-import java.util.UUID
 
 @SuppressWarnings(
   Array(
@@ -23,7 +22,7 @@ import java.util.UUID
     "org.wartremover.warts.SizeIs"
   )
 )
-class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with Matchers with RetryWhile {
+class FilesTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehaviors with Matchers with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
@@ -35,15 +34,15 @@ class FilesTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors w
 
   it should behave like readableWithRetrieveByExternalId(client.files, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
-  it should behave like readableWithRetrieveUnknownIds(client.dataSets)
+  it should behave like readableWithRetrieveUnknownIds(client.files, random)
 
-  private val externalId = UUID.randomUUID().toString.substring(0, 8)
+  private lazy val externalId = shortRandom()
 
-  private val filesToCreate = Seq(
+  private def filesToCreate = Seq(
     File(name = "scala-sdk-update-1", dataSetId = Some(testDataSet.id)),
     File(name = "scala-sdk-update-2", externalId = Some(s"${externalId}-2"))
   )
-  private val filesUpdates = Seq(
+  private def filesUpdates = Seq(
     // `name` can not be changed, but is required here
     File(name = "scala-sdk-update-1", externalId = Some(s"${externalId}-1"), dataSetId = Some(testDataSet.id)),
     File(name = "scala-sdk-update-2", metadata = Some(Map("a" -> "b")), dataSetId = Some(testDataSet.id))

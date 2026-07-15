@@ -1,0 +1,233 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/raw/dbs?limit=1",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/raw/dbs?limit=1",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "12a4562c-4428-9c8b-b9e8-195f5c2827ee"
+          ],
+          "content-length" : [
+            "100"
+          ],
+          "date" : [
+            "Wed, 01 Jul 2026 10:36:30 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 100,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "name" : "pyspark"
+                }
+              ],
+              "nextCursor" : "x13lZgeYj1A9GP_CVJXSRg=="
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/raw/dbs?limit=100",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/raw/dbs?limit=100",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "a472ff31-5008-97ac-8da7-bae3342d8980"
+          ],
+          "content-length" : [
+            "3741"
+          ],
+          "date" : [
+            "Wed, 01 Jul 2026 10:36:31 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 3741,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/6VXy24bMQy89ysMn+NW70e/oocAPRSFQYkUmjr2GrubF4L8e7VJE/vQigJ8WcCLWZIazZD086fVan0z035af139qD9Wq+fXZ319gD3Vt+vj03SEcbd+ff9y9W/QlOEWNhPuNj7YkAXB+uodk0eCmfD65hUqXdBeBmNlELoZE6aJ5i09Hodxbmcf4WEz0zRvMAeXA1An3EmVMKFpwx9+D3TbGTFICVbF0luALqpY59twSLmX/Uo1bugR9sdb2sj2V3SY7kb6BiMdGH6/D+NuX++wt4qMFkMxktGAVjK62Iy5uwcaDzT2Zg5Oecqykdlq46O0oeq0746s8jF6lRgy3zhnKD8VWjACGF8up+gUU2GsHwjVrmGmeYQjcIZePP/XVDBDgokanHprhJAhRN/LqXOkkui1SdKAXneTm0EZl1Ruk+utVVKqZszP9Nib1AS0ZERH43OxLT0c5qmd9QtX1qkhhaB0sLHbQMIhKsFY11VERTZjHodfw+5uhN7MUWuXkRhH9Fzax+GVs+BdYKw74HFBM7Y5FWp1bR/OJda6tVDTGbPqO1Px6nLxVOMe2Ib5wVAxVoToxP/zKmmlcTEIIfpCxpATCdCdFaRofUohdLXXzpgKcjHksQ2/rtDOgKS00DLa3jN50hEKI/3z+cu0NuQkvL/fzv3HUYGwRGTab7dzKaETQMj3DCdlZ0ypdE4lh8tjLifGxLj7pF4wxaPsnUwi1vwBGKUtUNof5ydm0axr1jAijUz3P2UPoogUGVu8EcD4cQFtt++jnpHjad+utlBFM0o5I9cLjYFh6yQCIQvWLcFevs29ccDofUJmbz/bMEjXoxtm2C/DSqn2DPggRzsjah/sFSqJ6K13jFCXC52GuzHTpoeCMgzVeA26F6q9qSOh18cgFaJG5g9MHcGbs/5Vnz8/vfwBvI/yfp0OAAA="
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/raw/dbs?limit=2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/raw/dbs?limit=2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "9fed273b-4f1d-9222-a95b-fde683c52305"
+          ],
+          "content-length" : [
+            "184"
+          ],
+          "date" : [
+            "Wed, 01 Jul 2026 10:36:31 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 184,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "name" : "pyspark"
+                },
+                {
+                  "name" : "scala-sdk-7858c0ea",
+                  "createdTime" : 1683718451803
+                }
+              ],
+              "nextCursor" : "CpyOGEOkHQpj0M-82XMegw=="
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : -225946914264206644
+}

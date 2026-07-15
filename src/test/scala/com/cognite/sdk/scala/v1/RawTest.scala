@@ -4,7 +4,7 @@
 package com.cognite.sdk.scala.v1
 
 import cats.syntax.either._
-import com.cognite.sdk.scala.common.{Items, ReadBehaviours, SdkTestSpec, WritableBehaviors}
+import com.cognite.sdk.scala.common.{Items, ReadBehaviours, SdkVcrTestSpec, WritableBehaviors}
 import fs2.Stream
 import io.circe.Json
 import io.circe.syntax._
@@ -19,7 +19,7 @@ import sttp.client3.UriContext
     "org.wartremover.warts.SizeIs"
   )
 )
-class RawTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with OptionValues {
+class RawTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehaviors with OptionValues {
   private val idsThatDoNotExist = Seq("nodatabase", "randomdatabase")
 
   it should behave like readable(client.rawDatabases)

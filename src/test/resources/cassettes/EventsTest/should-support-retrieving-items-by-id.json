@@ -1,0 +1,216 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events?limit=2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events?limit=2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "5b744619-0939-9844-a21b-1c35a7b298bb"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 14:14:06 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 614,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "a0572a25",
+                  "startTime" : 0,
+                  "endTime" : 0,
+                  "description" : "bar",
+                  "source" : "spark-events-test-f9db62e5",
+                  "id" : 2446050543268294,
+                  "lastUpdatedTime" : 1657540059521,
+                  "createdTime" : 1657540056518
+                },
+                {
+                  "externalId" : "c90a92bd",
+                  "startTime" : 0,
+                  "endTime" : 0,
+                  "description" : "bar",
+                  "source" : "spark-events-test-afe12158",
+                  "id" : 4366537150869534,
+                  "lastUpdatedTime" : 1602702369116,
+                  "createdTime" : 1602702368628
+                }
+              ],
+              "nextCursor" : "g8pWbrS6_ol2VuzHq75hRyvmkAcIHIejDDr_m3qoYq4"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/byids",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 84,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "id" : 2446050543268294
+                },
+                {
+                  "id" : 4366537150869534
+                }
+              ],
+              "ignoreUnknownIds" : false
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/byids",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "b721ce28-b921-9780-83ea-e21f136f7ce3"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 14:14:07 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 551,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "a0572a25",
+                  "startTime" : 0,
+                  "endTime" : 0,
+                  "description" : "bar",
+                  "source" : "spark-events-test-f9db62e5",
+                  "id" : 2446050543268294,
+                  "lastUpdatedTime" : 1657540059521,
+                  "createdTime" : 1657540056518
+                },
+                {
+                  "externalId" : "c90a92bd",
+                  "startTime" : 0,
+                  "endTime" : 0,
+                  "description" : "bar",
+                  "source" : "spark-events-test-afe12158",
+                  "id" : 4366537150869534,
+                  "lastUpdatedTime" : 1602702369116,
+                  "createdTime" : 1602702368628
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : 8959930511306826409
+}

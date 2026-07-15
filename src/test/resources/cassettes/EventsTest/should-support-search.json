@@ -1,0 +1,581 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 80,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "createdTime" : {
+                  "min" : 1581098334114,
+                  "max" : 1581098400000
+                }
+              },
+              "limit" : 100
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "5252884a-ed38-9e48-a385-33c7bcb49605"
+          ],
+          "access-control-expose-headers" : [
+            "X-Cognite-Fingerprint"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 14:14:50 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-cognite-fingerprint" : [
+            "com.cognite.api.services.search.SearchFingerprint@16b06414"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 579,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "startTime" : 1581098376482,
+                  "endTime" : 1581098386482,
+                  "type" : "test-data-populator",
+                  "subtype" : "test1",
+                  "id" : 7792648601512643,
+                  "lastUpdatedTime" : 1660302150053,
+                  "createdTime" : 1581098386503
+                },
+                {
+                  "description" : "description-2-1",
+                  "id" : 7069046636056,
+                  "lastUpdatedTime" : 1581098334240,
+                  "createdTime" : 1581098334114
+                },
+                {
+                  "description" : "description-1-1",
+                  "id" : 3197534962258846,
+                  "lastUpdatedTime" : 1581098334240,
+                  "createdTime" : 1581098334114
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 127,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "type" : "test-data-populator",
+                "subtype" : "test1",
+                "createdTime" : {
+                  "min" : 1581098334114,
+                  "max" : 1581102000000
+                }
+              },
+              "limit" : 100
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "0f85233f-bbfc-9249-8ef4-5571259cecaa"
+          ],
+          "access-control-expose-headers" : [
+            "X-Cognite-Fingerprint"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 14:14:50 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-cognite-fingerprint" : [
+            "com.cognite.api.services.search.SearchFingerprint@1fef4ee9"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 266,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "startTime" : 1581098376482,
+                  "endTime" : 1581098386482,
+                  "type" : "test-data-populator",
+                  "subtype" : "test1",
+                  "id" : 7792648601512643,
+                  "lastUpdatedTime" : 1660302150053,
+                  "createdTime" : 1581098386503
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 113,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "createdTime" : {
+                  "min" : 1581098334114,
+                  "max" : 1581102000000
+                }
+              },
+              "search" : {
+                "description" : "wjoel"
+              },
+              "limit" : 100
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "fd25de4e-0f8e-98a7-9645-6303657a3488"
+          ],
+          "access-control-expose-headers" : [
+            "X-Cognite-Fingerprint"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 14:14:50 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-cognite-fingerprint" : [
+            "com.cognite.api.services.search.SearchFingerprint@671598e5"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 526,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "startTime" : 1581099037598,
+                  "endTime" : 1581099047598,
+                  "type" : "test-data-populator",
+                  "description" : "wjoel",
+                  "id" : 5274719801547229,
+                  "lastUpdatedTime" : 1583420876292,
+                  "createdTime" : 1581099047616
+                },
+                {
+                  "startTime" : 1581099097693,
+                  "endTime" : 1581099107693,
+                  "type" : "test-data-populator",
+                  "description" : "test wjoel",
+                  "id" : 5288422401335419,
+                  "lastUpdatedTime" : 1583420953331,
+                  "createdTime" : 1581099107711
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 117,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "createdTime" : {
+                  "min" : 1581098334114,
+                  "max" : 1581102000000
+                }
+              },
+              "search" : {
+                "description" : "test joel"
+              },
+              "limit" : 100
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "c0e2dabc-f7c2-9a2e-9654-d2413f9a22fd"
+          ],
+          "access-control-expose-headers" : [
+            "X-Cognite-Fingerprint"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 14:14:50 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-cognite-fingerprint" : [
+            "com.cognite.api.services.search.SearchFingerprint@2fcdba14"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 526,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "startTime" : 1581099097693,
+                  "endTime" : 1581099107693,
+                  "type" : "test-data-populator",
+                  "description" : "test wjoel",
+                  "id" : 5288422401335419,
+                  "lastUpdatedTime" : 1583420953331,
+                  "createdTime" : 1581099107711
+                },
+                {
+                  "startTime" : 1581099037598,
+                  "endTime" : 1581099047598,
+                  "type" : "test-data-populator",
+                  "description" : "wjoel",
+                  "id" : 5274719801547229,
+                  "lastUpdatedTime" : 1583420876292,
+                  "createdTime" : 1581099047616
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 111,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "filter" : {
+                "createdTime" : {
+                  "min" : 1581098334114,
+                  "max" : 1581102000000
+                }
+              },
+              "search" : {
+                "description" : "wjoel"
+              },
+              "limit" : 1
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/events/search",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "5af2bc02-1cb2-966b-a039-a848129e1afb"
+          ],
+          "access-control-expose-headers" : [
+            "X-Cognite-Fingerprint"
+          ],
+          "date" : [
+            "Thu, 11 Jun 2026 14:14:51 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-cognite-fingerprint" : [
+            "com.cognite.api.services.search.SearchFingerprint@58261301"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 270,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "startTime" : 1581099037598,
+                  "endTime" : 1581099047598,
+                  "type" : "test-data-populator",
+                  "description" : "wjoel",
+                  "id" : 5274719801547229,
+                  "lastUpdatedTime" : 1583420876292,
+                  "createdTime" : 1581099047616
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : -8560495608222415413
+}

@@ -1,0 +1,144 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances/list",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "cdf-version" : [
+            "alpha"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 355,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "sources" : [
+                {
+                  "source" : {
+                    "type" : "view",
+                    "space" : "cdf_cdm",
+                    "externalId" : "CogniteDiagramAnnotation",
+                    "version" : "v1"
+                  }
+                }
+              ],
+              "instanceType" : "edge",
+              "cursor" : null,
+              "limit" : null,
+              "sort" : null,
+              "filter" : {
+                "equals" : {
+                  "property" : [
+                    "cdf_cdm",
+                    "CogniteDiagramAnnotation/v1",
+                    "status"
+                  ],
+                  "value" : "Approved"
+                }
+              },
+              "debug" : {
+                "timeout" : 1,
+                "emitResults" : false,
+                "profile" : null
+              },
+              "includeTyping" : true
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://bluefield.cognitedata.com/api/v1/projects/extractor-bluefield-testing/models/instances/list",
+        "status" : {
+          "code" : 408,
+          "reason" : "Request Timeout"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "ae0df708-f6ec-9d9a-a0ae-df1268bd71cb"
+          ],
+          "date" : [
+            "Mon, 08 Jun 2026 10:47:24 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "vary" : [
+            "Accept-Encoding"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 610,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "error" : {
+                "code" : 408,
+                "message" : "Graph query timed out. Reduce load or contention, or optimise your query.",
+                "notices" : [
+                  {
+                    "code" : "containersWithoutIndexesInvolved",
+                    "category" : "indexing",
+                    "level" : "warning",
+                    "hint" : "The query is using one or more containers that doesn't have any indexes declared.",
+                    "grade" : "C",
+                    "resultExpression" : "result",
+                    "containers" : [
+                      {
+                        "type" : "container",
+                        "space" : "cdf_cdm",
+                        "externalId" : "CogniteAnnotation"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "recordedEnv" : {
+    
+  }
+}

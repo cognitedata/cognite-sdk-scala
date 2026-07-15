@@ -5,9 +5,8 @@ package com.cognite.sdk.scala.v1
 
 import java.time.Instant
 import fs2._
-import com.cognite.sdk.scala.common.{CdpApiException, Items, ReadBehaviours, RetryWhile, SdkTestSpec, SetNull, SetValue, WritableBehaviors}
+import com.cognite.sdk.scala.common.{CdpApiException, Items, ReadBehaviours, RetryWhile, SdkVcrTestSpec, SetNull, SetValue, WritableBehaviors}
 
-import java.util.UUID
 import scala.util.control.NonFatal
 
 @SuppressWarnings(
@@ -19,20 +18,20 @@ import scala.util.control.NonFatal
     "org.wartremover.warts.SizeIs"
   )
 )
-class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
+class EventsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val idsThatDoNotExist = Seq(999991L, 999992L)
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
   // Unpartitioned read is too slow.
   // it should behave like readable(client.events)
 
-  it should behave like partitionedReadable(client.events)
+  it should behave like partitionedReadable(client.events, sleep = sleepUnlessPlayback)
 
   it should behave like readableWithRetrieve(client.events, idsThatDoNotExist, supportsMissingAndThrown = true)
 
   it should behave like readableWithRetrieveByExternalId(client.events, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
-  it should behave like readableWithRetrieveUnknownIds(client.dataSets)
+  it should behave like readableWithRetrieveUnknownIds(client.events, random, idsNotFoundMessage = "id not found")
 
   it should behave like writable(
     client.events,
@@ -76,7 +75,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
     retryWithExpectedResult[Seq[Event]](
       client.events.filter(EventsFilter(externalIdPrefix = Some(externalIdsPrefix))).compile.toList.unsafeRunSync(),
-      r => r should have size 4
+      r => r should have size 4,
+      sleep = sleepUnlessPlayback
     )
     createdItems
   }
@@ -95,7 +95,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
       retryWithExpectedResult[Seq[Event]](
         client.events.filter(EventsFilter(externalIdPrefix = Some(prefix))).compile.toList.unsafeRunSync(),
-        r => r should have size 0
+        r => r should have size 0,
+        sleep = sleepUnlessPlayback
       )
     } finally {
       try {
@@ -126,10 +127,11 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
 
       client.events.delete(internalIds ++ externalIds, true).unsafeRunSync()
 
-      //make sure that events are deletes
+      //make sure that events are deleted
       retryWithExpectedResult[Seq[Event]](
         client.events.filter(EventsFilter(externalIdPrefix = Some(prefix))).compile.toList.unsafeRunSync(),
-        r => r should have size 0
+        r => r should have size 0,
+        sleep = sleepUnlessPlayback
       )
     } finally {
       try {
@@ -140,12 +142,12 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     }
   }
 
-  private val eventsToCreate = Seq(
+  def eventsToCreate: Seq[Event] = Seq(
     Event(description = Some("scala-sdk-update-1"), `type` = Some("test"), subtype = Some("test")),
     Event(description = Some("scala-sdk-update-2"), `type` = Some("test"), subtype = Some("test")),
     Event(description = Some("scala-sdk-update-3"), `type` = Some("test"), dataSetId = Some(testDataSet.id))
   )
-  private val eventUpdates = Seq(
+  def eventUpdates: Seq[Event] = Seq(
     Event(description = Some("scala-sdk-update-1-1"), `type` = Some("testA"), subtype = Some(null)),
     Event(
       description = Some("scala-sdk-update-2-1"),
@@ -201,8 +203,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
     }
   )
 
-  private val updateExternalId1 = s"update-1-externalId-${UUID.randomUUID.toString.substring(0, 8)}"
-  private val updateExternalId2 = s"update-2-externalId-${UUID.randomUUID.toString.substring(0, 8)}"
+  private lazy val updateExternalId1 = s"update-1-externalId-${shortRandom()}"
+  private lazy val updateExternalId2 = s"update-2-externalId-${shortRandom()}"
 
   it should behave like updatableByExternalId(
     client.events,
@@ -242,7 +244,7 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
   }
 
   it should "update metadata on events with empty map" in {
-    val externalId1 = UUID.randomUUID.toString
+    val externalId1 = shortRandom()
 
     // Create event with metadata
     val eventsToCreate = Seq(
@@ -409,7 +411,8 @@ class EventsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors 
             max = Some(createdTimes.max)
           ))
         )))).unsafeRunSync(),
-        a => a should not be empty
+        a => a should not be empty,
+        sleep = sleepUnlessPlayback
       )
       foundItems.map(_.dataSetId) should contain only Some(testDataSet.id)
       created.filter(_.dataSetId.isDefined).map(_.id) should contain theSameElementsAs foundItems.map(_.id)

@@ -9,18 +9,19 @@ import org.scalatest.OptionValues
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
+import scala.util.Random
+
+@SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.ThreadSleep"))
 trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: AnyFlatSpec =>
   def readable[R, InternalId, PrimitiveId](
-      readable: Readable[R, IO],
+      readable: => Readable[R, IO],
       supportsLimit: Boolean = true
   )(implicit ioRuntime: IORuntime): Unit = {
-    val listLength = readable.list(Some(100)).compile.toList.unsafeRunSync().length
+    lazy val listLength = readable.list(Some(100)).compile.toList.unsafeRunSync().length
     it should "read items" in {
       readable.read().unsafeRunSync().items should not be empty
     }
@@ -46,7 +47,8 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   }
 
   def partitionedReadable[R, InternalId, PrimitiveId](
-      readable: PartitionedReadable[R, IO]
+      readable: => PartitionedReadable[R, IO],
+      sleep: Long => Unit = delay => Thread.sleep(delay)
   )(implicit ioRuntime: IORuntime): Unit = {
     it should "read items with partitions" in {
       val partitionStreams = readable.listPartitions(2)
@@ -91,12 +93,13 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
           .unsafeRunSync()
           .length
         (unlimitedLength, partitionsLength)
-      }, { case (unlimitedLength, partitionsLength) => assert(unlimitedLength === partitionsLength) })
+      }, { case (unlimitedLength, partitionsLength) => assert(unlimitedLength === partitionsLength) },
+        sleep = sleep)
     }
   }
 
   def readableWithRetrieve[R <: WithId[Long], W](
-      readable: Readable[R, IO] with RetrieveByIds[R, IO],
+      readable: => Readable[R, IO] with RetrieveByIds[R, IO],
       idsThatDoNotExist: Seq[Long],
       supportsMissingAndThrown: Boolean
   )(implicit ioRuntime: IORuntime): Unit = {
@@ -160,7 +163,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   }
 
   def readableWithRetrieveByRequiredExternalId[R <: WithRequiredExternalId with WithCreatedTime, W](
-     readable: Readable[R, IO] with RetrieveByExternalIds[R, IO],
+     readable: => Readable[R, IO] with RetrieveByExternalIds[R, IO],
      idsThatDoNotExist: Seq[String],
      supportsMissingAndThrown: Boolean
    )(implicit ioRuntime: IORuntime): Unit = {
@@ -205,7 +208,7 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   }
 
   def readableWithRetrieveByExternalId[R <: WithExternalId with WithCreatedTime, W](
-      readable: Readable[R, IO] with RetrieveByExternalIds[R, IO],
+      readable: => Readable[R, IO] with RetrieveByExternalIds[R, IO],
       idsThatDoNotExist: Seq[String],
       supportsMissingAndThrown: Boolean
   )(implicit ioRuntime: IORuntime): Unit = {
@@ -259,17 +262,19 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
   }
 
   def readableWithRetrieveUnknownIds[R <: WithExternalId with WithId[Long] with WithCreatedTime, W](
-      readable: Readable[R, IO]
+      readable: => Readable[R, IO]
         with RetrieveByExternalIdsWithIgnoreUnknownIds[R, IO]
-        with RetrieveByIdsWithIgnoreUnknownIds[R, IO]
+        with RetrieveByIdsWithIgnoreUnknownIds[R, IO],
+      random: => Random = ThreadLocalRandom.current(),
+      idsNotFoundMessage: String = "ids not found",
   )(implicit ioRuntime: IORuntime): Unit = {
-    val firstTwoItemItems = fetchTestItems(readable)
-    val firstTwoExternalIds = firstTwoItemItems.map(_.externalId.value)
-    val firstTwoIds = firstTwoItemItems.map(_.id)
-    val nonExistentExternalId = s"does-not-exist/${UUID.randomUUID.toString}"
-    val nonExistentId = ThreadLocalRandom.current().nextLong(1, 9007199254740991L)
+    def fetchFirstTwoItems = fetchTestItems(readable)
+    def nonExistentExternalId = s"does-not-exist/${Seq.fill(16)(random.nextInt(16)).map(_.toHexString).mkString}"
+    def nonExistentId = random.between(1L, 9007199254740991L)
 
     it should "support retrieving items by external id with ignoreUnknownIds=true" in {
+      val firsTwoItems = fetchFirstTwoItems
+      val firstTwoExternalIds = firsTwoItems.map(_.externalId.value)
       firstTwoExternalIds should have size 2
       val maybeItemsRead = readable.retrieveByExternalIds(
         firstTwoExternalIds ++ Seq(nonExistentExternalId),
@@ -287,16 +292,21 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
     }
 
     it should "throw when retrieving items by external id with ignoreUnknownIds=false" in {
+      val firsTwoItems = fetchFirstTwoItems
+      val firstTwoExternalIds = firsTwoItems.map(_.externalId.value)
       val exception = intercept[CdpApiException] {
         readable.retrieveByExternalIds(
           firstTwoExternalIds ++ Seq(nonExistentExternalId),
           ignoreUnknownIds = false
         ).unsafeRunSync()
       }
-      exception.message should include("ids not found")
+      exception.message should include(idsNotFoundMessage)
     }
 
     it should "support retrieving items by id with ignoreUnknownIds=true" in {
+      val firsTwoItems = fetchFirstTwoItems
+      val firstTwoIds = firsTwoItems.map(_.id)
+      val firstTwoExternalIds = firsTwoItems.map(_.externalId.value)
       val maybeItemsRead =
         readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = true).unsafeRunSync()
       val itemsReadIds = maybeItemsRead.map(_.externalId.value)
@@ -305,10 +315,12 @@ trait ReadBehaviours extends Matchers with OptionValues with RetryWhile { this: 
     }
 
     it should "throw when retrieving items by id with ignoreUnknownIds=false" in {
+      val firsTwoItems = fetchFirstTwoItems
+      val firstTwoIds = firsTwoItems.map(_.id)
       val exception = intercept[CdpApiException] {
         readable.retrieveByIds(firstTwoIds ++ Seq(nonExistentId), ignoreUnknownIds = false).unsafeRunSync()
       }
-      exception.message should include("ids not found")
+      exception.message should include(idsNotFoundMessage)
     }
   }
 }
