@@ -84,6 +84,9 @@ jobs:
 
     timeout-minutes: 60
 
+    permissions:
+      pull-requests: write
+
     steps:
     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       with:
@@ -145,6 +148,16 @@ jobs:
       uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
       with:
         token: ${{ secrets.codecov_token }}
+
+    - name: Comment PR with top 3 slowest test suites
+      if: github.event_name == 'pull_request'
+      continue-on-error: true
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        python3 .github/scripts/comment_slow_tests.py \
+          "${{ github.event.pull_request.number }}" \
+          "${{ github.repository }}"
 
   publish_jfrog:
     runs-on: ubuntu-latest
