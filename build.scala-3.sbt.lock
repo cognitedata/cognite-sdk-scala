@@ -354,11 +354,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-buffer",
-      "version" : "4.2.15.Final",
+      "version" : "4.2.16.Final",
       "artifacts" : [
         {
           "name" : "netty-buffer.jar",
-          "hash" : "sha1:2beb620803bf871cda2dd5d46b8f831e8015dd34"
+          "hash" : "sha1:05397ef65dcb60670e0e0dba4854522873af3070"
         }
       ],
       "configurations" : [
@@ -368,11 +368,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-codec-base",
-      "version" : "4.2.15.Final",
+      "version" : "4.2.16.Final",
       "artifacts" : [
         {
           "name" : "netty-codec-base.jar",
-          "hash" : "sha1:e97149fdd5fb04858efa90e314651c8d700dc68b"
+          "hash" : "sha1:01a01d45a9efc228c6d747525848b065e0656b5f"
         }
       ],
       "configurations" : [
@@ -382,11 +382,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-codec-compression",
-      "version" : "4.2.15.Final",
+      "version" : "4.2.16.Final",
       "artifacts" : [
         {
           "name" : "netty-codec-compression.jar",
-          "hash" : "sha1:89fc4a20b7ae6af974304b1695405e62c4f9b16d"
+          "hash" : "sha1:bdbbcfcdbe217b95c14a04df4fc5d31213d5c27c"
         }
       ],
       "configurations" : [
@@ -396,11 +396,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-codec-http",
-      "version" : "4.2.15.Final",
+      "version" : "4.2.16.Final",
       "artifacts" : [
         {
           "name" : "netty-codec-http.jar",
-          "hash" : "sha1:e611826aa054371bb9a17f27bdb05755a4cac5f0"
+          "hash" : "sha1:b5e0715df90047ee5a0138c8f704f43c751009e4"
         }
       ],
       "configurations" : [
@@ -410,11 +410,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-codec-socks",
-      "version" : "4.2.15.Final",
+      "version" : "4.2.16.Final",
       "artifacts" : [
         {
           "name" : "netty-codec-socks.jar",
-          "hash" : "sha1:5d6dc38231104f28b6ba48b77d2f90b93cdb6fe7"
+          "hash" : "sha1:0d227dd8807b28382ade355eaae4678d4a7cd13c"
         }
       ],
       "configurations" : [
@@ -424,11 +424,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-common",
-      "version" : "4.2.15.Final",
+      "version" : "4.2.16.Final",
       "artifacts" : [
         {
           "name" : "netty-common.jar",
-          "hash" : "sha1:7222492c1af9c2d4d78d521eea340a619e242fda"
+          "hash" : "sha1:c2bc7fa5acfa2afc777e944d84f0aa65559cc81e"
         }
       ],
       "configurations" : [
@@ -438,11 +438,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-handler",
-      "version" : "4.2.15.Final",
+      "version" : "4.2.16.Final",
       "artifacts" : [
         {
           "name" : "netty-handler.jar",
-          "hash" : "sha1:d5344afd1148e3b9927a74be019605ebb0937a93"
+          "hash" : "sha1:cc82873ae4b6d14effe480740ad838de09add70d"
         }
       ],
       "configurations" : [
@@ -452,11 +452,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-handler-proxy",
-      "version" : "4.2.15.Final",
+      "version" : "4.2.16.Final",
       "artifacts" : [
         {
           "name" : "netty-handler-proxy.jar",
-          "hash" : "sha1:31e63e04af11da75793ecbfc126d7691b8771d01"
+          "hash" : "sha1:df9f359db740a1dd2d3a02608cb8b43daf63c9d2"
         }
       ],
       "configurations" : [
@@ -466,11 +466,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-resolver",
-      "version" : "4.2.15.Final",
+      "version" : "4.2.16.Final",
       "artifacts" : [
         {
           "name" : "netty-resolver.jar",
-          "hash" : "sha1:b961a16d379b508b473e064ba06842bba280f4e3"
+          "hash" : "sha1:fcea6d64273b59ab9127b68c16ae98af34642139"
         }
       ],
       "configurations" : [
@@ -480,11 +480,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-transport",
-      "version" : "4.2.15.Final",
+      "version" : "4.2.16.Final",
       "artifacts" : [
         {
           "name" : "netty-transport.jar",
-          "hash" : "sha1:a000c3a6196ee40207b73ac619dcb339409dd62f"
+          "hash" : "sha1:ae87a3bec51d503475a19fbd718bf777f2fc06c6"
         }
       ],
       "configurations" : [
@@ -494,11 +494,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-transport-native-unix-common",
-      "version" : "4.2.15.Final",
+      "version" : "4.2.16.Final",
       "artifacts" : [
         {
           "name" : "netty-transport-native-unix-common.jar",
-          "hash" : "sha1:efb6943b4de9e0226a5ac35330f232605424af02"
+          "hash" : "sha1:3cf32390f1b80af890ac44aa0698c2ff58c2a4d7"
         }
       ],
       "configurations" : [
@@ -550,11 +550,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-http",
-      "version" : "12.1.10",
+      "version" : "12.1.11",
       "artifacts" : [
         {
           "name" : "jetty-http.jar",
-          "hash" : "sha1:3dc2e7c72c0140a9ccdc07b74a3faf47aac87fdf"
+          "hash" : "sha1:1ac6f17b6ae8b07eaba7305fbe3af846f0764478"
         }
       ],
       "configurations" : [
@@ -564,11 +564,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-io",
-      "version" : "12.1.10",
+      "version" : "12.1.11",
       "artifacts" : [
         {
           "name" : "jetty-io.jar",
-          "hash" : "sha1:15d137860b0ff721a9fc31a27d4ae283a8acf96c"
+          "hash" : "sha1:b581a335f75f27102c9b5155c88ad0eaf432c4ff"
         }
       ],
       "configurations" : [
@@ -578,11 +578,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-security",
-      "version" : "12.1.10",
+      "version" : "12.1.11",
       "artifacts" : [
         {
           "name" : "jetty-security.jar",
-          "hash" : "sha1:5abccd4b0958c9a77c9f9eb5a0266f31f99bb34f"
+          "hash" : "sha1:a92bf751f1edd5b4a7529d7323b2f40225ee286f"
         }
       ],
       "configurations" : [
@@ -592,11 +592,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-server",
-      "version" : "12.1.10",
+      "version" : "12.1.11",
       "artifacts" : [
         {
           "name" : "jetty-server.jar",
-          "hash" : "sha1:bbe5bc298a649d66cfe966525dce04af71f663ec"
+          "hash" : "sha1:d01ed1d317616ad84f3715b0f684af84a88d0c88"
         }
       ],
       "configurations" : [
@@ -606,11 +606,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-session",
-      "version" : "12.1.10",
+      "version" : "12.1.11",
       "artifacts" : [
         {
           "name" : "jetty-session.jar",
-          "hash" : "sha1:2b4df453d0bdb44a2c629ef7e07763f054727944"
+          "hash" : "sha1:8334e427954c70ad51b39ba3ac2e9a5ae7b146fe"
         }
       ],
       "configurations" : [
@@ -620,11 +620,11 @@
     {
       "org" : "org.eclipse.jetty",
       "name" : "jetty-util",
-      "version" : "12.1.10",
+      "version" : "12.1.11",
       "artifacts" : [
         {
           "name" : "jetty-util.jar",
-          "hash" : "sha1:dea1bd8e110853f3a0a15e8a8096faa2cf61e278"
+          "hash" : "sha1:b9e8ac7571d3420049ff3412ea6a3012d74b54f0"
         }
       ],
       "configurations" : [
@@ -634,11 +634,11 @@
     {
       "org" : "org.eclipse.jetty.compression",
       "name" : "jetty-compression-common",
-      "version" : "12.1.10",
+      "version" : "12.1.11",
       "artifacts" : [
         {
           "name" : "jetty-compression-common.jar",
-          "hash" : "sha1:56edb0cb640205312c9939cd485045a09c29ac9f"
+          "hash" : "sha1:31af6e4828fcedcec495af502ba4c57002f253c9"
         }
       ],
       "configurations" : [
@@ -648,11 +648,11 @@
     {
       "org" : "org.eclipse.jetty.compression",
       "name" : "jetty-compression-gzip",
-      "version" : "12.1.10",
+      "version" : "12.1.11",
       "artifacts" : [
         {
           "name" : "jetty-compression-gzip.jar",
-          "hash" : "sha1:562e02563cf59cae692ae02d3db93c81205d2030"
+          "hash" : "sha1:9bfee7d7e4ec2bd9ddf44e7bed1b263631c8626d"
         }
       ],
       "configurations" : [
@@ -662,11 +662,11 @@
     {
       "org" : "org.eclipse.jetty.compression",
       "name" : "jetty-compression-server",
-      "version" : "12.1.10",
+      "version" : "12.1.11",
       "artifacts" : [
         {
           "name" : "jetty-compression-server.jar",
-          "hash" : "sha1:92e639429902fa63783574814e5533895522a3ea"
+          "hash" : "sha1:e8e8643f0ccd1a4e05b49dabe11f6dfd87beef35"
         }
       ],
       "configurations" : [
@@ -676,11 +676,11 @@
     {
       "org" : "org.eclipse.jetty.ee11",
       "name" : "jetty-ee11-servlet",
-      "version" : "12.1.10",
+      "version" : "12.1.11",
       "artifacts" : [
         {
           "name" : "jetty-ee11-servlet.jar",
-          "hash" : "sha1:502910b619ba3d25601fbf08a468f4912daccc2d"
+          "hash" : "sha1:da463e59465e2a08e4651d525e368246783c5d76"
         }
       ],
       "configurations" : [

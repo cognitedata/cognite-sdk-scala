@@ -9,14 +9,14 @@ val supportedScalaVersions = List(scala213, scala3)
 val javaVersion = "17"
 
 // This is used only for tests.
-val jettyTestVersion = "12.1.10"
+val jettyTestVersion = "12.1.11"
 
 val sttpVersion = "3.11.0"
 val circeVersion = "0.14.16"
 val catsEffectVersion = "3.7.0"
 val fs2Version = "3.13.0"
 val natchezVersion = "0.3.10"
-val nettyVersion = "4.2.15.Final"
+val nettyVersion = "4.2.16.Final"
 val asyncHttpClientVersion = "2.16.0"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
