@@ -62,11 +62,11 @@
     {
       "org" : "com.google.protobuf",
       "name" : "protobuf-java",
-      "version" : "4.35.1",
+      "version" : "4.36.0",
       "artifacts" : [
         {
           "name" : "protobuf-java.jar",
-          "hash" : "sha1:b933d3f9fc35b0356f28980c2ffc5892d297eebf"
+          "hash" : "sha1:ce62ac32e1617569e0836b2a4a7e5d4c667e5d74"
         }
       ],
       "configurations" : [
