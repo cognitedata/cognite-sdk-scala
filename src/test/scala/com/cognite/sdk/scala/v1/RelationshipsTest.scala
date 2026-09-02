@@ -10,10 +10,14 @@ import java.time.Instant
 @SuppressWarnings(
   Array("org.wartremover.warts.SizeIs")
 )
-class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
+class RelationshipsTest extends SdkVcrTestSpec with ReadBehaviours with WritableBehaviors with RetryWhile {
   private val externalIdsThatDoNotExist = Seq("5PNii0w4GCDBvXPZ", "6VhKQqtTJqBHGulw")
 
-  it should behave like partitionedReadable(client.relationships)
+  // A fixed point in time to use in place of Instant.now() — request bodies containing
+  // timestamps must be identical between VCR record and playback runs to match the cassette.
+  private val fixedNow = Instant.ofEpochMilli(1700000000000L)
+
+  it should behave like partitionedReadable(client.relationships, sleep = sleepUnlessPlayback)
 
   it should behave like readableWithRetrieveByRequiredExternalId(client.relationships, externalIdsThatDoNotExist, supportsMissingAndThrown = true)
 
@@ -57,7 +61,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
     trySameIdsThatDoNotExist = false
   )
 
-  private val randomExternalId = shortRandom()
+  private lazy val randomExternalId = shortRandom()
 
   it should behave like updatableByRequiredExternalId(
     client.relationships,
@@ -68,8 +72,8 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
         sourceType = "sequence",
         targetExternalId = "scala-sdk-relationships-update-test-asset2",
         targetType = "sequence",
-        startTime = Some(Instant.now().minus(10, ChronoUnit.DAYS)),
-        endTime = Some(Instant.now().minus(9, ChronoUnit.DAYS)),
+        startTime = Some(fixedNow.minus(10, ChronoUnit.DAYS)),
+        endTime = Some(fixedNow.minus(9, ChronoUnit.DAYS)),
         labels = Some(Seq(CogniteExternalId("scala-sdk-relationships-test-label1"))),
         externalId = s"update-1-externalId-$randomExternalId",
         dataSetId = Some(2694232156565845L)
@@ -84,8 +88,8 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
           CogniteExternalId("scala-sdk-relationships-test-label1"),
           CogniteExternalId("scala-sdk-relationships-test-label2"))
         ),
-        startTime = Some(Instant.now().minus(10, ChronoUnit.DAYS)),
-        endTime = Some(Instant.now().minus(9, ChronoUnit.DAYS)),
+        startTime = Some(fixedNow.minus(10, ChronoUnit.DAYS)),
+        endTime = Some(fixedNow.minus(9, ChronoUnit.DAYS)),
         externalId = s"update-2-externalId-$randomExternalId",
         dataSetId = Some(2694232156565845L)
       )
@@ -147,7 +151,7 @@ class RelationshipsTest extends SdkTestSpec with ReadBehaviours with WritableBeh
     val createdItems = client.relationships.create(randomItems).unsafeRunSync()
 
     assert(createdItems.length == 3)
-    val minAge = Instant.now().minus(10, ChronoUnit.MINUTES)
+    val minAge = fixedNow.minus(10, ChronoUnit.MINUTES)
     val createdTimeRange = Some(
       TimeRange(min = Some(minAge))
     )
