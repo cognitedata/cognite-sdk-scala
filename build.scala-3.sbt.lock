@@ -522,11 +522,11 @@
     {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client",
-      "version" : "2.16.0",
+      "version" : "2.16.1",
       "artifacts" : [
         {
           "name" : "async-http-client.jar",
-          "hash" : "sha1:af91fcb4e5b03c9cbe115adf3133d8e3716901a6"
+          "hash" : "sha1:4f8ff7761b6951b59754d9eb53a5af483b7ef309"
         }
       ],
       "configurations" : [
@@ -536,11 +536,11 @@
     {
       "org" : "org.asynchttpclient",
       "name" : "async-http-client-netty-utils",
-      "version" : "2.16.0",
+      "version" : "2.16.1",
       "artifacts" : [
         {
           "name" : "async-http-client-netty-utils.jar",
-          "hash" : "sha1:b967a10eb112ff4c16b35061de17c81864fb9f10"
+          "hash" : "sha1:cf48c1339da13bb70f3cbb3ff50971c214ab3ccc"
         }
       ],
       "configurations" : [
