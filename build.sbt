@@ -9,7 +9,7 @@ val supportedScalaVersions = List(scala213, scala3)
 val javaVersion = "17"
 
 // This is used only for tests.
-val jettyTestVersion = "12.1.11"
+val jettyTestVersion = "12.1.12"
 
 val sttpVersion = "3.11.0"
 val circeVersion = "0.14.16"
@@ -17,7 +17,7 @@ val catsEffectVersion = "3.7.1"
 val fs2Version = "3.13.0"
 val natchezVersion = "0.3.10"
 val nettyVersion = "4.2.17.Final"
-val asyncHttpClientVersion = "2.16.0"
+val asyncHttpClientVersion = "2.16.1"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
@@ -155,7 +155,7 @@ lazy val core = project
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "4.35.1",
+      "com.google.protobuf" % "protobuf-java" % "4.36.0",
       "org.tpolecat" %% "natchez-core" % natchezVersion,
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
