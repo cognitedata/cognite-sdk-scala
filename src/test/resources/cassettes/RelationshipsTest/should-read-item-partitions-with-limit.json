@@ -1,0 +1,199 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships?limit=2&partition=1/2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships?limit=2&partition=1/2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "4b579983-2049-9e55-8f84-328ae46779df"
+          ],
+          "date" : [
+            "Wed, 02 Sep 2026 08:57:59 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 869,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "2b7fbf67",
+                  "sourceType" : "event",
+                  "sourceExternalId" : "scala-sdk-relationships-test-event1",
+                  "targetType" : "event",
+                  "targetExternalId" : "scala-sdk-relationships-test-event2",
+                  "startTime" : 1605866626000,
+                  "createdTime" : 1606324162979,
+                  "lastUpdatedTime" : 1625487266009,
+                  "labels" : [
+                  ]
+                },
+                {
+                  "externalId" : "f9a40e90",
+                  "sourceType" : "event",
+                  "sourceExternalId" : "scala-sdk-relationships-test-event1",
+                  "targetType" : "event",
+                  "targetExternalId" : "scala-sdk-relationships-test-event2",
+                  "createdTime" : 1606324472128,
+                  "lastUpdatedTime" : 1625487266009,
+                  "labels" : [
+                  ]
+                }
+              ],
+              "nextCursor" : "D2ynGHo2SM4C8QDS05cFkzYfJQCVO2-kL8ZAEcHB2VvYrv6eJG_GxGFPgTZF8ZHTp2Pjuzofa4tiyN5SuZugqY1YhhIXvAUmr4dk-osHnb4"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships?limit=2&partition=2/2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships?limit=2&partition=2/2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "382cc466-5a19-9caa-99c5-f3ab99bbb45f"
+          ],
+          "date" : [
+            "Wed, 02 Sep 2026 08:57:59 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 869,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "181c5cc8",
+                  "sourceType" : "event",
+                  "sourceExternalId" : "scala-sdk-relationships-test-event1",
+                  "targetType" : "event",
+                  "targetExternalId" : "scala-sdk-relationships-test-event2",
+                  "createdTime" : 1606324162979,
+                  "lastUpdatedTime" : 1625487266009,
+                  "labels" : [
+                  ]
+                },
+                {
+                  "externalId" : "14a9e933",
+                  "sourceType" : "event",
+                  "sourceExternalId" : "scala-sdk-relationships-test-event1",
+                  "targetType" : "event",
+                  "targetExternalId" : "scala-sdk-relationships-test-event2",
+                  "startTime" : 1605866626000,
+                  "createdTime" : 1606324472128,
+                  "lastUpdatedTime" : 1625487266009,
+                  "labels" : [
+                  ]
+                }
+              ],
+              "nextCursor" : "D2ynGHo2SM4C8QDS05cFkzYfJQCVO2-kL8ZAEcHB2VvYrv6eJG_GxGFPgTZF8ZHT4-qWjYswWjJs2w3Zkdh_2Nzu3XRj_h2IYJutWnOlKTo"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : -2263615010607941991
+}

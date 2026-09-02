@@ -1,0 +1,225 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 537,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "16109961",
+                  "sourceExternalId" : "scala-sdk-relationships-test-event1",
+                  "sourceType" : "event",
+                  "targetExternalId" : "scala-sdk-relationships-test-event2",
+                  "targetType" : "event",
+                  "startTime" : null,
+                  "endTime" : null,
+                  "confidence" : null,
+                  "dataSetId" : null,
+                  "labels" : null
+                },
+                {
+                  "externalId" : "0b5c8df3",
+                  "sourceExternalId" : "scala-sdk-relationships-test-event1",
+                  "sourceType" : "event",
+                  "targetExternalId" : "scala-sdk-relationships-test-event2",
+                  "targetType" : "event",
+                  "startTime" : null,
+                  "endTime" : null,
+                  "confidence" : null,
+                  "dataSetId" : null,
+                  "labels" : null
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships",
+        "status" : {
+          "code" : 201,
+          "reason" : "Created"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "9b10dda4-3347-978e-8b0c-e7585ef9b9fd"
+          ],
+          "date" : [
+            "Wed, 02 Sep 2026 08:58:08 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 706,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "16109961",
+                  "sourceType" : "event",
+                  "sourceExternalId" : "scala-sdk-relationships-test-event1",
+                  "targetType" : "event",
+                  "targetExternalId" : "scala-sdk-relationships-test-event2",
+                  "createdTime" : 1788339488630,
+                  "lastUpdatedTime" : 1788339488630,
+                  "labels" : [
+                  ]
+                },
+                {
+                  "externalId" : "0b5c8df3",
+                  "sourceType" : "event",
+                  "sourceExternalId" : "scala-sdk-relationships-test-event1",
+                  "targetType" : "event",
+                  "targetExternalId" : "scala-sdk-relationships-test-event2",
+                  "createdTime" : 1788339488630,
+                  "lastUpdatedTime" : 1788339488630,
+                  "labels" : [
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships/delete",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 88,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "16109961"
+                },
+                {
+                  "externalId" : "0b5c8df3"
+                }
+              ],
+              "ignoreUnknownIds" : false
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships/delete",
+        "status" : {
+          "code" : 202,
+          "reason" : "Accepted"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "c3e2ceee-21e1-937e-bbb1-e50601435f57"
+          ],
+          "date" : [
+            "Wed, 02 Sep 2026 08:58:08 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 6,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : 2899831175310823520
+}
