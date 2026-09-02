@@ -61,7 +61,7 @@ class RelationshipsTest extends SdkVcrTestSpec with ReadBehaviours with Writable
     trySameIdsThatDoNotExist = false
   )
 
-  private val randomExternalId = shortRandom()
+  private lazy val randomExternalId = shortRandom()
 
   it should behave like updatableByRequiredExternalId(
     client.relationships,
