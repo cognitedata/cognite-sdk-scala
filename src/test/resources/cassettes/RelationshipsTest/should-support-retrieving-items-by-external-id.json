@@ -1,0 +1,189 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships?limit=1000",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships?limit=1000",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "bc7be577-285a-95ec-b352-19f160485418"
+          ],
+          "date" : [
+            "Wed, 02 Sep 2026 08:58:03 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 12816,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/+2aS3ObMBSF9/kVjNemI13dq0f3XXTddNXpQiCp9dRxPIZ00snkvxeTh6HBL0KIR/XGDzgcmO9cHtLl7iJJJrPSXxWT5GPyrfqXJHf1Z7Xc35Z+tbDzz269csI1zynP9WT6JCiub1a5v/yz9LXA//aL8t+1n9omRW7nNi3cr3Tl57acXS+Kn7NlkZa+KNPagG8cSrv64ctt/g9rj/aHjUO+8rb07nJ2Ve+ASyYFIJdglHkWzW1Rfl26thAItQIpGWsKMz9vcEyS7/X3/XQnVshUyIJU8WAtKouyAZW0lBIqVuy0yAdjkXnD4iHfjRUVcNCjYeVojTdCxIO1d0GPTd6LHAO6eMh3YzVCA9FoWHVGSqM7X6FHJ291ZiwEjId8J1bihjOU4xW0lTJXUsaDtW9Bj03e6aCc8CEe8p1YK1YEgo2HVTHnhcrjwdq3oMcmf1N7p5BulqfBmUCAjTTy60WYOb/I6wNgH+RrcmrTezyAGiKkb5NQcx/7ggJBaBQ1g/KLZkhAoFRb8CJJIYihJiYU7E7ySYhS70hyE19XhDvrsjbjk+fN76cDeULD85iCEyC0CQDxnOov0kfBNVZlJFDsTr9b2G8WInCuhLVnrINiVWg0Kcr+A6yo+WFY28JeWJnkYIKkM9ZBsRrMvGDGR4xVC8UlaUDacxHoFvbEGrKMbMyj2PfAKnOAqmIjGsVuxVpd7g7D2hb2u2VlhnET9ZzLe2AN4EkgxPwksKallCSJe3o43cJeWKsRkiPkEY38TwJrpklzGfUD1hMtZfbMZ3cL+2FVlgsnYu44vgdWkjJD5mJ+M+GBljJGHnDLeinsh5UocyKLqJF7Elgxd5ULxn/L0ozJPa2VbmE/rD6oYGX8D1jjYlUiGIWcR45VozIC90y1dAv7PbdKw5yIvlpHx8qAYfyD1zUtJHUY1raw33sYmQbK2RnrsFh3H/GtvVrOfbOlWR2J/eLLh61BGgQBnKoBH2mkbdHYovCviqY22B7NP/7HR1MbHNf6bndUJYf1HM2ujqrSWgiDCs2e1/G2CN+yozp4xcCxFTNoe/6kTvO36M6fci1NB/Ls250/qD7Fa+tTR1ufB7zmM3T5PeZ6sf51/xe0avR2EDIAAA=="
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships/byids",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 88,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "181c5cc8"
+                },
+                {
+                  "externalId" : "2b7fbf67"
+                }
+              ],
+              "ignoreUnknownIds" : false
+            }
+          }
+        }
+      },
+      "response" : {
+        "method" : "POST",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships/byids",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "6809a9fb-ebd2-9553-9250-46de7cae4142"
+          ],
+          "date" : [
+            "Wed, 02 Sep 2026 08:58:03 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 741,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "json",
+            "body" : {
+              "items" : [
+                {
+                  "externalId" : "181c5cc8",
+                  "sourceType" : "event",
+                  "sourceExternalId" : "scala-sdk-relationships-test-event1",
+                  "targetType" : "event",
+                  "targetExternalId" : "scala-sdk-relationships-test-event2",
+                  "createdTime" : 1606324162979,
+                  "lastUpdatedTime" : 1625487266009,
+                  "labels" : [
+                  ]
+                },
+                {
+                  "externalId" : "2b7fbf67",
+                  "sourceType" : "event",
+                  "sourceExternalId" : "scala-sdk-relationships-test-event1",
+                  "targetType" : "event",
+                  "targetExternalId" : "scala-sdk-relationships-test-event2",
+                  "startTime" : 1605866626000,
+                  "createdTime" : 1606324162979,
+                  "lastUpdatedTime" : 1625487266009,
+                  "labels" : [
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "seed" : 438675442388491071
+}
