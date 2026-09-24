@@ -14,11 +14,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-core_2.13",
-      "version" : "3.13.0",
+      "version" : "3.14.0",
       "artifacts" : [
         {
           "name" : "fs2-core_2.13.jar",
-          "hash" : "sha1:855e978f169edc92e103aedd5bd566234608bee8"
+          "hash" : "sha1:486392a5ce4eee9ff58a6fec28b4b8f09e5df5c7"
         }
       ],
       "configurations" : [
@@ -30,11 +30,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-io_2.13",
-      "version" : "3.13.0",
+      "version" : "3.14.0",
       "artifacts" : [
         {
           "name" : "fs2-io_2.13.jar",
-          "hash" : "sha1:5f46171441a9cdc18dfd247022372ba4191b0309"
+          "hash" : "sha1:6b5beaf68c699c2153331773a99e8b08150fdcf1"
         }
       ],
       "configurations" : [
@@ -1032,11 +1032,11 @@
     {
       "org" : "org.scodec",
       "name" : "scodec-bits_2.13",
-      "version" : "1.2.4",
+      "version" : "1.2.5",
       "artifacts" : [
         {
           "name" : "scodec-bits_2.13.jar",
-          "hash" : "sha1:51c0b6503845fb7433a7cdced45e811cc83ccb27"
+          "hash" : "sha1:0f3e13cd6471f52655f248c594348ab42de12edf"
         }
       ],
       "configurations" : [
@@ -1290,11 +1290,11 @@
     {
       "org" : "org.typelevel",
       "name" : "cats-mtl_2.13",
-      "version" : "1.6.0",
+      "version" : "1.7.0",
       "artifacts" : [
         {
           "name" : "cats-mtl_2.13.jar",
-          "hash" : "sha1:d3672c0c6c057f1c3d0ffd644a5bcb5f9bff7d45"
+          "hash" : "sha1:7cae91e5cf5a6fa7c0d81c3ebf4e4f8713c72014"
         }
       ],
       "configurations" : [
