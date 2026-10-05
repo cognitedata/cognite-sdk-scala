@@ -132,6 +132,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   it should "filter transformations" in {
     val uniquePrefix = shortRandomUUID()
     val existedDataSetId = 216250735038513L
+    val dataDomainExternalId = s"$uniquePrefix-data-domain"
     val transformationsToCreate = (0 to 3).map { i =>
       TransformationCreate(
         s"$uniquePrefix-transformation-sdk-test-${i.toString}",
@@ -143,7 +144,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         destinationOidcCredentials = Some(credentials),
         externalId = s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         ignoreNullFields = true,
-        dataSetId = Some(existedDataSetId)
+        dataSetId = Some(existedDataSetId),
+        dataDomainExternalId = Some(dataDomainExternalId)
       )
     }
     val resCreates =
@@ -218,6 +220,21 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         .toList
         .unsafeRunSync()
       resFilterDataSetId.size shouldBe transformationsToCreate.size
+
+      val resFilterDataDomainExternalId = client.transformations
+        .filter(
+          TransformationsFilter(
+            nameRegex = Some(s"$uniquePrefix-transformation-sdk-test"),
+            dataDomainExternalIds = Some(Seq(dataDomainExternalId))
+          )
+        )
+        .compile
+        .toList
+        .unsafeRunSync()
+      resFilterDataDomainExternalId.size shouldBe transformationsToCreate.size
+      resFilterDataDomainExternalId
+        .map(_.dataDomainExternalId)
+        .toSet shouldBe Set(Some(dataDomainExternalId))
     } finally
       try
         client.transformations.delete(externalIds.map(CogniteExternalId(_)), true).unsafeRunSync()
