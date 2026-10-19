@@ -28,7 +28,8 @@ final case class TransformationRead(
     runningJob: Option[JobDetails],
     externalId: String,
     ignoreNullFields: Boolean,
-    dataSetId: Option[Long]
+    dataSetId: Option[Long],
+    dataDomainExternalId: Option[String] = None
 ) extends WithId[Long]
     with WithCreatedTime
     with ToCreate[TransformationCreate] {
@@ -43,7 +44,8 @@ final case class TransformationRead(
       destinationOidcCredentials = None,
       externalId = externalId,
       ignoreNullFields = ignoreNullFields,
-      dataSetId = dataSetId
+      dataSetId = dataSetId,
+      dataDomainExternalId = dataDomainExternalId
     )
 }
 
@@ -123,7 +125,8 @@ final case class TransformationCreate(
     destinationOidcCredentials: Option[ClientCredentials] = None,
     externalId: String,
     ignoreNullFields: Boolean,
-    dataSetId: Option[Long]
+    dataSetId: Option[Long],
+    dataDomainExternalId: Option[String] = None
 )
 
 final case class TimeFilter(
@@ -146,7 +149,8 @@ final case class TransformationsFilter(
     cdfProjectName: Option[String] = None,
     createdTime: Option[TimeFilter] = None,
     lastUpdatedTime: Option[TimeFilter] = None,
-    dataSetIds: Option[Seq[CogniteId]] = None
+    dataSetIds: Option[Seq[CogniteId]] = None,
+    dataDomainExternalIds: Option[Seq[String]] = None
 )
 
 object TransformationsFilter {
