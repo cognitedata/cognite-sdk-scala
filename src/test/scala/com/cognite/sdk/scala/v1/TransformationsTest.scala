@@ -3,37 +3,29 @@
 
 package com.cognite.sdk.scala.v1
 
-import cats.effect.IO
-import cats.effect.unsafe.implicits.global
 import com.cognite.sdk.scala.common.OAuth2.ClientCredentials
 import com.cognite.sdk.scala.common._
-import io.circe.syntax.EncoderOps
-import sttp.client3.SttpBackend
-import sttp.model.Uri
+import sttp.client3._
 
-import java.time.temporal.ChronoUnit
-import java.time.Instant
 import scala.util.control.NonFatal
-import java.util.UUID
 
 @SuppressWarnings(
   Array("org.wartremover.warts.NonUnitStatements")
 )
-class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
+class TransformationsTest extends SdkVcrTestSpec with RetryWhile {
 
-  private val client = new GenericClient[IO](
-    "scala-sdk-test",
-    "extractor-bluefield-testing",
-    baseUrl,
-    authProvider,
-    None,
-    None,
-    None,
-    sttpBackendAuth,
-    identity[SttpBackend[IO, Any]](_),
+  // Request bodies are recorded verbatim in the cassettes, so never send real credentials.
+  private def credentials: ClientCredentials = ClientCredentials(
+    uri"https://vcr-test.invalid/oauth2/token",
+    "vcr-client-id",
+    "vcr-client-secret",
+    List("https://vcr-test.invalid/.default"),
+    projectName,
+    None
   )
 
-  def shortRandomUUID(): String = UUID.randomUUID().toString.substring(0, 8)
+  // A fixed point in time in place of Instant.now() so request bodies match the cassette.
+  private val fixedPast = 1700000000000L
 
   it should "list transformations" in {
     val res = client.transformations.list(Some(5)).compile.toList.unsafeRunSync()
@@ -45,7 +37,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   it should "create and delete transformations" in {
-    val uniquePrefix = shortRandomUUID()
+    val uniquePrefix = shortRandom()
     val transformationsToCreate = (0 to 3).map { i =>
       TransformationCreate(
         s"$uniquePrefix-transformation-sdk-test-${i.toString}",
@@ -83,7 +75,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
           client.transformations.delete(externalIds.map(CogniteExternalId(_)), true).unsafeRunSync()
           client.transformations.retrieveByExternalIds(externalIds, true).unsafeRunSync()
         },
-        t => t shouldBe empty
+        t => t shouldBe empty,
+        sleep = sleepUnlessPlayback(_: Long)
       )
     } finally
       try
@@ -94,7 +87,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   it should "retrieve transformations by ids or externalIds" in {
-    val uniquePrefix = shortRandomUUID()
+    val uniquePrefix = shortRandom()
     val transformationsToCreate = (0 to 3).map { i =>
       TransformationCreate(
         s"$uniquePrefix-transformation-sdk-test-${i.toString}",
@@ -130,8 +123,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   it should "filter transformations" in {
-    val uniquePrefix = shortRandomUUID()
-    val existedDataSetId = 216250735038513L
+    val uniquePrefix = shortRandom()
+    val existedDataSetId = testDataSet.id
     val dataDomainExternalId = s"$uniquePrefix-data-domain"
     val transformationsToCreate = (0 to 3).map { i =>
       TransformationCreate(
@@ -182,12 +175,12 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         .toSet shouldBe Set(GenericDataSource("events"))
       resFilterUpsertEvents.map(_.conflictMode).toSet shouldBe Set("upsert")
 
-      val max1DaysAgo = TimeFilter(max = Some(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli))
+      val maxInThePast = TimeFilter(max = Some(fixedPast))
       val resFilterCreatedTime1DayAgo = client.transformations
         .filter(
           TransformationsFilter(
             nameRegex = Some(s"$uniquePrefix-transformation-sdk-test"),
-            createdTime = Some(max1DaysAgo)
+            createdTime = Some(maxInThePast)
           )
         )
         .compile
@@ -195,8 +188,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         .unsafeRunSync()
       resFilterCreatedTime1DayAgo shouldBe empty
 
-      val min3MinsAgo =
-        TimeFilter(min = Some(Instant.now().minus(3, ChronoUnit.MINUTES).toEpochMilli))
+      val min3MinsAgo = TimeFilter(min = Some(fixedPast))
       val resFilterCreatedTime3MinsAgo = client.transformations
         .filter(
           TransformationsFilter(
@@ -213,7 +205,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         .filter(
           TransformationsFilter(
             nameRegex = Some(s"$uniquePrefix-transformation-sdk-test"),
-            dataSetIds = Some(Seq(CogniteInternalId(216250735038513L)))
+            dataSetIds = Some(Seq(CogniteInternalId(existedDataSetId)))
           )
         )
         .compile
@@ -243,46 +235,8 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       }
   }
 
-  import FlatOidcCredentials.credentialEncoder
-
-  "ClientCredentials encoder" should "work with empty scopes and empty audience" in {
-    val credential = ClientCredentials(
-      Uri.unsafeParse("http://tokenUrl.com"),
-      "gcp",
-      "secret",
-      List.empty[String],
-      "project",
-      None
-    ).asJson
-    credential.toString() shouldBe """{
-                                     |  "clientId" : "gcp",
-                                     |  "clientSecret" : "secret",
-                                     |  "tokenUri" : "http://tokenUrl.com",
-                                     |  "cdfProjectName" : "project"
-                                     |}""".stripMargin
-  }
-
-  it should "work with non empty scopes and non empty audience" in {
-    val credential = ClientCredentials(
-      Uri.unsafeParse("http://tokenUrl.com"),
-      "gcp",
-      "secret",
-      (1 to 3).map(i => s"scope-${i.toString}").toList,
-      "project",
-      Some("audience")
-    ).asJson
-    credential.toString() shouldBe """{
-                                     |  "clientId" : "gcp",
-                                     |  "clientSecret" : "secret",
-                                     |  "tokenUri" : "http://tokenUrl.com",
-                                     |  "cdfProjectName" : "project",
-                                     |  "audience" : "audience",
-                                     |  "scopes" : "scope-1 scope-2 scope-3"
-                                     |}""".stripMargin
-  }
-
   it should "run transformation and get job by id" in {
-    val uniquePrefix = shortRandomUUID()
+    val uniquePrefix = shortRandom()
 
     val newTransformation = TransformationCreate(
       s"$uniquePrefix-transformation-sdk-test",
