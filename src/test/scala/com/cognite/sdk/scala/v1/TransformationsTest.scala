@@ -130,19 +130,19 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   }
 
   it should "filter transformations" in {
-    val uniquePrefix = shortRandomUUID()
+    val uniqueString = shortRandomUUID()
     val existedDataSetId = 216250735038513L
-    val dataDomainExternalId = s"$uniquePrefix-data-domain"
+    val dataDomainExternalId = s"data-domain-$uniqueString"
     val transformationsToCreate = (0 to 3).map { i =>
       TransformationCreate(
-        s"$uniquePrefix-transformation-sdk-test-${i.toString}",
+        s"$uniqueString-transformation-sdk-test-${i.toString}",
         Some(s"select abc ${i.toString}"),
         Some(GenericDataSource("events")),
         conflictMode = Some("upsert"),
         Some(false),
         sourceOidcCredentials = Some(credentials),
         destinationOidcCredentials = Some(credentials),
-        externalId = s"$uniquePrefix-transformation-sdk-test-${i.toString}",
+        externalId = s"$uniqueString-transformation-sdk-test-${i.toString}",
         ignoreNullFields = true,
         dataSetId = Some(existedDataSetId),
         dataDomainExternalId = Some(dataDomainExternalId)
@@ -154,7 +154,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
 
     try {
       val resFilterName = client.transformations
-        .filter(TransformationsFilter(nameRegex = Some(s"$uniquePrefix")))
+        .filter(TransformationsFilter(nameRegex = Some(s"$uniqueString")))
         .compile
         .toList
         .unsafeRunSync()
@@ -186,7 +186,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       val resFilterCreatedTime1DayAgo = client.transformations
         .filter(
           TransformationsFilter(
-            nameRegex = Some(s"$uniquePrefix-transformation-sdk-test"),
+            nameRegex = Some(s"$uniqueString-transformation-sdk-test"),
             createdTime = Some(max1DaysAgo)
           )
         )
@@ -200,7 +200,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       val resFilterCreatedTime3MinsAgo = client.transformations
         .filter(
           TransformationsFilter(
-            nameRegex = Some(s"$uniquePrefix-transformation-sdk-test"),
+            nameRegex = Some(s"$uniqueString-transformation-sdk-test"),
             createdTime = Some(min3MinsAgo)
           )
         )
@@ -212,7 +212,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       val resFilterDataSetId = client.transformations
         .filter(
           TransformationsFilter(
-            nameRegex = Some(s"$uniquePrefix-transformation-sdk-test"),
+            nameRegex = Some(s"$uniqueString-transformation-sdk-test"),
             dataSetIds = Some(Seq(CogniteInternalId(216250735038513L)))
           )
         )
@@ -224,7 +224,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
       val resFilterDataDomainExternalId = client.transformations
         .filter(
           TransformationsFilter(
-            nameRegex = Some(s"$uniquePrefix-transformation-sdk-test"),
+            nameRegex = Some(s"$uniqueString-transformation-sdk-test"),
             dataDomainExternalIds = Some(Seq(dataDomainExternalId))
           )
         )
