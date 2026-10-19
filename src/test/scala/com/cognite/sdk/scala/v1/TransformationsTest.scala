@@ -15,6 +15,11 @@ import scala.util.control.NonFatal
 )
 class TransformationsTest extends SdkVcrTestSpec with RetryWhile {
 
+  // Use the same credentials, project and base url as CommonDataModelTestHelper
+  override protected def envVarSuffix: String = ""
+  override def projectName: String = sys.env.getOrElse("TEST_PROJECT", "extractor-bluefield-testing")
+  override def baseUrl: String = GenericClient.defaultBaseUrl
+
   // The OIDC credentials are sent in request bodies. VcrBackend redacts clientId, clientSecret and
   // tokenUri there, so real credentials are used when recording and dummies during playback.
   private def credentials: ClientCredentials =
