@@ -5,6 +5,7 @@ package com.cognite.sdk.scala.v1
 
 import com.cognite.sdk.scala.common.OAuth2.ClientCredentials
 import com.cognite.sdk.scala.common._
+import com.cognite.sdk.scala.sttp.VcrMode
 import sttp.client3._
 
 import scala.util.control.NonFatal
@@ -14,15 +15,38 @@ import scala.util.control.NonFatal
 )
 class TransformationsTest extends SdkVcrTestSpec with RetryWhile {
 
-  // Request bodies are recorded verbatim in the cassettes, so never send real credentials.
-  private def credentials: ClientCredentials = ClientCredentials(
-    uri"https://vcr-test.invalid/oauth2/token",
-    "vcr-client-id",
-    "vcr-client-secret",
-    List("https://vcr-test.invalid/.default"),
-    projectName,
-    None
-  )
+  // The OIDC credentials are sent in request bodies. VcrBackend redacts clientId, clientSecret and
+  // tokenUri there, so real credentials are used when recording and dummies during playback.
+  private def credentials: ClientCredentials =
+    vcrMode match {
+      case VcrMode.Playback =>
+        ClientCredentials(
+          uri"https://vcr-test.invalid/oauth2/token",
+          "vcr-client-id",
+          "vcr-client-secret",
+          List(s"$baseUrl/.default"),
+          projectName,
+          Some(baseUrl)
+        )
+      case _ =>
+        val s = envVarSuffix
+        val tokenUri = sys.env
+          .get(s"TEST_TOKEN_URL$s")
+          .orElse(
+            sys.env
+              .get(s"TEST_AAD_TENANT$s")
+              .map(t => s"https://login.microsoftonline.com/$t/oauth2/v2.0/token")
+          )
+          .getOrElse(sys.error(s"TEST_TOKEN_URL$s or TEST_AAD_TENANT$s must be set"))
+        ClientCredentials(
+          uri"$tokenUri",
+          sys.env.getOrElse(s"TEST_CLIENT_ID$s", sys.error(s"TEST_CLIENT_ID$s must be set")),
+          sys.env.getOrElse(s"TEST_CLIENT_SECRET$s", sys.error(s"TEST_CLIENT_SECRET$s must be set")),
+          List(s"$baseUrl/.default"),
+          projectName,
+          Some(baseUrl)
+        )
+    }
 
   // A fixed point in time in place of Instant.now() so request bodies match the cassette.
   private val fixedPast = 1700000000000L
