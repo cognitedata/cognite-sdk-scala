@@ -338,6 +338,7 @@ class VcrBackend[F[_]](
   // playback works with different credential values.
   private val redactedBodyFields = Set("clientSecret", "clientId", "tokenUri", "nonce")
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private def redactJson(json: Json): Json =
     json.arrayOrObject(
       json,
