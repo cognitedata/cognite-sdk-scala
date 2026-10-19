@@ -333,15 +333,42 @@ class VcrBackend[F[_]](
     if (errors.isEmpty) None else Some(new RequestMismatch(errors))
   }
 
+  // Credential fields (e.g. OIDC credentials in transformation requests) are redacted from request
+  // bodies, both when recording and when matching, so secrets never end up in cassettes and
+  // playback works with different credential values.
+  private val redactedBodyFields = Set("clientSecret", "clientId", "tokenUri", "nonce")
+
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
+  private def redactJson(json: Json): Json =
+    json.arrayOrObject(
+      json,
+      arr => Json.fromValues(arr.map(redactJson)),
+      obj =>
+        Json.fromJsonObject(obj.toList.foldLeft(JsonObject.empty) { case (acc, (k, v)) =>
+          acc.add(
+            k,
+            if (redactedBodyFields.contains(k)) Json.fromString("<redacted>") else redactJson(v)
+          )
+        })
+    )
+
+  private def redactBody(bytes: Array[Byte]): Array[Byte] =
+    parse(new String(bytes, "UTF-8")) match {
+      case Right(json) =>
+        val redacted = redactJson(json)
+        if (redacted.equals(json)) bytes else redacted.noSpaces.getBytes("UTF-8")
+      case Left(_) => bytes
+    }
+
   private def extractRequestBody(request: Request[_, _]): Option[Array[Byte]] =
-    request.body match {
+    (request.body match {
       case StringBody(s, enc, _) =>
         val bytes = s.getBytes(enc)
         if (bytes.isEmpty) None else Some(bytes)
       case ByteArrayBody(ba, _) => if (ba.isEmpty) None else Some(ba)
       case NoBody               => None
       case _                    => None
-    }
+    }).map(redactBody)
 
   private def bodiesMatch(actual: Array[Byte], expected: Array[Byte]): Boolean = {
     val actualStr = new String(actual, "UTF-8")
