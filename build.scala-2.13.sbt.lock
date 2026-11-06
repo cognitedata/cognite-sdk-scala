@@ -370,11 +370,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-buffer",
-      "version" : "4.2.17.Final",
+      "version" : "4.2.19.Final",
       "artifacts" : [
         {
           "name" : "netty-buffer.jar",
-          "hash" : "sha1:daba397ff4ce7b22f6ac1e1f419e6e7754c135be"
+          "hash" : "sha1:c00e1256ce4f9c4ed44947bd8596be01d58141db"
         }
       ],
       "configurations" : [
@@ -384,11 +384,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-codec-base",
-      "version" : "4.2.17.Final",
+      "version" : "4.2.19.Final",
       "artifacts" : [
         {
           "name" : "netty-codec-base.jar",
-          "hash" : "sha1:7034de26b574322f365c790b9d6eb0634edab854"
+          "hash" : "sha1:abc65e2d8ff180f8f68bdefadb861f0e07b0a457"
         }
       ],
       "configurations" : [
@@ -398,11 +398,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-codec-compression",
-      "version" : "4.2.17.Final",
+      "version" : "4.2.19.Final",
       "artifacts" : [
         {
           "name" : "netty-codec-compression.jar",
-          "hash" : "sha1:ac6829387c962174e2efbcc94e833c9524ca1459"
+          "hash" : "sha1:34392c72a81269eb2ef1b5f171ff9d93014188de"
         }
       ],
       "configurations" : [
@@ -412,11 +412,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-codec-http",
-      "version" : "4.2.17.Final",
+      "version" : "4.2.19.Final",
       "artifacts" : [
         {
           "name" : "netty-codec-http.jar",
-          "hash" : "sha1:67610763a8f351161a9bad705a83e9a96a49e92f"
+          "hash" : "sha1:14bc8cdb50ced3a4d51d09e2f1f869fb4046ac7f"
         }
       ],
       "configurations" : [
@@ -426,11 +426,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-codec-socks",
-      "version" : "4.2.17.Final",
+      "version" : "4.2.19.Final",
       "artifacts" : [
         {
           "name" : "netty-codec-socks.jar",
-          "hash" : "sha1:ff173f7fff8473232eaa89a915d75af38b2bef48"
+          "hash" : "sha1:ac0652893932696257322ce3581e52b22da74982"
         }
       ],
       "configurations" : [
@@ -440,11 +440,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-common",
-      "version" : "4.2.17.Final",
+      "version" : "4.2.19.Final",
       "artifacts" : [
         {
           "name" : "netty-common.jar",
-          "hash" : "sha1:57fa9e9af0bf70530e2fe1c8c8d6138f9167cf7a"
+          "hash" : "sha1:aae16e793dd13a63fc9a9935ff11fa19d0de7885"
         }
       ],
       "configurations" : [
@@ -454,11 +454,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-handler",
-      "version" : "4.2.17.Final",
+      "version" : "4.2.19.Final",
       "artifacts" : [
         {
           "name" : "netty-handler.jar",
-          "hash" : "sha1:ed53dae90d09306b42bc886fa292510abdf5c5dc"
+          "hash" : "sha1:6cfc1334a230b3c4c8325417fada299067648672"
         }
       ],
       "configurations" : [
@@ -468,11 +468,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-handler-proxy",
-      "version" : "4.2.17.Final",
+      "version" : "4.2.19.Final",
       "artifacts" : [
         {
           "name" : "netty-handler-proxy.jar",
-          "hash" : "sha1:17f50f65e784e1cc2ddc5bbe30fdaa1193f93265"
+          "hash" : "sha1:06da1b66407b417323afc0abb61c16839e6ab66f"
         }
       ],
       "configurations" : [
@@ -482,11 +482,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-resolver",
-      "version" : "4.2.17.Final",
+      "version" : "4.2.19.Final",
       "artifacts" : [
         {
           "name" : "netty-resolver.jar",
-          "hash" : "sha1:6cba9d93bb06297cef0b7ac34e3873b6a25b4e3b"
+          "hash" : "sha1:58689765eb4fc7176aaa7e48b5350c34526d9887"
         }
       ],
       "configurations" : [
@@ -496,11 +496,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-transport",
-      "version" : "4.2.17.Final",
+      "version" : "4.2.19.Final",
       "artifacts" : [
         {
           "name" : "netty-transport.jar",
-          "hash" : "sha1:34335dc106caa0aefc242900d38ade65c8de64f4"
+          "hash" : "sha1:52c2306d4b71cfbfc8a6ab9de1d083d2978c3b83"
         }
       ],
       "configurations" : [
@@ -510,11 +510,11 @@
     {
       "org" : "io.netty",
       "name" : "netty-transport-native-unix-common",
-      "version" : "4.2.17.Final",
+      "version" : "4.2.19.Final",
       "artifacts" : [
         {
           "name" : "netty-transport-native-unix-common.jar",
-          "hash" : "sha1:c404f2366b51136d4a2fde678eec95be6d10ca16"
+          "hash" : "sha1:8ca98433d3ff179b2aab7f526a16435cb4242b7e"
         }
       ],
       "configurations" : [
