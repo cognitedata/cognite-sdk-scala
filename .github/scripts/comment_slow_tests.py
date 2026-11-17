@@ -16,6 +16,10 @@ for f in glob.glob("target/test-reports/*.xml"):
     except Exception:
         pass
 
+if not results:
+    print("No test suites found.")
+    sys.exit(0)
+
 results.sort(key=lambda x: -x[1])
 top3 = results[:3]
 
