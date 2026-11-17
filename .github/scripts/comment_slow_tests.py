@@ -6,6 +6,10 @@ import xml.etree.ElementTree as ET
 
 MARKER = "<!-- slow-tests-comment -->"
 
+if len(sys.argv) < 3:
+    print("Error: Missing required arguments. Usage: comment_slow_tests.py <pr_number> <repo>")
+    sys.exit(1)
+
 results = []
 for f in glob.glob("target/test-reports/*.xml"):
     try:
