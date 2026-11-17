@@ -9,19 +9,19 @@ val supportedScalaVersions = List(scala213, scala3)
 val javaVersion = "17"
 
 // This is used only for tests.
-val jettyTestVersion = "12.1.13"
+val jettyTestVersion = "12.1.14"
 
 val sttpVersion = "3.11.0"
 val circeVersion = "0.14.17"
 val catsEffectVersion = "3.7.1"
 val fs2Version = "3.14.0"
 val natchezVersion = "0.3.10"
-val nettyVersion = "4.2.17.Final"
+val nettyVersion = "4.2.19.Final"
 val asyncHttpClientVersion = "2.16.1"
 
 lazy val gpgPass = Option(System.getenv("GPG_KEY_PASSWORD"))
 
-ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.5.0"
+ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.6.0"
 
 lazy val patchVersion = scala.io.Source.fromFile("patch_version.txt").mkString.trim
 
