@@ -132,7 +132,6 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
   it should "filter transformations" in {
     val uniquePrefix = shortRandomUUID()
     val existedDataSetId = 216250735038513L
-    val dataDomainExternalId = s"$uniquePrefix-data-domain"
     val transformationsToCreate = (0 to 3).map { i =>
       TransformationCreate(
         s"$uniquePrefix-transformation-sdk-test-${i.toString}",
@@ -144,8 +143,7 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         destinationOidcCredentials = Some(credentials),
         externalId = s"$uniquePrefix-transformation-sdk-test-${i.toString}",
         ignoreNullFields = true,
-        dataSetId = Some(existedDataSetId),
-        dataDomainExternalId = Some(dataDomainExternalId)
+        dataSetId = Some(existedDataSetId)
       )
     }
     val resCreates =
@@ -220,21 +218,6 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
         .toList
         .unsafeRunSync()
       resFilterDataSetId.size shouldBe transformationsToCreate.size
-
-      val resFilterDataDomainExternalId = client.transformations
-        .filter(
-          TransformationsFilter(
-            nameRegex = Some(s"$uniquePrefix-transformation-sdk-test"),
-            dataDomainExternalIds = Some(Seq(dataDomainExternalId))
-          )
-        )
-        .compile
-        .toList
-        .unsafeRunSync()
-      resFilterDataDomainExternalId.size shouldBe transformationsToCreate.size
-      resFilterDataDomainExternalId
-        .map(_.dataDomainExternalId)
-        .toSet shouldBe Set(Some(dataDomainExternalId))
     } finally
       try
         client.transformations.delete(externalIds.map(CogniteExternalId(_)), true).unsafeRunSync()
@@ -281,7 +264,104 @@ class TransformationsTest extends CommonDataModelTestHelper with RetryWhile {
                                      |}""".stripMargin
   }
 
-  it should "run transformation and get job by id" in {
+  "TransformationCreate encoder" should "include dataDomainExternalId when set" in {
+    import com.cognite.sdk.scala.v1.resources.Transformations.createEncoder
+    val create = TransformationCreate(
+      name = "test-transformation",
+      externalId = "test-ext-id",
+      ignoreNullFields = true,
+      dataSetId = None,
+      dataDomainExternalId = Some("my-domain")
+    )
+    create.asJson.hcursor.get[String]("dataDomainExternalId") shouldBe Right("my-domain")
+  }
+
+  "TransformationCreate encoder" should "decode dataDomainExternalId as None when not set" in {
+    import com.cognite.sdk.scala.v1.resources.Transformations.createEncoder
+    val create = TransformationCreate(
+      name = "test-transformation",
+      externalId = "test-ext-id",
+      ignoreNullFields = true,
+      dataSetId = None,
+      dataDomainExternalId = None
+    )
+    create.asJson.hcursor.get[Option[String]]("dataDomainExternalId") shouldBe Right(None)
+  }
+
+  "TransformationsFilter encoder" should "include dataDomainExternalIds in filter requests" in {
+    import com.cognite.sdk.scala.v1.resources.Transformations.transformationsFilterRequestEncoder
+    val request = FilterRequest[TransformationsFilter](
+      filter = TransformationsFilter(dataDomainExternalIds = Some(Seq("domain-a", "domain-b"))),
+      limit = Some(100),
+      cursor = None,
+      partition = None,
+      aggregatedProperties = None
+    )
+    request.asJson.hcursor
+      .downField("filter")
+      .downField("dataDomainExternalIds")
+      .as[Seq[String]] shouldBe Right(Seq("domain-a", "domain-b"))
+  }
+
+  "TransformationRead decoder" should "decode dataDomainExternalId when present" in {
+    import com.cognite.sdk.scala.v1.resources.Transformations.readDecoder
+    import io.circe.parser.decode
+    val json =
+      """{
+        |  "id": 123,
+        |  "name": "test-transformation",
+        |  "query": "select 1",
+        |  "destination": {"type": "events"},
+        |  "conflictMode": "upsert",
+        |  "isPublic": false,
+        |  "blocked": null,
+        |  "createdTime": 1700000000000,
+        |  "lastUpdatedTime": 1700000000000,
+        |  "owner": {"user": "test-user"},
+        |  "ownerIsCurrentUser": true,
+        |  "hasSourceOidcCredentials": false,
+        |  "hasDestinationOidcCredentials": false,
+        |  "lastFinishedJob": null,
+        |  "runningJob": null,
+        |  "externalId": "test-ext-id",
+        |  "ignoreNullFields": true,
+        |  "dataSetId": null,
+        |  "dataDomainExternalId": "my-domain"
+        |}""".stripMargin
+    val decoded = decode[TransformationRead](json)
+    decoded.map(_.dataDomainExternalId) shouldBe Right(Some("my-domain"))
+  }
+
+  "TransformationRead decoder" should "decode dataDomainExternalId as None when missing" in {
+    import com.cognite.sdk.scala.v1.resources.Transformations.readDecoder
+    import io.circe.parser.decode
+    // jetfire omits dataDomainExternalId from responses when data domains are not enabled
+    val json =
+      """{
+        |  "id": 123,
+        |  "name": "test-transformation",
+        |  "query": "select 1",
+        |  "destination": {"type": "events"},
+        |  "conflictMode": "upsert",
+        |  "isPublic": false,
+        |  "blocked": null,
+        |  "createdTime": 1700000000000,
+        |  "lastUpdatedTime": 1700000000000,
+        |  "owner": {"user": "test-user"},
+        |  "ownerIsCurrentUser": true,
+        |  "hasSourceOidcCredentials": false,
+        |  "hasDestinationOidcCredentials": false,
+        |  "lastFinishedJob": null,
+        |  "runningJob": null,
+        |  "externalId": "test-ext-id",
+        |  "ignoreNullFields": true,
+        |  "dataSetId": null
+        |}""".stripMargin
+    val decoded = decode[TransformationRead](json)
+    decoded.map(_.dataDomainExternalId) shouldBe Right(None)
+  }
+
+  "Transformations" should "run transformation and get job by id" in {
     val uniquePrefix = shortRandomUUID()
 
     val newTransformation = TransformationCreate(
