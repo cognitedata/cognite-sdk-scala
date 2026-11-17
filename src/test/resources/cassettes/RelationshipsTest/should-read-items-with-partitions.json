@@ -1,0 +1,145 @@
+{
+  "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships?limit=1000&partition=1/2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships?limit=1000&partition=1/2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "45ba7fb7-31bf-92c3-b146-d5843201b65a"
+          ],
+          "date" : [
+            "Wed, 02 Sep 2026 08:57:57 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 5956,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/+3YsW7bMBAG4D1PIXiOAfJ4vCO7d+ieTkUH0jq2RhTHkNiiRZB3r6IiqV0rkatBAZgukiz++GF8IGic7y6qarXNctOtqnfVp/5TVd0N1/69/MjS7kLzoX5YXEHkFBPx6vIx0N1+azdy9XMvQ0C+yy7/vfr+uKTbhCasu/p63UoT8vZ2133d7rt1li6vhwL9pyGH9ovk5/p/r/5zPxx8w74iX21vhnpNyjoiAlJKPUU2rYQs9UGIDKAm8OyfQk3o8sd9fRwEi46B+rbDYJTmgLqqPg/3+8sX5ZMPqMSrcuTHWZFBg1uM1UXLDuv/GxrQGwfWLiYfXPQBEpYjP8pqtdcKaTHW2iWujaTCWXsrC0Ytx8qqFsObcljnnhNLyxswzieAcuRPWNFoh8aiQfMy63hwFqvHKEZ5KZjVGdZkHaCdYB0PzmRNMdpQ8q/aa7DSBqDfsfQGWEnDeazHwXlDBYg1CLFwVmayhBOz2nhwFmt01mki+wZY2U9MDOPBeawctKlNySPwa7BaooiqdsWzsvd0xtl6GpzFipI4BSr/bHVK0cR8Ox6cxcomeUatC2d1yN6gnmY9Dc6bshQo9EX/G/OohZbPYz0OPsN68fB0/wsu36lKRBcAAA=="
+          }
+        }
+      }
+    },
+    {
+      "request" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships?limit=1000&partition=2/2",
+        "headers" : {
+          "authorization" : [
+            "<redacted>"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "accept" : [
+            "application/json"
+          ],
+          "x-cdp-sdk" : [
+            "<redacted>"
+          ],
+          "accept-encoding" : [
+            "gzip, deflate"
+          ],
+          "x-cdp-app" : [
+            "scala-sdk-vcr-test"
+          ]
+        },
+        "entity" : null
+      },
+      "response" : {
+        "method" : "GET",
+        "uri" : "https://api.cognitedata.com/api/v1/projects/playground/relationships?limit=1000&partition=2/2",
+        "status" : {
+          "code" : 200,
+          "reason" : "OK"
+        },
+        "headers" : {
+          "server" : [
+            "envoy"
+          ],
+          "x-request-id" : [
+            "d347982c-8724-949d-aebc-39a89d659ca9"
+          ],
+          "date" : [
+            "Wed, 02 Sep 2026 08:57:58 GMT"
+          ],
+          "content-type" : [
+            "application/json"
+          ],
+          "transfer-encoding" : [
+            "chunked"
+          ],
+          "x-frame-options" : [
+            "DENY"
+          ],
+          "x-content-type-options" : [
+            "nosniff"
+          ],
+          "strict-transport-security" : [
+            "max-age=31536000; includeSubDomains"
+          ]
+        },
+        "entity" : {
+          "contentLength" : 6880,
+          "contentType" : "application/json",
+          "contentEncoding" : null,
+          "content" : {
+            "type" : "__gzipped_by_vcr_library_due_to_size",
+            "gzipped" : "H4sIAAAAAAAA/+2YSZObMBCF7/MrKJ9NSkt3S8o9h5wzOaVyEEJkXMFLGSY1qSn/98jMYhhjbOMlUyQXL/BoVN97ILUeb6JoNCn9tBhFH6Nv4V8UPVaf4bh/KP1yZvPP6frkiGvu0Dk9Gr8Iivn90vnb3wtfCfwvPyvfnv3ULFI4m9u4SH/GS5/bcjKfFXeTRRGXvijjqgDfVCjt8ocvd9V/Ont0fbGp4Jbelj69nUyrG3BiJAVwEkaZV1Fui/LrIm0KBYJWgoixujDxeY1jFH2vvlfjbqxgjTdSDgdrEUqUNaioiUgEVmwPeVCCC3098l46yCAdDvl2rEZqgXg1rNoSOUU0HKx9A43ccAZ0NfL3Ve1YxJvjcZaaDAW4Wkjms2yS+pmrBsA+0Ck+Nek9D6CCKOLLOFS/xz6jhEQwCutG+VndJIFCqaZgy0kpkYFGJpXodvJFCKQ7nNzY12ZhZy6rYnz0evlqfKaaolbzmMCJjHMlrR3Oo77lPkiuIcRIgux2v13Y6zlWYDQqTP4BrKD5YVibwl5YGXFhMsL/WM+KVSWGcZPBgLFqqTihFiFA3Vjbhb2whukmReBu4FiVIiTY0261C3thRcQklcmA2q0dWJUxdEBat4W9sIJLQxUYflo1Y7RnRd8u7PcSIMNSSUNeCaxpaVBGwp4pq13YC6tNQkfs2NCnrDUtQHUY1qawF9buET/Y6SL39a4wjMR+8eXT1YIMCCk4htc8asBd1tii8CdZUxXYbc2b+sdbUxU4bveg2ZSGxcN6CdHVlCqtpTQQGoU9+2U7hJdsSs+eGHFsYs66w/GuHvNLbHC85yz97Q2Og/IpT82nHmw+D9gpPXf8nn29Wf9a/QEq9NH34BoAAA=="
+          }
+        }
+      }
+    }
+  ],
+  "seed" : -1567216694129892999
+}
