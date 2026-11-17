@@ -12,7 +12,7 @@ val javaVersion = "17"
 val jettyTestVersion = "12.1.15"
 
 val sttpVersion = "3.11.0"
-val circeVersion = "0.14.16"
+val circeVersion = "0.14.17"
 val catsEffectVersion = "3.7.1"
 val fs2Version = "3.14.0"
 val natchezVersion = "0.3.10"
@@ -155,7 +155,7 @@ lazy val core = project
       "org.typelevel" %% "cats-effect-testkit" % catsEffectVersion % Test,
       "co.fs2" %% "fs2-core" % fs2Version,
       "co.fs2" %% "fs2-io" % fs2Version,
-      "com.google.protobuf" % "protobuf-java" % "4.36.1",
+      "com.google.protobuf" % "protobuf-java" % "4.36.2",
       "org.tpolecat" %% "natchez-core" % natchezVersion,
     ) ++ scalaTestDeps ++ sttpDeps ++ circeDeps(CrossVersion.partialVersion(scalaVersion.value)),
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
