@@ -14,11 +14,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-core_3",
-      "version" : "3.14.0",
+      "version" : "3.16.0",
       "artifacts" : [
         {
           "name" : "fs2-core_3.jar",
-          "hash" : "sha1:394f5f47e8ae53e3d2a3c20ec4c900f6b3f42e98"
+          "hash" : "sha1:4a4e602faa0930a2ea938edbd9675e1bc3e58267"
         }
       ],
       "configurations" : [
@@ -30,11 +30,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-io_3",
-      "version" : "3.14.0",
+      "version" : "3.16.0",
       "artifacts" : [
         {
           "name" : "fs2-io_3.jar",
-          "hash" : "sha1:e58da4a65b2fbee3f788982adfdd524d6b49fd9f"
+          "hash" : "sha1:35f681417d4803fdbeead582a678b851989ad60c"
         }
       ],
       "configurations" : [
@@ -720,11 +720,11 @@
     {
       "org" : "org.scala-lang",
       "name" : "scala3-library_3",
-      "version" : "3.3.8",
+      "version" : "3.3.9",
       "artifacts" : [
         {
           "name" : "scala3-library_3.jar",
-          "hash" : "sha1:1f390d7eb71670cac0411a39955918aadb9c0bdb"
+          "hash" : "sha1:e7fa78d579be8a5f33b00be9d59fab95d3146f0c"
         }
       ],
       "configurations" : [

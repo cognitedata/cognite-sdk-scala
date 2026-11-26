@@ -14,11 +14,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-core_2.13",
-      "version" : "3.14.0",
+      "version" : "3.16.0",
       "artifacts" : [
         {
           "name" : "fs2-core_2.13.jar",
-          "hash" : "sha1:486392a5ce4eee9ff58a6fec28b4b8f09e5df5c7"
+          "hash" : "sha1:18a9ea64e3c1203f7926d844b819619df2c41aad"
         }
       ],
       "configurations" : [
@@ -30,11 +30,11 @@
     {
       "org" : "co.fs2",
       "name" : "fs2-io_2.13",
-      "version" : "3.14.0",
+      "version" : "3.16.0",
       "artifacts" : [
         {
           "name" : "fs2-io_2.13.jar",
-          "hash" : "sha1:6b5beaf68c699c2153331773a99e8b08150fdcf1"
+          "hash" : "sha1:8b475382123cacfef7785dea5dff3ed3d3a9d536"
         }
       ],
       "configurations" : [
